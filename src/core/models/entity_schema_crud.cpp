@@ -445,17 +445,17 @@ namespace mantis {
                 throw std::runtime_error("The database `" + db_type + "` is not supported yet!");
             }
             const std::string query = db_type == "sqlite3"
-                                          ? "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ':name';"
+                                          ? "SELECT name FROM sqlite_master WHERE type = 'table' AND name = :name;"
                                           : db_type == "postgresql"
-                                                ? "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ':name');"
-                                                : "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ':name');";
+                                                ? "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = :name);"
+                                                : "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = :name);";
 
             soci::row db_data;
-            *sql << query, soci::use(table_name), soci::into(db_data);
+            *sql << query, soci::use(table_name, "name"), soci::into(db_data);
             return sql->got_data();
         } catch (const std::exception &e) {
             logger::critical("Error checking table in database: {}", e.what());
-            return false;
+            throw MantisException(500, e.what());
         }
     }
 
