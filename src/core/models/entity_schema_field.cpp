@@ -131,7 +131,7 @@ namespace mantis {
     EntitySchemaField &EntitySchemaField::setConstraints(const nlohmann::json &opts) {
         if (m_constraints.is_null())
             m_constraints = {
-                {"min-value", nullptr},
+                {"min_value", nullptr},
                 {"max_value", nullptr},
                 {"validator", nullptr},
                 {"default_value", nullptr}

@@ -101,11 +101,7 @@ namespace mantis {
             Files::createDir(new_table.name());
 
             // Add created table to the routes
-            if (const auto res = MantisBase::instance().router().addRoute(new_table.name());
-                !res.value("success", false)) {
-                logger::warn("Restart server to get new route changes! {}",
-                             res.value("error", ""));
-            }
+            MantisBase::instance().router().addSchemaCache(schema);
 
             return obj;
         } catch (...) {
@@ -360,35 +356,18 @@ namespace mantis {
             record["created"] = tmToStr(created_tm);
             record["updated"] = tmToStr(updated_tm);
 
-            if (auto res = MantisBase::instance().router().updateRouteCache(new_schema);
-                !res.value("success", false)) {
-                logger::warn("Restart server to update table changes! {}",
-                             res.value("error", ""));
-            }
+            // Update cache & subsequently the routes ...
+            MantisBase::instance().router().updateSchemaCache(old_entity.name(), new_schema);
 
             // Only trigger routes to be reloaded if table name changes.
             if (old_entity.name() != new_entity.name()) {
                 // Update file table folder name
                 Files::renameDir(old_entity.name(), new_entity.name());
-
-                // Update route for this table
-                const json obj{
-                    {"new_name", new_entity.name()},
-                    {"old_name", old_entity.name()},
-                    {"old_type", old_entity.type()}
-                };
-
-                logger::trace("Update With: {}", obj.dump());
-                if (auto res = MantisBase::instance().router().updateRoute(obj);
-                    !res.value("success", false)) {
-                    logger::warn("Restart server to get new route changes! {}",
-                                 res.value("error", ""));
-                }
             }
 
             return record;
         } catch (std::exception &e) {
-            logger::critical("Error Updating Table Schema: {}", e.what());
+            logger::critical("Error Updating EntitySchema: {}", e.what());
             throw;
         }
     }
@@ -408,31 +387,29 @@ namespace mantis {
                     soci::use(table_id), soci::into(schema);
 
             if (!sql->got_data()) {
-                throw std::runtime_error("Table with given id `" + table_id + "` was not found!");
+                throw MantisException(404, "EntitySchema with given id `" + table_id + "` was not found!");
             }
+
+            const auto entity_name = schema.at("name").get<std::string>();
 
             // Remove from DB
             *sql << "DELETE FROM _tables WHERE id = :id", soci::use(table_id);
-            *sql << "DROP TABLE IF EXISTS " + schema.at("name").get<std::string>();
+            *sql << "DROP TABLE IF EXISTS :entity_name", soci::use(entity_name);
 
             tr.commit();
 
             // Delete files directory
-            Files::deleteDir(schema.at("name").get<std::string>());
+            Files::deleteDir(entity_name);
 
-            // Update route for this table
-            const json obj{
-                {"name", schema.at("name").get<std::string>()},
-                {"type", schema.at("type").get<std::string>()}
-            };
-            if (const auto res = MantisBase::instance().router().removeRoute(obj);
-                !res.value("success", false)) {
-                logger::warn("Restart server to get new route changes! \n\t {}",
-                             res.value("error", ""));
-            }
-        } catch (const std::exception &e) {
+            // Remove route for this Entity
+            MantisBase::instance().router().removeSchemaCache(entity_name);
+
+        } catch (const MantisException &) {
             tr.rollback();
             throw;
+        } catch (const std::exception &e) {
+            tr.rollback();
+            throw MantisException(500, e.what());
         }
     }
 

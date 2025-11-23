@@ -48,40 +48,18 @@ namespace mantis {
 
         void Delete(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
-        // Manage routes
-        [[nodiscard]]
-        /// Adds a new table route passed on a given table name. Used mostly when a table is added after the server is
-        /// already running. The table has to be existing for routes to be created for.
-        /// @param table Table name
-        /// @return JSON object having `success` and `error` values.
-        json addRoute(const std::string &table);
-
-        /// Update existing route, probably due to a change in table name and/or table type
-        /// @param table_data Contains the changes, that is, `old_type`, `old_name` and `new_name` matching the old
-        /// table name and type together with the new table name. The new table type will be fetched from the db.
-        /// @return JSON object having `success` and `error` values.
-        json updateRoute(const json &table_data = json::object());
-
-        /// Update existing route internal data, probably due to a change in table internal metadata
-        /// @param table_data Contains the new table schema
-        /// @return JSON object having `success` and `error` values.
-        json updateRouteCache(const json &table_data = json::object());
-
-        /// Remove existing route(s), maybe due to deletion of a table.
-        /// @param table_data must have the deleted table's `name` and `type`.
-        /// @return JSON object having `success` and `error` values.
-        json removeRoute(const json &table_data = json::object());
-
+        // ----------- SCHEMA CACHE METHODS ----------- //
         const json &schemaCache(const std::string &table_name) const;
 
         Entity schemaCacheEntity(const std::string &table_name) const;
 
-        void addSchemaCache(const std::string &table_name, const nlohmann::json &table_schema);
+        void addSchemaCache(const nlohmann::json &entity_schema);
 
-        void updateSchemaCache(const std::string &table_name, const json &table_schema);
+        void updateSchemaCache(const std::string &old_entity_name, const json &new_schema);
 
         void removeSchemaCache(const std::string &table_name);
 
+        // ----------- UTILS METHODS ----------- //
         std::string decompressResponseBody(const std::string &body, const std::string &encoding);
 
     private:
@@ -91,6 +69,7 @@ namespace mantis {
 
         static std::string getMimeType(const std::string &path);
 
+        // ----------- REQ/RES METHODS ----------- //
         std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute() const;
 
         static std::function<void(const MantisRequest &, MantisResponse &)> fileServingHandler() ;
@@ -106,6 +85,7 @@ namespace mantis {
         std::function<void(const httplib::Request &, const httplib::Response &)> routingLogger();
 
         std::function<void(const httplib::Request &, httplib::Response &)> routingErrorHandler();
+
 
         MantisBase& mApp;
         httplib::Server svr;

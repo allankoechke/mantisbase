@@ -24,7 +24,7 @@ CMRC_DECLARE(mantis);
 namespace mantis {
     Router::Router()
         : mApp(MantisBase::instance()),
-    m_entitySchema(std::make_unique<EntitySchema>()){
+          m_entitySchema(std::make_unique<EntitySchema>()) {
         // Let's fix timing initialization, set the start time to current time
         svr.set_pre_routing_handler(preRoutingHandler());
 
@@ -49,7 +49,8 @@ namespace mantis {
             svr.stop();
     }
 
-    bool Router::initialize() { {
+    bool Router::initialize() {
+        {
             const auto sql = mApp.db().session();
             const soci::rowset rows = (sql->prepare << "SELECT schema FROM _tables");
 
@@ -164,246 +165,71 @@ namespace mantis {
         globalRouteHandler("DELETE", path);
     }
 
-    json Router::addRoute(const std::string &table) {
-        // TRACE_CLASS_METHOD()
-
-        if (trim(table).empty()) {
-            json res;
-            res["success"] = false;
-            res["error"] = "Table name can't be empty";
-            return res;
-        }
-
-        try {
-            const auto sql = mApp.db().session();
-
-            soci::row row;
-            const std::string query = "SELECT id, schema FROM _tables WHERE name = :name";
-            *sql << query, soci::use(table), soci::into(row);
-
-            if (!sql->got_data()) {
-                json res;
-                res["success"] = false;
-                res["error"] = "No table found with the name " + table;
-                return res;
-            }
-
-            const auto id = row.get<std::string>("id");
-            const auto name = row.get<std::string>("name");
-            const auto type = row.get<std::string>("type");
-            const auto hasApi = row.get<bool>("has_api");
-
-            // If `hasApi` is set, schema is valid, then, add API endpoints
-            if (const auto schema = row.get<json>("schema"); (hasApi && !schema.empty())) {
-                // We need to persist this instance, else it'll be cleaned up causing a crash
-                // const auto tableUnit = std::make_shared<TableUnit>(schema);
-                // tableUnit->setTableName(name);
-                // tableUnit->setTableId(id);
-                //
-                // if (!tableUnit->setupRoutes())
-                //     return false;
-
-                // m_routes.push_back(tableUnit);
-            }
-        } catch (const std::exception &e) {
-            json res;
-            res["success"] = false;
-            res["error"] = e.what();
-            return res;
-        }
-
-        json res;
-        res["success"] = true;
-        res["error"] = "";
-        return res;
-    }
-
-    json Router::updateRoute(const json &table_data) {
-        // TRACE_CLASS_METHOD()
-
-        json res;
-        res["success"] = false;
-        res["error"] = "";
-
-        if (table_data.is_null() || table_data.empty()) {
-            res["error"] = "Table data can't be empty!";
-            return res;
-        }
-
-        if (!table_data.contains("new_name") || table_data["new_name"].is_null() || table_data["new_name"].empty()) {
-            res["error"] = "Table new name can't be null/empty!";
-            return res;
-        }
-
-        if (!table_data.contains("old_name") || table_data["old_name"].is_null() || table_data["old_name"].empty()) {
-            res["error"] = "Table old name can't be null/empty!";
-            return res;
-        }
-
-        if (!table_data.contains("old_type") || table_data["old_type"].is_null() || table_data["old_type"].empty()) {
-            res["error"] = "Table type is required!";
-            return res;
-        }
-
-        const auto table_name = table_data.at("new_name").get<std::string>();
-        const auto table_old_name = table_data.at("old_name").get<std::string>();
-        const auto table_type = table_data.at("old_type").get<std::string>();
-
-        // // Let's find and remove existing object
-        // const auto it = std::ranges::find_if(m_routes, [&](const auto& route)
-        // {
-        //     return route->tableName() == table_old_name;
-        // });
-        //
-        // if (it == m_routes.end())
-        // {
-        //     res["error"] = "TableUnit for " + table_old_name + " not found!";
-        //     return res;
-        // }
-
-        // Also, check if we have defined some routes for this one ...
-        const auto basePath = "/api/v1/" + table_old_name;
-        m_routeRegistry.remove("GET", basePath);
-        m_routeRegistry.remove("GET", basePath + "/:id");
-
-        if (table_type != "view") {
-            m_routeRegistry.remove("POST", basePath);
-            m_routeRegistry.remove("PATCH", basePath + "/:id");
-            m_routeRegistry.remove("DELETE", basePath + "/:id");
-        }
-
-        if (table_type == "auth") {
-            m_routeRegistry.remove("POST", basePath + "/auth-with-password");
-        }
-
-        // Remove tableUnit instance for the instance
-        // m_routes.erase(it);
-
-        return addRoute(table_name);
-    }
-
-    json Router::updateRouteCache(const json &table_data) {
-        // TRACE_CLASS_METHOD()
-
-        json res;
-        res["success"] = false;
-        res["error"] = "";
-
-        // Get table name
-        const auto table_name = table_data.at("name").get<std::string>();
-
-        // // Let's find and remove existing object
-        // const auto it = std::ranges::find_if(m_routes, [&](const auto& route)
-        // {
-        //     return route->tableName() == table_name;
-        // });
-        //
-        // if (it == m_routes.end())
-        // {
-        //     res["error"] = "TableUnit for " + table_name + " not found!";
-        //     return res;
-        // }
-
-        // Update cached data & rules using the schema
-        // (*it)->fromJson(table_data);
-
-        res["success"] = true;
-        return res;
-    }
-
-    json Router::removeRoute(const json &table_data) {
-        // TRACE_CLASS_METHOD()
-
-        mantis::json res;
-        res["success"] = false;
-        res["error"] = "";
-
-        if (table_data.is_null() || table_data.empty()) {
-            res["error"] = "Table data can't be empty!";
-            return res;
-        }
-
-        if (!table_data.contains("name") || table_data["name"].is_null() || table_data["name"].empty()) {
-            res["error"] = "Table name can't be null/empty!";
-            return res;
-        }
-
-        if (!table_data.contains("type") || table_data["type"].is_null() || table_data["type"].empty()) {
-            res["error"] = "Table type is required!";
-            return res;
-        }
-
-        const auto table_name = table_data.at("name").get<std::string>();
-        const auto table_type = table_data.at("type").get<std::string>();
-
-        // // Let's find and remove existing object
-        // const auto it = std::ranges::find_if(m_routes, [&](const auto& route)
-        // {
-        //     return route->tableName() == table_name;
-        // });
-        //
-        // if (it == m_routes.end())
-        // {
-        //     res["error"] = "TableUnit not found!";
-        //     return res;
-        // }
-
-        // Also, check if we have defined some routes for this one ...
-
-        const auto basePath = "/api/v1/" + table_name;
-        m_routeRegistry.remove("GET", basePath);
-        m_routeRegistry.remove("GET", basePath + "/:id");
-
-        if (table_type != "view") {
-            m_routeRegistry.remove("POST", basePath);
-            m_routeRegistry.remove("PATCH", basePath + "/:id");
-            m_routeRegistry.remove("DELETE", basePath + "/:id");
-        }
-
-        if (table_type == "auth") {
-            m_routeRegistry.remove("POST", basePath + "/auth-with-password");
-        }
-
-        // // Remove tableUnit instance for the instance
-        // m_routes.erase(it);
-
-        res["success"] = true;
-        return res;
-    }
-
     const json &Router::schemaCache(const std::string &table_name) const {
-        if (m_entityMap.contains(table_name)) {
-            return m_entityMap.at(table_name).schema();
+        if (!m_entityMap.contains(table_name)) {
+            throw MantisException(404, "Entity schema for " + table_name + " was not found!");
         }
 
-        throw std::out_of_range("Table does not contain schema");
+        return m_entityMap.at(table_name).schema();
     }
 
     Entity Router::schemaCacheEntity(const std::string &table_name) const {
-        if (m_entityMap.contains(table_name)) {
-            return m_entityMap.at(table_name);
+        if (!m_entityMap.contains(table_name)) {
+            throw MantisException(404, "Entity schema for `" + table_name + "` was not found!");
         }
 
-        throw std::out_of_range("Table does not contain schema");
+        return m_entityMap.at(table_name);
     }
 
-    void Router::addSchemaCache(const std::string &table_name, const nlohmann::json &table_schema) {
-        if (m_entityMap.contains(table_name)) {
-            updateSchemaCache(table_name, table_schema);
-        } else {
-            m_entityMap.insert_or_assign(table_name, Entity(table_schema));
+    void Router::addSchemaCache(const nlohmann::json &entity_schema) {
+        const auto entity_name = entity_schema.at("name").get<std::string>();
+        if (m_entityMap.contains(entity_name)) {
+            throw MantisException(500, "An entity exists with given entity_name");
         }
+
+        // Create entity and its routes
+        auto entity = Entity(entity_schema);
+        entity.createEntityRoutes();
+        m_entityMap.insert_or_assign(entity_name, std::move(entity));
     }
 
-    void Router::updateSchemaCache(const std::string &table_name, const json &table_schema) {
-        if (!m_entityMap.contains(table_name))
-            throw std::out_of_range("Cannot update, schema not found for table: " + table_name);
+    void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) {
+        if (!m_entityMap.contains(old_entity_name))
+            throw MantisException(404, "Cannot update, schema not found for entity " + old_entity_name);
 
-        // it->second = table_schema;
+        // Clean up old entity route
+        removeSchemaCache(old_entity_name);
+
+        // Add new route
+        addSchemaCache(new_schema);
     }
 
-    void Router::removeSchemaCache(const std::string &table_name) {
-        m_entityMap.erase(table_name);
+    void Router::removeSchemaCache(const std::string &entity_name) {
+        // Let's find and remove existing object
+        if (!m_entityMap.contains(entity_name)) {
+            throw MantisException(404, "Could not find EntitySchema for " + entity_name);
+        }
+
+        // Get cached entity
+        const Entity& entity = m_entityMap.at(entity_name);
+
+        // Also, check if we have defined some routes for this one ...
+        const auto basePath = "/api/v1/" + entity_name + "/records";
+        m_routeRegistry.remove("GET", basePath);
+        m_routeRegistry.remove("GET", basePath + "/:id");
+
+        if (entity.type() != "view") {
+            m_routeRegistry.remove("POST", basePath);
+            m_routeRegistry.remove("PATCH", basePath + "/:id");
+            m_routeRegistry.remove("DELETE", basePath + "/:id");
+        }
+
+        if (entity.type() == "auth") {
+            m_routeRegistry.remove("POST", "/api/v1/" + entity_name + "/auth/login");
+        }
+
+        // Remove Entity instance for the cache
+        m_entityMap.erase(entity_name);
     }
 
     void Router::globalRouteHandler(const std::string &method, const std::string &path) {

@@ -145,9 +145,7 @@ namespace mantis {
         std::string m_viewSqlQuery;
         bool m_isSystem = false;
         bool m_hasApi = true;
-
         std::vector<EntitySchemaField> m_fields;
-
         std::string m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
     };
 } // mantis

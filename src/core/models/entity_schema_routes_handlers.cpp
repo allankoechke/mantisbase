@@ -9,7 +9,7 @@ namespace mantis {
                 // Extract path `id` value [REQUIRED]
                 const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
-                    throw MantisException(400, "Entity `id` or `schema_name` is required!");
+                    throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
 
                 // If table name is passed in, get the `id` equivalent
                 const auto schema_id = schema_id_or_name.starts_with("mbt_")
@@ -154,13 +154,17 @@ namespace mantis {
     }
 
     HandlerFn EntitySchema::deleteRouteHandler() const {
-        HandlerFn handler = [](MantisRequest &req, MantisResponse &res) {
-            // const auto entity_id = trim(req.getPathParamValue("id"));
-            // if (entity_id.empty())
-            //     throw MantisException(400, "Entity `id` is required!");
-            //
-            // entity.remove(entity_id);
-            // res.sendEmpty();
+        HandlerFn handler = [](const MantisRequest &req, const MantisResponse &res) {
+            const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
+            if (schema_id_or_name.empty())
+                throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
+
+            // If table name is passed in, get the `id` equivalent
+            const auto schema_id = schema_id_or_name.starts_with("mbt_")
+                                 ? schema_id_or_name
+                                 : EntitySchema::genEntityId(schema_id_or_name);
+            EntitySchema::dropTable(schema_id);
+            res.sendEmpty();
         };
 
         return handler;
