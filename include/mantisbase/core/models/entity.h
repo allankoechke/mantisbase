@@ -1,15 +1,12 @@
-//
-// Created by codeart on 09/11/2025.
-//
-
-#ifndef MANTISAPP_ENTITY_H
-#define MANTISAPP_ENTITY_H
+#ifndef MANTISBASE_ENTITY_H
+#define MANTISBASE_ENTITY_H
 
 #include <string>
 #include "mantisbase/mantis.h"
 #include "mantisbase/core/exceptions.h"
 #include "mantisbase/utils/soci_wrappers.h"
 #include "../types.h"
+#include "access_rules.h"
 
 namespace mantis {
     using Record = nlohmann::json;
@@ -41,15 +38,17 @@ namespace mantis {
         [[nodiscard]] std::optional<json> field(const std::string& field_name) const;
         [[nodiscard]] std::optional<json> hasField(const std::string& field_name) const;
 
-        [[nodiscard]] std::string listRule() const;
+        [[nodiscard]] const json& rules() const;
 
-        [[nodiscard]] std::string getRule() const;
+        [[nodiscard]] AccessRule listRule() const;
 
-        [[nodiscard]] std::string addRule() const;
+        [[nodiscard]] AccessRule getRule() const;
 
-        [[nodiscard]] std::string updateRule() const;
+        [[nodiscard]] AccessRule addRule() const;
 
-        [[nodiscard]] std::string deleteRule() const;
+        [[nodiscard]] AccessRule updateRule() const;
+
+        [[nodiscard]] AccessRule deleteRule() const;
 
         // --------------- DB CRUD OPS ------------------ //
         [[nodiscard]] Record create(const json &Record, const json &opts = json::object()) const;
@@ -93,4 +92,4 @@ namespace mantis {
     };
 } // mantis
 
-#endif //MANTISAPP_ENTITY_H
+#endif //MANTISBASE_ENTITY_H

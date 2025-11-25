@@ -1,7 +1,3 @@
-//
-// Created by codeart on 12/11/2025.
-//
-
 #include "../../../include/mantisbase/core/models/entity_schema.h"
 
 #include "mantisbase/core/exceptions.h"
@@ -50,20 +46,24 @@ namespace mantis {
         if (entity_schema.contains("has_api") && entity_schema["has_api"].is_boolean())
             eSchema.setHasApi(entity_schema.at("has_api").get<bool>());
 
-        if (entity_schema.contains("list_rule") && entity_schema["list_rule"].is_string())
-            eSchema.setListRule(entity_schema.at("list_rule").get<std::string>());
+        if (entity_schema.contains("rules")) {
+            auto rules = entity_schema["rules"];
 
-        if (entity_schema.contains("get_rule") && entity_schema["get_rule"].is_string())
-            eSchema.setListRule(entity_schema.at("get_rule").get<std::string>());
+            if (rules.contains("list"))
+                eSchema.setListRule(AccessRule::fromJSON(rules["list"]));
 
-        if (entity_schema.contains("add_rule") && entity_schema["add_rule"].is_string())
-            eSchema.setListRule(entity_schema.at("add_rule").get<std::string>());
+            if (rules.contains("get"))
+                eSchema.setGetRule(AccessRule::fromJSON(rules["get"]));
 
-        if (entity_schema.contains("update_rule") && entity_schema["update_rule"].is_string())
-            eSchema.setListRule(entity_schema.at("update_rule").get<std::string>());
+            if (rules.contains("add"))
+                eSchema.setAddRule(AccessRule::fromJSON(rules["add"]));
 
-        if (entity_schema.contains("delete_rule") && entity_schema["delete_rule"].is_string())
-            eSchema.setListRule(entity_schema.at("delete_rule").get<std::string>());
+            if (rules.contains("update"))
+                eSchema.setUpdateRule(AccessRule::fromJSON(rules["update"]));
+
+            if (rules.contains("delete"))
+                eSchema.setDeleteRule(AccessRule::fromJSON(rules["delete"]));
+        }
 
         // 'auth' and 'base' types have 'fields' key ...
         if ((_type == "base" || _type == "auth") && entity_schema.contains("fields") && entity_schema["fields"].
@@ -187,20 +187,24 @@ namespace mantis {
         if (new_data.contains("has_api"))
             setHasApi(new_data.at("has_api").get<bool>());
 
-        if (new_data.contains("list_rule"))
-            setListRule(new_data.at("list_rule").get<std::string>());
+        if (new_data.contains("rules")) {
+            auto rules = new_data["rules"];
 
-        if (new_data.contains("get_rule"))
-            setListRule(new_data.at("get_rule").get<std::string>());
+            if (rules.contains("list"))
+                setListRule(AccessRule::fromJSON(rules["list"]));
 
-        if (new_data.contains("add_rule"))
-            setListRule(new_data.at("add_rule").get<std::string>());
+            if (rules.contains("get"))
+                setGetRule(AccessRule::fromJSON(rules["get"]));
 
-        if (new_data.contains("update_rule"))
-            setListRule(new_data.at("update_rule").get<std::string>());
+            if (rules.contains("add"))
+                setAddRule(AccessRule::fromJSON(rules["add"]));
 
-        if (new_data.contains("delete_rule"))
-            setListRule(new_data.at("delete_rule").get<std::string>());
+            if (rules.contains("update"))
+                setUpdateRule(AccessRule::fromJSON(rules["update"]));
+
+            if (rules.contains("delete"))
+                setDeleteRule(AccessRule::fromJSON(rules["delete"]));
+        }
 
         // 'auth' and 'base' types have 'fields' key ...
         if ((m_type == "base" || m_type == "auth") && new_data.contains("fields") && new_data["fields"].
@@ -281,37 +285,37 @@ namespace mantis {
         return *this;
     }
 
-    std::string EntitySchema::listRule() const { return m_listRule; }
+    AccessRule EntitySchema::listRule() const { return m_listRule; }
 
-    EntitySchema &EntitySchema::setListRule(const std::string &listRule) {
+    EntitySchema &EntitySchema::setListRule(const AccessRule &listRule) {
         m_listRule = listRule;
         return *this;
     }
 
-    std::string EntitySchema::getRule() const { return m_getRule; }
+    AccessRule EntitySchema::getRule() const { return m_getRule; }
 
-    EntitySchema &EntitySchema::setGetRule(const std::string &getRule) {
+    EntitySchema &EntitySchema::setGetRule(const AccessRule &getRule) {
         m_getRule = getRule;
         return *this;
     }
 
-    std::string EntitySchema::addRule() const { return m_addRule; }
+    AccessRule EntitySchema::addRule() const { return m_addRule; }
 
-    EntitySchema &EntitySchema::setAddRule(const std::string &addRule) {
+    EntitySchema &EntitySchema::setAddRule(const AccessRule &addRule) {
         m_addRule = addRule;
         return *this;
     }
 
-    std::string EntitySchema::updateRule() const { return m_updateRule; }
+    AccessRule EntitySchema::updateRule() const { return m_updateRule; }
 
-    EntitySchema &EntitySchema::setUpdateRule(const std::string &updateRule) {
+    EntitySchema &EntitySchema::setUpdateRule(const AccessRule &updateRule) {
         m_updateRule = updateRule;
         return *this;
     }
 
-    std::string EntitySchema::deleteRule() const { return m_deleteRule; }
+    AccessRule EntitySchema::deleteRule() const { return m_deleteRule; }
 
-    EntitySchema &EntitySchema::setDeleteRule(const std::string &deleteRule) {
+    EntitySchema &EntitySchema::setDeleteRule(const AccessRule &deleteRule) {
         m_deleteRule = deleteRule;
         return *this;
     }
@@ -343,11 +347,14 @@ namespace mantis {
         j["type"] = m_type;
         j["system"] = m_isSystem;
         j["has_api"] = m_hasApi;
-        j["list_rule"] = m_listRule;
-        j["get_rule"] = m_getRule;
-        j["add_rule"] = m_addRule;
-        j["update_rule"] = m_updateRule;
-        j["delete_rule"] = m_deleteRule;
+
+        j["rules"] = {
+            {"list", m_listRule.toJSON() },
+            {"get", m_getRule.toJSON() },
+            {"add", m_addRule.toJSON() },
+            {"update", m_updateRule.toJSON() },
+            {"delete", m_deleteRule.toJSON() }
+        };
 
         if (m_type == "view") {
             j["view_query"] = m_viewSqlQuery;

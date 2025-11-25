@@ -1,7 +1,3 @@
-//
-// Created by codeart on 12/11/2025.
-//
-
 #ifndef MANTISBASE_ENTITY_SCHEMA_H
 #define MANTISBASE_ENTITY_SCHEMA_H
 
@@ -11,25 +7,29 @@
 
 #include "entity.h"
 #include "entity_schema_field.h"
+#include "access_rules.h"
 
 namespace mantis {
     class EntitySchema {
     public:
         EntitySchema() = default;
 
-        explicit EntitySchema(const std::string& entity_name, const std::string& entity_type = "base");
+        explicit EntitySchema(const std::string &entity_name, const std::string &entity_type = "base");
 
         // Allow copy constructors & assignment ops for easy cloning
         EntitySchema(const EntitySchema &);
+
         EntitySchema &operator=(const EntitySchema &);
 
         // Move operators ...
-        EntitySchema(EntitySchema&&) noexcept = default;
-        EntitySchema& operator=(EntitySchema&&) noexcept = default;
+        EntitySchema(EntitySchema &&) noexcept = default;
+
+        EntitySchema &operator=(EntitySchema &&) noexcept = default;
 
         ~EntitySchema();
 
         static EntitySchema fromSchema(const json &entity_schema);
+
         static EntitySchema fromEntity(const Entity &entity);
 
         [[nodiscard]] Entity toEntity() const;
@@ -38,40 +38,31 @@ namespace mantis {
         [[nodiscard]] std::string id() const;
 
         [[nodiscard]] std::string name() const;
-
         EntitySchema &setName(const std::string &name);
 
         [[nodiscard]] std::string type() const;
-
         EntitySchema &setType(const std::string &type);
 
         [[nodiscard]] bool hasApi() const;
-
         EntitySchema &setHasApi(const bool &hasApi);
 
         [[nodiscard]] bool isSystem() const;
-
         EntitySchema &setSystem(const bool &isSystem);
 
-        [[nodiscard]] std::string listRule() const;
+        [[nodiscard]] AccessRule listRule() const;
+        EntitySchema &setListRule(const AccessRule &listRule);
 
-        EntitySchema &setListRule(const std::string &listRule);
+        [[nodiscard]] AccessRule getRule() const;
+        EntitySchema &setGetRule(const AccessRule &getRule);
 
-        [[nodiscard]] std::string getRule() const;
+        [[nodiscard]] AccessRule addRule() const;
+        EntitySchema &setAddRule(const AccessRule &addRule);
 
-        EntitySchema &setGetRule(const std::string &getRule);
+        [[nodiscard]] AccessRule updateRule() const;
+        EntitySchema &setUpdateRule(const AccessRule &updateRule);
 
-        [[nodiscard]] std::string addRule() const;
-
-        EntitySchema &setAddRule(const std::string &addRule);
-
-        [[nodiscard]] std::string updateRule() const;
-
-        EntitySchema &setUpdateRule(const std::string &updateRule);
-
-        [[nodiscard]] std::string deleteRule() const;
-
-        EntitySchema &setDeleteRule(const std::string &deleteRule);
+        [[nodiscard]] AccessRule deleteRule() const;
+        EntitySchema &setDeleteRule(const AccessRule &deleteRule);
 
         [[nodiscard]] std::vector<EntitySchemaField> fields() const;
 
@@ -80,9 +71,11 @@ namespace mantis {
         bool removeField(const std::string &field_name);
 
         EntitySchemaField &field(const std::string &field_name);
+
         EntitySchemaField &fieldById(const std::string &field_name);
 
         [[nodiscard]] bool hasField(const std::string &field_name) const;
+
         [[nodiscard]] bool hasFieldById(const std::string &field_id) const;
 
         [[nodiscard]] std::string viewQuery() const;
@@ -115,9 +108,10 @@ namespace mantis {
 
         static bool tableExists(const EntitySchema &table);
 
-        static std::string genEntityId(const std::string& entity_name);
+        static std::string genEntityId(const std::string &entity_name);
 
-        static std::optional<std::string> validate(const EntitySchema& table_schema);
+        static std::optional<std::string> validate(const EntitySchema &table_schema);
+
         [[nodiscard]] std::optional<std::string> validate() const;
 
         // --------------- SCHEMA ROUTING ------------------ //
@@ -135,10 +129,12 @@ namespace mantis {
 
     private:
         static std::string getFieldType(const std::string &type, std::shared_ptr<soci::session> sql);
-        void addFieldsIfNotExist(const std::string& type);
 
-        static const std::vector<EntitySchemaField>& defaultBaseFieldsSchema();
-        static const std::vector<EntitySchemaField>& defaultAuthFieldsSchema();
+        void addFieldsIfNotExist(const std::string &type);
+
+        static const std::vector<EntitySchemaField> &defaultBaseFieldsSchema();
+
+        static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
 
         std::string m_name;
         std::string m_type;
@@ -146,7 +142,7 @@ namespace mantis {
         bool m_isSystem = false;
         bool m_hasApi = true;
         std::vector<EntitySchemaField> m_fields;
-        std::string m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
+        AccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
     };
 } // mantis
 

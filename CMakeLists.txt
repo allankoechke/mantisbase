@@ -77,6 +77,8 @@ set( MANTIS_SOURCES
         src/core/exceptions.cpp
         src/core/router_httplib_internals.cpp
         include/mantisbase/core/types.h
+        src/core/models/access_rules.cpp
+        src/core/models/access_rules.h
 )
 
 if(MANTIS_SCRIPTING_ENABLED)

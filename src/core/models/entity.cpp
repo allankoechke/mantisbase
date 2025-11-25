@@ -1,7 +1,3 @@
-//
-// Created by codeart on 09/11/2025.
-//
-
 #include "../../../include/mantisbase/core/models/entity.h"
 #include "../../../include/mantisbase/core/models/entity_schema.h"
 #include "../../../include/mantisbase/core/models/entity_schema_field.h"
@@ -22,16 +18,20 @@ namespace mantis {
             m_schema["system"] = false;
         if (!m_schema.contains("has_api"))
             m_schema["has_api"] = true;
-        if (!m_schema.contains("list_rule"))
-            m_schema["list_rule"] = "";
-        if (!m_schema.contains("get_rule"))
-            m_schema["get_rule"] = "";
-        if (!m_schema.contains("add_rule"))
-            m_schema["add_rule"] = "";
-        if (!m_schema.contains("update_rule"))
-            m_schema["update_rule"] = "";
-        if (!m_schema.contains("delete_rule"))
-            m_schema["delete_rule"] = "";
+
+        json rules = m_schema.contains("rules") ? schema["rules"] : json::object();
+        if (!rules.contains("list"))
+            rules = {{"list", AccessRule{}.toJSON()}};
+        if (!rules.contains("get"))
+            rules = {{"get", AccessRule{}.toJSON()}};
+        if (!rules.contains("add"))
+            rules = {{"add", AccessRule{}.toJSON()}};
+        if (!rules.contains("update"))
+            rules = {{"update", AccessRule{}.toJSON()}};
+        if (!rules.contains("delete"))
+            rules = {{"delete", AccessRule{}.toJSON()}};
+
+        m_schema["rules"] = rules;
 
         if (type() == "view") {
             if (!m_schema.contains("view_query"))
@@ -95,24 +95,28 @@ namespace mantis {
         return field(field_name).has_value();
     }
 
-    std::string Entity::listRule() const {
-        return m_schema.at("list_rule").get<std::string>();
+    const json& Entity::rules() const {
+        return m_schema["rules"];
     }
 
-    std::string Entity::getRule() const {
-        return m_schema.at("get_rule").get<std::string>();
+    AccessRule Entity::listRule() const {
+        return AccessRule::fromJSON(rules()["list"]);
     }
 
-    std::string Entity::addRule() const {
-        return m_schema.at("add_rule").get<std::string>();
+    AccessRule Entity::getRule() const {
+        return AccessRule::fromJSON(rules()["get"]);
     }
 
-    std::string Entity::updateRule() const {
-        return m_schema.at("update_rule").get<std::string>();
+    AccessRule Entity::addRule() const {
+        return AccessRule::fromJSON(rules()["add"]);
     }
 
-    std::string Entity::deleteRule() const {
-        return m_schema.at("delete_rule").get<std::string>();
+    AccessRule Entity::updateRule() const {
+        return AccessRule::fromJSON(rules()["update"]);
+    }
+
+    AccessRule Entity::deleteRule() const {
+        return AccessRule::fromJSON(rules()["delete"]);
     }
 
     // --------------------------------------------------------------------------- //
