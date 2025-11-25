@@ -55,6 +55,7 @@ namespace mantis
     {
         // Response Object
         json result;
+        result["claims"] = json::object();
         result["error"] = "";
         result["verified"] = false;
 
@@ -62,8 +63,8 @@ namespace mantis
         {
             // Decode the token
             const auto decoded = jwt::decode(token);
-
             const auto secretKey = MantisBase::jwtSecretKey();
+
             // Create verifier with your validation rules
             auto verifier = jwt::verify()
                 .allow_algorithm(jwt::algorithm::hs256{secretKey});
@@ -91,20 +92,21 @@ namespace mantis
                 return result;
             }
 
+            json claims;
             // Validation succeeded - extract all claims
-            // Extract all payload claims
             for (auto& [key, value] : decoded.get_payload_json())
             {
-                result[key] = value;
+                claims[key] = value;
             }
 
             // Enforce existence of `id` and `table` claims
-            if (!result.contains("id") || !result.contains("table"))
+            if (!claims.contains("id") || !claims.contains("table"))
             {
                 result["error"] = "Malformed token: Missing `id` or `table` claim field.";
                 return result;
             }
 
+            result["claims"] = claims;
             result["verified"] = true;
             return result;
         }

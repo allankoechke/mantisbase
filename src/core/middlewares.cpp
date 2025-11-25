@@ -18,11 +18,11 @@ namespace mantis {
             auth["id"] = nullptr; // Hold user `id` from auth user
             auth["table"] = nullptr; // Hold user table if valid
             auth["user"] = nullptr; // Hold hydrated user if valid
+            auth["verification"] = nullptr; // Hold hydrated verification status if valid
 
             if (req.hasHeader("Authorization")) {
                 const auto token = req.getBearerTokenAuth();
                 auth["token"] = trim(token);
-                auth["type"] = "user";
             }
 
             // Update the context
@@ -36,25 +36,35 @@ namespace mantis {
             // Get the auth var from the context, resort to empty object if it's not set.
             auto auth = req.getOr<json>("auth", json::object());
 
-            logger::trace("Auth Obj: `{}`", auth.dump());
-
             // Expand logged user if token is present and query user information if it exists
             if (auth.contains("token") && !auth["token"].is_null() && !auth["token"].empty()) {
                 const auto token = auth.at("token").get<std::string>();
 
                 // If token validation worked, lets get data from database
                 const auto resp = Auth::verifyToken(token);
-                // const auto verified = resp.at("verified").get<bool>();
+                auth["verification"] = resp;
 
-                const auto user_id = resp.at("id").get<std::string>();
-                const auto user_table = resp.at("table").get<std::string>();
+                // Update context data and exit if not verified
+                if (!resp.at("verified").get<bool>()) {
+                    req.set("auth", auth); // Update the `auth` data
+                    return HandlerResponse::Unhandled;
+                }
+
+                // If token is valid, try getting user record from db and populate context record
+                auto claims = resp["claims"];
+                const auto user_id = claims["id"].get<std::string>();
+                const auto user_table = claims["table"].get<std::string>();
+
+                // Set type to user since token is valid, but user record may be invalid
+                auth["type"] = "user";
 
                 try {
                     const auto user_entity = MantisBase::instance().entity(user_table);
                     if (auto user = user_entity.read(user_id); user.has_value()) {
                         auth["user"] = user;
                     }
-                } catch (...){} // Ignore errors for now
+                } catch (...) {
+                } // Ignore errors for now
             }
 
             req.set("auth", auth); // Update the `auth` data
@@ -62,12 +72,10 @@ namespace mantis {
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess() {
-        return [](MantisRequest &req, MantisResponse &res) {
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const Entity &entity) {
+        return [entity](MantisRequest &req, MantisResponse &res) {
             // Get the auth var from the context, resort to empty object if it's not set.
             auto auth = req.getOr<json>("auth", json::object());
-
-            logger::trace("Auth Obj: `{}`", auth.dump());
 
             auto method = req.getMethod();
             if (!(method == "GET"
@@ -77,147 +85,98 @@ namespace mantis {
                 json response;
                 response["status"] = 400;
                 response["data"] = json::object();
-                response["error"] = "Unsupported method";
+                response["error"] = "Unsupported method `" + method + "`";
 
                 res.sendJson(400, response);
                 return HandlerResponse::Handled;
             }
 
             // Store rule, depending on the request type
-            std::string rule = "";
+            AccessRule rule = method == "GET"
+                                  ? (req.hasPathParams()
+                                         ? entity.listRule()
+                                         : entity.getRule())
+                                  : method == "POST"
+                                        ? entity.addRule()
+                                        : method == "PATCH"
+                                              ? entity.updateRule()
+                                              : entity.deleteRule();
 
-            // try {
-            //     auto table = MantisBase::instance().entity(auth["table"].get<std::string>());
-            //
-            // rule = method == "GET"
-            //                        ? (req.hasPathParams() ? table.listRule() : table.getRule())
-            //                        : method == "POST"
-            //                        ? table.addRule()
-            //                        : method == "PATCH"
-            //                        ? table.updateRule()
-            //                        : table.deleteRule();
-            // }
+            if (rule.mode() == "public") {
+                // Open to all
+                return HandlerResponse::Unhandled;
+            }
 
-            logger::trace("Rule: `{}`", rule);
+            // For auth/empty/admin roles, ....
+            if (rule.mode() == "auth" || rule.mode().empty() || auth["table"].get<std::string>() == "_admins") {
+                // Require at least one valid auth on any table
+                auto verification = req.getOr<json>("verification", json::object());
+                if (verification.contains("verified") &&
+                    !verification["verified"].is_boolean() &&
+                    verification["verified"].get<bool>()) {
+                    return HandlerResponse::Unhandled;
+                }
 
-            // Remove whitespaces
-            rule = trim(rule);
+                // Send auth error
+                res.sendJson(403, {
+                                 {"data", json::object()},
+                                 {"status", 403},
+                                 {"error", verification["error"]}
+                             });
+                return HandlerResponse::Handled;
+            }
 
-            // Token map variables for evaluation
-            TokenMap vars;
+            if (rule.mode() == "custom") {
+                // Evaluate expression
+                const std::string expr = rule.expr();
 
-            // Expand logged user if token is present and query user information if it exists
-            if (auth.contains("token") && !auth["token"].is_null() && !auth["token"].empty()) {
-                const auto token = auth.at("token").get<std::string>();
+                // Token map variables for evaluation
+                TokenMap vars;
 
-                // If token validation worked, lets get data from database
-                if (const auto resp = Auth::verifyToken(token); resp.at("verified").get<bool>()) {
-                    logger::trace("Token Verified: `{}`", token);
-                    const auto user_id = resp.at("id").get<std::string>();
-                    const auto user_table = resp.at("table").get<std::string>();
+                // Add `auth` data to the TokenMap
+                vars["auth"] = MantisBase::instance().evaluator().jsonToTokenMap(auth);
 
-                    // Query for user with given ID, this info will be populated to the
-                    // expression evaluator args as well as available through
-                    // the session context, queried by:
-                    //  ` req.get<json>("auth").value("id", ""); // returns the user ID
-                    //  ` req.get<json>("auth").value("name", ""); // returns the user's name
-                    auto sql = MantisBase::instance().db().session();
-                    std::string query = "SELECT * FROM " + user_table + " WHERE id = :id LIMIT 1";
+                // Request Token Map
+                TokenMap reqMap;
+                reqMap["remoteAddr"] = req.getRemoteAddr();
+                reqMap["remotePort"] = req.getRemotePort();
+                reqMap["localAddr"] = req.getLocalAddr();
+                reqMap["localPort"] = req.getLocalPort();
 
-                    soci::row user_row;
-                    *sql << query, soci::use(user_id), soci::into(user_row);
-
-                    // Let's only populate TokenVars for now, no returning
-                    if (sql->got_data()) {
-                        // Populate the auth object with additional data from the database
-                        // remove `password` field if available
-                        auto user = user_table == "__admins"
-                                        ? sociRow2Json(user_row, {})
-                                        // MantisBase::instance().router().adminTableFields)
-                                        : sociRow2Json(user_row, {}); // TODO ... get table ...
-
-                        // Populate the `auth` object
-                        auth["type"] = "user";
-                        auth["id"] = user_id;
-                        auth["table"] = user_table;
-
-                        // Populate auth obj with user details ...
-                        for (const auto &[key, value]: user.items()) {
-                            auth[key] = value;
-                        }
-
-                        // Remove password field
-                        auth.erase("password");
-
-                        // Update context data
-                        req.set("auth", auth);
-
-                        // Add `auth` data to the TokenMap
-                        vars["auth"] = MantisBase::instance().evaluator().jsonToTokenMap(auth);
+                try {
+                    if (req.getMethod() == "POST" && !req.getBody().empty()) // TODO handle formdata
+                    {
+                        // Parse request body and add it to the request TokenMap
+                        auto request = json::parse(req.getMethod());
+                        reqMap["body"] = MantisBase::instance().evaluator().jsonToTokenMap(request);
                     }
-                }
-            }
-
-            // Request Token Map
-            TokenMap reqMap;
-            reqMap["remoteAddr"] = req.getRemoteAddr();
-            reqMap["remotePort"] = req.getRemotePort();
-            reqMap["localAddr"] = req.getLocalAddr();
-            reqMap["localPort"] = req.getLocalPort();
-
-            try {
-                if (req.getMethod() == "POST" && !req.getBody().empty()) // TODO handle formdata
-                {
-                    // Parse request body and add it to the request TokenMap
-                    auto request = json::parse(req.getMethod());
-                    reqMap["body"] = MantisBase::instance().evaluator().jsonToTokenMap(request);
-                }
-            } catch (...) {
-            }
-
-            // Add the request map to the vars
-            vars["req"] = reqMap;
-
-            // If the rule is empty, enforce admin authorization
-            if (rule.empty()) {
-                // Check if user is logged in as Admin
-                if (auth.contains("table") // Has `table` key
-                    && !auth["table"].is_null() // `table` value is not null
-                    && auth.at("table").get<std::string>() == "__admins"
-                ) // Check table value not null
-                {
-                    // If logged in as admin, grant access
-                    // Admins get unconditional data access
-                    return REQUEST_PENDING;
+                } catch (...) {
                 }
 
-                logger::trace("Table: `{}`", auth.at("table").get<std::string>());
+                // Add the request map to the vars
+                vars["req"] = reqMap;
 
-                // User was not an admin, lets return access denied error
+                // If expression evaluation returns true, lets return allowing execution
+                // continuation. Else, we'll craft an error response.
+                if (MantisBase::instance().evaluator().evaluate(expr, vars))
+                    return REQUEST_PENDING; // Proceed to next middleware
+
+                // Evaluation yielded false, return generic access denied error
                 json response;
                 response["status"] = 403;
                 response["data"] = json::object();
-                response["error"] = "Admin auth required to access this resource.";
+                response["error"] = "Access denied!";
 
                 res.sendJson(403, response);
                 return REQUEST_HANDLED;
             }
 
-            logger::trace("Expression Rule = {}", rule);
-
-            // If expression evaluation returns true, lets return allowing execution
-            // continuation. Else, we'll craft an error response.
-            if (MantisBase::instance().evaluator().evaluate(rule, vars))
-                return REQUEST_PENDING; // Proceed to next middleware
-
-            // Evaluation yielded false, return generic access denied error
-            json response;
-            response["status"] = 403;
-            response["data"] = json::object();
-            response["error"] = "Access denied!";
-
-            res.sendJson(403, response);
-            return REQUEST_HANDLED;
+            res.sendJson(403, {
+                             {"status", 403},
+                             {"data", json::object()},
+                             {"data", "Failed to authenticate user!"}
+                         });
+            return HandlerResponse::Handled;
         };
     }
 
