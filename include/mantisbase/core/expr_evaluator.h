@@ -13,8 +13,6 @@
 
 #include "../utils/utils.h"
 
-// #define __file__ "core/expr_evaluator.h"
-
 namespace mantis
 {
     using cparse::TokenMap;

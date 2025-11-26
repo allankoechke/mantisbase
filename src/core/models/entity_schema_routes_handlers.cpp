@@ -13,8 +13,8 @@ namespace mantis {
 
                 // If table name is passed in, get the `id` equivalent
                 const auto schema_id = schema_id_or_name.starts_with("mbt_")
-                                     ? schema_id_or_name
-                                     : EntitySchema::genEntityId(schema_id_or_name);
+                                           ? schema_id_or_name
+                                           : EntitySchema::genEntityId(schema_id_or_name);
 
                 // Read for entity matching given `id` if it exists, return it, else error `404`
                 const auto record = EntitySchema::getTable(schema_id);
@@ -127,8 +127,8 @@ namespace mantis {
 
             // If table name is passed in, get the `id` equivalent
             const auto schema_id = schema_id_or_name.starts_with("mbt_")
-                                 ? schema_id_or_name
-                                 : EntitySchema::genEntityId(schema_id_or_name);
+                                       ? schema_id_or_name
+                                       : EntitySchema::genEntityId(schema_id_or_name);
 
             // Check request body if valid ...
             const auto &[body, err] = req.getBodyAsJson();
@@ -166,8 +166,8 @@ namespace mantis {
 
             // If table name is passed in, get the `id` equivalent
             const auto schema_id = schema_id_or_name.starts_with("mbt_")
-                                 ? schema_id_or_name
-                                 : EntitySchema::genEntityId(schema_id_or_name);
+                                       ? schema_id_or_name
+                                       : EntitySchema::genEntityId(schema_id_or_name);
             EntitySchema::dropTable(schema_id);
             res.sendEmpty();
         };
@@ -178,10 +178,11 @@ namespace mantis {
     void EntitySchema::createEntityRoutes() const {
         auto &router = MantisBase::instance().router();
 
-        router.Get("/api/v1/schemas", getManyRouteHandler());
-        router.Post("/api/v1/schemas", postRouteHandler()); // Create Entity
-        router.Get("/api/v1/schemas/:schema_name_or_id", getOneRouteHandler());
-        router.Patch("/api/v1/schemas/:schema_name_or_id", patchRouteHandler()); // Update Entity
-        router.Delete("/api/v1/schemas/:schema_name_or_id", deleteRouteHandler()); // Delete Entity
+        router.Get("/api/v1/schemas", getManyRouteHandler(), {requireAdminAuth()});
+        router.Post("/api/v1/schemas", postRouteHandler(), {requireAdminAuth()}); // Create Entity
+        router.Get("/api/v1/schemas/:schema_name_or_id", getOneRouteHandler(), {requireAdminAuth()});
+        router.Patch("/api/v1/schemas/:schema_name_or_id", patchRouteHandler(), {requireAdminAuth()}); // Update Entity
+        router.Delete("/api/v1/schemas/:schema_name_or_id", deleteRouteHandler(), {requireAdminAuth()});
+        // Delete Entity
     };
 }

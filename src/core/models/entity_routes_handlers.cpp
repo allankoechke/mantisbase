@@ -255,19 +255,26 @@ namespace mantis {
         auto &router = MantisBase::instance().router();
 
         // All types do /get /get/:id
-        router.Get("/api/v1/" + name() + "/records", getManyRouteHandler());
-        router.Get("/api/v1/" + name() + "/records/:id", getOneRouteHandler());
+        router.Get("/api/v1/" + name() + "/records", getManyRouteHandler(),
+                   {hasAccess(name())});
+        router.Get("/api/v1/" + name() + "/records/:id", getOneRouteHandler(),
+                   {hasAccess(name())});
 
         // base & auth /post/:id /delete/:id
         if (type() == "base" || type() == "auth") {
-            router.Post("/api/v1/" + name() + "/records", postRouteHandler()); // Create Entity
-            router.Patch("/api/v1/" + name() + "/records/:id", patchRouteHandler()); // Update Entity
-            router.Delete("/api/v1/" + name() + "/records/:id", deleteRouteHandler()); // Delete Entity
+            router.Post("/api/v1/" + name() + "/records", postRouteHandler(),
+                        {hasAccess(name())}); // Create Entity
+            router.Patch("/api/v1/" + name() + "/records/:id", patchRouteHandler(),
+                         {hasAccess(name())});
+            // Update Entity
+            router.Delete("/api/v1/" + name() + "/records/:id", deleteRouteHandler(),
+                          {hasAccess(name())});
+            // Delete Entity
         }
 
         // auth /login
         if (type() == "auth") {
-            router.Post("/api/v1/" + name() + "/auth/login", authRouteHandler());
+            router.Post("/api/v1/" + name() + "/auth/token", authRouteHandler());
             // router.Post("/api/v1/" + name() + "/auth/logout", authRouteHandler());
             // router.Post("/api/v1/" + name() + "/auth/reset-password", authRouteHandler());
             // router.Post("/api/v1/" + name() + "/auth/login", authRouteHandler());

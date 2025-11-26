@@ -279,7 +279,7 @@ namespace mantis {
 
     void Router::generateMiscEndpoints() {
         auto &router = mApp.router();
-        router.Get("/api/healthcheck", healthCheckHandler());
+        router.Get("/api/v1/health", healthCheckHandler());
         router.Get("/api/files/:entity/:file", fileServingHandler());
         router.Get(R"(/admin(.*))", handleAdminDashboardRoute());
 
