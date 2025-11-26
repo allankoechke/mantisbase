@@ -214,7 +214,7 @@ namespace mantis {
         const Entity& entity = m_entityMap.at(entity_name);
 
         // Also, check if we have defined some routes for this one ...
-        const auto basePath = "/api/v1/" + entity_name + "/records";
+        const auto basePath = "/api/v1/entities/" + entity_name;
         m_routeRegistry.remove("GET", basePath);
         m_routeRegistry.remove("GET", basePath + "/:id");
 
@@ -225,7 +225,7 @@ namespace mantis {
         }
 
         if (entity.type() == "auth") {
-            m_routeRegistry.remove("POST", "/api/v1/" + entity_name + "/auth/login");
+            m_routeRegistry.remove("POST", "/api/v1/entities/" + entity_name + "/auth/token");
         }
 
         // Remove Entity instance for the cache

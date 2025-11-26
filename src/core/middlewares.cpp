@@ -18,7 +18,6 @@ namespace mantis {
             auth["id"] = nullptr; // Hold user `id` from auth user
             auth["table"] = nullptr; // Hold user table if valid
             auth["user"] = nullptr; // Hold hydrated user if valid
-            auth["verification"] = nullptr; // Hold hydrated verification status if valid
 
             if (req.hasHeader("Authorization")) {
                 const auto token = req.getBearerTokenAuth();
@@ -27,6 +26,7 @@ namespace mantis {
 
             // Update the context
             req.set("auth", auth);
+            req.set("verification", json::object());
             return HandlerResponse::Unhandled;
         };
     }
@@ -41,8 +41,8 @@ namespace mantis {
                 const auto token = auth.at("token").get<std::string>();
 
                 // If token validation worked, lets get data from database
-                const auto resp = Auth::verifyToken(token);
-                auth["verification"] = resp;
+                const json resp = Auth::verifyToken(token);
+                req.set("verification", resp);
 
                 // Update context data and exit if not verified
                 if (!resp.at("verified").get<bool>()) {
@@ -54,6 +54,10 @@ namespace mantis {
                 auto claims = resp["claims"];
                 const auto user_id = claims["id"].get<std::string>();
                 const auto user_table = claims["table"].get<std::string>();
+
+                // Update auth keys ...
+                auth["id"] = user_id;
+                auth["table"] = user_table;
 
                 // Set type to user since token is valid, but user record may be invalid
                 auth["type"] = "user";
@@ -72,7 +76,7 @@ namespace mantis {
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const std::string& entity_name) {
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const std::string &entity_name) {
         return [entity_name](MantisRequest &req, MantisResponse &res) {
             const auto entity = MantisBase::instance().entity(entity_name);
 
@@ -113,8 +117,18 @@ namespace mantis {
             if (rule.mode() == "auth" || rule.mode().empty() || auth["table"].get<std::string>() == "_admins") {
                 // Require at least one valid auth on any table
                 auto verification = req.getOr<json>("verification", json::object());
+                if (verification.empty()) {
+                    // Send auth error
+                    res.sendJson(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Auth required to access this resource!"}
+                                 });
+                    return HandlerResponse::Handled;
+                }
+
                 if (verification.contains("verified") &&
-                    !verification["verified"].is_boolean() &&
+                    verification["verified"].is_boolean() &&
                     verification["verified"].get<bool>()) {
                     return HandlerResponse::Unhandled;
                 }
@@ -206,34 +220,57 @@ namespace mantis {
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminAuth() {
         return [](MantisRequest &req, const MantisResponse &res) {
-            // Require admin authentication
-            auto verification = req.getOr<json>("verification", json::object());
-            const bool ok = verification.contains("verified") &&
-                            !verification["verified"].is_boolean() &&
-                            verification["verified"].get<bool>();
-            if (ok) {
-                auto auth = req.getOr<json>("auth", json::object());
-                // Ensure the auth user was for admin table
-                if (auth["table"].get<std::string>() == "_admins") {
-                    return HandlerResponse::Unhandled;
+            try {
+                // Require admin authentication
+                auto verification = req.getOr<json>("verification", json::object());
+                logger::trace("Verification: {}", verification.dump());
+                if (verification.empty()) {
+                    // Send auth error
+                    res.sendJson(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Auth required to access this resource!"}
+                                 });
+                    return HandlerResponse::Handled;
+                }
+
+                const bool ok = verification.contains("verified") &&
+                                verification["verified"].is_boolean() &&
+                                verification["verified"].get<bool>();
+                if (ok) {
+                    auto auth = req.getOr<json>("auth", json::object());
+                    logger::trace("Auth: {}", auth.dump());
+                    // Ensure the auth user was for admin table
+                    if (auth["table"].get<std::string>() == "_admins") {
+                        return HandlerResponse::Unhandled;
+                    }
+
+                    // Send auth error
+                    res.sendJson(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Admin auth required to access this resource."}
+                                 });
+                    return HandlerResponse::Handled;
                 }
 
                 // Send auth error
                 res.sendJson(403, {
                                  {"data", json::object()},
                                  {"status", 403},
-                                 {"error", "Admin auth required to access this resource."}
+                                 {"error", verification["error"]}
+                             });
+                return HandlerResponse::Handled;
+            } catch (std::exception &e) {
+                logger::critical("Error authenticating as admin: {}", e.what());
+                // Send auth error
+                res.sendJson(500, {
+                                 {"data", json::object()},
+                                 {"status", 500},
+                                 {"error", e.what()}
                              });
                 return HandlerResponse::Handled;
             }
-
-            // Send auth error
-            res.sendJson(403, {
-                             {"data", json::object()},
-                             {"status", 403},
-                             {"error", verification["error"]}
-                         });
-            return HandlerResponse::Handled;
         };
     }
 
@@ -244,7 +281,8 @@ namespace mantis {
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireEntityAuth(const std::string &entity_name) {
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)>
+    requireEntityAuth(const std::string &entity_name) {
         return [entity_name](MantisRequest &req, MantisResponse &res) {
             return REQUEST_PENDING;
         };

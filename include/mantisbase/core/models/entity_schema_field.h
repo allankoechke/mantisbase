@@ -77,7 +77,7 @@ namespace mantis {
         std::string m_id, m_name, m_type;
         bool m_required = false, m_primaryKey = false, m_isSystem = false, m_isUnique = false;
         nlohmann::json m_constraints = {
-            {"min-value", nullptr},
+            {"min_value", nullptr},
             {"max_value", nullptr},
             {"validator", nullptr},
             {"default_value", nullptr}

@@ -225,6 +225,9 @@ namespace mantis {
                     {"table", entity.name()}
                 });
 
+                // Redact password in response ...
+                if (user.contains("password")) user.erase("password");
+
                 // Return token and auth user
                 res.sendJson(200, {
                                  {
@@ -254,27 +257,32 @@ namespace mantis {
 
         auto &router = MantisBase::instance().router();
 
-        // All types do /get /get/:id
-        router.Get("/api/v1/" + name() + "/records", getManyRouteHandler(),
+        // List Entities
+        router.Get("/api/v1/entities/" + name(), getManyRouteHandler(),
                    {hasAccess(name())});
-        router.Get("/api/v1/" + name() + "/records/:id", getOneRouteHandler(),
+
+        // Fetch Entity
+        router.Get("/api/v1/entities/" + name() + "/:id", getOneRouteHandler(),
                    {hasAccess(name())});
 
         // base & auth /post/:id /delete/:id
         if (type() == "base" || type() == "auth") {
-            router.Post("/api/v1/" + name() + "/records", postRouteHandler(),
-                        {hasAccess(name())}); // Create Entity
-            router.Patch("/api/v1/" + name() + "/records/:id", patchRouteHandler(),
-                         {hasAccess(name())});
+            // Create Entity
+            router.Post("/api/v1/entities/" + name(), postRouteHandler(),
+                        {hasAccess(name())});
+
             // Update Entity
-            router.Delete("/api/v1/" + name() + "/records/:id", deleteRouteHandler(),
-                          {hasAccess(name())});
+            router.Patch("/api/v1/entities/" + name() + "/:id", patchRouteHandler(),
+                         {hasAccess(name())});
+
             // Delete Entity
+            router.Delete("/api/v1/entities/" + name() + "/:id", deleteRouteHandler(),
+                          {hasAccess(name())});
         }
 
         // auth /login
         if (type() == "auth") {
-            router.Post("/api/v1/" + name() + "/auth/token", authRouteHandler());
+            router.Post("/api/v1/entities/" + name() + "/auth/token", authRouteHandler());
             // router.Post("/api/v1/" + name() + "/auth/logout", authRouteHandler());
             // router.Post("/api/v1/" + name() + "/auth/reset-password", authRouteHandler());
             // router.Post("/api/v1/" + name() + "/auth/login", authRouteHandler());

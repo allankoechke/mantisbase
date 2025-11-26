@@ -71,12 +71,12 @@ namespace mantis
 
             const auto& config = json::object(); // MantisBase::instance().settings().configs();
             // Add JWT Issuer if enabled
-            if (!config.value("jwtEnableSetIssuer", false))
+            if (config.value("jwtEnableSetIssuer", false))
             {
                 verifier.with_issuer(config.at("appName").get<std::string>());
             }
             // Add JWT audience if enabled
-            if (!config.value("jwtEnableSetAudience", false))
+            if (config.value("jwtEnableSetAudience", false))
             {
                 verifier.with_audience(config.at("baseUrl").get<std::string>());
             }
