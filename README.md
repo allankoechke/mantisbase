@@ -22,7 +22,9 @@
 - Single app binary for portability (~11MB, 3MB compressed)
 
 > [!WARNING]  
-> MantisBase is still under active development and API might change as the project stablizes.
+> Mantis is still under active development and API might change as the project stablizes.
+> We have started work on v0.3.x release changes that will rework whole codebase to create a stable API and improve performance. Follow the work on the [`v0.3`](https://github.com/allankoechke/mantis/tree/v0.3) branch.
+
 
 ## 🛠️ Tech Stack
 
