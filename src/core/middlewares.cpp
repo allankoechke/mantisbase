@@ -1,7 +1,3 @@
-//
-// Created by codeart on 12/11/2025.
-//
-
 #include "../include/mantisbase/core/middlewares.h"
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/core/models/entity.h"
@@ -18,7 +14,7 @@ namespace mantis {
             auth["type"] = "guest"; // or 'user' or 'admin'
             auth["token"] = nullptr; // User token from header ...
             auth["id"] = nullptr; // Hold user `id` from auth user
-            auth["table"] = nullptr; // Hold user table if valid
+            auth["entity"] = nullptr; // Hold user table if valid
             auth["user"] = nullptr; // Hold hydrated user if valid
 
             if (req.hasHeader("Authorization")) {
@@ -57,11 +53,11 @@ namespace mantis {
                 // If token is valid, try getting user record from db and populate context record
                 auto claims = resp["claims"];
                 const auto user_id = claims["id"].get<std::string>();
-                const auto user_table = claims["table"].get<std::string>();
+                const auto user_table = claims["entity"].get<std::string>();
 
                 // Update auth keys ...
                 auth["id"] = user_id;
-                auth["table"] = user_table;
+                auth["entity"] = user_table;
 
                 // Set type to user since token is valid, but user record may be invalid
                 auth["type"] = "user";
@@ -120,7 +116,7 @@ namespace mantis {
             }
 
             // For auth/empty/admin roles, ....
-            if (rule.mode() == "auth" || rule.mode().empty() || auth["table"].get<std::string>() == "_admins") {
+            if (rule.mode() == "auth" || rule.mode().empty() || auth["entity"].get<std::string>() == "mb_admins") {
                 // Require at least one valid auth on any table
                 auto verification = req.getOr<json>("verification", json::object());
                 if (verification.empty()) {
@@ -153,13 +149,13 @@ namespace mantis {
                 const std::string expr = rule.expr();
 
                 // Token map variables for evaluation
-                TokenMap vars;
+                // TokenMap vars;
 
                 // Add `auth` data to the TokenMap
-                vars["auth"] = MantisBase::instance().evaluator().jsonToTokenMap(auth);
+                // vars["auth"] = MantisBase::instance().evaluator().jsonToTokenMap(auth);
 
                 // Request Token Map
-                TokenMap reqMap;
+                json reqMap;
                 reqMap["remoteAddr"] = req.getRemoteAddr();
                 reqMap["remotePort"] = req.getRemotePort();
                 reqMap["localAddr"] = req.getLocalAddr();
@@ -170,18 +166,18 @@ namespace mantis {
                     {
                         // Parse request body and add it to the request TokenMap
                         auto request = json::parse(req.getMethod());
-                        reqMap["body"] = MantisBase::instance().evaluator().jsonToTokenMap(request);
+                        // reqMap["body"] = MantisBase::instance().evaluator().jsonToTokenMap(request);
                     }
                 } catch (...) {
                 }
 
                 // Add the request map to the vars
-                vars["req"] = reqMap;
+                // vars["req"] = reqMap;
 
                 // If expression evaluation returns true, lets return allowing execution
                 // continuation. Else, we'll craft an error response.
-                if (MantisBase::instance().evaluator().evaluate(expr, vars))
-                    return REQUEST_PENDING; // Proceed to next middleware
+                // if (MantisBase::instance().evaluator().evaluate(expr, vars))
+                //     return REQUEST_PENDING; // Proceed to next middleware
 
                 // Evaluation yielded false, return generic access denied error
                 json response;
@@ -221,7 +217,7 @@ namespace mantis {
             res.sendJson(403, {
                              {"status", 403},
                              {"data", json::object()},
-                             {"data", "Guest user required to access this resource."}
+                             {"data", "Only guest users allowed to access this resource."}
                          });
             return HandlerResponse::Handled;
         };
@@ -252,7 +248,7 @@ namespace mantis {
                     auto auth = req.getOr<json>("auth", json::object());
                     // logger::trace("Auth: {}", auth.dump());
                     // Ensure the auth user was for admin table
-                    if (auth["table"].get<std::string>() == "_admins") {
+                    if (auth["entity"].get<std::string>() == "mb_admins") {
                         return HandlerResponse::Unhandled;
                     }
 

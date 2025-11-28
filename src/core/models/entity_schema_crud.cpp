@@ -13,7 +13,7 @@ namespace mantis {
     nlohmann::json EntitySchema::listTables(const json &) {
         const auto sql = MantisBase::instance().db().session();
         const soci::rowset rs = (sql->prepare <<
-                                 "SELECT id, schema, created, updated FROM _tables");
+                                 "SELECT id, schema, created, updated FROM mb_tables");
 
         auto response = json::array();
         for (const auto &row: rs) {
@@ -40,7 +40,7 @@ namespace mantis {
         const auto sql = MantisBase::instance().db().session();
 
         soci::row row;
-        *sql << "SELECT id, schema, created, updated FROM _tables WHERE id = :id", soci::use(table_id), soci::into(row);
+        *sql << "SELECT id, schema, created, updated FROM mb_tables WHERE id = :id", soci::use(table_id), soci::into(row);
 
         if (!sql->got_data())
             throw MantisException(404, "No table for given id/name `" + table_id + "`");
@@ -83,8 +83,8 @@ namespace mantis {
             // Execute DDL & Save to DB
             logger::debug("Schema: {}", schema.dump());
 
-            // Insert to __tables
-            *sql << "INSERT INTO _tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",
+            // Insert to mb_tables
+            *sql << "INSERT INTO mb_tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",
                     soci::use(id), soci::use(schema), soci::use(created_tm), soci::use(created_tm);
 
             // Create actual SQL table
@@ -122,11 +122,11 @@ namespace mantis {
             // Get saved database record
             nlohmann::json schema; // Original Entity Schema
             std::tm created_tm; // Created timestamp
-            *sql << "SELECT schema, created FROM _tables WHERE id = :id",
+            *sql << "SELECT schema, created FROM mb_tables WHERE id = :id",
                     soci::use(table_id), soci::into(schema), soci::into(created_tm);
 
             if (!sql->got_data()) {
-                throw std::invalid_argument("Table with id `" + table_id + "` was not found!");
+                throw MantisException(404, "Entity with id/name `" + table_id + "` was not found!");
             }
 
             EntitySchema old_entity{schema}; // Old table data
@@ -338,7 +338,7 @@ namespace mantis {
             std::tm updated_tm = *std::localtime(&t);
 
             // Update table record, if all went well.
-            std::string query = "UPDATE _tables SET id = :id, schema = :schema,";
+            std::string query = "UPDATE mb_tables SET id = :id, schema = :schema,";
             query += " updated = :updated WHERE id = :old_id";
 
             std::string old_id = old_entity.id();
@@ -384,7 +384,7 @@ namespace mantis {
         try {
             // Check if item exists of given id
             nlohmann::json schema;
-            *sql << "SELECT schema FROM _tables WHERE id = :id",
+            *sql << "SELECT schema FROM mb_tables WHERE id = :id",
                     soci::use(table_id), soci::into(schema);
 
             if (!sql->got_data()) {
@@ -394,7 +394,7 @@ namespace mantis {
             const auto entity_name = schema.at("name").get<std::string>();
 
             // Remove from DB
-            *sql << "DELETE FROM _tables WHERE id = :id", soci::use(table_id);
+            *sql << "DELETE FROM mb_tables WHERE id = :id", soci::use(table_id);
             *sql << "DROP TABLE IF EXISTS " + entity_name;
 
             // Delete files directory

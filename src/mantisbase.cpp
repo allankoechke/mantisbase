@@ -1,41 +1,24 @@
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/config.hpp"
-// #include "../include/mantis/core/settings_mgr.h"
-#include "../include/mantisbase/core/files.h"
-#include "../include/mantisbase/core/route_registry.h"
 #include "../include/mantisbase/core/models/entity.h"
 
-#include <builtin_features.h>
 #include <cmrc/cmrc.hpp>
 #include <fstream>
-
-#ifdef MANTIS_ENABLE_SCRIPTING
-#include "../include/mantis/core/private-impl/duktape_custom_types.h"
-#endif
-
-// #define __file__ "app/app.cpp"
 
 namespace mantis
 {
     MantisBase::MantisBase()
         : m_dbType("sqlite3"),
           m_startTime(std::chrono::steady_clock::now())
-#ifdef MANTIS_ENABLE_SCRIPTING
           , m_dukCtx(duk_create_heap_default())
-#endif
 
     {
-        // Initialize Default Features in cparse
-        cparse::cparse_init();
-
         // Enable Multi Sinks
         logger::init();
     }
 
     MantisBase::~MantisBase()
     {
-        // TRACE_CLASS_METHOD()
-
         if (!m_toStartServer) {
             std::cout << std::endl;
             logger::info("Exitting, nothing else to do. Did you intend to run the server? Try `mantisapp serve` instead.");
@@ -44,10 +27,8 @@ namespace mantis
         // Terminate any shared pointers
         close();
 
-#ifdef MANTIS_ENABLE_SCRIPTING
         // Destroy duk context
         duk_destroy_heap(m_dukCtx);
-#endif
     }
 
     void MantisBase::init(const int argc, char* argv[])
@@ -314,12 +295,10 @@ namespace mantis
         return entity_obj;
     }
 
-#ifdef MANTIS_ENABLE_SCRIPTING
-    duk_context* MantisApp::ctx() const
+    duk_context* MantisBase::ctx() const
     {
         return m_dukCtx;
     }
-#endif
 
     void MantisBase::openBrowserOnStart() const
     {
@@ -486,52 +465,10 @@ namespace mantis
         if (!createDirs(resolvePath(m_publicDir)))
             return false;
 
-#ifdef MANTIS_ENABLE_SCRIPTING
         if (!createDirs(resolvePath(m_scriptsDir)))
             return false;
-#endif
 
         return true;
-    }
-
-    std::string MantisBase::getUserValueSecurely(const std::string& prompt)
-    {
-        std::string password;
-        logger::info("{}", prompt);
-        std::cout << " [Type In] > ";
-
-#ifdef WIN32
-        char ch;
-        while ((ch = _getch()) != '\r')
-        {
-            // Enter key
-            if (ch == '\b')
-            {
-                // Backspace
-                if (!password.empty())
-                {
-                    password.pop_back();
-                    std::cout << "\b \b"; // Erase character from console
-                }
-            }
-            else
-            {
-                password += ch;
-                std::cout << '*'; // Optional: print '*' for each char
-            }
-        }
-#else
-        termios oldt, newt;
-        tcgetattr(STDIN_FILENO, &oldt); // get current terminal settings
-        newt = oldt;
-        newt.c_lflag &= ~ECHO; // disable echo
-        tcsetattr(STDIN_FILENO, TCSANOW, &newt); // set new settings
-        std::getline(std::cin, password); // read password
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // restore old settings
-#endif
-
-        std::cout << '\n';
-        return password;
     }
 
 #ifdef MANTIS_ENABLE_SCRIPTING

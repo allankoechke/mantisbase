@@ -137,7 +137,7 @@ namespace mantis
         //  ` ctx.get<json>("auth").value("name", ""); // returns the user's name
         auto sql = MantisBase::instance().db().session();
         soci::row r;
-        std::string query = "SELECT * FROM __admins WHERE id = :id LIMIT 1";
+        std::string query = "SELECT * FROM mb_admins WHERE id = :id LIMIT 1";
         *sql << query, soci::use(_id), soci::into(r);
 
         // Return 404 if user was not found
@@ -153,7 +153,7 @@ namespace mantis
         }
 
         // Check if user is logged in as Admin
-        if (_table == "_admins")
+        if (_table == "mb_admins")
         {
             // If logged in as admin, grant access
             // Admins get unconditional data access

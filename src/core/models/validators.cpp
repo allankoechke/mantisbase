@@ -30,7 +30,10 @@ namespace mantis {
     };
 
     std::optional<json> Validators::findPreset(const std::string &key) {
-        if (const auto it = presets.find(key); it != presets.end()) {
+        if (key.empty()) return std::nullopt;
+
+        const auto n_key = key.starts_with("@") ? key.substr(1) : key;
+        if (const auto it = presets.find(n_key); it != presets.end()) {
             return it->second;
         }
 

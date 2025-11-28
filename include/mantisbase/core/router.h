@@ -86,12 +86,17 @@ namespace mantis {
 
         std::function<void(const httplib::Request &, httplib::Response &)> routingErrorHandler();
 
+        std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogin();
+        std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh();
+        std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogout();
+
 
         MantisBase& mApp;
         httplib::Server svr;
         std::unique_ptr<EntitySchema> m_entitySchema;
         RouteRegistry m_routeRegistry;
-        std::vector<MiddlewareFn> m_globalMiddlewares;
+        std::vector<MiddlewareFn> m_preRoutingMiddlewares;
+        std::vector<HandlerFn> m_postRoutingMiddlewares;
         std::vector<nlohmann::json> m_schemas;
         std::unordered_map<std::string, Entity> m_entityMap;
     };

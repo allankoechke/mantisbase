@@ -12,10 +12,10 @@ TEST(DatabaseTest, TestDatabaseConnected) {
 
 TEST(DatabaseTest, CheckSystemSchemaMigrated) {
     auto& mApp = TestFixture::app();
-    auto admin_entity = mApp.entity("_admins");
+    auto admin_entity = mApp.entity("mb_admins");
 
     EXPECT_EQ(admin_entity.type(), "auth");
-    EXPECT_EQ(admin_entity.name(), "_admins");
+    EXPECT_EQ(admin_entity.name(), "mb_admins");
     EXPECT_TRUE(admin_entity.hasApi());
     EXPECT_TRUE(admin_entity.isSystem());
     EXPECT_EQ(admin_entity.listRule(), "");

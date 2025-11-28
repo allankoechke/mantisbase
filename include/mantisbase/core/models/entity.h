@@ -83,8 +83,6 @@ namespace mantis {
 
         [[nodiscard]] HandlerFn deleteRouteHandler() const;
 
-        [[nodiscard]] HandlerFn authRouteHandler() const;
-
         void createEntityRoutes() const;
 
     private:

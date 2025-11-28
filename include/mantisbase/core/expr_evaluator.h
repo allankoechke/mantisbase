@@ -7,17 +7,17 @@
 #define EXPR_EVALUATOR_H
 
 #include <string>
-#include <shunting-yard.h>
-#include <containers.h>
+// #include <shunting-yard.h>
+// #include <containers.h>
 #include <nlohmann/json.hpp>
 
 #include "../utils/utils.h"
 
 namespace mantis
 {
-    using cparse::TokenMap;
-    using cparse::calculator;
-    using cparse::packToken;
+    // using cparse::TokenMap;
+    // using cparse::calculator;
+    // using cparse::packToken;
     using json = nlohmann::json;
 
     /**
@@ -34,7 +34,7 @@ namespace mantis
          * @param vars Parameter tokens
          * @return True or False
          */
-        auto evaluate(const std::string& expr, const TokenMap& vars) -> bool;
+        auto evaluate(const std::string& expr, const std::vector<json>& vars) -> bool;
 
         /**
          * @brief Evaluates a given expression in a context of the given JSON object variables.
@@ -51,7 +51,7 @@ namespace mantis
          * @param j JSON Object
          * @return TokenMap equivalent of the JSON Object
          */
-        auto jsonToTokenMap(const json& j) -> TokenMap;
+        // auto jsonToTokenMap(const json& j) -> TokenMap;
 
         const std::string __class_name__ = "mantis::ExprEvaluator";
     };

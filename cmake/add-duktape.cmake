@@ -1,4 +1,3 @@
-
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/duktape)
 
 target_compile_options(duktape PRIVATE
@@ -7,9 +6,8 @@ target_compile_options(duktape PRIVATE
 )
 
 # Link to libs
-target_link_libraries(mantis
-        PUBLIC
-        duktape
+target_link_libraries(mantisbase_lib
+        PUBLIC duktape
 )
 
 # Include directories

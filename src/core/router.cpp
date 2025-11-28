@@ -40,8 +40,8 @@ namespace mantis {
         svr.set_error_handler(routingErrorHandler());
 
         // Add global middlewares to work across all routes
-        m_globalMiddlewares.push_back(getAuthToken()); // Get auth token from the header
-        m_globalMiddlewares.push_back(hydrateContextData()); // Fill request context with necessary data
+        m_preRoutingMiddlewares.push_back(getAuthToken()); // Get auth token from the header
+        m_preRoutingMiddlewares.push_back(hydrateContextData()); // Fill request context with necessary data
     }
 
     Router::~Router() {
@@ -52,7 +52,7 @@ namespace mantis {
     bool Router::initialize() {
         {
             const auto sql = mApp.db().session();
-            const soci::rowset rows = (sql->prepare << "SELECT schema FROM _tables");
+            const soci::rowset rows = (sql->prepare << "SELECT schema FROM mb_tables");
 
             if (sql->got_data()) {
                 for (const auto &row: rows) {
@@ -72,7 +72,7 @@ namespace mantis {
         }
 
         // Add admin routes
-        EntitySchema admin_schema{"_admins", "auth"};
+        EntitySchema admin_schema{"mb_admins", "auth"};
         admin_schema.removeField("name");
         admin_schema.setSystem(true);
         auto admin_entity = admin_schema.toEntity();
@@ -224,10 +224,6 @@ namespace mantis {
             m_routeRegistry.remove("DELETE", basePath + "/:id");
         }
 
-        if (entity.type() == "auth") {
-            m_routeRegistry.remove("POST", "/api/v1/entities/" + entity_name + "/auth/token");
-        }
-
         // Remove Entity instance for the cache
         m_entityMap.erase(entity_name);
     }
@@ -249,7 +245,7 @@ namespace mantis {
             }
 
             // First, execute global middlewares
-            for (const auto &g_mw: m_globalMiddlewares) {
+            for (const auto &g_mw: m_preRoutingMiddlewares) {
                 if (g_mw(ma_req, ma_res) == HandlerResponse::Handled) return;
             }
 
@@ -261,6 +257,11 @@ namespace mantis {
             // Finally, execute the handler function
             if (const auto func = std::get_if<HandlerFn>(&route->handler)) {
                 (*func)(ma_req, ma_res);
+            }
+
+            // Any post routing checks?
+            for (const auto &p_mw: m_postRoutingMiddlewares) {
+                p_mw(ma_req, ma_res); // Execute all, no return types
             }
         };
 
@@ -281,7 +282,12 @@ namespace mantis {
         auto &router = mApp.router();
         router.Get("/api/v1/health", healthCheckHandler());
         router.Get("/api/files/:entity/:file", fileServingHandler());
-        router.Get(R"(/admin(.*))", handleAdminDashboardRoute());
+        router.Get(R"(/mb-admin(.*))", handleAdminDashboardRoute());
+
+        // Systemwide auth endpoints
+        router.Post("/api/v1/auth/login", handleAuthLogin());
+        router.Post("/api/v1/auth/refresh", handleAuthRefresh());
+        router.Post("/api/v1/auth/logout", handleAuthLogout());
 
         // Add entity schema routes
         // GET|POST|PATCH|DELETE `/api/v1/schemas*`
