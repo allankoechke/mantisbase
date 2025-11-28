@@ -70,7 +70,12 @@ namespace mantis {
             is_array()) {
             // For each defined field, create the field schema and push to the fields array ...
             for (const auto &field: entity_schema["fields"]) {
-                eSchema.fields().emplace_back(field);
+                if (!eSchema.hasField(field["name"].get<std::string>()))
+                    eSchema.fields().emplace_back(field);
+
+                // If field exists, update accordingly ...
+                // TODO ...
+                // - Ensure order provided from user is followed ...
             }
         }
 

@@ -92,7 +92,14 @@ namespace mantis
 }
 
 // Macro to automatically insert logger with function name
-#define TRACE_CLASS_METHOD() mantis::FuncLogger _logger(std::format("{} {}::{}()", __file__, __class_name__, __func__));
-#define TRACE_METHOD mantis::FuncLogger _logger(std::format("{} {}()", __file__, __func__));
+inline std::string getFile(const std::string& path) {
+    const std::filesystem::path p = path;
+    return p.filename();
+}
+
+#define MANTIS_FUNC() std::format("{} - {}()", getFile(__FILE__), __FUNCTION__);
+#define TRACE_FUNC(x) mantis::FuncLogger _logger(x);
+#define TRACE_CLASS_METHOD() mantis::FuncLogger _logger(std::format("{} {}::{}()", getFile(__FILE__), "", __FUNCTION__));
+#define TRACE_METHOD() mantis::FuncLogger _logger(std::format("{} {}()", getFile(__FILE__), __FUNCTION__));
 
 #endif //MANTIS_LOGGER_H

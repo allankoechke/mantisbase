@@ -377,6 +377,7 @@ namespace mantis {
     }
 
     void EntitySchema::dropTable(const std::string &table_id) {
+        TRACE_METHOD();
         const auto sql = MantisBase::instance().db().session();
         soci::transaction tr(*sql);
 
@@ -394,9 +395,7 @@ namespace mantis {
 
             // Remove from DB
             *sql << "DELETE FROM _tables WHERE id = :id", soci::use(table_id);
-            *sql << "DROP TABLE IF EXISTS :entity_name", soci::use(entity_name);
-
-            tr.commit();
+            *sql << "DROP TABLE IF EXISTS " + entity_name;
 
             // Delete files directory
             Files::deleteDir(entity_name);
@@ -404,11 +403,14 @@ namespace mantis {
             // Remove route for this Entity
             MantisBase::instance().router().removeSchemaCache(entity_name);
 
-        } catch (const MantisException &) {
+            tr.commit();
+        } catch (const MantisException &e) {
             tr.rollback();
+            logger::critical("Error dropping table schema: {}", e.what());
             throw;
         } catch (const std::exception &e) {
             tr.rollback();
+            logger::critical("Error dropping table schema: {}", e.what());
             throw MantisException(500, e.what());
         }
     }

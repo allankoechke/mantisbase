@@ -8,7 +8,9 @@
 
 namespace mantis {
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> getAuthToken() {
-        return [](MantisRequest &req, MantisResponse &_) {
+        std::string msg = MANTIS_FUNC();
+        return [msg](MantisRequest &req, MantisResponse &_) {
+            TRACE_FUNC(msg);
             // If we have an auth header, extract it into the ctx, else
             // add a guest user type. The auth if present, should have
             // the user id, auth table, etc.
@@ -32,7 +34,9 @@ namespace mantis {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hydrateContextData() {
-        return [](MantisRequest &req, MantisResponse &res) {
+        std::string msg = MANTIS_FUNC();
+        return [msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
             // Get the auth var from the context, resort to empty object if it's not set.
             auto auth = req.getOr<json>("auth", json::object());
 
@@ -77,7 +81,9 @@ namespace mantis {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const std::string &entity_name) {
-        return [entity_name](MantisRequest &req, MantisResponse &res) {
+        std::string msg = MANTIS_FUNC();
+        return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
             const auto entity = MantisBase::instance().entity(entity_name);
 
             // Get the auth var from the context, resort to empty object if it's not set.
@@ -196,15 +202,18 @@ namespace mantis {
         };
     }
 
-
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr) {
-        return [expr](MantisRequest &req, MantisResponse &res) {
+        std::string msg = MANTIS_FUNC();
+        return [expr, msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
             return REQUEST_PENDING;
         };
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireGuestOnly() {
-        return [](MantisRequest &req, MantisResponse &res) {
+        std::string msg = MANTIS_FUNC();
+        return [msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
             const auto auth = req.getOr<json>("auth", json::object());
             if (auth["type"] == "guest")
                 return HandlerResponse::Unhandled;
@@ -219,11 +228,13 @@ namespace mantis {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminAuth() {
-        return [](MantisRequest &req, const MantisResponse &res) {
+        std::string msg = MANTIS_FUNC();
+        return [msg](MantisRequest &req, const MantisResponse &res) {
+            TRACE_FUNC(msg);
             try {
                 // Require admin authentication
                 auto verification = req.getOr<json>("verification", json::object());
-                logger::trace("Verification: {}", verification.dump());
+                // logger::trace("Verification: {}", verification.dump());
                 if (verification.empty()) {
                     // Send auth error
                     res.sendJson(403, {
@@ -239,7 +250,7 @@ namespace mantis {
                                 verification["verified"].get<bool>();
                 if (ok) {
                     auto auth = req.getOr<json>("auth", json::object());
-                    logger::trace("Auth: {}", auth.dump());
+                    // logger::trace("Auth: {}", auth.dump());
                     // Ensure the auth user was for admin table
                     if (auth["table"].get<std::string>() == "_admins") {
                         return HandlerResponse::Unhandled;
@@ -255,10 +266,11 @@ namespace mantis {
                 }
 
                 // Send auth error
+                const auto err_str = verification["error"].empty() ? "Token Verification Error" : verification["error"];
                 res.sendJson(403, {
                                  {"data", json::object()},
                                  {"status", 403},
-                                 {"error", verification["error"]}
+                                 {"error",}
                              });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {
@@ -276,14 +288,18 @@ namespace mantis {
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
         const std::string &entity_name) {
-        return [entity_name](MantisRequest &req, MantisResponse &res) {
+        std::string msg = MANTIS_FUNC();
+        return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
             return REQUEST_PENDING;
         };
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)>
     requireEntityAuth(const std::string &entity_name) {
-        return [entity_name](MantisRequest &req, MantisResponse &res) {
+        std::string msg = MANTIS_FUNC();
+        return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
             return REQUEST_PENDING;
         };
     }

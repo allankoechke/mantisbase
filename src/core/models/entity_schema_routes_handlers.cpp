@@ -161,16 +161,32 @@ namespace mantis {
 
     HandlerFn EntitySchema::deleteRouteHandler() const {
         HandlerFn handler = [](const MantisRequest &req, const MantisResponse &res) {
-            const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
-            if (schema_id_or_name.empty())
-                throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
+            try {
+                const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
+                if (schema_id_or_name.empty())
+                    throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
 
-            // If table name is passed in, get the `id` equivalent
-            const auto schema_id = schema_id_or_name.starts_with("mbt_")
-                                       ? schema_id_or_name
-                                       : EntitySchema::genEntityId(schema_id_or_name);
-            EntitySchema::dropTable(schema_id);
-            res.sendEmpty();
+                // If table name is passed in, get the `id` equivalent
+                const auto schema_id = schema_id_or_name.starts_with("mbt_")
+                                           ? schema_id_or_name
+                                           : EntitySchema::genEntityId(schema_id_or_name);
+                EntitySchema::dropTable(schema_id);
+                res.sendEmpty();
+            } catch (const MantisException &e) {
+                res.sendJson(e.code(), {
+                                 {"status", e.code()},
+                                 {"error", e.what()},
+                                 {"data", json::object()}
+                             }
+                );
+            } catch (const std::exception &e) {
+                res.sendJson(500, {
+                                 {"status", 500},
+                                 {"error", e.what()},
+                                 {"data", json::object()}
+                             }
+                );
+            }
         };
 
         return handler;
