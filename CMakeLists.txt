@@ -76,9 +76,7 @@ set( MANTIS_SOURCES
 
         src/core/exceptions.cpp
         src/core/router_httplib_internals.cpp
-        include/mantisbase/core/types.h
         src/core/models/access_rules.cpp
-        src/core/models/access_rules.h
 )
 
 if(MANTIS_SCRIPTING_ENABLED)
@@ -90,15 +88,10 @@ if(MANTIS_SCRIPTING_ENABLED)
 endif ()
 
 # Add library
-add_library(mantisbase_lib
-    ${MANTIS_LIB_TYPE}
-        ${MANTIS_SOURCES}
-)
+add_library(mantisbase_lib ${MANTIS_LIB_TYPE} ${MANTIS_SOURCES})
 
 # Add main executable
-add_executable(mantisbase_app
-        src/main.cpp
-)
+add_executable(mantisbase_app src/main.cpp)
 
 # Ensure resultant name is always `mantisbase` despite targets names for consistency
 set_target_properties(mantisbase_lib PROPERTIES OUTPUT_NAME mantisbase)
