@@ -14,8 +14,8 @@ Thank you for your interest in contributing to **Mantis**, a lightweight Backend
   
 #### 1. **Clone the repository with submodules:**  
    ```bash  
-   git clone --recurse-submodules https://github.com/allankoechke/mantis.git  
-   cd mantis
+   git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git  
+   cd mantisbase
    ```
 
 #### 2. Build the project:
@@ -26,10 +26,10 @@ cmake --build build
 ```
 
 #### 3. Run the application:
-Check on commandline args by running `./build/mantisapp --help`
+Check on commandline args by running `./build/mantisbase --help`
 
 ```bash
-./build/mantisapp serve
+./build/mantisbase serve
 ```
 
 ### 📁 Project Structure
@@ -47,7 +47,7 @@ mantis/
 ```
 
 ### 🛠️ Build System
-Mantis uses CMake with the following key dependencies: README.md:46-53
+MantisBase uses CMake with the following key dependencies: README.md:46-53
 
 - httplib-cpp: HTTP server framework
 - spdlog: Structured logging
@@ -144,7 +144,7 @@ The system uses SOCI for database abstraction with SQLite as the default backend
 - Update migration scripts if needed
 
 #### API Development
-Mantis auto-generates REST APIs from database table definitions. When adding API features:
+MantisBase auto-generates REST APIs from database table definitions. When adding API features:
 
 - Follow RESTful conventions
 - Maintain backward compatibility
@@ -156,6 +156,6 @@ GitHub Discussions: For questions and general discussion
 Wiki: For detailed documentation and guides
 
 ### 📜 License
-By contributing to Mantis, you agree that your contributions will be licensed under the MIT License.
+By contributing to MantisBase, you agree that your contributions will be licensed under the MIT License.
 
-Thank you for helping make Mantis better! 🚀
+Thank you for helping make MantisBase better! 🚀

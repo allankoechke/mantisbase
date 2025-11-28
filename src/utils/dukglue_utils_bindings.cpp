@@ -4,7 +4,7 @@
 namespace mantis {
     void registerUtilsToDuktapeEngine()
     {
-        const auto ctx = MantisApp::instance().ctx();
+        const auto ctx = MantisBase::instance().ctx();
 
         dukglue_register_function(ctx, &generateTimeBasedId, "generateTimeBasedId");
         dukglue_register_function(ctx, &generateReadableTimeId, "generateReadableTimeId");

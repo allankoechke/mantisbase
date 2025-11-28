@@ -1,19 +1,12 @@
-//
-// Created by allan on 18/10/2025.
-//
-
-#ifndef MANTISAPP_TEST_FIXTURE_H
-#define MANTISAPP_TEST_FIXTURE_H
+#ifndef MANTISBASE_TEST_FIXTURE_H
+#define MANTISBASE_TEST_FIXTURE_H
 
 #include <thread>
 #include <chrono>
-#include <httplib.h>
 #include <iostream>
 #include <filesystem>
 
-#include "mantis/app/app.h"
-#include "mantis/core/http.h"
-#include "mantis/utils/utils.h"
+#include "../include/mantisbase/mantis.h"
 
 namespace fs = std::filesystem;
 
@@ -21,9 +14,9 @@ inline fs::path getBaseDir()
 {
     // Base test directory for files and SQLite data
 #ifdef _WIN32
-    auto base_path = fs::temp_directory_path() / "mantisapp_tests" / mantis::generateShortId();
+    auto base_path = fs::temp_directory_path() / "mantisbase_tests" / mantis::generateShortId();
 #else
-    auto base_path = fs::path("/tmp") / "mantisapp_tests" / mantis::generateShortId();
+    auto base_path = fs::path("/tmp") / "mantisbase_tests" / mantis::generateShortId();
 #endif
 
     try
@@ -41,11 +34,11 @@ inline fs::path getBaseDir()
 struct TestFixture
 {
     int port = 7075;
-    mantis::MantisApp& mApp;
+    mantis::MantisBase& mApp;
 
 private:
     TestFixture(const mantis::json& config)
-        : mApp(mantis::MantisApp::create(config))
+        : mApp(mantis::MantisBase::create(config))
     {
         std::cout << "[TestFixture] Setting up DB and starting server...\n";
     }
@@ -57,13 +50,13 @@ public:
         return _instance;
     }
 
-    mantis::MantisApp& mantisApp() const
+    static mantis::MantisBase& app()
     {
-        return mantis::MantisApp::instance();
+        return mantis::MantisBase::instance();
     }
 
     // Wait until the server port responds
-    bool waitForServer(const int retries = 50, const int delayMs = 500) const
+    [[nodiscard]] bool waitForServer(const int retries = 50, const int delayMs = 500) const
     {
         httplib::Client cli("http://localhost", port);
         for (int i = 0; i < retries; ++i)
@@ -80,7 +73,7 @@ public:
         std::cout << "[TestFixture] Shutting down server...\n";
 
         // Graceful shutdown
-        mantisApp().close();
+        app().close();
 
         // Cleanup the temporary directory & files
         try
@@ -102,4 +95,4 @@ public:
     }
 };
 
-#endif //MANTISAPP_TEST_FIXTURE_H
+#endif //MANTISBASE_TEST_FIXTURE_H

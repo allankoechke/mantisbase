@@ -18,6 +18,8 @@ int main(int argc, char* argv[])
     args["scriptsDir"] = scriptingDir;
     args["serve"] = {{"port", 7075}, {"host", "0.0.0.0"}};
 
+    mantis::logger::trace("Args: {}", args.dump());
+
     // Setup Db, Server, etc.
     auto& tFix = TestFixture::instance(args);
 
@@ -26,7 +28,7 @@ int main(int argc, char* argv[])
     {
         try
         {
-            auto& app = tFix.mantisApp();
+            auto& app = tFix.app();
             [[maybe_unused]] auto res = app.run();
         }
         catch (const std::exception& e)

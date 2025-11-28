@@ -3,34 +3,50 @@
 //
 
 #include <gtest/gtest.h>
-#include <mantis/core/database.h>
-#include <mantis/app/app.h>
-#include "mantis/core/tables/tables.h"
+#include <mantisbase/mantis.h>
+#include "../test_fixure.h"
 
-class DatabaseTest : public ::testing::Test {
-
-};
-
-TEST_F(DatabaseTest, ConnectToDB) {
-    EXPECT_TRUE(mantis::MantisApp::instance().db().isConnected());
+TEST(DatabaseTest, TestDatabaseConnected) {
+    EXPECT_TRUE(TestFixture::app().db().isConnected());
 }
 
-TEST_F(DatabaseTest, MigrationForSystemTablesSuccessful) {
-    // Verify we have tables
-    // const auto sql = mantis::MantisApp::instance().db().session();
-    // const soci::rowset<soci::row> rs = (sql->prepare << "SELECT id, name FROM __tables");
-    //
-    // // int count = 0;
-    // for (const auto& row : rs)
-    // {
-    //     const auto id = row.get<std::string>(0);
-    //     const auto name = row.get<std::string>(1);
-    //
-    //     std::cout << id << " " << name << std::endl;
-    //
-    //     EXPECT_EQ(id, mantis::TableUnit::generateTableId(name));
-    //     // count++;
-    // }
+TEST(DatabaseTest, CheckSystemSchemaMigrated) {
+    auto& mApp = TestFixture::app();
+    auto admin_entity = mApp.entity("_admins");
 
-    // EXPECT_TRUE(count > 0);
+    EXPECT_EQ(admin_entity.type(), "auth");
+    EXPECT_EQ(admin_entity.name(), "_admins");
+    EXPECT_TRUE(admin_entity.hasApi());
+    EXPECT_TRUE(admin_entity.isSystem());
+    EXPECT_EQ(admin_entity.listRule(), "");
+    EXPECT_EQ(admin_entity.getRule(), "");
+    EXPECT_EQ(admin_entity.addRule(), "");
+    EXPECT_EQ(admin_entity.updateRule(), "");
+    EXPECT_EQ(admin_entity.deleteRule(), "");
+
+    // Create schema, check fields
+    mantis::EntitySchema admin_schema = mantis::EntitySchema::fromEntity(admin_entity);
+
+    EXPECT_TRUE(admin_schema.hasField("id"));
+    EXPECT_EQ(admin_schema.field("id").type(), "string");
+
+    EXPECT_TRUE(admin_schema.field("id").isSystem());
+    EXPECT_TRUE(admin_schema.field("id").isPrimaryKey());
+
+    EXPECT_TRUE(admin_schema.hasField("updated"));
+    EXPECT_EQ(admin_schema.field("updated").type(), "date");
+
+    EXPECT_TRUE(admin_schema.hasField("created"));
+    EXPECT_EQ(admin_schema.field("created").type(), "date");
+
+    // Name field should have been deleted ...
+    // EXPECT_FALSE(admin_schema.hasField("name"));
+
+    EXPECT_TRUE(admin_schema.hasField("email"));
+    EXPECT_EQ(admin_schema.field("email").type(), "string");
+
+    EXPECT_TRUE(admin_schema.hasField("password"));
+    EXPECT_EQ(admin_schema.field("password").type(), "string");
+    auto c = admin_schema.field("password").constraints();
+    EXPECT_EQ(c["validator"].get<std::string>(), "@password");
 }

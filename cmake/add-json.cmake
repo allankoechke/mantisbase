@@ -5,13 +5,13 @@ set(JSON_Install OFF CACHE INTERNAL "")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/json)
 
 # Link to libs
-target_link_libraries(mantis
+target_link_libraries(mantisbase_lib
         PUBLIC
         nlohmann_json::nlohmann_json
 )
 
 # Include directories
-target_include_directories(mantis
+target_include_directories(mantisbase_lib
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/json/single_include
 )

@@ -1,4 +1,4 @@
-#include "../../include/mantis/utils/utils.h"
+#include "../../include/mantisbase/utils/utils.h"
 
 namespace mantis
 {
@@ -34,7 +34,7 @@ namespace mantis
         }
         catch (const fs::filesystem_error& e)
         {
-            Log::critical("Filesystem error while creating directory '{}', reason: {}",
+            logger::critical("Filesystem error while creating directory '{}', reason: {}",
                           path.string(), e.what());
             return false;
         }

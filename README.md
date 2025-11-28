@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="assets/mantis-cover.png" alt="Mantis Cover" width="100%" />
+  <img src="assets/mantisbase-banner.jpg" alt="MantisBase Cover" width="100%" />
 </p>
-
-<h1 align="center">Mantis</h1>
 
 <p align="center">
   <strong>A lightweight, pluggable Backend-as-a-Service (BaaS) library built in C++</strong><br />
@@ -13,7 +11,7 @@
 
 ## 🔧 Overview
 
-**Mantis** is a modular, lightweight C++ library designed to power modern backend systems in embedded devices, desktop tools, or standalone server deployments. Inspired by systems like PocketBase and Supabase, Mantis focuses on:
+**MantisBase** is a modular, lightweight C++ library designed to power modern backend systems in embedded devices, desktop tools, or standalone server deployments. Inspired by systems like PocketBase and Supabase, Mantis focuses on:
 
 - Minimal runtime footprint
 - SQLite as the default local database (with optional MySQL/PSQL support)
@@ -25,7 +23,7 @@
 
 > [!WARNING]  
 > Mantis is still under active development and API might change as the project stablizes.
-> We have started work on v0.3.x release changes that will rework whole codebase to create a stable API and improve performance. Follow the work on the [`v0.3-dev`](https://github.com/allankoechke/mantis/tree/v0.3-dev) branch.
+> We have started work on v0.3.x release changes that will rework whole codebase to create a stable API and improve performance. Follow the work on the [`v0.3`](https://github.com/allankoechke/mantis/tree/v0.3) branch.
 
 
 ## 🛠️ Tech Stack
@@ -62,7 +60,7 @@ To use the admin dashboard once we have started the server, we need to set up a 
 We can achieve this easily through the command-line tool for mantisapp.
 
 ```bash
-mantisapp admins --add john@doe.com
+mantisbase admins --add john@doe.com
 ```
 
 You will be prompted to enter and confirm the password after which the user account can be used to sign into the admin dashboard.
@@ -71,7 +69,7 @@ You will be prompted to enter and confirm the password after which the user acco
 Download pre-built binaries from our [release page](https://github.com/allankoechke/mantis/releases). First, download the zip package (~4mb) for the target platform and unzip it. With that, we can start the server as shown below;
 
 ```bash
-mantisapp serve -p 7070
+mantisbase serve -p 7070
 ```
 
 ### 2. Building from source
@@ -85,11 +83,11 @@ sudo apt install libpq-dev
 
 For Windows, we don't have any dependencies outside the cloned repo.
 ```bash
-git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/allankoechke/mantis.git
-cd mantis
+git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/allankoechke/mantisbase.git
+cd mantisbase
 cmake -B build
 cmake --build build
-./build/mantisapp serve
+./build/mantisbase serve
 ```
 
 By default, the app runs on port `7070`.
@@ -98,27 +96,27 @@ By default, the app runs on port `7070`.
 You can also embed Mantis as a library in your own C++ project:
 
 - Add this project as a submodule to your project.
-- Link your project to the library `mantis` target.
+- Link your project to the library `mantisbase` target.
 - Extend the project as shown below.
 
 ```cpp
-#include <mantis/app/app.h>
+#include <mantis/mantisbase.h>
 
 int main(const int argc, char* argv[])
 {
-    auto& app = mantis::MantisApp::create(argc, argv);
+    auto& app = mantis::MantisBase::create(argc, argv);
     return app.run();
     
     // Or simply
-    // return mantis::MantisApp::create(argc, argv).run()
+    // return mantis::MantisBase::create(argc, argv).run()
 }
 ```
 Check [/examples dir](/examples) for a working sample.
 
-> Note: `MantisApp` has a blocking event loop when listening for http events. To avoid blocking your main thread if you intend to run something else there, move this into a separate thread.
+> Note: `MantisBase` has a blocking event loop when listening for http events. To avoid blocking your main thread if you intend to run something else there, move this into a separate thread.
 
 ### 4. Using Docker
-You can also run `mantisapp` in a docker container. Check [using docker](doc/docker.md) docs for more information.  
+You can also run `mantisbase` in a docker container. Check [using docker](doc/docker.md) docs for more information.  
 
 ---
 
@@ -162,10 +160,10 @@ Mantis works with many cmd options, allowing us to configure and set different o
 - Providing debug info when running the server by setting the `--dev` mode flag.
 
 ```
-mantisapp serve # Uses port 7070 by default
-mantisapp --dev serve --port 5000 --host 127.0.0.1
-mantisapp --dev admins --add admin@mantis.app # You will be prompted to enter password
-mantisapp --database PSQL --connection "dbname=mantis host=127.0.0.1 port=5432 username=postgres password=postgres" serve
+mantisbase serve # Uses port 7070 by default
+mantisbase --dev serve --port 5000 --host 127.0.0.1
+mantisbase --dev admins --add admin@mantis.app # You will be prompted to enter password
+mantisbase --database PSQL --connection "dbname=mantis host=127.0.0.1 port=5432 username=postgres password=postgres" serve
 ```
 
 For more detailed CMD options, check out the [docs](doc/01.cmd.md) on this topic.
@@ -224,8 +222,4 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) and ope
 ## 📜 License
 
 MIT License © 2025 Allan K. Koech
-
----
-
-<p align="center"><i>Built with ❤️ using C++, SQLite, and a vision for portability.</i></p>
 

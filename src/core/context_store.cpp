@@ -1,8 +1,10 @@
-#include "../../include/mantis/core/context_store.h"
-#include "../../include/mantis/app/app.h"
-#include "../../include/mantis/core/logging.h"
+#include "../../include/mantisbase/core/context_store.h"
+#include "../../include/mantisbase/mantisbase.h"
+#include "../../include/mantisbase/core/logger.h"
 
-#include <dukglue/dukglue.h>
+#ifdef MANTIS_ENABLE_SCRIPTING
+    #include <dukglue/dukglue.h>
+#endif
 
 namespace mantis
 {
@@ -13,35 +15,35 @@ namespace mantis
             const auto i = "ContextStore::Dump";
             if (value.type() == typeid(std::string))
             {
-                Log::debug("{} - {}: {}", i, key, std::any_cast<std::string>(value));
+                logger::debug("{} - {}: {}", i, key, std::any_cast<std::string>(value));
             }
             else if (value.type() == typeid(const char*))
             {
-                Log::debug("{} - {}: {}", i, key, std::any_cast<const char*>(value));
+                logger::debug("{} - {}: {}", i, key, std::any_cast<const char*>(value));
             }
             else if (value.type() == typeid(int))
             {
-                Log::debug("{} - {}: {}", i, key, std::any_cast<int>(value));
+                logger::debug("{} - {}: {}", i, key, std::any_cast<int>(value));
             }
             else if (value.type() == typeid(double))
             {
-                Log::debug("{} - {}: {}", i, key, std::any_cast<double>(value));
+                logger::debug("{} - {}: {}", i, key, std::any_cast<double>(value));
             }
             else if (value.type() == typeid(float))
             {
-                Log::debug("{} - {}: {}", i, key, std::any_cast<float>(value));
+                logger::debug("{} - {}: {}", i, key, std::any_cast<float>(value));
             }
             else if (value.type() == typeid(bool))
             {
-                Log::debug("{} - {}: {}", i, key, (std::any_cast<bool>(value) ? "true" : "false"));
+                logger::debug("{} - {}: {}", i, key, (std::any_cast<bool>(value) ? "true" : "false"));
             }
             else if (value.type() == typeid(json))
             {
-                Log::debug("{} - {}: {}", i, key, std::any_cast<json>(value).dump());
+                logger::debug("{} - {}: {}", i, key, std::any_cast<json>(value).dump());
             }
             else
             {
-                Log::debug("{} - {}: {}", i, key, "<Unknown Type>");
+                logger::debug("{} - {}: {}", i, key, "<Unknown Type>");
             }
         }
     }
@@ -51,6 +53,7 @@ namespace mantis
         return data.contains(key);
     }
 
+#ifdef MANTIS_ENABLE_SCRIPTING
     DukValue ContextStore::get_duk(const std::string& key)
     {
         const auto it = data.find(key);
@@ -94,7 +97,7 @@ namespace mantis
         {
             // Unsupported type - throw error
             // Maybe supported later in future
-            Log::warn("Unsupported type stored for key `{}`", key);
+            logger::warn("Unsupported type stored for key `{}`", key);
             duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported type stored for key '%s'", key.c_str());
         }
 
@@ -145,9 +148,10 @@ namespace mantis
         default:
             {
                 // Unsupported type - throw error
-                Log::warn("Unsupported type stored for key `{}`", key);
+                logger::warn("Unsupported type stored for key `{}`", key);
                 duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported type stored for key '%s'", key.c_str());
             }
         }
     }
+#endif
 } // mantis

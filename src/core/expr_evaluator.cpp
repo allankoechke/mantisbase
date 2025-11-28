@@ -1,11 +1,13 @@
-#include "../../include/mantis/core/expr_evaluator.h"
-#include "../../include/mantis/core/logging.h"
+#include "../../include/mantisbase/core/expr_evaluator.h"
+
+#include "httplib.h"
+#include "../../include/mantisbase/core/logger.h"
 
 #define __file__ "core/evaluator.cpp"
 
 namespace mantis
 {
-    bool ExprEvaluator::evaluate(const std::string& expr, const TokenMap& vars)
+    bool ExprMgr::evaluate(const std::string& expr, const TokenMap& vars)
     {
         try
         {
@@ -13,18 +15,18 @@ namespace mantis
             return result.asBool(); // true/false
         } catch (std::exception& e)
         {
-            Log::critical("Error evaluating expression '{}', error: {}", expr, e.what());
+            logger::critical("Error evaluating expression '{}', error: {}", expr, e.what());
             return false;
         }
     }
 
-    bool ExprEvaluator::evaluate(const std::string& expr, const json& vars)
+    bool ExprMgr::evaluate(const std::string& expr, const json& vars)
     {
         const auto t_vars = jsonToTokenMap(vars);
         return evaluate(expr, t_vars);
     }
 
-    TokenMap ExprEvaluator::jsonToTokenMap(const json& j)
+    TokenMap ExprMgr::jsonToTokenMap(const json& j)
     {
         cparse::TokenMap map;
 

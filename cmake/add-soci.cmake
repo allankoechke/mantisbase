@@ -38,14 +38,14 @@ endif(MANTIS_HAS_POSTGRESQL)
 # Add SOCI subdirectory - this should generate soci-config.h
 add_subdirectory ( ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/soci )
 
-target_link_libraries ( mantis
+target_link_libraries ( mantisbase_lib
         PUBLIC
         soci_core
         soci_sqlite3
 )
 
 if(MANTIS_HAS_POSTGRESQL)
-    target_link_libraries ( mantis
+    target_link_libraries ( mantisbase_lib
             PUBLIC
             soci_postgresql
             pq
@@ -54,7 +54,7 @@ if(MANTIS_HAS_POSTGRESQL)
 endif(MANTIS_HAS_POSTGRESQL)
 
 # Include directories
-target_include_directories ( mantis
+target_include_directories ( mantisbase_lib
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/soci/3rdParty
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/soci/include

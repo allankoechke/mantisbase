@@ -17,7 +17,7 @@ if(DOXYGEN_FOUND)
     set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in)
     set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
     set(DOXY_MAINPAGE ${CMAKE_SOURCE_DIR}/doc/QuickStart.md)
-    set(DOXYGEN_LOGO ${CMAKE_SOURCE_DIR}/assets/mantis.png)
+    set(DOXYGEN_LOGO ${CMAKE_SOURCE_DIR}/assets/mantisbase.jpg)
 
     configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
 
@@ -34,6 +34,6 @@ if(DOXYGEN_FOUND)
             ${CMAKE_CURRENT_BINARY_DIR}/docs/html/assets
     )
 else()
-    message("Doxygen not installed, skipping building docs")
+    message("-- Doxygen not installed, skipping building docs")
 endif()
 

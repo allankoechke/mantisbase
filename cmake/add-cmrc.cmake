@@ -54,5 +54,5 @@ file(GLOB_RECURSE ADMIN_STATIC_FILES LIST_DIRECTORIES false "${MANTIS_ADMIN_EXTR
 file(GLOB_RECURSE MANTIS_ASSET_FILES LIST_DIRECTORIES false "${CMAKE_CURRENT_SOURCE_DIR}/assets/*")
 
 cmrc_add_resource_library(mantis-rc NAMESPACE mantis ${ADMIN_STATIC_FILES} ${MANTIS_ASSET_FILES})
-target_link_libraries(mantis PRIVATE mantis-rc)
-target_compile_definitions(mantis PRIVATE CMRC_ENABLE)
+target_link_libraries(mantisbase_lib PRIVATE mantis-rc)
+target_compile_definitions(mantisbase_lib PRIVATE CMRC_ENABLE)

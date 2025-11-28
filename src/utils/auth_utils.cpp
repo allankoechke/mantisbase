@@ -1,5 +1,5 @@
-#include "../../include/mantis/utils/utils.h"
-#include "../../include/mantis/app/app.h"
+#include "../../include/mantisbase/utils/utils.h"
+#include "../../include/mantisbase/mantisbase.h"
 
 #include <bcrypt-cpp/bcrypt.h>
 

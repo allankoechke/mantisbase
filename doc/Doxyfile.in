@@ -1,4 +1,4 @@
-PROJECT_NAME           = Mantis App
+PROJECT_NAME           = MantisBase
 OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/docs
 INPUT                  = @PROJECT_SOURCE_DIR@/include @PROJECT_SOURCE_DIR@/src @CMAKE_SOURCE_DIR@/doc
 RECURSIVE              = YES

@@ -2,10 +2,8 @@
 @mainpage Getting Started
 
 <p align="center">
-  <img src="assets/mantis-cover.png" alt="Mantis Cover" width="100%" />
+  <img src="assets/mantisbase-banner.jpg" alt="MantisBase Cover" width="100%" />
 </p>
-
-<h1 align="center">Mantis</h1>
 
 <p align="center">
   <strong>A lightweight, pluggable Backend-as-a-Service (BaaS) library built in C++</strong><br />
@@ -16,7 +14,7 @@
 
 ## 🔧 Overview
 
-**Mantis** is a modular, lightweight C++ library designed to power modern backend systems in embedded devices, desktop tools, or standalone server deployments. Inspired by systems like PocketBase and Supabase, Mantis focuses on:
+**MantisBase** is a modular, lightweight C++ library designed to power modern backend systems in embedded devices, desktop tools, or standalone server deployments. Inspired by systems like PocketBase and Supabase, MantisBase focuses on:
 
 - Minimal runtime footprint
 - SQLite as the default local database (with optional MySQL/PSQL support)
@@ -41,21 +39,21 @@
 
 ## 🚀 Getting Started
 
-There are several ways to get started with Mantis:
+There are several ways to get started with MantisBase:
 
 ### 1. Using Pre-built Binaries
 
 Download pre-built binaries from the [release page](https://github.com/allankoechke/mantis/releases). Unzip the package and start the server:
 
 ```bash
-mantisapp --dev serve
+mantisbase --dev serve
 ```
 
 #### Creating an Admin Account
 To use the admin dashboard, you must first create an admin user account. This can be done via the CLI:
 
 ```bash
-mantisapp admins --add john@doe.com
+mantisbase admins --add john@doe.com
 ```
 You will be prompted to enter and confirm the password. The account can then be used to log in to the admin dashboard.
 
@@ -64,48 +62,48 @@ You will be prompted to enter and confirm the password. The account can then be 
 Clone the repository and build the project:
 
 ```bash
-git clone --recurse-submodules https://github.com/allankoechke/mantis.git
-cd mantis
+git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git
+cd mantisbase
 cmake -B build
 cmake --build build
-./build/mantisapp serve
+./build/mantisbase serve
 ```
 By default, the server runs on port `7070`.
 
 ### 3. Embedding in Another Project
 
-You can embed Mantis as a library in your own C++ project:
+You can embed MantisBase as a library in your own C++ project:
 
 - Add this project as a submodule to your project.
-- Link your project to the `mantis` library target.
+- Link your project to the `mantisbase` library target.
 - Extend your project as shown below:
 
 ```cpp
-#include <mantis/app/app.h>
+#include <mantis/mantisbase.h>
 
 int main(const int argc, char* argv[])
 {
-    auto& app = mantis::MantisApp::create(argc, argv);
+    auto& app = mantis::MantisBase::create(argc, argv);
     return app.run();
 }
 ```
 Check [mantis/examples](https://github.com/allankoechke/mantis/tree/master/examples) for a sample.
 
-> **Note:** `MantisApp` has a blocking event loop when listening for HTTP events. To avoid blocking your main thread, run it in a separate thread if needed.
+> **Note:** `MantisBase` has a blocking event loop when listening for HTTP events. To avoid blocking your main thread, run it in a separate thread if needed.
 
 ### 4. Using Docker
 
-You can also run `mantisapp` in a Docker container. See [doc/docker.md](doc/docker.md) for more information.
+You can also run `mantisbase` in a Docker container. See [doc/docker.md](doc/docker.md) for more information.
 
 ---
 
 ## 🖥️ Admin Dashboard
 
-Mantis ships with a lightweight admin dashboard available at `<host>:<port>/admin` (admin login required). The dashboard allows for easy management of:
+MantisBase ships with a lightweight admin dashboard available at `<host>:<port>/admin` (admin login required). The dashboard allows for easy management of:
 
 - **CRUD** on admin accounts
 - **CRUD** on system logs [WIP]
-- **CRUD** on database tables (managed by Mantis)
+- **CRUD** on database tables (managed by MantisBase)
 - **CRUD** on records in the tables
 - Schema & database migration [WIP]
 
@@ -133,7 +131,7 @@ mantis/
 
 ## 🩺 Healthcheck Endpoint
 
-Mantis provides a healthcheck endpoint for monitoring and orchestration tools:
+MantisBase provides a healthcheck endpoint for monitoring and orchestration tools:
 
 ```
 GET /api/v1/health
@@ -154,7 +152,7 @@ Use this endpoint to verify server availability and uptime.
 
 ## 📂 File Handling
 
-Mantis supports file uploads and management via the API:
+MantisBase supports file uploads and management via the API:
 
 - **Serving files:**
   - All files stored in the database are served under `/api/files/<table name>/<filename>`
@@ -169,8 +167,8 @@ Mantis supports file uploads and management via the API:
 See [files.md](11.files.md) for more details.
 
 ---
-# Extending Mantis with JavaScript
-Mantis has a built-in lightweight JavaScript engine based on the `Duktape` library. This allows us to write scripts that will be evaluated to provide extensions to existing functionality.
+# Extending MantisBase with JavaScript
+MantisBase has a built-in lightweight JavaScript engine based on the `Duktape` library. This allows us to write scripts that will be evaluated to provide extensions to existing functionality.
 
 For adding routes for instance:
 

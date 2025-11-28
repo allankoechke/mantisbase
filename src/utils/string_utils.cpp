@@ -1,4 +1,4 @@
-#include "../../include/mantis/utils/utils.h"
+#include "../../include/mantisbase/utils/utils.h"
 
 #include <algorithm>
 #include <httplib.h>
@@ -14,7 +14,7 @@ namespace mantis
         }
         catch (const std::exception& e)
         {
-            Log::critical("JSON parse error: {}", e.what());
+            logger::critical("JSON parse error: {}", e.what());
             return std::nullopt;
         }
     }
@@ -122,7 +122,7 @@ namespace mantis
         return value ? std::string(value) : defaultValue;
     }
 
-    static bool invalidChar(const unsigned char c)
+    bool invalidChar(const unsigned char c)
     {
         return c < 0x20 || c == 0x7F ||
             c == '<' || c == '>' || c == ':' || c == '"' ||
@@ -131,12 +131,11 @@ namespace mantis
             c == '%' || c == '=';
     }
 
-    static void sanitizeInPlace(std::string& s)
+    void sanitizeInPlace(std::string& s)
     {
         for (auto& ch : s)
         {
-            unsigned char c = static_cast<unsigned char>(ch);
-            if (invalidChar(c)) ch = '_';
+            if (const auto c = static_cast<unsigned char>(ch); invalidChar(c)) ch = '_';
         }
 
         // collapse consecutive underscores
@@ -186,7 +185,7 @@ namespace mantis
 
         if (max_size <= maxLen)
         {
-            const auto name = stem;
+            const auto& name = stem;
             return ext.empty()
                        ? std::format("{}{}{}", id, idSep, name)
                        : std::format("{}{}{}{}", id, idSep, name, ext);
