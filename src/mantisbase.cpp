@@ -204,7 +204,6 @@ namespace mantis
 
         // Create instance objects
         m_logger = std::make_unique<LogsMgr>();
-        m_exprEval = std::make_unique<ExprMgr>(); // depends on log()
         m_database = std::make_unique<Database>(); // depends on log()
         m_router = std::make_unique<Router>(); // depends on db() & http()
         m_kvStore = std::make_unique<KVStore>(); // depends on db(), router() & http()
@@ -229,7 +228,6 @@ namespace mantis
         if (m_kvStore) m_kvStore.reset();
         if (m_router) m_router.reset();
         if (m_database) m_database.reset();
-        if (m_exprEval) m_exprEval.reset();
         if (m_logger) m_logger.reset();
     }
 
@@ -272,11 +270,6 @@ namespace mantis
     Router& MantisBase::router() const
     {
         return *m_router;
-    }
-
-    ExprMgr& MantisBase::evaluator() const
-    {
-        return *m_exprEval;
     }
 
     KVStore& MantisBase::settings() const

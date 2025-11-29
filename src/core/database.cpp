@@ -138,6 +138,7 @@ namespace mantis {
             // Used for `id` to track given tokens for single use only
             EntitySchema service_schema{"mb_service_acc", "base"};
             service_schema.setSystem(true);
+            service_schema.setHasApi(false);
             *sql << service_schema.toDDL();
 
             // Create and manage other db tables, keeping track of access rules, schema, etc.!

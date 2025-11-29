@@ -79,7 +79,14 @@ namespace mantis {
         admin_entity.createEntityRoutes();
         m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
 
-        // Misc
+        // Service Schema [No routes]
+        EntitySchema service_schema{"mb_service_acc", "base"};
+        service_schema.setHasApi(false);
+        service_schema.setSystem(true);
+        auto service_entity = admin_schema.toEntity();
+        m_entityMap.emplace(service_entity.name(), std::move(service_entity));
+
+        // Misc Endpoints [admin, auth, etc]
         generateMiscEndpoints();
 
         return true;

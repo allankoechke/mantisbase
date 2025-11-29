@@ -246,8 +246,6 @@ namespace mantis
         [[nodiscard]] argparse::ArgumentParser& cmd() const;
         /// Get the router object instance.
         [[nodiscard]] Router& router() const;
-        /// Get the `cparse` expression evaluator unit object instance.
-        [[nodiscard]] ExprMgr& evaluator() const;
         /// Get the settings unit object
         [[nodiscard]] KVStore& settings() const;
 
@@ -380,7 +378,6 @@ namespace mantis
         std::unique_ptr<LogsMgr> m_logger;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
         std::unique_ptr<Router> m_router;
-        std::unique_ptr<ExprMgr> m_exprEval;
         std::unique_ptr<KVStore> m_kvStore;
         duk_context* m_dukCtx; // For duktape context
 
