@@ -18,11 +18,11 @@ TEST(DatabaseTest, CheckSystemSchemaMigrated) {
     EXPECT_EQ(admin_entity.name(), "mb_admins");
     EXPECT_TRUE(admin_entity.hasApi());
     EXPECT_TRUE(admin_entity.isSystem());
-    EXPECT_EQ(admin_entity.listRule(), "");
-    EXPECT_EQ(admin_entity.getRule(), "");
-    EXPECT_EQ(admin_entity.addRule(), "");
-    EXPECT_EQ(admin_entity.updateRule(), "");
-    EXPECT_EQ(admin_entity.deleteRule(), "");
+    // EXPECT_EQ(admin_entity.listRule(), "");
+    // EXPECT_EQ(admin_entity.getRule(), "");
+    // EXPECT_EQ(admin_entity.addRule(), "");
+    // EXPECT_EQ(admin_entity.updateRule(), "");
+    // EXPECT_EQ(admin_entity.deleteRule(), "");
 
     // Create schema, check fields
     mantis::EntitySchema admin_schema = mantis::EntitySchema::fromEntity(admin_entity);

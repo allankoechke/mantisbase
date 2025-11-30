@@ -21,8 +21,7 @@ namespace mantis {
 
 
     private:
-        std::string m_mode;
-        std::string m_expr;
+        std::string m_mode = "auth", m_expr;
     };
 } // mantis
 
