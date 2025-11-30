@@ -149,35 +149,36 @@ namespace mantis {
                 const std::string expr = rule.expr();
 
                 // Token map variables for evaluation
-                // TokenMap vars;
+                TokenMap vars;
 
                 // Add `auth` data to the TokenMap
-                // vars["auth"] = MantisBase::instance().evaluator().jsonToTokenMap(auth);
+                vars["auth"] = auth;
 
                 // Request Token Map
-                json reqMap;
-                reqMap["remoteAddr"] = req.getRemoteAddr();
-                reqMap["remotePort"] = req.getRemotePort();
-                reqMap["localAddr"] = req.getLocalAddr();
-                reqMap["localPort"] = req.getLocalPort();
+                json req_obj;
+                req_obj["remoteAddr"] = req.getRemoteAddr();
+                req_obj["remotePort"] = req.getRemotePort();
+                req_obj["localAddr"] = req.getLocalAddr();
+                req_obj["localPort"] = req.getLocalPort();
+                        req_obj["body"] = json::object();
 
                 try {
-                    if (req.getMethod() == "POST" && !req.getBody().empty()) // TODO handle formdata
+                    // TODO handle form data
+                    if (req.getMethod() == "POST" && !req.getBody().empty())
                     {
                         // Parse request body and add it to the request TokenMap
-                        auto request = json::parse(req.getMethod());
-                        // reqMap["body"] = MantisBase::instance().evaluator().jsonToTokenMap(request);
+                        req_obj["body"] = req.getBodyAsJson();
                     }
                 } catch (...) {
                 }
 
                 // Add the request map to the vars
-                // vars["req"] = reqMap;
+                vars["req"] = req_obj;
 
                 // If expression evaluation returns true, lets return allowing execution
                 // continuation. Else, we'll craft an error response.
-                // if (MantisBase::instance().evaluator().evaluate(expr, vars))
-                //     return REQUEST_PENDING; // Proceed to next middleware
+                if (Expr::eval(expr, vars))
+                    return HandlerResponse::Unhandled; // Proceed to next middleware
 
                 // Evaluation yielded false, return generic access denied error
                 json response;

@@ -14,6 +14,8 @@
 
 namespace mantis
 {
+    using TokenMap = std::unordered_map<std::string, nlohmann::json>;
+
     class DukCtx {
     public:
         DukCtx();
@@ -38,7 +40,7 @@ namespace mantis
          * @param vars Parameter tokens
          * @return True or False
          */
-        static bool eval(const std::string& expr, const std::unordered_map<std::string, json>& vars = {});
+        static bool eval(const std::string& expr, const std::unordered_map<std::string, nlohmann::json>& vars = {});
     };
 } // mantis
 

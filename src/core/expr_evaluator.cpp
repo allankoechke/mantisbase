@@ -17,7 +17,7 @@ namespace mantis
 
     duk_context * DukCtx::get() const { return m_ctx;}
 
-    bool Expr::eval(const std::string& expr, const std::unordered_map<std::string, json>& vars)
+    bool Expr::eval(const std::string& expr, const std::unordered_map<std::string, nlohmann::json>& vars)
     {
             // Create isolated context for this evaluation
             const DukCtx ctx;
