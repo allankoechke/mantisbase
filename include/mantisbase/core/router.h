@@ -42,7 +42,11 @@ namespace mantis {
         // ----------- HTTP METHODS ----------- //
         void Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
+        void Post(const std::string &path, const HandlerWithContentReaderFn &handler, const Middlewares &middlewares = {});
+
         void Post(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
+
+        void Patch(const std::string &path, const HandlerWithContentReaderFn &handler, const Middlewares &middlewares = {});
 
         void Patch(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
@@ -64,6 +68,8 @@ namespace mantis {
 
     private:
         void globalRouteHandler(const std::string &method, const std::string &path);
+
+        void globalRouteHandlerWithReader(const std::string &method, const std::string &path);
 
         void generateMiscEndpoints();
 

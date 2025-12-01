@@ -74,7 +74,7 @@ namespace mantis {
                 // Get JSON Body
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
-                    res.sendJson(500, {
+                    res.sendJSON(500, {
                                      {"status", 500},
                                      {"data", json::object()},
                                      {"error", err}
@@ -85,7 +85,7 @@ namespace mantis {
                 // The body should contain `identity`, `password` and `entity` keys
                 for (const auto &key: std::vector<std::string>{"identity", "password", "entity"}) {
                     if (!body.contains(key) || !body[key].is_string() || body[key].empty()) {
-                        res.sendJson(400, {
+                        res.sendJSON(400, {
                                          {"status", 400},
                                          {"data", json::object()},
                                          {"error", "Expected `" + key + "` key in the request body."}
@@ -99,7 +99,7 @@ namespace mantis {
 
                 // Auth only supported on `auth` tables only
                 if (entity.type() != "auth") {
-                    res.sendJson(400, {
+                    res.sendJSON(400, {
                                      {"status", 400},
                                      {"data", json::object()},
                                      {
@@ -114,7 +114,7 @@ namespace mantis {
                 auto opt_user = entity.queryFromCols(body["identity"].get<std::string>(), {"id", "email"});
                 if (!opt_user.has_value()) {
                     // No user found, return 404
-                    res.sendJson(404, {
+                    res.sendJSON(404, {
                                      {"status", 404},
                                      {"data", json::object()},
                                      {
@@ -130,7 +130,7 @@ namespace mantis {
 
                 // Validate password
                 if (!verifyPassword(body["password"].get<std::string>(), user["password"].get<std::string>())) {
-                    res.sendJson(404, {
+                    res.sendJSON(404, {
                                      {"status", 404},
                                      {"data", json::object()},
                                      {
@@ -149,7 +149,7 @@ namespace mantis {
 
                 // Remove password in response and send response obj.
                 user.erase("password");
-                res.sendJson(200, {
+                res.sendJSON(200, {
                                  {"status", 200},
                                  {
                                      "data", {
@@ -161,14 +161,14 @@ namespace mantis {
                              }
                 );
             } catch (const MantisException &e) {
-                res.sendJson(e.code(), {
+                res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
                              }
                 );
             } catch (const std::exception &e) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
                                  {"error", e.what()}
@@ -183,14 +183,14 @@ namespace mantis {
             try {
                 // TODO - Add auth refresh tokens for admins
             } catch (const MantisException &e) {
-                res.sendJson(e.code(), {
+                res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
                              }
                 );
             } catch (const std::exception &e) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
                                  {"error", e.what()}
@@ -205,14 +205,14 @@ namespace mantis {
             try {
                 // TODO - Maybe create banned tokens for auth?
             } catch (const MantisException &e) {
-                res.sendJson(e.code(), {
+                res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
                              }
                 );
             } catch (const std::exception &e) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
                                  {"error", e.what()}

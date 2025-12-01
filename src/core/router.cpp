@@ -155,12 +155,26 @@ namespace mantis {
         globalRouteHandler("GET", path);
     }
 
-    void Router::Post(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
+    void Router::Post(const std::string &path, const HandlerWithContentReaderFn &handler,
+                      const Middlewares &middlewares) {
+        m_routeRegistry.add("POST", path, handler, middlewares);
+        globalRouteHandlerWithReader("POST", path);
+    }
+
+    void Router::Post(const std::string &path, const HandlerFn &handler,
+                      const Middlewares &middlewares) {
         m_routeRegistry.add("POST", path, handler, middlewares);
         globalRouteHandler("POST", path);
     }
 
-    void Router::Patch(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
+    void Router::Patch(const std::string &path, const HandlerWithContentReaderFn &handler,
+                       const Middlewares &middlewares) {
+        m_routeRegistry.add("PATCH", path, handler, middlewares);
+        globalRouteHandlerWithReader("PATCH", path);
+    }
+
+    void Router::Patch(const std::string &path, const HandlerFn &handler,
+                       const Middlewares &middlewares) {
         m_routeRegistry.add("PATCH", path, handler, middlewares);
         globalRouteHandler("PATCH", path);
     }
@@ -245,7 +259,7 @@ namespace mantis {
                 response["error"] = std::format("{} {} Route Not Found", method, path);
                 response["data"] = json::object();
 
-                ma_res.sendJson(404, response);
+                ma_res.sendJSON(404, response);
                 return;
             }
 
@@ -278,6 +292,52 @@ namespace mantis {
             svr.Post(path, handlerFunc);
         } else if (method == "DELETE") {
             svr.Delete(path, handlerFunc);
+        } else {
+            throw MantisException(500, "Router method `" + method + "` is not supported!");
+        }
+    }
+
+     void Router::globalRouteHandlerWithReader(const std::string &method, const std::string &path) {
+        const std::function handlerFuncWithContentReader = [this, method, path](
+            const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &cr) {
+            MantisRequest ma_req{req};
+            MantisResponse ma_res{res};
+
+            const auto route = m_routeRegistry.find(method, path);
+            if (!route) {
+                ma_res.sendJSON(404, {
+                                    {"status", 404},
+                                    {"error", std::format("{} {} Route Not Found", method, path)},
+                                    {"data", json::object()}
+                                });
+                return;
+            }
+
+            // First, execute global middlewares
+            for (const auto &g_mw: m_preRoutingMiddlewares) {
+                if (g_mw(ma_req, ma_res) == HandlerResponse::Handled) return;
+            }
+
+            // Secondly, execute route specific middlewares
+            for (const auto &mw: route->middlewares) {
+                if (mw(ma_req, ma_res) == HandlerResponse::Handled) return;
+            }
+
+            // Finally, execute the handler function
+            if (const auto func = std::get_if<HandlerWithContentReaderFn>(&route->handler)) {
+                (*func)(ma_req, ma_res, cr);
+            }
+
+            // Any post routing checks?
+            for (const auto &p_mw: m_postRoutingMiddlewares) {
+                p_mw(ma_req, ma_res); // Execute all, no return types
+            }
+        };
+
+        if (method == "PATCH") {
+            svr.Patch(path, handlerFuncWithContentReader);
+        } else if (method == "POST") {
+            svr.Post(path, handlerFuncWithContentReader);
         } else {
             throw MantisException(500, "Router method `" + method + "` is not supported!");
         }
@@ -358,7 +418,7 @@ namespace mantis {
                 response["status"] = 400;
                 response["data"] = json::object();
 
-                res.sendJson(400, response);
+                res.sendJSON(400, response);
                 return;
             }
 
@@ -375,7 +435,7 @@ namespace mantis {
             response["status"] = 404;
             response["data"] = json::object();
 
-            res.sendJson(404, response);
+            res.sendJSON(404, response);
         };
     }
 

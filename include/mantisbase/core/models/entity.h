@@ -79,9 +79,9 @@ namespace mantis {
 
         [[nodiscard]] HandlerFn getManyRouteHandler() const;
 
-        [[nodiscard]] HandlerFn postRouteHandler() const;
+        [[nodiscard]] HandlerWithContentReaderFn postRouteHandler() const;
 
-        [[nodiscard]] HandlerFn patchRouteHandler() const;
+        [[nodiscard]] HandlerWithContentReaderFn patchRouteHandler() const;
 
         [[nodiscard]] HandlerFn deleteRouteHandler() const;
 

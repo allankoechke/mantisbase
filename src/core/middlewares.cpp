@@ -95,7 +95,7 @@ namespace mantis {
                 response["data"] = json::object();
                 response["error"] = "Unsupported method `" + method + "`";
 
-                res.sendJson(400, response);
+                res.sendJSON(400, response);
                 return HandlerResponse::Handled;
             }
 
@@ -121,7 +121,7 @@ namespace mantis {
                 auto verification = req.getOr<json>("verification", json::object());
                 if (verification.empty()) {
                     // Send auth error
-                    res.sendJson(403, {
+                    res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
                                      {"error", "Auth required to access this resource!"}
@@ -136,7 +136,7 @@ namespace mantis {
                 }
 
                 // Send auth error
-                res.sendJson(403, {
+                res.sendJSON(403, {
                                  {"data", json::object()},
                                  {"status", 403},
                                  {"error", verification["error"]}
@@ -186,11 +186,11 @@ namespace mantis {
                 response["data"] = json::object();
                 response["error"] = "Access denied!";
 
-                res.sendJson(403, response);
+                res.sendJSON(403, response);
                 return REQUEST_HANDLED;
             }
 
-            res.sendJson(403, {
+            res.sendJSON(403, {
                              {"status", 403},
                              {"data", json::object()},
                              {"data", "Failed to authenticate user!"}
@@ -215,7 +215,7 @@ namespace mantis {
             if (auth["type"] == "guest")
                 return HandlerResponse::Unhandled;
 
-            res.sendJson(403, {
+            res.sendJSON(403, {
                              {"status", 403},
                              {"data", json::object()},
                              {"data", "Only guest users allowed to access this resource."}
@@ -234,7 +234,7 @@ namespace mantis {
                 // logger::trace("Verification: {}", verification.dump());
                 if (verification.empty()) {
                     // Send auth error
-                    res.sendJson(403, {
+                    res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
                                      {"error", "Auth required to access this resource!"}
@@ -254,7 +254,7 @@ namespace mantis {
                     }
 
                     // Send auth error
-                    res.sendJson(403, {
+                    res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
                                      {"error", "Admin auth required to access this resource."}
@@ -264,7 +264,7 @@ namespace mantis {
 
                 // Send auth error
                 const auto err_str = verification["error"].empty() ? "Token Verification Error" : verification["error"];
-                res.sendJson(403, {
+                res.sendJSON(403, {
                                  {"data", json::object()},
                                  {"status", 403},
                                  {"error", err_str}
@@ -273,7 +273,7 @@ namespace mantis {
             } catch (std::exception &e) {
                 logger::critical("Error authenticating as admin: {}", e.what());
                 // Send auth error
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"status", 500},
                                  {"error", e.what()}

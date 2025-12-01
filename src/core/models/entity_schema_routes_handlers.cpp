@@ -18,7 +18,7 @@ namespace mantis {
 
                 // Read for entity matching given `id` if it exists, return it, else error `404`
                 const auto record = EntitySchema::getTable(schema_id);
-                res.sendJson(200,
+                res.sendJSON(200,
                              {
                                  {"data", record},
                                  {"error", ""},
@@ -26,14 +26,14 @@ namespace mantis {
                              }
                 );
             } catch (const MantisException &e) {
-                res.sendJson(e.code(), {
+                res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", e.code()}
                              }
                 );
             } catch (const std::exception &e) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", 500}
@@ -49,21 +49,21 @@ namespace mantis {
         HandlerFn handler = [](MantisRequest &req, MantisResponse &res) {
             try {
                 const auto tables = EntitySchema::listTables();
-                res.sendJson(200, {
+                res.sendJSON(200, {
                                  {"data", tables},
                                  {"error", ""},
                                  {"status", 200}
                              }
                 );
             } catch (const MantisException &e) {
-                res.sendJson(e.code(), {
+                res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", e.code()}
                              }
                 );
             } catch (const std::exception &e) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", 500}
@@ -80,7 +80,7 @@ namespace mantis {
             try {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
-                    res.sendJson(400, {
+                    res.sendJSON(400, {
                                      {"data", json::object()},
                                      {"error", err},
                                      {"status", 400}
@@ -93,21 +93,21 @@ namespace mantis {
                     throw MantisException(400, val_err.value());
 
                 auto _schema = EntitySchema::createTable(eSchema);
-                res.sendJson(200, {
+                res.sendJSON(200, {
                                  {"data", _schema},
                                  {"error", ""},
                                  {"status", 200}
                              }
                 );
             } catch (const MantisException &e) {
-                res.sendJson(e.code(), {
+                res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", e.code()}
                              }
                 );
             } catch (const std::exception &e) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", 500}
@@ -133,7 +133,7 @@ namespace mantis {
             // Check request body if valid ...
             const auto &[body, err] = req.getBodyAsJson();
             if (!err.empty()) {
-                res.sendJson(400, {
+                res.sendJSON(400, {
                                  {"data", json::object()},
                                  {"error", err},
                                  {"status", 400}
@@ -172,14 +172,14 @@ namespace mantis {
                 EntitySchema::dropTable(schema_id);
                 res.sendEmpty();
             } catch (const MantisException &e) {
-                res.sendJson(e.code(), {
+                res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"error", e.what()},
                                  {"data", json::object()}
                              }
                 );
             } catch (const std::exception &e) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"status", 500},
                                  {"error", e.what()},
                                  {"data", json::object()}

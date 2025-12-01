@@ -41,7 +41,7 @@ namespace mantis {
                 m_schema["fields"] = json::array();
         }
 
-        logger::trace("Creating Entity\n: {}", m_schema.dump());
+        // logger::trace("Creating Entity\n: {}", m_schema.dump());
     }
 
     Entity::Entity(const std::string &name, const std::string &type)

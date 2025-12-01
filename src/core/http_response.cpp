@@ -140,7 +140,7 @@ namespace mantis
         send(statusCode, data, "text/plain");
     }
 
-    void MantisResponse::sendJson(const int statusCode, const json& data) const
+    void MantisResponse::sendJSON(const int statusCode, const json& data) const
     {
         send(statusCode, data.dump(), "application/json");
     }

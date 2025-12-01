@@ -226,7 +226,7 @@ namespace mantis {
 
         void send(int statusCode, const std::string &data = "", const std::string &content_type = "text/plain") const;
 
-        void sendJson(int statusCode = 200, const json &data = json::object()) const;
+        void sendJSON(int statusCode = 200, const json &data = json::object()) const;
 #ifdef MANTIS_ENABLE_SCRIPTING
         void sendJson(int statusCode, const DukValue &data) const;
 #endif

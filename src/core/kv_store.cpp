@@ -82,7 +82,7 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = "Auth token missing";
 
-            res.sendJson(403, response);
+            res.sendJSON(403, response);
             return REQUEST_HANDLED;
         }
 
@@ -94,7 +94,7 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = "Auth token missing";
 
-            res.sendJson(403, response);
+            res.sendJSON(403, response);
             return REQUEST_HANDLED;
         }
 
@@ -110,7 +110,7 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = resp.value("error", "");
 
-            res.sendJson(403, response);
+            res.sendJSON(403, response);
             return REQUEST_HANDLED;
         }
 
@@ -126,7 +126,7 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = "Auth token missing user id or table name";
 
-            res.sendJson(403, response);
+            res.sendJSON(403, response);
             return REQUEST_HANDLED;
         }
 
@@ -148,7 +148,7 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = "Auth id was not found.";
 
-            res.sendJson(404, response);
+            res.sendJSON(404, response);
             return REQUEST_HANDLED;
         }
 
@@ -166,7 +166,7 @@ namespace mantis
         response["data"] = json::object();
         response["error"] = "Admin auth required to access this resource.";
 
-        res.sendJson(403, response);
+        res.sendJSON(403, response);
         return REQUEST_HANDLED;
     }
 
@@ -212,7 +212,7 @@ namespace mantis
                     response["data"] = m_configs;
                     response["data"]["mantisVersion"] = MantisBase::appVersion();
 
-                    res.sendJson(200, response);
+                    res.sendJSON(200, response);
                     return;
                 }
 
@@ -236,7 +236,7 @@ namespace mantis
                     response["data"] = settings;
                     response["data"]["mantisVersion"] = MantisBase::appVersion();
 
-                    res.sendJson(200, response);
+                    res.sendJSON(200, response);
                     return;
                 }
 
@@ -245,7 +245,7 @@ namespace mantis
                 response["error"] = "Settings object not found!";
                 response["data"] = json::object();
 
-                res.sendJson(404, response);
+                res.sendJSON(404, response);
             }, { });
                 // [](MantisRequest& req, MantisResponse& res)-> bool
                 // {
@@ -275,7 +275,7 @@ namespace mantis
                     response["error"] = "Could not parse request body, expected JSON!";
                     response["data"] = json::object();
 
-                    res.sendJson(400, response);
+                    res.sendJSON(400, response);
                     return;
                 }
 
@@ -340,7 +340,7 @@ namespace mantis
                 response["data"] = m_configs;
                 response["data"]["mantisVersion"] = MantisBase::appVersion();
 
-                res.sendJson(200, response);
+                res.sendJSON(200, response);
             }, {
             });
     }

@@ -24,7 +24,7 @@ namespace mantis {
 
                 // Read for entity matching given `id` if it exists, return it, else error `404`
                 if (const auto record = entity.read(entity_id); record.has_value()) {
-                    res.sendJson(200,
+                    res.sendJSON(200,
                                  {
                                      {"data", record},
                                      {"error", ""},
@@ -32,7 +32,7 @@ namespace mantis {
                                  }
                     );
                 } else {
-                    res.sendJson(404,
+                    res.sendJSON(404,
                                  {
                                      {"data", json::object()},
                                      {"error", "Resource not found!"},
@@ -41,7 +41,7 @@ namespace mantis {
                     );
                 }
             } catch (const std::exception &e) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", 500}
@@ -75,8 +75,8 @@ namespace mantis {
                                             : false;
                 // Filter parameters
                 std::string filter = req.hasQueryParam("filter")
-                                            ? req.getQueryParamValue("filter")
-                                            : "";
+                                         ? req.getQueryParamValue("filter")
+                                         : "";
 
                 nlohmann::json opts;
                 opts["pagination"] = {
@@ -90,7 +90,7 @@ namespace mantis {
                 int items_count = skip_total_count ? -1 : entity.countRecords();
 
                 const auto records = entity.list(opts);
-                res.sendJson(200, {
+                res.sendJSON(200, {
                                  {
                                      "data", {
                                          {"page", page},
@@ -105,7 +105,7 @@ namespace mantis {
                              }
                 );
             } catch (const std::exception &e) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", 500}
@@ -117,46 +117,62 @@ namespace mantis {
         return handler;
     }
 
-    HandlerFn Entity::postRouteHandler() const {
+    HandlerWithContentReaderFn Entity::postRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
         logger::trace("Creating POST /api/v1/entities/{}", entity_name);
 
-        HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
-            // Get entity object for given name
-            const auto entity = MantisBase::instance().entity(entity_name);
-            const auto &[body, err] = req.getBodyAsJson();
-            if (!err.empty()) {
-                res.sendJson(500, {
-                                 {"data", json::object()},
-                                 {"error", err},
-                                 {"status", 400}
-                             });
-            }
+        HandlerWithContentReaderFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res, const MantisContentReader& reader) {
+            try {
+                // Get entity object for given name
+                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto &[body, err] = req.getBodyAsJson();
+                if (!err.empty()) {
+                    res.sendJSON(500, {
+                                     {"data", json::object()},
+                                     {"error", err},
+                                     {"status", 400}
+                                 });
+                }
 
-            if (const auto &val_err = Validators::validateRequestBody(entity, body);
-                val_err.has_value()) {
-                res.sendJson(400, {
-                                 {"data", json::object()},
-                                 {"error", val_err.value()},
-                                 {"status", 400}
-                             });
-                return;
-            }
+                if (const auto &val_err = Validators::validateRequestBody(entity, body);
+                    val_err.has_value()) {
+                    res.sendJSON(400, {
+                                     {"data", json::object()},
+                                     {"error", val_err.value()},
+                                     {"status", 400}
+                                 });
+                    return;
+                }
 
-            const auto record = entity.create(body);
-            res.sendJson(200, record);
+                const auto record = entity.create(body);
+                res.sendJSON(200, record);
+            } catch (const MantisException &e) {
+                res.sendJSON(e.code(), {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", e.code()}
+                             }
+                );
+            } catch (const std::exception &e) {
+                res.sendJSON(500, {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", 500}
+                             }
+                );
+            }
         };
 
         return handler;
     }
 
-    HandlerFn Entity::patchRouteHandler() const {
+    HandlerWithContentReaderFn Entity::patchRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
         logger::trace("Creating PATCH /api/v1/entities/{}/:id", entity_name);
 
-        HandlerFn handler = [entity_name](MantisRequest &req, MantisResponse &res) {
+        HandlerWithContentReaderFn handler = [entity_name](MantisRequest &req, MantisResponse &res, const MantisContentReader& reader) {
             // Get entity object for given name
             const auto entity = MantisBase::instance().entity(entity_name);
 
@@ -167,7 +183,7 @@ namespace mantis {
 
             const auto &[body, err] = req.getBodyAsJson();
             if (!err.empty()) {
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", err},
                                  {"status", 400}
@@ -176,7 +192,7 @@ namespace mantis {
 
             if (const auto &val_err = Validators::validateRequestBody(entity, body);
                 val_err.has_value()) {
-                res.sendJson(400, {
+                res.sendJSON(400, {
                                  {"data", json::object()},
                                  {"error", val_err.value()},
                                  {"status", 400}
@@ -185,7 +201,7 @@ namespace mantis {
             }
 
             const auto record = entity.update(entity_id, body);
-            res.sendJson(200, record);
+            res.sendJSON(200, record);
             return;
         };
 
@@ -198,15 +214,31 @@ namespace mantis {
         logger::trace("Creating DELETE /api/v1/entities/{}/:id", entity_name);
 
         HandlerFn handler = [entity_name](MantisRequest &req, MantisResponse &res) {
-            // Get entity object for given name
-            const auto entity = MantisBase::instance().entity(entity_name);
+            try {
+                // Get entity object for given name
+                const auto entity = MantisBase::instance().entity(entity_name);
 
-            const auto entity_id = trim(req.getPathParamValue("id"));
-            if (entity_id.empty())
-                throw MantisException(400, "Entity `id` is required!");
+                const auto entity_id = trim(req.getPathParamValue("id"));
+                if (entity_id.empty())
+                    throw MantisException(400, "Entity `id` is required!");
 
-            entity.remove(entity_id);
-            res.sendEmpty();
+                entity.remove(entity_id);
+                res.sendEmpty();
+            } catch (const MantisException &e) {
+                res.sendJSON(e.code(), {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", e.code()}
+                             }
+                );
+            } catch (const std::exception &e) {
+                res.sendJSON(500, {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", 500}
+                             }
+                );
+            }
         };
 
         return handler;
