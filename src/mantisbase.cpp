@@ -283,7 +283,7 @@ namespace mantis
         // Get schema cache from db, check if we have this data, return data if available
         const auto entity_obj = m_router->schemaCacheEntity(table_name);
 
-        logger::trace("Fetched entity JSON: `{}`", entity_obj.schema().dump());
+        // logger::trace("Fetched entity JSON: `{}`", entity_obj.schema().dump());
 
         return entity_obj;
     }

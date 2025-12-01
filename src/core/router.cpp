@@ -54,20 +54,18 @@ namespace mantis {
             const auto sql = mApp.db().session();
             const soci::rowset rows = (sql->prepare << "SELECT schema FROM mb_tables");
 
-            if (sql->got_data()) {
-                for (const auto &row: rows) {
-                    const auto schema = row.get<nlohmann::json>("schema");
+            for (const auto &row: rows) {
+                const auto schema = row.get<nlohmann::json>("schema");
 
-                    // Create entity based on the schema
-                    Entity entity{schema};
+                // Create entity based on the schema
+                Entity entity{schema};
 
-                    // Create routes based on the entity type
-                    if (entity.hasApi()) entity.createEntityRoutes();
+                // Create routes based on the entity type
+                if (entity.hasApi()) entity.createEntityRoutes();
 
-                    // Store this object to keep alive function pointers
-                    // if not, possible access violation error
-                    m_entityMap.emplace(entity.name(), std::move(entity));
-                }
+                // Store this object to keep alive function pointers
+                // if not, possible access violation error
+                m_entityMap.emplace(entity.name(), std::move(entity));
             }
         }
 
@@ -218,7 +216,7 @@ namespace mantis {
         }
 
         // Get cached entity
-        const Entity& entity = m_entityMap.at(entity_name);
+        const Entity &entity = m_entityMap.at(entity_name);
 
         // Also, check if we have defined some routes for this one ...
         const auto basePath = "/api/v1/entities/" + entity_name;
