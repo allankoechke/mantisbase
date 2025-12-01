@@ -201,13 +201,6 @@ namespace mantis {
 
     Records Entity::list(const json &opts) const {
         const auto sql = MantisBase::instance().db().session();
-        // TODO ...
-        // if (pagination.at("count_pages").get<bool>()) {
-        //     int count = -1;
-        //     // Let's count total records, unless switched off
-        //     *sql << "SELECT COUNT(id) FROM " + name(), soci::into(count);
-        // }
-
         int page = 1;
         int per_page = 100;
 
@@ -464,6 +457,14 @@ namespace mantis {
     }
 
     const json &Entity::schema() const { return m_schema; }
+
+    int Entity::countRecords() const {
+        // TODO add record filtering ...
+        const auto sql = MantisBase::instance().db().session();
+        int count = 0;
+        *sql << "SELECT COUNT(id) FROM " + name(), soci::into(count);
+        return count;
+    }
 
     bool Entity::recordExists(const std::string &id) const {
         try {

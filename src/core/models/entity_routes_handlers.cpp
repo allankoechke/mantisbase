@@ -10,6 +10,7 @@ namespace mantis {
     HandlerFn Entity::getOneRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
+        logger::trace("Creating GET /api/v1/entities/{}/:id", entity_name);
 
         HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
             try {
@@ -55,23 +56,50 @@ namespace mantis {
     HandlerFn Entity::getManyRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
+        logger::trace("Creating GET /api/v1/entities/{}", entity_name);
 
-        HandlerFn handler = [entity_name](MantisRequest &req, MantisResponse &res) {
+        HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
             try {
                 // Get entity object for given `name`
                 const auto entity = MantisBase::instance().entity(entity_name);
 
-                // nlohmann::json opts;
-                // opts["pagination"] = {
-                //     {"page_index", 1},
-                //     {"per_page", 100},
-                //     {"skip_total_count", false}
-                // };
-                std::cout << "List for `" << entity.name() << "`: \n";
+                // Page number to query
+                auto page = req.hasQueryParam("page") ? std::stoi(req.getQueryParamValue("page")) : 1;
 
-                const auto records = entity.list();
+                // Records per request
+                auto page_size = req.hasQueryParam("page_size") ? std::stoi(req.getQueryParamValue("page_size")) : 100;
+
+                // Skip counting total items
+                bool skip_total_count = req.hasQueryParam("skip_total_count")
+                                            ? strToBool(req.getQueryParamValue("skip_total_count"))
+                                            : false;
+                // Filter parameters
+                std::string filter = req.hasQueryParam("filter")
+                                            ? req.getQueryParamValue("filter")
+                                            : "";
+
+                nlohmann::json opts;
+                opts["pagination"] = {
+                    {"page", page},
+                    {"page_size", page_size},
+                    {"skip_total_count", skip_total_count}
+                };
+                opts["filter"] = filter; // TODO
+
+                // Get total count
+                int items_count = skip_total_count ? -1 : entity.countRecords();
+
+                const auto records = entity.list(opts);
                 res.sendJson(200, {
-                                 {"data", records},
+                                 {
+                                     "data", {
+                                         {"page", page},
+                                         {"items_count", records.size()},
+                                         {"page_size", page_size},
+                                         {"total_count", items_count},
+                                         {"items", records}
+                                     }
+                                 },
                                  {"error", ""},
                                  {"status", 200}
                              }
@@ -92,10 +120,32 @@ namespace mantis {
     HandlerFn Entity::postRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
+        logger::trace("Creating POST /api/v1/entities/{}", entity_name);
 
-        HandlerFn handler = [entity_name](MantisRequest &req, MantisResponse &res) {
+        HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
             // Get entity object for given name
             const auto entity = MantisBase::instance().entity(entity_name);
+            const auto &[body, err] = req.getBodyAsJson();
+            if (!err.empty()) {
+                res.sendJson(500, {
+                                 {"data", json::object()},
+                                 {"error", err},
+                                 {"status", 400}
+                             });
+            }
+
+            if (const auto &val_err = Validators::validateRequestBody(entity, body);
+                val_err.has_value()) {
+                res.sendJson(400, {
+                                 {"data", json::object()},
+                                 {"error", val_err.value()},
+                                 {"status", 400}
+                             });
+                return;
+            }
+
+            const auto record = entity.create(body);
+            res.sendJson(200, record);
         };
 
         return handler;
@@ -104,6 +154,7 @@ namespace mantis {
     HandlerFn Entity::patchRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
+        logger::trace("Creating PATCH /api/v1/entities/{}/:id", entity_name);
 
         HandlerFn handler = [entity_name](MantisRequest &req, MantisResponse &res) {
             // Get entity object for given name
@@ -144,6 +195,7 @@ namespace mantis {
     HandlerFn Entity::deleteRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
+        logger::trace("Creating DELETE /api/v1/entities/{}/:id", entity_name);
 
         HandlerFn handler = [entity_name](MantisRequest &req, MantisResponse &res) {
             // Get entity object for given name

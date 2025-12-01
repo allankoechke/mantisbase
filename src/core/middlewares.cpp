@@ -267,7 +267,7 @@ namespace mantis {
                 res.sendJson(403, {
                                  {"data", json::object()},
                                  {"status", 403},
-                                 {"error",}
+                                 {"error", err_str}
                              });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {

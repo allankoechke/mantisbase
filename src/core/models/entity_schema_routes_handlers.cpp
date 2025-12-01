@@ -48,7 +48,6 @@ namespace mantis {
     HandlerFn EntitySchema::getManyRouteHandler() const {
         HandlerFn handler = [](MantisRequest &req, MantisResponse &res) {
             try {
-                logger::trace("Listing all tables ...");
                 const auto tables = EntitySchema::listTables();
                 res.sendJson(200, {
                                  {"data", tables},

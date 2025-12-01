@@ -220,7 +220,7 @@ namespace mantis {
             // Create default base object
             for (const auto &field: table.fields()) {
                 // Skip system generated fields
-                if (const auto &name = field.value("name", "");
+                if (const auto &name = field["name"].get<std::string>();
                     name == "id" || name == "created" || name == "updated")
                     continue;
 

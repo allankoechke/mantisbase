@@ -84,7 +84,7 @@ namespace mantis {
 
                 // The body should contain `identity`, `password` and `entity` keys
                 for (const auto &key: std::vector<std::string>{"identity", "password", "entity"}) {
-                    if (!body.contains(key) || body[key].is_string() || body[key].empty()) {
+                    if (!body.contains(key) || !body[key].is_string() || body[key].empty()) {
                         res.sendJson(400, {
                                          {"status", 400},
                                          {"data", json::object()},
@@ -111,7 +111,7 @@ namespace mantis {
                 }
 
                 // Get user for given identity
-                auto opt_user = entity.queryFromCols(body["entity"].get<std::string>(), {"id", "email"});
+                auto opt_user = entity.queryFromCols(body["identity"].get<std::string>(), {"id", "email"});
                 if (!opt_user.has_value()) {
                     // No user found, return 404
                     res.sendJson(404, {
@@ -119,7 +119,7 @@ namespace mantis {
                                      {"data", json::object()},
                                      {
                                          "error",
-                                         "No user found matching given `identity`, `password` and `entity` combination."
+                                         "No user found for given `identity`, `password` & `entity` combination."
                                      }
                                  });
                     return;
