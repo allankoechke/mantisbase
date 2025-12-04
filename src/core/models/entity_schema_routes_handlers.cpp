@@ -97,10 +97,10 @@ namespace mantis {
                     throw MantisException(400, val_err.value());
 
                 auto _schema = EntitySchema::createTable(eSchema);
-                res.sendJSON(200, {
+                res.sendJSON(201, {
                                  {"data", _schema},
                                  {"error", ""},
-                                 {"status", 200}
+                                 {"status", 201}
                              }
                 );
             } catch (const MantisException &e) {

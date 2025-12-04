@@ -22,7 +22,6 @@ namespace mantis {
     class KVStore;
     class Database;
     class LogsMgr;
-    // class SettingsMgr;
     class Router;
     class Files;
 

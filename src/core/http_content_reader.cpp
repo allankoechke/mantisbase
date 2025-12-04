@@ -36,7 +36,7 @@ namespace mantis {
 
     std::pair<json, json> MantisContentReader::formDataToJSON(const Entity &entity) const {
         if (!isMultipartFormData())
-            throw MantisException(500, "Expected Form Data request type");
+            throw MantisException(400, "Expected form data request, but it seems null.");
 
         json json_body{}, json_files{};
 
