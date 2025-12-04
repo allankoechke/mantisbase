@@ -302,6 +302,7 @@ namespace mantis {
             const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &cr) {
             MantisRequest ma_req{req};
             MantisResponse ma_res{res};
+            const MantisContentReader ma_cr{cr, ma_req};
 
             const auto route = m_routeRegistry.find(method, path);
             if (!route) {
@@ -325,7 +326,7 @@ namespace mantis {
 
             // Finally, execute the handler function
             if (const auto func = std::get_if<HandlerWithContentReaderFn>(&route->handler)) {
-                (*func)(ma_req, ma_res, cr);
+                (*func)(ma_req, ma_res, ma_cr);
             }
 
             // Any post routing checks?

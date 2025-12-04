@@ -4,6 +4,8 @@
 
 #ifndef MANTISAPP_DUKTAPE_CUSTOM_TYPES_H
 #define MANTISAPP_DUKTAPE_CUSTOM_TYPES_H
+#include "exceptions.h"
+#include "models/entity.h"
 
 #ifdef MANTIS_ENABLE_SCRIPTING
 #include <dukglue/dukglue.h>
@@ -237,6 +239,40 @@ namespace mantis {
         void sendEmpty(int statusCode = 204) const;
 
         static void registerDuktapeMethods();
+    };
+
+    ///> Middleware shorthand for the content reader
+    class MantisContentReader {
+        const httplib::ContentReader &m_reader;
+        const MantisRequest &m_req;
+
+        std::vector<httplib::FormData> m_files;
+        json m_json{};
+        bool m_parsed = false;
+
+    public:
+        explicit MantisContentReader(const httplib::ContentReader &reader, const MantisRequest &req);
+
+        [[nodiscard]] const httplib::ContentReader &reader() const;
+
+        [[nodiscard]] bool isMultipartFormData() const;
+
+        [[nodiscard]] const std::vector<httplib::FormData> &files() const;
+
+        [[nodiscard]] const json &jsonBody() const;
+
+        [[nodiscard]] json formDataToJSON(const Entity &entity) const;
+
+        static std::string hashMultipartMetadata(const httplib::FormData& data);
+
+    private:
+        void read();
+
+        void readMultipart();
+
+        void readJson();
+
+        static json getValueFromType(const std::string& type, const std::string& value);
     };
 } // mantis
 

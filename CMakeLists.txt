@@ -79,6 +79,7 @@ set( MANTIS_SOURCES
         src/core/models/access_rules.cpp
 
         src/utils/dukglue_utils_bindings.cpp
+        src/core/http_content_reader.cpp
         # src/core/private-impl/duktape_wrapper.cpp
 )
 

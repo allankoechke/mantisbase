@@ -12,15 +12,13 @@ namespace mantis {
     class MantisBase;
     class MantisRequest;
     class MantisResponse;
+    class MantisContentReader;
     class Entity;
     class EntitySchema;
     class EntitySchemaField;
 
     using json = nlohmann::json;
     using HandlerResponse = httplib::Server::HandlerResponse;
-
-    ///> Middleware shorthand for the content reader
-    using MantisContentReader = httplib::ContentReader;
 
     ///> Route Handler function shorthand
     using HandlerFn = std::function<void(MantisRequest&, MantisResponse&)>;

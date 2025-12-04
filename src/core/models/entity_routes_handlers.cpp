@@ -122,18 +122,12 @@ namespace mantis {
         const std::string entity_name = name();
         logger::trace("Creating POST /api/v1/entities/{}", entity_name);
 
-        HandlerWithContentReaderFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res, const MantisContentReader& reader) {
+        HandlerWithContentReaderFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res,
+                                                           const MantisContentReader &reader) {
             try {
                 // Get entity object for given name
                 const auto entity = MantisBase::instance().entity(entity_name);
-                const auto &[body, err] = req.getBodyAsJson();
-                if (!err.empty()) {
-                    res.sendJSON(500, {
-                                     {"data", json::object()},
-                                     {"error", err},
-                                     {"status", 400}
-                                 });
-                }
+                const auto& body = reader.formDataToJSON(entity);
 
                 if (const auto &val_err = Validators::validateRequestBody(entity, body);
                     val_err.has_value()) {
@@ -172,7 +166,8 @@ namespace mantis {
         const std::string entity_name = name();
         logger::trace("Creating PATCH /api/v1/entities/{}/:id", entity_name);
 
-        HandlerWithContentReaderFn handler = [entity_name](MantisRequest &req, MantisResponse &res, const MantisContentReader& reader) {
+        HandlerWithContentReaderFn handler = [entity_name](MantisRequest &req, MantisResponse &res,
+                                                           const MantisContentReader &reader) {
             // Get entity object for given name
             const auto entity = MantisBase::instance().entity(entity_name);
 
