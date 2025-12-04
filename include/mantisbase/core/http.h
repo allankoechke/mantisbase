@@ -261,7 +261,7 @@ namespace mantis {
 
         [[nodiscard]] const json &jsonBody() const;
 
-        [[nodiscard]] json formDataToJSON(const Entity &entity) const;
+        [[nodiscard]] std::pair<json, json> formDataToJSON(const Entity &entity) const;
 
         static std::string hashMultipartMetadata(const httplib::FormData& data);
 

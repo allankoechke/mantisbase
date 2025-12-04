@@ -1,10 +1,7 @@
-//
-// Created by codeart on 16/11/2025.
-//
-
 #include "../../include/mantisbase/core/models/entity.h"
 // #include "spdlog/fmt/bundled/std.h"
 #include "../../include/mantisbase/core/auth.h"
+#include <fstream>
 
 namespace mantis {
     HandlerFn Entity::getOneRouteHandler() const {
@@ -124,10 +121,15 @@ namespace mantis {
 
         HandlerWithContentReaderFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res,
                                                            const MantisContentReader &reader) {
+            // For tracking written files, just in case we need to revert changes
+            std::vector<std::string> saved_files{};
+
             try {
                 // Get entity object for given name
                 const auto entity = MantisBase::instance().entity(entity_name);
-                const auto& body = reader.formDataToJSON(entity);
+
+                // Get payload body as JSON and file data metadata
+                const auto &[body, files] = reader.formDataToJSON(entity);
 
                 if (const auto &val_err = Validators::validateRequestBody(entity, body);
                     val_err.has_value()) {
@@ -139,8 +141,55 @@ namespace mantis {
                     return;
                 }
 
-                const auto record = entity.create(body);
-                res.sendJSON(200, record);
+                for (const auto &file: reader.files()) {
+                    // For non-file types, continue
+                    if (file.filename.empty()) continue;
+
+                    const auto file_list = files[file.name].is_array()
+                                               ? files[file.name]
+                                               : json::array({files[file.name]});
+
+                    auto it = std::ranges::find_if(file_list, [&](const json &f) {
+                        return f["hash"].get<std::string>() == MantisContentReader::hashMultipartMetadata(file);
+                    });
+
+                    if (it == file_list.end()) {
+                        // Should not happen, but if it does, throw 500 error
+                        res.sendJSON(500, "Error writing files, hash mismatch!");
+                        return;
+                    }
+
+                    auto &file_record = *it;
+                    const auto filepath = file_record["path"].get<std::string>();
+                    if (std::ofstream ofs(filepath, std::ios::binary); ofs.is_open()) {
+                        ofs.write(file.content.data(), file.content.size());
+                        ofs.close();
+
+                        // Keep track of written files
+                        saved_files.push_back(file_record["filename"].get<std::string>());
+                    } else {
+                        res.sendJSON(500, "Failed to save file: " + file.filename);
+
+                        // Remove any written files
+                        for (const auto &f: saved_files) {
+                            [[maybe_unused]]
+                                    auto _ = Files::removeFile(entity.name(), f);
+                        }
+
+                        return;
+                    }
+                }
+
+                // Create the record
+                auto record = entity.create(body);
+
+                // For auth types, remove the password field from the response
+                if (entity.type() == "auth" && record.contains("password"))
+                {
+                    record.erase("password");
+                }
+                res.sendJSON(201, record);
+                return;
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
@@ -155,6 +204,12 @@ namespace mantis {
                                  {"status", 500}
                              }
                 );
+            }
+
+            // Remove saved files if we encountered an error
+            for (const auto& f : saved_files)
+            {
+               Files::removeFile(entity_name, f);
             }
         };
 

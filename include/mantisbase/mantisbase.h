@@ -15,25 +15,13 @@
 #include <filesystem>
 #include <chrono>
 #include <argparse/argparse.hpp>
-#include "core/kv_store.h"
 #include <dukglue/dukglue.h>
 
-#include "core/expr_evaluator.h"
-
+#include "core/types.h"
+#include "core/kv_store.h"
 
 namespace mantis
 {
-    class MantisResponse;
-    class MantisRequest;
-    namespace fs = std::filesystem;
-
-    class Database;
-    class LogsMgr;
-    // class SettingsMgr;
-    class Router;
-    class Files;
-    class Entity;
-
     /**
      * @brief MantisBase entry point.
      *

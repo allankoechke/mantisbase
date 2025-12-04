@@ -17,6 +17,15 @@ namespace mantis {
     class EntitySchema;
     class EntitySchemaField;
 
+    namespace fs = std::filesystem;
+
+    class KVStore;
+    class Database;
+    class LogsMgr;
+    // class SettingsMgr;
+    class Router;
+    class Files;
+
     using json = nlohmann::json;
     using HandlerResponse = httplib::Server::HandlerResponse;
 

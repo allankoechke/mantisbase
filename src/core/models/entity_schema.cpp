@@ -70,12 +70,14 @@ namespace mantis {
             is_array()) {
             // For each defined field, create the field schema and push to the fields array ...
             for (const auto &field: entity_schema["fields"]) {
-                if (!eSchema.hasField(field["name"].get<std::string>()))
-                    eSchema.fields().emplace_back(field);
-
-                // If field exists, update accordingly ...
-                // TODO ...
-                // - Ensure order provided from user is followed ...
+                logger::trace("Field\n\t- {}", field.dump());
+                auto field_name = field["name"].get<std::string>();
+                if (!eSchema.hasField(field_name)) {
+                    logger::trace("Adding entity field: {}", field.dump());
+                    eSchema.addField(EntitySchemaField(field));
+                } else {
+                    eSchema.field(field_name).updateWith(field);
+                }
             }
         }
 
@@ -111,7 +113,7 @@ namespace mantis {
         if (entity.type() != "view") {
             eSchema.fields().reserve(entity.fields().size());
             for (const auto &field: entity.fields()) {
-                eSchema.fields().emplace_back(field);
+                eSchema.addField(EntitySchemaField(field));
             }
         }
 
@@ -128,19 +130,19 @@ namespace mantis {
     }
 
     std::string EntitySchema::id() const {
-        if (m_name.empty()) throw std::invalid_argument("Expected table name is empty!");
+        if (m_name.empty()) throw MantisException(400, "Expected table name is empty!");
         return EntitySchema::genEntityId(m_name);
     }
 
     EntitySchemaField &EntitySchema::field(const std::string &field_name) {
-        if (field_name.empty()) throw std::invalid_argument("Empty field name.");
+        if (field_name.empty()) throw MantisException(500, "Empty field name provided.");
 
         const auto it = std::ranges::find_if(m_fields, [field_name](const auto &field) {
             return field_name == field.name();
         });
 
         if (it == m_fields.end())
-            throw std::out_of_range("Field not found for name `" + field_name + "`");
+            throw MantisException(404, "Field not found for name `" + field_name + "`");
 
         return *it;
     }
@@ -328,7 +330,10 @@ namespace mantis {
     std::vector<EntitySchemaField> EntitySchema::fields() const { return m_fields; }
 
     EntitySchema &EntitySchema::addField(const EntitySchemaField &field) {
-        const auto _ = field.validate();
+        if (const auto err = field.validate(); err.has_value()) {
+            throw MantisException(400, std::format("Field validation failed for entity schema with message: {}", err.value()));
+        }
+
         m_fields.push_back(field);
         return *this;
     }
@@ -366,7 +371,7 @@ namespace mantis {
         } else {
             j["fields"] = json::array();
             for (const auto &field: m_fields) {
-                j["fields"].emplace_back(field.toJson());
+                j["fields"].emplace_back(field.toJSON());
             }
         }
         return j;
@@ -436,6 +441,35 @@ namespace mantis {
         }
 
         throw std::runtime_error("Unsupported field type `" + type + "`");
+    }
+
+    std::string EntitySchema::dump() const {
+        auto str = std::format(
+            "\n\tid: {}\n\tName: {}\n\tType: {}\n\tIs System? {}\n\tHas API? {}\n\tRules:\n\t\t- list: {}\n\t\t- get: {}\n\t\t- add: {}\n\t\t- update: {}\n\t\t- delete: {}",
+            id(),
+            m_name,
+            m_type,
+            m_isSystem,
+            m_hasApi,
+            m_listRule.toJSON().dump(),
+            m_getRule.toJSON().dump(),
+            m_addRule.toJSON().dump(),
+            m_updateRule.toJSON().dump(),
+            m_deleteRule.toJSON().dump()
+        );
+
+        if (m_type == "view") {
+            str += std::format("\n\tView Query: `{}`", m_viewSqlQuery);
+        } else {
+            str += "\n\tFields:";
+            for (const auto &field: m_fields) {
+                str += std::format("\n\t  - Name: `{}`\n\t\tSchema: {}", field.name(), field.toJSON().dump());
+            }
+        }
+
+        logger::trace("Entity Schema {}", str);
+
+        return str;
     }
 
     std::string EntitySchema::genEntityId(const std::string &entity_name) {

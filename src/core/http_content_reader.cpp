@@ -34,7 +34,7 @@ namespace mantis {
         return m_json;
     }
 
-    json MantisContentReader::formDataToJSON(const Entity &entity) const {
+    std::pair<json, json> MantisContentReader::formDataToJSON(const Entity &entity) const {
         if (!isMultipartFormData())
             throw MantisException(500, "Expected Form Data request type");
 
@@ -148,7 +148,7 @@ namespace mantis {
             }
         }
 
-        return {{"data", json_body}, {"files", json_files }};
+        return std::make_pair(json_body, json_files);
     }
 
     std::string MantisContentReader::hashMultipartMetadata(const httplib::FormData &data) {

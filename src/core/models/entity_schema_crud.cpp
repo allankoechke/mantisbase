@@ -69,7 +69,7 @@ namespace mantis {
             const auto id = new_table.id();
             const auto schema = new_table.toJson();
 
-            logger::trace("Creating table with data: {}", schema.dump());
+            logger::trace("Creating table with data\n\tSchema: {}", schema.dump());
 
             // Check if item exits already in db
             if (tableExists(schema.at("name").get<std::string>())) {

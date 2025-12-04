@@ -1,6 +1,7 @@
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/config.hpp"
 #include "../include/mantisbase/core/models/entity.h"
+#include "../include/mantisbase/core/kv_store.h"
 
 #include <cmrc/cmrc.hpp>
 #include <fstream>

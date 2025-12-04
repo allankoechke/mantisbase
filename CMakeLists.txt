@@ -20,9 +20,7 @@ option(MANTIS_SCRIPTING_ENABLED "Enable JS Scripting" OFF)
 set(MANTIS_SHARED_DEPS FALSE)
 if(MANTIS_SHARED_DEPS)
     set(BUILD_SHARED_LIBS TRUE)
-    set(MANTIS_LIB_TYPE SHARED
-            include/mantisbase/core/exceptions.cpp
-            include/mantisbase/core/exceptions.h)
+    set(MANTIS_LIB_TYPE SHARED)
     message("-- Building Mantis dynamic libs")
 else()
     set(BUILD_SHARED_LIBS FALSE)
@@ -81,6 +79,8 @@ set( MANTIS_SOURCES
         src/utils/dukglue_utils_bindings.cpp
         src/core/http_content_reader.cpp
         # src/core/private-impl/duktape_wrapper.cpp
+
+        src/core/exceptions.cpp
 )
 
 # Add library

@@ -76,7 +76,7 @@ namespace mantis {
     }
 
     HandlerFn EntitySchema::postRouteHandler() const {
-        HandlerFn handler = [](MantisRequest &req, MantisResponse &res) {
+        HandlerFn handler = [](const MantisRequest &req, const MantisResponse &res) {
             try {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
@@ -88,7 +88,11 @@ namespace mantis {
                     );
                 }
 
+                logger::trace("Create Entity Schema: \n\tSchema: {}", body.dump());
+
                 const auto eSchema = EntitySchema::fromSchema(body);
+                auto _ = eSchema.dump();
+
                 if (const auto val_err = eSchema.validate(); val_err.has_value())
                     throw MantisException(400, val_err.value());
 
