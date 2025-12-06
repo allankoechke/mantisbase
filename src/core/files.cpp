@@ -38,9 +38,9 @@ namespace mantis {
         fs::remove_all(dirPath(entity_name));
     }
 
-    std::optional<std::string> Files::getFilePath(const std::string &table, const std::string &filename) {
+    std::optional<std::string> Files::getFilePath(const std::string &entity_name, const std::string &filename) {
         // Check if file exists, if so, return the path, else, return std::nullopt
-        if (auto path = filePath(table, filename); fs::exists(path)) {
+        if (auto path = filePath(entity_name, filename); fs::exists(path)) {
             return path;
         }
 
@@ -59,15 +59,15 @@ namespace mantis {
         return (fs::path(MantisBase::instance().dataDir()) / "files" / entity_name / filename).string();
     }
 
-    bool Files::removeFile(const std::string &table, const std::string &filename) {
+    bool Files::removeFile(const std::string &entity_name, const std::string &filename) {
         try {
-            if (table.empty() || filename.empty()) {
+            if (entity_name.empty() || filename.empty()) {
                 logger::warn("Entity name and filename are required!");
                 return false;
             }
 
-            const auto path = filePath(table, filename);
-            logger::trace("Removing file at `<data dir>/{}/{}`", table, filename);
+            const auto path = filePath(entity_name, filename);
+            logger::trace("Removing file at `<data dir>/{}/{}`", entity_name, filename);
 
             // Remove the file, only if it exists
             if (fs::exists(path)) {
@@ -75,7 +75,7 @@ namespace mantis {
                 return true;
             }
 
-            logger::warn("File `<data dir>/{}/{}` seems to be missing!", table, filename);
+            logger::warn("File `<data dir>/{}/{}` seems to be missing!", entity_name, filename);
         } catch (const std::exception &e) {
             logger::critical("Error removing file\n\t{}", e.what());
         }

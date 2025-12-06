@@ -70,13 +70,13 @@ namespace mantis
         /**
          * @brief Fetch filename absolute path only if the file exists, else, return empty response.
          *
-         * @param table Table name
-         * @param filename FIle name
+         * @param entity_name Table name
+         * @param filename File name
          * @return Absolute filepath or none if filename does not exist in the table directory.
          *
          * @see filePath() above.
          */
-        static std::optional<std::string> getFilePath(const std::string& table, const std::string& filename);
+        static std::optional<std::string> getFilePath(const std::string& entity_name, const std::string& filename);
 
         /**
          * @brief Remove existing file given the table and filename.

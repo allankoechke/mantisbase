@@ -273,6 +273,8 @@ namespace mantis {
     void Entity::createEntityRoutes() const {
         auto &router = MantisBase::instance().router();
 
+        std::cout << std::endl;
+
         // List Entities
         router.Get("/api/v1/entities/" + name(), getManyRouteHandler(),
                    {hasAccess(name())});
