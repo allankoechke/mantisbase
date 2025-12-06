@@ -20,50 +20,54 @@ namespace mantis {
         if (isMultipartFormData()) {
             readMultipart();
         } else {
-            readJson();
+            readJSON();
         }
 
         m_parsed = true;
     }
 
-    const std::vector<httplib::FormData> &MantisContentReader::files() const {
-        return m_files;
+    const std::vector<httplib::FormData> &MantisContentReader::formData() const {
+        return m_formData;
+    }
+
+    const json &MantisContentReader::filesMetadata() const {
+        return m_filesMetadata;
     }
 
     const json &MantisContentReader::jsonBody() const {
         return m_json;
     }
 
-    std::pair<json, json> MantisContentReader::formDataToJSON(const Entity &entity) const {
+    void MantisContentReader::parseFormDataToEntity(const Entity &entity) {
         if (!isMultipartFormData())
             throw MantisException(400, "Expected form data request, but it seems null.");
 
         json json_body{}, json_files{};
 
         // Process uploaded files and form fields
-        for (const auto &file: m_files) {
+        for (const auto &form_data: m_formData) {
             //
-            if (!file.filename.empty()) {
-                if (!entity.hasField(file.name)) {
+            if (!form_data.filename.empty()) {
+                if (!entity.hasField(form_data.name)) {
                     throw MantisException(
                         400,
-                        std::format("Unknown field `{}` for file type upload!", file.name)
+                        std::format("Unknown field `{}` for file type upload!", form_data.name)
                     );
                 }
 
-                const auto e_field = EntitySchemaField(entity.field(file.name).value());
+                const auto e_field = EntitySchemaField(entity.field(form_data.name).value());
 
                 // Ensure field is of `file|files` type.
                 if (!(e_field.type() == "file" || e_field.type() == "files")) {
                     throw MantisException(
                         400,
-                        std::format("Field `{}` is not of type `file` or `files`!", file.name)
+                        std::format("Field `{}` is not of type `file` or `files`!", form_data.name)
                     );
                 }
 
                 // Handle file upload
                 const auto dir = Files::dirPath(entity.name(), true);
-                const auto new_filename = sanitizeFilename(file.filename);
+                const auto new_filename = sanitizeFilename(form_data.filename);
 
                 // Create filepath for writing file contents
                 std::string filepath = (fs::path(dir) / new_filename).string();
@@ -72,25 +76,25 @@ namespace mantis {
                 json file_record;
                 file_record["filename"] = new_filename;
                 file_record["path"] = filepath; // Path on disk to write the file
-                file_record["name"] = file.name; // Original file name as passed by the user
-                file_record["hash"] = MantisContentReader::hashMultipartMetadata(file);
+                file_record["name"] = form_data.name; // Original file name as passed by the user
+                file_record["hash"] = MantisContentReader::hashMultipartMetadata(form_data);
 
                 if (e_field.type() == "file") {
                     // For `file` type
-                    json_files[file.name] = file_record;
+                    json_files[form_data.name] = file_record;
 
                     // Add to the req body
-                    json_body[file.name] = new_filename;
+                    json_body[form_data.name] = new_filename;
                 } else {
                     try {
                         // Should be a JSON array, lets construct that if necessary
-                        if (!json_body.contains(file.name))
-                            json_body[file.name] = nullptr;
-                        if (!json_files.contains(file.name))
-                            json_files[file.name] = nullptr;
+                        if (!json_body.contains(form_data.name))
+                            json_body[form_data.name] = nullptr;
+                        if (!json_files.contains(form_data.name))
+                            json_files[form_data.name] = nullptr;
 
-                        json_body[file.name].push_back(new_filename);
-                        json_files[file.name].push_back(file_record);
+                        json_body[form_data.name].push_back(new_filename);
+                        json_files[form_data.name].push_back(file_record);
                     } catch (std::exception &e) {
                         throw MantisException(
                             500,
@@ -103,7 +107,7 @@ namespace mantis {
             // This is a regular form field, treat as JSON data
             else {
                 try {
-                    auto e_field_opt = entity.field(file.name);
+                    auto e_field_opt = entity.field(form_data.name);
                     if (e_field_opt.has_value()) {
                         auto schema_field = EntitySchemaField(e_field_opt.value());
 
@@ -113,28 +117,30 @@ namespace mantis {
                             // For file types, append the file list to any existing array if any or
                             // parse the array correctly to an array of data
                             if (type == "files") {
-                                auto data = trim(file.content).empty() ? nullptr : json::parse(file.content);
+                                auto data = trim(form_data.content).empty()
+                                ? nullptr
+                                : json::parse(form_data.content);
                                 if (!data.is_array() && !data.is_null()) {
                                     throw MantisException(400, std::format(
                                                               "Error parsing field `{}`, expected an array!",
-                                                              file.name));
+                                                              form_data.name));
                                 }
 
                                 // Create empty field if it does not exist yet
-                                if (!json_body.contains(file.name))
-                                    json_body[file.name] = nullptr;
+                                if (!json_body.contains(form_data.name))
+                                    json_body[form_data.name] = nullptr;
 
                                 // For empty/null values, just continue
                                 if (data == nullptr) continue;
 
                                 // Append data content to the body field
                                 for (const auto &d: data)
-                                    json_body[file.name].push_back(d);
+                                    json_body[form_data.name].push_back(d);
                             } else {
                                 // For all other input types, simply add the data to the respective field.
                                 // Overwrites any existing data
-                                auto v = getValueFromType(type, file.content)["value"];
-                                json_body[file.name] = v;
+                                auto v = getValueFromType(type, form_data.content)["value"];
+                                json_body[form_data.name] = v;
                             }
                         } catch (std::exception &e) {
                             throw MantisException(500, e.what());
@@ -148,7 +154,47 @@ namespace mantis {
             }
         }
 
-        return std::make_pair(json_body, json_files);
+        m_json = json_body;
+        m_filesMetadata = json_files;
+    }
+
+    void MantisContentReader::writeFiles(const std::string &entity_name) {
+        for (const auto &formData: m_formData) {
+            // For non-file types, continue
+            if (formData.filename.empty()) continue;
+
+            const auto file_list = m_filesMetadata[formData.name].is_array()
+                                       ? m_filesMetadata[formData.name]
+                                       : json::array({m_filesMetadata[formData.name]});
+
+            auto it = std::ranges::find_if(file_list, [&](const json &f) {
+                return f["hash"].get<std::string>() == MantisContentReader::hashMultipartMetadata(formData);
+            });
+
+            if (it == file_list.end()) {
+                // Should not happen, but if it does, throw 500 error
+                throw MantisException(500, "Error writing files, hash mismatch!");
+            }
+
+            auto &file_record = *it;
+            const auto filepath = file_record["path"].get<std::string>();
+            if (std::ofstream ofs(filepath, std::ios::binary); ofs.is_open()) {
+                ofs.write(formData.content.data(), formData.content.size());
+                ofs.close();
+            } else {
+                undoWrittenFiles(entity_name);
+                throw MantisException(500, "Failed to open `" + formData.filename + "` file for writing.");
+            }
+        }
+    }
+
+    void MantisContentReader::undoWrittenFiles(const std::string &entity_name) {
+        // Remove any written files
+        for (const auto &file: m_filesMetadata) {
+            if (file.contains("filename")) {
+                [[maybe_unused]] auto _ = Files::removeFile(entity_name, file["filename"].get<std::string>());
+            }
+        }
     }
 
     std::string MantisContentReader::hashMultipartMetadata(const httplib::FormData &data) {
@@ -169,26 +215,17 @@ namespace mantis {
     json MantisContentReader::getValueFromType(const std::string &type, const std::string &value) {
         json obj;
         const auto content = trim(value);
-        if (content.empty())
-        {
+        if (content.empty()) {
             obj["value"] = nullptr;
-        }
-        else if (type == "xml" || type == "string" || type == "date" || type == "file")
-        {
+        } else if (type == "xml" || type == "string" || type == "date" || type == "file") {
             obj["value"] = content;
-        }
-        else if (type == "double" || type == "int8" || type == "uint8" || type == "int16" ||
-                 type == "uint16" || type == "int32" ||
-                 type == "uint32" || type == "int64" || type == "uint64")
-        {
+        } else if (type == "double" || type == "int8" || type == "uint8" || type == "int16" ||
+                   type == "uint16" || type == "int32" ||
+                   type == "uint32" || type == "int64" || type == "uint64") {
             obj["value"] = json::parse(content);
-        }
-        else if (type == "json" || type == "bool")
-        {
+        } else if (type == "json" || type == "bool") {
             obj["value"] = json::parse(content);
-        }
-        else
-        {
+        } else {
             obj["value"] = content;
         }
 
@@ -197,18 +234,18 @@ namespace mantis {
 
     void MantisContentReader::readMultipart() {
         m_reader(
-            [&](const httplib::FormData &file) {
-                m_files.push_back(file);
+            [&](const httplib::FormData &form_data) {
+                m_formData.push_back(form_data);
                 return true;
             },
             [&](const char *data, const size_t len) {
-                m_files.back().content.append(data, len);
+                m_formData.back().content.append(data, len);
                 return true;
             }
         );
     }
 
-    void MantisContentReader::readJson() {
+    void MantisContentReader::readJSON() {
         std::string body;
         m_reader([&](const char *data, const size_t data_length) -> bool {
             body.append(data, data_length);

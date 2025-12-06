@@ -302,7 +302,7 @@ namespace mantis {
             const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &cr) {
             MantisRequest ma_req{req};
             MantisResponse ma_res{res};
-            const MantisContentReader ma_cr{cr, ma_req};
+            MantisContentReader ma_cr{cr, ma_req};
 
             const auto route = m_routeRegistry.find(method, path);
             if (!route) {

@@ -69,8 +69,6 @@ namespace mantis {
             const auto id = new_table.id();
             const auto schema = new_table.toJson();
 
-            logger::trace("Creating table with data\n\tSchema: {}", schema.dump());
-
             // Check if item exits already in db
             if (tableExists(schema.at("name").get<std::string>())) {
                 throw MantisException(500, "Table with similar name exists.");
@@ -81,7 +79,7 @@ namespace mantis {
             std::tm created_tm = *std::localtime(&t);
 
             // Execute DDL & Save to DB
-            logger::debug("Schema: {}", schema.dump());
+            logger::trace("Creating table with data with schema: \n{}", schema.dump(4));
 
             // Insert to mb_tables
             *sql << "INSERT INTO mb_tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",

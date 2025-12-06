@@ -13,25 +13,20 @@ namespace mantis {
     class EntitySchema {
     public:
         EntitySchema() = default;
-
         explicit EntitySchema(const std::string &entity_name, const std::string &entity_type = "base");
 
         // Allow copy constructors & assignment ops for easy cloning
         EntitySchema(const EntitySchema &);
-
         EntitySchema &operator=(const EntitySchema &);
 
         // Move operators ...
         EntitySchema(EntitySchema &&) noexcept = default;
-
         EntitySchema &operator=(EntitySchema &&) noexcept = default;
 
         ~EntitySchema();
 
         static EntitySchema fromSchema(const json &entity_schema);
-
         static EntitySchema fromEntity(const Entity &entity);
-
         [[nodiscard]] Entity toEntity() const;
 
         // ----------- SCHEMA METHODS ----------- //

@@ -33,7 +33,7 @@ namespace mantis {
 
     ///> Route Handler function with content reader shorthand
     using HandlerWithContentReaderFn = std::function<void(MantisRequest&, MantisResponse&,
-                                                                 const MantisContentReader&)>;
+                                                                 MantisContentReader&)>;
 
     ///> Middleware shorthand for the function
     using MiddlewareFn = std::function<HandlerResponse(MantisRequest&, MantisResponse&)>;

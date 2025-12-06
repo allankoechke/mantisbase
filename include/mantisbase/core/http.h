@@ -16,6 +16,8 @@
 #include "../utils/utils.h"
 #include "types.h"
 
+#include <fstream>
+
 namespace mantis {
 #ifdef MANTIS_ENABLE_SCRIPTING
     class DuktapeImpl {
@@ -246,8 +248,8 @@ namespace mantis {
         const httplib::ContentReader &m_reader;
         const MantisRequest &m_req;
 
-        std::vector<httplib::FormData> m_files;
-        json m_json{};
+        std::vector<httplib::FormData> m_formData;
+        json m_json{}, m_filesMetadata{};
         bool m_parsed = false;
 
     public:
@@ -257,11 +259,17 @@ namespace mantis {
 
         [[nodiscard]] bool isMultipartFormData() const;
 
-        [[nodiscard]] const std::vector<httplib::FormData> &files() const;
+        [[nodiscard]] const std::vector<httplib::FormData> &formData() const;
+
+        [[nodiscard]] const json &filesMetadata() const;
 
         [[nodiscard]] const json &jsonBody() const;
 
-        [[nodiscard]] std::pair<json, json> formDataToJSON(const Entity &entity) const;
+        void parseFormDataToEntity(const Entity &entity);
+
+        void writeFiles(const std::string& entity_name);
+
+        void undoWrittenFiles(const std::string& entity_name);
 
         static std::string hashMultipartMetadata(const httplib::FormData& data);
 
@@ -270,7 +278,7 @@ namespace mantis {
 
         void readMultipart();
 
-        void readJson();
+        void readJSON();
 
         static json getValueFromType(const std::string& type, const std::string& value);
     };

@@ -405,7 +405,6 @@ namespace mantis {
     }
 
     void Entity::remove(const std::string &id) const {
-        // TRACE_CLASS_METHOD()
         // Views should not reach here
         if (type() == "view")
             throw std::invalid_argument("Remove is not implemented for Entity of `view` type!");
@@ -419,7 +418,7 @@ namespace mantis {
         *sql << sqlStr, soci::use(id), soci::into(row);
 
         if (!sql->got_data()) {
-            throw std::runtime_error(std::format("Could not find record with id = {}", id));
+            throw MantisException(404, std::format("Resource not found for given id `{}`", id));
         }
 
         // Remove from DB
@@ -439,8 +438,6 @@ namespace mantis {
                 if (!file.empty()) files_in_fields.emplace_back(file);
             }
             if (type == "files" && !record[name].is_null() && record[name].is_array()) {
-                logger::trace("DEL FILES: '{}'", record[name].dump());
-
                 const auto &files = record.value(name, std::vector<std::string>{});
                 // Expand the array data out
                 for (const auto &file: files) {
@@ -451,8 +448,7 @@ namespace mantis {
 
         // For each file field, remove it in the filesystem
         for (const auto &file_name: files_in_fields) {
-            [[maybe_unused]]
-                    auto _ = Files::removeFile(name(), file_name);
+            [[maybe_unused]] auto _ = Files::removeFile(name(), file_name);
         }
     }
 
