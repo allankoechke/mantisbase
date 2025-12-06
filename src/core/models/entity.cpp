@@ -82,20 +82,20 @@ namespace mantis {
         return m_schema.at("fields").get_ref<const std::vector<json> &>();
     }
 
-    std::optional<json> Entity::field(const std::string& field_name) const {
+    std::optional<json> Entity::field(const std::string &field_name) const {
         if (!m_schema.contains("fields")) return std::nullopt;
-        for (auto _field : m_schema["fields"]) {
+        for (auto _field: m_schema["fields"]) {
             if (_field.contains("name") && _field["name"].get<std::string>() == field_name)
                 return _field;
         }
         return std::nullopt;
     }
 
-    std::optional<json> Entity::hasField(const std::string& field_name) const {
+    std::optional<json> Entity::hasField(const std::string &field_name) const {
         return field(field_name).has_value();
     }
 
-    const json& Entity::rules() const {
+    const json &Entity::rules() const {
         return m_schema["rules"];
     }
 
@@ -306,11 +306,12 @@ namespace mantis {
                 }
             }
 
-            // TODO, what do I return here?
-            // Check that we have fields to update, if not so, just return
-            // if (updateFields.empty()) {
-            //     return result;
-            // }
+            if (columns.empty())
+                throw MantisException(
+                    400, data.empty()
+                             ? "No column data provided for updating."
+                             : "No matching column in schema to update."
+                );
 
             // Add Updated field as an extra field for updates ...
             columns += columns.empty() ? ("updated = :updated") : (", updated = :updated");
@@ -352,7 +353,7 @@ namespace mantis {
                                                  : json::array({record[field_name]});
 
                     if (file_field["value"] == nullptr ||
-                        (file_field["value"].is_array() && file_field["value"].size() == 0) ||
+                        (file_field["value"].is_array() && file_field["value"].empty()) ||
                         (file_field["value"].is_string() && file_field["value"].empty())) {
                         // If value set is null, add all file(s) to delete array
                         files_to_delete.insert(files_to_delete.end(), files_in_db.begin(), files_in_db.end());
@@ -373,11 +374,11 @@ namespace mantis {
             }
 
             // Create the SQL Query
-            std::string sql_query = "UPDATE " + name() + " SET " + columns + " WHERE id = :id";
+            std::string sql_query = "UPDATE " + name() + " SET " + columns + " WHERE id = :old_id";
 
             // Bind soci::values to entity values, throws an error if it fails
             auto vals = json2SociValue(data, fields());
-            vals.set("id", id);
+            vals.set("old_id", id);
             vals.set("updated", created_tm);
 
             // Bind values, then execute
@@ -385,11 +386,7 @@ namespace mantis {
             tr.commit();
 
             // Delete files, if any were removed ...
-            for (const auto &file: files_to_delete) {
-                if (!Files::removeFile(name(), file)) {
-                    logger::warn("Could not delete file `{}` maybe it's missing?", file);
-                }
-            }
+            Files::removeFiles(name(), files_to_delete);
 
             // Query back the created record and send it back to the client
             soci::row r;
@@ -399,8 +396,10 @@ namespace mantis {
             // Redact passwords
             if (type() == "auth") new_record.erase("password");
             return new_record;
-        } catch (...) {
+        } catch (const MantisException &) {
             throw;
+        } catch (const std::exception &e) {
+            throw MantisException(500, e.what());
         }
     }
 
@@ -429,7 +428,7 @@ namespace mantis {
         const auto record = sociRow2Json(row, fields());
 
         // Extract all fields that have file/files as the underlying data
-        std::vector<json> files_in_fields;
+        std::vector<std::string> files_in_fields;
         std::ranges::for_each(fields(), [&](const json &field) {
             const auto &type = field["type"].get<std::string>();
             const auto &name = field["name"].get<std::string>();
@@ -447,9 +446,7 @@ namespace mantis {
         });
 
         // For each file field, remove it in the filesystem
-        for (const auto &file_name: files_in_fields) {
-            [[maybe_unused]] auto _ = Files::removeFile(name(), file_name);
-        }
+        Files::removeFiles(name(), files_in_fields);
     }
 
     const json &Entity::schema() const { return m_schema; }
