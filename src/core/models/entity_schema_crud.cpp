@@ -40,7 +40,8 @@ namespace mantis {
         const auto sql = MantisBase::instance().db().session();
 
         soci::row row;
-        *sql << "SELECT id, schema, created, updated FROM mb_tables WHERE id = :id", soci::use(table_id), soci::into(row);
+        *sql << "SELECT id, schema, created, updated FROM mb_tables WHERE id = :id", soci::use(table_id),
+                soci::into(row);
 
         if (!sql->got_data())
             throw MantisException(404, "No table for given id/name `" + table_id + "`");
@@ -109,12 +110,11 @@ namespace mantis {
     }
 
     nlohmann::json EntitySchema::updateTable(const std::string &table_id, const nlohmann::json &new_data) {
-        // if (new_data.empty()) // return
+        if (new_data.empty())
+            throw MantisException(400, "Schema body is empty!");
 
         const auto sql = MantisBase::instance().db().session();
         soci::transaction tr(*sql);
-
-        const auto db_type = MantisBase::instance().dbType();
 
         try {
             // Get saved database record
@@ -124,21 +124,24 @@ namespace mantis {
                     soci::use(table_id), soci::into(schema), soci::into(created_tm);
 
             if (!sql->got_data()) {
-                throw MantisException(404, "Entity with id/name `" + table_id + "` was not found!");
+                throw MantisException(404, "Entity with id `" + table_id + "` was not found!");
             }
 
-            EntitySchema old_entity{schema}; // Old table data
+            EntitySchema old_entity = EntitySchema::fromSchema(schema); // Old table data
             EntitySchema new_entity{old_entity}; // New table data
             new_entity.updateWith(new_data);
 
-            if (old_entity.type() == "view")
+
+            if (new_entity.type() == "view")
                 throw MantisException(500, "View types do not implement `/update` route");
 
+            std::cout << "3\n";
             // Validate new object
             if (auto err = new_entity.validate(); err.has_value())
                 throw MantisException(400, err.value());
 
 
+            std::cout << "4\n";
             // --------- Handle Field(s) Changes ---------------- //
             // Drop deleted columns
             if (new_data.contains("deleted_fields")) {
@@ -146,10 +149,10 @@ namespace mantis {
                     // If the field is valid, generate drop colum statement and execute!
                     *sql << sql->get_backend()->drop_column(old_entity.name(), trim(field_name));
                 }
-
-                //     *sql << ("ALTER TABLE " + t_name + " ADD " + sql->get_backend()->constraint_unique(
-                // //                              "unique_" + field_name, field_name));
             }
+
+            std::cout << "5\n";
+            const auto db_type = MantisBase::instance().dbType();
 
             for (const auto &e_field: new_entity.fields()) {
                 // Check if the field exists in the database already, then:
@@ -316,21 +319,23 @@ namespace mantis {
                 }
             }
 
+            std::cout << "6\n";
             // --------- Handle View Query Changes -------------- //
             // std::string m_viewSqlQuery;
             // TODO ...
 
             // --------- Handle Type Changes -------------------- //
             if (old_entity.type() != new_entity.type()) {
-                // TODO, change database type
                 throw MantisException(500, "Changing entity type is currently not supported.");
             }
 
+            std::cout << "7\n";
             // --------- Handle Name Changes -------------------- //
             if (old_entity.name() != new_entity.name()) {
                 *sql << "ALTER TABLE " + old_entity.name() + " RENAME TO " + new_entity.name();
             }
 
+            std::cout << "8\n";
             // Get updated timestamp
             std::time_t t = time(nullptr);
             std::tm updated_tm = *std::localtime(&t);
@@ -345,6 +350,7 @@ namespace mantis {
             *sql << query, soci::use(new_id), soci::use(new_schema),
                     soci::use(updated_tm), soci::use(old_id);
 
+            std::cout << "9\n";
             // Write out any pending changes ...
             tr.commit();
 
@@ -354,19 +360,27 @@ namespace mantis {
             record["created"] = tmToStr(created_tm);
             record["updated"] = tmToStr(updated_tm);
 
+            std::cout << "10\n";
             // Update cache & subsequently the routes ...
             MantisBase::instance().router().updateSchemaCache(old_entity.name(), new_schema);
 
+            std::cout << "11\n";
             // Only trigger routes to be reloaded if table name changes.
             if (old_entity.name() != new_entity.name()) {
                 // Update file table folder name
                 Files::renameDir(old_entity.name(), new_entity.name());
             }
 
+            std::cout << "12\n";
             return record;
-        } catch (std::exception &e) {
-            logger::critical("Error Updating EntitySchema: {}", e.what());
+        } catch (const MantisException &e) {
+            tr.rollback();
+            logger::critical("Error Updating EntitySchema\n\t- {}", e.what());
             throw;
+        } catch (const std::exception &e) {
+            tr.rollback();
+            logger::critical("Error Updating EntitySchema\n\t- {}", e.what());
+            throw MantisException(500, e.what());
         }
     }
 

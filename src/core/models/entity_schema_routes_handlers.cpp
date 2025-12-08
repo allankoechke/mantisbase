@@ -125,38 +125,48 @@ namespace mantis {
 
     HandlerFn EntitySchema::patchRouteHandler() const {
         HandlerFn handler = [](MantisRequest &req, MantisResponse &res) {
-            const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
-            if (schema_id_or_name.empty())
-                throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
+            try {
+                const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
+                if (schema_id_or_name.empty())
+                    throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
 
-            // If table name is passed in, get the `id` equivalent
-            const auto schema_id = schema_id_or_name.starts_with("mbt_")
-                                       ? schema_id_or_name
-                                       : EntitySchema::genEntityId(schema_id_or_name);
+                // If table name is passed in, get the `id` equivalent
+                const auto schema_id = schema_id_or_name.starts_with("mbt_")
+                                           ? schema_id_or_name
+                                           : EntitySchema::genEntityId(schema_id_or_name);
 
-            // Check request body if valid ...
-            const auto &[body, err] = req.getBodyAsJson();
-            if (!err.empty()) {
-                res.sendJSON(400, {
+                // Check request body if valid ...
+                const auto &[body, err] = req.getBodyAsJson();
+                if (!err.empty()) {
+                    res.sendJSON(400, {
+                                     {"data", json::object()},
+                                     {"error", err},
+                                     {"status", 400}
+                                 });
+                }
+
+                auto _schema = EntitySchema::updateTable(schema_id, body);
+                res.sendJSON(200, {
+                                 {"data", _schema},
+                                 {"error", ""},
+                                 {"status", 200}
+                             }
+                );
+            } catch (const MantisException &e) {
+                res.sendJSON(e.code(), {
                                  {"data", json::object()},
-                                 {"error", err},
-                                 {"status", 400}
-                             });
+                                 {"error", e.what()},
+                                 {"status", e.code()}
+                             }
+                );
+            } catch (const std::exception &e) {
+                res.sendJSON(500, {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", 500}
+                             }
+                );
             }
-
-            // if (const auto &val_err = Validators::validateUpdateRequestBody(entity, body);
-            //     val_err.has_value()) {
-            //     res.sendJson(400, {
-            //                      {"data", json::object()},
-            //                      {"error", val_err.value()},
-            //                      {"status", 400}
-            //                  });
-            //     return;
-            // }
-
-            // const auto record = entity.update(entity_id, body);
-            // res.sendJson(200, record);
-            // return;
         };
 
         return handler;
