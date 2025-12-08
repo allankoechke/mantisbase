@@ -21,7 +21,7 @@ void AccessPermissionTest::createTestTableWithRules() const
         {"getRule", "auth.id == req.id"},                // Users can only get their own records
         {"addRule", "auth.table == 'users'"},            // Only users can add
         {"updateRule", "auth.id == req.id"},             // Users can only update their own records
-        {"deleteRule", "auth.table == '__admin'"},       // Only admins can delete
+        {"deleteRule", "auth.table == 'mb_admin'"},       // Only admins can delete
         {"fields", nlohmann::json::array({
             {{"name", "title"}, {"type", "string"}, {"required", true}},
             {{"name", "user_id"}, {"type", "string"}, {"required", true}}

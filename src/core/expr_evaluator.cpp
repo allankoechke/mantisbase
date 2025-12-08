@@ -1,84 +1,43 @@
 #include "../../include/mantisbase/core/expr_evaluator.h"
-
-#include "httplib.h"
 #include "../../include/mantisbase/core/logger.h"
 
-#define __file__ "core/evaluator.cpp"
+#include <httplib.h>
 
-namespace mantis
-{
-    bool ExprMgr::evaluate(const std::string& expr, const TokenMap& vars)
-    {
-        try
-        {
-            const packToken result = calculator::calculate(expr.c_str(), vars);
-            return result.asBool(); // true/false
-        } catch (std::exception& e)
-        {
+namespace mantis {
+    DukCtx::DukCtx() {
+        // Create isolated context for this evaluation
+        m_ctx = duk_create_heap_default();
+    }
+
+    DukCtx::~DukCtx() {
+        // Always clean up context to ensure no state leakage
+        duk_destroy_heap(m_ctx);
+    }
+
+    duk_context *DukCtx::get() const { return m_ctx; }
+
+    bool Expr::eval(const std::string &expr, const std::unordered_map<std::string, nlohmann::json> &vars) {
+        if (trim(expr).empty()) return false;
+
+        // Create isolated context for this evaluation
+        const DukCtx ctx;
+
+        try {
+            // Inject each JSON object as a global variable
+            for (const auto &[key, value]: vars) {
+                // Push JSON string and decode it to JavaScript object
+                std::string val_str = value.dump();
+                duk_push_lstring(ctx.get(), val_str.data(), val_str.length());
+                duk_json_decode(ctx.get(), -1);
+                duk_put_global_string(ctx.get(), key.c_str());
+            }
+
+            // Evaluate expression and return boolean result
+            return dukglue_peval<bool>(ctx.get(), expr.c_str());
+        } catch (const DukErrorException &e) {
+            // Handle evaluation errors
             logger::critical("Error evaluating expression '{}', error: {}", expr, e.what());
             return false;
         }
     }
-
-    bool ExprMgr::evaluate(const std::string& expr, const json& vars)
-    {
-        const auto t_vars = jsonToTokenMap(vars);
-        return evaluate(expr, t_vars);
-    }
-
-    TokenMap ExprMgr::jsonToTokenMap(const json& j)
-    {
-        cparse::TokenMap map;
-
-        for (const auto& [key, value] : j.items())
-        {
-            if (value.is_null())
-            {
-                map[key] = cparse::packToken::None();
-            }
-            else if (value.is_boolean())
-            {
-                map[key] = value.get<bool>();
-            }
-            else if (value.is_number_integer())
-            {
-                map[key] = value.get<int64_t>();
-            }
-            else if (value.is_number_float())
-            {
-                map[key] = value.get<double>();
-            }
-            else if (value.is_string())
-            {
-                map[key] = value.get<std::string>();
-            }
-            else if (value.is_object())
-            {
-                map[key] = jsonToTokenMap(value); // Recursive conversion
-            }
-            else if (value.is_array())
-            {
-                cparse::TokenList list;
-                for (const auto& item : value)
-                {
-                    if (item.is_object())
-                    {
-                        list.push(jsonToTokenMap(item));
-                    }
-                    else
-                    {
-                        // Convert primitive types
-                        if (item.is_string()) list.push(item.get<std::string>());
-                        else if (item.is_number_integer()) list.push(item.get<int64_t>());
-                        else if (item.is_number_float()) list.push(item.get<double>());
-                        else if (item.is_boolean()) list.push(item.get<bool>());
-                        else if (item.is_null()) list.push(cparse::packToken::None());
-                    }
-                }
-                map[key] = list;
-            }
-        }
-
-        return map;
-    };
 } // mantis

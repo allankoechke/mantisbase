@@ -41,7 +41,7 @@ namespace mantis {
                 m_schema["fields"] = json::array();
         }
 
-        logger::trace("Creating Entity\n: {}", m_schema.dump());
+        // logger::trace("Creating Entity\n: {}", m_schema.dump());
     }
 
     Entity::Entity(const std::string &name, const std::string &type)
@@ -201,13 +201,6 @@ namespace mantis {
 
     Records Entity::list(const json &opts) const {
         const auto sql = MantisBase::instance().db().session();
-        // TODO ...
-        // if (pagination.at("count_pages").get<bool>()) {
-        //     int count = -1;
-        //     // Let's count total records, unless switched off
-        //     *sql << "SELECT COUNT(id) FROM " + name(), soci::into(count);
-        // }
-
         int page = 1;
         int per_page = 100;
 
@@ -412,7 +405,6 @@ namespace mantis {
     }
 
     void Entity::remove(const std::string &id) const {
-        // TRACE_CLASS_METHOD()
         // Views should not reach here
         if (type() == "view")
             throw std::invalid_argument("Remove is not implemented for Entity of `view` type!");
@@ -426,7 +418,7 @@ namespace mantis {
         *sql << sqlStr, soci::use(id), soci::into(row);
 
         if (!sql->got_data()) {
-            throw std::runtime_error(std::format("Could not find record with id = {}", id));
+            throw MantisException(404, std::format("Resource not found for given id `{}`", id));
         }
 
         // Remove from DB
@@ -446,8 +438,6 @@ namespace mantis {
                 if (!file.empty()) files_in_fields.emplace_back(file);
             }
             if (type == "files" && !record[name].is_null() && record[name].is_array()) {
-                logger::trace("DEL FILES: '{}'", record[name].dump());
-
                 const auto &files = record.value(name, std::vector<std::string>{});
                 // Expand the array data out
                 for (const auto &file: files) {
@@ -458,12 +448,19 @@ namespace mantis {
 
         // For each file field, remove it in the filesystem
         for (const auto &file_name: files_in_fields) {
-            [[maybe_unused]]
-                    auto _ = Files::removeFile(name(), file_name);
+            [[maybe_unused]] auto _ = Files::removeFile(name(), file_name);
         }
     }
 
     const json &Entity::schema() const { return m_schema; }
+
+    int Entity::countRecords() const {
+        // TODO add record filtering ...
+        const auto sql = MantisBase::instance().db().session();
+        int count = 0;
+        *sql << "SELECT COUNT(id) FROM " + name(), soci::into(count);
+        return count;
+    }
 
     bool Entity::recordExists(const std::string &id) const {
         try {

@@ -74,12 +74,12 @@ namespace mantis
         {
             if (table.empty() || filename.empty())
             {
-                logger::warn("Table name and filename are required!");
+                logger::warn("Entity name and filename are required!");
                 return false;
             }
 
             const auto path = filePath(table, filename);
-            logger::trace("Removing file at `{}`", path);
+            logger::trace("Removing file at `/{}/{}`", table, filename);
 
             // Remove the file, only if it exists
             if (fs::exists(path))
@@ -88,11 +88,11 @@ namespace mantis
                 return true;
             }
 
-            logger::warn("Could not remove file at `{}`, seems to be missing!", path);
+            logger::warn("File `/{}/{}` seems to be missing!", table, filename);
         }
         catch (const std::exception& e)
         {
-            logger::critical("Error removing file: {}", e.what());
+            logger::critical("Error removing file\n\t{}", e.what());
         }
 
         return false;

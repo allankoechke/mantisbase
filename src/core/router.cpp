@@ -40,8 +40,8 @@ namespace mantis {
         svr.set_error_handler(routingErrorHandler());
 
         // Add global middlewares to work across all routes
-        m_globalMiddlewares.push_back(getAuthToken()); // Get auth token from the header
-        m_globalMiddlewares.push_back(hydrateContextData()); // Fill request context with necessary data
+        m_preRoutingMiddlewares.push_back(getAuthToken()); // Get auth token from the header
+        m_preRoutingMiddlewares.push_back(hydrateContextData()); // Fill request context with necessary data
     }
 
     Router::~Router() {
@@ -52,34 +52,39 @@ namespace mantis {
     bool Router::initialize() {
         {
             const auto sql = mApp.db().session();
-            const soci::rowset rows = (sql->prepare << "SELECT schema FROM _tables");
+            const soci::rowset rows = (sql->prepare << "SELECT schema FROM mb_tables");
 
-            if (sql->got_data()) {
-                for (const auto &row: rows) {
-                    const auto schema = row.get<nlohmann::json>("schema");
+            for (const auto &row: rows) {
+                const auto schema = row.get<nlohmann::json>("schema");
 
-                    // Create entity based on the schema
-                    Entity entity{schema};
+                // Create entity based on the schema
+                Entity entity{schema};
 
-                    // Create routes based on the entity type
-                    if (entity.hasApi()) entity.createEntityRoutes();
+                // Create routes based on the entity type
+                if (entity.hasApi()) entity.createEntityRoutes();
 
-                    // Store this object to keep alive function pointers
-                    // if not, possible access violation error
-                    m_entityMap.emplace(entity.name(), std::move(entity));
-                }
+                // Store this object to keep alive function pointers
+                // if not, possible access violation error
+                m_entityMap.emplace(entity.name(), std::move(entity));
             }
         }
 
         // Add admin routes
-        EntitySchema admin_schema{"_admins", "auth"};
+        EntitySchema admin_schema{"mb_admins", "auth"};
         admin_schema.removeField("name");
         admin_schema.setSystem(true);
         auto admin_entity = admin_schema.toEntity();
         admin_entity.createEntityRoutes();
         m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
 
-        // Misc
+        // Service Schema [No routes]
+        EntitySchema service_schema{"mb_service_acc", "base"};
+        service_schema.setHasApi(false);
+        service_schema.setSystem(true);
+        auto service_entity = admin_schema.toEntity();
+        m_entityMap.emplace(service_entity.name(), std::move(service_entity));
+
+        // Misc Endpoints [admin, auth, etc]
         generateMiscEndpoints();
 
         return true;
@@ -150,12 +155,26 @@ namespace mantis {
         globalRouteHandler("GET", path);
     }
 
-    void Router::Post(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
+    void Router::Post(const std::string &path, const HandlerWithContentReaderFn &handler,
+                      const Middlewares &middlewares) {
+        m_routeRegistry.add("POST", path, handler, middlewares);
+        globalRouteHandlerWithReader("POST", path);
+    }
+
+    void Router::Post(const std::string &path, const HandlerFn &handler,
+                      const Middlewares &middlewares) {
         m_routeRegistry.add("POST", path, handler, middlewares);
         globalRouteHandler("POST", path);
     }
 
-    void Router::Patch(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
+    void Router::Patch(const std::string &path, const HandlerWithContentReaderFn &handler,
+                       const Middlewares &middlewares) {
+        m_routeRegistry.add("PATCH", path, handler, middlewares);
+        globalRouteHandlerWithReader("PATCH", path);
+    }
+
+    void Router::Patch(const std::string &path, const HandlerFn &handler,
+                       const Middlewares &middlewares) {
         m_routeRegistry.add("PATCH", path, handler, middlewares);
         globalRouteHandler("PATCH", path);
     }
@@ -211,7 +230,7 @@ namespace mantis {
         }
 
         // Get cached entity
-        const Entity& entity = m_entityMap.at(entity_name);
+        const Entity &entity = m_entityMap.at(entity_name);
 
         // Also, check if we have defined some routes for this one ...
         const auto basePath = "/api/v1/entities/" + entity_name;
@@ -222,10 +241,6 @@ namespace mantis {
             m_routeRegistry.remove("POST", basePath);
             m_routeRegistry.remove("PATCH", basePath + "/:id");
             m_routeRegistry.remove("DELETE", basePath + "/:id");
-        }
-
-        if (entity.type() == "auth") {
-            m_routeRegistry.remove("POST", "/api/v1/entities/" + entity_name + "/auth/token");
         }
 
         // Remove Entity instance for the cache
@@ -244,12 +259,12 @@ namespace mantis {
                 response["error"] = std::format("{} {} Route Not Found", method, path);
                 response["data"] = json::object();
 
-                ma_res.sendJson(404, response);
+                ma_res.sendJSON(404, response);
                 return;
             }
 
             // First, execute global middlewares
-            for (const auto &g_mw: m_globalMiddlewares) {
+            for (const auto &g_mw: m_preRoutingMiddlewares) {
                 if (g_mw(ma_req, ma_res) == HandlerResponse::Handled) return;
             }
 
@@ -261,6 +276,11 @@ namespace mantis {
             // Finally, execute the handler function
             if (const auto func = std::get_if<HandlerFn>(&route->handler)) {
                 (*func)(ma_req, ma_res);
+            }
+
+            // Any post routing checks?
+            for (const auto &p_mw: m_postRoutingMiddlewares) {
+                p_mw(ma_req, ma_res); // Execute all, no return types
             }
         };
 
@@ -277,11 +297,63 @@ namespace mantis {
         }
     }
 
+     void Router::globalRouteHandlerWithReader(const std::string &method, const std::string &path) {
+        const std::function handlerFuncWithContentReader = [this, method, path](
+            const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &cr) {
+            MantisRequest ma_req{req};
+            MantisResponse ma_res{res};
+            MantisContentReader ma_cr{cr, ma_req};
+
+            const auto route = m_routeRegistry.find(method, path);
+            if (!route) {
+                ma_res.sendJSON(404, {
+                                    {"status", 404},
+                                    {"error", std::format("{} {} Route Not Found", method, path)},
+                                    {"data", json::object()}
+                                });
+                return;
+            }
+
+            // First, execute global middlewares
+            for (const auto &g_mw: m_preRoutingMiddlewares) {
+                if (g_mw(ma_req, ma_res) == HandlerResponse::Handled) return;
+            }
+
+            // Secondly, execute route specific middlewares
+            for (const auto &mw: route->middlewares) {
+                if (mw(ma_req, ma_res) == HandlerResponse::Handled) return;
+            }
+
+            // Finally, execute the handler function
+            if (const auto func = std::get_if<HandlerWithContentReaderFn>(&route->handler)) {
+                (*func)(ma_req, ma_res, ma_cr);
+            }
+
+            // Any post routing checks?
+            for (const auto &p_mw: m_postRoutingMiddlewares) {
+                p_mw(ma_req, ma_res); // Execute all, no return types
+            }
+        };
+
+        if (method == "PATCH") {
+            svr.Patch(path, handlerFuncWithContentReader);
+        } else if (method == "POST") {
+            svr.Post(path, handlerFuncWithContentReader);
+        } else {
+            throw MantisException(500, "Router method `" + method + "` is not supported!");
+        }
+    }
+
     void Router::generateMiscEndpoints() {
         auto &router = mApp.router();
         router.Get("/api/v1/health", healthCheckHandler());
         router.Get("/api/files/:entity/:file", fileServingHandler());
-        router.Get(R"(/admin(.*))", handleAdminDashboardRoute());
+        router.Get(R"(/mb-admin(.*))", handleAdminDashboardRoute());
+
+        // Systemwide auth endpoints
+        router.Post("/api/v1/auth/login", handleAuthLogin());
+        router.Post("/api/v1/auth/refresh", handleAuthRefresh());
+        router.Post("/api/v1/auth/logout", handleAuthLogout());
 
         // Add entity schema routes
         // GET|POST|PATCH|DELETE `/api/v1/schemas*`
@@ -347,7 +419,7 @@ namespace mantis {
                 response["status"] = 400;
                 response["data"] = json::object();
 
-                res.sendJson(400, response);
+                res.sendJSON(400, response);
                 return;
             }
 
@@ -364,7 +436,7 @@ namespace mantis {
             response["status"] = 404;
             response["data"] = json::object();
 
-            res.sendJson(404, response);
+            res.sendJSON(404, response);
         };
     }
 

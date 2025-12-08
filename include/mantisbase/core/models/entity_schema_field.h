@@ -61,7 +61,7 @@ namespace mantis {
         EntitySchemaField &setConstraints(const nlohmann::json &opts);
 
         // ----------------- SCHEMA FIELD OPS ---------------------- //
-        [[nodiscard]] nlohmann::json toJson() const;
+        [[nodiscard]] nlohmann::json toJSON() const;
 
         [[nodiscard]] soci::db_type toSociType() const;
 

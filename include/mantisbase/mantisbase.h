@@ -1,51 +1,27 @@
 /**
  * @file mantisbase.h
  *
- * @brief The main application for mantis.
+ * @brief The main application for mantisbase.
  *
  * Controls all other units creation, commandline parsing as well as handling application state.
  *
  * Created by allan on 16/05/2025.
  */
 
-#ifndef APP_H
-#define APP_H
+#ifndef MANTISBASE_APP_H
+#define MANTISBASE_APP_H
 
 #include <string>
 #include <filesystem>
 #include <chrono>
 #include <argparse/argparse.hpp>
-
-#include "core/kv_store.h"
-
-#ifdef MANTIS_ENABLE_SCRIPTING
 #include <dukglue/dukglue.h>
-#endif
 
-
-#include "core/expr_evaluator.h"
-
-// For password management ... // TODO get a proper library
-#ifdef _WIN32
-#include <conio.h>
-#else
-#include <termios.h>
-#include <unistd.h>
-#endif
+#include "core/types.h"
+#include "core/kv_store.h"
 
 namespace mantis
 {
-    class MantisResponse;
-    class MantisRequest;
-    namespace fs = std::filesystem;
-
-    class Database;
-    class LogsMgr;
-    // class SettingsMgr;
-    class Router;
-    class Files;
-    class Entity;
-
     /**
      * @brief MantisBase entry point.
      *
@@ -62,6 +38,13 @@ namespace mantis
     {
     public:
         ~MantisBase();
+
+        // Disable copying and moving
+        MantisBase(const MantisBase&) = delete;
+        MantisBase& operator=(const MantisBase&) = delete;
+        MantisBase(MantisBase&&) = delete;
+        MantisBase& operator=(MantisBase&&) = delete;
+
         /**
          * @brief Retrieve existing application instance.
          * @return A reference to the existing application instance.
@@ -251,8 +234,6 @@ namespace mantis
         [[nodiscard]] argparse::ArgumentParser& cmd() const;
         /// Get the router object instance.
         [[nodiscard]] Router& router() const;
-        /// Get the `cparse` expression evaluator unit object instance.
-        [[nodiscard]] ExprMgr& evaluator() const;
         /// Get the settings unit object
         [[nodiscard]] KVStore& settings() const;
 
@@ -265,10 +246,8 @@ namespace mantis
          */
         [[nodiscard]] Entity entity(const std::string& table_name) const;
 
-#ifdef MANTIS_ENABLE_SCRIPTING
         /// Get the duktape context
         [[nodiscard]] duk_context* ctx() const;
-#endif
 
 
         /**
@@ -289,17 +268,9 @@ namespace mantis
         [[nodiscard]] bool isDevMode() const;
 
     private:
-        const std::string __class_name__ = "mantis::MantisBase";
-
         // Make class creation private to enforce
         // singleton app pattern.
         MantisBase();
-
-        // Disable copying and moving
-        MantisBase(const MantisBase&) = delete;
-        MantisBase& operator=(const MantisBase&) = delete;
-        MantisBase(MantisBase&&) = delete;
-        MantisBase& operator=(MantisBase&&) = delete;
 
         /**
          * @brief Run initialization actions for Mantis, ensuring all objects are initialized properly before use.
@@ -384,7 +355,6 @@ namespace mantis
         std::chrono::time_point<std::chrono::steady_clock> m_startTime;
 
         int m_port = 7070;
-
         std::string m_host = "127.0.0.1";
 
         int m_poolSize = 2;
@@ -396,14 +366,10 @@ namespace mantis
         std::unique_ptr<LogsMgr> m_logger;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
         std::unique_ptr<Router> m_router;
-        std::unique_ptr<ExprMgr> m_exprEval;
         std::unique_ptr<KVStore> m_kvStore;
-
-#ifdef MANTIS_ENABLE_SCRIPTING
         duk_context* m_dukCtx; // For duktape context
-#endif
 
     };
 }
 
-#endif //APP_H
+#endif //MANTISBASE_APP_H

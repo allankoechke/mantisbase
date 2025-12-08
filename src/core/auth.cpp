@@ -11,16 +11,16 @@ namespace mantis
     {
         // Get signing key for JWT ...
         const auto secretKey = MantisBase::jwtSecretKey();
-        if (claims_params.empty() || !claims_params.contains("id") || !claims_params.contains("table"))
+        if (claims_params.empty() || !claims_params.contains("id") || !claims_params.contains("entity"))
         {
-            throw std::invalid_argument("Missing `id` and/or `table` fields in token claims.");
+            throw std::invalid_argument("Missing `id` and/or `entity` fields in token claims.");
         }
 
         // Give access token based on login type, `admin` or `user`
         const auto& config = json::object(); // MantisBase::instance().settings().configs();
         const int expiry_t = timeout > 0
                                  ? timeout // Use `timeout` value if provided
-                                 : claims_params.at("table").get<std::string>() == "_admins"
+                                 : claims_params.at("entity").get<std::string>() == "mb_admins"
                                  ? config.value("adminSessionTimeout", 1 * 60 * 60) // admins
                                  : config.value("sessionTimeout", 24 * 60 * 60); // users
 
@@ -100,9 +100,9 @@ namespace mantis
             }
 
             // Enforce existence of `id` and `table` claims
-            if (!claims.contains("id") || !claims.contains("table"))
+            if (!claims.contains("id") || !claims.contains("entity"))
             {
-                result["error"] = "Malformed token: Missing `id` or `table` claim field.";
+                result["error"] = "Malformed token: Missing `id` or `entity` claim field.";
                 return result;
             }
 

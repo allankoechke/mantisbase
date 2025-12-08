@@ -1,7 +1,3 @@
-//
-// Created by codeart on 12/11/2025.
-//
-
 #include "../include/mantisbase/core/middlewares.h"
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/core/models/entity.h"
@@ -18,7 +14,7 @@ namespace mantis {
             auth["type"] = "guest"; // or 'user' or 'admin'
             auth["token"] = nullptr; // User token from header ...
             auth["id"] = nullptr; // Hold user `id` from auth user
-            auth["table"] = nullptr; // Hold user table if valid
+            auth["entity"] = nullptr; // Hold user table if valid
             auth["user"] = nullptr; // Hold hydrated user if valid
 
             if (req.hasHeader("Authorization")) {
@@ -57,11 +53,11 @@ namespace mantis {
                 // If token is valid, try getting user record from db and populate context record
                 auto claims = resp["claims"];
                 const auto user_id = claims["id"].get<std::string>();
-                const auto user_table = claims["table"].get<std::string>();
+                const auto user_table = claims["entity"].get<std::string>();
 
                 // Update auth keys ...
                 auth["id"] = user_id;
-                auth["table"] = user_table;
+                auth["entity"] = user_table;
 
                 // Set type to user since token is valid, but user record may be invalid
                 auth["type"] = "user";
@@ -99,7 +95,7 @@ namespace mantis {
                 response["data"] = json::object();
                 response["error"] = "Unsupported method `" + method + "`";
 
-                res.sendJson(400, response);
+                res.sendJSON(400, response);
                 return HandlerResponse::Handled;
             }
 
@@ -120,12 +116,12 @@ namespace mantis {
             }
 
             // For auth/empty/admin roles, ....
-            if (rule.mode() == "auth" || rule.mode().empty() || auth["table"].get<std::string>() == "_admins") {
+            if (rule.mode() == "auth" || rule.mode().empty() || auth["entity"].get<std::string>() == "mb_admins") {
                 // Require at least one valid auth on any table
                 auto verification = req.getOr<json>("verification", json::object());
                 if (verification.empty()) {
                     // Send auth error
-                    res.sendJson(403, {
+                    res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
                                      {"error", "Auth required to access this resource!"}
@@ -140,7 +136,7 @@ namespace mantis {
                 }
 
                 // Send auth error
-                res.sendJson(403, {
+                res.sendJSON(403, {
                                  {"data", json::object()},
                                  {"status", 403},
                                  {"error", verification["error"]}
@@ -156,32 +152,33 @@ namespace mantis {
                 TokenMap vars;
 
                 // Add `auth` data to the TokenMap
-                vars["auth"] = MantisBase::instance().evaluator().jsonToTokenMap(auth);
+                vars["auth"] = auth;
 
                 // Request Token Map
-                TokenMap reqMap;
-                reqMap["remoteAddr"] = req.getRemoteAddr();
-                reqMap["remotePort"] = req.getRemotePort();
-                reqMap["localAddr"] = req.getLocalAddr();
-                reqMap["localPort"] = req.getLocalPort();
+                json req_obj;
+                req_obj["remoteAddr"] = req.getRemoteAddr();
+                req_obj["remotePort"] = req.getRemotePort();
+                req_obj["localAddr"] = req.getLocalAddr();
+                req_obj["localPort"] = req.getLocalPort();
+                        req_obj["body"] = json::object();
 
                 try {
-                    if (req.getMethod() == "POST" && !req.getBody().empty()) // TODO handle formdata
+                    // TODO handle form data
+                    if (req.getMethod() == "POST" && !req.getBody().empty())
                     {
                         // Parse request body and add it to the request TokenMap
-                        auto request = json::parse(req.getMethod());
-                        reqMap["body"] = MantisBase::instance().evaluator().jsonToTokenMap(request);
+                        req_obj["body"] = req.getBodyAsJson();
                     }
                 } catch (...) {
                 }
 
                 // Add the request map to the vars
-                vars["req"] = reqMap;
+                vars["req"] = req_obj;
 
                 // If expression evaluation returns true, lets return allowing execution
                 // continuation. Else, we'll craft an error response.
-                if (MantisBase::instance().evaluator().evaluate(expr, vars))
-                    return REQUEST_PENDING; // Proceed to next middleware
+                if (Expr::eval(expr, vars))
+                    return HandlerResponse::Unhandled; // Proceed to next middleware
 
                 // Evaluation yielded false, return generic access denied error
                 json response;
@@ -189,11 +186,11 @@ namespace mantis {
                 response["data"] = json::object();
                 response["error"] = "Access denied!";
 
-                res.sendJson(403, response);
+                res.sendJSON(403, response);
                 return REQUEST_HANDLED;
             }
 
-            res.sendJson(403, {
+            res.sendJSON(403, {
                              {"status", 403},
                              {"data", json::object()},
                              {"data", "Failed to authenticate user!"}
@@ -218,10 +215,10 @@ namespace mantis {
             if (auth["type"] == "guest")
                 return HandlerResponse::Unhandled;
 
-            res.sendJson(403, {
+            res.sendJSON(403, {
                              {"status", 403},
                              {"data", json::object()},
-                             {"data", "Guest user required to access this resource."}
+                             {"data", "Only guest users allowed to access this resource."}
                          });
             return HandlerResponse::Handled;
         };
@@ -237,7 +234,7 @@ namespace mantis {
                 // logger::trace("Verification: {}", verification.dump());
                 if (verification.empty()) {
                     // Send auth error
-                    res.sendJson(403, {
+                    res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
                                      {"error", "Auth required to access this resource!"}
@@ -252,12 +249,12 @@ namespace mantis {
                     auto auth = req.getOr<json>("auth", json::object());
                     // logger::trace("Auth: {}", auth.dump());
                     // Ensure the auth user was for admin table
-                    if (auth["table"].get<std::string>() == "_admins") {
+                    if (auth["entity"].get<std::string>() == "mb_admins") {
                         return HandlerResponse::Unhandled;
                     }
 
                     // Send auth error
-                    res.sendJson(403, {
+                    res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
                                      {"error", "Admin auth required to access this resource."}
@@ -267,16 +264,16 @@ namespace mantis {
 
                 // Send auth error
                 const auto err_str = verification["error"].empty() ? "Token Verification Error" : verification["error"];
-                res.sendJson(403, {
+                res.sendJSON(403, {
                                  {"data", json::object()},
                                  {"status", 403},
-                                 {"error",}
+                                 {"error", err_str}
                              });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {
                 logger::critical("Error authenticating as admin: {}", e.what());
                 // Send auth error
-                res.sendJson(500, {
+                res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"status", 500},
                                  {"error", e.what()}

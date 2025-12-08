@@ -23,7 +23,7 @@ namespace mantis
     {
         std::string s = value;
         std::ranges::transform(s, s.begin(), ::tolower);
-        return (s == "1" || s == "true" || s == "yes" || s == "on");
+        return (s == "1" || s == "true" || s == "yes" || s == "on" || s == "t");
     }
 
     void toLowerCase(std::string& str)

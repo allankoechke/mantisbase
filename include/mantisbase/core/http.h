@@ -4,6 +4,8 @@
 
 #ifndef MANTISAPP_DUKTAPE_CUSTOM_TYPES_H
 #define MANTISAPP_DUKTAPE_CUSTOM_TYPES_H
+#include "exceptions.h"
+#include "models/entity.h"
 
 #ifdef MANTIS_ENABLE_SCRIPTING
 #include <dukglue/dukglue.h>
@@ -13,6 +15,8 @@
 #include <mantisbase/core/context_store.h>
 #include "../utils/utils.h"
 #include "types.h"
+
+#include <fstream>
 
 namespace mantis {
 #ifdef MANTIS_ENABLE_SCRIPTING
@@ -226,7 +230,7 @@ namespace mantis {
 
         void send(int statusCode, const std::string &data = "", const std::string &content_type = "text/plain") const;
 
-        void sendJson(int statusCode = 200, const json &data = json::object()) const;
+        void sendJSON(int statusCode = 200, const json &data = json::object()) const;
 #ifdef MANTIS_ENABLE_SCRIPTING
         void sendJson(int statusCode, const DukValue &data) const;
 #endif
@@ -237,6 +241,46 @@ namespace mantis {
         void sendEmpty(int statusCode = 204) const;
 
         static void registerDuktapeMethods();
+    };
+
+    ///> Middleware shorthand for the content reader
+    class MantisContentReader {
+        const httplib::ContentReader &m_reader;
+        const MantisRequest &m_req;
+
+        std::vector<httplib::FormData> m_formData;
+        json m_json{}, m_filesMetadata{};
+        bool m_parsed = false;
+
+    public:
+        explicit MantisContentReader(const httplib::ContentReader &reader, const MantisRequest &req);
+
+        [[nodiscard]] const httplib::ContentReader &reader() const;
+
+        [[nodiscard]] bool isMultipartFormData() const;
+
+        [[nodiscard]] const std::vector<httplib::FormData> &formData() const;
+
+        [[nodiscard]] const json &filesMetadata() const;
+
+        [[nodiscard]] const json &jsonBody() const;
+
+        void parseFormDataToEntity(const Entity &entity);
+
+        void writeFiles(const std::string& entity_name);
+
+        void undoWrittenFiles(const std::string& entity_name);
+
+        static std::string hashMultipartMetadata(const httplib::FormData& data);
+
+    private:
+        void read();
+
+        void readMultipart();
+
+        void readJSON();
+
+        static json getValueFromType(const std::string& type, const std::string& value);
     };
 } // mantis
 

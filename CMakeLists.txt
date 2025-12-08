@@ -20,9 +20,7 @@ option(MANTIS_SCRIPTING_ENABLED "Enable JS Scripting" OFF)
 set(MANTIS_SHARED_DEPS FALSE)
 if(MANTIS_SHARED_DEPS)
     set(BUILD_SHARED_LIBS TRUE)
-    set(MANTIS_LIB_TYPE SHARED
-            include/mantisbase/core/exceptions.cpp
-            include/mantisbase/core/exceptions.h)
+    set(MANTIS_LIB_TYPE SHARED)
     message("-- Building Mantis dynamic libs")
 else()
     set(BUILD_SHARED_LIBS FALSE)
@@ -76,29 +74,20 @@ set( MANTIS_SOURCES
 
         src/core/exceptions.cpp
         src/core/router_httplib_internals.cpp
-        include/mantisbase/core/types.h
         src/core/models/access_rules.cpp
-        src/core/models/access_rules.h
-)
 
-if(MANTIS_SCRIPTING_ENABLED)
-    set( MANTIS_SOURCES
-            ${MANTIS_SOURCES}
-            src/utils/dukglue_utils_bindings.cpp
-            src/core/private-impl/duktape_wrapper.cpp
-    )
-endif ()
+        src/utils/dukglue_utils_bindings.cpp
+        src/core/http_content_reader.cpp
+        # src/core/private-impl/duktape_wrapper.cpp
+
+        src/core/exceptions.cpp
+)
 
 # Add library
-add_library(mantisbase_lib
-    ${MANTIS_LIB_TYPE}
-        ${MANTIS_SOURCES}
-)
+add_library(mantisbase_lib ${MANTIS_LIB_TYPE} ${MANTIS_SOURCES})
 
 # Add main executable
-add_executable(mantisbase_app
-        src/main.cpp
-)
+add_executable(mantisbase_app src/main.cpp)
 
 # Ensure resultant name is always `mantisbase` despite targets names for consistency
 set_target_properties(mantisbase_lib PROPERTIES OUTPUT_NAME mantisbase)
@@ -130,9 +119,6 @@ include(cmake/add-json.cmake)
 # Add SOCI
 include(cmake/add-soci.cmake)
 
-# Add the cparse module for expr evaluation
-include(cmake/cparse.cmake)
-
 # Add wolfssl library
 include(cmake/add-wolfssl.cmake)
 
@@ -146,10 +132,8 @@ include(cmake/add-cmrc.cmake)
 option(MANTIS_BUILD_WITH_ASAN "Enable ASAN build for UNIX" ON)
 include(cmake/add-asan.cmake)
 
-if(MANTIS_SCRIPTING_ENABLED)
-    # Include duktape for ECMASCRIPT scripting in Mantis
-    include(cmake/add-duktape.cmake)
-endif (MANTIS_SCRIPTING_ENABLED)
+# Include duktape for ECMASCRIPT scripting in Mantis
+include(cmake/add-duktape.cmake)
 
 # Include directories
 target_include_directories(mantisbase_lib
@@ -159,7 +143,6 @@ target_include_directories(mantisbase_lib
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/argparse/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/spdlog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/jwt-cpp/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/cparse
     ${CMAKE_BINARY_DIR}/include
 )
 
@@ -187,5 +170,4 @@ target_link_libraries(mantisbase_lib
         PUBLIC
         httplib::httplib
         spdlog::spdlog
-        cparse
 )

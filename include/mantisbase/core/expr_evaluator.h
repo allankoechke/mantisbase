@@ -7,26 +7,32 @@
 #define EXPR_EVALUATOR_H
 
 #include <string>
-#include <shunting-yard.h>
-#include <containers.h>
 #include <nlohmann/json.hpp>
+#include <dukglue/dukglue.h>
 
 #include "../utils/utils.h"
 
 namespace mantis
 {
-    using cparse::TokenMap;
-    using cparse::calculator;
-    using cparse::packToken;
-    using json = nlohmann::json;
+    using TokenMap = std::unordered_map<std::string, nlohmann::json>;
+
+    class DukCtx {
+    public:
+        DukCtx();
+
+        ~DukCtx();
+
+        [[nodiscard]] duk_context* get() const;
+
+    private:
+        duk_context* m_ctx;
+    };
 
     /**
      * @brief Struct instance for handling evaluation of database access rules.
      */
-    struct ExprMgr
+    struct Expr
     {
-        ExprMgr() = default;
-
         /**
          * @brief Evaluates a given expression in a context of the given TokenMap variables.
          *
@@ -34,26 +40,7 @@ namespace mantis
          * @param vars Parameter tokens
          * @return True or False
          */
-        auto evaluate(const std::string& expr, const TokenMap& vars) -> bool;
-
-        /**
-         * @brief Evaluates a given expression in a context of the given JSON object variables.
-         *
-         * @param expr Access rule expression.
-         * @param vars Parameter variables as JSON.
-         * @return True or False
-         */
-        auto evaluate(const std::string& expr, const json& vars) -> bool;
-
-        /**
-         * @brief Convert a given JSON Object to the equivalent TokenMap so that we can pass it to the evaluator.
-         *
-         * @param j JSON Object
-         * @return TokenMap equivalent of the JSON Object
-         */
-        auto jsonToTokenMap(const json& j) -> TokenMap;
-
-        const std::string __class_name__ = "mantis::ExprEvaluator";
+        static bool eval(const std::string& expr, const std::unordered_map<std::string, nlohmann::json>& vars = {});
     };
 } // mantis
 

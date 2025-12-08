@@ -82,7 +82,7 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = "Auth token missing";
 
-            res.sendJson(403, response);
+            res.sendJSON(403, response);
             return REQUEST_HANDLED;
         }
 
@@ -94,7 +94,7 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = "Auth token missing";
 
-            res.sendJson(403, response);
+            res.sendJSON(403, response);
             return REQUEST_HANDLED;
         }
 
@@ -110,7 +110,7 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = resp.value("error", "");
 
-            res.sendJson(403, response);
+            res.sendJSON(403, response);
             return REQUEST_HANDLED;
         }
 
@@ -126,7 +126,7 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = "Auth token missing user id or table name";
 
-            res.sendJson(403, response);
+            res.sendJSON(403, response);
             return REQUEST_HANDLED;
         }
 
@@ -137,7 +137,7 @@ namespace mantis
         //  ` ctx.get<json>("auth").value("name", ""); // returns the user's name
         auto sql = MantisBase::instance().db().session();
         soci::row r;
-        std::string query = "SELECT * FROM __admins WHERE id = :id LIMIT 1";
+        std::string query = "SELECT * FROM mb_admins WHERE id = :id LIMIT 1";
         *sql << query, soci::use(_id), soci::into(r);
 
         // Return 404 if user was not found
@@ -148,12 +148,12 @@ namespace mantis
             response["data"] = json::object();
             response["error"] = "Auth id was not found.";
 
-            res.sendJson(404, response);
+            res.sendJSON(404, response);
             return REQUEST_HANDLED;
         }
 
         // Check if user is logged in as Admin
-        if (_table == "_admins")
+        if (_table == "mb_admins")
         {
             // If logged in as admin, grant access
             // Admins get unconditional data access
@@ -166,7 +166,7 @@ namespace mantis
         response["data"] = json::object();
         response["error"] = "Admin auth required to access this resource.";
 
-        res.sendJson(403, response);
+        res.sendJSON(403, response);
         return REQUEST_HANDLED;
     }
 
@@ -212,7 +212,7 @@ namespace mantis
                     response["data"] = m_configs;
                     response["data"]["mantisVersion"] = MantisBase::appVersion();
 
-                    res.sendJson(200, response);
+                    res.sendJSON(200, response);
                     return;
                 }
 
@@ -236,7 +236,7 @@ namespace mantis
                     response["data"] = settings;
                     response["data"]["mantisVersion"] = MantisBase::appVersion();
 
-                    res.sendJson(200, response);
+                    res.sendJSON(200, response);
                     return;
                 }
 
@@ -245,7 +245,7 @@ namespace mantis
                 response["error"] = "Settings object not found!";
                 response["data"] = json::object();
 
-                res.sendJson(404, response);
+                res.sendJSON(404, response);
             }, { });
                 // [](MantisRequest& req, MantisResponse& res)-> bool
                 // {
@@ -275,7 +275,7 @@ namespace mantis
                     response["error"] = "Could not parse request body, expected JSON!";
                     response["data"] = json::object();
 
-                    res.sendJson(400, response);
+                    res.sendJSON(400, response);
                     return;
                 }
 
@@ -340,7 +340,7 @@ namespace mantis
                 response["data"] = m_configs;
                 response["data"]["mantisVersion"] = MantisBase::appVersion();
 
-                res.sendJson(200, response);
+                res.sendJSON(200, response);
             }, {
             });
     }

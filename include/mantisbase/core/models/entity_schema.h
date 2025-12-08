@@ -13,55 +13,59 @@ namespace mantis {
     class EntitySchema {
     public:
         EntitySchema() = default;
-
         explicit EntitySchema(const std::string &entity_name, const std::string &entity_type = "base");
 
         // Allow copy constructors & assignment ops for easy cloning
         EntitySchema(const EntitySchema &);
-
         EntitySchema &operator=(const EntitySchema &);
 
         // Move operators ...
         EntitySchema(EntitySchema &&) noexcept = default;
-
         EntitySchema &operator=(EntitySchema &&) noexcept = default;
 
         ~EntitySchema();
 
         static EntitySchema fromSchema(const json &entity_schema);
-
         static EntitySchema fromEntity(const Entity &entity);
-
         [[nodiscard]] Entity toEntity() const;
 
         // ----------- SCHEMA METHODS ----------- //
         [[nodiscard]] std::string id() const;
 
         [[nodiscard]] std::string name() const;
+
         EntitySchema &setName(const std::string &name);
 
         [[nodiscard]] std::string type() const;
+
         EntitySchema &setType(const std::string &type);
 
         [[nodiscard]] bool hasApi() const;
+
         EntitySchema &setHasApi(const bool &hasApi);
 
         [[nodiscard]] bool isSystem() const;
+
         EntitySchema &setSystem(const bool &isSystem);
 
         [[nodiscard]] AccessRule listRule() const;
+
         EntitySchema &setListRule(const AccessRule &listRule);
 
         [[nodiscard]] AccessRule getRule() const;
+
         EntitySchema &setGetRule(const AccessRule &getRule);
 
         [[nodiscard]] AccessRule addRule() const;
+
         EntitySchema &setAddRule(const AccessRule &addRule);
 
         [[nodiscard]] AccessRule updateRule() const;
+
         EntitySchema &setUpdateRule(const AccessRule &updateRule);
 
         [[nodiscard]] AccessRule deleteRule() const;
+
         EntitySchema &setDeleteRule(const AccessRule &deleteRule);
 
         [[nodiscard]] std::vector<EntitySchemaField> fields() const;
@@ -72,7 +76,7 @@ namespace mantis {
 
         EntitySchemaField &field(const std::string &field_name);
 
-        EntitySchemaField &fieldById(const std::string &field_name);
+        EntitySchemaField &fieldById(const std::string &field_id);
 
         [[nodiscard]] bool hasField(const std::string &field_name) const;
 
@@ -90,6 +94,8 @@ namespace mantis {
         [[nodiscard]] std::string toDDL() const;
 
         static std::string toDefaultSqlValue(const std::string &type, const nlohmann::json &v);
+
+        std::string dump() const;
 
         // ----------- SCHEMA CRUD ----------- //
         static nlohmann::json listTables(const nlohmann::json &opts = nlohmann::json::object());

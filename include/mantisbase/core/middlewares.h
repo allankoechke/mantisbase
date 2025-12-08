@@ -1,7 +1,3 @@
-//
-// Created by codeart on 12/11/2025.
-//
-
 #ifndef MANTISBASE_MIDDLEWARES_H
 #define MANTISBASE_MIDDLEWARES_H
 

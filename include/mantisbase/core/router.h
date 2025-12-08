@@ -42,7 +42,11 @@ namespace mantis {
         // ----------- HTTP METHODS ----------- //
         void Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
+        void Post(const std::string &path, const HandlerWithContentReaderFn &handler, const Middlewares &middlewares = {});
+
         void Post(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
+
+        void Patch(const std::string &path, const HandlerWithContentReaderFn &handler, const Middlewares &middlewares = {});
 
         void Patch(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
@@ -65,6 +69,8 @@ namespace mantis {
     private:
         void globalRouteHandler(const std::string &method, const std::string &path);
 
+        void globalRouteHandlerWithReader(const std::string &method, const std::string &path);
+
         void generateMiscEndpoints();
 
         static std::string getMimeType(const std::string &path);
@@ -86,12 +92,17 @@ namespace mantis {
 
         std::function<void(const httplib::Request &, httplib::Response &)> routingErrorHandler();
 
+        std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogin();
+        std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh();
+        std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogout();
+
 
         MantisBase& mApp;
         httplib::Server svr;
         std::unique_ptr<EntitySchema> m_entitySchema;
         RouteRegistry m_routeRegistry;
-        std::vector<MiddlewareFn> m_globalMiddlewares;
+        std::vector<MiddlewareFn> m_preRoutingMiddlewares;
+        std::vector<HandlerFn> m_postRoutingMiddlewares;
         std::vector<nlohmann::json> m_schemas;
         std::unordered_map<std::string, Entity> m_entityMap;
     };

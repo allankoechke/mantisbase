@@ -12,22 +12,28 @@ namespace mantis {
     class MantisBase;
     class MantisRequest;
     class MantisResponse;
+    class MantisContentReader;
     class Entity;
     class EntitySchema;
     class EntitySchemaField;
 
+    namespace fs = std::filesystem;
+
+    class KVStore;
+    class Database;
+    class LogsMgr;
+    class Router;
+    class Files;
+
     using json = nlohmann::json;
     using HandlerResponse = httplib::Server::HandlerResponse;
-
-    ///> Middleware shorthand for the content reader
-    using MantisContentReader = httplib::ContentReader;
 
     ///> Route Handler function shorthand
     using HandlerFn = std::function<void(MantisRequest&, MantisResponse&)>;
 
     ///> Route Handler function with content reader shorthand
     using HandlerWithContentReaderFn = std::function<void(MantisRequest&, MantisResponse&,
-                                                                 const MantisContentReader&)>;
+                                                                 MantisContentReader&)>;
 
     ///> Middleware shorthand for the function
     using MiddlewareFn = std::function<HandlerResponse(MantisRequest&, MantisResponse&)>;

@@ -206,7 +206,7 @@ namespace mantis {
                 }
 
                 try {
-                    auto admin_entity = entity("_admins");
+                    auto admin_entity = entity("mb_admins");
 
                     // Create new admin user
                     const auto admin_user = admin_entity.create({{"email", email}, {"password", password}});
@@ -227,7 +227,7 @@ namespace mantis {
                     quit(400, "");
                 }
 
-                auto admin_entity = entity("_admins");
+                auto admin_entity = entity("mb_admins");
                 auto resp = admin_entity.queryFromCols(identifier, {"id", "email"});
                 if (!resp.has_value()) {
                     logger::critical("Admin not found matching id/email on '{}'",

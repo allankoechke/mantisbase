@@ -51,7 +51,7 @@ namespace mantis {
         [[nodiscard]] AccessRule deleteRule() const;
 
         // --------------- DB CRUD OPS ------------------ //
-        [[nodiscard]] Record create(const json &Record, const json &opts = json::object()) const;
+        [[nodiscard]] Record create(const json &record, const json &opts = json::object()) const;
 
         [[nodiscard]] Records list(const json &opts = json::object()) const;
 
@@ -63,6 +63,8 @@ namespace mantis {
 
         // --------------- SCHEMA OPS ------------------ //
         [[nodiscard]] const json &schema() const;
+
+        [[nodiscard]] int countRecords() const;
 
         // --------------- UTILITY OPS ------------------ //
         [[nodiscard]] bool recordExists(const std::string &id) const;
@@ -77,13 +79,11 @@ namespace mantis {
 
         [[nodiscard]] HandlerFn getManyRouteHandler() const;
 
-        [[nodiscard]] HandlerFn postRouteHandler() const;
+        [[nodiscard]] HandlerWithContentReaderFn postRouteHandler() const;
 
-        [[nodiscard]] HandlerFn patchRouteHandler() const;
+        [[nodiscard]] HandlerWithContentReaderFn patchRouteHandler() const;
 
         [[nodiscard]] HandlerFn deleteRouteHandler() const;
-
-        [[nodiscard]] HandlerFn authRouteHandler() const;
 
         void createEntityRoutes() const;
 

@@ -4,6 +4,7 @@
 
 #include "../../../include/mantisbase/core/models/entity_schema_field.h"
 #include "../../../include/mantisbase/utils/utils.h"
+#include "mantisbase/core/exceptions.h"
 
 namespace mantis {
     EntitySchemaField::EntitySchemaField(std::string field_name, std::string field_type)
@@ -76,7 +77,7 @@ namespace mantis {
     std::string EntitySchemaField::name() const { return m_name; }
 
     EntitySchemaField &EntitySchemaField::setName(const std::string &name) {
-        if (trim(name).empty()) throw std::invalid_argument("Field name is required!");
+        if (trim(name).empty()) throw MantisException(400, "Field name is required!");
         m_name = trim(name);
         return *this;
     }
@@ -85,10 +86,10 @@ namespace mantis {
 
     EntitySchemaField &EntitySchemaField::setType(const std::string &type) {
         if (type.empty())
-            throw std::invalid_argument("Field type is required!");
+            throw MantisException(400, "Field type is required!");
 
         if (!isValidFieldType(type))
-            throw std::invalid_argument("Invalid field type `" + type + "`");
+            throw MantisException(400, "Invalid field type `" + type + "`");
 
         m_type = type;
         return *this;
@@ -153,7 +154,7 @@ namespace mantis {
         return *this;
     }
 
-    nlohmann::json EntitySchemaField::toJson() const {
+    nlohmann::json EntitySchemaField::toJSON() const {
         return {
             {"id", genFieldId(m_name)},
             {"name", m_name},
