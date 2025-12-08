@@ -94,7 +94,7 @@ namespace mantis
 // Macro to automatically insert logger with function name
 inline std::string getFile(const std::string& path) {
     const std::filesystem::path p = path;
-    return p.filename();
+    return p.filename().string();
 }
 
 #define MANTIS_FUNC() std::format("{} - {}()", getFile(__FILE__), __FUNCTION__);

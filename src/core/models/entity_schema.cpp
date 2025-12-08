@@ -481,7 +481,7 @@ namespace mantis {
             return "Entity schema name is empty!";
 
         if (!(table_schema.type() == "base" || table_schema.type() == "view" || table_schema.type() == "auth")) {
-            return "Entity schema type is invalid!";
+            return "Expected entity type to be either `base`, `auth` or `view`!";
         }
 
         if (table_schema.type() == "view") {

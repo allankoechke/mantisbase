@@ -149,7 +149,6 @@ namespace mantis {
                     record.erase("password");
                 }
                 res.sendJSON(201, record);
-                return;
             } catch (const MantisException &e) {
                 reader.undoWrittenFiles(entity_name);
                 res.sendJSON(e.code(), {
@@ -178,35 +177,58 @@ namespace mantis {
         logger::trace("Creating PATCH /api/v1/entities/{}/:id", entity_name);
 
         HandlerWithContentReaderFn handler = [entity_name](MantisRequest &req, MantisResponse &res,
-                                                           const MantisContentReader &reader) {
-            // Get entity object for given name
-            const auto entity = MantisBase::instance().entity(entity_name);
-            const auto entity_id = trim(req.getPathParamValue("id"));
-            if (entity_id.empty())
-                throw MantisException(400, "Entity `id` is required!");
+                                                           MantisContentReader &reader) {
+            try {
+                // Get entity object for given name
+                const auto entity = MantisBase::instance().entity(entity_name);
 
-            const auto &[body, err] = req.getBodyAsJson();
-            if (!err.empty()) {
+                const auto entity_id = trim(req.getPathParamValue("id"));
+                if (entity_id.empty())
+                    throw MantisException(400, "Entity `id` is required!");
+
+                // Parse form data to JSON body and files metadata
+                reader.parseFormDataToEntity(entity);
+
+                // Validate request body
+                if (const auto &val_err = Validators::validateUpdateRequestBody(entity, reader.jsonBody());
+                    val_err.has_value()) {
+                    res.sendJSON(400, {
+                                     {"data", json::object()},
+                                     {"error", val_err.value()},
+                                     {"status", 400}
+                                 });
+                    return;
+                }
+
+                // Write files to disk first
+                reader.writeFiles(entity_name);
+
+                // Update records ...
+                auto record = entity.update(entity_id, reader.jsonBody());
+
+                // For auth types, remove the password field from the response
+                if (entity.type() == "auth" && record.contains("password")) {
+                    record.erase("password");
+                }
+
+                res.sendJSON(200, record);
+            } catch (const MantisException &e) {
+                reader.undoWrittenFiles(entity_name);
+                res.sendJSON(e.code(), {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", e.code()}
+                             }
+                );
+            } catch (const std::exception &e) {
+                reader.undoWrittenFiles(entity_name);
                 res.sendJSON(500, {
                                  {"data", json::object()},
-                                 {"error", err},
-                                 {"status", 400}
-                             });
+                                 {"error", e.what()},
+                                 {"status", 500}
+                             }
+                );
             }
-
-            if (const auto &val_err = Validators::validateRequestBody(entity, body);
-                val_err.has_value()) {
-                res.sendJSON(400, {
-                                 {"data", json::object()},
-                                 {"error", val_err.value()},
-                                 {"status", 400}
-                             });
-                return;
-            }
-
-            const auto record = entity.update(entity_id, body);
-            res.sendJSON(200, record);
-            return;
         };
 
         return handler;
@@ -250,6 +272,8 @@ namespace mantis {
 
     void Entity::createEntityRoutes() const {
         auto &router = MantisBase::instance().router();
+
+        std::cout << std::endl;
 
         // List Entities
         router.Get("/api/v1/entities/" + name(), getManyRouteHandler(),
