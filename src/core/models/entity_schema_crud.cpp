@@ -68,7 +68,7 @@ namespace mantis {
                 throw MantisException(400, err.value());
 
             const auto id = new_table.id();
-            const auto schema = new_table.toJson();
+            const auto schema = new_table.toJSON();
 
             // Check if item exits already in db
             if (tableExists(schema.at("name").get<std::string>())) {
@@ -109,8 +109,8 @@ namespace mantis {
         }
     }
 
-    nlohmann::json EntitySchema::updateTable(const std::string &table_id, const nlohmann::json &new_data) {
-        if (new_data.empty())
+    nlohmann::json EntitySchema::updateTable(const std::string &table_id, const nlohmann::json &new_schema) {
+        if (new_schema.empty())
             throw MantisException(400, "Schema body is empty!");
 
         const auto sql = MantisBase::instance().db().session();
@@ -118,112 +118,153 @@ namespace mantis {
 
         try {
             // Get saved database record
-            nlohmann::json schema; // Original Entity Schema
+            nlohmann::json old_schema; // Original Entity Schema
             std::tm created_tm; // Created timestamp
             *sql << "SELECT schema, created FROM mb_tables WHERE id = :id",
-                    soci::use(table_id), soci::into(schema), soci::into(created_tm);
+                    soci::use(table_id), soci::into(old_schema), soci::into(created_tm);
 
             if (!sql->got_data()) {
-                throw MantisException(404, "Entity with id `" + table_id + "` was not found!");
+                throw MantisException(404, "Entity resource for given name/id was not found!");
             }
 
-            EntitySchema old_entity = EntitySchema::fromSchema(schema); // Old table data
+            EntitySchema old_entity = EntitySchema::fromSchema(old_schema); // Old table data
             EntitySchema new_entity{old_entity}; // New table data
-            new_entity.updateWith(new_data);
+            assert(old_entity == new_entity); // These two objects should be same
+            new_entity.updateWith(new_schema);
 
-
-            if (new_entity.type() == "view")
-                throw MantisException(500, "View types do not implement `/update` route");
-
-            std::cout << "3\n";
             // Validate new object
             if (auto err = new_entity.validate(); err.has_value())
                 throw MantisException(400, err.value());
 
-
-            std::cout << "4\n";
             // --------- Handle Field(s) Changes ---------------- //
-            // Drop deleted columns
-            if (new_data.contains("deleted_fields")) {
-                for (const auto &field_name: new_data["deleted_fields"]) {
-                    // If the field is valid, generate drop colum statement and execute!
-                    *sql << sql->get_backend()->drop_column(old_entity.name(), trim(field_name));
+            if (new_schema.contains("fields")) {
+                for (const auto &field: new_schema["fields"]) {
+                    if (field.contains("op") && field["op"].is_string() && !field["op"].empty()) {
+                        auto id = field.contains("id") ? field["id"].get<std::string>() : "";
+                        logger::trace("Field id: {}", id);
+
+                        if (id.empty()) {
+                            throw MantisException(400, "Expected an `id` in field for `op` operations.");
+                        }
+
+                        if (!old_entity.hasFieldById(id)) {
+                            throw MantisException(400, "No field found with id `" + id + "` for `op` operations.");
+                        }
+
+                        const auto op = field["op"].get<std::string>();
+                        if (op == "delete" || op == "remove") {
+                            auto &f = old_entity.fieldById(id);
+
+                            // If the field is valid, generate drop colum statement and execute!
+                            *sql << sql->get_backend()->drop_column(old_entity.name(), trim(f.name()));
+                            continue;
+                        }
+
+                        throw MantisException(400, "Field `op` expected `remove` or `delete` value only.");
+                    }
                 }
             }
 
-            std::cout << "5\n";
+            // Get db type
             const auto db_type = MantisBase::instance().dbType();
 
-            for (const auto &e_field: new_entity.fields()) {
+            const auto new_schema_fields = new_schema.contains("fields") && new_schema["fields"].is_array()
+                                               ? new_schema["fields"]
+                                               : json::array();
+
+            for (const auto &entity_field_schema: new_schema_fields) {
                 // Check if the field exists in the database already, then:
                 //  > If it exists: Update its particulars
                 //  > Else, create the field
-                if (old_entity.hasFieldById(e_field.id())) {
-                    // Update existing item field data ...
-                    auto &old_field = old_entity.fieldById(e_field.id());
 
-                    // Name changed?
-                    if (new_entity.id() != EntitySchemaField::genFieldId(new_entity.name())) {
+                if (entity_field_schema.contains("id")
+                    && old_entity.hasFieldById(entity_field_schema["id"].get<std::string>())) {
+                    // Extract `id` from the schema JSON
+                    auto e_id = entity_field_schema["id"].get<std::string>();
+
+                    // Extract old field by `id`
+                    auto &old_field = old_entity.fieldById(e_id);
+
+                    // Create and update a copy
+                    auto new_field = EntitySchemaField(old_field).updateWith(entity_field_schema);
+
+                    // Check if field name was changed
+                    if (old_field.name() != new_field.name()) {
                         auto entity_name = old_entity.name();
                         auto old_name = old_field.name();
-                        auto new_name = new_entity.name();
+                        auto new_name = new_field.name();
                         *sql << "ALTER TABLE :table_name RENAME COLUMN :old_field_name TO :new_field_name",
                                 soci::use(entity_name), soci::use(old_name), soci::use(new_name);
                     }
 
-                    if (old_field.required() != e_field.required()) {
+                    // Check if `required` flag was updated
+                    if (old_field.required() != new_field.required()) {
+                        // ------------- SQLite -----------------
+                        // SQLite requires recreating the table afresh to get the changes
                         if (db_type == "sqlite3")
                             throw MantisException(
                                 500, "Adding/dropping required constraints not supported on SQLite databases!");
 
-                        if (db_type == "postgresql") {
-                            auto table = old_entity.name();
-                            auto column = e_field.name();
+                        // Get the state
+                        bool is_required = new_field.required();
 
-                            if (e_field.required()) {
+                        // ------------- POSTGRESQL -----------------
+                        if (db_type == "postgresql") {
+                            const auto &entity_name = old_entity.name();
+                            const auto &field_name = new_field.name();
+
+                            if (is_required) {
                                 *sql << "ALTER TABLE :table ALTER COLUMN :column SET NOT NULL;",
-                                        soci::use(table), soci::use(column);
+                                        soci::use(entity_name), soci::use(field_name);
                             } else {
                                 *sql << "ALTER TABLE :table ALTER COLUMN :column DROP NOT NULL;",
-                                        soci::use(table), soci::use(column);
+                                        soci::use(entity_name), soci::use(field_name);
                             }
-                        } else {
-                            // MYSQL
-                            auto table = old_entity.name();
-                            auto column = e_field.name();
-                            auto d_type = sql->get_backend()->create_column_type(e_field.toSociType(), 0, 0);
+                        }
 
-                            if (e_field.required()) {
+                        // ------------- MYSQL -----------------
+                        else if (db_type == "mysql") {
+                            auto table = old_entity.name();
+                            auto column = new_field.name();
+                            auto d_type = sql->get_backend()->create_column_type(new_field.toSociType(), 0, 0);
+
+                            if (new_field.required()) {
                                 *sql << "ALTER TABLE :table MODIFY :column :datatype NOT NULL;",
                                         soci::use(table), soci::use(column), soci::use(d_type);
                             } else {
                                 *sql << "ALTER TABLE :table MODIFY :column :datatype NULL;",
                                         soci::use(table), soci::use(column), soci::use(column);
                             }
+                        } else {
+                            throw MantisException(500, "Database type not supported.");
                         }
                     }
 
-                    if (old_field.isPrimaryKey() != e_field.isPrimaryKey()) {
+                    if (old_field.isPrimaryKey() != new_field.isPrimaryKey()) {
+                        // ------------- SQLite ----------------- //
                         if (db_type == "sqlite3")
                             throw MantisException(
                                 500, "Adding/dropping primary key constraints not supported on SQLite databases!");
 
+                        // ------------- POSTGRESQL ----------------- //
                         if (db_type == "postgresql") {
                             auto table = old_entity.name();
-                            auto column = e_field.name();
+                            auto column = new_field.name();
 
-                            if (e_field.required()) {
+                            if (new_field.required()) {
                                 *sql << "ALTER TABLE :table ADD CONSTRAINT pk_:column PRIMARY KEY (:column);",
                                         soci::use(table), soci::use(column), soci::use(column);
                             } else {
                                 *sql << "ALTER TABLE :table DROP CONSTRAINT pk_:column;",
                                         soci::use(table), soci::use(column);
                             }
-                        } else {
-                            // MYSQL
+                        }
+
+                        // ------------- MYSQL ----------------- //
+                        else {
                             auto table = old_entity.name();
-                            auto column = e_field.name();
-                            if (e_field.required()) {
+                            auto column = new_field.name();
+                            if (new_field.required()) {
                                 *sql << "ALTER TABLE :table ADD PRIMARY KEY (:column);",
                                         soci::use(table), soci::use(column);
                             } else {
@@ -233,109 +274,125 @@ namespace mantis {
                         }
                     }
 
-                    if (old_field.isUnique() != e_field.isUnique()) {
+                    if (old_field.isUnique() != new_field.isUnique()) {
+                        // ------------- SQLite ----------------- //
                         if (db_type == "sqlite3")
                             throw MantisException(
                                 500, "Adding/dropping unique constraints not supported on SQLite databases!");
+
+                        // ------------- POSTGRESQL ----------------- //
                         if (db_type == "postgresql") {
-                            if (e_field.isUnique()) {
+                            if (new_field.isUnique()) {
                                 auto table = old_entity.name();
-                                auto column = e_field.name();
+                                auto column = new_field.name();
                                 *sql << "ALTER TABLE :table DROP CONSTRAINT uniq_:column;",
                                         soci::use(table), soci::use(column);
                             } else {
                                 auto table = old_entity.name();
-                                auto column = e_field.name();
+                                auto column = new_field.name();
                                 *sql << "ALTER TABLE :table ADD CONSTRAINT uniq_:column UNIQUE (:column);",
                                         soci::use(table), soci::use(column), soci::use(column);
                             }
-                        } else {
-                            // MYSQL
-                            if (e_field.isUnique()) {
+                        }
+
+                        // ------------- MYSQL ----------------- //
+                        else {
+                            if (new_field.isUnique()) {
                                 auto table = old_entity.name();
-                                auto column = e_field.name();
+                                auto column = new_field.name();
                                 *sql << "ALTER TABLE :table DROP INDEX uniq_:column;",
                                         soci::use(table), soci::use(column);
                             } else {
                                 auto table = old_entity.name();
-                                auto column = e_field.name();
+                                auto column = new_field.name();
                                 *sql << "ALTER TABLE :table ADD CONSTRAINT uniq_:column UNIQUE (:column);",
                                         soci::use(table), soci::use(column), soci::use(column);
                             }
                         }
                     }
 
-                    if (old_field.constraints().at("default_value") != e_field.constraints().at("default_value")) {
+                    if (old_field.constraint("default_value") != new_field.constraint("default_value")) {
+                        // ------------- SQLite ----------------- //
                         if (db_type == "sqlite3")
                             throw MantisException(
                                 500, "Changing default value for a column not supported in SQLite database.");
+
+                        // ------------- POSTGRESQL ----------------- //
                         if (db_type == "postgresql") {
                             // If value is empty, reset default value
-                            if (e_field.constraints()["default_value"].is_null()) {
+                            if (new_field.constraint("default_value").is_null()) {
                                 auto table = old_entity.name();
-                                auto column = e_field.name();
+                                auto column = new_field.name();
                                 *sql << "ALTER TABLE :table ALTER COLUMN :column DROP DEFAULT;",
                                         soci::use(table), soci::use(column);
                             } else {
                                 auto table = old_entity.name();
-                                auto column = e_field.name();
+                                auto column = new_field.name();
                                 auto def_val =
-                                        toDefaultSqlValue(e_field.type(), e_field.constraints()["default_value"]);
+                                        toDefaultSqlValue(new_field.type(), new_field.constraint("default_value"));
                                 *sql << "ALTER TABLE :table ALTER COLUMN :column SET DEFAULT :default;",
                                         soci::use(table), soci::use(column), soci::use(def_val);
                             }
                         }
+
+                        // ------------- MYSQL ----------------- //
                         if (db_type == "mysql") {
                             // If value is empty, reset default value
-                            if (e_field.constraints()["default_value"].is_null()) {
+                            if (new_field.constraint("default_value").is_null()) {
                                 auto table = old_entity.name();
-                                auto column = e_field.name();
+                                auto column = new_field.name();
                                 *sql << "ALTER TABLE :table ALTER :column DROP DEFAULT;",
                                         soci::use(table), soci::use(column);
                             } else {
                                 auto table = old_entity.name();
-                                auto column = e_field.name();
+                                auto column = new_field.name();
                                 auto def_val =
-                                        toDefaultSqlValue(e_field.type(), e_field.constraints()["default_value"]);
+                                        toDefaultSqlValue(new_field.type(), new_field.constraint("default_value"));
                                 *sql << "ALTER TABLE :table ALTER :column SET DEFAULT :default;",
                                         soci::use(table), soci::use(column), soci::use(def_val);
                             }
                         }
                     }
-                } else {
-                    // Create item
-                    std::string query = sql->get_backend()->add_column(old_entity.name(), e_field.name(),
-                                                                       e_field.toSociType(), 0, 0);
+                }
+                // Field does not exist in the entity yet, create one.
+                else {
+                    EntitySchemaField new_field(entity_field_schema);
 
-                    if (e_field.isPrimaryKey()) query += " PRIMARY KEY";
-                    if (e_field.required()) query += " NOT NULL";
-                    if (e_field.isUnique()) query += " UNIQUE";
-                    if (e_field.constraints().contains("default_value") && !e_field.constraints()["default_value"].
-                        is_null()) {
+                    // Create item
+                    std::string query = sql->get_backend()->add_column(old_entity.name(), new_field.name(),
+                                                                       new_field.toSociType(), 0, 0);
+
+                    if (new_field.isPrimaryKey()) query += " PRIMARY KEY";
+                    if (new_field.required()) query += " NOT NULL";
+                    if (new_field.isUnique()) query += " UNIQUE";
+                    if (auto def_val = new_field.constraint("default_value"); !def_val.is_null()) {
                         query += " DEFAULT ";
-                        query += toDefaultSqlValue(e_field.type(), e_field.constraints()["default_value"]);
+                        query += toDefaultSqlValue(new_field.type(), def_val);
                     }
                     *sql << query;
                 }
             }
 
-            std::cout << "6\n";
             // --------- Handle View Query Changes -------------- //
             // std::string m_viewSqlQuery;
-            // TODO ...
+            if (old_entity.viewQuery() != new_entity.viewQuery()) {
+                throw MantisException(500, "View query has not been implemented yet!");
+
+                // TODO
+                // - Update view query
+                // - Drop all queries and recreate them to match new fields
+            }
 
             // --------- Handle Type Changes -------------------- //
             if (old_entity.type() != new_entity.type()) {
                 throw MantisException(500, "Changing entity type is currently not supported.");
             }
 
-            std::cout << "7\n";
             // --------- Handle Name Changes -------------------- //
             if (old_entity.name() != new_entity.name()) {
                 *sql << "ALTER TABLE " + old_entity.name() + " RENAME TO " + new_entity.name();
             }
 
-            std::cout << "8\n";
             // Get updated timestamp
             std::time_t t = time(nullptr);
             std::tm updated_tm = *std::localtime(&t);
@@ -346,13 +403,13 @@ namespace mantis {
 
             std::string old_id = old_entity.id();
             std::string new_id = new_entity.id();
-            json new_schema = new_entity.toJson();
+            json new_schema = new_entity.toJSON();
             *sql << query, soci::use(new_id), soci::use(new_schema),
                     soci::use(updated_tm), soci::use(old_id);
 
-            std::cout << "9\n";
             // Write out any pending changes ...
             tr.commit();
+
 
             json record;
             record["id"] = new_entity.id();
@@ -360,18 +417,20 @@ namespace mantis {
             record["created"] = tmToStr(created_tm);
             record["updated"] = tmToStr(updated_tm);
 
-            std::cout << "10\n";
-            // Update cache & subsequently the routes ...
-            MantisBase::instance().router().updateSchemaCache(old_entity.name(), new_schema);
+            // Wrap in new try catch block to suppress any errors here to avoid rollbacks
+            try {
+                // Update cache & subsequently the routes ...
+                MantisBase::instance().router().updateSchemaCache(old_entity.name(), new_schema);
 
-            std::cout << "11\n";
-            // Only trigger routes to be reloaded if table name changes.
-            if (old_entity.name() != new_entity.name()) {
-                // Update file table folder name
-                Files::renameDir(old_entity.name(), new_entity.name());
+                // Only trigger routes to be reloaded if table name changes.
+                if (old_entity.name() != new_entity.name()) {
+                    // Update file table folder name
+                    Files::renameDir(old_entity.name(), new_entity.name());
+                }
+            } catch (std::exception &e) {
+                logger::critical("Error updating entity schema\n\t- {}", e.what());
             }
 
-            std::cout << "12\n";
             return record;
         } catch (const MantisException &e) {
             tr.rollback();

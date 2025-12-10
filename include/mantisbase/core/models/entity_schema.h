@@ -25,6 +25,9 @@ namespace mantis {
 
         ~EntitySchema();
 
+        // For bool operations
+        bool operator==(const EntitySchema &other) const;
+
         static EntitySchema fromSchema(const json &entity_schema);
         static EntitySchema fromEntity(const Entity &entity);
         [[nodiscard]] Entity toEntity() const;
@@ -89,13 +92,13 @@ namespace mantis {
         void updateWith(const nlohmann::json &new_data);
 
         // ----------- SCHEMA CONVERSION ----------- //
-        [[nodiscard]] json toJson() const;
+        [[nodiscard]] json toJSON() const;
 
         [[nodiscard]] std::string toDDL() const;
 
         static std::string toDefaultSqlValue(const std::string &type, const nlohmann::json &v);
 
-        std::string dump() const;
+        [[nodiscard]] std::string dump() const;
 
         // ----------- SCHEMA CRUD ----------- //
         static nlohmann::json listTables(const nlohmann::json &opts = nlohmann::json::object());
@@ -104,7 +107,7 @@ namespace mantis {
 
         static nlohmann::json createTable(const EntitySchema &new_table);
 
-        static nlohmann::json updateTable(const std::string &table_id, const nlohmann::json &new_data);
+        static nlohmann::json updateTable(const std::string &table_id, const nlohmann::json &new_schema);
 
         static void dropTable(const EntitySchema &original_table);
 

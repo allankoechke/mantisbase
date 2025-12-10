@@ -9,26 +9,31 @@
 #include <string>
 
 #include "nlohmann/json.hpp"
+#include "nlohmann/json.hpp"
 #include "soci/soci-backend.h"
 
 namespace mantis {
     class EntitySchemaField {
     public:
-        static const std::vector<std::string>& defaultBaseFields();
-        static const std::vector<std::string>& defaultAuthFields();
-        static const std::vector<std::string>& defaultEntityFieldTypes();
-
         // Convenience constructor
         EntitySchemaField(std::string field_name, std::string field_type);
 
         explicit EntitySchemaField(const nlohmann::json &field_schema);
 
-        void updateWith(const nlohmann::json &field_schema);
+        EntitySchemaField(const EntitySchemaField &other);
+        bool operator==(const EntitySchemaField &other) const;
+
+        // ----------------- STATIC GLOBAL METHODS ---------------------- //
+
+        static const std::vector<std::string> &defaultBaseFields();
+
+        static const std::vector<std::string> &defaultAuthFields();
+
+        static const std::vector<std::string> &defaultEntityFieldTypes();
 
         // ----------------- SCHEMA FIELD METHODS ---------------------- //
-        [[nodiscard]] std::string id() const;
 
-        EntitySchemaField &setId(const std::string &id);
+        [[nodiscard]] std::string id() const;
 
         [[nodiscard]] std::string name() const;
 
@@ -56,11 +61,13 @@ namespace mantis {
 
         [[nodiscard]] nlohmann::json constraints() const;
 
-        [[nodiscard]] nlohmann::json constraints(const std::string& key) const;
+        [[nodiscard]] nlohmann::json constraint(const std::string &key) const;
 
         EntitySchemaField &setConstraints(const nlohmann::json &opts);
 
         // ----------------- SCHEMA FIELD OPS ---------------------- //
+        EntitySchemaField &updateWith(const nlohmann::json &field_schema);
+
         [[nodiscard]] nlohmann::json toJSON() const;
 
         [[nodiscard]] soci::db_type toSociType() const;
@@ -71,17 +78,22 @@ namespace mantis {
 
         static bool isValidFieldType(const std::string &type);
 
-        static std::string genFieldId(const std::string& id);
+        static std::string genFieldId(const std::string &id);
+
+        static const nlohmann::json &defaultConstraints() {
+            static const nlohmann::json default_constraints = {
+                {"min_value", nullptr},
+                {"max_value", nullptr},
+                {"validator", nullptr},
+                {"default_value", nullptr}
+            };
+            return default_constraints;
+        }
 
     private:
         std::string m_id, m_name, m_type;
         bool m_required = false, m_primaryKey = false, m_isSystem = false, m_isUnique = false;
-        nlohmann::json m_constraints = {
-            {"min_value", nullptr},
-            {"max_value", nullptr},
-            {"validator", nullptr},
-            {"default_value", nullptr}
-        };
+        nlohmann::json m_constraints{};
     };
 } // mantis
 
