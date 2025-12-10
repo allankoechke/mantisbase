@@ -81,7 +81,7 @@ namespace mantis {
         EntitySchema service_schema{"mb_service_acc", "base"};
         service_schema.setHasApi(false);
         service_schema.setSystem(true);
-        auto service_entity = admin_schema.toEntity();
+        auto service_entity = service_schema.toEntity();
         m_entityMap.emplace(service_entity.name(), std::move(service_entity));
 
         // Misc Endpoints [admin, auth, etc]
@@ -297,7 +297,7 @@ namespace mantis {
         }
     }
 
-     void Router::globalRouteHandlerWithReader(const std::string &method, const std::string &path) {
+    void Router::globalRouteHandlerWithReader(const std::string &method, const std::string &path) {
         const std::function handlerFuncWithContentReader = [this, method, path](
             const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &cr) {
             MantisRequest ma_req{req};
@@ -354,6 +354,7 @@ namespace mantis {
         router.Post("/api/v1/auth/login", handleAuthLogin());
         router.Post("/api/v1/auth/refresh", handleAuthRefresh());
         router.Post("/api/v1/auth/logout", handleAuthLogout());
+        router.Post("/api/v1/auth/setup/admin", handleSetupAdmin());
 
         // Add entity schema routes
         // GET|POST|PATCH|DELETE `/api/v1/schemas*`

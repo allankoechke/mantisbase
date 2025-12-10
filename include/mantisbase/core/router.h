@@ -96,6 +96,8 @@ namespace mantis {
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh();
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogout();
 
+        std::function<void(MantisRequest &, MantisResponse &)> handleSetupAdmin();
+
 
         MantisBase& mApp;
         httplib::Server svr;

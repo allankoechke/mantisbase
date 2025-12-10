@@ -44,7 +44,7 @@ namespace mantis {
                 const json resp = Auth::verifyToken(token);
                 req.set("verification", resp);
 
-                // Update context data and exit if not verified
+                // Update context data and exit from middleware if not verified
                 if (!resp.at("verified").get<bool>()) {
                     req.set("auth", auth); // Update the `auth` data
                     return HandlerResponse::Unhandled;
@@ -65,7 +65,7 @@ namespace mantis {
                 try {
                     const auto user_entity = MantisBase::instance().entity(user_table);
                     if (auto user = user_entity.read(user_id); user.has_value()) {
-                        auth["user"] = user;
+                        auth["user"] = user.value();
                     }
                 } catch (...) {
                 } // Ignore errors for now

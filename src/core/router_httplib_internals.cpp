@@ -222,6 +222,109 @@ namespace mantis {
         };
     }
 
+    std::function<void(MantisRequest &, MantisResponse &)> Router::handleSetupAdmin() {
+        return [](MantisRequest &req, const MantisResponse &res) {
+            try {
+                auto auth = req.getOr("auth", json::object());
+                // Require at least one valid auth on any table
+                auto verification = req.getOr<json>("verification", json::object());
+                if (verification.empty()) {
+                    // Send auth error
+                    res.sendJSON(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Auth required to access this resource!"}
+                                 });
+                    return;
+                }
+
+                const bool verified = verification.contains("verified") &&
+                                      verification["verified"].is_boolean() &&
+                                      verification["verified"].get<bool>();
+
+                if (!verified) {
+                    // Send auth error
+                    res.sendJSON(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", verification["error"]}
+                                 });
+                    return;
+                }
+
+                // Token must be signed to this entity to proceed
+                if (auth["entity"].get<std::string>() != "mb_service_acc") {
+                    // Send auth error
+                    res.sendJSON(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Auth user does not have access to this route."}
+                                 });
+                    return;
+                }
+
+                if (auth["user"].is_null()) {
+                    // Send auth error
+                    res.sendJSON(404, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Auth user does not exist."}
+                                 });
+                    return;
+                }
+
+                // Check token table and user ...
+                const auto entity = MantisBase::instance().entity("mb_service_acc");
+                const auto admin_entity = MantisBase::instance().entity("mb_admins");
+
+                const auto &[body, err] = req.getBodyAsJson();
+
+                if (!err.empty()) {
+                    res.sendJSON(400, {
+                                     {"data", json::object()},
+                                     {"status", 400},
+                                     {"error", err}
+                                 });
+                    return;
+                }
+
+                // Validate request body
+                if (const auto v_err = Validators::validateRequestBody(admin_entity.schema(), body);
+                    v_err.has_value()) {
+                    logger::critical("Error validating request body\n\t— {}", v_err.value());
+
+                    res.sendJSON(400, {
+                                     {"data", json::object()},
+                                     {"status", 400},
+                                     {"error", v_err.value()}
+                                 });
+                    return;
+                }
+
+                // Create new admin user
+                const auto admin_user = admin_entity.create(body);
+                res.sendJSON(201, admin_user);
+
+                // At the end, remove auth account
+                entity.remove(auth["id"].get<std::string>());
+            } catch (const MantisException &e) {
+                res.sendJSON(e.code(), {
+                                 {"status", e.code()},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             }
+                );
+            } catch (const std::exception &e) {
+                res.sendJSON(500, {
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             }
+                );
+            }
+        };
+    }
+
     std::function<void(const httplib::Request &, httplib::Response &)> Router::optionsHandler() {
         return [](const httplib::Request &, httplib::Response &res) {
             // Headers are already set by post_routing_handler
