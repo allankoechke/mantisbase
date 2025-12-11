@@ -115,7 +115,7 @@ namespace mantis {
                 logger.set_level(spdlog::level::trace);
 
                 logger.info(
-                    "Starting Servers: \n\t├── API Endpoints: http://{}/api/v1/ \n\t└── Admin Dashboard: http://{}/admin\n",
+                    "Starting Servers: \n\t├── API Endpoints: http://{}/api/v1/ \n\t└── Admin Dashboard: http://{}/mb-admin\n",
                     endpoint, endpoint);
 
                 MantisBase::instance().openBrowserOnStart();
@@ -368,7 +368,7 @@ namespace mantis {
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::handleAdminDashboardRoute() const {
-        return [this](const MantisRequest &req, MantisResponse &res) {
+        return [](const MantisRequest &req, MantisResponse &res) {
             try {
                 const auto fs = cmrc::mantis::get_filesystem();
                 std::string path = req.matches()[1];

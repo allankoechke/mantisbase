@@ -276,7 +276,7 @@ namespace mantis {
             // Create token and pass it in
             const auto token = Auth::createToken(claims, 30 * 60); // Token valid for 30mins
 
-            const std::string url = std::format("http://localhost:{}/panel?token={}", m_port, token);
+            const std::string url = std::format("http://localhost:{}/mb-admin?token={}", m_port, token);
             logger::info(
                 "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins add <email> <password>\n",
                 url);

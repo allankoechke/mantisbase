@@ -8,12 +8,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
-
-# Mantis Admin Dashboard Fetch Flags
-# Mantis Admin dashboard version to embed
-set(MANTIS_ADMIN_VERSION v0.1.7)
-set(MANTIS_ADMIN_HASH 184fe54ab4d003de49cc75565258fafe098486b8a177fb8f9405398015e16081)
-
 option(MANTIS_SCRIPTING_ENABLED "Enable JS Scripting" OFF)
 
 # Flag for building deps as shared/static libs
