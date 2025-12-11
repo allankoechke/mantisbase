@@ -25,3 +25,7 @@
 [submodule "3rdParty/wolfssl"]
 	path = 3rdParty/wolfssl
 	url = https://github.com/wolfSSL/wolfssl.git
+[submodule "3rdParty/mb-admin"]
+	path = 3rdParty/mb-admin
+	url = git@github.com:allankoechke/mantisbase-admin.git
+	branch = mb-admin

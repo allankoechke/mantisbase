@@ -119,8 +119,9 @@ include(cmake/add-wolfssl.cmake)
 # Add bcrypt to the project
 include(cmake/add-bcrypt.cmake)
 
-# Add CMRC for bundling assets
-include(cmake/add-cmrc.cmake)
+# Add admin assets using cmrc
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/cmrc)
+add_subdirectory(3rdParty/mb-admin)
 
 # Include address sanitizer for Linux debug/releaseWithDebug builds
 option(MANTIS_BUILD_WITH_ASAN "Enable ASAN build for UNIX" ON)

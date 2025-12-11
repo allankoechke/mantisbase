@@ -375,16 +375,16 @@ namespace mantis {
 
                 // Normalize the path
                 if (path.empty() || path == "/") {
-                    path = "/qrc/index.html";
+                    path = "/public/index.html";
                 } else {
-                    path = std::format("/qrc{}", path);
+                    path = std::format("/public{}", path);
                 }
 
                 if (!fs.exists(path)) {
                     logger::trace("{} path does not exists", path);
 
                     // fallback to index.html for React routes
-                    path = "/qrc/index.html";
+                    path = "/public/index.html";
                 }
 
                 try {
@@ -393,7 +393,7 @@ namespace mantis {
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(200);
                 } catch (const std::exception &e) {
-                    const auto file = fs.open("/qrc/404.html");
+                    const auto file = fs.open("/public/404.html");
                     const auto mime = Router::getMimeType("404.html");
 
                     res.setContent(file.begin(), file.size(), mime);
