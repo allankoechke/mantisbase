@@ -126,6 +126,7 @@ namespace mantis {
                 const auto entity = MantisBase::instance().entity(entity_name);
 
                 // Parse form data to JSON body and files metadata
+                // Ignored for non multipart-form data
                 reader.parseFormDataToEntity(entity);
 
                 if (const auto &val_err = Validators::validateRequestBody(entity, reader.jsonBody());
@@ -139,6 +140,7 @@ namespace mantis {
                 }
 
                 // Write files to disk ...
+                // Ignored for non multipart-form data
                 reader.writeFiles(entity_name);
 
                 // Create the record
@@ -150,7 +152,9 @@ namespace mantis {
                 }
                 res.sendJSON(201, record);
             } catch (const MantisException &e) {
+                // Ignored for non multipart-form data
                 reader.undoWrittenFiles(entity_name);
+
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -158,7 +162,9 @@ namespace mantis {
                              }
                 );
             } catch (const std::exception &e) {
+                // Ignored for non multipart-form data
                 reader.undoWrittenFiles(entity_name);
+
                 res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},

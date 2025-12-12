@@ -212,7 +212,6 @@ namespace mantis {
         router.Post("/api/v1/schemas", postRouteHandler(), {requireAdminAuth()}); // Create Entity
         router.Get("/api/v1/schemas/:schema_name_or_id", getOneRouteHandler(), {requireAdminAuth()});
         router.Patch("/api/v1/schemas/:schema_name_or_id", patchRouteHandler(), {requireAdminAuth()}); // Update Entity
-        router.Delete("/api/v1/schemas/:schema_name_or_id", deleteRouteHandler(), {requireAdminAuth()});
-        // Delete Entity
+        router.Delete("/api/v1/schemas/:schema_name_or_id", deleteRouteHandler(), {requireAdminAuth()}); // Delete Entity
     };
 }
