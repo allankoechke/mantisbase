@@ -37,6 +37,13 @@ namespace mantis {
                                  }
                     );
                 }
+            } catch (const MantisException &e) {
+                res.sendJSON(e.code(), {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", e.code()}
+                             }
+                );
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
                                  {"data", json::object()},
@@ -101,6 +108,13 @@ namespace mantis {
                                  {"status", 200}
                              }
                 );
+            } catch (const MantisException &e) {
+                res.sendJSON(e.code(), {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", e.code()}
+                             }
+                );
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
                                  {"data", json::object()},
@@ -150,7 +164,14 @@ namespace mantis {
                 if (entity.type() == "auth" && record.contains("password")) {
                     record.erase("password");
                 }
-                res.sendJSON(201, record);
+
+                // Send record back to user
+                res.sendJSON(201, {
+                                 {"data", record},
+                                 {"error", ""},
+                                 {"status", 201}
+                             }
+                );
             } catch (const MantisException &e) {
                 // Ignored for non multipart-form data
                 reader.undoWrittenFiles(entity_name);
@@ -217,7 +238,13 @@ namespace mantis {
                     record.erase("password");
                 }
 
-                res.sendJSON(200, record);
+                // Send record back to user
+                res.sendJSON(200, {
+                                 {"data", record},
+                                 {"error", ""},
+                                 {"status", 200}
+                             }
+                );
             } catch (const MantisException &e) {
                 reader.undoWrittenFiles(entity_name);
                 res.sendJSON(e.code(), {
