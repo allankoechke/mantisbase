@@ -19,8 +19,6 @@
 #include "../utils/utils.h"
 #include "logger.h"
 
-// #define __file__ "core/tables/database.h"
-
 namespace mantis {
     using json = nlohmann::json;
 

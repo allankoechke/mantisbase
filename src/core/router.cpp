@@ -73,6 +73,7 @@ namespace mantis {
         EntitySchema admin_schema{"mb_admins", "auth"};
         admin_schema.removeField("name");
         admin_schema.setSystem(true);
+        std::cout << admin_schema.toJSON().dump(4);
         auto admin_entity = admin_schema.toEntity();
         admin_entity.createEntityRoutes();
         m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
@@ -373,6 +374,8 @@ namespace mantis {
                 const auto fs = cmrc::mantis::get_filesystem();
                 std::string path = req.matches()[1];
 
+                // logger::trace("GET MantisBase Admin file\n\t- {}", path);
+
                 // Normalize the path
                 if (path.empty() || path == "/") {
                     path = "/public/index.html";
@@ -410,7 +413,6 @@ namespace mantis {
     std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
         logger::trace("Registering /api/files/:entity/:file GET endpoint ...");
         return [](const MantisRequest &req, MantisResponse &res) {
-            std::cout << "fileServingHandler()" << std::endl;
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");
 

@@ -244,4 +244,14 @@ namespace mantis {
     std::string EntitySchemaField::genFieldId(const std::string &id) {
         return "mbf_" + std::to_string(std::hash<std::string>{}(id));
     }
+
+    const nlohmann::json & EntitySchemaField::defaultConstraints() {
+        static const nlohmann::json default_constraints = {
+            {"min_value", nullptr},
+            {"max_value", nullptr},
+            {"validator", nullptr},
+            {"default_value", nullptr}
+        };
+        return default_constraints;
+    }
 } // mantis

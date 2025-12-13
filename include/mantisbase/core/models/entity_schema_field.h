@@ -80,15 +80,7 @@ namespace mantis {
 
         static std::string genFieldId(const std::string &id);
 
-        static const nlohmann::json &defaultConstraints() {
-            static const nlohmann::json default_constraints = {
-                {"min_value", nullptr},
-                {"max_value", nullptr},
-                {"validator", nullptr},
-                {"default_value", nullptr}
-            };
-            return default_constraints;
-        }
+        static const nlohmann::json &defaultConstraints();
 
     private:
         std::string m_id, m_name, m_type;

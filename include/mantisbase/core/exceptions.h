@@ -11,15 +11,19 @@
 namespace mantis {
     class MantisException final : public std::exception {
     public:
-        MantisException(int code, std::string message);
+        MantisException(int _code, std::string _msg);
 
-        const char* what() const noexcept override;
+        MantisException(int _code, std::string _msg, std::string _desc);
 
-        int code() const noexcept;
+        [[nodiscard]] const char* what() const noexcept override;
+
+        [[nodiscard]] const char* desc() const noexcept;
+
+        [[nodiscard]] int code() const noexcept;
 
     private:
         int m_code = -1;
-        std::string m_msg;
+        std::string m_msg, m_desc;
     };
 } // mantis
 
