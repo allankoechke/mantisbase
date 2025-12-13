@@ -97,8 +97,9 @@ inline std::string getFile(const std::string& path) {
     return p.filename().string();
 }
 
-#define MANTIS_FUNC() std::format("{} - {}()", getFile(__FILE__), __FUNCTION__);
+#define MANTIS_FUNC() std::format("{} - {}()", getFile(__FILE__), __FUNCTION__)
 #define TRACE_FUNC(x) mantis::FuncLogger _logger(x);
+#define TRACE_MANTIS_FUNC() try{ mantis::FuncLogger _logger(MANTIS_FUNC()); } catch(...){}
 #define TRACE_CLASS_METHOD() mantis::FuncLogger _logger(std::format("{} {}::{}()", getFile(__FILE__), "", __FUNCTION__));
 #define TRACE_METHOD() mantis::FuncLogger _logger(std::format("{} {}()", getFile(__FILE__), __FUNCTION__));
 

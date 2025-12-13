@@ -225,6 +225,8 @@ namespace mantis {
 
         // Add new route
         addSchemaCache(new_schema);
+
+        assert(m_entityMap.contains(new_schema)); // Ensure new entity has been added
     }
 
     void Router::removeSchemaCache(const std::string &entity_name) {
@@ -377,8 +379,6 @@ namespace mantis {
                 const auto fs = cmrc::mantis::get_filesystem();
                 std::string path = req.matches()[1];
 
-                // logger::trace("GET MantisBase Admin file\n\t- {}", path);
-
                 // Normalize the path
                 if (path.empty() || path == "/") {
                     path = "/public/index.html";
@@ -408,6 +408,7 @@ namespace mantis {
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
+                res.setReason(e.what());
                 logger::critical("Error processing /admin request: {}", e.what());
             }
         };

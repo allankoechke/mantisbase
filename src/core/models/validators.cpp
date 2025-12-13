@@ -40,7 +40,9 @@ namespace mantis {
         return std::nullopt;
     }
 
+    // TODO check for empty body fields before checking if they satisfy constraints
     std::optional<std::string> Validators::validatePreset(const std::string &key, const std::string &value) {
+        TRACE_MANTIS_FUNC();
         if (key.empty())
             throw MantisException(500, "Validator key can't be empty!");
 
@@ -61,10 +63,14 @@ namespace mantis {
     }
 
     std::optional<std::string> Validators::minimumConstraintCheck(const json &field, const json &body) {
+        TRACE_MANTIS_FUNC();
         if (!field["constraints"]["min_value"].is_null()) {
             const auto &min_value = field["constraints"]["min_value"].get<double>();
             const auto &field_name = field["name"].get<std::string>();
-            const auto &field_type = field["name"].get<std::string>();
+            const auto &field_type = field["type"].get<std::string>();
+
+            if (!body.contains(field_name))
+                return std::format("Request body is missing `{}` data.", field_name);
 
             if (field_type == "string" && body.value(field_name, "").size() < static_cast<size_t>(min_value)) {
                 return
@@ -87,10 +93,14 @@ namespace mantis {
     }
 
     std::optional<std::string> Validators::maximumConstraintCheck(const json &field, const json &body) {
+        TRACE_MANTIS_FUNC();
         if (!field["constraints"]["max_value"].is_null()) {
             const auto max_value = field["constraints"]["max_value"].get<double>();
             const auto &field_name = field["name"].get<std::string>();
-            const auto &field_type = field["name"].get<std::string>();
+            const auto &field_type = field["type"].get<std::string>();
+
+            if (!body.contains(field_name))
+                return std::format("Request body is missing `{}` data.", field_name);
 
             if (field_type == "string" && body.value(field_name, "").size() > static_cast<size_t>(max_value)) {
                 return
@@ -113,20 +123,28 @@ namespace mantis {
     }
 
     std::optional<std::string> Validators::requiredConstraintCheck(const json &field, const json &body) {
-        // Get the required flag and the field name
-        const auto &required = field.value("required", false);
-        const auto &field_name = field["name"].get<std::string>();
-        const bool has_default_value = !field["constraints"]["default_value"].is_null();
+        TRACE_MANTIS_FUNC();
 
-        // If default value is set on db level and value is null, skip this check
-        if (required && !has_default_value && body[field_name].is_null()) {
-            return std::format("Field `{}` is required", field_name);
+        try {
+            // Get the required flag and the field name
+            const auto &required = field.value("required", false);
+            const auto &field_name = field["name"].get<std::string>();
+            const bool has_default_value = !field["constraints"]["default_value"].is_null();
+
+            // If default value is set on db level and value is null, skip this check
+            if (required && !has_default_value && (!body.contains(field_name) || body[field_name].is_null())) {
+                return std::format("Field `{}` is required", field_name);
+            }
+
+            return std::nullopt;
+        } catch (const std::exception &e) {
+            logger::trace("Required Constraints Exception: {}", e.what());
+            return std::nullopt;
         }
-
-        return std::nullopt;
     }
 
     std::optional<std::string> Validators::validatorConstraintCheck(const json &field, const json &body) {
+        TRACE_MANTIS_FUNC();
         if (field["constraints"]["validator"].is_string()) {
             const auto &pattern = field["constraints"]["validator"].get<std::string>();
             const auto &field_name = field["name"].get<std::string>();
@@ -150,7 +168,9 @@ namespace mantis {
     }
 
     std::optional<std::string> Validators::viewTypeSQLCheck(const json &body) {
-        if (!body.contains("view_query") || body["view_query"].is_null() || trim(body["view_query"].get<std::string>()).empty()) {
+        TRACE_MANTIS_FUNC();
+        if (!body.contains("view_query") || body["view_query"].is_null() || trim(body["view_query"].get<std::string>()).
+            empty()) {
             return "View tables require a valid SQL View query!";
         }
 
@@ -214,6 +234,7 @@ namespace mantis {
     }
 
     std::optional<std::string> Validators::validateRequestBody(const Entity &entity, const json &body) {
+        TRACE_MANTIS_FUNC();
         // If the table type is of view type, check that the SQL is passed in ...
         if (entity.type() == "view") {
             if (const auto err = viewTypeSQLCheck(body); err.has_value()) return err;
@@ -245,6 +266,7 @@ namespace mantis {
     }
 
     std::optional<std::string> Validators::validateUpdateRequestBody(const Entity &entity, const json &body) {
+        TRACE_MANTIS_FUNC();
         // If the table type is of view type, check that the SQL is passed in ...
         if (entity.type() == "view") {
             if (const auto err = viewTypeSQLCheck(body); err.has_value()) return err;
