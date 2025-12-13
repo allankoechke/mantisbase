@@ -209,6 +209,7 @@ namespace mantis {
 
         // Create entity and its routes
         auto entity = Entity(entity_schema);
+        std::cout << entity_name << "\n" << entity.schema().dump(2) << std::endl;
         entity.createEntityRoutes();
         m_entityMap.insert_or_assign(entity_name, std::move(entity));
     }
@@ -219,6 +220,8 @@ namespace mantis {
 
         // Clean up old entity route
         removeSchemaCache(old_entity_name);
+
+        assert(!m_entityMap.contains(new_schema)); // Ensure we don't have any old schema data anymore
 
         // Add new route
         addSchemaCache(new_schema);
