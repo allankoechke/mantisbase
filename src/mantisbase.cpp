@@ -6,7 +6,7 @@
 #include <cmrc/cmrc.hpp>
 #include <fstream>
 
-namespace mantis {
+namespace mb {
     MantisBase::MantisBase()
         : m_dbType("sqlite3"),
           m_startTime(std::chrono::steady_clock::now())

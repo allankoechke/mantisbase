@@ -4,7 +4,7 @@
 
 #include "../../../include/mantisbase/core/models/validators.h"
 
-namespace mantis {
+namespace mb {
     std::unordered_map<std::string, json> Validators::presets = {
         {
             "email", json{

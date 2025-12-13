@@ -4,7 +4,7 @@
 #include "../../../include/mantisbase/utils/uuidv7.h"
 #include "mantisbase/utils/soci_wrappers.h"
 
-namespace mantis {
+namespace mb {
     Entity::Entity(const nlohmann::json &schema) {
         if (!schema.contains("name") || !schema.contains("type"))
             throw std::invalid_argument("Missing required fields `name` and `type` in schema!");

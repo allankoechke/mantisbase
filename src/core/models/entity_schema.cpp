@@ -2,7 +2,7 @@
 
 #include "mantisbase/core/exceptions.h"
 
-namespace mantis {
+namespace mb {
     EntitySchema::EntitySchema(const std::string &entity_name, const std::string &entity_type) {
         setName(entity_name).setType(entity_type);
     }

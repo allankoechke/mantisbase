@@ -11,7 +11,7 @@
 #include <string>
 #include "../utils/utils.h"
 
-namespace mantis
+namespace mb
 {
     /**
      * This class manages creation and verification of JWTs.

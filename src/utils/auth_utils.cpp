@@ -3,7 +3,7 @@
 
 #include <bcrypt-cpp/bcrypt.h>
 
-namespace mantis
+namespace mb
 {
     std::string hashPassword(const std::string& password)
     {

@@ -2,7 +2,7 @@
 #include <spdlog/sinks/stdout_color_sinks-inl.h>
 #include "spdlog/sinks/ansicolor_sink.h"
 
-void mantis::LogsMgr::setLogLevel(const LogLevel& level)
+void mb::LogsMgr::setLogLevel(const LogLevel& level)
 {
     const auto set_spdlog_level = [&](const spdlog::level::level_enum lvl)
     {
@@ -35,7 +35,7 @@ void mantis::LogsMgr::setLogLevel(const LogLevel& level)
     }
 }
 
-void mantis::LogsMgr::init()
+void mb::LogsMgr::init()
 {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_level(spdlog::level::info);
@@ -48,12 +48,12 @@ void mantis::LogsMgr::init()
     spdlog::set_default_logger(logger);
 }
 
-mantis::FuncLogger::FuncLogger(const std::string& msg): m_msg(msg)
+mb::FuncLogger::FuncLogger(const std::string& msg): m_msg(msg)
 {
     logger::trace("Enter: {}", m_msg);
 }
 
-mantis::FuncLogger::~FuncLogger()
+mb::FuncLogger::~FuncLogger()
 {
     logger::trace("Exit:  {}", m_msg);
 }

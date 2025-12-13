@@ -21,7 +21,7 @@
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
 
-namespace mantis {
+namespace mb {
     Router::Router()
         : mApp(MantisBase::instance()),
           m_entitySchema(std::make_unique<EntitySchema>()) {

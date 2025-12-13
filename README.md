@@ -104,11 +104,11 @@ You can also embed Mantis as a library in your own C++ project:
 
 int main(const int argc, char* argv[])
 {
-    auto& app = mantis::MantisBase::create(argc, argv);
+    auto& app = mb::MantisBase::create(argc, argv);
     return app.run();
     
     // Or simply
-    // return mantis::MantisBase::create(argc, argv).run()
+    // return mb::MantisBase::create(argc, argv).run()
 }
 ```
 Check [/examples dir](/examples) for a working sample.

@@ -56,7 +56,7 @@ namespace soci {
         typedef std::string base_type;
 
         static void from_base(const std::string &s, const indicator ind, json &jb) {
-            if (ind == i_null || (ind != i_null && mantis::trim(s).empty())) {
+            if (ind == i_null || (ind != i_null && mb::trim(s).empty())) {
                 jb = json{}; // or handle null as appropriate
                 return;
             }
@@ -64,8 +64,8 @@ namespace soci {
             try {
                 jb = json::parse(s); // or however you parse JSON
             } catch (const std::exception &e) {
-                mantis::logger::critical("Failed to parse JSON value from DB.\n\t- {}", e.what());
-                throw mantis::MantisException(500, "Failed to parse JSON value from DB.", e.what());
+                mb::logger::critical("Failed to parse JSON value from DB.\n\t- {}", e.what());
+                throw mb::MantisException(500, "Failed to parse JSON value from DB.", e.what());
             }
         }
 

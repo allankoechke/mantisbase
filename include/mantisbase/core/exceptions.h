@@ -8,7 +8,7 @@
 #include <exception>
 #include <string>
 
-namespace mantis {
+namespace mb {
     class MantisException final : public std::exception {
     public:
         MantisException(int _code, std::string _msg);

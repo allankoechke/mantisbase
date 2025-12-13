@@ -25,7 +25,7 @@ TEST(DatabaseTest, CheckSystemSchemaMigrated) {
     // EXPECT_EQ(admin_entity.deleteRule(), "");
 
     // Create schema, check fields
-    mantis::EntitySchema admin_schema = mantis::EntitySchema::fromEntity(admin_entity);
+    mb::EntitySchema admin_schema = mb::EntitySchema::fromEntity(admin_entity);
 
     EXPECT_TRUE(admin_schema.hasField("id"));
     EXPECT_EQ(admin_schema.field("id").type(), "string");

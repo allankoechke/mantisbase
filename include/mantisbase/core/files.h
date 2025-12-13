@@ -10,7 +10,7 @@
 #include <string>
 #include "../utils/utils.h"
 
-namespace mantis
+namespace mb
 {
     /**
      * @brief Handle file management for record type files.

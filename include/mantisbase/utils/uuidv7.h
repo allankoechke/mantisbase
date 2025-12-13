@@ -15,7 +15,7 @@
 #include <cstdint>
 #include <mutex>
 
-namespace mantis {
+namespace mb {
     inline uint64_t now_unix_ms() {
         using namespace std::chrono;
         return static_cast<uint64_t>(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());

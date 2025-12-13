@@ -10,7 +10,7 @@
 #include "mantisbase/core/models/entity_schema_field.h"
 #include "soci/values.h"
 
-namespace mantis {
+namespace mb {
     inline soci::values json2SociValue(const json &entity, const json &fields) {
         if (!fields.is_array()) throw std::invalid_argument("Fields must be an array");
 
@@ -142,7 +142,7 @@ namespace mantis {
             }
             else if (colType == "date")
             {
-                res_json[colName] = mantis::dbDateToString(row, i);
+                res_json[colName] = mb::dbDateToString(row, i);
             }
             else if (colType == "int8")
             {

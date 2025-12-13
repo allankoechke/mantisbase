@@ -12,7 +12,7 @@
 #include "nlohmann/json.hpp"
 
 
-namespace mantis {
+namespace mb {
     using json = nlohmann::json;
 
     class Validators {

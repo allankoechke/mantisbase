@@ -12,7 +12,7 @@
 #define MANTIS_GIT_COMMIT "@MANTIS_GIT_COMMIT@"
 #define MANTIS_VERSION "@PROJECT_VERSION@@MANTIS_VERSION_SUFFIX@"
 
-namespace mantis {
+namespace mb {
     inline const char* getVersionString() {
         return MANTIS_VERSION;
     }
@@ -29,7 +29,7 @@ namespace mantis {
         return std::tuple(MANTIS_VERSION_MAJOR, MANTIS_VERSION_MINOR, MANTIS_VERSION_PATCH)
              >= std::tuple(major, minor, patch);
     }
-} // namespace mantis
+} // namespace mb
 
 
 

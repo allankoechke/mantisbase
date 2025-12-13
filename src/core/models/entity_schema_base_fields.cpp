@@ -5,7 +5,7 @@
 #include "../../../include/mantisbase/core/models/entity_schema.h"
 #include "../../../include/mantisbase/core/models/entity_schema_field.h"
 
-namespace mantis {
+namespace mb {
     const std::vector<EntitySchemaField> &EntitySchema::defaultBaseFieldsSchema() {
         static const std::vector _base_field_schema = {
             EntitySchemaField{

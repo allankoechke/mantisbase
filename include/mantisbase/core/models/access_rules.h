@@ -4,24 +4,22 @@
 #include <string>
 #include <nlohmann/json.hpp>
 
-namespace mantis {
+namespace mb {
     class AccessRule {
     public:
-        AccessRule() = default;
-        explicit AccessRule(const std::string &mode, const std::string &expr = "");
+        explicit AccessRule(const std::string &mode = "", const std::string &expr = "");
 
-        nlohmann::json toJSON() const;
+        [[nodiscard]] nlohmann::json toJSON() const;
         static AccessRule fromJSON(const nlohmann::json &j);
 
-        std::string mode() const;
+        [[nodiscard]] std::string mode() const;
         void setMode(const std::string& _mode);
 
-        std::string expr() const;
+        [[nodiscard]] std::string expr() const;
         void setExpr(const std::string& _expr);
 
-
     private:
-        std::string m_mode = "auth", m_expr;
+        std::string m_mode, m_expr;
     };
 } // mantis
 

@@ -3,7 +3,7 @@
 #include "../../include/mantisbase/core/auth.h"
 #include <fstream>
 
-namespace mantis {
+namespace mb {
     HandlerFn Entity::getOneRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();

@@ -2,7 +2,7 @@
 // #include "spdlog/fmt/bundled/std.h"
 #include "../../include/mantisbase/core/auth.h"
 
-namespace mantis {
+namespace mb {
     HandlerFn EntitySchema::getOneRouteHandler() const {
         HandlerFn handler = [](const MantisRequest &req, const MantisResponse &res) {
             try {

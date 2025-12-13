@@ -37,7 +37,7 @@ namespace std
 }
 #endif
 
-namespace mantis
+namespace mb
 {
     namespace fs = std::filesystem; ///< Use shorthand `fs` to refer to the `std::filesystem`
     using json = nlohmann::json;    ///> JSON convenience for the nlomann::json namespace

@@ -6,7 +6,7 @@
 #include "../utils/utils.h"
 #include "http.h"
 
-namespace mantis
+namespace mb
 {
     /**
      * @brief Manages application settings

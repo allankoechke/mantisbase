@@ -20,7 +20,7 @@
 #include  "types.h"
 #include "logger.h"
 
-namespace mantis
+namespace mb
 {
     /**
      * Structure to allow for hashing of the `RouteKey` for use in std::unordered_map as a key.
@@ -95,7 +95,7 @@ namespace mantis
          */
         json remove(const std::string& method, const std::string& path);
 
-        const std::string __class_name__ = "mantis::RouteRegistry";
+        const std::string __class_name__ = "mb::RouteRegistry";
     };
 }
 

@@ -14,9 +14,9 @@ inline fs::path getBaseDir()
 {
     // Base test directory for files and SQLite data
 #ifdef _WIN32
-    auto base_path = fs::temp_directory_path() / "mantisbase_tests" / mantis::generateShortId();
+    auto base_path = fs::temp_directory_path() / "mantisbase_tests" / mb::generateShortId();
 #else
-    auto base_path = fs::path("/tmp") / "mantisbase_tests" / mantis::generateShortId();
+    auto base_path = fs::path("/tmp") / "mantisbase_tests" / mb::generateShortId();
 #endif
 
     try
@@ -34,25 +34,25 @@ inline fs::path getBaseDir()
 struct TestFixture
 {
     int port = 7075;
-    mantis::MantisBase& mApp;
+    mb::MantisBase& mApp;
 
 private:
-    TestFixture(const mantis::json& config)
-        : mApp(mantis::MantisBase::create(config))
+    TestFixture(const mb::json& config)
+        : mApp(mb::MantisBase::create(config))
     {
         std::cout << "[TestFixture] Setting up DB and starting server...\n";
     }
 
 public:
-    static TestFixture& instance(const mantis::json& config)
+    static TestFixture& instance(const mb::json& config)
     {
         static TestFixture _instance{config};
         return _instance;
     }
 
-    static mantis::MantisBase& app()
+    static mb::MantisBase& app()
     {
-        return mantis::MantisBase::instance();
+        return mb::MantisBase::instance();
     }
 
     // Wait until the server port responds

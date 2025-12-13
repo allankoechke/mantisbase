@@ -9,7 +9,7 @@
 
 #include "mantisbase/core/exceptions.h"
 
-namespace mantis {
+namespace mb {
     nlohmann::json EntitySchema::listTables(const json &) {
         const auto sql = MantisBase::instance().db().session();
         const soci::rowset rs = (sql->prepare <<

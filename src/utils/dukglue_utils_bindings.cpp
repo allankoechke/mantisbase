@@ -1,7 +1,7 @@
 #include "../../include/mantisbase/utils/utils.h"
 #include "../../include/mantisbase/mantisbase.h"
 
-namespace mantis {
+namespace mb {
     void registerUtilsToDuktapeEngine()
     {
         // const auto ctx = MantisBase::instance().ctx();

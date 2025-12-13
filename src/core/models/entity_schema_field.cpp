@@ -3,7 +3,7 @@
 #include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/soci_wrappers.h"
 
-namespace mantis {
+namespace mb {
     EntitySchemaField::EntitySchemaField(std::string field_name, std::string field_type)
         : m_name(std::move(field_name)),
           m_type(std::move(field_type)),

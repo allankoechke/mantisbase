@@ -6,7 +6,7 @@
 
 TEST(EntitySchema, EntitySchemaBaseType) {
     // Base field type
-    mantis::EntitySchema base{"test", "base"};
+    mb::EntitySchema base{"test", "base"};
 
     EXPECT_EQ(base.type(), "base");
     EXPECT_EQ(base.name(), "test");
@@ -29,7 +29,7 @@ TEST(EntitySchema, EntitySchemaBaseType) {
 
 TEST(EntitySchema, EntitySchemaAuthType) {
     // Auth Type
-    mantis::EntitySchema auth{"test", "auth"};
+    mb::EntitySchema auth{"test", "auth"};
 
     EXPECT_EQ(auth.type(), "auth");
     EXPECT_EQ(auth.name(), "test");
@@ -62,7 +62,7 @@ TEST(EntitySchema, EntitySchemaAuthType) {
 
 TEST(EntitySchema, EntitySchemaViewType) {
     // View Type
-    mantis::EntitySchema view{"test", "view"};
+    mb::EntitySchema view{"test", "view"};
 
     EXPECT_EQ(view.type(), "view");
     EXPECT_EQ(view.name(), "test");

@@ -12,7 +12,7 @@
 #include <dukglue/dukglue.h>
 #endif
 
-namespace mantis
+namespace mb
 {
     /// Shorten JSON namespace
     using json = nlohmann::json;
@@ -57,7 +57,7 @@ namespace mantis
     class ContextStore
     {
         std::unordered_map<std::string, std::any> data;
-        std::string __class_name__ = "mantis::ContextStore";
+        std::string __class_name__ = "mb::ContextStore";
 
     public:
         ContextStore() = default;

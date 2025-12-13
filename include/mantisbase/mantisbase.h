@@ -20,7 +20,7 @@
 #include "core/types.h"
 #include "core/kv_store.h"
 
-namespace mantis
+namespace mb
 {
     /**
      * @brief MantisBase entry point.

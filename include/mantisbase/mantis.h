@@ -37,7 +37,7 @@
 // For convenience to using json,
 // lets include it here
 #include <nlohmann/json.hpp>
-namespace mantis {
+namespace mb {
     using json = nlohmann::json;
 }
 

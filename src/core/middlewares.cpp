@@ -2,7 +2,7 @@
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/core/models/entity.h"
 
-namespace mantis {
+namespace mb {
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> getAuthToken() {
         std::string msg = MANTIS_FUNC();
         return [msg](MantisRequest &req, MantisResponse &_) {

@@ -13,7 +13,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include "../utils/utils.h"
 
-namespace mantis
+namespace mb
 {
     using json = nlohmann::json;
 
@@ -98,9 +98,9 @@ inline std::string getFile(const std::string& path) {
 }
 
 #define MANTIS_FUNC() std::format("{} - {}()", getFile(__FILE__), __FUNCTION__)
-#define TRACE_FUNC(x) mantis::FuncLogger _logger(x);
-#define TRACE_MANTIS_FUNC() try{ mantis::FuncLogger _logger(MANTIS_FUNC()); } catch(...){}
-#define TRACE_CLASS_METHOD() mantis::FuncLogger _logger(std::format("{} {}::{}()", getFile(__FILE__), "", __FUNCTION__));
-#define TRACE_METHOD() mantis::FuncLogger _logger(std::format("{} {}()", getFile(__FILE__), __FUNCTION__));
+#define TRACE_FUNC(x) mb::FuncLogger _logger(x);
+#define TRACE_MANTIS_FUNC() try{ mb::FuncLogger _logger(MANTIS_FUNC()); } catch(...){}
+#define TRACE_CLASS_METHOD() mb::FuncLogger _logger(std::format("{} {}::{}()", getFile(__FILE__), "", __FUNCTION__));
+#define TRACE_METHOD() mb::FuncLogger _logger(std::format("{} {}()", getFile(__FILE__), __FUNCTION__));
 
 #endif //MANTIS_LOGGER_H

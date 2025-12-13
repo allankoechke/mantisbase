@@ -10,7 +10,7 @@
 #include <fstream>
 #include <filesystem>
 
-namespace mantis {
+namespace mb {
     namespace fs = std::filesystem;
 
     void Files::createDir(const std::string &entity_name) {

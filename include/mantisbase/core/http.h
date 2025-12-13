@@ -18,7 +18,7 @@
 
 #include <fstream>
 
-namespace mantis {
+namespace mb {
 #ifdef MANTIS_ENABLE_SCRIPTING
     class DuktapeImpl {
     public:
@@ -43,7 +43,7 @@ namespace mantis {
         const httplib::Request &m_req;
         ContextStore m_store;
 
-        const std::string __class_name__ = "mantis::MantisRequest";
+        const std::string __class_name__ = "mb::MantisRequest";
 
     public:
         /**
@@ -162,7 +162,7 @@ namespace mantis {
     class MantisResponse {
         httplib::Response &m_res;
 
-        const std::string __class_name__ = "mantis::MantisResponse";
+        const std::string __class_name__ = "mb::MantisResponse";
 
     public:
         explicit MantisResponse(httplib::Response &_resp);

@@ -5,7 +5,7 @@
 #include <cstring>
 #include <jwt-cpp/traits/nlohmann-json/defaults.h>
 
-namespace mantis
+namespace mb
 {
     std::string Auth::createToken(const json& claims_params, const int timeout)
     {

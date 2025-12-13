@@ -9,7 +9,7 @@
 #include "entity_schema_field.h"
 #include "access_rules.h"
 
-namespace mantis {
+namespace mb {
     class EntitySchema {
     public:
         EntitySchema() = default;

@@ -8,7 +8,7 @@
 #include <httplib.h>
 #include <nlohmann/json.hpp>
 
-namespace mantis {
+namespace mb {
     class MantisBase;
     class MantisRequest;
     class MantisResponse;

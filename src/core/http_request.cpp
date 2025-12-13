@@ -3,7 +3,7 @@
 
 #define __file__ "duktape_response_wrapper.cpp"
 
-namespace mantis
+namespace mb
 {
     MantisRequest::MantisRequest(const httplib::Request& _req)
         : m_req(_req),
@@ -21,7 +21,7 @@ namespace mantis
         return m_req.path;
     }
 
-    std::string mantis::MantisRequest::getBody() const
+    std::string mb::MantisRequest::getBody() const
     {
         return m_req.body;
     }

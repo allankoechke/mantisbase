@@ -6,7 +6,7 @@
 #include "types.h"
 #include "models/entity.h"
 
-namespace mantis {
+namespace mb {
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> getAuthToken();
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> hydrateContextData();
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> hasAccess(const std::string& entity_name);

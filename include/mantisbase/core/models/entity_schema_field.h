@@ -12,7 +12,7 @@
 #include "nlohmann/json.hpp"
 #include "soci/soci-backend.h"
 
-namespace mantis {
+namespace mb {
     class EntitySchemaField {
     public:
         // Convenience constructor

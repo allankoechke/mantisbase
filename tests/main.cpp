@@ -11,14 +11,14 @@ int main(int argc, char* argv[])
     const auto dataDir = (baseDir / "data").string();
     const auto publicDir = (baseDir / "www").string();
 
-    mantis::json args;
+    mb::json args;
     args["database"] = "SQLITE";
     args["dataDir"] = dataDir;
     args["publicDir"] = publicDir;
     args["scriptsDir"] = scriptingDir;
     args["serve"] = {{"port", 7075}, {"host", "0.0.0.0"}};
 
-    mantis::logger::trace("Args: {}", args.dump());
+    mb::logger::trace("Args: {}", args.dump());
 
     // Setup Db, Server, etc.
     auto& tFix = TestFixture::instance(args);

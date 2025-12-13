@@ -7,7 +7,7 @@
 
 #define __file__ "core/http.cpp"
 
-namespace mantis
+namespace mb
 {
     size_t RouteKeyHash::operator()(const RouteKey& k) const
     {

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <httplib.h>
 
-namespace mantis
+namespace mb
 {
     std::optional<json> tryParseJsonStr(const std::string& json_str)
     {

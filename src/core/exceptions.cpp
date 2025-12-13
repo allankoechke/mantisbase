@@ -4,7 +4,7 @@
 
 #include "../../include/mantisbase/core/exceptions.h"
 
-namespace mantis {
+namespace mb {
     MantisException::MantisException(const int _code, std::string _msg)
         : m_code(_code),
           m_msg(std::move(_msg)) {

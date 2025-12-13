@@ -3,7 +3,7 @@
 
 #include <httplib.h>
 
-namespace mantis {
+namespace mb {
     DukCtx::DukCtx() {
         // Create isolated context for this evaluation
         m_ctx = duk_create_heap_default();

@@ -8,7 +8,7 @@
 #include "../types.h"
 #include "access_rules.h"
 
-namespace mantis {
+namespace mb {
     using Record = nlohmann::json;
     using Records = std::vector<Record>;
 

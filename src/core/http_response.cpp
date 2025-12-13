@@ -3,7 +3,7 @@
 
 #define __file__ "duktape_response_wrapper.cpp"
 
-namespace mantis
+namespace mb
 {
     MantisResponse::MantisResponse(httplib::Response& _resp) : m_res(_resp)
     {

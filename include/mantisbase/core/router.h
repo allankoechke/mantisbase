@@ -16,7 +16,7 @@
 #include "../utils/utils.h"
 #include  "types.h"
 
-namespace mantis {
+namespace mb {
     /**
      * @brief Router class allows for managing routes as well as acting as a top-wrapper on the HttpUnit.
      */

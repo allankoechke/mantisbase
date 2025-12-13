@@ -12,7 +12,7 @@
 
 #include "../utils/utils.h"
 
-namespace mantis
+namespace mb
 {
     using TokenMap = std::unordered_map<std::string, nlohmann::json>;
 

@@ -19,7 +19,7 @@
 #include "../utils/utils.h"
 #include "logger.h"
 
-namespace mantis {
+namespace mb {
     using json = nlohmann::json;
 
     /**

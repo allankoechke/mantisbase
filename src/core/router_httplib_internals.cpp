@@ -4,7 +4,7 @@
 
 #include "../../include/mantisbase/core/router.h"
 
-namespace mantis {
+namespace mb {
     std::function<HandlerResponse(const httplib::Request &, httplib::Response &)> Router::preRoutingHandler() {
         return [](const httplib::Request &req, httplib::Response &_) -> HandlerResponse {
             auto &mutable_req = const_cast<httplib::Request &>(req);

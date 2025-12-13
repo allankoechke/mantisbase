@@ -3,7 +3,7 @@
 //
 #include "../include/mantisbase/core/http.h"
 
-namespace mantis {
+namespace mb {
     MantisContentReader::MantisContentReader(
         const httplib::ContentReader &reader,
         const MantisRequest &req)
