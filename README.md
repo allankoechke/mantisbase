@@ -187,9 +187,8 @@ mantisbase/
 
 * [CLI Reference](doc/01.cmd.md)
 * [API Reference](doc/02.api.md)
-* [Architecture Overview](doc/04.architecture.md)
+* [Authentication API](doc/02.auth.md)
 * [Embedding Guide](doc/05.embedding.md)
-* [Sync Engine Design](doc/10.sync.md)
 
 For full API Docs, check [https://docs.mantisbase.dev](https://allankoechke.github.io/mantisbase/).
 

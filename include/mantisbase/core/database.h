@@ -23,49 +23,70 @@ namespace mb {
     using json = nlohmann::json;
 
     /**
-     * @brief Database Management Class
+     * @brief Database connection and session management.
      *
-     * The class handles database connections, pooling and sessions.
+     * Handles database connections, connection pooling, and provides
+     * session management for executing queries. Supports SQLite (default)
+     * and PostgreSQL.
+     *
+     * @code
+     * Database db;
+     * db.connect("dbname=mantis user=postgres password=pass");
+     * auto session = db.session();
+     * *session << "SELECT * FROM users", soci::into(rows);
+     * @endcode
      */
     class Database {
     public:
+        /**
+         * @brief Construct database instance.
+         */
         Database();
 
+        /**
+         * @brief Destructor (disconnects from database).
+         */
         ~Database();
 
         /**
-         * @brief Initializes the connection pool & connects to specific database.
-         * @param conn_str Connection string for database containing username, password, etc. Not used for SQLite dbs.
-         * @return A flag whether connection was successful or not.
+         * @brief Connect to database and initialize connection pool.
+         * @param conn_str Connection string (format depends on database type)
+         *   - SQLite: path to database file or empty for default
+         *   - PostgreSQL: "dbname=name host=host port=5432 user=user password=pass"
+         * @return true if connection successful, false otherwise
          */
         bool connect(const std::string &conn_str);
 
         /**
-         * @brief CLose all database connections and destroy connection pools.
+         * @brief Close all database connections and destroy connection pool.
          */
         void disconnect() const;
 
         /**
-         * @brief Run database migrations, creates the default system tables.
-         * @return `true` if migration completes successfully else `false`.
+         * @brief Create system tables (mb_tables, mb_admins, etc.).
+         * @return true if migration successful, false otherwise
          */
         bool createSysTables() const;
 
         /**
-         * @brief Get access to a session from the pool
-         * @return A shared pointer to soci::session
+         * @brief Get a database session from the connection pool.
+         * @return Shared pointer to soci::session
+         * @code
+         * auto sql = db.session();
+         * *sql << "SELECT * FROM users WHERE id = :id", soci::use(id), soci::into(row);
+         * @endcode
          */
         [[nodiscard]] std::shared_ptr<soci::session> session() const;
 
         /**
-         * Access to the underlying soci connection_pool instance
-         * @return A reference to the soci::connection_pool instance
+         * @brief Get access to the underlying connection pool.
+         * @return Reference to soci::connection_pool
          */
         [[nodiscard]] soci::connection_pool &connectionPool() const;
 
         /**
-         * @brief Check if the database is connected
-         * @return Flag of the database connection
+         * @brief Check if database is connected.
+         * @return true if connected, false otherwise
          */
         [[nodiscard]] bool isConnected() const;
 

@@ -1,13 +1,13 @@
 services:
-  mantisapp:
+  mantisbase:
     build:
       context: .
       dockerfile: Dockerfile
-    image: mantisapp:latest
+    image: mantisbase:latest
     restart: unless-stopped
     ports:
       - "7070:80"
     volumes:
-      - ./data:/mantis/data
-      - ./www:/mantis/public
-      - ./scripts:/mantis/scripts
+      - ./data:/mb/data
+      - ./www:/mb/public
+      - ./scripts:/mb/scripts
