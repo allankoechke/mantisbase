@@ -1,3 +1,11 @@
+/**
+ * @file entity_schema.h
+ * @brief Entity schema builder and management class.
+ *
+ * Provides methods to define, validate, and manage database table schemas
+ * including fields, access rules, and DDL generation.
+ */
+
 #ifndef MANTISBASE_ENTITY_SCHEMA_H
 #define MANTISBASE_ENTITY_SCHEMA_H
 
@@ -153,6 +161,6 @@ namespace mb {
         std::vector<EntitySchemaField> m_fields;
         AccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
     };
-} // mantis
+} // mb
 
 #endif //MANTISBASE_ENTITY_SCHEMA_H

@@ -1,6 +1,10 @@
-//
-// Created by codeart on 17/11/2025.
-//
+/**
+ * @file types.h
+ * @brief Type definitions and aliases for MantisBase.
+ *
+ * Defines common types used throughout the MantisBase library including
+ * handler functions, middleware types, and route keys.
+ */
 
 #ifndef MANTISBASE_TYPES_H
 #define MANTISBASE_TYPES_H

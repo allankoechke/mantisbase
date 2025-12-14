@@ -1,6 +1,10 @@
-//
-// Created by codeart on 09/11/2025.
-//
+/**
+ * @file uuidv7.h
+ * @brief UUID v7 generation utilities.
+ *
+ * Provides functions for generating UUID v7 identifiers that are
+ * time-ordered and suitable for database primary keys.
+ */
 
 #ifndef MANTISAPP_UUIDV7_H
 #define MANTISAPP_UUIDV7_H

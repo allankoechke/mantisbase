@@ -127,6 +127,6 @@ namespace mb {
             return new MantisLoggerImpl();
         }
     };
-}
+} // mb
 
 #endif //DATABASE_H

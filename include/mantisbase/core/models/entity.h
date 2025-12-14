@@ -1,3 +1,11 @@
+/**
+ * @file entity.h
+ * @brief Entity class for database table operations and CRUD functionality.
+ *
+ * Represents a database table/entity with schema information and provides
+ * methods for creating, reading, updating, and deleting records.
+ */
+
 #ifndef MANTISBASE_ENTITY_H
 #define MANTISBASE_ENTITY_H
 
@@ -92,6 +100,6 @@ namespace mb {
     private:
         nlohmann::json m_schema;
     };
-} // mantis
+} // mb
 
 #endif //MANTISBASE_ENTITY_H

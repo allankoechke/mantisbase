@@ -33,15 +33,12 @@ namespace mb
      * ctx.set<bool>("verified", true);
      *
      * // Retrieve values
-     * std::optional key = ctx.get<std::string>("key");
      *
      * // From scripting using JS
      * req.set("key", 5") // INT/DOUBLE/FLOATS ...
      * req.set("key2", { a: 5, b: 7}) // Objects/JSON
      * req.set("valid", true) // BOOLs
      *
-     * req.get("key") // -> Return 5
-     * req.get("nothing") // -> undefined
      * req.getOr("nothing", "Default Value")
      * @endcode
      *
@@ -143,6 +140,6 @@ namespace mb
 #endif
     };
 
-} // mantis
+} // mb
 
 #endif //MANTISAPP_CONTEXTSTORE_H

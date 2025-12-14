@@ -1,3 +1,11 @@
+/**
+ * @file middlewares.h
+ * @brief Middleware functions for request processing.
+ *
+ * Provides pre-built middleware functions for authentication, authorization,
+ * and request context management.
+ */
+
 #ifndef MANTISBASE_MIDDLEWARES_H
 #define MANTISBASE_MIDDLEWARES_H
 

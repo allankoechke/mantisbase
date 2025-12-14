@@ -1,6 +1,10 @@
-//
-// Created by allan on 17/05/2025.
-//
+/**
+ * @file mantis.h
+ * @brief Convenience header that includes all MantisBase public API headers.
+ *
+ * This header provides a single include point for all MantisBase functionality.
+ * It includes core components, models, utilities, and third-party dependencies.
+ */
 
 #ifndef MANTIS_H
 #define MANTIS_H

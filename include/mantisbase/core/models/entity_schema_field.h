@@ -1,6 +1,10 @@
-//
-// Created by codeart on 13/11/2025.
-//
+/**
+ * @file entity_schema_field.h
+ * @brief Entity schema field definition and validation.
+ *
+ * Represents a single field in a database table schema with type,
+ * constraints, and validation rules.
+ */
 
 #ifndef MANTISBASE_ENTITY_SCHEMA_FIELD_H
 #define MANTISBASE_ENTITY_SCHEMA_FIELD_H
@@ -87,6 +91,6 @@ namespace mb {
         bool m_required = false, m_primaryKey = false, m_isSystem = false, m_isUnique = false;
         nlohmann::json m_constraints{};
     };
-} // mantis
+} // mb
 
 #endif //MANTISBASE_ENTITY_SCHEMA_FIELD_H

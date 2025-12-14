@@ -105,6 +105,6 @@ namespace mb
          */
         static bool fileExists(const std::string& entity_name, const std::string& filename);
     };
-} // mantis
+} // mb
 
 #endif // MANTIS_FILES_H

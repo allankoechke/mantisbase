@@ -1,3 +1,11 @@
+/**
+ * @file access_rules.h
+ * @brief Access rule definition for entity permissions.
+ *
+ * Defines access control rules with mode and expression for
+ * controlling read/write access to database entities.
+ */
+
 #ifndef MANTISBASE_ACCESS_RULES_H
 #define MANTISBASE_ACCESS_RULES_H
 
@@ -21,6 +29,6 @@ namespace mb {
     private:
         std::string m_mode, m_expr;
     };
-} // mantis
+} // mb
 
 #endif //MANTISBASE_ACCESS_RULES_H

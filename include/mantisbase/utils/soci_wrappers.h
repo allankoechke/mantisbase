@@ -1,6 +1,10 @@
-//
-// Created by codeart on 09/11/2025.
-//
+/**
+ * @file soci_wrappers.h
+ * @brief SOCI database wrapper utilities.
+ *
+ * Provides conversion functions between JSON objects and SOCI database
+ * value types for seamless data binding and retrieval.
+ */
 
 #ifndef MANTISAPP_SOCI_WRAPPERS_H
 #define MANTISAPP_SOCI_WRAPPERS_H

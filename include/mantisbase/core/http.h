@@ -282,6 +282,6 @@ namespace mb {
 
         static json getValueFromType(const std::string& type, const std::string& value);
     };
-} // mantis
+} // mb
 
 #endif //MANTISAPP_DUKTAPE_CUSTOM_TYPES_H

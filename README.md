@@ -11,7 +11,7 @@
 
 ## 🔧 Overview
 
-**MantisBase** is a modular, lightweight C++ library designed to power modern backend systems in embedded devices, desktop tools, or standalone server deployments. Inspired by systems like PocketBase and Supabase, Mantis focuses on:
+**MantisBase** is a modular, lightweight C++ library designed to power modern backend systems in embedded devices, desktop tools, or standalone server deployments. Inspired by systems like PocketBase and Supabase, MantisBase focuses on:
 
 - Minimal runtime footprint
 - SQLite as the default local database (with optional MySQL/PSQL support)
@@ -22,8 +22,8 @@
 - Single app binary for portability (~11MB, 3MB compressed)
 
 > [!WARNING]  
-> Mantis is still under active development and API might change as the project stablizes.
-> We have started work on v0.3.x release changes that will rework whole codebase to create a stable API and improve performance. Follow the work on the [`v0.3`](https://github.com/allankoechke/mantis/tree/v0.3) branch.
+> MantisBase is still under active development and API might change as the project stabilizes.
+> We have started work on v0.3.x release changes that will rework whole codebase to create a stable API and improve performance. Follow the work on the [`v0.3`](https://github.com/allankoechke/mantisbase/tree/v0.3) branch.
 
 
 ## 🛠️ Tech Stack
@@ -42,13 +42,13 @@
 ---
 
 ## 🚀 Getting Started
-There are three ways to get started with Mantis. 
+There are four ways to get started with MantisBase: 
 1. Using pre-built binaries
 2. Building from source
 3. Embedding in another project
 4. Running in a docker container
 
-For any option taken, Mantis provides:
+For any option taken, MantisBase provides:
 - An Admin dashboard exposed at `http://localhost:7070/admin`
 - API endpoints exposed at `http://localhost:7070/api/v1/`
 
@@ -66,7 +66,7 @@ mantisbase admins --add john@doe.com
 You will be prompted to enter and confirm the password after which the user account can be used to sign into the admin dashboard.
 
 ### 1. Using pre-built binaries
-Download pre-built binaries from our [release page](https://github.com/allankoechke/mantis/releases). First, download the zip package (~4mb) for the target platform and unzip it. With that, we can start the server as shown below;
+Download pre-built binaries from our [release page](https://github.com/allankoechke/mantisbase/releases). First, download the zip package (~4mb) for the target platform and unzip it. With that, we can start the server as shown below;
 
 ```bash
 mantisbase serve -p 7070
@@ -100,7 +100,7 @@ You can also embed Mantis as a library in your own C++ project:
 - Extend the project as shown below.
 
 ```cpp
-#include <mantis/mantisbase.h>
+#include <mantisbase/mantisbase.h>
 
 int main(const int argc, char* argv[])
 {
@@ -127,8 +127,8 @@ You can also run `mantisbase` in a docker container. Check [using docker](doc/do
 
 ---
 
-## Extending Mantis with JavaScript
-Mantis has a built-in lightweight JavaScript engine based on the `Duktape` library. This allows us to write scripts that will be evaluated to provide extensions to existing functionality.
+## Extending MantisBase with JavaScript
+MantisBase has a built-in lightweight JavaScript engine based on the `Duktape` library. This allows us to write scripts that will be evaluated to provide extensions to existing functionality.
 
 For adding routes for instance:
 
@@ -150,11 +150,11 @@ app.router().addRoute("GET", "/someapi/method/:arg", function(req, res){
 })
 ```
 
-Check more information at [Scripting Page](13.scripting.md).
+Check more information at [Scripting Page](doc/13.scripting.md).
 
 ## Basic CMD Usage  
 
-Mantis works with many cmd options, allowing us to configure and set different options that work best with our setup. This includes but not limited to:
+MantisBase works with many cmd options, allowing us to configure and set different options that work best with our setup. This includes but not limited to:
 - Selecting backend database: By default, SQLite is used but for Linux builds, you can also use PostgreSQL by providing the flags `--database PSQL --connection "dbname=<db> host=<host IP> port=<port> username=<db username> password=<db password>"`
 - Switching base command options, that is, `serve` to start HTTP server, `admins` to set up admin accounts, `sync` WIP and `migrate` WIP.
 - Providing debug info when running the server by setting the `--dev` mode flag.
@@ -171,9 +171,9 @@ For more detailed CMD options, check out the [docs](doc/01.cmd.md) on this topic
 ## 📁 Project Structure
 
 ```
-mantis/
+mantisbase/
 ├── include/
-│   └── mantis/         # Public API headers
+│   └── mantisbase/     # Public API headers
 ├── src/                # Internal implementation
 ├── examples/           # Embedding examples
 ├── tests/              # Unit & integration tests
@@ -191,7 +191,7 @@ mantis/
 * [Embedding Guide](doc/05.embedding.md)
 * [Sync Engine Design](doc/10.sync.md)
 
-For full API Docs, check [https://docs.mantisapp.dev](https://allankoechke.github.io/mantis/).
+For full API Docs, check [https://docs.mantisbase.dev](https://allankoechke.github.io/mantisbase/).
 
 ---
 
@@ -211,7 +211,7 @@ All these dependencies are included in the project as source files or as git sub
 ---
 
 ## YouTube Video?
-- [Mantis YouTube Playlist](https://youtube.com/playlist?list=PLsG0sKNmNpyQwsZuReuqo_nl_j4SdJoiJ&si=a9jFK4QjFJb06NAw)
+- [MantisBase YouTube Playlist](https://youtube.com/playlist?list=PLsG0sKNmNpyQwsZuReuqo_nl_j4SdJoiJ&si=a9jFK4QjFJb06NAw)
 
 ## 🤝 Contributing
 

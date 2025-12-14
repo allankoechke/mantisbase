@@ -108,6 +108,6 @@ namespace mb {
         std::vector<nlohmann::json> m_schemas;
         std::unordered_map<std::string, Entity> m_entityMap;
     };
-}
+} // mb
 
 #endif // MANTIS_SERVER_H

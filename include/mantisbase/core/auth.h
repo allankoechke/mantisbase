@@ -41,6 +41,6 @@ namespace mb
          */
         static json verifyToken(const std::string& token);
     };
-} // mantis
+} // mb
 
 #endif //JWTUNIT_H

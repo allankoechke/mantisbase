@@ -79,7 +79,7 @@ You can embed MantisBase as a library in your own C++ project:
 - Extend your project as shown below:
 
 ```cpp
-#include <mantis/mantisbase.h>
+#include <mantisbase/mantisbase.h>
 
 int main(const int argc, char* argv[])
 {
@@ -87,7 +87,7 @@ int main(const int argc, char* argv[])
     return app.run();
 }
 ```
-Check [mantis/examples](https://github.com/allankoechke/mantis/tree/master/examples) for a sample.
+Check [mantisbase/examples](https://github.com/allankoechke/mantisbase/tree/master/examples) for a sample.
 
 > **Note:** `MantisBase` has a blocking event loop when listening for HTTP events. To avoid blocking your main thread, run it in a separate thread if needed.
 
@@ -117,9 +117,9 @@ _Admin dashboard snapshot_
 ## 📁 Project Structure
 
 ```
-mantis/
+mantisbase/
 ├── include/
-│   └── mantis/         # Public API headers
+│   └── mantisbase/     # Public API headers
 ├── src/                # Internal implementation
 ├── examples/           # Embedding examples
 ├── tests/              # Unit & integration tests
@@ -193,5 +193,5 @@ Check more information at [Scripting Page](13.scripting.md).
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/allankoechke/mantis/blob/master/CONTRIBUTING.md) and open an issue or PR.
+Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/allankoechke/mantisbase/blob/master/CONTRIBUTING.md) and open an issue or PR.
 
