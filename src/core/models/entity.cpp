@@ -453,10 +453,27 @@ namespace mb {
 
     int Entity::countRecords() const {
         // TODO add record filtering ...
-        const auto sql = MantisBase::instance().db().session();
-        int count = 0;
-        *sql << "SELECT COUNT(id) FROM " + name(), soci::into(count);
-        return count;
+        try {
+            const auto sql = MantisBase::instance().db().session();
+            int count = 0;
+            *sql << "SELECT COUNT(id) FROM " + name(), soci::into(count);
+            return count;
+        } catch (std::exception &e) {
+            throw MantisException(500, e.what());
+        }
+    }
+
+    bool Entity::isEmpty() const {
+        try {
+            const auto& sql = MantisBase::instance().db().session();
+            int dummy = 0;
+            soci::indicator ind = soci::i_null;
+            *sql << "SELECT 1 FROM " + name() + " LIMIT 1",
+                    soci::into(dummy, ind);
+            return ind == soci::i_null;
+        } catch (const std::exception& e) {
+            throw MantisException(500, e.what());
+        }
     }
 
     bool Entity::recordExists(const std::string &id) const {

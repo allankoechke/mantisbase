@@ -145,7 +145,7 @@ namespace mb {
                 }
 
                 // If verification was successful, generate token and return 200 OK
-                auto token = Auth::createToken({{"id", body["identity"]}, {"entity", entity.name()}});
+                auto token = Auth::createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
                 // Remove password in response and send response obj.
                 user.erase("password");

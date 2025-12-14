@@ -135,10 +135,10 @@ namespace mb {
             m_store.set(key, value);
         }
 
-        template<typename T>
-        std::optional<T *> get(const std::string &key) {
-            return m_store.get<T>(key);
-        }
+        // template<typename T>
+        // std::optional<T *> get(const std::string &key) {
+        //     return m_store.get<T>(key);
+        // }
 
         template<typename T>
         T &getOr(const std::string &key, T default_value) {

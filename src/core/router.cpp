@@ -73,7 +73,6 @@ namespace mb {
         EntitySchema admin_schema{"mb_admins", "auth"};
         admin_schema.removeField("name");
         admin_schema.setSystem(true);
-        std::cout << admin_schema.toJSON().dump(4);
         auto admin_entity = admin_schema.toEntity();
         admin_entity.createEntityRoutes();
         m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
@@ -102,8 +101,14 @@ namespace mb {
             const auto host = mApp.host();
             const auto port = mApp.port();
 
+            // Get admin entity, query all admins
+            const auto admin_entity = mApp.entity("mb_admins");
+
+            // If we don't have admin accounts, spin up admin dashboard
+            bool launch_admin_setup = admin_entity.isEmpty();
+
             // Launch logging/browser in separate thread after listen starts
-            std::thread notifier([host, port]() -> void {
+            std::thread notifier([host, port, launch_admin_setup]() -> void {
                 // Wait a little for the server to be fully ready
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 auto endpoint = std::format("{}:{}", host, port);
@@ -116,10 +121,11 @@ namespace mb {
                 logger.set_level(spdlog::level::trace);
 
                 logger.info(
-                    "Starting Servers: \n\t├── API Endpoints: http://{}/api/v1/ \n\t└── Admin Dashboard: http://{}/mb-admin\n",
+                    "Starting Servers: \n\t├── API Endpoints: http://{}/api/v1/ \n\t└── Admin Dashboard: http://{}/mb\n",
                     endpoint, endpoint);
 
-                MantisBase::instance().openBrowserOnStart();
+                if (launch_admin_setup)
+                    MantisBase::instance().openBrowserOnStart();
             });
 
             if (!svr.listen(host, port)) {
@@ -354,7 +360,7 @@ namespace mb {
         auto &router = mApp.router();
         router.Get("/api/v1/health", healthCheckHandler());
         router.Get("/api/files/:entity/:file", fileServingHandler());
-        router.Get(R"(/mb-admin(.*))", handleAdminDashboardRoute());
+        router.Get(R"(/mb(/.*)?)", handleAdminDashboardRoute());
 
         // Systemwide auth endpoints
         router.Post("/api/v1/auth/login", handleAuthLogin());

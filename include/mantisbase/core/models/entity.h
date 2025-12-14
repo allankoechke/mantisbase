@@ -66,6 +66,8 @@ namespace mb {
 
         [[nodiscard]] int countRecords() const;
 
+        [[nodiscard]] bool isEmpty() const;
+
         // --------------- UTILITY OPS ------------------ //
         [[nodiscard]] bool recordExists(const std::string &id) const;
 

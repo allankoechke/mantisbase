@@ -255,15 +255,9 @@ namespace mb {
     }
 
     void MantisBase::openBrowserOnStart() const {
+        std::cout << std::endl;
+
         try {
-            // Get admin entity, query all admins
-            const auto admin_entity = entity("mb_admins");
-
-            // If we don't have admin accounts, spin up admin dashboard
-            // if (!admin_entity.list().empty()) return;
-
-            std::cout << std::endl;
-
             // Create service account
             const auto s_acc = entity("mb_service_acc");
             auto record = s_acc.create({});
@@ -273,31 +267,28 @@ namespace mb {
             claims["id"] = record["id"];
             claims["entity"] = "mb_service_acc";
 
-            logger::trace("Claims: {}", claims.dump(2));
-
             // Create token and pass it in
             const auto token = Auth::createToken(claims, 30 * 60); // Token valid for 30mins
 
-            const std::string url = std::format("http://localhost:{}/mb-admin/setup?token={}", m_port, token);
+            const std::string url = std::format("http://localhost:{}/mb/setup?token={}", m_port, token);
             logger::info(
                 "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins add <email> <password>\n",
                 url);
 
 #ifdef _WIN32
-            std::string command = "start " + url;
+            const std::string command = "start " + url;
 #elif __APPLE__
-            std::string command = "open " + url;
+            const std::string command = "open " + url;
 #elif __linux__
-            std::string command = "xdg-open " + url;
+            const std::string command = "xdg-open " + url;
 #else
             logger::critical("Unsupported platform");
 #endif
 
-
             if (int result = std::system(command.c_str()); result != 0) {
                 logger::info("Could not open browser, result code: {}", result);
             }
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             logger::critical("Failed to spin admin dashboard\n\t— {}", e.what());
         }
 
@@ -318,7 +309,7 @@ namespace mb {
             return;
         }
 
-        throw std::invalid_argument("Expected database type of either `sqlite3` or `postgresql`");
+        throw MantisException(500, "Expected database type of either `sqlite3` or `postgresql` but got {}", dbType);
     }
 
     std::string MantisBase::jwtSecretKey() {
