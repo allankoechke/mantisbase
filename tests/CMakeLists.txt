@@ -26,8 +26,13 @@ file(GLOB TEST_FILES
         unit/test_database.cpp
         unit/test_models.cpp
         unit/test_expr_eval.cpp
-        # unit/*.cpp
-        # integration/*.cpp
+        unit/test_jwt.cpp
+        unit/test_access_rules.cpp
+        unit/test_context_store.cpp
+        unit/test_entity_schema_field.cpp
+        integration/test_integration_crud.cpp
+        integration/test_integration_schema.cpp
+        integration/test_integration_auth.cpp
 )
 
 add_executable(mantisbase_tests ${TEST_FILES})
