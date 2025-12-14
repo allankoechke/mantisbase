@@ -66,10 +66,9 @@ See [Installation Guide](00.installation.md) for more details.
 Before using the admin dashboard, create an admin user:
 
 ```bash
-./mantisbase admins --add admin@example.com
+./mantisbase admins --add admin@example.com admin_password_bjb12!
 ```
 
-You'll be prompted to enter and confirm a password.
 
 ### 2. Access the Admin Dashboard
 
