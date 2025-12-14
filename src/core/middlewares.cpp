@@ -62,6 +62,8 @@ namespace mb {
                 // Set type to user since token is valid, but user record may be invalid
                 auth["type"] = "user";
 
+                logger::trace("Authenticated on entity {} as user with id {}", user_table, user_id);
+
                 try {
                     const auto user_entity = MantisBase::instance().entity(user_table);
                     if (auto user = user_entity.read(user_id); user.has_value()) {
@@ -111,7 +113,7 @@ namespace mb {
                                                   ? entity.updateRule()
                                                   : entity.deleteRule();
 
-                logger::trace("Access Rule?\n\t: {}", rule.toJSON().dump());
+                // logger::trace("Access Rule?\n\t: {}", rule.toJSON().dump());
 
                 if (rule.mode() == "public") {
                     logger::trace("Public access, no auth required!");
@@ -138,6 +140,18 @@ namespace mb {
                     if (verification.contains("verified") &&
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
+
+                        // Check if verified user object is valid, if not throw auth error
+                        if (auth["user"].is_null() || !auth["user"].is_object()) {
+                            res.sendJSON(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Auth user not found!"}
+                                 });
+
+                            return HandlerResponse::Handled;
+                        }
+
                         return HandlerResponse::Unhandled;
                     }
 
@@ -168,6 +182,17 @@ namespace mb {
                     if (verification.contains("verified") &&
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
+
+                        // Check if verified user object is valid, if not throw auth error
+                        if (auth["user"].is_null() || !auth["user"].is_object()) {
+                            res.sendJSON(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Auth user not found!"}
+                                 });
+                            return HandlerResponse::Handled;
+                        }
+
                         return HandlerResponse::Unhandled;
                     }
 
@@ -276,7 +301,8 @@ namespace mb {
             try {
                 // Require admin authentication
                 auto verification = req.getOr<json>("verification", json::object());
-                // logger::trace("Verification: {}", verification.dump());
+                logger::trace("Verification: {}", verification.dump());
+
                 if (verification.empty()) {
                     // Send auth error
                     res.sendJSON(403, {
@@ -292,6 +318,18 @@ namespace mb {
                                 verification["verified"].get<bool>();
                 if (ok) {
                     auto auth = req.getOr<json>("auth", json::object());
+                    logger::trace("Ver User Auth: {}", auth.dump());
+
+                    // Check if verified user object is valid, if not throw auth error
+                    if (auth["user"].is_null() || !auth["user"].is_object()) {
+                        res.sendJSON(403, {
+                                 {"data", json::object()},
+                                 {"status", 403},
+                                 {"error", "Auth user not found!"}
+                             });
+                        return HandlerResponse::Handled;
+                    }
+
                     // logger::trace("Auth: {}", auth.dump());
                     // Ensure the auth user was for admin table
                     if (auth["entity"].get<std::string>() == "mb_admins") {

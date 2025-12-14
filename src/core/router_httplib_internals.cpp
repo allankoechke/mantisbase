@@ -224,8 +224,11 @@ namespace mb {
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleSetupAdmin() {
         return [](MantisRequest &req, const MantisResponse &res) {
+            TRACE_MANTIS_FUNC();
             try {
                 auto auth = req.getOr("auth", json::object());
+logger::trace("Auth Data: {}", auth.dump());
+
                 // Require at least one valid auth on any table
                 auto verification = req.getOr<json>("verification", json::object());
                 if (verification.empty()) {
@@ -253,12 +256,12 @@ namespace mb {
                 }
 
                 // Token must be signed to this entity to proceed
-                if (auth["entity"].get<std::string>() != "mb_service_acc") {
+                if (!auth["entity"].is_string() || auth["entity"].get<std::string>() != "mb_service_acc") {
                     // Send auth error
                     res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
-                                     {"error", "Auth user does not have access to this route."}
+                                     {"error", "Expected a service account token, access denied!"}
                                  });
                     return;
                 }
@@ -268,7 +271,7 @@ namespace mb {
                     res.sendJSON(404, {
                                      {"data", json::object()},
                                      {"status", 403},
-                                     {"error", "Auth user does not exist."}
+                                     {"error", "Auth service account does not exist!"}
                                  });
                     return;
                 }

@@ -260,7 +260,7 @@ namespace mb {
             const auto admin_entity = entity("mb_admins");
 
             // If we don't have admin accounts, spin up admin dashboard
-            if (!admin_entity.list().empty()) return;
+            // if (!admin_entity.list().empty()) return;
 
             std::cout << std::endl;
 
@@ -273,10 +273,12 @@ namespace mb {
             claims["id"] = record["id"];
             claims["entity"] = "mb_service_acc";
 
+            logger::trace("Claims: {}", claims.dump(2));
+
             // Create token and pass it in
             const auto token = Auth::createToken(claims, 30 * 60); // Token valid for 30mins
 
-            const std::string url = std::format("http://localhost:{}/mb-admin?token={}", m_port, token);
+            const std::string url = std::format("http://localhost:{}/mb-admin/setup?token={}", m_port, token);
             logger::info(
                 "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins add <email> <password>\n",
                 url);
