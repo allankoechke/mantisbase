@@ -520,11 +520,25 @@ namespace mb {
         // Get a session object
         const auto sql = MantisBase::instance().db().session();
 
+        // Validate all column names against entity schema
+        std::vector<std::string> valid_columns;
+        for (const auto& col_name : columns) {
+            if (hasField(col_name).has_value()) {
+                valid_columns.push_back(col_name);
+            } else {
+                logger::warn("Invalid column name '{}' in queryFromCols for entity '{}'", col_name, name());
+            }
+        }
+
+        if (valid_columns.empty()) {
+            throw MantisException(400, "No valid columns provided");
+        }
+
         // Build dynamic WHERE clause
         std::string where_clause;
-        for (size_t i = 0; i < columns.size(); ++i) {
+        for (size_t i = 0; i < valid_columns.size(); ++i) {
             if (i > 0) where_clause += " OR ";
-            where_clause += columns[i] + " = :value";
+            where_clause += valid_columns[i] + " = :value";
         }
 
         const std::string query = "SELECT * FROM " + name() + " WHERE " + where_clause + " LIMIT 1";

@@ -10,8 +10,6 @@
 #include <fstream>
 #include <filesystem>
 
-#include "../../tests/test_fixure.h"
-
 namespace mb {
     namespace fs = std::filesystem;
 
@@ -45,7 +43,8 @@ namespace mb {
                 std::format("New entity name `{}` is not a valid SQL table name format!", new_entity_name));
         }
 
-        logger::trace("Renaming folder name from `files/{}` to `files/{}`", old_entity_name, new_entity_name);
+        logger::trace("Renaming folder name from `files/{}` to `files/{}`",
+            old_entity_name, new_entity_name);
 
         // Rename folder if it exists, else, create it
         if (const auto old_path = dirPath(old_entity_name); fs::exists(old_path))
@@ -76,7 +75,7 @@ namespace mb {
 
     std::string Files::dirPath(const std::string &entity_name, const bool create_if_missing) {
         // Create entity file directory
-        const auto path = getBaseDir() / entity_name;
+        const auto path = filesBaseDir() / entity_name;
 
         if (!isCanonicalPath(path)) {
             throw MantisException(500, "Path transversal detected.",
@@ -102,7 +101,7 @@ namespace mb {
                 std::format("File name `{}` is empty or invalid!", filename));
         }
 
-        const auto c_path = getCanonicalPath(getBaseDir() / entity_name / filename);
+        const auto c_path = getCanonicalPath(filesBaseDir() / entity_name / filename);
         return c_path.string();
     }
 
