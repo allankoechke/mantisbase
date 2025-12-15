@@ -1,67 +1,28 @@
 #include <gtest/gtest.h>
 #include <httplib.h>
 #include <nlohmann/json.hpp>
-#include <thread>
-#include <chrono>
 #include "../test_fixure.h"
+#include "../common/test_helpers.h"
+#include "../common/test_config.h"
 
 class IntegrationSchemaTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        client = std::make_unique<httplib::Client>("http://localhost", 7075);
-        
-        // Wait for server to be ready
-        int retries = 50;
-        bool serverReady = false;
-        for (int i = 0; i < retries; ++i) {
-            if (auto res = client->Get("/api/v1/health"); res && res->status == 200) {
-                serverReady = true;
-                break;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-        ASSERT_TRUE(serverReady);
+        // Server is already started in main.cpp, just get client
+        auto& fixture = TestFixture::instance(mb::json{});
+        client = std::make_unique<httplib::Client>(fixture.client());
         
         // Create admin token
-        adminToken = createAdminToken();
+        adminToken = TestHelpers::createTestAdminToken(*client);
         ASSERT_FALSE(adminToken.empty());
     }
 
     void TearDown() override {
         // Clean up test schemas
-        if (!adminToken.empty()) {
-            httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
-            client->Delete("/api/v1/schemas/test_schema", headers);
-            client->Delete("/api/v1/schemas/test_schema_update", headers);
-        }
-    }
-
-    std::string createAdminToken() {
-        nlohmann::json setupAdmin = {
-            {"email", "admin@test.com"},
-            {"password", "adminpass123"}
-        };
-        
-        auto setupRes = client->Post("/api/v1/auth/setup/admin", 
-            setupAdmin.dump(), "application/json");
-        
-        nlohmann::json login = {
-            {"entity", "mb_admins"},
-            {"identity", "admin@test.com"},
-            {"password", "adminpass123"}
-        };
-        
-        auto loginRes = client->Post("/api/v1/auth/login", 
-            login.dump(), "application/json");
-        
-        if (loginRes && loginRes->status == 200) {
-            auto response = nlohmann::json::parse(loginRes->body);
-            if (response.contains("token")) {
-                return response["token"].get<std::string>();
-            }
-        }
-        
-        return "";
+        TestHelpers::cleanupTestEntity(*client, "test_schema", adminToken);
+        TestHelpers::cleanupTestEntity(*client, "test_schema_update", adminToken);
+        TestHelpers::cleanupTestEntity(*client, "test_schema_delete", adminToken);
+        TestHelpers::cleanupTestEntity(*client, "test_schema_rules", adminToken);
     }
 
     std::unique_ptr<httplib::Client> client;

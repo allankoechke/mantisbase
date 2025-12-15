@@ -1,29 +1,19 @@
 #include <gtest/gtest.h>
 #include <httplib.h>
 #include <nlohmann/json.hpp>
-#include <thread>
-#include <chrono>
 #include "../test_fixure.h"
+#include "../common/test_helpers.h"
+#include "../common/test_config.h"
 
 class IntegrationAuthTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        client = std::make_unique<httplib::Client>("http://localhost", 7075);
-        
-        // Wait for server to be ready
-        int retries = 50;
-        bool serverReady = false;
-        for (int i = 0; i < retries; ++i) {
-            if (auto res = client->Get("/api/v1/health"); res && res->status == 200) {
-                serverReady = true;
-                break;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-        ASSERT_TRUE(serverReady);
+        // Server is already started in main.cpp, just get client
+        auto& fixture = TestFixture::instance(mb::json{});
+        client = std::make_unique<httplib::Client>(fixture.client());
         
         // Create admin token for setup
-        adminToken = createAdminToken();
+        adminToken = TestHelpers::createTestAdminToken(*client);
         
         // Create test user entity
         createUserEntity();
@@ -31,59 +21,39 @@ protected:
 
     void TearDown() override {
         // Clean up test entities
-        if (!adminToken.empty()) {
-            httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
-            client->Delete("/api/v1/schemas/test_users", headers);
-        }
-    }
-
-    std::string createAdminToken() {
-        nlohmann::json setupAdmin = {
-            {"email", "admin@test.com"},
-            {"password", "adminpass123"}
-        };
-        
-        auto setupRes = client->Post("/api/v1/auth/setup/admin", 
-            setupAdmin.dump(), "application/json");
-        
-        nlohmann::json login = {
-            {"entity", "mb_admins"},
-            {"identity", "admin@test.com"},
-            {"password", "adminpass123"}
-        };
-        
-        auto loginRes = client->Post("/api/v1/auth/login", 
-            login.dump(), "application/json");
-        
-        if (loginRes && loginRes->status == 200) {
-            auto response = nlohmann::json::parse(loginRes->body);
-            if (response.contains("token")) {
-                return response["token"].get<std::string>();
-            }
-        }
-        
-        return "";
+        TestHelpers::cleanupTestEntity(*client, "test_users", adminToken);
     }
 
     void createUserEntity() {
         if (adminToken.empty()) return;
         
-        httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
-        
-        nlohmann::json schema = {
-            {"name", "test_users"},
-            {"type", "auth"},
+        nlohmann::json access_rules = {
             {"list", {{"mode", "auth"}}},
             {"get", {{"mode", "auth"}}},
             {"add", {{"mode", "public"}}},
             {"update", {{"mode", "auth"}}},
-            {"delete", {{"mode", ""}}},
-            {"fields", nlohmann::json::array({
-                {{"name", "name"}, {"type", "string"}, {"required", true}},
-                {{"name", "email"}, {"type", "string"}, {"required", true}, {"unique", true}},
-                {{"name", "password"}, {"type", "string"}, {"required", true}}
-            })}
+            {"delete", {{"mode", ""}}}
         };
+        
+        nlohmann::json fields = nlohmann::json::array({
+            {{"name", "name"}, {"type", "string"}, {"required", true}},
+            {{"name", "email"}, {"type", "string"}, {"required", true}, {"unique", true}},
+            {{"name", "password"}, {"type", "string"}, {"required", true}}
+        });
+        
+        httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+        nlohmann::json schema = {
+            {"name", "test_users"},
+            {"type", "auth"},
+            {"fields", fields}
+        };
+        
+        // Add access rules
+        schema["list"] = access_rules["list"];
+        schema["get"] = access_rules["get"];
+        schema["add"] = access_rules["add"];
+        schema["update"] = access_rules["update"];
+        schema["delete"] = access_rules["delete"];
         
         client->Post("/api/v1/schemas", headers, schema.dump(), "application/json");
         
@@ -91,7 +61,7 @@ protected:
         nlohmann::json user = {
             {"name", "Test User"},
             {"email", "testuser@example.com"},
-            {"password", "testpass123"}
+            {"password", TestConfig::getTestPassword()}
         };
         
         client->Post("/api/v1/entities/test_users", 
@@ -106,7 +76,7 @@ TEST_F(IntegrationAuthTest, LoginWithValidCredentials) {
     nlohmann::json login = {
         {"entity", "test_users"},
         {"identity", "testuser@example.com"},
-        {"password", "testpass123"}
+        {"password", TestConfig::getTestPassword()}
     };
     
     auto res = client->Post("/api/v1/auth/login", 
@@ -143,7 +113,7 @@ TEST_F(IntegrationAuthTest, LoginWithInvalidEntity) {
     nlohmann::json login = {
         {"entity", "nonexistent"},
         {"identity", "testuser@example.com"},
-        {"password", "testpass123"}
+        {"password", TestConfig::getTestPassword()}
     };
     
     auto res = client->Post("/api/v1/auth/login", 
@@ -192,7 +162,7 @@ TEST_F(IntegrationAuthTest, RefreshToken) {
     nlohmann::json login = {
         {"entity", "test_users"},
         {"identity", "testuser@example.com"},
-        {"password", "testpass123"}
+        {"password", TestConfig::getTestPassword()}
     };
     
     auto loginRes = client->Post("/api/v1/auth/login", 
@@ -227,7 +197,7 @@ TEST_F(IntegrationAuthTest, Logout) {
     nlohmann::json login = {
         {"entity", "test_users"},
         {"identity", "testuser@example.com"},
-        {"password", "testpass123"}
+        {"password", TestConfig::getTestPassword()}
     };
     
     auto loginRes = client->Post("/api/v1/auth/login", 
@@ -250,7 +220,7 @@ TEST_F(IntegrationAuthTest, UseTokenForAuthenticatedRequest) {
     nlohmann::json login = {
         {"entity", "test_users"},
         {"identity", "testuser@example.com"},
-        {"password", "testpass123"}
+        {"password", TestConfig::getTestPassword()}
     };
     
     auto loginRes = client->Post("/api/v1/auth/login", 

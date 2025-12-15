@@ -411,6 +411,12 @@ namespace mb {
             MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             
+            // Skip rate limiting in test mode if disabled
+            if (const char* test_disable = std::getenv("TEST_DISABLE_RATE_LIMIT"); 
+                test_disable && std::string(test_disable) == "1") {
+                return HandlerResponse::Unhandled;
+            }
+            
             try {
                 // Determine the identifier for rate limiting
                 std::string identifier;
