@@ -4,6 +4,15 @@
 
 namespace mb {
     EntitySchema::EntitySchema(const std::string &entity_name, const std::string &entity_type) {
+        // Ensure name is valid
+        if (!EntitySchema::isValidEntityName(entity_name)) {
+            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", entity_name);
+        }
+
+        if (!EntitySchema::isValidEntityType(entity_type)) {
+            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", entity_type);
+        }
+
         setName(entity_name).setType(entity_type);
     }
 
@@ -41,6 +50,15 @@ namespace mb {
 
         const auto _name = entity_schema.at("name").get<std::string>();
         const auto _type = entity_schema.at("type").get<std::string>();
+
+        // Ensure name is valid
+        if (!EntitySchema::isValidEntityName(_name)) {
+            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", _name);
+        }
+
+        if (!EntitySchema::isValidEntityType(_type)) {
+            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", _type);
+        }
 
         eSchema.setName(_name);
         eSchema.setType(_type);
@@ -559,6 +577,20 @@ namespace mb {
 
     std::optional<std::string> EntitySchema::validate() const {
         return validate(*this);
+    }
+
+    bool EntitySchema::isValidEntityType(const std::string &type) {
+        if (type == "base" || type == "view" || type == "auth") {
+            return true;
+        }
+        return false;
+    }
+
+    bool EntitySchema::isValidEntityName(const std::string &name) {
+        if (name.empty() || name.length() > 64) return false;
+        return std::ranges::all_of(name, [](const char c) {
+            return std::isalnum(c) || c == '_';
+        });
     }
 
     std::string EntitySchema::getFieldType(const std::string &type, std::shared_ptr<soci::session> sql) {

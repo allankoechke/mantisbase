@@ -6,8 +6,17 @@
 
 namespace mb {
     Entity::Entity(const nlohmann::json &schema) {
-        if (!schema.contains("name") || !schema.contains("type"))
+        if (!schema.contains("name") || !schema["name"].is_string() || !schema.contains("type") || !schema["type"].is_string())
             throw std::invalid_argument("Missing required fields `name` and `type` in schema!");
+
+        // Ensure name is valid
+        if (!EntitySchema::isValidEntityName(schema["name"].get<std::string>())) {
+            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", schema);
+        }
+
+        if (!EntitySchema::isValidEntityType(schema["type"].get<std::string>())) {
+            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", type);
+        }
 
         m_schema = schema;
 
@@ -46,6 +55,14 @@ namespace mb {
 
     Entity::Entity(const std::string &name, const std::string &type)
         : Entity({{"name", name}, {"type", type}}) {
+        // Ensure name is valid
+        if (!EntitySchema::isValidEntityName(name)) {
+            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", name);
+        }
+
+        if (!EntitySchema::isValidEntityType(type)) {
+            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", type);
+        }
     }
 
     std::string Entity::id() const {

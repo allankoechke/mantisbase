@@ -363,10 +363,12 @@ namespace mb {
         router.Get(R"(/mb(/.*)?)", handleAdminDashboardRoute());
 
         // Systemwide auth endpoints
-        router.Post("/api/v1/auth/login", handleAuthLogin());
+        // Rate limit login endpoint: 5 attempts per minute per IP to prevent brute force attacks
+        router.Post("/api/v1/auth/login", handleAuthLogin(), {rateLimit(5, 60, false)});
         router.Post("/api/v1/auth/refresh", handleAuthRefresh());
         router.Post("/api/v1/auth/logout", handleAuthLogout());
-        router.Post("/api/v1/auth/setup/admin", handleSetupAdmin());
+        // Rate limit admin setup: 3 attempts per hour per IP (very strict for security)
+        router.Post("/api/v1/auth/setup/admin", handleSetupAdmin(), {rateLimit(3, 3600, false)});
 
         // Add entity schema routes
         // GET|POST|PATCH|DELETE `/api/v1/schemas*`
@@ -425,6 +427,16 @@ namespace mb {
         return [](const MantisRequest &req, MantisResponse &res) {
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");
+
+            if (!EntitySchema::isValidEntityName(table_name)) {
+                json response;
+                response["error"] = std::format("Invalid entity name `{}`", table_name);
+                response["status"] = 400;
+                response["data"] = json::object();
+
+                res.sendJSON(400, response);
+                return;
+            }
 
             if (table_name.empty() || file_name.empty()) {
                 json response;

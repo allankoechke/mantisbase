@@ -1,38 +1,49 @@
 # Code Review: Security, Performance, and Code Quality Analysis
 
+## 📝 Recent Updates
+
+**Entity Name Validation Added (✅):**
+- Entity name validation has been implemented in `Entity` and `EntitySchema` constructors
+- Validation function `EntitySchema::isValidEntityName()` checks:
+  - Name is not empty
+  - Name length <= 64 characters  
+  - Only alphanumeric and underscore characters allowed
+- This addresses the SQL injection risk from table name construction in most cases
+
+**Remaining Work:**
+- Entity names from URL path parameters still need validation (file serving routes, schema routes)
+- See sections below for specific locations
+
+---
+
 ## 🔒 Security Vulnerabilities
 
-### 1. **SQL Injection Risk in Table Name Construction** (HIGH PRIORITY)
+### 1. **SQL Injection Risk in Table Name Construction** ✅ PARTIALLY ADDRESSED
 **Location:** `src/core/models/entity.cpp` (multiple locations)
 
-**Issue:** Table names are concatenated directly into SQL queries without validation. While `name()` comes from the database schema, it should still be validated to prevent injection if schema data is ever compromised.
+**Status:** Entity name validation has been added to Entity and EntitySchema constructors using `EntitySchema::isValidEntityName()`, which validates:
+- Name is not empty
+- Name length <= 64 characters
+- Only alphanumeric and underscore characters allowed
+
+**Remaining Concerns:**
+- Entity names from URL path parameters should also be validated before use
+- File serving route (`/api/files/:entity/:file`) extracts entity name from path without validation
+- Schema routes may accept entity names from path parameters
 
 **Affected Code:**
 ```cpp
-// Line 483
-*sql << "SELECT id FROM " + name() + " WHERE id = :id LIMIT 1"
+// router.cpp:426 - File serving route
+const auto table_name = req.getPathParamValue("entity"); // Should validate!
 
-// Line 513
-const std::string query = "SELECT * FROM " + name() + " WHERE " + where_clause + " LIMIT 1";
-
-// Line 175
-std::string sql_query = "INSERT INTO " + name() + "(" + columns + ") VALUES (" + placeholders + ")";
+// entity_schema_routes_handlers.cpp:10 - Schema lookup
+const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id")); // Should validate if it's a name!
 ```
 
 **Recommendation:**
-- Add table name validation function that only allows alphanumeric characters and underscores
-- Use a whitelist approach: validate against known entity names from schema cache
-- Consider using prepared statement placeholders for table names (if supported by SOCI)
-
-**Example Fix:**
-```cpp
-bool isValidTableName(const std::string& name) {
-    if (name.empty() || name.length() > 64) return false;
-    return std::all_of(name.begin(), name.end(), [](char c) {
-        return std::isalnum(c) || c == '_';
-    });
-}
-```
+- Validate entity names from path parameters before using them
+- Use `EntitySchema::isValidEntityName()` for all user-provided entity names
+- Consider whitelist validation against known entity names from schema cache for additional security
 
 ### 2. **SQL Injection in JavaScript Query Interface** (CRITICAL)
 **Location:** `src/core/database.cpp:230-325`
@@ -53,25 +64,25 @@ const char *query = duk_require_string(ctx, 0);
 - **Option 4:** Add strict validation and sanitization
 - Add query logging for security auditing
 
-### 3. **Path Traversal Vulnerability in File Operations** (MEDIUM PRIORITY)
-**Location:** `src/core/files.cpp`
+### 3. **Path Traversal Vulnerability in File Operations** ✅ PARTIALLY ADDRESSED
+**Location:** `src/core/files.cpp`, `src/core/router.cpp`
 
-**Issue:** While `filesystem::path` operations are used, entity names and filenames should be validated to prevent directory traversal attacks.
+**Status:** Entity name validation has been added to Entity/EntitySchema constructors. However, entity names from URL path parameters still need validation.
+
+**Current Protection:** 
+- ✅ Entity names are validated in constructors using `isValidEntityName()`
+- ✅ `sanitizeFilename()` is used for uploaded files
+- ⚠️ Entity names from URL path parameters are not validated before use
 
 **Affected Code:**
 ```cpp
-// Line 51
-auto path = (fs::path(MantisBase::instance().dataDir()) / "files" / entity_name).string();
-
-// Line 59
-return (fs::path(MantisBase::instance().dataDir()) / "files" / entity_name / filename).string();
+// router.cpp:426 - File serving route
+const auto table_name = req.getPathParamValue("entity"); // Should validate before use!
+Files::getFilePath(table_name, file_name); // Uses entity_name without validation
 ```
 
-**Current Protection:** `sanitizeFilename()` is used for uploaded files, but entity names are not sanitized.
-
 **Recommendation:**
-- Validate entity names (alphanumeric + underscore only)
-- Ensure `sanitizeFilename()` properly handles all edge cases
+- Validate entity names from path parameters using `EntitySchema::isValidEntityName()` before passing to file operations
 - Add path canonicalization check to ensure final path is within expected directory
 - Consider using `fs::canonical()` and verifying it starts with the base directory
 
@@ -364,7 +375,8 @@ namespace EntityType {
 
 ### Critical (Fix Immediately)
 1. SQL injection in JavaScript query interface
-2. Table name validation in SQL queries
+2. ✅ **RESOLVED:** Table name validation in SQL queries - Entity name validation added to constructors
+3. **REMAINING:** Validate entity names from URL path parameters (file serving, schema routes)
 
 ### High Priority (Fix Soon)
 1. Path traversal in file operations

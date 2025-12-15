@@ -14,7 +14,9 @@ namespace mb {
                 // If table name is passed in, get the `id` equivalent
                 const auto schema_id = schema_id_or_name.starts_with("mbt_")
                                            ? schema_id_or_name
-                                           : EntitySchema::genEntityId(schema_id_or_name);
+                                           : (EntitySchema::isValidEntityName(schema_id_or_name)
+                                                  ? EntitySchema::genEntityId(schema_id_or_name)
+                                                  : throw MantisException(400, "Invalid entity name/id"));
 
                 // Read for entity matching given `id` if it exists, return it, else error `404`
                 const auto record = EntitySchema::getTable(schema_id);
@@ -212,6 +214,7 @@ namespace mb {
         router.Post("/api/v1/schemas", postRouteHandler(), {requireAdminAuth()}); // Create Entity
         router.Get("/api/v1/schemas/:schema_name_or_id", getOneRouteHandler(), {requireAdminAuth()});
         router.Patch("/api/v1/schemas/:schema_name_or_id", patchRouteHandler(), {requireAdminAuth()}); // Update Entity
-        router.Delete("/api/v1/schemas/:schema_name_or_id", deleteRouteHandler(), {requireAdminAuth()}); // Delete Entity
+        router.Delete("/api/v1/schemas/:schema_name_or_id", deleteRouteHandler(), {requireAdminAuth()});
+        // Delete Entity
     };
 }

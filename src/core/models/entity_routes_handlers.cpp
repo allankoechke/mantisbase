@@ -68,10 +68,14 @@ namespace mb {
                 const auto entity = MantisBase::instance().entity(entity_name);
 
                 // Page number to query
-                auto page = req.hasQueryParam("page") ? std::stoi(req.getQueryParamValue("page")) : 1;
+                auto page = req.hasQueryParam("page")
+                                ? safe_stoi(req.getQueryParamValue("page"), 1)
+                                : 1;
 
                 // Records per request
-                auto page_size = req.hasQueryParam("page_size") ? std::stoi(req.getQueryParamValue("page_size")) : 100;
+                auto page_size = req.hasQueryParam("page_size")
+                                     ? safe_stoi(req.getQueryParamValue("page_size"), 100)
+                                     : 100;
 
                 // Skip counting total items
                 bool skip_total_count = req.hasQueryParam("skip_total_count")

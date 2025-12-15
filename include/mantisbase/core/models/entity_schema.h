@@ -337,6 +337,18 @@ namespace mb {
          */
         [[nodiscard]] std::optional<std::string> validate() const;
 
+        /**
+         * @brief Validate this schema name to alphanum and _ only
+         * @return Boolean true if all checks out
+         */
+        static bool isValidEntityName(const std::string& name);
+
+        /**
+         * @brief Validate this schema type to the 3 supported types
+         * @return Boolean true if all checks out
+         */
+        static bool isValidEntityType(const std::string& type);
+
         // --------------- SCHEMA ROUTING ------------------ //
         [[nodiscard]] HandlerFn getOneRouteHandler() const;
 

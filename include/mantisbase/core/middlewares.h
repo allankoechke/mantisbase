@@ -77,6 +77,30 @@ namespace mb {
      * @return Middleware function that validates entity auth
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> requireEntityAuth(const std::string& entity_name);
+    
+    /**
+     * @brief Rate limiting middleware to prevent abuse.
+     * 
+     * Limits the number of requests per time window. Can rate limit by IP address
+     * or by authenticated user ID.
+     * 
+     * @param max_requests Maximum number of requests allowed in the time window
+     * @param window_seconds Time window duration in seconds
+     * @param use_user_id If true, rate limit by authenticated user ID; if false, use IP address
+     * @return Middleware function that enforces rate limits
+     * @code
+     * // Rate limit by IP: 100 requests per minute
+     * router.Get("/api/v1/data", handler, {rateLimit(100, 60, false)});
+     * 
+     * // Rate limit by user: 10 requests per second
+     * router.Post("/api/v1/upload", handler, {rateLimit(10, 1, true)});
+     * @endcode
+     */
+    std::function<HandlerResponse(MantisRequest&, MantisResponse&)> rateLimit(
+        int max_requests, 
+        int window_seconds, 
+        bool use_user_id = false
+    );
 }
 
 #endif //MANTISBASE_MIDDLEWARES_H

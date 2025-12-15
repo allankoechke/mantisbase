@@ -1,6 +1,10 @@
 #include "../include/mantisbase/core/middlewares.h"
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/core/models/entity.h"
+#include <unordered_map>
+#include <deque>
+#include <chrono>
+#include <mutex>
 
 namespace mb {
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> getAuthToken() {
@@ -379,6 +383,148 @@ namespace mb {
         return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             return REQUEST_PENDING;
+        };
+    }
+
+    // Rate limiting storage structure
+    namespace {
+        struct RateLimitEntry {
+            std::deque<std::chrono::steady_clock::time_point> requests;
+            std::chrono::steady_clock::time_point last_cleanup;
+        };
+
+        // In-memory storage for rate limit tracking
+        // Key: identifier (IP address or user ID)
+        // Value: deque of request timestamps within the window
+        std::unordered_map<std::string, RateLimitEntry> rate_limit_store;
+        std::mutex rate_limit_mutex;
+        constexpr auto CLEANUP_INTERVAL = std::chrono::minutes(5);
+    }
+
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rateLimit(
+        int max_requests, 
+        int window_seconds, 
+        bool use_user_id) {
+        std::string msg = MANTIS_FUNC();
+        
+        return [max_requests, window_seconds, use_user_id, msg](
+            MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
+            
+            try {
+                // Determine the identifier for rate limiting
+                std::string identifier;
+                
+                if (use_user_id) {
+                    // Try to get user ID from auth context
+                    auto auth = req.getOr<json>("auth", json::object());
+                    if (auth.contains("id") && !auth["id"].is_null()) {
+                        identifier = auth["id"].get<std::string>();
+                    } else {
+                        // Fallback to IP if no user ID available
+                        identifier = req.getRemoteAddr();
+                    }
+                } else {
+                    // Use IP address
+                    identifier = req.getRemoteAddr();
+                }
+                
+                if (identifier.empty()) {
+                    // If we can't identify the client, allow the request
+                    // (could also deny, but allowing is safer for legitimate users)
+                    logger::warn("Rate limit: Unable to identify client, allowing request");
+                    return HandlerResponse::Unhandled;
+                }
+                
+                const auto now = std::chrono::steady_clock::now();
+                const auto window_duration = std::chrono::seconds(window_seconds);
+                const auto cutoff_time = now - window_duration;
+                
+                // Lock for thread-safe access
+                std::lock_guard<std::mutex> lock(rate_limit_mutex);
+                
+                // Get or create entry for this identifier
+                auto& entry = rate_limit_store[identifier];
+                
+                // Cleanup old requests outside the window
+                while (!entry.requests.empty() && entry.requests.front() < cutoff_time) {
+                    entry.requests.pop_front();
+                }
+                
+                // Periodic cleanup of stale entries (every 5 minutes per identifier)
+                if (now - entry.last_cleanup > CLEANUP_INTERVAL) {
+                    entry.last_cleanup = now;
+                    // If no requests in window, remove the entry to save memory
+                    if (entry.requests.empty()) {
+                        rate_limit_store.erase(identifier);
+                        return HandlerResponse::Unhandled;
+                    }
+                }
+                
+                // Check if rate limit exceeded
+                if (entry.requests.size() >= static_cast<size_t>(max_requests)) {
+                    // Calculate retry-after seconds (time until oldest request expires)
+                    const auto oldest_request = entry.requests.front();
+                    const auto retry_after = std::chrono::duration_cast<std::chrono::seconds>(
+                        window_duration - (now - oldest_request)
+                    ).count() + 1; // Add 1 second buffer
+                    
+                    // Set rate limit headers
+                    res.setHeader("X-RateLimit-Limit", std::to_string(max_requests));
+                    res.setHeader("X-RateLimit-Remaining", "0");
+                    // Calculate reset time (Unix timestamp when the window expires)
+                    const auto reset_time = std::chrono::duration_cast<std::chrono::seconds>(
+                        std::chrono::system_clock::now().time_since_epoch()
+                    ).count() + retry_after;
+                    res.setHeader("X-RateLimit-Reset", std::to_string(reset_time));
+                    res.setHeader("Retry-After", std::to_string(retry_after));
+                    
+                    // Send 429 Too Many Requests response
+                    res.sendJSON(429, {
+                        {"status", 429},
+                        {"data", json::object()},
+                        {"error", std::format(
+                            "Rate limit exceeded. Maximum {} requests per {} seconds. Retry after {} seconds.",
+                            max_requests, window_seconds, retry_after
+                        )}
+                    });
+                    
+                    logger::warn("Rate limit exceeded for identifier: {} ({} requests in {}s window)", 
+                                identifier, entry.requests.size(), window_seconds);
+                    
+                    return HandlerResponse::Handled;
+                }
+                
+                // Add current request timestamp
+                entry.requests.push_back(now);
+                
+                // Set rate limit headers for successful requests
+                const auto remaining = max_requests - static_cast<int>(entry.requests.size());
+                res.setHeader("X-RateLimit-Limit", std::to_string(max_requests));
+                res.setHeader("X-RateLimit-Remaining", std::to_string(remaining));
+                // Calculate reset time (Unix timestamp when the oldest request in window expires)
+                if (!entry.requests.empty()) {
+                    const auto time_until_reset = std::chrono::duration_cast<std::chrono::seconds>(
+                        window_duration - (now - entry.requests.front())
+                    ).count();
+                    const auto reset_time = std::chrono::duration_cast<std::chrono::seconds>(
+                        std::chrono::system_clock::now().time_since_epoch()
+                    ).count() + time_until_reset;
+                    res.setHeader("X-RateLimit-Reset", std::to_string(reset_time));
+                } else {
+                    const auto reset_time = std::chrono::duration_cast<std::chrono::seconds>(
+                        std::chrono::system_clock::now().time_since_epoch()
+                    ).count() + window_seconds;
+                    res.setHeader("X-RateLimit-Reset", std::to_string(reset_time));
+                }
+                
+                return HandlerResponse::Unhandled;
+                
+            } catch (const std::exception &e) {
+                logger::error("Rate limit middleware error: {}", e.what());
+                // On error, allow the request to proceed (fail open)
+                return HandlerResponse::Unhandled;
+            }
         };
     }
 }
