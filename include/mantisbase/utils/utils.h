@@ -292,10 +292,37 @@ namespace mb {
      */
     std::string tmToStr(const std::tm &t);
 
+    /**
+     * @brief Convert ISO formatted datetime string to std::tm structure.
+     * @param value ISO formatted datetime string
+     * @return std::tm structure representing the datetime
+     */
     std::tm strToTM(const std::string &value);
 
+    /**
+     * @brief Convert database date value from SOCI row to string.
+     * @param row SOCI row containing the date value
+     * @param index Column index in the row
+     * @return String representation of the date
+     */
     std::string dbDateToString(const soci::row &row, int index);
 
+    /**
+     * @brief Safely convert string to integer with default fallback.
+     *
+     * Attempts to convert a string to an integer. If conversion fails
+     * (invalid format, out of range, etc.), returns the default value
+     * instead of throwing an exception.
+     *
+     * @param s String to convert
+     * @param default_val Default value to return if conversion fails
+     * @return Converted integer or default value
+     *
+     * @code
+     * int page = safe_stoi(req.getQueryParam("page"), 1);  // Defaults to 1 if invalid
+     * int limit = safe_stoi(req.getQueryParam("limit"), 100);  // Defaults to 100 if invalid
+     * @endcode
+     */
     int safe_stoi(const std::string &s, const int default_val);
 
     // ----------------------------------------------------------------- //

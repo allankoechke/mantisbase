@@ -82,18 +82,28 @@ namespace mb {
      * @brief Rate limiting middleware to prevent abuse.
      * 
      * Limits the number of requests per time window. Can rate limit by IP address
-     * or by authenticated user ID.
+     * or by authenticated user ID. When the rate limit is exceeded, returns a
+     * 429 Too Many Requests response with rate limit headers.
      * 
      * @param max_requests Maximum number of requests allowed in the time window
      * @param window_seconds Time window duration in seconds
-     * @param use_user_id If true, rate limit by authenticated user ID; if false, use IP address
+     * @param use_user_id If true, rate limit by authenticated user ID; if false, use IP address.
+     *                    Falls back to IP if user ID is not available.
      * @return Middleware function that enforces rate limits
+     * 
+     * @note The login endpoint uses this middleware with 5 requests per 60 seconds by IP.
+     * @note Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Remaining,
+     *       X-RateLimit-Reset, and Retry-After.
+     * 
      * @code
      * // Rate limit by IP: 100 requests per minute
      * router.Get("/api/v1/data", handler, {rateLimit(100, 60, false)});
      * 
      * // Rate limit by user: 10 requests per second
      * router.Post("/api/v1/upload", handler, {rateLimit(10, 1, true)});
+     * 
+     * // Login endpoint: 5 attempts per minute per IP (prevents brute force)
+     * router.Post("/api/v1/auth/login", loginHandler, {rateLimit(5, 60, false)});
      * @endcode
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> rateLimit(
