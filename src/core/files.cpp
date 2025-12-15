@@ -55,8 +55,9 @@ namespace mb {
     }
 
     void Files::deleteDir(const std::string &entity_name) {
-        logger::trace("Removing <data dir>/{}/*", entity_name);
+        logger::trace("Dropping dir files/{}/* completed.", entity_name);
         fs::remove_all(dirPath(entity_name));
+        logger::trace("Dropping dir files/{}/* completed.", entity_name);
     }
 
     std::optional<std::string> Files::getFilePath(const std::string &entity_name, const std::string &filename) {
@@ -77,6 +78,16 @@ namespace mb {
         // Create entity file directory
         const auto path = filesBaseDir() / entity_name;
 
+        if (!EntitySchema::isValidEntityName(entity_name)) {
+            throw MantisException(400, "Invalid entity name `{}`.", entity_name);
+        }
+
+        // Ensure base directory exists before canonicalization
+        const auto base_dir = filesBaseDir();
+        if (!fs::exists(base_dir)) {
+            fs::create_directories(base_dir);
+        }
+        
         if (!isCanonicalPath(path)) {
             throw MantisException(500, "Path transversal detected.",
                 std::format("Entity name `{}` results in path transversal.", entity_name));
@@ -140,16 +151,23 @@ namespace mb {
     }
 
     fs::path Files::getCanonicalPath(const fs::path &path) {
-        // Canonicalize and verify it's within base_path
-        const auto canonical_path = fs::canonical(path);
-        const auto canonical_base = fs::canonical(filesBaseDir());
-
-        // Check if canonical_path is within canonical_base
-        // We need to ensure the base path is a complete prefix, not just a substring match
-        // Using path comparison is more reliable than string comparison
+        // Ensure base directory exists
+        const auto base_dir = filesBaseDir();
+        if (!fs::exists(base_dir)) {
+            fs::create_directories(base_dir);
+        }
         
-        // Get the relative path from base to target
+        // Use weakly_canonical for paths that might not exist yet
+        // It resolves symlinks and normalizes the path without requiring existence
         std::error_code ec;
+        const auto canonical_path = fs::weakly_canonical(path, ec);
+        if (ec) {
+            throw MantisException(400, "Failed to resolve path: {}", ec.message());
+        }
+        
+        const auto canonical_base = fs::canonical(base_dir); // Base should exist now
+
+        // Get the relative path from base to target
         const auto relative = fs::relative(canonical_path, canonical_base, ec);
         
         // If relative path calculation failed or path is outside base, it's traversal
@@ -158,7 +176,6 @@ namespace mb {
         }
         
         // Additional check: ensure the path string starts with base path
-        // This catches edge cases where fs::relative might not work as expected
         const std::string path_str = canonical_path.string();
         const std::string base_str = canonical_base.string();
         
@@ -168,7 +185,6 @@ namespace mb {
         }
         
         // Ensure the next character (if any) is a path separator or path ends there
-        // This prevents matching "/data/files" with "/data/files_backup/..."
         if (path_str.length() > base_str.length()) {
             const char next_char = path_str[base_str.length()];
             if (next_char != fs::path::preferred_separator && next_char != '/') {
@@ -180,12 +196,22 @@ namespace mb {
     }
 
     bool Files::isCanonicalPath(const fs::path &path) {
-        // Canonicalize and verify it's within base_path
-        const auto canonical_path = fs::canonical(path);
-        const auto canonical_base = fs::canonical(filesBaseDir());
+        // Ensure base directory exists
+        const auto base_dir = filesBaseDir();
+        if (!fs::exists(base_dir)) {
+            fs::create_directories(base_dir);
+        }
+        
+        // Use weakly_canonical for paths that might not exist yet
+        std::error_code ec;
+        const auto canonical_path = fs::weakly_canonical(path, ec);
+        if (ec) {
+            return false; // Can't resolve path, consider it invalid
+        }
+        
+        const auto canonical_base = fs::canonical(base_dir); // Base should exist now
 
         // Get the relative path from base to target
-        std::error_code ec;
         const auto relative = fs::relative(canonical_path, canonical_base, ec);
         
         // If relative path calculation failed or contains "..", it's not within base

@@ -88,9 +88,10 @@ namespace mb {
                                      {"status", 400}
                                  }
                     );
+                    return;
                 }
 
-                logger::trace("Create Entity Schema: \n\tSchema: {}", body.dump());
+                // logger::trace("Create Entity Schema: \n\tSchema: {}", body.dump());
 
                 const auto eSchema = EntitySchema::fromSchema(body);
                 auto _ = eSchema.dump();
@@ -106,6 +107,8 @@ namespace mb {
                              }
                 );
             } catch (const MantisException &e) {
+                logger::critical("Error creating entity schema\n\t- {}", e.what());
+
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -113,6 +116,8 @@ namespace mb {
                              }
                 );
             } catch (const std::exception &e) {
+                logger::critical("Error creating entity schema\n\t- {}", e.what());
+
                 res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -145,6 +150,7 @@ namespace mb {
                                      {"error", err},
                                      {"status", 400}
                                  });
+                    return;
                 }
 
                 auto _schema = EntitySchema::updateTable(schema_id, body);

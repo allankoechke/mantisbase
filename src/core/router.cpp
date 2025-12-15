@@ -215,7 +215,6 @@ namespace mb {
 
         // Create entity and its routes
         auto entity = Entity(entity_schema);
-        std::cout << entity_name << "\n" << entity.schema().dump(2) << std::endl;
         entity.createEntityRoutes();
         m_entityMap.insert_or_assign(entity_name, std::move(entity));
     }

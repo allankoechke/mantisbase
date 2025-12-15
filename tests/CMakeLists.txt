@@ -71,7 +71,7 @@ if (BUILD_COMBINED_TESTS)
 
     include(GoogleTest)
     add_test(NAME all_mantisbase_tests COMMAND mantisbase_tests)
-else
+else ()
     # Separate unit and integration tests (recommended)
     
     # Unit Tests (no server needed)

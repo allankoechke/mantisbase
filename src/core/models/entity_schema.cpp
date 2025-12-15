@@ -93,10 +93,10 @@ namespace mb {
             is_array()) {
             // For each defined field, create the field schema and push to the fields array ...
             for (const auto &field: entity_schema["fields"]) {
-                logger::trace("Field\n\t- {}", field.dump());
+                // logger::trace("Field\n\t- {}", field.dump());
                 auto field_name = field["name"].get<std::string>();
                 if (!eSchema.hasField(field_name)) {
-                    logger::trace("Adding entity field: {}", field.dump());
+                    // logger::trace("Adding entity field: {}", field.dump());
                     eSchema.addField(EntitySchemaField(field));
                 } else {
                     eSchema.field(field_name).updateWith(field);
@@ -526,7 +526,7 @@ namespace mb {
             }
         }
 
-        logger::trace("Entity Schema {}", str);
+        // logger::trace("Entity Schema {}", str);
 
         return str;
     }
@@ -633,4 +633,4 @@ namespace mb {
             throw MantisException(500, "Operation not supported for `view` types.");
         }
     }
-} // mantis
+} // mb

@@ -15,7 +15,7 @@ namespace mb {
         }
 
         if (!EntitySchema::isValidEntityType(schema["type"].get<std::string>())) {
-            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", type);
+            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", schema["type"].get<std::string>());
         }
 
         m_schema = schema;

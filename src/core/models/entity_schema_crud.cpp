@@ -80,7 +80,7 @@ namespace mb {
             std::tm created_tm = *std::localtime(&t);
 
             // Execute DDL & Save to DB
-            logger::trace("Creating table with data with schema: \n{}", schema.dump(4));
+            // logger::trace("Creating table with data with schema: \n{}", schema.dump(4));
 
             // Insert to mb_tables
             *sql << "INSERT INTO mb_tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",
@@ -90,20 +90,29 @@ namespace mb {
             *sql << new_table.toDDL();
             tr.commit();
 
+            // Create response object
             json obj;
-            obj["id"] = id;
-            obj["schema"] = schema;
-            obj["created"] = tmToStr(created_tm);
-            obj["updated"] = tmToStr(created_tm);
 
-            // Create files directory
-            Files::createDir(new_table.name());
+            try {
+                obj["id"] = id;
+                obj["schema"] = schema;
+                obj["created"] = tmToStr(created_tm);
+                obj["updated"] = tmToStr(created_tm);
 
-            // Add created table to the routes
-            MantisBase::instance().router().addSchemaCache(schema);
+                // Create files directory
+                Files::createDir(new_table.name());
+
+                // Add created table to the routes
+                MantisBase::instance().router().addSchemaCache(schema);
+            } catch (const std::exception& e) {
+                logger::critical("Could not parse entity after creation\n\t- {}", e.what());
+            }
 
             return obj;
-        } catch (...) {
+        } catch (const MantisException& e) {
+            tr.rollback();
+            throw;
+        } catch (const std::exception& e) {
             tr.rollback();
             throw;
         }
@@ -141,7 +150,7 @@ namespace mb {
                 for (const auto &field: new_schema["fields"]) {
                     if (field.contains("op") && field["op"].is_string() && !field["op"].empty()) {
                         auto id = field.contains("id") ? field["id"].get<std::string>() : "";
-                        logger::trace("Field id: {}", id);
+                        // logger::trace("Field id: {}", id);
 
                         if (id.empty()) {
                             throw MantisException(400, "Expected an `id` in field for `op` operations.");

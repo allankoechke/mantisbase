@@ -142,7 +142,7 @@ namespace mb {
     nlohmann::json EntitySchemaField::constraints() const { return m_constraints; }
 
     nlohmann::json EntitySchemaField::constraint(const std::string &key) const {
-        logger::trace("Field `{}`, Constraints: \n\t> ", m_name, m_constraints.dump());
+        // logger::trace("Field `{}`, Constraints: \n\t> ", m_name, m_constraints.dump());
         if (!m_constraints.contains(key)) {
             throw MantisException(404, "No constraint found for key `" + key + "`");
         }

@@ -527,7 +527,7 @@ namespace mb {
                 return HandlerResponse::Unhandled;
                 
             } catch (const std::exception &e) {
-                logger::error("Rate limit middleware error: {}", e.what());
+                logger::critical("Rate limit middleware error: {}", e.what());
                 // On error, allow the request to proceed (fail open)
                 return HandlerResponse::Unhandled;
             }
