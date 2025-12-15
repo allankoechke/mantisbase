@@ -217,6 +217,7 @@ namespace mb {
         auto entity = Entity(entity_schema);
         entity.createEntityRoutes();
         m_entityMap.insert_or_assign(entity_name, std::move(entity));
+        std::cout << std::endl;
     }
 
     void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) {
@@ -256,6 +257,8 @@ namespace mb {
 
         // Remove Entity instance for the cache
         m_entityMap.erase(entity_name);
+
+        std::cout << std::endl;
     }
 
     void Router::globalRouteHandler(const std::string &method, const std::string &path) {
