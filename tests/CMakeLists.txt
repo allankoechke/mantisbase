@@ -31,6 +31,7 @@ file(GLOB TEST_FILES
         unit/test_context_store.cpp
         unit/test_entity_schema_field.cpp
         unit/test_files_security.cpp
+        unit/test_ip_validation.cpp
         integration/test_integration_crud.cpp
         integration/test_integration_schema.cpp
         integration/test_integration_auth.cpp
