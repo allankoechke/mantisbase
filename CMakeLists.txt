@@ -152,8 +152,12 @@ include(cmake/add-doxygen.cmake)
 include(cmake/add-semver.cmake)
 
 # Add Tests
-option(MANTIS_BUILD_TESTS "Build Mantis Tests" ON)
-include(cmake/add-tests.cmake)
+option(MANTIS_BUILD_TESTS "Build Mantis Tests" OFF)
+if (MANTIS_BUILD_TESTS)
+    message("-- Enabling tests for MantisBase")
+    enable_testing()
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
+endif ()
 
 configure_file(
         include/mantisbase/config.hpp.in
