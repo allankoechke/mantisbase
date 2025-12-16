@@ -6,7 +6,7 @@
     #include <dukglue/dukglue.h>
 #endif
 
-namespace mantis
+namespace mb
 {
     void ContextStore::dump()
     {

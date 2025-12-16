@@ -12,7 +12,7 @@
 
 #include "../utils/utils.h"
 
-namespace mantis
+namespace mb
 {
     using TokenMap = std::unordered_map<std::string, nlohmann::json>;
 
@@ -42,6 +42,6 @@ namespace mantis
          */
         static bool eval(const std::string& expr, const std::unordered_map<std::string, nlohmann::json>& vars = {});
     };
-} // mantis
+} // mb
 
 #endif //EXPR_EVALUATOR_H

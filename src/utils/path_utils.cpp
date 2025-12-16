@@ -1,6 +1,6 @@
 #include "../../include/mantisbase/utils/utils.h"
 
-namespace mantis
+namespace mb
 {
     fs::path joinPaths(const std::string& path1, const std::string& path2)
     {

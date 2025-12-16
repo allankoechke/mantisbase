@@ -12,7 +12,7 @@
 #include <dukglue/dukglue.h>
 #endif
 
-namespace mantis
+namespace mb
 {
     /// Shorten JSON namespace
     using json = nlohmann::json;
@@ -33,15 +33,12 @@ namespace mantis
      * ctx.set<bool>("verified", true);
      *
      * // Retrieve values
-     * std::optional key = ctx.get<std::string>("key");
      *
      * // From scripting using JS
      * req.set("key", 5") // INT/DOUBLE/FLOATS ...
      * req.set("key2", { a: 5, b: 7}) // Objects/JSON
      * req.set("valid", true) // BOOLs
      *
-     * req.get("key") // -> Return 5
-     * req.get("nothing") // -> undefined
      * req.getOr("nothing", "Default Value")
      * @endcode
      *
@@ -57,7 +54,7 @@ namespace mantis
     class ContextStore
     {
         std::unordered_map<std::string, std::any> data;
-        std::string __class_name__ = "mantis::ContextStore";
+        std::string __class_name__ = "mb::ContextStore";
 
     public:
         ContextStore() = default;
@@ -143,6 +140,6 @@ namespace mantis
 #endif
     };
 
-} // mantis
+} // mb
 
 #endif //MANTISAPP_CONTEXTSTORE_H

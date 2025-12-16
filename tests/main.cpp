@@ -1,9 +1,23 @@
 #include <gtest/gtest.h>
 #include <iostream>
+#include <cstdlib>
+#ifdef _WIN32
+#include <stdlib.h>
+#else
+#include <cstdlib>
+#endif
 #include "test_fixure.h"
+#include "common/test_config.h"
 
 int main(int argc, char* argv[])
 {
+    // Disable rate limiting in tests to prevent test failures
+    #ifdef _WIN32
+        _putenv_s("TEST_DISABLE_RATE_LIMIT", "1");
+    #else
+        setenv("TEST_DISABLE_RATE_LIMIT", "1", 1);
+    #endif
+    
     // Setup directories for tests, for each, create a unique directory
     // in which we will use for current tests then later tear it down.
     const auto baseDir = getBaseDir();
@@ -11,14 +25,14 @@ int main(int argc, char* argv[])
     const auto dataDir = (baseDir / "data").string();
     const auto publicDir = (baseDir / "www").string();
 
-    mantis::json args;
+    mb::json args;
     args["database"] = "SQLITE";
     args["dataDir"] = dataDir;
     args["publicDir"] = publicDir;
     args["scriptsDir"] = scriptingDir;
-    args["serve"] = {{"port", 7075}, {"host", "0.0.0.0"}};
+    args["serve"] = {{"port", TestConfig::getTestPort()}, {"host", "0.0.0.0"}};
 
-    mantis::logger::trace("Args: {}", args.dump());
+    mb::logger::trace("Args: {}", args.dump());
 
     // Setup Db, Server, etc.
     auto& tFix = TestFixture::instance(args);
@@ -37,11 +51,17 @@ int main(int argc, char* argv[])
         }
     });
 
-    // Wait or perform tests
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    // Wait for server to be ready (replaces fixed sleep)
+    if (!tFix.waitForServer(20, 100)) {
+        std::cerr << "[Test] Server failed to start within timeout\n";
+        tFix.teardownOnce(baseDir);
+        return 1;
+    }
+    
+    std::cout << "[Test] Server is ready, starting tests...\n";
 
     ::testing::InitGoogleTest(&argc, argv);
-    const int result = RUN_ALL_TESTS(); // Catch::Session().run(argc, argv);
+    const int result = RUN_ALL_TESTS();
 
     // Clean up files, data, etc.
     tFix.teardownOnce(baseDir);

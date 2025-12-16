@@ -3,7 +3,7 @@
 //
 #include "../include/mantisbase/core/http.h"
 
-namespace mantis {
+namespace mb {
     MantisContentReader::MantisContentReader(
         const httplib::ContentReader &reader,
         const MantisRequest &req)
@@ -18,8 +18,10 @@ namespace mantis {
         if (m_parsed) return;
 
         if (isMultipartFormData()) {
+            logger::trace("Reading request as Multipart!");
             readMultipart();
         } else {
+            logger::trace("Reading request as JSON!");
             readJSON();
         }
 
@@ -39,8 +41,11 @@ namespace mantis {
     }
 
     void MantisContentReader::parseFormDataToEntity(const Entity &entity) {
-        if (!isMultipartFormData())
-            throw MantisException(400, "Expected form data request, but it seems null.");
+        if (!isMultipartFormData()) {
+            // No reason to throw an error, just return for now
+            // throw MantisException(400, "Expected form data request, but it seems null.");
+            return;
+        }
 
         json json_body{}, json_files{};
 
@@ -159,6 +164,8 @@ namespace mantis {
     }
 
     void MantisContentReader::writeFiles(const std::string &entity_name) {
+        if (!isMultipartFormData()) return;
+
         for (const auto &formData: m_formData) {
             // For non-file types, continue
             if (formData.filename.empty()) continue;
@@ -189,6 +196,8 @@ namespace mantis {
     }
 
     void MantisContentReader::undoWrittenFiles(const std::string &entity_name) {
+        if (!isMultipartFormData()) return;
+
         // Remove any written files
         for (const auto &file: m_filesMetadata) {
             if (file.contains("filename")) {

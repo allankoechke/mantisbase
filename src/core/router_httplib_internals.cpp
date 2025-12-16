@@ -4,7 +4,7 @@
 
 #include "../../include/mantisbase/core/router.h"
 
-namespace mantis {
+namespace mb {
     std::function<HandlerResponse(const httplib::Request &, httplib::Response &)> Router::preRoutingHandler() {
         return [](const httplib::Request &req, httplib::Response &_) -> HandlerResponse {
             auto &mutable_req = const_cast<httplib::Request &>(req);
@@ -145,7 +145,7 @@ namespace mantis {
                 }
 
                 // If verification was successful, generate token and return 200 OK
-                auto token = Auth::createToken({{"id", body["identity"]}, {"entity", entity.name()}});
+                auto token = Auth::createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
                 // Remove password in response and send response obj.
                 user.erase("password");
@@ -204,6 +204,112 @@ namespace mantis {
         return [](MantisRequest &, const MantisResponse &res) {
             try {
                 // TODO - Maybe create banned tokens for auth?
+            } catch (const MantisException &e) {
+                res.sendJSON(e.code(), {
+                                 {"status", e.code()},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             }
+                );
+            } catch (const std::exception &e) {
+                res.sendJSON(500, {
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             }
+                );
+            }
+        };
+    }
+
+    std::function<void(MantisRequest &, MantisResponse &)> Router::handleSetupAdmin() {
+        return [](MantisRequest &req, const MantisResponse &res) {
+            TRACE_MANTIS_FUNC();
+            try {
+                auto auth = req.getOr("auth", json::object());
+logger::trace("Auth Data: {}", auth.dump());
+
+                // Require at least one valid auth on any table
+                auto verification = req.getOr<json>("verification", json::object());
+                if (verification.empty()) {
+                    // Send auth error
+                    res.sendJSON(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Auth required to access this resource!"}
+                                 });
+                    return;
+                }
+
+                const bool verified = verification.contains("verified") &&
+                                      verification["verified"].is_boolean() &&
+                                      verification["verified"].get<bool>();
+
+                if (!verified) {
+                    // Send auth error
+                    res.sendJSON(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", verification["error"]}
+                                 });
+                    return;
+                }
+
+                // Token must be signed to this entity to proceed
+                if (!auth["entity"].is_string() || auth["entity"].get<std::string>() != "mb_service_acc") {
+                    // Send auth error
+                    res.sendJSON(403, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Expected a service account token, access denied!"}
+                                 });
+                    return;
+                }
+
+                if (auth["user"].is_null()) {
+                    // Send auth error
+                    res.sendJSON(404, {
+                                     {"data", json::object()},
+                                     {"status", 403},
+                                     {"error", "Auth service account does not exist!"}
+                                 });
+                    return;
+                }
+
+                // Check token table and user ...
+                const auto entity = MantisBase::instance().entity("mb_service_acc");
+                const auto admin_entity = MantisBase::instance().entity("mb_admins");
+
+                const auto &[body, err] = req.getBodyAsJson();
+
+                if (!err.empty()) {
+                    res.sendJSON(400, {
+                                     {"data", json::object()},
+                                     {"status", 400},
+                                     {"error", err}
+                                 });
+                    return;
+                }
+
+                // Validate request body
+                if (const auto v_err = Validators::validateRequestBody(admin_entity.schema(), body);
+                    v_err.has_value()) {
+                    logger::critical("Error validating request body\n\t— {}", v_err.value());
+
+                    res.sendJSON(400, {
+                                     {"data", json::object()},
+                                     {"status", 400},
+                                     {"error", v_err.value()}
+                                 });
+                    return;
+                }
+
+                // Create new admin user
+                const auto admin_user = admin_entity.create(body);
+                res.sendJSON(201, admin_user);
+
+                // At the end, remove auth account
+                entity.remove(auth["id"].get<std::string>());
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},

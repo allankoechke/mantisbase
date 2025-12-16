@@ -11,7 +11,7 @@
 #include <soci/soci.h>
 
 
-namespace mantis
+namespace mb
 {
     bool KVStore::setupRoutes()
     {

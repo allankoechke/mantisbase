@@ -1,6 +1,10 @@
-//
-// Created by codeart on 09/11/2025.
-//
+/**
+ * @file uuidv7.h
+ * @brief UUID v7 generation utilities.
+ *
+ * Provides functions for generating UUID v7 identifiers that are
+ * time-ordered and suitable for database primary keys.
+ */
 
 #ifndef MANTISAPP_UUIDV7_H
 #define MANTISAPP_UUIDV7_H
@@ -15,7 +19,7 @@
 #include <cstdint>
 #include <mutex>
 
-namespace mantis {
+namespace mb {
     inline uint64_t now_unix_ms() {
         using namespace std::chrono;
         return static_cast<uint64_t>(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());

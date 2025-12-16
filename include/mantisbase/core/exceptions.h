@@ -1,6 +1,10 @@
-//
-// Created by codeart on 15/11/2025.
-//
+/**
+ * @file exceptions.h
+ * @brief Custom exception class for MantisBase errors.
+ *
+ * Provides a structured exception type with error code, message,
+ * and optional description for error handling.
+ */
 
 #ifndef MANTISBASE_EXCEPTIONS_H
 #define MANTISBASE_EXCEPTIONS_H
@@ -8,19 +12,23 @@
 #include <exception>
 #include <string>
 
-namespace mantis {
+namespace mb {
     class MantisException final : public std::exception {
     public:
-        MantisException(int code, std::string message);
+        MantisException(int _code, std::string _msg);
 
-        const char* what() const noexcept override;
+        MantisException(int _code, std::string _msg, std::string _desc);
 
-        int code() const noexcept;
+        [[nodiscard]] const char* what() const noexcept override;
+
+        [[nodiscard]] const char* desc() const noexcept;
+
+        [[nodiscard]] int code() const noexcept;
 
     private:
         int m_code = -1;
-        std::string m_msg;
+        std::string m_msg, m_desc;
     };
-} // mantis
+} // mb
 
 #endif //MANTISBASE_EXCEPTIONS_H

@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-ARG MANTIS_VERSION=0.2.12
+ARG MANTIS_VERSION=0.3.0
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -9,13 +9,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /mantis
+WORKDIR /mb
 
-RUN wget -O /tmp/mantisapp.zip https://github.com/allankoechke/mantis/releases/download/v${MANTIS_VERSION}/mantisapp_v${MANTIS_VERSION}_linux.zip \
-  && unzip /tmp/mantisapp.zip -d /mantis \
-  && chmod +x /mantis/mantisapp \
-  && rm /tmp/mantisapp.zip
+RUN wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/releases/download/v${MANTIS_VERSION}/mantisbase_v${MANTIS_VERSION}_linux.zip \
+  && unzip /tmp/mantisbase.zip -d /mb \
+  && chmod +x /mb/mantisbase \
+  && rm /tmp/mantisbase.zip
 
 EXPOSE 80
 
-CMD ["/mantis/mantisapp", "--dev", "serve", "-p", "80"]
+CMD ["/mb/mantisbase", "--dev", "serve", "-p", "80"]

@@ -3,7 +3,7 @@
 
 #include "../../include/mantisbase/mantisbase.h"
 
-namespace mantis
+namespace mb
 {
     std::string tmToStr(const std::tm& t)
     {

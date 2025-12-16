@@ -2,8 +2,17 @@
 
 #include "mantisbase/core/exceptions.h"
 
-namespace mantis {
+namespace mb {
     EntitySchema::EntitySchema(const std::string &entity_name, const std::string &entity_type) {
+        // Ensure name is valid
+        if (!EntitySchema::isValidEntityName(entity_name)) {
+            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", entity_name);
+        }
+
+        if (!EntitySchema::isValidEntityType(entity_type)) {
+            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", entity_type);
+        }
+
         setName(entity_name).setType(entity_type);
     }
 
@@ -16,6 +25,7 @@ namespace mantis {
             m_viewSqlQuery = other.m_viewSqlQuery;
             m_isSystem = other.m_isSystem;
             m_hasApi = other.m_hasApi;
+            m_viewSqlQuery = other.m_viewSqlQuery;
             m_fields = other.m_fields;
             m_listRule = other.m_listRule;
             m_getRule = other.m_getRule;
@@ -28,6 +38,10 @@ namespace mantis {
 
     EntitySchema::~EntitySchema() = default;
 
+    bool EntitySchema::operator==(const EntitySchema &other) const {
+        return toJSON() == other.toJSON();
+    }
+
     EntitySchema EntitySchema::fromSchema(const json &entity_schema) {
         EntitySchema eSchema;
 
@@ -36,6 +50,15 @@ namespace mantis {
 
         const auto _name = entity_schema.at("name").get<std::string>();
         const auto _type = entity_schema.at("type").get<std::string>();
+
+        // Ensure name is valid
+        if (!EntitySchema::isValidEntityName(_name)) {
+            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", _name);
+        }
+
+        if (!EntitySchema::isValidEntityType(_type)) {
+            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", _type);
+        }
 
         eSchema.setName(_name);
         eSchema.setType(_type);
@@ -70,10 +93,10 @@ namespace mantis {
             is_array()) {
             // For each defined field, create the field schema and push to the fields array ...
             for (const auto &field: entity_schema["fields"]) {
-                logger::trace("Field\n\t- {}", field.dump());
+                // logger::trace("Field\n\t- {}", field.dump());
                 auto field_name = field["name"].get<std::string>();
                 if (!eSchema.hasField(field_name)) {
-                    logger::trace("Adding entity field: {}", field.dump());
+                    // logger::trace("Adding entity field: {}", field.dump());
                     eSchema.addField(EntitySchemaField(field));
                 } else {
                     eSchema.field(field_name).updateWith(field);
@@ -126,7 +149,7 @@ namespace mantis {
     }
 
     Entity EntitySchema::toEntity() const {
-        return Entity{toJson()};
+        return Entity{toJSON()};
     }
 
     std::string EntitySchema::id() const {
@@ -174,31 +197,44 @@ namespace mantis {
     void EntitySchema::updateWith(const nlohmann::json &new_data) {
         if (new_data.empty()) return;
 
-        if (new_data.contains("deleted_fields")) {
-            for (const auto &field: new_data["deleted_fields"]) {
-                removeField(field.get<std::string>());
-            }
-        }
-
         if (new_data.contains("name")) {
+            if (!new_data["name"].is_string() || new_data["name"].empty()) {
+                throw MantisException(400, "Expected name to be a valid string.");
+            }
+
             setName(new_data["name"].get<std::string>());
         }
 
         if (new_data.contains("type")) {
+            if (!new_data["type"].is_string() || new_data["type"].empty()) {
+                throw MantisException(400, "Expected `type` to be a valid string.");
+            }
+
             setType(new_data["type"].get<std::string>());
         }
 
-        if (new_data.contains("system"))
-            setSystem(new_data.at("system").get<bool>());
+        if (new_data.contains("system")) {
+            if (!new_data["system"].is_boolean()) {
+                throw MantisException(400, "Expected `system` to be a bool.");
+            }
 
-        if (new_data.contains("has_api"))
+            setSystem(new_data.at("system").get<bool>());
+        }
+
+        if (new_data.contains("has_api")) {
+            if (!new_data["has_api"].is_boolean()) {
+                throw MantisException(400, "Expected `has_api` to be a bool.");
+            }
+
             setHasApi(new_data.at("has_api").get<bool>());
+    }
 
         if (new_data.contains("rules")) {
             auto rules = new_data["rules"];
 
-            if (rules.contains("list"))
+            if (rules.contains("list")) {
                 setListRule(AccessRule::fromJSON(rules["list"]));
+            }
 
             if (rules.contains("get"))
                 setGetRule(AccessRule::fromJSON(rules["get"]));
@@ -228,13 +264,35 @@ namespace mantis {
                     throw MantisException(
                         400, "At least field `id` or `name` should be provided for each field entry.");
 
-                if (id.empty() && hasFieldById(id)) {
+                if (!id.empty() && hasFieldById(id)) {
                     // Update existing item by id
                     auto &f = fieldById(id);
+
+                    // Check if op is set to delete/remove
+                    if (field.contains("op") && field["op"].is_string() && !field["op"].empty()) {
+                        const auto op = field["op"].get<std::string>();
+                        if (op == "delete" || op == "remove") {
+                            removeField(f.name());
+                            continue;
+                        }
+
+                        throw MantisException(400, "Field `op` expected `remove` or `delete` value but found `" + op + "`");
+                    }
+
                     f.updateWith(field);
                 } else if (!name.empty() && hasField(name)) {
                     // try updating via name
                     auto &f = EntitySchema::field(name);
+
+                    // Check if op is set to delete/remove
+                    if (field.contains("op") && field["op"].is_string() && !field["op"].empty()) {
+                        const auto op = field["op"].get<std::string>();
+                        if (op == "delete" || op == "remove") {
+                            removeField(f.name());
+                            continue;
+                        }
+                    }
+
                     f.updateWith(field);
                 } else {
                     // create new field
@@ -331,7 +389,8 @@ namespace mantis {
 
     EntitySchema &EntitySchema::addField(const EntitySchemaField &field) {
         if (const auto err = field.validate(); err.has_value()) {
-            throw MantisException(400, std::format("Field validation failed for entity schema with message: {}", err.value()));
+            throw MantisException(400, std::format("Field validation failed for entity schema with message: {}",
+                                                   err.value()));
         }
 
         m_fields.push_back(field);
@@ -350,7 +409,7 @@ namespace mantis {
         return true;
     }
 
-    nlohmann::json EntitySchema::toJson() const {
+    nlohmann::json EntitySchema::toJSON() const {
         json j;
         j["id"] = id();
         j["name"] = m_name;
@@ -359,11 +418,11 @@ namespace mantis {
         j["has_api"] = m_hasApi;
 
         j["rules"] = {
-            {"list", m_listRule.toJSON() },
-            {"get", m_getRule.toJSON() },
-            {"add", m_addRule.toJSON() },
-            {"update", m_updateRule.toJSON() },
-            {"delete", m_deleteRule.toJSON() }
+            {"list", m_listRule.toJSON()},
+            {"get", m_getRule.toJSON()},
+            {"add", m_addRule.toJSON()},
+            {"update", m_updateRule.toJSON()},
+            {"delete", m_deleteRule.toJSON()}
         };
 
         if (m_type == "view") {
@@ -467,7 +526,7 @@ namespace mantis {
             }
         }
 
-        logger::trace("Entity Schema {}", str);
+        // logger::trace("Entity Schema {}", str);
 
         return str;
     }
@@ -477,7 +536,7 @@ namespace mantis {
     }
 
     std::optional<std::string> EntitySchema::validate(const EntitySchema &table_schema) {
-        if (trim(table_schema.name()).empty())
+        if (table_schema.name().empty())
             return "Entity schema name is empty!";
 
         if (!(table_schema.type() == "base" || table_schema.type() == "view" || table_schema.type() == "auth")) {
@@ -520,6 +579,20 @@ namespace mantis {
         return validate(*this);
     }
 
+    bool EntitySchema::isValidEntityType(const std::string &type) {
+        if (type == "base" || type == "view" || type == "auth") {
+            return true;
+        }
+        return false;
+    }
+
+    bool EntitySchema::isValidEntityName(const std::string &name) {
+        if (name.empty() || name.length() > 64) return false;
+        return std::ranges::all_of(name, [](const char c) {
+            return std::isalnum(c) || c == '_';
+        });
+    }
+
     std::string EntitySchema::getFieldType(const std::string &type, std::shared_ptr<soci::session> sql) {
         const auto db_type = sql->get_backend()->get_backend_name();
         // For date types, enforce `text` type SQLite ONLY
@@ -560,4 +633,4 @@ namespace mantis {
             throw MantisException(500, "Operation not supported for `view` types.");
         }
     }
-} // mantis
+} // mb

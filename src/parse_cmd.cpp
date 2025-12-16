@@ -10,7 +10,7 @@
 
 #include "mantisbase/core/models/validators.h"
 
-namespace mantis {
+namespace mb {
     void MantisBase::parseArgs() {
         // Main program parser with global arguments
         argparse::ArgumentParser program("mantisbase", appVersion());

@@ -1,7 +1,7 @@
 #include "../../include/mantis/core/private-impl/http.h"
 #include <iostream>
 
-namespace mantis
+namespace mb
 {
     duk_ret_t DuktapeImpl::nativeConsoleInfo(duk_context* ctx)
     {

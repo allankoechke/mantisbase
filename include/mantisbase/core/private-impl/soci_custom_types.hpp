@@ -11,6 +11,7 @@
 #include <soci/soci.h>
 #include <nlohmann/json.hpp>
 #include "../../utils/utils.h"
+#include "../exceptions.h"
 
 /**
  * @brief Add SOCI support for `booleans` and `json` types
@@ -28,11 +29,11 @@ namespace soci {
      * @brief Boolean type conversion to base soci::type
      * This will allow us to cast to/from boolean types when dealing with soci.
      */
-    template <>
+    template<>
     struct type_conversion<bool> {
         typedef uint16_t base_type;
 
-        static void from_base(uint16_t i, indicator ind, bool & b) {
+        static void from_base(uint16_t i, indicator ind, bool &b) {
             if (ind == i_null) {
                 b = false;
                 return;
@@ -40,7 +41,7 @@ namespace soci {
             b = (i != 0);
         }
 
-        static void to_base(const bool & b, uint16_t & i, indicator & ind) {
+        static void to_base(const bool &b, uint16_t &i, indicator &ind) {
             i = b ? 1 : 0;
             ind = i_ok;
         }
@@ -50,19 +51,25 @@ namespace soci {
      * @brief JSON type conversion to base soci::type
      * This will allow us to cast to/from json types when dealing with soci.
      */
-    template <>
+    template<>
     struct type_conversion<json> {
         typedef std::string base_type;
 
-        static void from_base(const std::string & s, indicator ind, json & jb) {
-            if (ind == i_null) {
+        static void from_base(const std::string &s, const indicator ind, json &jb) {
+            if (ind == i_null || (ind != i_null && mb::trim(s).empty())) {
                 jb = json{}; // or handle null as appropriate
                 return;
             }
-            jb = json::parse(s); // or however you parse JSON
+
+            try {
+                jb = json::parse(s); // or however you parse JSON
+            } catch (const std::exception &e) {
+                mb::logger::critical("Failed to parse JSON value from DB.\n\t- {}", e.what());
+                throw mb::MantisException(500, "Failed to parse JSON value from DB.", e.what());
+            }
         }
 
-        static void to_base(const json & json, std::string & s, indicator & ind) {
+        static void to_base(const json &json, std::string &s, indicator &ind) {
             s = json.dump();
             ind = i_ok;
         }

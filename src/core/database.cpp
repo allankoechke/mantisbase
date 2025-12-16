@@ -15,7 +15,7 @@
 
 // #define __file__ "core/tables/sys_tables.cpp"
 
-namespace mantis {
+namespace mb {
     Database::Database() : m_connPool(nullptr) {
     }
 
@@ -345,4 +345,4 @@ namespace mantis {
         return 1; // Return the object
     }
 #endif
-} // namespace mantis
+} // namespace mb

@@ -3,7 +3,7 @@
 #include "mantis/core/http.h"
 #include "mantis/utils/utils.h"
 
-using namespace mantis;
+using namespace mb;
 
 int main(int argc, char** argv)
 {
@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     // This is better for embedding MantisApp into another application
     // ```cpp
     // int main() {
-    //     const mantis::json opts{{"dev", true}, {"serve", {{"port", 7896}, {"host", "127.0.0.1"}}}};
+    //     const mb::json opts{{"dev", true}, {"serve", {{"port", 7896}, {"host", "127.0.0.1"}}}};
     //     auto& app = MantisApp::create(opts);
     //
     //     return app.run();

@@ -4,10 +4,19 @@
 #include "../../../include/mantisbase/utils/uuidv7.h"
 #include "mantisbase/utils/soci_wrappers.h"
 
-namespace mantis {
+namespace mb {
     Entity::Entity(const nlohmann::json &schema) {
-        if (!schema.contains("name") || !schema.contains("type"))
+        if (!schema.contains("name") || !schema["name"].is_string() || !schema.contains("type") || !schema["type"].is_string())
             throw std::invalid_argument("Missing required fields `name` and `type` in schema!");
+
+        // Ensure name is valid
+        if (!EntitySchema::isValidEntityName(schema["name"].get<std::string>())) {
+            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", schema);
+        }
+
+        if (!EntitySchema::isValidEntityType(schema["type"].get<std::string>())) {
+            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", schema["type"].get<std::string>());
+        }
 
         m_schema = schema;
 
@@ -46,6 +55,14 @@ namespace mantis {
 
     Entity::Entity(const std::string &name, const std::string &type)
         : Entity({{"name", name}, {"type", type}}) {
+        // Ensure name is valid
+        if (!EntitySchema::isValidEntityName(name)) {
+            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", name);
+        }
+
+        if (!EntitySchema::isValidEntityType(type)) {
+            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", type);
+        }
     }
 
     std::string Entity::id() const {
@@ -453,10 +470,27 @@ namespace mantis {
 
     int Entity::countRecords() const {
         // TODO add record filtering ...
-        const auto sql = MantisBase::instance().db().session();
-        int count = 0;
-        *sql << "SELECT COUNT(id) FROM " + name(), soci::into(count);
-        return count;
+        try {
+            const auto sql = MantisBase::instance().db().session();
+            int count = 0;
+            *sql << "SELECT COUNT(id) FROM " + name(), soci::into(count);
+            return count;
+        } catch (std::exception &e) {
+            throw MantisException(500, e.what());
+        }
+    }
+
+    bool Entity::isEmpty() const {
+        try {
+            const auto& sql = MantisBase::instance().db().session();
+            int dummy = 0;
+            soci::indicator ind = soci::i_null;
+            *sql << "SELECT 1 FROM " + name() + " LIMIT 1",
+                    soci::into(dummy, ind);
+            return ind == soci::i_null;
+        } catch (const std::exception& e) {
+            throw MantisException(500, e.what());
+        }
     }
 
     bool Entity::recordExists(const std::string &id) const {
@@ -486,11 +520,25 @@ namespace mantis {
         // Get a session object
         const auto sql = MantisBase::instance().db().session();
 
+        // Validate all column names against entity schema
+        std::vector<std::string> valid_columns;
+        for (const auto& col_name : columns) {
+            if (hasField(col_name).has_value()) {
+                valid_columns.push_back(col_name);
+            } else {
+                logger::warn("Invalid column name '{}' in queryFromCols for entity '{}'", col_name, name());
+            }
+        }
+
+        if (valid_columns.empty()) {
+            throw MantisException(400, "No valid columns provided");
+        }
+
         // Build dynamic WHERE clause
         std::string where_clause;
-        for (size_t i = 0; i < columns.size(); ++i) {
+        for (size_t i = 0; i < valid_columns.size(); ++i) {
             if (i > 0) where_clause += " OR ";
-            where_clause += columns[i] + " = :value";
+            where_clause += valid_columns[i] + " = :value";
         }
 
         const std::string query = "SELECT * FROM " + name() + " WHERE " + where_clause + " LIMIT 1";

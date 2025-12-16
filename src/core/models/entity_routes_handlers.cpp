@@ -3,7 +3,7 @@
 #include "../../include/mantisbase/core/auth.h"
 #include <fstream>
 
-namespace mantis {
+namespace mb {
     HandlerFn Entity::getOneRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
@@ -37,6 +37,13 @@ namespace mantis {
                                  }
                     );
                 }
+            } catch (const MantisException &e) {
+                res.sendJSON(e.code(), {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", e.code()}
+                             }
+                );
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
                                  {"data", json::object()},
@@ -61,10 +68,14 @@ namespace mantis {
                 const auto entity = MantisBase::instance().entity(entity_name);
 
                 // Page number to query
-                auto page = req.hasQueryParam("page") ? std::stoi(req.getQueryParamValue("page")) : 1;
+                auto page = req.hasQueryParam("page")
+                                ? safe_stoi(req.getQueryParamValue("page"), 1)
+                                : 1;
 
                 // Records per request
-                auto page_size = req.hasQueryParam("page_size") ? std::stoi(req.getQueryParamValue("page_size")) : 100;
+                auto page_size = req.hasQueryParam("page_size")
+                                     ? safe_stoi(req.getQueryParamValue("page_size"), 100)
+                                     : 100;
 
                 // Skip counting total items
                 bool skip_total_count = req.hasQueryParam("skip_total_count")
@@ -101,6 +112,13 @@ namespace mantis {
                                  {"status", 200}
                              }
                 );
+            } catch (const MantisException &e) {
+                res.sendJSON(e.code(), {
+                                 {"data", json::object()},
+                                 {"error", e.what()},
+                                 {"status", e.code()}
+                             }
+                );
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
                                  {"data", json::object()},
@@ -126,6 +144,7 @@ namespace mantis {
                 const auto entity = MantisBase::instance().entity(entity_name);
 
                 // Parse form data to JSON body and files metadata
+                // Ignored for non multipart-form data
                 reader.parseFormDataToEntity(entity);
 
                 if (const auto &val_err = Validators::validateRequestBody(entity, reader.jsonBody());
@@ -139,6 +158,7 @@ namespace mantis {
                 }
 
                 // Write files to disk ...
+                // Ignored for non multipart-form data
                 reader.writeFiles(entity_name);
 
                 // Create the record
@@ -148,9 +168,18 @@ namespace mantis {
                 if (entity.type() == "auth" && record.contains("password")) {
                     record.erase("password");
                 }
-                res.sendJSON(201, record);
+
+                // Send record back to user
+                res.sendJSON(201, {
+                                 {"data", record},
+                                 {"error", ""},
+                                 {"status", 201}
+                             }
+                );
             } catch (const MantisException &e) {
+                // Ignored for non multipart-form data
                 reader.undoWrittenFiles(entity_name);
+
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -158,7 +187,9 @@ namespace mantis {
                              }
                 );
             } catch (const std::exception &e) {
+                // Ignored for non multipart-form data
                 reader.undoWrittenFiles(entity_name);
+
                 res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -211,7 +242,13 @@ namespace mantis {
                     record.erase("password");
                 }
 
-                res.sendJSON(200, record);
+                // Send record back to user
+                res.sendJSON(200, {
+                                 {"data", record},
+                                 {"error", ""},
+                                 {"status", 200}
+                             }
+                );
             } catch (const MantisException &e) {
                 reader.undoWrittenFiles(entity_name);
                 res.sendJSON(e.code(), {

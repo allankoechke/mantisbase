@@ -1,6 +1,10 @@
-//
-// Created by codeart on 11/11/2025.
-//
+/**
+ * @file validators.h
+ * @brief Validation utilities for entity schemas and request bodies.
+ *
+ * Provides validation methods for checking field constraints, presets,
+ * and request body validation against entity schemas.
+ */
 
 #ifndef MANTISBASE_VALIDATORS_H
 #define MANTISBASE_VALIDATORS_H
@@ -12,7 +16,7 @@
 #include "nlohmann/json.hpp"
 
 
-namespace mantis {
+namespace mb {
     using json = nlohmann::json;
 
     class Validators {
@@ -44,6 +48,6 @@ namespace mantis {
     private:
         static std::unordered_map<std::string, json> presets;
     };
-} // mantis
+} // mb
 
 #endif //MANTISBASE_VALIDATORS_H

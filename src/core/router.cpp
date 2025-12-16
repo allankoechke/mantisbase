@@ -21,7 +21,7 @@
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
 
-namespace mantis {
+namespace mb {
     Router::Router()
         : mApp(MantisBase::instance()),
           m_entitySchema(std::make_unique<EntitySchema>()) {
@@ -81,7 +81,7 @@ namespace mantis {
         EntitySchema service_schema{"mb_service_acc", "base"};
         service_schema.setHasApi(false);
         service_schema.setSystem(true);
-        auto service_entity = admin_schema.toEntity();
+        auto service_entity = service_schema.toEntity();
         m_entityMap.emplace(service_entity.name(), std::move(service_entity));
 
         // Misc Endpoints [admin, auth, etc]
@@ -101,8 +101,14 @@ namespace mantis {
             const auto host = mApp.host();
             const auto port = mApp.port();
 
+            // Get admin entity, query all admins
+            const auto admin_entity = mApp.entity("mb_admins");
+
+            // If we don't have admin accounts, spin up admin dashboard
+            bool launch_admin_setup = admin_entity.isEmpty();
+
             // Launch logging/browser in separate thread after listen starts
-            std::thread notifier([host, port]() -> void {
+            std::thread notifier([host, port, launch_admin_setup]() -> void {
                 // Wait a little for the server to be fully ready
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 auto endpoint = std::format("{}:{}", host, port);
@@ -115,10 +121,11 @@ namespace mantis {
                 logger.set_level(spdlog::level::trace);
 
                 logger.info(
-                    "Starting Servers: \n\t├── API Endpoints: http://{}/api/v1/ \n\t└── Admin Dashboard: http://{}/admin\n",
+                    "Starting Servers: \n\t├── API Endpoints: http://{}/api/v1/ \n\t└── Admin Dashboard: http://{}/mb\n",
                     endpoint, endpoint);
 
-                MantisBase::instance().openBrowserOnStart();
+                if (launch_admin_setup)
+                    MantisBase::instance().openBrowserOnStart();
             });
 
             if (!svr.listen(host, port)) {
@@ -210,6 +217,7 @@ namespace mantis {
         auto entity = Entity(entity_schema);
         entity.createEntityRoutes();
         m_entityMap.insert_or_assign(entity_name, std::move(entity));
+        std::cout << std::endl;
     }
 
     void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) {
@@ -219,8 +227,12 @@ namespace mantis {
         // Clean up old entity route
         removeSchemaCache(old_entity_name);
 
+        assert(!m_entityMap.contains(new_schema)); // Ensure we don't have any old schema data anymore
+
         // Add new route
         addSchemaCache(new_schema);
+
+        assert(m_entityMap.contains(new_schema)); // Ensure new entity has been added
     }
 
     void Router::removeSchemaCache(const std::string &entity_name) {
@@ -245,6 +257,8 @@ namespace mantis {
 
         // Remove Entity instance for the cache
         m_entityMap.erase(entity_name);
+
+        std::cout << std::endl;
     }
 
     void Router::globalRouteHandler(const std::string &method, const std::string &path) {
@@ -297,7 +311,7 @@ namespace mantis {
         }
     }
 
-     void Router::globalRouteHandlerWithReader(const std::string &method, const std::string &path) {
+    void Router::globalRouteHandlerWithReader(const std::string &method, const std::string &path) {
         const std::function handlerFuncWithContentReader = [this, method, path](
             const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &cr) {
             MantisRequest ma_req{req};
@@ -348,12 +362,15 @@ namespace mantis {
         auto &router = mApp.router();
         router.Get("/api/v1/health", healthCheckHandler());
         router.Get("/api/files/:entity/:file", fileServingHandler());
-        router.Get(R"(/mb-admin(.*))", handleAdminDashboardRoute());
+        router.Get(R"(/mb(/.*)?)", handleAdminDashboardRoute());
 
         // Systemwide auth endpoints
-        router.Post("/api/v1/auth/login", handleAuthLogin());
+        // Rate limit login endpoint: 5 attempts per minute per IP to prevent brute force attacks
+        router.Post("/api/v1/auth/login", handleAuthLogin(), {rateLimit(5, 60, false)});
         router.Post("/api/v1/auth/refresh", handleAuthRefresh());
         router.Post("/api/v1/auth/logout", handleAuthLogout());
+        // Rate limit admin setup: 3 attempts per hour per IP (very strict for security)
+        router.Post("/api/v1/auth/setup/admin", handleSetupAdmin(), {rateLimit(3, 3600, false)});
 
         // Add entity schema routes
         // GET|POST|PATCH|DELETE `/api/v1/schemas*`
@@ -367,23 +384,23 @@ namespace mantis {
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::handleAdminDashboardRoute() const {
-        return [this](const MantisRequest &req, MantisResponse &res) {
+        return [](const MantisRequest &req, MantisResponse &res) {
             try {
                 const auto fs = cmrc::mantis::get_filesystem();
                 std::string path = req.matches()[1];
 
                 // Normalize the path
                 if (path.empty() || path == "/") {
-                    path = "/qrc/index.html";
+                    path = "/public/index.html";
                 } else {
-                    path = std::format("/qrc{}", path);
+                    path = std::format("/public{}", path);
                 }
 
                 if (!fs.exists(path)) {
                     logger::trace("{} path does not exists", path);
 
                     // fallback to index.html for React routes
-                    path = "/qrc/index.html";
+                    path = "/public/index.html";
                 }
 
                 try {
@@ -392,7 +409,7 @@ namespace mantis {
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(200);
                 } catch (const std::exception &e) {
-                    const auto file = fs.open("/qrc/404.html");
+                    const auto file = fs.open("/public/404.html");
                     const auto mime = Router::getMimeType("404.html");
 
                     res.setContent(file.begin(), file.size(), mime);
@@ -401,6 +418,7 @@ namespace mantis {
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
+                res.setReason(e.what());
                 logger::critical("Error processing /admin request: {}", e.what());
             }
         };
@@ -409,9 +427,18 @@ namespace mantis {
     std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
         logger::trace("Registering /api/files/:entity/:file GET endpoint ...");
         return [](const MantisRequest &req, MantisResponse &res) {
-            std::cout << "fileServingHandler()" << std::endl;
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");
+
+            if (!EntitySchema::isValidEntityName(table_name)) {
+                json response;
+                response["error"] = std::format("Invalid entity name `{}`", table_name);
+                response["status"] = 400;
+                response["data"] = json::object();
+
+                res.sendJSON(400, response);
+                return;
+            }
 
             if (table_name.empty() || file_name.empty()) {
                 json response;

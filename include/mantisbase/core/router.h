@@ -16,54 +16,154 @@
 #include "../utils/utils.h"
 #include  "types.h"
 
-namespace mantis {
+namespace mb {
     /**
-     * @brief Router class allows for managing routes as well as acting as a top-wrapper on the HttpUnit.
+     * @brief HTTP router for managing routes and request handling.
+     *
+     * Router provides methods to register HTTP routes with handlers and middlewares,
+     * manages entity schema cache, and handles request routing.
+     *
+     * @code
+     * // Register a GET route
+     * router.Get("/users", [](MantisRequest& req, MantisResponse& res) {
+     *     res.sendJSON(200, {{"users", "data"}});
+     * });
+     *
+     * // Register a POST route with middleware
+     * router.Post("/posts", handler, {requireAdminAuth()});
+     * @endcode
      */
     class Router {
     public:
+        /**
+         * @brief Construct router instance.
+         */
         Router();
 
+        /**
+         * @brief Destructor.
+         */
         ~Router();
 
-        /// Initialize the router instance creating tables and admin routes.
+        /**
+         * @brief Initialize router: create system tables and admin routes.
+         * @return true if initialization successful
+         */
         bool initialize();
 
-        /// Bind to a port and start listening for new connections.
-        /// Calls @see HttpUnit::listen() under the hood.
+        /**
+         * @brief Start HTTP server and begin listening for connections.
+         * @return true if server started successfully
+         */
         bool listen();
 
-        /// Close the HTTP Server connection
-        /// Calls @see HttpUnit::close()
+        /**
+         * @brief Close HTTP server and stop listening.
+         */
         void close();
 
+        /**
+         * @brief Get underlying httplib::Server instance.
+         * @return Reference to HTTP server
+         */
         httplib::Server &server();
 
         // ----------- HTTP METHODS ----------- //
+        /**
+         * @brief Register GET route.
+         * @param path Route path (supports path parameters like /:id)
+         * @param handler Request handler function
+         * @param middlewares Optional middleware functions
+         * @code
+         * router.Get("/users/:id", [](MantisRequest& req, MantisResponse& res) {
+         *     std::string id = req.getPathParamValue("id");
+         *     // ... handle request
+         * });
+         * @endcode
+         */
         void Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
+        /**
+         * @brief Register POST route with content reader (for file uploads).
+         * @param path Route path
+         * @param handler Handler with content reader for multipart/form-data
+         * @param middlewares Optional middleware functions
+         */
         void Post(const std::string &path, const HandlerWithContentReaderFn &handler, const Middlewares &middlewares = {});
 
+        /**
+         * @brief Register POST route.
+         * @param path Route path
+         * @param handler Request handler function
+         * @param middlewares Optional middleware functions
+         */
         void Post(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
+        /**
+         * @brief Register PATCH route with content reader (for file uploads).
+         * @param path Route path
+         * @param handler Handler with content reader
+         * @param middlewares Optional middleware functions
+         */
         void Patch(const std::string &path, const HandlerWithContentReaderFn &handler, const Middlewares &middlewares = {});
 
+        /**
+         * @brief Register PATCH route.
+         * @param path Route path
+         * @param handler Request handler function
+         * @param middlewares Optional middleware functions
+         */
         void Patch(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
+        /**
+         * @brief Register DELETE route.
+         * @param path Route path
+         * @param handler Request handler function
+         * @param middlewares Optional middleware functions
+         */
         void Delete(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
         // ----------- SCHEMA CACHE METHODS ----------- //
+        /**
+         * @brief Get cached schema JSON by table name.
+         * @param table_name Table name to lookup
+         * @return Reference to cached schema JSON
+         */
         const json &schemaCache(const std::string &table_name) const;
 
+        /**
+         * @brief Get cached entity by table name.
+         * @param table_name Table name to lookup
+         * @return Entity instance from cache
+         */
         Entity schemaCacheEntity(const std::string &table_name) const;
 
+        /**
+         * @brief Add schema to cache.
+         * @param entity_schema Schema JSON to cache
+         */
         void addSchemaCache(const nlohmann::json &entity_schema);
 
+        /**
+         * @brief Update cached schema.
+         * @param old_entity_name Old table name
+         * @param new_schema Updated schema JSON
+         */
         void updateSchemaCache(const std::string &old_entity_name, const json &new_schema);
 
+        /**
+         * @brief Remove schema from cache.
+         * @param table_name Table name to remove
+         */
         void removeSchemaCache(const std::string &table_name);
 
         // ----------- UTILS METHODS ----------- //
+        /**
+         * @brief Decompress response body based on encoding.
+         * @param body Compressed body data
+         * @param encoding Encoding type (e.g., "gzip", "deflate")
+         * @return Decompressed body string
+         */
         std::string decompressResponseBody(const std::string &body, const std::string &encoding);
 
     private:
@@ -96,6 +196,8 @@ namespace mantis {
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh();
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogout();
 
+        std::function<void(MantisRequest &, MantisResponse &)> handleSetupAdmin();
+
 
         MantisBase& mApp;
         httplib::Server svr;
@@ -106,6 +208,6 @@ namespace mantis {
         std::vector<nlohmann::json> m_schemas;
         std::unordered_map<std::string, Entity> m_entityMap;
     };
-}
+} // mb
 
 #endif // MANTIS_SERVER_H

@@ -1,3 +1,11 @@
+/**
+ * @file kv_store.h
+ * @brief Key-value store for application settings.
+ *
+ * Manages application-wide settings stored in the database with
+ * REST API endpoints for configuration management.
+ */
+
 #ifndef KV_STORE_H
 #define KV_STORE_H
 
@@ -6,7 +14,7 @@
 #include "../utils/utils.h"
 #include "http.h"
 
-namespace mantis
+namespace mb
 {
     /**
      * @brief Manages application settings
@@ -64,6 +72,6 @@ namespace mantis
         // may not be that significant though...!
         json m_configs;
     };
-} // mantis
+} // mb
 
 #endif // KV_STORE_H

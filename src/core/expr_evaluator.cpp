@@ -3,7 +3,7 @@
 
 #include <httplib.h>
 
-namespace mantis {
+namespace mb {
     DukCtx::DukCtx() {
         // Create isolated context for this evaluation
         m_ctx = duk_create_heap_default();
@@ -36,7 +36,7 @@ namespace mantis {
             return dukglue_peval<bool>(ctx.get(), expr.c_str());
         } catch (const DukErrorException &e) {
             // Handle evaluation errors
-            logger::critical("Error evaluating expression '{}', error: {}", expr, e.what());
+            logger::critical("Error evaluating expression `{}`, error: {}", expr, e.what());
             return false;
         }
     }

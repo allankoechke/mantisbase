@@ -16,7 +16,7 @@
 int main(const int argc, char* argv[])
 {
     // Create `MantisBase` instance with the passed in arguments
-    auto& app = mantis::MantisBase::create(argc, argv);
+    auto& app = mb::MantisBase::create(argc, argv);
 
     // Or simply
     // Create the JSON object
@@ -27,7 +27,7 @@ int main(const int argc, char* argv[])
     //     }
     // }
     // const json args{{"dev", nullptr}, {"serve", {{"port", 9089}}}};
-    // auto& app = mantis::MantisBase::create(args);
+    // auto& app = mb::MantisBase::create(args);
 
     // Run the http server listening loop
     return app.run();

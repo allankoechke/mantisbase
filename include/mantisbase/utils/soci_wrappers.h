@@ -1,6 +1,10 @@
-//
-// Created by codeart on 09/11/2025.
-//
+/**
+ * @file soci_wrappers.h
+ * @brief SOCI database wrapper utilities.
+ *
+ * Provides conversion functions between JSON objects and SOCI database
+ * value types for seamless data binding and retrieval.
+ */
 
 #ifndef MANTISAPP_SOCI_WRAPPERS_H
 #define MANTISAPP_SOCI_WRAPPERS_H
@@ -10,7 +14,7 @@
 #include "mantisbase/core/models/entity_schema_field.h"
 #include "soci/values.h"
 
-namespace mantis {
+namespace mb {
     inline soci::values json2SociValue(const json &entity, const json &fields) {
         if (!fields.is_array()) throw std::invalid_argument("Fields must be an array");
 
@@ -142,7 +146,7 @@ namespace mantis {
             }
             else if (colType == "date")
             {
-                res_json[colName] = mantis::dbDateToString(row, i);
+                res_json[colName] = mb::dbDateToString(row, i);
             }
             else if (colType == "int8")
             {
