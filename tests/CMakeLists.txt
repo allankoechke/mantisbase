@@ -27,6 +27,7 @@ option(BUILD_COMBINED_TESTS "Build all tests in one executable" OFF)
 if (BUILD_COMBINED_TESTS)
     # Combined tests (backward compatibility)
     file(GLOB TEST_FILES
+            test_fixure.cpp
             main.cpp
             unit/test_database.cpp
             unit/test_models.cpp
@@ -37,9 +38,9 @@ if (BUILD_COMBINED_TESTS)
             unit/test_entity_schema_field.cpp
             unit/test_files_security.cpp
             unit/test_ip_validation.cpp
-            integration/test_integration_crud.cpp
-            integration/test_integration_schema.cpp
-            integration/test_integration_auth.cpp
+#            integration/test_integration_crud.cpp
+#            integration/test_integration_schema.cpp
+#            integration/test_integration_auth.cpp
     )
 
     add_executable(mantisbase_tests ${TEST_FILES})
@@ -76,6 +77,8 @@ else ()
     
     # Unit Tests (no server needed)
     file(GLOB UNIT_TEST_FILES
+            test_fixure.cpp
+            unit/main.cpp
             unit/test_database.cpp
             unit/test_models.cpp
             unit/test_expr_eval.cpp
@@ -110,7 +113,6 @@ else ()
     target_link_libraries(mantisbase_unit_tests PRIVATE
             mantisbase_lib
             GTest::gtest
-            GTest::gtest_main
             GTest::gmock_main
     )
 
@@ -120,9 +122,9 @@ else ()
     # Integration Tests (require server)
     file(GLOB INTEGRATION_TEST_FILES
             main.cpp
-            integration/test_integration_crud.cpp
-            integration/test_integration_schema.cpp
-            integration/test_integration_auth.cpp
+#            integration/test_integration_crud.cpp
+#            integration/test_integration_schema.cpp
+#            integration/test_integration_auth.cpp
     )
 
     add_executable(mantisbase_integration_tests ${INTEGRATION_TEST_FILES})

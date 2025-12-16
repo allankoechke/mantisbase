@@ -121,8 +121,4 @@ public:
     }
 };
 
-// Static member definitions
-std::atomic<bool> TestFixture::server_ready{false};
-std::mutex TestFixture::server_mutex;
-
 #endif //MANTISBASE_TEST_FIXTURE_H
