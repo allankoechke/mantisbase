@@ -80,15 +80,28 @@ http://localhost:7070/mb
 
 Log in with the admin credentials you just created.
 
+**The Admin Dashboard is a powerful visual interface** that provides:
+
+- **Visual Data Management** - Browse, create, edit, and delete records through an intuitive table interface
+- **Schema Builder** - Create and configure entity schemas without writing API calls
+- **Access Control Configuration** - Set up access rules with a user-friendly interface
+- **Search & Filtering** - Quickly find records with built-in search and filter capabilities
+- **File Management** - Upload and manage files associated with your entities
+
+![MantisBase Admin Dashboard](mantisbase-admin.png)
+
+The dashboard is the **recommended way** to interact with MantisBase during development, as it provides a complete GUI alternative to the REST API and makes it easy to explore and manage your data.
+
 ### 3. Create Your First Entity
 
 You can create entities (tables) via the admin dashboard or using the API:
 
-**Using the Admin Dashboard:**
-1. Log in to the admin dashboard
-2. Navigate to "Schemas" or "Tables"
-3. Click "Create New"
-4. Define your table name, fields, and access rules
+**Using the Admin Dashboard (Recommended):**
+1. Log in to the admin dashboard at `http://localhost:7070/mb`
+2. Navigate to "Schemas" or use the sidebar to access entity management
+3. Click "New" or "Create New"
+4. Define your table name, fields, and access rules using the visual interface
+5. The dashboard will automatically generate the API endpoints for your new entity
 
 **Using the API:**
 
@@ -151,12 +164,12 @@ curl -X DELETE http://localhost:7070/api/v1/entities/posts/<id> \
 MantisBase provides standalone authentication endpoints:
 
 ```bash
-# Login
+# Login (identity can be email or user ID)
 curl -X POST http://localhost:7070/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "entity": "users",
-    "email": "user@example.com",
+    "identity": "user@example.com",
     "password": "password"
   }'
 

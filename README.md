@@ -47,6 +47,20 @@ Before using the admin dashboard, create an admin user:
 
 Once admin user has been created, log in at `http://localhost:7070/mb`.
 
+### Admin Dashboard
+
+MantisBase includes a powerful web-based admin dashboard that provides a visual interface for managing your data. The dashboard is **essential** for:
+
+- **Visual Data Management** - View, create, edit, and delete records through an intuitive interface
+- **Schema Management** - Create and configure entity schemas without writing API calls
+- **Access Control Configuration** - Set up access rules visually
+- **Real-time Data Exploration** - Browse your data with search, filtering, and pagination
+- **User Management** - Manage authentication entities and users
+
+![MantisBase Admin Dashboard](doc/mantisbase-admin.png)
+
+Access the dashboard at `http://localhost:7070/mb` after creating an admin account. The dashboard provides a complete GUI alternative to the REST API, making it perfect for non-technical users and rapid development.
+
 ### 3. Create Your First Entity
 
 Use the admin dashboard or API to create a table. For example, create a `posts` table:
@@ -155,6 +169,21 @@ See [Docker Guide](doc/06.docker.md) for details.
 ---
 
 ## Key Features
+
+### Admin Dashboard
+
+The **MantisBase Admin Dashboard** is a fully-featured web interface that provides visual management of your entire backend:
+
+- **Entity Management** - Create, view, edit, and delete records through an intuitive table interface
+- **Schema Builder** - Design database schemas with a visual form builder
+- **Access Rules Editor** - Configure permissions with a user-friendly interface
+- **File Management** - Upload and manage files associated with your entities
+- **Search & Filtering** - Quickly find and filter records across all entities
+- **Real-time Updates** - See changes reflected immediately
+
+![MantisBase Admin Dashboard](doc/mantisbase-admin.png)
+
+The dashboard is accessible at `/mb` and requires admin authentication. It's the **recommended way** to interact with MantisBase during development and for non-technical team members.
 
 ### Auto-generated REST APIs
 
@@ -331,10 +360,10 @@ curl http://localhost:7070/api/v1/entities/users
 ### Authentication Flow
 
 ```bash
-# 1. Login
+# 1. Login (identity can be email or user ID)
 curl -X POST http://localhost:7070/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"entity": "users", "email": "user@example.com", "password": "password"}'
+  -d '{"entity": "users", "identity": "user@example.com", "password": "password"}'
 
 # Response: {"token": "...", "user": {...}}
 
