@@ -47,7 +47,8 @@ namespace TestHelpers {
                     {"email", TestConfig::getAdminEmail()},
                     {"password", TestConfig::getTestPassword()}
                 };
-                admin_entity.create(admin_data);
+                auto r = admin_entity.create(admin_data);
+                std::cout << "Created record: " << r.dump() << std::endl;
             }
             
             // Login to get token
@@ -61,8 +62,9 @@ namespace TestHelpers {
             
             if (loginRes && loginRes->status == 200) {
                 auto response = nlohmann::json::parse(loginRes->body);
-                if (response.contains("token")) {
-                    return response["token"].get<std::string>();
+                std::cout << "-- Response: " << response.dump() << std::endl;
+                if (response.contains("data") && response["data"].contains("token")) {
+                    return response["data"]["token"].get<std::string>();
                 }
             }
         } catch (const std::exception& e) {
@@ -100,8 +102,9 @@ namespace TestHelpers {
                 
                 if (loginRes && loginRes->status == 200) {
                     auto response = nlohmann::json::parse(loginRes->body);
-                    if (response.contains("token")) {
-                        return response["token"].get<std::string>();
+                    std::cout << "-- Response: " << response.dump() << std::endl;
+                    if (response.contains("data") && response["data"].contains("token")) {
+                        return response["data"]["token"].get<std::string>();
                     }
                 }
             } catch (...) {

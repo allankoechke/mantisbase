@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <cstdlib>
+#include <atomic>
+#include <thread>
+#include <chrono>
 #ifdef _WIN32
 #include <stdlib.h>
 #else
@@ -25,35 +28,70 @@ int main(int argc, char* argv[])
     const auto dataDir = (baseDir / "data").string();
     const auto publicDir = (baseDir / "www").string();
 
+    auto port = TestConfig::getTestPort();
+
     mb::json args;
     args["database"] = "SQLITE";
     args["dataDir"] = dataDir;
     args["publicDir"] = publicDir;
     args["scriptsDir"] = scriptingDir;
-    args["serve"] = {{"port", TestConfig::getTestPort()}, {"host", "0.0.0.0"}};
+    args["serve"] = {{"port", port}, {"host", "0.0.0.0"}};
 
     mb::logger::trace("Args: {}", args.dump());
 
     // Setup Db, Server, etc.
     auto& tFix = TestFixture::instance(args);
 
-    // Spawn a new thread to run the
-    auto serverThread = std::thread([&tFix]()
+    // Spawn a new thread to run the server
+    std::atomic<bool> server_error{false};
+    std::string server_error_msg;
+    
+    std::cout << "[Test] Starting server thread...\n";
+    auto serverThread = std::thread([&tFix, &server_error, &server_error_msg]()
     {
         try
         {
+            std::cout << "[Test] Server thread: Calling app.run()...\n";
             auto& app = tFix.app();
+            std::cout << "[Test] Server thread: app.run() started, server should be listening...\n";
             [[maybe_unused]] auto res = app.run();
+            std::cout << "[Test] Server thread: app.run() returned with code " << res << '\n';
         }
         catch (const std::exception& e)
         {
-            std::cerr << "Error Starting Server: " << e.what() << '\n';
+            server_error.store(true);
+            server_error_msg = e.what();
+            std::cerr << "[Test] Error Starting Server: " << e.what() << '\n';
+        }
+        catch (...)
+        {
+            server_error.store(true);
+            server_error_msg = "Unknown error";
+            std::cerr << "[Test] Error Starting Server: Unknown error\n";
         }
     });
 
-    // Wait for server to be ready (replaces fixed sleep)
-    if (!tFix.waitForServer(20, 100)) {
+    // Give the server thread time to initialize and start listening
+    // Router initialization queries the database which can take a moment
+    std::cout << "[Test] Waiting for server to initialize...\n";
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    
+    if (server_error.load()) {
+        std::cerr << "[Test] Server thread failed: " << server_error_msg << '\n';
+        if (serverThread.joinable()) {
+            serverThread.join();
+        }
+        tFix.teardownOnce(baseDir);
+        return 1;
+    }
+
+    // Wait for server to be ready (health check)
+    std::cout << "[Test] Waiting for server to respond to health checks...\n";
+    if (!tFix.waitForServer(30, 200)) {
         std::cerr << "[Test] Server failed to start within timeout\n";
+        if (serverThread.joinable()) {
+            serverThread.join();
+        }
         tFix.teardownOnce(baseDir);
         return 1;
     }

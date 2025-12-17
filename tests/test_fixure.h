@@ -68,19 +68,60 @@ public:
             return true;
         }
         
-        httplib::Client cli("http://localhost", port);
         int delay_ms = initial_delay_ms;
+        
+        std::cout << "[TestFixture] Waiting for server on port " << port << "...\n";
         
         for (int i = 0; i < max_retries; ++i)
         {
-            if (auto res = cli.Get("/api/v1/health"); res && res->status == 200) {
-                server_ready.store(true);
-                return true;
+            try {
+                // Create a fresh client for each attempt to avoid connection issues
+                // Use 127.0.0.1 instead of localhost for better reliability (per httplib docs)
+                httplib::Client cli("127.0.0.1", port);
+                cli.set_connection_timeout(1, 0); // 1 second connection timeout
+                cli.set_read_timeout(1, 0); // 1 second read timeout
+                
+                // Try health endpoint first
+                if (auto res = cli.Get("/api/v1/health")) {
+                    if (res->status == 200) {
+                        server_ready.store(true);
+                        std::cout << "[TestFixture] Health check passed (attempt " << (i + 1) << ")\n";
+                        return true;
+                    } else {
+                        if (i % 5 == 0) { // Only log every 5th attempt to reduce noise
+                            std::cout << "[TestFixture] Health check returned status " << res->status 
+                                      << " (attempt " << (i + 1) << ")\n";
+                        }
+                    }
+                } else {
+                    // Health endpoint failed, but try a fallback - check if server responds to any request
+                    // This handles cases where health endpoint has issues but server is running
+                    if (auto fallback_res = cli.Get("/mb")) {
+                        // Server is responding (even if not 200, any response means server is up)
+                        server_ready.store(true);
+                        std::cout << "[TestFixture] Server is responding (fallback check passed, attempt " << (i + 1) << ")\n";
+                        return true;
+                    }
+                    
+                    if (i % 5 == 0) { // Only log every 5th attempt
+                        std::cout << "[TestFixture] Health check failed - no response (attempt " << (i + 1) << ")\n";
+                    }
+                }
+            } catch (const std::exception& e) {
+                if (i % 5 == 0) { // Only log every 5th attempt
+                    std::cout << "[TestFixture] Health check exception: " << e.what() 
+                              << " (attempt " << (i + 1) << ")\n";
+                }
             }
+            
             std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
             // Exponential backoff, max 500ms
             delay_ms = std::min(delay_ms * 2, 500);
         }
+        
+        std::cerr << "[TestFixture] Health check failed after " << max_retries << " attempts\n";
+        std::cerr << "[TestFixture] Server may be running but health endpoint not responding\n";
+        std::cerr << "[TestFixture] Try manually: curl http://127.0.0.1:" << port << "/api/v1/health\n";
         return false;
     }
 
@@ -112,12 +153,12 @@ public:
 
     httplib::Client client() const
     {
-        return httplib::Client("http://localhost", port);
+        return httplib::Client("127.0.0.1", port);
     }
     
     static httplib::Client staticClient()
     {
-        return httplib::Client("http://localhost", TestConfig::getTestPort());
+        return httplib::Client("127.0.0.1", TestConfig::getTestPort());
     }
 };
 

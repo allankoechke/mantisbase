@@ -21,11 +21,11 @@ if (NOT GTest_FOUND)
     FetchContent_MakeAvailable(googletest)
 endif ()
 
-# Option to build combined tests (backward compatibility) or separate
+# Option to build combined tests or separate
 option(BUILD_COMBINED_TESTS "Build all tests in one executable" OFF)
 
 if (BUILD_COMBINED_TESTS)
-    # Combined tests (backward compatibility)
+    # Combined tests
     file(GLOB TEST_FILES
             test_fixure.cpp
             main.cpp
@@ -38,9 +38,9 @@ if (BUILD_COMBINED_TESTS)
             unit/test_entity_schema_field.cpp
             unit/test_files_security.cpp
             unit/test_ip_validation.cpp
-#            integration/test_integration_crud.cpp
-#            integration/test_integration_schema.cpp
-#            integration/test_integration_auth.cpp
+            integration/test_integration_crud.cpp
+            integration/test_integration_schema.cpp
+            integration/test_integration_auth.cpp
     )
 
     add_executable(mantisbase_tests ${TEST_FILES})
@@ -121,10 +121,11 @@ else ()
     
     # Integration Tests (require server)
     file(GLOB INTEGRATION_TEST_FILES
+            test_fixure.cpp
             main.cpp
-#            integration/test_integration_crud.cpp
-#            integration/test_integration_schema.cpp
-#            integration/test_integration_auth.cpp
+            integration/test_integration_crud.cpp
+            integration/test_integration_schema.cpp
+            integration/test_integration_auth.cpp
     )
 
     add_executable(mantisbase_integration_tests ${INTEGRATION_TEST_FILES})

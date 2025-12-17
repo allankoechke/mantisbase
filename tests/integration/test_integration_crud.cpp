@@ -9,7 +9,7 @@ class IntegrationCRUDTest : public ::testing::Test {
 protected:
     void SetUp() override {
         // Server is already started in main.cpp, just get client
-        auto& fixture = TestFixture::instance(mb::json{});
+        const auto& fixture = TestFixture::instance(mb::json{});
         client = std::make_unique<httplib::Client>(fixture.client());
         
         // Create admin token for schema operations
@@ -27,10 +27,10 @@ protected:
 
     void createTestEntity() {
         if (adminToken.empty()) return;
-        
-        httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
-        
-        nlohmann::json schema = {
+
+        const httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+
+        const nlohmann::json schema = {
             {"name", "test_products"},
             {"type", "base"},
             {"list", {{"mode", "public"}}},
@@ -40,7 +40,7 @@ protected:
             {"delete", {{"mode", ""}}}, // Admin only
             {"fields", nlohmann::json::array({
                 {{"name", "name"}, {"type", "string"}, {"required", true}},
-                {{"name", "price"}, {"type", "number"}, {"required", true}},
+                {{"name", "price"}, {"type", "double"}, {"required", true}},
                 {{"name", "description"}, {"type", "string"}}
             })}
         };
@@ -78,7 +78,7 @@ protected:
             {"password", TestConfig::getTestPassword()}
         };
         
-        auto createRes = client->Post("/api/v1/entities/test_users", 
+        auto createRes = client->Post("/api/v1/entities/test_users", headers,
             user.dump(), "application/json");
         
         if (!createRes || createRes->status != 201) {
@@ -97,8 +97,8 @@ protected:
         
         if (loginRes && loginRes->status == 200) {
             auto response = nlohmann::json::parse(loginRes->body);
-            if (response.contains("token")) {
-                return response["token"].get<std::string>();
+            if (response.contains("data") && response["data"].contains("token")) {
+                return response["data"]["token"].get<std::string>();
             }
         }
         
@@ -116,7 +116,7 @@ TEST_F(IntegrationCRUDTest, CreateRecord) {
         {"description", "A test product"}
     };
     
-    auto res = client->Post("/api/v1/entities/test_products", 
+    auto res = client->Post("/api/v1/entities/test_products", {{"Authorization", "Bearer " + adminToken}},
         record.dump(), "application/json");
     
     ASSERT_TRUE(res != nullptr);
@@ -138,15 +138,15 @@ TEST_F(IntegrationCRUDTest, ListRecords) {
         record.dump(), "application/json");
     
     // List records
-    auto res = client->Get("/api/v1/entities/test_products");
+    auto res = client->Get("/api/v1/entities/test_products", {{"Authorization", "Bearer " + adminToken}});
     
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 200);
     
     auto response = nlohmann::json::parse(res->body);
-    EXPECT_TRUE(response.contains("data"));
-    EXPECT_TRUE(response["data"].is_array());
-    EXPECT_GT(response["data"].size(), 0);
+    EXPECT_TRUE(response.contains("data") && response["data"].contains("items"));
+    EXPECT_TRUE(response["data"]["items"].is_array());
+    EXPECT_EQ(response["data"]["items"].size(), response["data"]["items_count"]);
 }
 
 TEST_F(IntegrationCRUDTest, GetRecord) {
