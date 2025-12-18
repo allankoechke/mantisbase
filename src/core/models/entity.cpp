@@ -6,12 +6,17 @@
 
 namespace mb {
     Entity::Entity(const nlohmann::json &schema) {
-        if (!schema.contains("name") || !schema["name"].is_string() || !schema.contains("type") || !schema["type"].is_string())
-            throw std::invalid_argument("Missing required fields `name` and `type` in schema!");
+        logger::trace("Creating Entity from JSON Schema\n\t- {}", schema.dump());
+
+        if (!schema.contains("name") || !schema["name"].is_string() || schema["name"].empty())
+            throw MantisException(400, "Missing required entity `name` in schema!", schema.dump());
+
+        if (!schema.contains("type") || !schema["type"].is_string() || schema["type"].empty())
+            throw MantisException(400, "Missing required entity `type` in schema!", schema.dump());
 
         // Ensure name is valid
         if (!EntitySchema::isValidEntityName(schema["name"].get<std::string>())) {
-            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", schema);
+            throw MantisException(400, "Invalid character in entity name", schema.dump());
         }
 
         if (!EntitySchema::isValidEntityType(schema["type"].get<std::string>())) {

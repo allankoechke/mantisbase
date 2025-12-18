@@ -37,6 +37,7 @@ public:
         const auto publicDir = (baseDir / "www").string();
 
         mb::json args;
+        args["dev"] = true;
         args["database"] = "SQLITE";
         args["dataDir"] = dataDir;
         args["publicDir"] = publicDir;

@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
     auto port = TestConfig::getTestPort();
 
     mb::json args;
+    args["dev"] = true;
     args["database"] = "SQLITE";
     args["dataDir"] = dataDir;
     args["publicDir"] = publicDir;
