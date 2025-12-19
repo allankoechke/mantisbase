@@ -27,7 +27,7 @@ protected:
 
 TEST_F(JWTTestFixture, CreateValidToken) {
     const nlohmann::json claims = {{"id", "123"}, {"entity", "users"}};
-    std::string token = mb::Auth::createToken(claims, 3600);
+    const std::string token = mb::Auth::createToken(claims, 3600);
     
     EXPECT_FALSE(token.empty());
     EXPECT_GT(token.length(), 20); // JWT tokens are typically long
@@ -45,7 +45,7 @@ TEST_F(JWTTestFixture, CreateTokenMissingFields) {
 
 TEST_F(JWTTestFixture, VerifyValidToken) {
     const nlohmann::json claims = {{"id", "123"}, {"entity", "users"}};
-    std::string token = mb::Auth::createToken(claims, 3600);
+    const std::string token = mb::Auth::createToken(claims, 3600);
     
     EXPECT_FALSE(token.empty());
     

@@ -63,7 +63,7 @@ TEST(EntitySchema, EntitySchemaAuthType) {
 
 TEST(EntitySchema, EntitySchemaViewType) {
     // View Type
-    mb::EntitySchema view{"test", "view"};
+    const mb::EntitySchema view{"test", "view"};
 
     EXPECT_EQ(view.type(), "view");
     EXPECT_EQ(view.name(), "test");

@@ -47,8 +47,8 @@ TEST(DatabaseTest, EntityOperations) {
     const auto& mApp = TestFixture::app();
     
     // Check that we can get system entities
-    EXPECT_NO_THROW(mApp.entity("mb_admins"));
-    EXPECT_THROW(mApp.entity("mb_tables"), mb::MantisException);
+    EXPECT_NO_THROW(auto _ = mApp.entity("mb_admins"));
+    EXPECT_THROW(auto _ = mApp.entity("mb_tables"), mb::MantisException);
 
     const auto admin_entity = mApp.entity("mb_admins");
     EXPECT_TRUE(admin_entity.isSystem());

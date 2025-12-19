@@ -17,8 +17,10 @@ int main(int argc, char* argv[])
     // Disable rate limiting in tests to prevent test failures
     #ifdef _WIN32
         _putenv_s("TEST_DISABLE_RATE_LIMIT", "1");
+        _putenv_s("TEST_DISABLE_SPAWN_MB_ADMIN", "1");
     #else
         setenv("TEST_DISABLE_RATE_LIMIT", "1", 1);
+        setenv("TEST_DISABLE_SPAWN_MB_ADMIN", "1", 1);
     #endif
     
     // Setup directories for tests, for each, create a unique directory
@@ -31,14 +33,14 @@ int main(int argc, char* argv[])
     auto port = TestConfig::getTestPort();
 
     mb::json args;
-    args["dev"] = true;
+    // args["dev"] = true;
     args["database"] = "SQLITE";
     args["dataDir"] = dataDir;
     args["publicDir"] = publicDir;
     args["scriptsDir"] = scriptingDir;
     args["serve"] = {{"port", port}, {"host", "0.0.0.0"}};
 
-    mb::logger::trace("Args: {}", args.dump());
+    // mb::logger::trace("Args: {}", args.dump());
 
     // Setup Db, Server, etc.
     auto& tFix = TestFixture::instance(args);

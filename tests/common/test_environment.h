@@ -37,14 +37,14 @@ public:
         const auto publicDir = (baseDir / "www").string();
 
         mb::json args;
-        args["dev"] = true;
+        // args["dev"] = true;
         args["database"] = "SQLITE";
         args["dataDir"] = dataDir;
         args["publicDir"] = publicDir;
         args["scriptsDir"] = scriptingDir;
         args["serve"] = {{"port", 0}, {"host", "0.0.0.0"}}; // Port 0 = don't start server
 
-        mb::logger::trace("Test Environment Args: {}", args.dump());
+        // mb::logger::trace("Test Environment Args: {}", args.dump());
 
         // Setup MantisBase instance (without starting server for unit tests)
         TestFixture::instance(args);

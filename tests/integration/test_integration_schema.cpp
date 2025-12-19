@@ -54,8 +54,6 @@ TEST_F(IntegrationSchemaTest, CreateSchema) {
         }
     };
 
-    std::cout << "Schema: " << schema.dump() << std::endl;
-
     auto res = client->Post("/api/v1/schemas", headers,
                             schema.dump(), "application/json");
 
@@ -163,7 +161,6 @@ TEST_F(IntegrationSchemaTest, UpdateSchema) {
     EXPECT_EQ(res->status, 200);
 
     auto response = nlohmann::json::parse(res->body);
-    std::cout << "RES: " << response.dump() << std::endl;
     EXPECT_GT(response["data"]["schema"]["fields"].size(), 2);
 }
 
@@ -213,8 +210,6 @@ TEST_F(IntegrationSchemaTest, SchemaWithAccessRules) {
         }
     };
 
-    std::cout << "SCHEMA: " << schema.dump() << std::endl;
-
     auto res = client->Post("/api/v1/schemas", headers,
                             schema.dump(), "application/json");
 
@@ -222,7 +217,6 @@ TEST_F(IntegrationSchemaTest, SchemaWithAccessRules) {
     EXPECT_EQ(res->status, 201);
 
     auto response = nlohmann::json::parse(res->body);
-    std::cout << "RES: " << response["data"]["schema"]["rules"].dump() << std::endl;
     EXPECT_EQ(response["data"]["schema"]["rules"]["list"]["mode"], "public");
     EXPECT_EQ(response["data"]["schema"]["rules"]["add"]["mode"], "custom");
     EXPECT_EQ(response["data"]["schema"]["rules"]["add"]["expr"], "auth.id != null");
