@@ -412,7 +412,7 @@ namespace mb {
             TRACE_FUNC(msg);
             
             // Skip rate limiting in test mode if disabled
-            if (const char* test_disable = std::getenv("TEST_DISABLE_RATE_LIMIT"); 
+            if (const char* test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");
                 test_disable && std::string(test_disable) == "1") {
                 return HandlerResponse::Unhandled;
             }

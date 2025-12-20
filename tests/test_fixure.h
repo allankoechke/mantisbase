@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <atomic>
 #include <mutex>
+#include <utility>
 
 #include "../include/mantisbase/mantis.h"
 #include "common/test_config.h"
@@ -36,7 +37,7 @@ struct TestFixture {
     static std::mutex server_mutex;
 
 private:
-    TestFixture(const mb::json &config)
+    explicit TestFixture(const mb::json &config)
         : port(TestConfig::getTestPort()),
           mApp(mb::MantisBase::create(config)) {
         std::cout << "[TestFixture] Setting up DB and starting server on port " << port << "...\n";
@@ -114,41 +115,70 @@ public:
         }
 
         std::cerr << "[TestFixture] Health check failed after " << max_retries << " attempts\n";
-        std::cerr << "[TestFixture] Server may be running but health endpoint not responding\n";
-        std::cerr << "[TestFixture] Try manually: curl http://127.0.0.1:" << port << "/api/v1/health\n";
         return false;
     }
 
-    void teardownOnce(const fs::path &base_path) const {
+    static void teardownOnce() {
         std::lock_guard<std::mutex> lock(server_mutex);
-        std::cout << "[TestFixture] Shutting down server...\n";
+        std::cout << "[TestFixture] Shutting down server ...\n";
 
+        // First, just stop the HTTP server without destroying the router
+        // This allows the server thread to exit cleanly from router.listen()
         try {
-            std::cout << "A\n";
-            try {
-                // Graceful shutdown
-                app().close();
-            } catch (...) {std::cerr << "[TestFixture] ERR closing app.\n";}
-            std::cout << "B\n";
-            server_ready.store(false);
-            std::cout << "C\n";
+            if (app().router().server().is_running()) {
+                app().router().close();
+                std::cout << "[TestFixture] HTTP server stopped.\n";
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "[TestFixture] Error stopping HTTP server: " << e.what() << "\n";
+        } catch (...) {
+            std::cerr << "[TestFixture] Unknown error stopping HTTP server\n";
+        }
 
+        std::cout << "[TestFixture] Server stopped.\n";
+    }
+    
+    static void cleanup() {
+        std::lock_guard<std::mutex> lock(server_mutex);
+        // Now do the full cleanup - destroy router and other resources
+        // This should only be called after the server thread has exited
+        try {
+            // Try to access and close MantisBase
+            // If it's already destroyed or being destroyed, exceptions will be caught
+            try {
+                app().close();
+            } catch (const std::runtime_error& e) {
+                // MantisBase not created yet or already destroyed - that's ok
+                // This is expected during static destruction, so don't log
+            } catch (const std::exception& e) {
+                // Other exceptions during cleanup are expected during shutdown
+                // Don't log to avoid noise
+            } catch (...) {
+                // Any other exception means MantisBase is likely being destroyed
+                // Just ignore it
+            }
+        } catch (...) {
+            // Ignore all errors during cleanup - we're shutting down anyway
+        }
+    }
+
+
+    static void cleanDir(const fs::path &base_path) {
+        try {
             // Cleanup the temporary directory & files
             if (fs::exists(base_path)) {
-                std::cout << "D\n";
                 fs::remove_all(base_path);
                 std::cout << "[TestFixture] Removed directory " << base_path.string() << "...\n";
             }
         } catch (const std::exception &e) {
-            std::cout << "E\n";
-            std::cerr << "[TestFixture] Error shutting down server: " << e.what() << "\n";
+            std::cerr << "[TestFixture] Cleaning up failed: " << e.what() << std::endl;
         }
 
-        std::cout << "F\n";
-        std::cout << "[TestFixture] Server stopped.\n";
+        server_ready.store(false);
     }
 
-    httplib::Client client() const {
+
+    [[nodiscard]] httplib::Client client() const {
         return httplib::Client("127.0.0.1", port);
     }
 

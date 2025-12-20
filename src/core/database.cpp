@@ -16,7 +16,7 @@
 // #define __file__ "core/tables/sys_tables.cpp"
 
 namespace mb {
-    Database::Database() : m_connPool(nullptr) {
+    Database::Database() : m_connPool(nullptr), mbApp(MantisBase::instance()) {
     }
 
     Database::~Database() {
@@ -38,8 +38,11 @@ namespace mb {
 
             const auto db_type = MantisBase::instance().dbType();
 
+            auto pool_size = static_cast<size_t>(MantisBase::instance().poolSize());
             // Populate the pools with db connections
-            for (int i = 0; i < MantisBase::instance().poolSize(); ++i) {
+            for (std::size_t i = 0; i < pool_size; ++i) {
+                std::cout << std::format("Creating db session for index `{}/{}`\n", i, pool_size);
+
                 if (db_type == "sqlite3") {
                     // For SQLite, lets explicitly define location and name of the database
                     // we intend to use within the `dataDir`
@@ -103,23 +106,40 @@ namespace mb {
         return true;
     }
 
-    void Database::disconnect() const {
-        // Write checkpoint out
+    void Database::disconnect() {
+        // Make disconnect() safe to call multiple times and handle null/invalid states
+        if (!m_connPool) {
+            // Already disconnected or never connected, nothing to do
+            return;
+        }
+
+        // Write checkpoint out (may fail if database is already closed, that's ok)
         writeCheckpoint();
 
-        // Pool size cast
-        const auto pool_size = static_cast<size_t>(MantisBase::instance().poolSize());
+        // Pool size cast - may fail if MantisBase instance is invalid, that's ok
+        const auto pool_size = static_cast<size_t>(mbApp.poolSize());
+
         // Close all sessions in the pool
         for (std::size_t i = 0; i < pool_size; ++i) {
             try {
                 if (soci::session &sess = m_connPool->at(i); sess.is_connected()) {
-                    // Check if session is connected
                     sess.close();
+                    logger::debug("DB Shutdown: Closing soci::session object  {} of {} connections", i + 1, pool_size);
+                } else {
+                    logger::debug("DB Shutdown: soci::session object at index `{}` of {} connections is not connected.",
+                                  i + 1, pool_size);
                 }
             } catch (const soci::soci_error &e) {
                 logger::critical("Database disconnection soci::error at index `{}`: {}", i, e.what());
+            } catch (...) {
+                // Ignore other errors during session close
             }
         }
+
+        // Reset the connection pool
+        m_connPool.reset();
+
+        logger::debug("DB Shutdown: Session disconnection completed.");
     }
 
     bool Database::createSysTables() const {
@@ -180,23 +200,34 @@ namespace mb {
     }
 
     bool Database::isConnected() const {
-        if (m_connPool == nullptr) return false;
+        if (!m_connPool) return false;
 
         const auto sql = session();
         return sql->is_connected();
     }
 
     void Database::writeCheckpoint() const {
+        // Make writeCheckpoint() safe to call during shutdown
+        if (!m_connPool) {
+            // No connection pool, nothing to checkpoint
+            return;
+        }
+
         // Enable this write checkpoint for SQLite databases ONLY
-        if (MantisBase::instance().dbType() == "sqlite3") {
-            try {
-                // Write out the WAL data to db file & truncate it
-                if (const auto sql = session(); sql->is_connected()) {
-                    *sql << "PRAGMA wal_checkpoint(TRUNCATE)";
+        try {
+            if (MantisBase::instance().dbType() == "sqlite3") {
+                try {
+                    // Write out the WAL data to db file & truncate it
+                    if (const auto sql = session(); sql->is_connected()) {
+                        *sql << "PRAGMA wal_checkpoint(TRUNCATE)";
+                    }
+                } catch (std::exception &e) {
+                    logger::critical("Database Connection SOCI::Error: {}", e.what());
                 }
-            } catch (std::exception &e) {
-                logger::critical("Database Connection SOCI::Error: {}", e.what());
             }
+        } catch (...) {
+            // If MantisBase instance is invalid or dbType() fails, ignore it
+            // This can happen during shutdown when instance is being torn down
         }
     }
 #ifdef MANTIS_SCRIPTING_ENABLED

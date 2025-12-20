@@ -149,7 +149,7 @@ namespace mb {
         if (svr.is_running()) {
             svr.stop();
             m_entityMap.clear();
-            logger::info("HTTP Server Stopped.\n\t ...");
+            logger::info("HTTP Server Stopped.");
         }
     }
 

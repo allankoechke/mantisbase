@@ -89,7 +89,8 @@ namespace mb {
          * @param handler Handler with content reader for multipart/form-data
          * @param middlewares Optional middleware functions
          */
-        void Post(const std::string &path, const HandlerWithContentReaderFn &handler, const Middlewares &middlewares = {});
+        void Post(const std::string &path, const HandlerWithContentReaderFn &handler,
+                  const Middlewares &middlewares = {});
 
         /**
          * @brief Register POST route.
@@ -105,7 +106,8 @@ namespace mb {
          * @param handler Handler with content reader
          * @param middlewares Optional middleware functions
          */
-        void Patch(const std::string &path, const HandlerWithContentReaderFn &handler, const Middlewares &middlewares = {});
+        void Patch(const std::string &path, const HandlerWithContentReaderFn &handler,
+                   const Middlewares &middlewares = {});
 
         /**
          * @brief Register PATCH route.
@@ -178,9 +180,9 @@ namespace mb {
         // ----------- REQ/RES METHODS ----------- //
         std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute() const;
 
-        static std::function<void(const MantisRequest &, MantisResponse &)> fileServingHandler() ;
+        static std::function<void(const MantisRequest &, MantisResponse &)> fileServingHandler();
 
-        static std::function<void(const MantisRequest &, MantisResponse &)> healthCheckHandler() ;
+        static std::function<void(const MantisRequest &, MantisResponse &)> healthCheckHandler();
 
         std::function<HandlerResponse(const httplib::Request &, httplib::Response &)> preRoutingHandler();
 
@@ -193,19 +195,21 @@ namespace mb {
         std::function<void(const httplib::Request &, httplib::Response &)> routingErrorHandler();
 
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogin();
+
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh();
+
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogout();
 
         std::function<void(MantisRequest &, MantisResponse &)> handleSetupAdmin();
 
-
-        MantisBase& mApp;
+        // Member Variables
+        MantisBase &mApp;
         httplib::Server svr;
-        std::unique_ptr<EntitySchema> m_entitySchema;
         RouteRegistry m_routeRegistry;
+        // std::vector<nlohmann::json> m_schemas;
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
         std::vector<HandlerFn> m_postRoutingMiddlewares;
-        std::vector<nlohmann::json> m_schemas;
+        std::unique_ptr<EntitySchema> m_entitySchema;
         std::unordered_map<std::string, Entity> m_entityMap;
     };
 } // mb

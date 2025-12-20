@@ -27,10 +27,15 @@ namespace mb {
 
         // Destroy duk context
         duk_destroy_heap(m_dukCtx);
+
+        if (m_logger) {
+            logger::trace("[MB] Resetting logger instance, BYE!");
+            m_logger.reset();
+        }
     }
 
     void MantisBase::init(const int argc, char *argv[]) {
-        logger::info("Initializing Mantis, v{}", appVersion());
+        logger::info("Initializing MantisBase, v{}", appVersion());
 
         // Set that the object was created successfully, now initializing
         m_isCreated = true;
@@ -73,9 +78,9 @@ namespace mb {
         if (app.m_isCreated)
             throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
 
-        logger::trace("MantisBase Config: {}", config.dump());
+        // logger::trace("MantisBase Config: {}", config.dump());
 
-        app.m_cmdArgs.emplace_back("mantisapp"); // Arg[0] should be the app name
+        app.m_cmdArgs.emplace_back("mantisbase"); // Arg[0] should be the app name
 
         // dataDir publicDir scriptsDir serve [port host] admins [add remove]
         // --database psql
@@ -195,12 +200,48 @@ namespace mb {
     }
 
     void MantisBase::close() {
-        // Destroy instance objects
-        if (m_opts) m_opts.reset();
-        if (m_kvStore) m_kvStore.reset();
-        if (m_router) m_router.reset();
-        if (m_database) m_database.reset();
-        if (m_logger) m_logger.reset();
+        // Already closed, nothing to do
+        if (!m_isCreated.load()) {
+            return;
+        }
+
+        logger::trace("[MB] Starting closing all units ...");
+        try {
+            if (m_router) {
+                logger::trace("[MB] Starting Router closing ...");
+                m_router->close();
+                logger::trace("[MB] Finished Router closing ...");
+            }
+
+            if (m_kvStore) {
+                logger::trace("[MB] Starting KV Store closing ...");
+                // m_kvStore.reset();
+                logger::trace("[MB] Finished KV Store closing ...");
+            }
+
+            if (m_database) {
+                logger::trace("[MB] Starting DB closing ...");
+                m_database->disconnect();
+                logger::trace("[MB] Finished DB Store closing ...");
+            }
+
+            if (m_router) {
+                logger::trace("[MB] Resetting router instance ...");
+                // m_router.reset();
+                logger::trace("[MB] Resetting router instance [OK] ...");
+            }
+
+            if (m_opts) {
+                logger::trace("[MB] Resetting opts instance [OK] ...");
+                // m_opts.reset();
+                logger::trace("[MB] Resetting opts instance [OK] ...");
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "[MB]  Error during reset: " << e.what() << std::endl;
+        }
+
+        m_isCreated.store(false);
+        logger::debug("[MB] Finished closing all units");
     }
 
     int MantisBase::run() {
@@ -242,11 +283,13 @@ namespace mb {
         return *m_kvStore;
     }
 
-    Entity MantisBase::entity(const std::string &table_name) const {
-        if (table_name.empty()) throw std::invalid_argument("Table name is invalid!");
+    Entity MantisBase::entity(const std::string &entity_name) const {
+        if (!EntitySchema::isValidEntityName(entity_name))
+            throw MantisException(400,
+                                  std::format("Invalid entity name `{}` provided.", entity_name));
 
         // Get schema cache from db, check if we have this data, return data if available
-        const auto entity_obj = m_router->schemaCacheEntity(table_name);
+        const auto entity_obj = m_router->schemaCacheEntity(entity_name);
         return entity_obj;
     }
 
@@ -255,6 +298,10 @@ namespace mb {
     }
 
     void MantisBase::openBrowserOnStart() const {
+        // Skip spinning the default browser on first boot
+        // Useful for tests
+        if (getEnvOrDefault("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "1") == "1") return;
+
         std::cout << std::endl;
 
         try {

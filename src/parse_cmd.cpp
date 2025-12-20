@@ -29,6 +29,10 @@ namespace mb {
         program.add_argument("--scriptsDir")
                 .nargs(1)
                 .help("<dir> JS script files directory (default: ./scripts).");
+        program.add_argument("--poolSize")
+                .nargs(1)
+                .scan<'i', int>()
+                .help("<pool size> Size of database connection pools >= 1");
         program.add_argument("--dev").flag();
 
         // Serve subcommand
@@ -41,9 +45,6 @@ namespace mb {
                 .nargs(1)
                 .default_value("0.0.0.0")
                 .help("<host> Server Host (default: 0.0.0.0)");
-        serve_command.add_argument("--poolSize")
-                .scan<'i', int>()
-                .help("<pool size> Size of database connection pools >= 1");
 
         // Admins subcommand with nested subcommands
         // admins add user@doe.com 123456789
@@ -118,6 +119,7 @@ namespace mb {
         const auto dataDir = program.present<std::string>("--dataDir").value_or("data");
         const auto pubDir = program.present<std::string>("--publicDir").value_or("public");
         const auto scriptsDir = program.present<std::string>("--scriptsDir").value_or("scripts");
+        const auto pools = program.present<int>("--poolSize").value_or(-1);
 
         // Set trace mode if flag is set
         if (program.get<bool>("--dev")) {
@@ -154,6 +156,9 @@ namespace mb {
             quit(-1, std::format("Backend Database `{}` is unsupported!", db));
         }
 
+        // Set pool size before initiating connections
+        setPoolSize(pools > 0 ? pools : m_dbType == "sqlite3" ? 4 : 10);
+
         // Initialize database connection & Migration
         if (!m_database->connect(connString)) {
             // Connection to database failed
@@ -177,12 +182,8 @@ namespace mb {
             const auto host = serve_command.get<std::string>("--host");
             const auto port = serve_command.get<int>("--port");
 
-            int default_pool_size = m_dbType == "sqlite3" ? 4 : 10;
-            const auto pools = serve_command.present<int>("--poolSize").value_or(default_pool_size);
-
             setHost(host);
             setPort(port);
-            setPoolSize(pools > 0 ? pools : 1);
 
             // Set the serve flag to true, will be checked later before
             // running the listen on port & host above.
@@ -244,7 +245,8 @@ namespace mb {
                     quit(500, e.what());
                 }
             } else {
-                std::cout << std::endl << "Unknown arguments to `admins` subcommand.\n\n" << admins_command << std::endl;
+                std::cout << std::endl << "Unknown arguments to `admins` subcommand.\n\n" << admins_command <<
+                        std::endl;
             }
         } else if (program.is_subcommand_used("migrate")) {
             // Do migration stuff here

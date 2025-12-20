@@ -146,11 +146,6 @@ namespace mb
          * @return SOCI's database pool size.
          */
         [[nodiscard]] int poolSize() const;
-        /**
-         * @brief Set the database pool size value.
-         * @param pool_size New pool size value.
-         */
-        void setPoolSize(const int& pool_size);
 
         /**
          * @brief Retrieve HTTP Server host address. For instance, a host of `127.0.0.1`, `0.0.0.0`, etc.
@@ -241,10 +236,10 @@ namespace mb
          * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
          * If table does not exist yet, return an emty object.
          *
-         * @param table_name Name of the table of interest
+         * @param entity_name Name of the table of interest
          * @return Entity object for the selected table
          */
-        [[nodiscard]] Entity entity(const std::string& table_name) const;
+        [[nodiscard]] Entity entity(const std::string& entity_name) const;
 
         /// Get the duktape context
         [[nodiscard]] duk_context* ctx() const;
@@ -284,21 +279,19 @@ namespace mb
          */
         static MantisBase& getInstanceImpl();
 
+        /**
+         * @brief Set the database pool size value.
+         * @param pool_size New pool size value.
+         */
+        void setPoolSize(const int& pool_size);
+
+
         // Private members
         void parseArgs(); ///> Parse command-line arguments
         void init_units(); ///> Initialize application units
 
         [[nodiscard]]
         bool ensureDirsAreCreated() const; /// Ensures we created all required directories
-        /**
-         * @brief Get user input value, especially for password inputs or any secure value
-         *
-         * // TODO change to a proper input library
-         *
-         * @param prompt The message prompt to the user
-         * @return Entered user input as a string, cast accordingly!
-         */
-        static std::string getUserValueSecurely(const std::string& prompt);
 
 #ifdef MANTIS_ENABLE_SCRIPTING
         /**
@@ -362,13 +355,12 @@ namespace mb
         bool m_launchAdminPanel = false;
         bool m_isDevMode = false;
 
-        std::unique_ptr<Database> m_database;
         std::unique_ptr<LogsMgr> m_logger;
-        std::unique_ptr<argparse::ArgumentParser> m_opts;
+        std::unique_ptr<Database> m_database;
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KVStore> m_kvStore;
+        std::unique_ptr<argparse::ArgumentParser> m_opts;
         duk_context* m_dukCtx; // For duktape context
-
     };
 }
 
