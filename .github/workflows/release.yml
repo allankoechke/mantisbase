@@ -2,11 +2,11 @@ name: CMake Multiple Platforms
 
 on:
   push:
-    branches: [ "master", "v0.3-dev" ]
+    branches: [ "master", "v0.3.x" ]
     tags:
       - 'v*'
   pull_request:
-      branches: [ "master", "v0.3-dev" ]
+      branches: [ "master", "v0.3.x" ]
 
 permissions:
   contents: write
@@ -90,30 +90,30 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'ubuntu-latest'
         run: |
           cd ${{ github.workspace }}/build/bin
-          rm mantisapp_tests
+          rm mantisbase_tests
           mkdir -p zip
-          zip -r zip/mantisapp_${{ github.ref_name }}_${{ matrix.platform }}.zip mantisapp*
+          zip -r zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip mantisbase*
         shell: bash
 
       - name: Zip the build output (Windows)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          del "${{ steps.strings.outputs.build-output-dir }}\bin\mantisapp_tests.exe"
+          del "${{ steps.strings.outputs.build-output-dir }}\bin\mantisbase_tests.exe"
           $BinPath = "${{ steps.strings.outputs.build-output-dir }}\bin"
           $ZipPath = "$BinPath\zip"
-          $ZipFile = "$ZipPath\mantisapp_${{ github.ref_name }}_${{ matrix.platform }}.zip"
+          $ZipFile = "$ZipPath\mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip"
 
           New-Item -ItemType Directory -Force -Path $ZipPath | Out-Null
-          Compress-Archive -Path "$BinPath\mantisapp*.exe" -DestinationPath $ZipFile -Force
+          Compress-Archive -Path "$BinPath\mantisbase*.exe" -DestinationPath $ZipFile -Force
 
       - name: Upload zipped artifact
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
-          name: mantisapp_${{ github.ref_name }}_${{ matrix.platform }}.zip
+          name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip
           path: |
-            ${{ github.workspace }}/build/bin/zip/mantisapp_${{ github.ref_name }}_${{ matrix.platform }}.zip
+            ${{ github.workspace }}/build/bin/zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip
 
   release:
     needs: build
@@ -123,12 +123,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: mantisapp_${{ github.ref_name }}_linux.zip
+          name: mantisbase_${{ github.ref_name }}_linux.zip
           path: ./artifacts
           
       - uses: actions/download-artifact@v4
         with:
-          name: mantisapp_${{ github.ref_name }}_windows.zip
+          name: mantisbase_${{ github.ref_name }}_windows.zip
           path: ./artifacts
 
       - name: Show artifact contents
