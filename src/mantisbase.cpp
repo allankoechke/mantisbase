@@ -28,10 +28,10 @@ namespace mb {
         // Destroy duk context
         duk_destroy_heap(m_dukCtx);
 
-        if (m_logger) {
-            logger::trace("[MB] Resetting logger instance, BYE!");
-            m_logger.reset();
-        }
+        // if (m_logger) {
+        //     logger::trace("[MB] Resetting logger instance, BYE!");
+        //     m_logger.reset();
+        // }
     }
 
     void MantisBase::init(const int argc, char *argv[]) {

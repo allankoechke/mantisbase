@@ -142,24 +142,7 @@ public:
         std::lock_guard<std::mutex> lock(server_mutex);
         // Now do the full cleanup - destroy router and other resources
         // This should only be called after the server thread has exited
-        try {
-            // Try to access and close MantisBase
-            // If it's already destroyed or being destroyed, exceptions will be caught
-            try {
-                app().close();
-            } catch (const std::runtime_error& e) {
-                // MantisBase not created yet or already destroyed - that's ok
-                // This is expected during static destruction, so don't log
-            } catch (const std::exception& e) {
-                // Other exceptions during cleanup are expected during shutdown
-                // Don't log to avoid noise
-            } catch (...) {
-                // Any other exception means MantisBase is likely being destroyed
-                // Just ignore it
-            }
-        } catch (...) {
-            // Ignore all errors during cleanup - we're shutting down anyway
-        }
+        app().close();
     }
 
 

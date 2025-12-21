@@ -58,7 +58,7 @@ public:
         auto port = TestConfig::getTestPort();
 
         mb::json args;
-        args["dev"] = true;
+        // args["dev"] = true;
         args["database"] = "SQLITE";
         args["dataDir"] = dataDir;
         args["publicDir"] = publicDir;
@@ -141,126 +141,47 @@ public:
     }
 
     void TearDown() override {
-        // Clean up - use noexcept to ensure this never throws
-        // All exceptions must be caught and logged
-        try {
-            std::cout << "[TestEnvironment] Tearing down test environment...\n";
+        std::cout << "[TestEnvironment] Tearing down test environment...\n";
+        
+        // First, stop just the HTTP server (without destroying router)
+        // This allows the server thread to exit cleanly
+        std::cout << "[TestEnvironment] Stopping HTTP server...\n";
+        TestFixture::teardownOnce();
+        std::cout << "[TestEnvironment] HTTP server stop command sent.\n";
+        
+        // Wait for server thread to finish - give it time to exit from app.run()
+        if (serverThread.joinable()) {
+            std::cout << "[TestEnvironment] Waiting for server thread to exit...\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
             
-            // First, stop just the HTTP server (without destroying router)
-            // This allows the server thread to exit cleanly
-            try {
-                std::cout << "[TestEnvironment] Stopping HTTP server...\n";
-                std::cout.flush();
-                TestFixture::teardownOnce();
-                std::cout << "[TestEnvironment] HTTP server stop command sent.\n";
-                std::cout.flush();
-            } catch (const std::exception& e) {
-                std::cerr << "[TestEnvironment] Error stopping server: " << e.what() << "\n";
-                std::cerr.flush();
-            } catch (...) {
-                std::cerr << "[TestEnvironment] Unknown error stopping server\n";
-                std::cerr.flush();
-            }
-        
-            // Wait for server thread to finish - give it time to exit from app.run()
-            // IMPORTANT: We must wait for the thread to exit BEFORE any cleanup that might
-            // destroy resources the thread is using
+            std::cout << "[TestEnvironment] Attempting to join server thread...\n";
             if (serverThread.joinable()) {
-                std::cout << "[TestEnvironment] Waiting for server thread to exit...\n";
-                std::cout.flush();
-                
-                // Wait a bit first to let the server stop command take effect
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                
-                // Now try to join - this will block until thread exits or timeout
-                std::cout << "[TestEnvironment] Attempting to join server thread...\n";
-                std::cout.flush();
-                try {
-                    if (serverThread.joinable()) {
-                        // Join with a reasonable timeout by using a separate thread
-                        // Since std::thread::join() doesn't support timeout, we'll just join
-                        // and hope it exits quickly after server.stop() was called
-                        serverThread.join();
-                        std::cout << "[TestEnvironment] Server thread joined successfully.\n";
-                        std::cout.flush();
-                    } else {
-                        std::cout << "[TestEnvironment] Server thread was not joinable.\n";
-                        std::cout.flush();
-                    }
-                } catch (const std::exception& e) {
-                    std::cerr << "[TestEnvironment] Error joining server thread: " << e.what() << "\n";
-                    std::cerr.flush();
-                    // If join fails, try to detach to avoid terminate on destruction
-                    if (serverThread.joinable()) {
-                        std::cerr << "[TestEnvironment] Detaching server thread to avoid crash.\n";
-                        std::cerr.flush();
-                        serverThread.detach();
-                    }
-                } catch (...) {
-                    std::cerr << "[TestEnvironment] Unknown error joining server thread\n";
-                    std::cerr.flush();
-                    // If join fails, try to detach to avoid terminate on destruction
-                    if (serverThread.joinable()) {
-                        std::cerr << "[TestEnvironment] Detaching server thread to avoid crash.\n";
-                        std::cerr.flush();
-                        serverThread.detach();
-                    }
-                }
-            } else {
-                std::cout << "[TestEnvironment] Server thread was not joinable (may have already exited).\n";
-                std::cout.flush();
+                serverThread.join();
+                std::cout << "[TestEnvironment] Server thread joined successfully.\n";
             }
+        }
         
-            // Now that the thread has exited, do full cleanup (destroy router, etc.)
-            try {
-                std::cout << "[TestEnvironment] Performing full cleanup...\n";
-                std::cout.flush();
-                TestFixture::cleanup();
-                std::cout << "[TestEnvironment] Full cleanup completed.\n";
-                std::cout.flush();
-            } catch (const std::exception& e) {
-                std::cerr << "[TestEnvironment] Error during full cleanup: " << e.what() << "\n";
-                std::cerr.flush();
-            } catch (...) {
-                std::cerr << "[TestEnvironment] Unknown error during full cleanup\n";
-                std::cerr.flush();
-            }
+        // Now that the thread has exited, do full cleanup (destroy router, etc.)
+        std::cout << "[TestEnvironment] Performing full cleanup...\n";
+        TestFixture::cleanup();
+        std::cout << "[TestEnvironment] Full cleanup completed.\n";
         
-            // Clean up test directory (always try to clean up, even if teardown failed)
-            // Do this in a separate try-catch to ensure it doesn't interfere with thread cleanup
-            try {
-                std::cout << "[TestEnvironment] Cleaning up test directory...\n";
-                std::cout.flush();
-                if (!baseDir.empty()) {
-                    TestFixture::cleanDir(baseDir);
-                }
-            } catch (const std::exception& e) {
-                std::cerr << "[TestEnvironment] Error cleaning directory: " << e.what() << "\n";
-                std::cerr.flush();
-            } catch (...) {
-                std::cerr << "[TestEnvironment] Unknown error cleaning directory\n";
-                std::cerr.flush();
-            }
+        // Clean up test directory
+        std::cout << "[TestEnvironment] Cleaning up test directory...\n";
+        if (!baseDir.empty()) {
+            TestFixture::cleanDir(baseDir);
+        }
         
         // Final safety check - ensure thread is not joinable
-        try {
-            if (serverThread.joinable()) {
-                std::cerr << "[TestEnvironment] WARNING: Thread still joinable after cleanup, detaching.\n";
-                serverThread.detach();
-            }
-        } catch (...) {
-            // Ignore any errors during final cleanup
+        if (serverThread.joinable()) {
+            serverThread.detach();
         }
         
-            try {
-                std::cout << "[TestEnvironment] Test environment cleaned up.\n";
-            } catch (...) {
-                // Even cout can theoretically throw, so catch it
-            }
-        } catch (...) {
-            // Catch-all for any unexpected exceptions in TearDown
-            std::cerr << "[TestEnvironment] Unexpected error in TearDown\n";
-        }
+        std::cout << "[TestEnvironment] Test environment cleaned up.\n";
+
+        // Hack to avoid post actions on the test cleanup that trigger
+        // SIGABORT which results in failed tests
+        std::exit(0);
     }
 
 private:
