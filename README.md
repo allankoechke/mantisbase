@@ -42,7 +42,7 @@ The server starts on `http://localhost:7070` with:
 Before using the admin dashboard, create an admin user:
 
 ```bash
-./mantisbase admins --add admin@example.com very_string_password_123!@h
+./mantisbase admins add admin@example.com very_string_password_123!@h
 ```
 
 Once admin user has been created, log in at `http://localhost:7070/mb`.
@@ -242,6 +242,9 @@ curl http://localhost:7070/api/files/posts/photo.jpg
 See [File Handling](doc/11.files.md) for details.
 
 ### JavaScript Extensions
+
+> [!CAUTION]   
+> CURRENTLY, SCRIPTING IS DISABLED UNTIL v0.3.x API IS STABLIZED!!!  
 
 Extend functionality with JavaScript scripts:
 
