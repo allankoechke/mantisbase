@@ -1,10 +1,14 @@
 var searchData=
 [
-  ['main_0',['main',['../mantisapp_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e',1,'mantisapp.cpp']]],
-  ['mantisrequest_1',['MantisRequest',['../classmantis_1_1MantisRequest.html#af2494b3ab8e81ae0288f0dc3081cac21',1,'mantis::MantisRequest']]],
-  ['mantisresponse_2',['MantisResponse',['../classmantis_1_1MantisResponse.html#ae786788d8e44a88653051814cea2a4d1',1,'mantis::MantisResponse']]],
-  ['matches_3',['matches',['../classmantis_1_1MantisRequest.html#a376187caade2d628b95fff1378baf1b5',1,'mantis::MantisRequest']]],
-  ['maximumconstraintcheck_4',['maximumConstraintCheck',['../classmantis_1_1TableUnit.html#ac17b661420659bd3b642a2a40a4221e5',1,'mantis::TableUnit']]],
-  ['migrate_5',['migrate',['../classmantis_1_1DatabaseUnit.html#a7e7d860c444dc7abfe5fd777bd1ebc2f',1,'mantis::DatabaseUnit::migrate()'],['../classmantis_1_1SettingsUnit.html#a1f81caa793192b9656e436a74e5448cd',1,'mantis::SettingsUnit::migrate()']]],
-  ['minimumconstraintcheck_6',['minimumConstraintCheck',['../classmantis_1_1TableUnit.html#a2b7d42641883972aeba4284e28f77a9f',1,'mantis::TableUnit']]]
+  ['main_0',['main',['../main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e',1,'main.cpp']]],
+  ['mantisbase_1',['mantisbase',['../classmb_1_1MantisBase.html#a3b139657d6ac5b0ea339d1944c526e26',1,'mb::MantisBase::MantisBase(const MantisBase &amp;)=delete'],['../classmb_1_1MantisBase.html#a95a5adac09556a9771e554e732fa9a2e',1,'mb::MantisBase::MantisBase(MantisBase &amp;&amp;)=delete']]],
+  ['mantiscontentreader_2',['MantisContentReader',['../classmb_1_1MantisContentReader.html#ae54c7e15766a17954992a11352c046a5',1,'mb::MantisContentReader']]],
+  ['mantisexception_3',['mantisexception',['../classmb_1_1MantisException.html#ac278199165f131cb27b327c31f736a38',1,'mb::MantisException::MantisException(int _code, std::string _msg)'],['../classmb_1_1MantisException.html#ade1d5a88c97721960376c2f7c0f826f8',1,'mb::MantisException::MantisException(int _code, std::string _msg, std::string _desc)']]],
+  ['mantisrequest_4',['MantisRequest',['../classmb_1_1MantisRequest.html#ac9fb656d469777196bf6bc15e0b50812',1,'mb::MantisRequest']]],
+  ['mantisresponse_5',['MantisResponse',['../classmb_1_1MantisResponse.html#aefb7f95106fdfc426827818b789f79ce',1,'mb::MantisResponse']]],
+  ['matches_6',['matches',['../classmb_1_1MantisRequest.html#af519b13deaaff60034061dadb1f86943',1,'mb::MantisRequest']]],
+  ['maximumconstraintcheck_7',['maximumConstraintCheck',['../classmb_1_1Validators.html#a3c6c560823b2cf439cbda2f8f2c28c83',1,'mb::Validators']]],
+  ['migrate_8',['migrate',['../classmb_1_1KVStore.html#a7ac08923ac4aaa342310fe1bfe2b6ea1',1,'mb::KVStore']]],
+  ['minimumconstraintcheck_9',['minimumConstraintCheck',['../classmb_1_1Validators.html#acddbbf2eeeb3a9441e45307c525f781b',1,'mb::Validators']]],
+  ['mode_10',['mode',['../classmb_1_1AccessRule.html#afc7e9897e7ccbab40946c60768ac080e',1,'mb::AccessRule']]]
 ];

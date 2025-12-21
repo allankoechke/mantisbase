@@ -1,0 +1,35 @@
+<map id="/home/runner/work/mantisbase/mantisbase/src/core/logger.cpp" name="/home/runner/work/mantisbase/mantisbase/src/core/logger.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="421,5,649,45"/>
+<area shape="rect" id="Node000002" href="$logger_8h.html" title=" " alt="" coords="263,93,436,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="495,48,403,90,401,85,493,43"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="461,93,609,133"/>
+<area shape="poly" id="edge16_Node000001_Node000015" title=" " alt="" coords="537,46,537,79,532,79,532,46"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="633,93,799,133"/>
+<area shape="poly" id="edge17_Node000001_Node000016" title=" " alt="" coords="576,43,665,85,663,90,573,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,277,152,302"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="263,123,225,131,187,143,151,160,119,183,105,201,95,222,84,264,79,262,90,220,100,198,115,179,148,155,185,138,224,126,262,118"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="130,189,254,214"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="316,136,226,184,224,180,314,131"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="279,181,420,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="352,134,352,167,347,167,347,134"/>
+<area shape="rect" id="Node000006" href="$utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="444,189,551,214"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="376,131,461,180,458,185,373,136"/>
+<area shape="poly" id="edge14_Node000006_Node000002" title=" " alt="" coords="483,191,400,142,403,138,485,186"/>
+<area shape="poly" id="edge13_Node000006_Node000003" title=" " alt="" coords="461,217,433,224,299,249,164,272,143,276,142,271,164,267,298,244,431,219,459,211"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="176,277,235,302"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="459,217,433,224,339,246,247,272,242,274,240,269,246,267,338,241,431,219,457,212"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="259,277,349,302"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="472,217,344,273,342,268,470,212"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="373,277,445,302"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="487,216,433,269,429,265,484,212"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="469,277,536,302"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="501,214,504,263,498,263,495,214"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="561,277,658,302"/>
+<area shape="poly" id="edge10_Node000006_Node000011" title=" " alt="" coords="514,212,585,266,581,270,511,216"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="683,277,768,302"/>
+<area shape="poly" id="edge11_Node000006_Node000012" title=" " alt="" coords="529,212,683,269,681,274,527,217"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="793,277,879,302"/>
+<area shape="poly" id="edge12_Node000006_Node000013" title=" " alt="" coords="551,211,658,235,781,267,791,270,790,275,779,272,657,240,550,216"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="903,269,1051,309"/>
+<area shape="poly" id="edge15_Node000006_Node000014" title=" " alt="" coords="552,208,890,266,889,272,551,214"/>
+</map>

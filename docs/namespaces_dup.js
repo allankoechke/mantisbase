@@ -1,5 +1,5 @@
 var namespaces_dup =
 [
-    [ "mantis", "namespacemantis.html", "namespacemantis" ],
+    [ "mb", "namespacemb.html", "namespacemb" ],
     [ "std", "namespacestd.html", null ]
 ];

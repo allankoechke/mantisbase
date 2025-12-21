@@ -1,18 +1,8 @@
 var searchData=
 [
-  ['databaseunit_0',['DatabaseUnit',['../classmantis_1_1DatabaseUnit.html#a4d6e14bf7e3e6a6cb0475991bbea8a8e',1,'mantis::DatabaseUnit']]],
-  ['datadir_1',['dataDir',['../classmantis_1_1MantisApp.html#ac888ce270d5351648b7c93804c1fcb1e',1,'mantis::MantisApp']]],
-  ['db_2',['db',['../classmantis_1_1MantisApp.html#a3c6ccdd3c1704e22505ff8ad2e85f49c',1,'mantis::MantisApp']]],
-  ['dbdatetostring_3',['dbDateToString',['../namespacemantis.html#a634042b7708af2536b4a3978eba873f7',1,'mantis']]],
-  ['dbtype_4',['dbType',['../classmantis_1_1MantisApp.html#a756378e197e6f606105fcd209224de09',1,'mantis::MantisApp']]],
-  ['dbtypebyname_5',['dbTypeByName',['../classmantis_1_1MantisApp.html#a7153c926c60a9c2dccf2db9e2157d381',1,'mantis::MantisApp']]],
-  ['debug_6',['debug',['../classmantis_1_1LoggingUnit.html#ad402cd3c384fba6c7de3d39833642c7e',1,'mantis::LoggingUnit']]],
-  ['delete_7',['Delete',['../classmantis_1_1HttpUnit.html#a338be16efdc5cef0e99576988c57911b',1,'mantis::HttpUnit']]],
-  ['deletedir_8',['deleteDir',['../classmantis_1_1FileUnit.html#a2223a3c2f48d058ffa13f45e6429f28b',1,'mantis::FileUnit']]],
-  ['deleterecord_9',['deleterecord',['../classmantis_1_1SysTablesUnit.html#a171c61fda019f70f83cd33799d07c621',1,'mantis::SysTablesUnit::deleteRecord()'],['../classmantis_1_1TableUnit.html#ac5e4b9a57f9f45b86c8fcb0d8b86e909',1,'mantis::TableUnit::deleteRecord(MantisRequest &amp;req, MantisResponse &amp;res)']]],
-  ['deleterule_10',['deleteRule',['../classmantis_1_1TableUnit.html#ae1818aa842d78e7180e756c2fef4f339',1,'mantis::TableUnit']]],
-  ['dirfrompath_11',['dirFromPath',['../namespacemantis.html#ab35751b3a0762476bf6d955eacc1a6c1',1,'mantis']]],
-  ['dirpath_12',['dirPath',['../classmantis_1_1FileUnit.html#a328d039a2c447101e9835c72e4a1da95',1,'mantis::FileUnit']]],
-  ['disconnect_13',['disconnect',['../classmantis_1_1DatabaseUnit.html#a6b930d444ba72828d4118ffd15da8b95',1,'mantis::DatabaseUnit']]],
-  ['dump_14',['dump',['../classmantis_1_1ContextStore.html#aeec644aff0b727b5eb6593b2ba57f583',1,'mantis::ContextStore']]]
+  ['entity_0',['entity',['../classmb_1_1MantisBase.html#a1043575a422c2c536b1022593bb977d2',1,'mb::MantisBase::entity()'],['../classmb_1_1Entity.html#a5636ba006f4060a5a001f18c1905e30d',1,'mb::Entity::Entity(const nlohmann::json &amp;schema)'],['../classmb_1_1Entity.html#a174cc1f2ba1366bdfb58afb6dd249814',1,'mb::Entity::Entity(const std::string &amp;name, const std::string &amp;type)']]],
+  ['entityschema_1',['entityschema',['../classmb_1_1EntitySchema.html#afe18d737844d081696dd52cbed998398',1,'mb::EntitySchema::EntitySchema()=default'],['../classmb_1_1EntitySchema.html#a813c48ec23da48604c3919ac2fc22fdc',1,'mb::EntitySchema::EntitySchema(const std::string &amp;entity_name, const std::string &amp;entity_type=&quot;base&quot;)'],['../classmb_1_1EntitySchema.html#aba597aa890e644b165e0a5d0b8e04f17',1,'mb::EntitySchema::EntitySchema(const EntitySchema &amp;)'],['../classmb_1_1EntitySchema.html#a15fd2f97444d3cd69b193518f58d6ff7',1,'mb::EntitySchema::EntitySchema(EntitySchema &amp;&amp;) noexcept=default']]],
+  ['entityschemafield_2',['entityschemafield',['../classmb_1_1EntitySchemaField.html#ae3a273e277829fb6aa0cb71254075e4f',1,'mb::EntitySchemaField::EntitySchemaField(std::string field_name, std::string field_type)'],['../classmb_1_1EntitySchemaField.html#a7a9189251397485237f318f349ebc140',1,'mb::EntitySchemaField::EntitySchemaField(const nlohmann::json &amp;field_schema)'],['../classmb_1_1EntitySchemaField.html#af5fbd5f763eb129e50d8e8bab5717292',1,'mb::EntitySchemaField::EntitySchemaField(const EntitySchemaField &amp;other)']]],
+  ['eval_3',['eval',['../structmb_1_1Expr.html#a12a96b90ba9370e005ba6646fc7f39da',1,'mb::Expr']]],
+  ['expr_4',['expr',['../classmb_1_1AccessRule.html#ae273785c70448a7aa5883add0f80c4c8',1,'mb::AccessRule']]]
 ];

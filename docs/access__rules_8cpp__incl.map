@@ -1,0 +1,14 @@
+<map id="/home/runner/work/mantisbase/mantisbase/src/core/models/access_rules.cpp" name="/home/runner/work/mantisbase/mantisbase/src/core/models/access_rules.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="113,5,338,60"/>
+<area shape="rect" id="Node000002" href="$access__rules_8h.html" title="Access rule definition for entity permissions." alt="" coords="5,108,211,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,62,144,102,141,97,190,58"/>
+<area shape="rect" id="Node000005" href="$exceptions_8h.html" title="Custom exception class for MantisBase errors." alt="" coords="235,115,453,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="261,58,320,104,316,108,257,62"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="212,196,271,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="141,146,211,187,209,191,139,150"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="35,196,181,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="111,148,111,182,105,182,105,148"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="330,143,269,189,266,185,327,139"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="301,196,387,221"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="347,141,347,182,341,182,341,141"/>
+</map>

@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['list_0',['list',['../classmantis_1_1CrudInterface.html#ab0c3e66024e491b6b4e5bb19b606ff63',1,'mantis::CrudInterface::list()'],['../classmantis_1_1SysTablesUnit.html#a8a9b61841e0afefcb250f2be9f43f749',1,'mantis::SysTablesUnit::list()'],['../classmantis_1_1TableUnit.html#a0bd0bc213913ddcc6cc32ed903ca9ff7',1,'mantis::TableUnit::list(const json &amp;opts) override']]],
-  ['list_5frecords_1',['list_records',['../classmantis_1_1TableUnit.html#af201253f7b84d2c0c8f5dc1a24bb1563',1,'mantis::TableUnit']]],
-  ['listen_2',['listen',['../classmantis_1_1HttpUnit.html#ab79d396b33678132ce0747d9b39ba4ab',1,'mantis::HttpUnit::listen()'],['../classmantis_1_1RouterUnit.html#aa4ec6ba53565a334f2dede9e060fa302',1,'mantis::RouterUnit::listen()']]],
-  ['listrule_3',['listRule',['../classmantis_1_1TableUnit.html#a5fd00682fbcf6d187c6a2952df92ee2d',1,'mantis::TableUnit']]],
-  ['log_4',['log',['../classmantis_1_1MantisApp.html#a413ca02b3eb0174a13e6dbb8aafa5c36',1,'mantis::MantisApp']]],
-  ['loggingunit_5',['LoggingUnit',['../classmantis_1_1LoggingUnit.html#a8424de8648a39b0911e2134492305ada',1,'mantis::LoggingUnit']]]
+  ['list_0',['list',['../classmb_1_1Entity.html#a371b841679716be5ea4638020befeab6',1,'mb::Entity']]],
+  ['listen_1',['listen',['../classmb_1_1Router.html#a81eac97d693020860c9cf686a7349246',1,'mb::Router']]],
+  ['listrule_2',['listrule',['../classmb_1_1Entity.html#aeae002b9fa42b1e12fbc7dce7ce4d3fb',1,'mb::Entity::listRule()'],['../classmb_1_1EntitySchema.html#aec5b7bceace8f50619b13da58ff980ff',1,'mb::EntitySchema::listRule() const']]],
+  ['listtables_3',['listTables',['../classmb_1_1EntitySchema.html#a0c083da0fd34882d99c464d07b24f544',1,'mb::EntitySchema']]],
+  ['log_4',['log',['../classmb_1_1MantisBase.html#aa75eb5d8cbf0539062c31c14c870cca1',1,'mb::MantisBase']]],
+  ['logsmgr_5',['LogsMgr',['../classmb_1_1LogsMgr.html#a6193abd1b4b7e4e62ebea73446eaebae',1,'mb::LogsMgr']]]
 ];

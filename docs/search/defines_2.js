@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['trace_5fclass_5fmethod_0',['TRACE_CLASS_METHOD',['../logging_8h.html#a558f262c132aae0f82c218213dd1ed0d',1,'logging.h']]],
-  ['trace_5fmethod_1',['TRACE_METHOD',['../logging_8h.html#a3415e3e8dd3d16ea64aec8f0e9af4283',1,'logging.h']]]
+  ['request_5fhandled_0',['REQUEST_HANDLED',['../types_8h.html#a4f08ea4b1e854e5b01082b2a1ea6ad5e',1,'types.h']]],
+  ['request_5fpending_1',['REQUEST_PENDING',['../types_8h.html#ad5550135843ca34b930f5ceb0584adaa',1,'types.h']]]
 ];

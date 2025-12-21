@@ -1,5 +1,0 @@
-<map id="mantis::MantisLoggerImpl" name="mantis::MantisLoggerImpl">
-<area shape="rect" id="Node000001" title="Logger implementation for soci, allowing us to override the default logging behaviour with our own cu..." alt="" coords="5,79,197,104"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="35,5,168,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,44,104,79,99,79,99,44"/>
-</map>

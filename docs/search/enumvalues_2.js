@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['critical_0',['CRITICAL',['../namespacemantis.html#ada8131e8cb8fbce16294534a4a808d07a99cd1c61610c76a57cb8d10d6df6b870',1,'mantis']]]
+  ['info_0',['INFO',['../namespacemb.html#a45b395bbdb082a2a10815855bad98c81a551b723eafd6a31d444fcb2f5920fbd3',1,'mb']]]
 ];

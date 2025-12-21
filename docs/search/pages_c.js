@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['up_20mantis_0',['Setting Up Mantis',['../setup.html',1,'']]],
-  ['usage_1',['Command Line Usage',['../cli.html',1,'']]]
+  ['scripting_20in_20mantisbase_0',['Scripting in MantisBase',['../scripting.html',1,'']]],
+  ['setting_20up_20mantisbase_1',['Setting Up MantisBase',['../setup.html',1,'']]],
+  ['start_20guide_2',['Quick Start Guide',['../index.html',1,'']]]
 ];

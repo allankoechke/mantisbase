@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['httpunit_0',['HttpUnit',['../classmantis_1_1HttpUnit.html',1,'mantis']]]
+  ['logsmgr_0',['LogsMgr',['../classmb_1_1LogsMgr.html',1,'mb']]]
 ];

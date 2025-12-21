@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['log_0',['Log',['../namespacemantis.html#ae32fb5a6aeb988dd0ab354f811874d86',1,'mantis']]],
-  ['loglevel_1',['LogLevel',['../namespacemantis.html#ac8fcce3e8202c1c2a90a006d99cc9690',1,'mantis']]]
+  ['json_0',['json',['../namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d',1,'mb']]]
 ];

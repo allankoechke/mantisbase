@@ -1,14 +1,13 @@
 var searchData=
 [
-  ['validate_0',['validate',['../classmantis_1_1Validator.html#a7acf0cb2cb7e05c671815227c90de55f',1,'mantis::Validator']]],
-  ['validaterequestbody_1',['validateRequestBody',['../classmantis_1_1TableUnit.html#ad38c47ca30b6d8daee2a5aa925d13db0',1,'mantis::TableUnit']]],
-  ['validatetableschema_2',['validateTableSchema',['../classmantis_1_1TableUnit.html#a6df4f26ba41a44b863f957c8eda306eb',1,'mantis::TableUnit']]],
-  ['validateupdaterequestbody_3',['validateUpdateRequestBody',['../classmantis_1_1TableUnit.html#a63dd4186b26588dba3d6f4c5b19abc74',1,'mantis::TableUnit']]],
-  ['validator_4',['Validator',['../classmantis_1_1Validator.html#ae00a05c4f424bcb45b7664affae83264',1,'mantis::Validator']]],
-  ['validatorconstraintcheck_5',['validatorConstraintCheck',['../classmantis_1_1TableUnit.html#a3106af6bd9e72ed0ca745196c2189240',1,'mantis::TableUnit']]],
-  ['validators_6',['validators',['../classmantis_1_1MantisApp.html#a9a945a51d82e62bb503860105882a9d4',1,'mantis::MantisApp']]],
-  ['verifyjwttoken_7',['verifyJwtToken',['../classmantis_1_1JwtUnit.html#a4333f45ed6f55007a649abe478a71af4',1,'mantis::JwtUnit']]],
-  ['verifypassword_8',['verifyPassword',['../namespacemantis.html#aa3b485737835c66ce8e394ba0bbdb2e2',1,'mantis']]],
-  ['viewtable_9',['ViewTable',['../structmantis_1_1ViewTable.html#ac62545c3c78665c023bcf3ae0c3645ea',1,'mantis::ViewTable']]],
-  ['viewtypesqlcheck_10',['viewTypeSQLCheck',['../classmantis_1_1TableUnit.html#ac5ccfe2d890673b0c1041829405497f1',1,'mantis::TableUnit']]]
+  ['validate_0',['validate',['../classmb_1_1EntitySchema.html#a13dab5c58f462268ef16c3835f011025',1,'mb::EntitySchema::validate(const EntitySchema &amp;table_schema)'],['../classmb_1_1EntitySchema.html#a37d0ab101f2ebe332b24bae36788b6c8',1,'mb::EntitySchema::validate() const'],['../classmb_1_1EntitySchemaField.html#af117d972e8658499f7f95e30993abea2',1,'mb::EntitySchemaField::validate()']]],
+  ['validatepreset_1',['validatePreset',['../classmb_1_1Validators.html#aa6c728983425d6ef8eb2f327e94c61e3',1,'mb::Validators']]],
+  ['validaterequestbody_2',['validaterequestbody',['../classmb_1_1Validators.html#a9709bad0fa704e95307bbc49cbbda84a',1,'mb::Validators::validateRequestBody(const json &amp;schema, const json &amp;body)'],['../classmb_1_1Validators.html#ac11a8e022236c0a2d753b8911e99ce3a',1,'mb::Validators::validateRequestBody(const Entity &amp;schema, const json &amp;body)']]],
+  ['validatetableschema_3',['validateTableSchema',['../classmb_1_1Validators.html#a5f277433ec04f0ae19ea5ec656325c03',1,'mb::Validators']]],
+  ['validateupdaterequestbody_4',['validateupdaterequestbody',['../classmb_1_1Validators.html#a2639b517b7ab8754b1f4e30dce7b981e',1,'mb::Validators::validateUpdateRequestBody(const json &amp;schema, const json &amp;body)'],['../classmb_1_1Validators.html#ab923ab02cceae780f4532c3559411ec2',1,'mb::Validators::validateUpdateRequestBody(const Entity &amp;schema, const json &amp;body)']]],
+  ['validatorconstraintcheck_5',['validatorConstraintCheck',['../classmb_1_1Validators.html#adebaa11e8cd9f1d0978ef21b7fadf500',1,'mb::Validators']]],
+  ['verifypassword_6',['verifyPassword',['../namespacemb.html#aa3085c18b75188b1e46d16c21ab2e58b',1,'mb']]],
+  ['verifytoken_7',['verifyToken',['../classmb_1_1Auth.html#a031825f245bbb77de29e6e68bcfff756',1,'mb::Auth']]],
+  ['viewquery_8',['viewquery',['../classmb_1_1Entity.html#a0cecc9118e992c15d1b8dabb671b7748',1,'mb::Entity::viewQuery()'],['../classmb_1_1EntitySchema.html#a5dca679b4d803cf7bfacc93102d6950f',1,'mb::EntitySchema::viewQuery()']]],
+  ['viewtypesqlcheck_9',['viewTypeSQLCheck',['../classmb_1_1Validators.html#a5e2e7fe072dd5a7d95de9c4757374bbb',1,'mb::Validators']]]
 ];

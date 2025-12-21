@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['yet_0',['Mantis Sync Engine Design (NOT IMPLEMENTED YET!)',['../sync.html#autotoc_md122',1,'']]]
+  ['⏱️_20token_20expiration_0',['⏱️ Token Expiration',['../auth_api.html#autotoc_md60',1,'']]]
 ];

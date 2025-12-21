@@ -2,14 +2,19 @@ var dir_aebb8dcc11953d78e620bbef0b9e2183 =
 [
     [ "models", "dir_0e7a58851e096bd60301b89de049e7fd.html", "dir_0e7a58851e096bd60301b89de049e7fd" ],
     [ "private-impl", "dir_2558a52f543d87c98b276f788396ad70.html", "dir_2558a52f543d87c98b276f788396ad70" ],
-    [ "tables", "dir_26a9c97102a0702bb9e5f820823d39bc.html", "dir_26a9c97102a0702bb9e5f820823d39bc" ],
+    [ "auth.cpp", "auth_8cpp.html", null ],
     [ "context_store.cpp", "context__store_8cpp.html", null ],
-    [ "database.cpp", "database_8cpp.html", "database_8cpp" ],
-    [ "expr_evaluator.cpp", "expr__evaluator_8cpp.html", "expr__evaluator_8cpp" ],
-    [ "fileunit.cpp", "fileunit_8cpp.html", null ],
-    [ "http.cpp", "http_8cpp.html", "http_8cpp" ],
-    [ "jwt.cpp", "jwt_8cpp.html", null ],
-    [ "logging.cpp", "logging_8cpp.html", null ],
+    [ "database.cpp", "database_8cpp.html", null ],
+    [ "exceptions.cpp", "exceptions_8cpp.html", null ],
+    [ "expr_evaluator.cpp", "expr__evaluator_8cpp.html", null ],
+    [ "files.cpp", "files_8cpp.html", null ],
+    [ "http_content_reader.cpp", "http__content__reader_8cpp.html", null ],
+    [ "http_request.cpp", "http__request_8cpp.html", "http__request_8cpp" ],
+    [ "http_response.cpp", "http__response_8cpp.html", "http__response_8cpp" ],
+    [ "kv_store.cpp", "kv__store_8cpp.html", null ],
+    [ "logger.cpp", "logger_8cpp.html", null ],
+    [ "middlewares.cpp", "middlewares_8cpp.html", "middlewares_8cpp" ],
+    [ "route_registry.cpp", "route__registry_8cpp.html", "route__registry_8cpp" ],
     [ "router.cpp", "router_8cpp.html", "router_8cpp" ],
-    [ "settings.cpp", "settings_8cpp.html", "settings_8cpp" ]
+    [ "router_httplib_internals.cpp", "router__httplib__internals_8cpp.html", null ]
 ];

@@ -1,10 +1,9 @@
 var searchData=
 [
-  ['openbrowseronstart_0',['openBrowserOnStart',['../classmantis_1_1MantisApp.html#a49b1b62210b2786a9717eafe4d8d8710',1,'mantis::MantisApp']]],
-  ['operator_28_29_1',['operator()',['../structmantis_1_1RouteKeyHash.html#a954efb5a6570445760d5c76e798fdcd1',1,'mantis::RouteKeyHash']]],
-  ['operators_2',['Supported Operators',['../rest_api_rules.html#autotoc_md49',1,'']]],
-  ['options_3',['options',['../cli.html#autotoc_md10',1,'⚙️ Global Options'],['../embedding.html#autotoc_md104',1,'📦 Integration Options'],['../setup.html#autotoc_md0',1,'🧩 Installation Options']]],
-  ['or_20shared_20library_20strong_4',['&lt;strong&gt;As a Static or Shared Library&lt;/strong&gt;',['../embedding.html#autotoc_md105',1,'']]],
-  ['overview_5',['overview',['../architecture.html#autotoc_md95',1,'📁 File Structure Overview'],['../sync.html#autotoc_md124',1,'🔄 Sync Model Overview'],['../index.html#autotoc_md163',1,'🔧 Overview'],['../architecture.html#autotoc_md74',1,'Mantis Architecture Overview'],['../rest_api_rules.html#autotoc_md43',1,'Overview']]],
-  ['ownership_20based_20rules_6',['Ownership-Based Rules',['../rest_api_rules.html#autotoc_md52',1,'']]]
+  ['query_20parameters_20pending_0',['🎛️ Query Parameters [PENDING]',['../rest_api.html#autotoc_md38',1,'']]],
+  ['queryfromcols_1',['queryFromCols',['../classmb_1_1Entity.html#a989ceb00a45ae7cbc505ca9538ff6499',1,'mb::Entity']]],
+  ['quick_20start_20guide_2',['Quick Start Guide',['../index.html',1,'']]],
+  ['quick_20start_20pre_20built_20binaries_3',['Quick Start (Pre-built Binaries)',['../index.html#autotoc_md201',1,'']]],
+  ['quickstart_2emd_4',['QuickStart.md',['../QuickStart_8md.html',1,'']]],
+  ['quit_5',['quit',['../classmb_1_1MantisBase.html#a101567ba238672d54c65e5aa346bf710',1,'mb::MantisBase']]]
 ];

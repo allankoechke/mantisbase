@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mantis App: /home/runner/work/mantis/mantis/src/utils/string_utils.cpp File Reference</title>
+<title>MantisBase: /home/runner/work/mantisbase/mantisbase/src/utils/string_utils.cpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,9 +26,8 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="mantis.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Mantis App<span id="projectnumber">&#160;v0.2.12</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.0</span>
    </div>
   </td>
  </tr>
@@ -98,94 +97,110 @@ $(document).ready(function(){initNavTree('string__utils_8cpp.html',''); initResi
   <div class="headertitle"><div class="title">string_utils.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="utils_8h_source.html">../../include/mantis/utils/utils.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="utils_8h_source.html">../../include/mantisbase/utils/utils.h</a>&quot;</code><br />
 <code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;httplib.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for string_utils.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="string__utils_8cpp__incl.png" border="0" usemap="#a_2home_2runner_2work_2mantis_2mantis_2src_2utils_2string__utils_8cpp" alt=""/></div>
-<map name="a_2home_2runner_2work_2mantis_2mantis_2src_2utils_2string__utils_8cpp" id="a_2home_2runner_2work_2mantis_2mantis_2src_2utils_2string__utils_8cpp">
-<area shape="rect" title=" " alt="" coords="451,5,645,60"/>
-<area shape="rect" href="utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="477,108,619,148"/>
-<area shape="poly" title=" " alt="" coords="551,60,551,94,545,94,545,60"/>
-<area shape="rect" title=" " alt="" coords="5,203,91,229"/>
-<area shape="poly" title=" " alt="" coords="477,63,93,201,92,196,475,58"/>
-<area shape="rect" title=" " alt="" coords="643,115,719,141"/>
-<area shape="poly" title=" " alt="" coords="587,58,655,105,652,110,584,62"/>
-<area shape="rect" title=" " alt="" coords="115,203,173,229"/>
-<area shape="poly" title=" " alt="" coords="477,140,341,161,263,178,186,199,180,201,179,195,185,193,261,173,340,156,476,135"/>
-<area shape="rect" title=" " alt="" coords="197,203,288,229"/>
-<area shape="poly" title=" " alt="" coords="477,150,301,199,290,202,289,197,299,193,476,145"/>
-<area shape="rect" title=" " alt="" coords="312,203,384,229"/>
-<area shape="poly" title=" " alt="" coords="505,151,388,200,386,196,503,146"/>
-<area shape="rect" title=" " alt="" coords="408,203,475,229"/>
-<area shape="poly" title=" " alt="" coords="526,150,468,197,465,192,523,146"/>
-<area shape="rect" title=" " alt="" coords="499,203,597,229"/>
-<area shape="poly" title=" " alt="" coords="551,148,551,189,545,189,545,148"/>
-<area shape="poly" title=" " alt="" coords="477,139,306,160,204,177,103,199,92,202,91,197,102,193,203,172,305,155,476,133"/>
-<area shape="rect" title=" " alt="" coords="621,203,707,229"/>
-<area shape="poly" title=" " alt="" coords="575,146,639,193,636,197,572,150"/>
-<area shape="rect" title=" " alt="" coords="643,291,789,317"/>
-<area shape="poly" title=" " alt="" coords="620,146,682,168,706,181,722,194,731,215,734,238,727,279,722,278,728,238,726,216,718,198,703,185,680,173,618,151"/>
-<area shape="rect" href="logging_8h.html" title="Wrapper around spdlog&#39;s functionality." alt="" coords="783,203,910,229"/>
-<area shape="poly" title=" " alt="" coords="607,145,788,197,787,202,605,151"/>
-<area shape="rect" title=" " alt="" coords="934,203,1085,229"/>
-<area shape="poly" title=" " alt="" coords="620,143,631,145,777,170,923,193,946,198,945,203,922,199,776,175,630,151,619,148"/>
-<area shape="rect" title=" " alt="" coords="1109,196,1257,236"/>
-<area shape="poly" title=" " alt="" coords="620,143,631,145,759,162,861,170,964,177,1095,193,1094,198,963,182,861,175,759,168,630,151,619,149"/>
-<area shape="poly" title=" " alt="" coords="813,206,632,154,633,149,814,201"/>
-<area shape="poly" title=" " alt="" coords="831,231,747,286,744,281,828,227"/>
-<area shape="rect" title=" " alt="" coords="814,291,938,317"/>
-<area shape="poly" title=" " alt="" coords="853,228,870,277,865,279,848,230"/>
-<area shape="rect" title=" " alt="" coords="963,284,1104,324"/>
-<area shape="poly" title=" " alt="" coords="873,226,981,276,978,281,871,231"/>
+<div class="center"><img src="string__utils_8cpp__incl.png" border="0" usemap="#a_2home_2runner_2work_2mantisbase_2mantisbase_2src_2utils_2string__utils_8cpp" alt=""/></div>
+<map name="a_2home_2runner_2work_2mantisbase_2mantisbase_2src_2utils_2string__utils_8cpp" id="a_2home_2runner_2work_2mantisbase_2mantisbase_2src_2utils_2string__utils_8cpp">
+<area shape="rect" title=" " alt="" coords="762,5,987,60"/>
+<area shape="rect" href="utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="508,108,681,148"/>
+<area shape="poly" title=" " alt="" coords="797,63,665,106,663,101,795,58"/>
+<area shape="rect" title=" " alt="" coords="989,203,1075,229"/>
+<area shape="poly" title=" " alt="" coords="877,60,884,103,891,126,903,146,917,158,939,171,991,195,989,200,936,176,914,162,899,150,887,128,878,105,872,61"/>
+<area shape="rect" title=" " alt="" coords="913,115,989,141"/>
+<area shape="poly" title=" " alt="" coords="898,59,934,103,930,106,894,62"/>
+<area shape="rect" title=" " alt="" coords="5,203,64,229"/>
+<area shape="poly" title=" " alt="" coords="508,135,417,142,309,153,192,172,77,199,70,201,69,196,75,193,191,167,308,148,417,136,508,130"/>
+<area shape="rect" title=" " alt="" coords="88,203,179,229"/>
+<area shape="poly" title=" " alt="" coords="508,142,359,165,191,199,179,202,178,197,190,193,358,159,507,137"/>
+<area shape="rect" title=" " alt="" coords="203,203,275,229"/>
+<area shape="poly" title=" " alt="" coords="508,147,402,169,287,199,280,201,278,196,286,193,401,164,507,142"/>
+<area shape="rect" title=" " alt="" coords="299,203,365,229"/>
+<area shape="poly" title=" " alt="" coords="529,151,378,199,372,201,371,196,376,193,527,145"/>
+<area shape="rect" title=" " alt="" coords="390,203,487,229"/>
+<area shape="poly" title=" " alt="" coords="562,150,473,199,470,194,559,146"/>
+<area shape="poly" title=" " alt="" coords="682,138,822,160,978,193,989,196,987,202,977,199,821,165,681,143"/>
+<area shape="rect" title=" " alt="" coords="511,203,598,229"/>
+<area shape="poly" title=" " alt="" coords="588,149,568,192,563,190,583,147"/>
+<area shape="rect" title=" " alt="" coords="531,291,677,317"/>
+<area shape="poly" title=" " alt="" coords="603,148,613,196,614,239,611,277,606,277,609,239,608,196,598,149"/>
+<area shape="rect" href="logger_8h.html" title=" " alt="" coords="674,203,793,229"/>
+<area shape="poly" title=" " alt="" coords="619,146,698,194,695,199,616,151"/>
+<area shape="rect" title=" " alt="" coords="817,196,965,236"/>
+<area shape="poly" title=" " alt="" coords="660,145,814,190,812,195,659,151"/>
+<area shape="poly" title=" " alt="" coords="720,206,643,157,646,153,723,201"/>
+<area shape="poly" title=" " alt="" coords="717,231,634,286,631,281,714,227"/>
+<area shape="rect" title=" " alt="" coords="702,291,826,317"/>
+<area shape="poly" title=" " alt="" coords="740,228,758,277,753,279,735,230"/>
+<area shape="rect" title=" " alt="" coords="851,284,992,324"/>
+<area shape="poly" title=" " alt="" coords="760,226,869,276,867,281,758,231"/>
 </map>
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
-<tr class="memitem:namespacemantis" id="r_namespacemantis"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html">mantis</a></td></tr>
-<tr class="memdesc:namespacemantis"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="router_8h.html">router.h</a> <br /></td></tr>
+<tr class="memitem:namespacemb" id="r_namespacemb"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html">mb</a></td></tr>
+<tr class="memdesc:namespacemb"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="router_8h.html">router.h</a> <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a8ecebf53d24d9678f7005d0b4ee8da6d" id="r_a8ecebf53d24d9678f7005d0b4ee8da6d"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacemantis.html#a0255780f56da02614156f7ef7cd3d3a3">json</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#a8ecebf53d24d9678f7005d0b4ee8da6d">mantis::tryParseJsonStr</a> (const std::string &amp;json_str)</td></tr>
-<tr class="memdesc:a8ecebf53d24d9678f7005d0b4ee8da6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attempt to parse a JSON string.  <br /></td></tr>
-<tr class="separator:a8ecebf53d24d9678f7005d0b4ee8da6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8290417ff7c03d59488e7c321ff05c7" id="r_ac8290417ff7c03d59488e7c321ff05c7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#ac8290417ff7c03d59488e7c321ff05c7">mantis::strToBool</a> (const std::string &amp;value)</td></tr>
-<tr class="memdesc:ac8290417ff7c03d59488e7c321ff05c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert given string value to boolean type.  <br /></td></tr>
-<tr class="separator:ac8290417ff7c03d59488e7c321ff05c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acbd04202feeade10ac601e3bc4d00feb" id="r_acbd04202feeade10ac601e3bc4d00feb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#acbd04202feeade10ac601e3bc4d00feb">mantis::toLowerCase</a> (std::string &amp;str)</td></tr>
-<tr class="memdesc:acbd04202feeade10ac601e3bc4d00feb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a string to its lowercase variant.  <br /></td></tr>
-<tr class="separator:acbd04202feeade10ac601e3bc4d00feb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0aa0dffb82adecf81cc50947b7b7f1f" id="r_aa0aa0dffb82adecf81cc50947b7b7f1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#aa0aa0dffb82adecf81cc50947b7b7f1f">mantis::toUpperCase</a> (std::string &amp;str)</td></tr>
-<tr class="memdesc:aa0aa0dffb82adecf81cc50947b7b7f1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a string to its uppercase variant.  <br /></td></tr>
-<tr class="separator:aa0aa0dffb82adecf81cc50947b7b7f1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a842ffce0f72c6aed85cdfa2c1f0615f5" id="r_a842ffce0f72c6aed85cdfa2c1f0615f5"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#a842ffce0f72c6aed85cdfa2c1f0615f5">mantis::trim</a> (const std::string &amp;s)</td></tr>
-<tr class="memdesc:a842ffce0f72c6aed85cdfa2c1f0615f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trims leading and trailing whitespaces from a string.  <br /></td></tr>
-<tr class="separator:a842ffce0f72c6aed85cdfa2c1f0615f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2bc2a84280e5b58546a4ddfdeea4a230" id="r_a2bc2a84280e5b58546a4ddfdeea4a230"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#a2bc2a84280e5b58546a4ddfdeea4a230">mantis::generateTimeBasedId</a> ()</td></tr>
-<tr class="memdesc:a2bc2a84280e5b58546a4ddfdeea4a230"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a time base UUID.  <br /></td></tr>
-<tr class="separator:a2bc2a84280e5b58546a4ddfdeea4a230"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3832564f3023e4b1683a1a9392f17bd8" id="r_a3832564f3023e4b1683a1a9392f17bd8"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#a3832564f3023e4b1683a1a9392f17bd8">mantis::generateReadableTimeId</a> ()</td></tr>
-<tr class="memdesc:a3832564f3023e4b1683a1a9392f17bd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a readable time-based UUID.  <br /></td></tr>
-<tr class="separator:a3832564f3023e4b1683a1a9392f17bd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90a5625faff184237b8c6a18c660139a" id="r_a90a5625faff184237b8c6a18c660139a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#a90a5625faff184237b8c6a18c660139a">mantis::generateShortId</a> (size_t length=16)</td></tr>
-<tr class="memdesc:a90a5625faff184237b8c6a18c660139a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a short UUID.  <br /></td></tr>
-<tr class="separator:a90a5625faff184237b8c6a18c660139a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afb33333e17a1823a3d22b074c7bd6a6e" id="r_afb33333e17a1823a3d22b074c7bd6a6e"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#afb33333e17a1823a3d22b074c7bd6a6e">mantis::splitString</a> (const std::string &amp;input, const std::string &amp;delimiter)</td></tr>
-<tr class="memdesc:afb33333e17a1823a3d22b074c7bd6a6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Split given string based on given delimiter.  <br /></td></tr>
-<tr class="separator:afb33333e17a1823a3d22b074c7bd6a6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e25a8cc629f217be134c89138011502" id="r_a5e25a8cc629f217be134c89138011502"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#a5e25a8cc629f217be134c89138011502">mantis::getEnvOrDefault</a> (const std::string &amp;key, const std::string &amp;defaultValue)</td></tr>
-<tr class="memdesc:a5e25a8cc629f217be134c89138011502"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a value from an environment variable or a default value if the env variable was not set.  <br /></td></tr>
-<tr class="separator:a5e25a8cc629f217be134c89138011502"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a71d9b005929526118af08c2ed3f74e8e" id="r_a71d9b005929526118af08c2ed3f74e8e"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#a71d9b005929526118af08c2ed3f74e8e">mantis::sanitizeFilename</a> (std::string_view original, std::size_t maxLen=50, std::size_t idLen=12, std::string_view idSep=&quot;_&quot;)</td></tr>
-<tr class="memdesc:a71d9b005929526118af08c2ed3f74e8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sanitize a filename and ensure uniqueness.  <br /></td></tr>
-<tr class="separator:a71d9b005929526118af08c2ed3f74e8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afb9883ad342a2828a282d3bd13f4910f" id="r_afb9883ad342a2828a282d3bd13f4910f"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#afb9883ad342a2828a282d3bd13f4910f">mantis::sanitizeFilename_JSWrapper</a> (const std::string &amp;original)</td></tr>
-<tr class="separator:afb9883ad342a2828a282d3bd13f4910f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbb7d92fa5a0b643308cec05f16d86bd" id="r_acbb7d92fa5a0b643308cec05f16d86bd"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#acbb7d92fa5a0b643308cec05f16d86bd">mb::tryParseJsonStr</a> (const std::string &amp;json_str)</td></tr>
+<tr class="memdesc:acbb7d92fa5a0b643308cec05f16d86bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attempt to parse a JSON string.  <br /></td></tr>
+<tr class="separator:acbb7d92fa5a0b643308cec05f16d86bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae77a8e2cd17097b492084ae16ef26fee" id="r_ae77a8e2cd17097b492084ae16ef26fee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ae77a8e2cd17097b492084ae16ef26fee">mb::strToBool</a> (const std::string &amp;value)</td></tr>
+<tr class="memdesc:ae77a8e2cd17097b492084ae16ef26fee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert given string value to boolean type.  <br /></td></tr>
+<tr class="separator:ae77a8e2cd17097b492084ae16ef26fee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a610ae91c5e525b5899cf9445107360e9" id="r_a610ae91c5e525b5899cf9445107360e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a610ae91c5e525b5899cf9445107360e9">mb::toLowerCase</a> (std::string &amp;str)</td></tr>
+<tr class="memdesc:a610ae91c5e525b5899cf9445107360e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a string to its lowercase variant.  <br /></td></tr>
+<tr class="separator:a610ae91c5e525b5899cf9445107360e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe6b794953335d0601b9fe55af49027f" id="r_abe6b794953335d0601b9fe55af49027f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#abe6b794953335d0601b9fe55af49027f">mb::toUpperCase</a> (std::string &amp;str)</td></tr>
+<tr class="memdesc:abe6b794953335d0601b9fe55af49027f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a string to its uppercase variant.  <br /></td></tr>
+<tr class="separator:abe6b794953335d0601b9fe55af49027f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a409c1fc8483d2c71f13abd04598f4db2" id="r_a409c1fc8483d2c71f13abd04598f4db2"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a409c1fc8483d2c71f13abd04598f4db2">mb::trim</a> (const std::string &amp;s)</td></tr>
+<tr class="memdesc:a409c1fc8483d2c71f13abd04598f4db2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trims leading and trailing whitespaces from a string.  <br /></td></tr>
+<tr class="separator:a409c1fc8483d2c71f13abd04598f4db2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bbd6b13fd498f212dd8f5d7b7565e2e" id="r_a4bbd6b13fd498f212dd8f5d7b7565e2e"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a4bbd6b13fd498f212dd8f5d7b7565e2e">mb::generateTimeBasedId</a> ()</td></tr>
+<tr class="memdesc:a4bbd6b13fd498f212dd8f5d7b7565e2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a time base UUID.  <br /></td></tr>
+<tr class="separator:a4bbd6b13fd498f212dd8f5d7b7565e2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1b47490bcd171b34e7371a721ec4d82" id="r_af1b47490bcd171b34e7371a721ec4d82"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#af1b47490bcd171b34e7371a721ec4d82">mb::generateReadableTimeId</a> ()</td></tr>
+<tr class="memdesc:af1b47490bcd171b34e7371a721ec4d82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a readable time-based UUID.  <br /></td></tr>
+<tr class="separator:af1b47490bcd171b34e7371a721ec4d82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5004cdfdf21f04cf630c15f7f191bac" id="r_ab5004cdfdf21f04cf630c15f7f191bac"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ab5004cdfdf21f04cf630c15f7f191bac">mb::generateShortId</a> (size_t length=16)</td></tr>
+<tr class="memdesc:ab5004cdfdf21f04cf630c15f7f191bac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a short UUID.  <br /></td></tr>
+<tr class="separator:ab5004cdfdf21f04cf630c15f7f191bac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2496b58c49de9a3a1758c8fc6fee2996" id="r_a2496b58c49de9a3a1758c8fc6fee2996"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a2496b58c49de9a3a1758c8fc6fee2996">mb::splitString</a> (const std::string &amp;input, const std::string &amp;delimiter)</td></tr>
+<tr class="memdesc:a2496b58c49de9a3a1758c8fc6fee2996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Split given string based on given delimiter.  <br /></td></tr>
+<tr class="separator:a2496b58c49de9a3a1758c8fc6fee2996"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98ec5c96bf449442fcf900d7061e7406" id="r_a98ec5c96bf449442fcf900d7061e7406"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a98ec5c96bf449442fcf900d7061e7406">mb::getEnvOrDefault</a> (const std::string &amp;key, const std::string &amp;defaultValue)</td></tr>
+<tr class="memdesc:a98ec5c96bf449442fcf900d7061e7406"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a value from an environment variable or a default value if the env variable was not set.  <br /></td></tr>
+<tr class="separator:a98ec5c96bf449442fcf900d7061e7406"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa98dbdb983996e7b60b25c3e0f8eac98" id="r_aa98dbdb983996e7b60b25c3e0f8eac98"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aa98dbdb983996e7b60b25c3e0f8eac98">mb::invalidChar</a> (unsigned char c)</td></tr>
+<tr class="memdesc:aa98dbdb983996e7b60b25c3e0f8eac98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a character is invalid in a filename.  <br /></td></tr>
+<tr class="separator:aa98dbdb983996e7b60b25c3e0f8eac98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a3823264846aca9828eab91e2048b27" id="r_a8a3823264846aca9828eab91e2048b27"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a8a3823264846aca9828eab91e2048b27">mb::sanitizeInPlace</a> (std::string &amp;s)</td></tr>
+<tr class="memdesc:a8a3823264846aca9828eab91e2048b27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sanitize a string in-place by removing or replacing invalid characters.  <br /></td></tr>
+<tr class="separator:a8a3823264846aca9828eab91e2048b27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae7a705435d7624d4530a2ab3f8df9fe" id="r_aae7a705435d7624d4530a2ab3f8df9fe"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aae7a705435d7624d4530a2ab3f8df9fe">mb::sanitizeFilename</a> (std::string_view original, std::size_t maxLen=50, std::size_t idLen=12, std::string_view idSep=&quot;_&quot;)</td></tr>
+<tr class="memdesc:aae7a705435d7624d4530a2ab3f8df9fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sanitize a filename and ensure uniqueness.  <br /></td></tr>
+<tr class="separator:aae7a705435d7624d4530a2ab3f8df9fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3176a96dbbc7784fb6638cad25c6030" id="r_ac3176a96dbbc7784fb6638cad25c6030"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ac3176a96dbbc7784fb6638cad25c6030">mb::sanitizeFilename_JSWrapper</a> (const std::string &amp;original)</td></tr>
+<tr class="separator:ac3176a96dbbc7784fb6638cad25c6030"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a428d170b1c8c2100c9ba7fda3b6f0d" id="r_a3a428d170b1c8c2100c9ba7fda3b6f0d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d">mb::safe_stoi</a> (const std::string &amp;s, const int default_val)</td></tr>
+<tr class="memdesc:a3a428d170b1c8c2100c9ba7fda3b6f0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Safely convert string to integer with default fallback.  <br /></td></tr>
+<tr class="separator:a3a428d170b1c8c2100c9ba7fda3b6f0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae82806bf179419d9e5dc249e39c200e1" id="r_ae82806bf179419d9e5dc249e39c200e1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ae82806bf179419d9e5dc249e39c200e1">mb::isValidIPv4</a> (const std::string &amp;ip)</td></tr>
+<tr class="memdesc:ae82806bf179419d9e5dc249e39c200e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates if a string is a valid IPv4 address.  <br /></td></tr>
+<tr class="separator:ae82806bf179419d9e5dc249e39c200e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00f860404d17bfa8ba311ed9b227dad8" id="r_a00f860404d17bfa8ba311ed9b227dad8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a00f860404d17bfa8ba311ed9b227dad8">mb::isValidIPv6</a> (const std::string &amp;ip)</td></tr>
+<tr class="memdesc:a00f860404d17bfa8ba311ed9b227dad8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates if a string is a valid IPv6 address.  <br /></td></tr>
+<tr class="separator:a00f860404d17bfa8ba311ed9b227dad8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65eb364a52f818ded81fe4256c9b74fa" id="r_a65eb364a52f818ded81fe4256c9b74fa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a65eb364a52f818ded81fe4256c9b74fa">mb::isValidIP</a> (const std::string &amp;ip)</td></tr>
+<tr class="memdesc:a65eb364a52f818ded81fe4256c9b74fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates if a string is a valid IP address (IPv4 or IPv6).  <br /></td></tr>
+<tr class="separator:a65eb364a52f818ded81fe4256c9b74fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

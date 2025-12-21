@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mantis App: Setting Up Mantis</title>
+<title>MantisBase: Setting Up MantisBase</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,9 +26,8 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="mantis.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Mantis App<span id="projectnumber">&#160;v0.2.12</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.0</span>
    </div>
   </td>
  </tr>
@@ -92,16 +91,16 @@ $(document).ready(function(){initNavTree('setup.html',''); initResizable(); });
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Setting Up Mantis</div></div>
+  <div class="headertitle"><div class="title">Setting Up MantisBase</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Getting started with <b>Mantis</b> is simple. You can use the prebuilt binaries for a quick start, or embed the source code directly into your own C++ project.</p>
+<div class="textblock"><p>Getting started with <b>MantisBase</b> is simple. You can use the prebuilt binaries for a quick start, or embed the source code directly into your own C++ project.</p>
 <h2><a class="anchor" id="autotoc_md0"></a>
 🧩 Installation Options</h2>
-<p>Mantis is available in two formats:</p>
+<p>MantisBase is available in two formats:</p>
 <ul>
 <li>✅ <b>Precompiled binaries</b> for <b>Windows</b> and <b>Linux</b> (64-bit)<ul>
-<li>You can find them in the <a href="https://github.com/allankoechke/mantis/releases">Releases section</a>. <blockquote class="doxtable">
+<li>You can find them in the <a href="https://github.com/allankoechke/mantisbase/releases">Releases section</a>. <blockquote class="doxtable">
 <p>&zwj;<em>Currently, only 64-bit builds for Linux and Windows are provided. Support for other platforms is planned for future versions.</em> </p>
 </blockquote>
 </li>
@@ -119,22 +118,34 @@ $(document).ready(function(){initNavTree('setup.html',''); initResizable(); });
 <h3><a class="anchor" id="autotoc_md3"></a>
 🔧 Setup Steps:</h3>
 <ol type="1">
-<li><b>Download</b> the appropriate zip file from <a href="https://github.com/allankoechke/mantis/releases">Releases</a>.</li>
+<li><b>Download</b> the appropriate zip file from <a href="https://github.com/allankoechke/mantisbase/releases">Releases</a>.</li>
 <li><b>Extract</b> it using your preferred archive tool.</li>
-<li>Inside, you’ll find the <code>mantisapp</code> binary.</li>
+<li>Inside, you’ll find the <code>mantisbase</code> binary.</li>
 </ol>
 <p>Place the binary wherever you want, then run it directly from the terminal.</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md5"></a>
-🚀 Running Mantis</h2>
+🚀 Running MantisBase</h2>
 <p>Once extracted, run the app like this:</p>
-<div class="fragment"><div class="line">./mantisapp serve</div>
-</div><!-- fragment --><p>This starts the Mantis server on port 8000, bound to localhost. You can now access its REST API or embedded dashboard.</p>
+<div class="fragment"><div class="line">./mantisbase serve</div>
+</div><!-- fragment --><p>This starts the MantisBase server on port 7070, bound to localhost. You can now access its REST API or embedded dashboard.</p>
 <h2><a class="anchor" id="autotoc_md6"></a>
+🎛️ Admin Dashboard</h2>
+<p>MantisBase includes a powerful web-based admin dashboard that provides a visual interface for managing your data. The dashboard is <b>essential</b> for development and data management:</p>
+<ul>
+<li><b>Visual Data Management</b> - View, create, edit, and delete records through an intuitive interface</li>
+<li><b>Schema Management</b> - Create and configure entity schemas without writing API calls</li>
+<li><b>Access Control Configuration</b> - Set up access rules visually</li>
+<li><b>Real-time Data Exploration</b> - Browse your data with search, filtering, and pagination</li>
+</ul>
+<p><img src="mantisbase-admin.png" alt="MantisBase Admin Dashboard" class="inline"/></p>
+<p>After creating an admin account (see <a class="el" href="QuickStart_8md.html">Quick Start Guide</a>), access the dashboard at <code><a href="http://localhost:7070/mb">http://localhost:7070/mb</a></code>. The dashboard provides a complete GUI alternative to the REST API, making it perfect for non-technical users and rapid development.</p>
+<h2><a class="anchor" id="autotoc_md7"></a>
 📚 Next Steps</h2>
 <ul>
 <li>Learn how to <a class="el" href="05_8embedding_8md.html">Embed Mantis</a> into your C++ app.</li>
 <li>Explore the <a class="el" href="02_8api_8md.html">REST API generation</a> to build your app.</li>
+<li>Access the <a href="QuickStart.md#2-access-the-admin-dashboard">Admin Dashboard</a> to manage your data visually.</li>
 </ul>
 <hr  />
  </div></div><!-- contents -->

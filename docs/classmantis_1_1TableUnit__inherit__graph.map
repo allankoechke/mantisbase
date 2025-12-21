@@ -1,7 +1,0 @@
-<map id="mantis::TableUnit" name="mantis::TableUnit">
-<area shape="rect" id="Node000001" title="Class to model the behaviour of a table in database." alt="" coords="21,93,157,119"/>
-<area shape="rect" id="Node000003" href="$classmantis_1_1SysTablesUnit.html" title="Class to manage tables metadata like access rules, name, etc." alt="" coords="5,167,172,192"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="91,132,91,167,86,167,86,132"/>
-<area shape="rect" id="Node000002" href="$classmantis_1_1CrudInterface.html" title=" " alt="" coords="7,5,170,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,59,91,93,86,93,86,59"/>
-</map>

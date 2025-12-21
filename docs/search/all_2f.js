@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['📝_20notes_0',['📝 Notes',['../cli.html#autotoc_md20',1,'']]]
+  ['🚪_20logout_0',['🚪 Logout',['../auth_api.html#autotoc_md54',1,'']]]
 ];

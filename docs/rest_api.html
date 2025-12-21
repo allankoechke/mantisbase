@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mantis App: REST API Reference Guide</title>
+<title>MantisBase: REST API Reference Guide</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,9 +26,8 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="mantis.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Mantis App<span id="projectnumber">&#160;v0.2.12</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.0</span>
    </div>
   </td>
  </tr>
@@ -95,95 +94,243 @@ $(document).ready(function(){initNavTree('rest_api.html',''); initResizable(); }
   <div class="headertitle"><div class="title">REST API Reference Guide</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Mantis provides auto-generated RESTful APIs for interacting with database tables and views. This document covers the default API structure, supported HTTP methods, authentication handling, and customization options.</p>
+<div class="textblock"><p>MantisBase provides auto-generated RESTful APIs for interacting with database entities. This document covers the entity endpoints, schema management, and request handling.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md25"></a>
+<h2><a class="anchor" id="autotoc_md22"></a>
 🌐 Base URL</h2>
-<p>When Mantis is running locally:</p>
-<div class="fragment"><div class="line">http://localhost:7070/api/</div>
-</div><!-- fragment --><p>You can configure the port and base path by passing in the commandline args to the <code>serve</code> subcommand as:</p>
-<div class="fragment"><div class="line">mantisapp serve -p 8000 -h 127.0.0.1</div>
-</div><!-- fragment --><p>Check on the <a class="el" href="01_8cmd_8md.html">CLI args</a> for more options on changing default values.</p>
-<hr  />
-<h2><a class="anchor" id="autotoc_md27"></a>
-📄 REST API Endpoints</h2>
-<p>Mantis automatically exposes the following endpoints for each table or view:</p>
+<p>When MantisBase is running locally:</p>
+<div class="fragment"><div class="line">http://localhost:7070/api/v1/</div>
+</div><!-- fragment --><p>You can configure the port and host using command-line arguments:</p>
+<div class="fragment"><div class="line">mantisbase serve -p 8000 -h 127.0.0.1</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md24"></a>
+📄 Entity Endpoints</h2>
+<p>MantisBase automatically exposes CRUD endpoints for each entity (table or view):</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Method   </th><th class="markdownTableHeadNone">Endpoint   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/&lt;table&gt;</code>   </td><td class="markdownTableBodyNone">List all records    </td></tr>
+<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/entities/&lt;entity&gt;</code>   </td><td class="markdownTableBodyNone">List all records    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/&lt;table&gt;/:id</code>   </td><td class="markdownTableBodyNone">Get a specific record    </td></tr>
+<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/entities/&lt;entity&gt;/:id</code>   </td><td class="markdownTableBodyNone">Get a specific record    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/&lt;table&gt;</code>   </td><td class="markdownTableBodyNone">Create a new record    </td></tr>
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/entities/&lt;entity&gt;</code>   </td><td class="markdownTableBodyNone">Create a new record    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">PATCH   </td><td class="markdownTableBodyNone"><code>/api/v1/&lt;table&gt;/:id</code>   </td><td class="markdownTableBodyNone">Update partial fields    </td></tr>
+<td class="markdownTableBodyNone">PATCH   </td><td class="markdownTableBodyNone"><code>/api/v1/entities/&lt;entity&gt;/:id</code>   </td><td class="markdownTableBodyNone">Update partial fields    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">DELETE   </td><td class="markdownTableBodyNone"><code>/api/v1/&lt;table&gt;/:id</code>   </td><td class="markdownTableBodyNone">Delete a record    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/&lt;table&gt;/auth-with-password</code>   </td><td class="markdownTableBodyNone">Authenticate user for <code>auth</code> tables   </td></tr>
+<td class="markdownTableBodyNone">DELETE   </td><td class="markdownTableBodyNone"><code>/api/v1/entities/&lt;entity&gt;/:id</code>   </td><td class="markdownTableBodyNone">Delete a record   </td></tr>
 </table>
+<h3><a class="anchor" id="autotoc_md25"></a>
+Example Requests</h3>
+<div class="fragment"><div class="line"># List all users</div>
+<div class="line">curl http://localhost:7070/api/v1/entities/users</div>
+<div class="line"> </div>
+<div class="line"># Get specific user</div>
+<div class="line">curl http://localhost:7070/api/v1/entities/users/123</div>
+<div class="line"> </div>
+<div class="line"># Create a new user</div>
+<div class="line">curl -X POST http://localhost:7070/api/v1/entities/users \</div>
+<div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{&quot;name&quot;: &quot;John Doe&quot;, &quot;email&quot;: &quot;john@example.com&quot;}&#39;</div>
+<div class="line"> </div>
+<div class="line"># Update user</div>
+<div class="line">curl -X PATCH http://localhost:7070/api/v1/entities/users/123 \</div>
+<div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{&quot;name&quot;: &quot;Jane Doe&quot;}&#39;</div>
+<div class="line"> </div>
+<div class="line"># Delete user</div>
+<div class="line">curl -X DELETE http://localhost:7070/api/v1/entities/users/123 \</div>
+<div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot;</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md27"></a>
+🔐 Authentication</h2>
+<p>All entity endpoints require authentication via JWT tokens. Include the token in the <code>Authorization</code> header:</p>
+<div class="fragment"><div class="line">Authorization: Bearer &lt;token&gt;</div>
+</div><!-- fragment --><p>For authentication endpoints, see <a class="el" href="02_8auth_8md.html">Authentication API</a>.</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md29"></a>
-🔐 Authentication</h2>
-<p>If auth is enabled, all API calls must include a valid JWT in the <code>Authorization</code> header:</p>
-<div class="fragment"><div class="line">Authorization: Bearer &lt;token&gt;</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md30"></a>
-Auth Endpoints</h3>
-<p>Check above Rest API section above.</p>
-<hr  />
-<h2><a class="anchor" id="autotoc_md32"></a>
-🎛️ Filtering &amp; Query Parameters [PENDING]</h2>
-<p>APIs support filtering, sorting, and pagination:</p>
-<div class="fragment"><div class="line">GET /api/v1/tasks?status=done&amp;limit=10&amp;offset=20&amp;sort=-created_at</div>
-</div><!-- fragment --><ul>
-<li><code>limit</code>, <code>offset</code> – pagination</li>
-<li><code>sort</code> – sort by field (<code>-</code> prefix for descending)</li>
-<li>Field filters – simple equality filters via query string</li>
-</ul>
-<hr  />
+🛡️ Middlewares</h2>
+<p>Middlewares are functions that run before your route handler, allowing you to add authentication, authorization, and request processing logic.</p>
+<h3><a class="anchor" id="autotoc_md30"></a>
+Default Middlewares</h3>
+<p>Every endpoint automatically has two middlewares applied globally:</p>
+<ol type="1">
+<li>**<code>getAuthToken()</code>** - Extracts JWT token from <code>Authorization</code> header and stores it in request context</li>
+<li>**<code>hydrateContextData()</code>** - Validates token, fetches user data from database, and populates request context with user information</li>
+</ol>
+<p>Additionally, entity endpoints automatically have:</p><ol type="1">
+<li>**<code>hasAccess(entity_name)</code>** - Evaluates entity access rules to determine if the authenticated user can perform the requested operation. Called automatically by entity endpoints to confirm access rules before data query.</li>
+</ol>
+<h3><a class="anchor" id="autotoc_md31"></a>
+Available Middlewares</h3>
+<p>You can use these middlewares when creating custom endpoints:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Middleware   </th><th class="markdownTableHeadNone">Description   </th><th class="markdownTableHeadNone">Usage    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>getAuthToken()</code>   </td><td class="markdownTableBodyNone">Extract token from Authorization header   </td><td class="markdownTableBodyNone">Applied globally to all routes    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>hydrateContextData()</code>   </td><td class="markdownTableBodyNone">Validate token and load user data   </td><td class="markdownTableBodyNone">Applied globally to all routes    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>hasAccess(entity_name)</code>   </td><td class="markdownTableBodyNone">Check entity access rules   </td><td class="markdownTableBodyNone">Applied automatically to entity endpoints    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>requireAdminAuth()</code>   </td><td class="markdownTableBodyNone">Require admin authentication   </td><td class="markdownTableBodyNone">Blocks non-admin users    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>requireEntityAuth(entity_name)</code>   </td><td class="markdownTableBodyNone">Require authentication from specific entity   </td><td class="markdownTableBodyNone">Only allows users from specified entity table    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>requireAdminOrEntityAuth(entity_name)</code>   </td><td class="markdownTableBodyNone">Require admin OR entity auth   </td><td class="markdownTableBodyNone">Allows admins or users from specified entity    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>requireGuestOnly()</code>   </td><td class="markdownTableBodyNone">Require no authentication   </td><td class="markdownTableBodyNone">Blocks authenticated users, only allows guests    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>requireExprEval(expr)</code>   </td><td class="markdownTableBodyNone">Evaluate custom expression   </td><td class="markdownTableBodyNone">Custom expression-based access control    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>rateLimit(max_requests, window_seconds, use_user_id)</code>   </td><td class="markdownTableBodyNone">Rate limiting middleware   </td><td class="markdownTableBodyNone">Limits requests per time window by IP or user ID   </td></tr>
+</table>
+<h3><a class="anchor" id="autotoc_md32"></a>
+Using Middlewares</h3>
+<p>When creating custom endpoints, you can specify middlewares as the third parameter:</p>
+<div class="fragment"><div class="line"><span class="comment">// Require admin authentication</span></div>
+<div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/admin/stats&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    res.sendJSON(200, {{<span class="stringliteral">&quot;stats&quot;</span>, <span class="stringliteral">&quot;data&quot;</span>}});</div>
+<div class="line">}, {<a class="code hl_function" href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">requireAdminAuth</a>()});</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Require authentication from specific entity</span></div>
+<div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/users/profile&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    <span class="keyword">auto</span> auth = req.getOr&lt;<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&gt;(<span class="stringliteral">&quot;auth&quot;</span>, json::object());</div>
+<div class="line">    std::string userId = auth[<span class="stringliteral">&quot;id&quot;</span>];</div>
+<div class="line">    <span class="comment">// ... return user profile</span></div>
+<div class="line">}, {<a class="code hl_function" href="namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc">requireEntityAuth</a>(<span class="stringliteral">&quot;users&quot;</span>)});</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Allow admins OR users from specific entity</span></div>
+<div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/posts/draft&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    <span class="comment">// ... return draft posts</span></div>
+<div class="line">}, {<a class="code hl_function" href="namespacemb.html#a87d6b4b4d0f26734624b2802248fa9e7">requireAdminOrEntityAuth</a>(<span class="stringliteral">&quot;users&quot;</span>)});</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Guest-only endpoint (no authentication required)</span></div>
+<div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/public/info&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    res.sendJSON(200, {{<span class="stringliteral">&quot;info&quot;</span>, <span class="stringliteral">&quot;public data&quot;</span>}});</div>
+<div class="line">}, {<a class="code hl_function" href="namespacemb.html#aa278b4b6ee2546434b11e162893f3bac">requireGuestOnly</a>()});</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Custom expression evaluation</span></div>
+<div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/restricted&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    <span class="comment">// ... handler</span></div>
+<div class="line">}, {<a class="code hl_function" href="namespacemb.html#ab6a5c1472a256eb0e8174e1f0765624d">requireExprEval</a>(<span class="stringliteral">&quot;auth.id != \&quot;\&quot; &amp;&amp; auth.user.verified == true&quot;</span>)});</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Rate limiting by IP address (100 requests per minute)</span></div>
+<div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/data&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    res.sendJSON(200, {{<span class="stringliteral">&quot;data&quot;</span>, <span class="stringliteral">&quot;response&quot;</span>}});</div>
+<div class="line">}, {<a class="code hl_function" href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">rateLimit</a>(100, 60, <span class="keyword">false</span>)});</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Rate limiting by user ID (10 requests per second)</span></div>
+<div class="line">router.Post(<span class="stringliteral">&quot;/api/v1/upload&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    <span class="comment">// ... handler</span></div>
+<div class="line">}, {<a class="code hl_function" href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">rateLimit</a>(10, 1, <span class="keyword">true</span>)});</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Multiple middlewares (executed in order)</span></div>
+<div class="line">router.Post(<span class="stringliteral">&quot;/api/v1/sensitive&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    <span class="comment">// ... handler</span></div>
+<div class="line">}, {</div>
+<div class="line">    <a class="code hl_function" href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">requireAdminAuth</a>(),</div>
+<div class="line">    <a class="code hl_function" href="namespacemb.html#ab6a5c1472a256eb0e8174e1f0765624d">requireExprEval</a>(<span class="stringliteral">&quot;req.body.priority &lt;= 5&quot;</span>)</div>
+<div class="line">});</div>
+<div class="ttc" id="anamespacemb_html_a735b4776576110b750e5446ce05e8d81"><div class="ttname"><a href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">mb::rateLimit</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; rateLimit(int max_requests, int window_seconds, bool use_user_id=false)</div><div class="ttdoc">Rate limiting middleware to prevent abuse.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:404</div></div>
+<div class="ttc" id="anamespacemb_html_a87d6b4b4d0f26734624b2802248fa9e7"><div class="ttname"><a href="namespacemb.html#a87d6b4b4d0f26734624b2802248fa9e7">mb::requireAdminOrEntityAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireAdminOrEntityAuth(const std::string &amp;entity_name)</div><div class="ttdoc">Require admin OR entity authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:371</div></div>
+<div class="ttc" id="anamespacemb_html_aa278b4b6ee2546434b11e162893f3bac"><div class="ttname"><a href="namespacemb.html#aa278b4b6ee2546434b11e162893f3bac">mb::requireGuestOnly</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireGuestOnly()</div><div class="ttdoc">Require guest-only access (no authentication).</div><div class="ttdef"><b>Definition</b> middlewares.cpp:282</div></div>
+<div class="ttc" id="anamespacemb_html_ab6a5c1472a256eb0e8174e1f0765624d"><div class="ttname"><a href="namespacemb.html#ab6a5c1472a256eb0e8174e1f0765624d">mb::requireExprEval</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireExprEval(const std::string &amp;expr)</div><div class="ttdoc">Require expression evaluation to pass.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:274</div></div>
+<div class="ttc" id="anamespacemb_html_ab7c5922d7edd2da97857b5383049101f"><div class="ttname"><a href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">mb::requireAdminAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireAdminAuth()</div><div class="ttdoc">Require admin authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:299</div></div>
+<div class="ttc" id="anamespacemb_html_ae3903a4fb6e5f572be9884d6768da4fc"><div class="ttname"><a href="namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc">mb::requireEntityAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireEntityAuth(const std::string &amp;entity_name)</div><div class="ttdoc">Require entity-specific authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:381</div></div>
+<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> context_store.h:18</div></div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md33"></a>
+Accessing User Data in Handlers</h3>
+<p>After middlewares run, you can access authenticated user data from the request context:</p>
+<div class="fragment"><div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/me&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    <span class="comment">// Get auth data from context (set by middlewares)</span></div>
+<div class="line">    <span class="keyword">auto</span> auth = req.getOr&lt;json&gt;(<span class="stringliteral">&quot;auth&quot;</span>, json::object());</div>
+<div class="line">    </div>
+<div class="line">    <span class="keywordflow">if</span> (auth[<span class="stringliteral">&quot;type&quot;</span>] == <span class="stringliteral">&quot;guest&quot;</span>) {</div>
+<div class="line">        res.sendJSON(401, {{<span class="stringliteral">&quot;error&quot;</span>, <span class="stringliteral">&quot;Not authenticated&quot;</span>}});</div>
+<div class="line">        <span class="keywordflow">return</span>;</div>
+<div class="line">    }</div>
+<div class="line">    </div>
+<div class="line">    <span class="comment">// Access user information</span></div>
+<div class="line">    std::string userId = auth[<span class="stringliteral">&quot;id&quot;</span>];</div>
+<div class="line">    std::string userEntity = auth[<span class="stringliteral">&quot;entity&quot;</span>];</div>
+<div class="line">    <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> userData = auth[<span class="stringliteral">&quot;user&quot;</span>]; <span class="comment">// Full user record from database</span></div>
+<div class="line">    </div>
+<div class="line">    res.sendJSON(200, {{<span class="stringliteral">&quot;user&quot;</span>, userData}});</div>
+<div class="line">});</div>
+</div><!-- fragment --><blockquote class="doxtable">
+<p>&zwj;<b>Note</b>: Middlewares execute in the order they are specified. If a middleware returns <code>HandlerResponse::Handled</code>, subsequent middlewares and the handler are skipped. </p>
+</blockquote>
 <h2><a class="anchor" id="autotoc_md34"></a>
-⚙️ API Customization [In Dev]</h2>
-<p>You can create custom API endpoints to customize behaviour or add missing functionality by invoking the <code>router()</code>'s <code>Get/Post/Patch/Delete</code> methods from C++. Check the [example/main.cpp] on how to do that.</p>
-<p>What can't you do currently?</p><ul>
-<li>Add other hooks to existing autogenerated routes</li>
-</ul>
-<hr  />
-<h2><a class="anchor" id="autotoc_md36"></a>
-🗃️ System Tables API</h2>
-<p>You can also interact with system tables to introspect schema or access logs:</p>
-<ul>
-<li>GET/POST/PATCH/DELETE/etc. <code>/api/v1/tables</code></li>
-<li>GET/POST/PATCH/DELETE/etc. <code>/api/v1/admins</code></li>
-</ul>
-<blockquote class="doxtable">
-<p>&zwj;⚠️ Access to system tables may be restricted to admin users ONLY. </p>
+&lt;/blockquote&gt;</h2>
+<h2><a class="anchor" id="autotoc_md35"></a>
+🗃️ Schema Management API</h2>
+<p>Schema management endpoints allow you to create, read, update, and delete entity schemas. <b>These endpoints require admin authentication only.</b></p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Method   </th><th class="markdownTableHeadNone">Endpoint   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/schemas</code>   </td><td class="markdownTableBodyNone">List all schemas    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/schemas/:schema_name_or_id</code>   </td><td class="markdownTableBodyNone">Get a specific schema    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/schemas</code>   </td><td class="markdownTableBodyNone">Create a new schema    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">PATCH   </td><td class="markdownTableBodyNone"><code>/api/v1/schemas/:schema_name_or_id</code>   </td><td class="markdownTableBodyNone">Update a schema    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">DELETE   </td><td class="markdownTableBodyNone"><code>/api/v1/schemas/:schema_name_or_id</code>   </td><td class="markdownTableBodyNone">Delete a schema   </td></tr>
+</table>
+<h3><a class="anchor" id="autotoc_md36"></a>
+Example: Create a Schema</h3>
+<div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/schemas \</div>
+<div class="line">  -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{</div>
+<div class="line">    &quot;name&quot;: &quot;posts&quot;,</div>
+<div class="line">    &quot;type&quot;: &quot;base&quot;,</div>
+<div class="line">    &quot;fields&quot;: [</div>
+<div class="line">      {&quot;name&quot;: &quot;title&quot;, &quot;type&quot;: &quot;string&quot;, &quot;required&quot;: true},</div>
+<div class="line">      {&quot;name&quot;: &quot;content&quot;, &quot;type&quot;: &quot;string&quot;},</div>
+<div class="line">      {&quot;name&quot;: &quot;author_id&quot;, &quot;type&quot;: &quot;string&quot;, &quot;required&quot;: true}</div>
+<div class="line">    ],</div>
+<div class="line">    &quot;rules&quot;: {</div>
+<div class="line">      &quot;list&quot;: {&quot;mode&quot;: &quot;public&quot;, &quot;expr&quot;: &quot;auth.id != \&quot;\&quot;&quot;},</div>
+<div class="line">      &quot;get&quot;: {&quot;mode&quot;: &quot;auth&quot;, &quot;expr&quot;: &quot;&quot;},</div>
+<div class="line">      &quot;add&quot;: {&quot;mode&quot;: &quot;auth&quot;, &quot;expr&quot;: &quot;&quot;},</div>
+<div class="line">      &quot;update&quot;: {&quot;mode&quot;: &quot;auth&quot;, &quot;expr&quot;: &quot;&quot;},</div>
+<div class="line">      &quot;delete&quot;: {&quot;mode&quot;: &quot;custom&quot;, &quot;expr&quot;: &quot;auth.entity == \&quot;mb_admins\&quot;&quot;}</div>
+<div class="line">    }</div>
+<div class="line">  }&#39;</div>
+</div><!-- fragment --><blockquote class="doxtable">
+<p>&zwj;⚠️ <b>Admin Only</b>: All schema endpoints require admin authentication. Regular users cannot access these endpoints. </p>
 </blockquote>
 <h2><a class="anchor" id="autotoc_md37"></a>
 &lt;/blockquote&gt;</h2>
 <h2><a class="anchor" id="autotoc_md38"></a>
-🗃️ Middlewares</h2>
-<p>By default, all tables have two middlewares applied to:</p><ul>
-<li><code>getToken()</code> to extract token into request context.</li>
-<li><code>hasAccess()</code> to evaluate access rules against logged in user.</li>
-</ul>
-<blockquote class="doxtable">
-<p>&zwj;⚠️ The access expression is applied to whole table, that is, each table has to define rules for 'getRule, addRule, listRule, deleteRule and updateRule`. </p>
-</blockquote>
-<h2><a class="anchor" id="autotoc_md39"></a>
-&lt;/blockquote&gt;</h2>
-<h2><a class="anchor" id="autotoc_md40"></a>
-🧪 Example Requests</h2>
-<div class="fragment"><div class="line"># List tasks</div>
-<div class="line">curl http://localhost:7070/api/v1/tasks</div>
-<div class="line"> </div>
-<div class="line"># Create task</div>
-<div class="line">curl -X POST http://localhost:8080/api/v1/tasks   -H &quot;Authorization: Bearer &lt;token&gt;&quot;   -H &quot;Content-Type: application/json&quot;   -d &#39;{&quot;title&quot;: &quot;Write API docs&quot;, &quot;status&quot;: &quot;in_progress&quot;}&#39;</div>
+🎛️ Query Parameters [PENDING]</h2>
+<p>Future support for filtering, sorting, and pagination:</p>
+<div class="fragment"><div class="line">GET /api/v1/entities/tasks?status=done&amp;limit=10&amp;offset=20&amp;sort=-created_at</div>
 </div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md40"></a>
+⚙️ Custom Endpoints</h2>
+<p>You can create custom API endpoints using the router:</p>
+<div class="fragment"><div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/custom&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
+<div class="line">    res.sendJSON(200, {{<span class="stringliteral">&quot;message&quot;</span>, <span class="stringliteral">&quot;Custom endpoint&quot;</span>}});</div>
+<div class="line">}, {<a class="code hl_function" href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">requireAdminAuth</a>()});</div>
+</div><!-- fragment --><p>Check the <a class="el" href="05_8embedding_8md.html">Embedding Guide</a> for more details.</p>
+<hr  />
 <h2><a class="anchor" id="autotoc_md42"></a>
+📁 File Handling</h2>
+<p>Files uploaded via multipart/form-data are stored and can be accessed at:</p>
+<div class="fragment"><div class="line">GET /api/files/&lt;entity&gt;/&lt;filename&gt;</div>
+</div><!-- fragment --><p>See <a class="el" href="11_8files_8md.html">File Handling</a> for more details.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md44"></a>
 🏁 Summary</h2>
-<p>Mantis provides zero-setup APIs for all your structured data. With support for CRUD, authentication, query filtering, and future extensions, it's a ready-to-use backend interface for apps, tools, and embedded systems. </p>
+<p>MantisBase provides zero-setup REST APIs for all your entities. With automatic authentication, access control, and schema management, it's ready to use out of the box. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

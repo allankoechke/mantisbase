@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mantis App: Healthcheck Endpoint</title>
+<title>MantisBase: Healthcheck Endpoint</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,9 +26,8 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="mantis.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Mantis App<span id="projectnumber">&#160;v0.2.12</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.0</span>
    </div>
   </td>
  </tr>
@@ -95,41 +94,61 @@ $(document).ready(function(){initNavTree('healthcheck.html',''); initResizable()
   <div class="headertitle"><div class="title">Healthcheck Endpoint</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This document describes the healthcheck endpoint in the Mantis project, its purpose, route, and expected results.</p>
-<h2><a class="anchor" id="autotoc_md146"></a>
-Purpose</h2>
-<p>The healthcheck endpoint provides a simple way to verify that the Mantis server is running and responsive. It is typically used by monitoring tools, load balancers, or deployment scripts to check the application's status and uptime.</p>
-<h2><a class="anchor" id="autotoc_md147"></a>
-Route</h2>
+<div class="textblock"><p>The healthcheck endpoint provides a simple way to verify that the MantisBase server is running and responsive. It is useful for monitoring tools, load balancers, and deployment scripts.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md176"></a>
+Endpoint</h2>
 <div class="fragment"><div class="line">GET /api/v1/health</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md148"></a>
-Expected Results</h2>
-<p>A successful request to the healthcheck endpoint returns a JSON response with the following structure:</p>
-<div class="fragment"><div class="line">{</div>
-<div class="line">  &quot;status&quot;: &quot;ok&quot;,</div>
-<div class="line">  &quot;uptime&quot;: &lt;seconds&gt;</div>
-<div class="line">}</div>
-</div><!-- fragment --><ul>
-<li><code>status</code>: Always set to <code>ok</code> if the server is healthy.</li>
-<li><code>uptime</code>: The number of seconds the server has been running since it started.</li>
-</ul>
-<p>The HTTP status code for a healthy response is <code>200 OK</code>.</p>
-<h2><a class="anchor" id="autotoc_md149"></a>
-Example Response</h2>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md178"></a>
+Response</h2>
+<p>A successful request returns a JSON response with the following structure:</p>
 <div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;status&quot;: &quot;ok&quot;,</div>
 <div class="line">  &quot;uptime&quot;: 12345</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md150"></a>
+</div><!-- fragment --><ul>
+<li><code>status</code>: Always set to <code>"ok"</code> if the server is healthy</li>
+<li><code>uptime</code>: Number of seconds the server has been running since startup</li>
+</ul>
+<p>The HTTP status code for a healthy response is <code>200 OK</code>.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md180"></a>
+Example</h2>
+<p><b>Request:</b></p>
+<div class="fragment"><div class="line">curl http://localhost:7070/api/v1/health</div>
+</div><!-- fragment --><p><b>Response:</b></p>
+<div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;status&quot;: &quot;ok&quot;,</div>
+<div class="line">  &quot;uptime&quot;: 12345</div>
+<div class="line">}</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md182"></a>
 Error Handling</h2>
 <p>If the server encounters an error while processing the healthcheck, it may return a <code>500 Internal Server Error</code> with an appropriate error message.</p>
-<h2><a class="anchor" id="autotoc_md151"></a>
+<hr  />
+<h2><a class="anchor" id="autotoc_md184"></a>
 Usage</h2>
 <ul>
-<li>Use this endpoint to verify server availability.</li>
-<li>Integrate with external monitoring or orchestration systems for automated health checks.</li>
+<li>Verify server availability and responsiveness</li>
+<li>Integrate with monitoring systems (Prometheus, Nagios, etc.)</li>
+<li>Use in orchestration systems (Kubernetes liveness/readiness probes, Docker healthchecks)</li>
+<li>Load balancer health checks</li>
 </ul>
-<p>For implementation details, see the <code>generateMiscEndpoints</code> method in <code><a class="el" href="router_8cpp.html">src/core/router.cpp</a></code>. </p>
+<p><b>Example Docker healthcheck:</b></p>
+<div class="fragment"><div class="line">HEALTHCHECK --interval=30s --timeout=3s \</div>
+<div class="line">  CMD curl -f http:<span class="comment">//localhost:7070/api/v1/health || exit 1</span></div>
+</div><!-- fragment --><p><b>Example Kubernetes liveness probe:</b></p>
+<div class="fragment"><div class="line">livenessProbe:</div>
+<div class="line">  httpGet:</div>
+<div class="line">    path: /api/v1/health</div>
+<div class="line">    port: 7070</div>
+<div class="line">  initialDelaySeconds: 30</div>
+<div class="line">  periodSeconds: 10</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md186"></a>
+Summary</h2>
+<p>The healthcheck endpoint provides a simple, lightweight way to monitor MantisBase server status and uptime, making it easy to integrate with various monitoring and orchestration systems. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

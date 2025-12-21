@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['update_0',['update',['../classmantis_1_1CrudInterface.html#abb3fabb2a6c3d2af19713107952514fd',1,'mantis::CrudInterface::update()'],['../classmantis_1_1SysTablesUnit.html#ae99aa2fe743f9a57d99ed451f93edce6',1,'mantis::SysTablesUnit::update()'],['../classmantis_1_1TableUnit.html#a3bae0ee69c4c82ad91553015195fc603',1,'mantis::TableUnit::update()']]],
-  ['updaterecord_1',['updaterecord',['../classmantis_1_1SysTablesUnit.html#ae90c6020a00a647148e474f2b694c86d',1,'mantis::SysTablesUnit::updateRecord()'],['../classmantis_1_1TableUnit.html#a604402a842ba3015dc73ed006fd7331a',1,'mantis::TableUnit::updateRecord()']]],
-  ['updateroute_2',['updateRoute',['../classmantis_1_1RouterUnit.html#ab83eb5ac38e30bc7f925798dbc51f969',1,'mantis::RouterUnit']]],
-  ['updateroutecache_3',['updateRouteCache',['../classmantis_1_1RouterUnit.html#ab4f9537b6f3257947f1a7d312478309b',1,'mantis::RouterUnit']]],
-  ['updaterule_4',['updateRule',['../classmantis_1_1TableUnit.html#a23a3ee7b0cd72e3522c1ecefd5a2682b',1,'mantis::TableUnit']]]
+  ['undowrittenfiles_0',['undoWrittenFiles',['../classmb_1_1MantisContentReader.html#afb3582a2e2f5ad6903ae34a6462d8805',1,'mb::MantisContentReader']]],
+  ['update_1',['update',['../classmb_1_1Entity.html#a3b3def9702c7fbcf709881fab5db51ed',1,'mb::Entity']]],
+  ['updaterule_2',['updaterule',['../classmb_1_1Entity.html#a46c3c33bb152351d9406d43e8364a523',1,'mb::Entity::updateRule()'],['../classmb_1_1EntitySchema.html#a00a4ca54fb5d39e5b4bf1cee88925bfe',1,'mb::EntitySchema::updateRule()']]],
+  ['updateschemacache_3',['updateSchemaCache',['../classmb_1_1Router.html#a28a492e40b98020d800db095f5f40c81',1,'mb::Router']]],
+  ['updatetable_4',['updateTable',['../classmb_1_1EntitySchema.html#a90a339d16ff46e9d2cf6a43e37b485a2',1,'mb::EntitySchema']]],
+  ['updatewith_5',['updatewith',['../classmb_1_1EntitySchema.html#a7b6ab04661cd18975799570a87c317e6',1,'mb::EntitySchema::updateWith()'],['../classmb_1_1EntitySchemaField.html#a9653e2d92473a8ef41953fbf5ccaabce',1,'mb::EntitySchemaField::updateWith()']]]
 ];

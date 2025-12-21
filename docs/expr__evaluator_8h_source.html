@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mantis App: /home/runner/work/mantis/mantis/include/mantis/core/expr_evaluator.h Source File</title>
+<title>MantisBase: /home/runner/work/mantisbase/mantisbase/include/mantisbase/core/expr_evaluator.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,9 +26,8 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="mantis.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Mantis App<span id="projectnumber">&#160;v0.2.12</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.0</span>
    </div>
   </td>
  </tr>
@@ -105,52 +104,52 @@ $(document).ready(function(){initNavTree('expr__evaluator_8h_source.html',''); i
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#define EXPR_EVALUATOR_H</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;shunting-yard.h&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;containers.h&gt;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;nlohmann/json.hpp&gt;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../utils/utils.h&quot;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// #define __file__ &quot;core/expr_evaluator.h&quot;</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemantis.html">mantis</a></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>{</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keyword">using </span>cparse::TokenMap;</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">using </span>cparse::calculator;</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">using </span>cparse::packToken;</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">using </span><a class="code hl_typedef" href="mantis_8h.html#ab701e3ac61a85b337ec5c1abaad6742d">json</a> = nlohmann::json;</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;nlohmann/json.hpp&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;dukglue/dukglue.h&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../utils/utils.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>{</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="namespacemb.html#ac7d3dfe501576fab5dc51f2aa478f367">   17</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#ac7d3dfe501576fab5dc51f2aa478f367">TokenMap</a> = std::unordered_map&lt;std::string, nlohmann::json&gt;;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="foldopen" id="foldopen00019" data-start="{" data-end="};">
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classmb_1_1DukCtx.html">   19</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classmb_1_1DukCtx.html">DukCtx</a> {</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        <a class="code hl_function" href="classmb_1_1DukCtx.html#a39219b6422f24cc0aa69defba4c51ef1">DukCtx</a>();</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <a class="code hl_function" href="classmb_1_1DukCtx.html#a44bf49571b77c6f0983d43dddfac03ae">~DukCtx</a>();</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="foldopen" id="foldopen00028" data-start="{" data-end="};">
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="structmantis_1_1ExprEvaluator.html">   28</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structmantis_1_1ExprEvaluator.html">ExprEvaluator</a></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    {</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="structmantis_1_1ExprEvaluator.html#a1f1e622f0b8388951c87dfa6d92f2f4a">   30</a></span>        <a class="code hl_function" href="structmantis_1_1ExprEvaluator.html#a1f1e622f0b8388951c87dfa6d92f2f4a">ExprEvaluator</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keyword">auto</span> <a class="code hl_function" href="structmantis_1_1ExprEvaluator.html#a413d97dd78d8624a6cc3013971c54dcc">evaluate</a>(<span class="keyword">const</span> std::string&amp; expr, <span class="keyword">const</span> TokenMap&amp; vars) -&gt; bool;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keyword">auto</span> <a class="code hl_function" href="structmantis_1_1ExprEvaluator.html#a413d97dd78d8624a6cc3013971c54dcc">evaluate</a>(<span class="keyword">const</span> std::string&amp; expr, <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemantis.html#a0255780f56da02614156f7ef7cd3d3a3">json</a>&amp; vars) -&gt; bool;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="keyword">auto</span> <a class="code hl_function" href="structmantis_1_1ExprEvaluator.html#ad223247f0d45bb5d964a09bf10fe8b08">jsonToTokenMap</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacemantis.html#a0255780f56da02614156f7ef7cd3d3a3">json</a>&amp; j) -&gt; TokenMap;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="structmantis_1_1ExprEvaluator.html#a365712a486e18bb69b182994bdc8dacc">   58</a></span>        <span class="keyword">const</span> std::string <a class="code hl_variable" href="structmantis_1_1ExprEvaluator.html#a365712a486e18bb69b182994bdc8dacc">__class_name__</a> = <span class="stringliteral">&quot;mantis::ExprEvaluator&quot;</span>;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    };</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        [[nodiscard]] duk_context* <a class="code hl_function" href="classmb_1_1DukCtx.html#a1f294bd025344ce8750045128db68ca3">get</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        duk_context* m_ctx;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    };</div>
 </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>} <span class="comment">// mantis</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#endif </span><span class="comment">//EXPR_EVALUATOR_H</span></div>
-<div class="ttc" id="amantis_8h_html_ab701e3ac61a85b337ec5c1abaad6742d"><div class="ttname"><a href="mantis_8h.html#ab701e3ac61a85b337ec5c1abaad6742d">json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdef"><b>Definition</b> mantis.h:38</div></div>
-<div class="ttc" id="anamespacemantis_html"><div class="ttname"><a href="namespacemantis.html">mantis</a></div><div class="ttdoc">router.h</div><div class="ttdef"><b>Definition</b> app.h:32</div></div>
-<div class="ttc" id="anamespacemantis_html_a0255780f56da02614156f7ef7cd3d3a3"><div class="ttname"><a href="namespacemantis.html#a0255780f56da02614156f7ef7cd3d3a3">mantis::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> context_store.h:15</div></div>
-<div class="ttc" id="astructmantis_1_1ExprEvaluator_html"><div class="ttname"><a href="structmantis_1_1ExprEvaluator.html">mantis::ExprEvaluator</a></div><div class="ttdoc">Struct instance for handling evaluation of database access rules.</div><div class="ttdef"><b>Definition</b> expr_evaluator.h:29</div></div>
-<div class="ttc" id="astructmantis_1_1ExprEvaluator_html_a1f1e622f0b8388951c87dfa6d92f2f4a"><div class="ttname"><a href="structmantis_1_1ExprEvaluator.html#a1f1e622f0b8388951c87dfa6d92f2f4a">mantis::ExprEvaluator::ExprEvaluator</a></div><div class="ttdeci">ExprEvaluator()=default</div></div>
-<div class="ttc" id="astructmantis_1_1ExprEvaluator_html_a365712a486e18bb69b182994bdc8dacc"><div class="ttname"><a href="structmantis_1_1ExprEvaluator.html#a365712a486e18bb69b182994bdc8dacc">mantis::ExprEvaluator::__class_name__</a></div><div class="ttdeci">const std::string __class_name__</div><div class="ttdef"><b>Definition</b> expr_evaluator.h:58</div></div>
-<div class="ttc" id="astructmantis_1_1ExprEvaluator_html_a413d97dd78d8624a6cc3013971c54dcc"><div class="ttname"><a href="structmantis_1_1ExprEvaluator.html#a413d97dd78d8624a6cc3013971c54dcc">mantis::ExprEvaluator::evaluate</a></div><div class="ttdeci">auto evaluate(const std::string &amp;expr, const TokenMap &amp;vars) -&gt; bool</div><div class="ttdoc">Evaluates a given expression in a context of the given TokenMap variables.</div><div class="ttdef"><b>Definition</b> expr_evaluator.cpp:8</div></div>
-<div class="ttc" id="astructmantis_1_1ExprEvaluator_html_ad223247f0d45bb5d964a09bf10fe8b08"><div class="ttname"><a href="structmantis_1_1ExprEvaluator.html#ad223247f0d45bb5d964a09bf10fe8b08">mantis::ExprEvaluator::jsonToTokenMap</a></div><div class="ttdeci">auto jsonToTokenMap(const json &amp;j) -&gt; TokenMap</div><div class="ttdoc">Convert a given JSON Object to the equivalent TokenMap so that we can pass it to the evaluator.</div><div class="ttdef"><b>Definition</b> expr_evaluator.cpp:27</div></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="foldopen" id="foldopen00034" data-start="{" data-end="};">
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="structmb_1_1Expr.html">   34</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structmb_1_1Expr.html">Expr</a></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    {</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="structmb_1_1Expr.html#a12a96b90ba9370e005ba6646fc7f39da">eval</a>(<span class="keyword">const</span> std::string&amp; expr, <span class="keyword">const</span> std::unordered_map&lt;std::string, nlohmann::json&gt;&amp; vars = {});</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    };</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>} <span class="comment">// mb</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#endif </span><span class="comment">//EXPR_EVALUATOR_H</span></div>
+<div class="ttc" id="aclassmb_1_1DukCtx_html"><div class="ttname"><a href="classmb_1_1DukCtx.html">mb::DukCtx</a></div><div class="ttdef"><b>Definition</b> expr_evaluator.h:19</div></div>
+<div class="ttc" id="aclassmb_1_1DukCtx_html_a1f294bd025344ce8750045128db68ca3"><div class="ttname"><a href="classmb_1_1DukCtx.html#a1f294bd025344ce8750045128db68ca3">mb::DukCtx::get</a></div><div class="ttdeci">duk_context * get() const</div><div class="ttdef"><b>Definition</b> expr_evaluator.cpp:17</div></div>
+<div class="ttc" id="aclassmb_1_1DukCtx_html_a39219b6422f24cc0aa69defba4c51ef1"><div class="ttname"><a href="classmb_1_1DukCtx.html#a39219b6422f24cc0aa69defba4c51ef1">mb::DukCtx::DukCtx</a></div><div class="ttdeci">DukCtx()</div><div class="ttdef"><b>Definition</b> expr_evaluator.cpp:7</div></div>
+<div class="ttc" id="aclassmb_1_1DukCtx_html_a44bf49571b77c6f0983d43dddfac03ae"><div class="ttname"><a href="classmb_1_1DukCtx.html#a44bf49571b77c6f0983d43dddfac03ae">mb::DukCtx::~DukCtx</a></div><div class="ttdeci">~DukCtx()</div><div class="ttdef"><b>Definition</b> expr_evaluator.cpp:12</div></div>
+<div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdoc">router.h</div><div class="ttdef"><b>Definition</b> auth.h:15</div></div>
+<div class="ttc" id="anamespacemb_html_ac7d3dfe501576fab5dc51f2aa478f367"><div class="ttname"><a href="namespacemb.html#ac7d3dfe501576fab5dc51f2aa478f367">mb::TokenMap</a></div><div class="ttdeci">std::unordered_map&lt; std::string, nlohmann::json &gt; TokenMap</div><div class="ttdef"><b>Definition</b> expr_evaluator.h:17</div></div>
+<div class="ttc" id="astructmb_1_1Expr_html"><div class="ttname"><a href="structmb_1_1Expr.html">mb::Expr</a></div><div class="ttdoc">Struct instance for handling evaluation of database access rules.</div><div class="ttdef"><b>Definition</b> expr_evaluator.h:35</div></div>
+<div class="ttc" id="astructmb_1_1Expr_html_a12a96b90ba9370e005ba6646fc7f39da"><div class="ttname"><a href="structmb_1_1Expr.html#a12a96b90ba9370e005ba6646fc7f39da">mb::Expr::eval</a></div><div class="ttdeci">static bool eval(const std::string &amp;expr, const std::unordered_map&lt; std::string, nlohmann::json &gt; &amp;vars={})</div><div class="ttdoc">Evaluates a given expression in a context of the given TokenMap variables.</div><div class="ttdef"><b>Definition</b> expr_evaluator.cpp:19</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_114ef740a9f18adcf7622a40401f05ce.html">mantis</a></li><li class="navelem"><a class="el" href="dir_f9381c1b06d540c9aafb80ecdbe7578b.html">core</a></li><li class="navelem"><a class="el" href="expr__evaluator_8h.html">expr_evaluator.h</a></li>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_f12416a0fca21990dcfd6e2a4a1d87bc.html">mantisbase</a></li><li class="navelem"><a class="el" href="dir_c0de5ed7d1b1c858ab368f9650e8062e.html">core</a></li><li class="navelem"><a class="el" href="expr__evaluator_8h.html">expr_evaluator.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>

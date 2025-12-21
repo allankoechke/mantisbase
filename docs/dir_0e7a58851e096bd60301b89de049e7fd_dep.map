@@ -1,7 +1,7 @@
-<map id="/home/runner/work/mantis/mantis/src/core/models" name="/home/runner/work/mantis/mantis/src/core/models">
+<map id="/home/runner/work/mantisbase/mantisbase/src/core/models" name="/home/runner/work/mantisbase/mantisbase/src/core/models">
 <area shape="rect" id="node1" href="dir_0e7a58851e096bd60301b89de049e7fd.html" title="models" alt="" coords="27,52,98,77"/>
 <area shape="rect" id="node2" href="dir_d44c64559bbebec7f509842c48db8b23.html" title="include" alt="" coords="28,125,97,151"/>
-<area shape="poly" id="edge1" href="dir_000009_000006.html" alt="" coords="65,78,65,112,60,112,60,78"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000009_000006.html" title="1" alt="" coords="66,100,76,114"/>
+<area shape="poly" id="edge1" href="dir_000006_000003.html" alt="" coords="65,78,65,112,60,112,60,78"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000006_000003.html" title="19" alt="" coords="62,100,80,114"/>
 <area shape="rect" id="clust1" href="dir_aebb8dcc11953d78e620bbef0b9e2183.html" title="core" alt="" coords="16,16,109,88"/>
 </map>

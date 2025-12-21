@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mantis App: /home/runner/work/mantis/mantis/src/utils/path_utils.cpp File Reference</title>
+<title>MantisBase: /home/runner/work/mantisbase/mantisbase/src/utils/path_utils.cpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,9 +26,8 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="mantis.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Mantis App<span id="projectnumber">&#160;v0.2.12</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.0</span>
    </div>
   </td>
  </tr>
@@ -98,68 +97,66 @@ $(document).ready(function(){initNavTree('path__utils_8cpp.html',''); initResiza
   <div class="headertitle"><div class="title">path_utils.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="utils_8h_source.html">../../include/mantis/utils/utils.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="utils_8h_source.html">../../include/mantisbase/utils/utils.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for path_utils.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="path__utils_8cpp__incl.png" border="0" usemap="#a_2home_2runner_2work_2mantis_2mantis_2src_2utils_2path__utils_8cpp" alt=""/></div>
-<map name="a_2home_2runner_2work_2mantis_2mantis_2src_2utils_2path__utils_8cpp" id="a_2home_2runner_2work_2mantis_2mantis_2src_2utils_2path__utils_8cpp">
-<area shape="rect" title=" " alt="" coords="512,5,707,60"/>
-<area shape="rect" href="utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="538,108,681,148"/>
-<area shape="poly" title=" " alt="" coords="612,60,612,94,607,94,607,60"/>
+<div class="center"><img src="path__utils_8cpp__incl.png" border="0" usemap="#a_2home_2runner_2work_2mantisbase_2mantisbase_2src_2utils_2path__utils_8cpp" alt=""/></div>
+<map name="a_2home_2runner_2work_2mantisbase_2mantisbase_2src_2utils_2path__utils_8cpp" id="a_2home_2runner_2work_2mantisbase_2mantisbase_2src_2utils_2path__utils_8cpp">
+<area shape="rect" title=" " alt="" coords="442,5,667,60"/>
+<area shape="rect" href="utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="468,108,641,148"/>
+<area shape="poly" title=" " alt="" coords="557,60,557,94,552,94,552,60"/>
 <area shape="rect" title=" " alt="" coords="5,203,64,229"/>
-<area shape="poly" title=" " alt="" coords="538,134,445,140,329,151,202,170,77,199,70,201,68,196,75,193,201,165,328,146,444,135,538,129"/>
+<area shape="poly" title=" " alt="" coords="468,137,286,156,180,174,77,199,70,201,69,196,75,193,179,168,285,150,468,131"/>
 <area shape="rect" title=" " alt="" coords="88,203,179,229"/>
-<area shape="poly" title=" " alt="" coords="538,140,378,162,284,179,191,199,179,202,178,197,190,193,283,173,378,157,538,135"/>
+<area shape="poly" title=" " alt="" coords="468,145,337,167,191,199,179,202,178,197,190,193,336,162,467,139"/>
 <area shape="rect" title=" " alt="" coords="203,203,275,229"/>
-<area shape="poly" title=" " alt="" coords="538,143,420,166,287,199,280,201,278,196,286,193,419,160,537,138"/>
+<area shape="poly" title=" " alt="" coords="468,151,380,172,287,199,280,201,278,196,286,193,379,167,467,145"/>
 <area shape="rect" title=" " alt="" coords="299,203,365,229"/>
-<area shape="poly" title=" " alt="" coords="538,150,378,199,372,201,370,196,376,193,537,145"/>
+<area shape="poly" title=" " alt="" coords="505,151,378,198,373,201,371,196,376,194,503,146"/>
 <area shape="rect" title=" " alt="" coords="390,203,487,229"/>
-<area shape="poly" title=" " alt="" coords="573,150,475,200,472,195,571,146"/>
+<area shape="poly" title=" " alt="" coords="531,150,467,197,464,193,527,146"/>
 <area shape="rect" title=" " alt="" coords="512,203,597,229"/>
-<area shape="poly" title=" " alt="" coords="599,150,572,193,567,190,595,147"/>
+<area shape="poly" title=" " alt="" coords="557,148,557,189,552,189,552,148"/>
 <area shape="rect" title=" " alt="" coords="622,203,709,229"/>
-<area shape="poly" title=" " alt="" coords="624,147,652,190,648,193,620,150"/>
-<area shape="rect" title=" " alt="" coords="644,291,791,317"/>
-<area shape="poly" title=" " alt="" coords="666,146,698,166,724,195,731,216,733,238,728,278,723,278,728,238,726,217,719,197,695,170,663,151"/>
-<area shape="rect" href="logging_8h.html" title="Wrapper around spdlog&#39;s functionality." alt="" coords="785,203,911,229"/>
-<area shape="poly" title=" " alt="" coords="655,146,798,196,796,201,653,151"/>
-<area shape="rect" title=" " alt="" coords="935,203,1086,229"/>
-<area shape="poly" title=" " alt="" coords="682,142,925,193,945,198,944,203,923,199,681,147"/>
-<area shape="rect" title=" " alt="" coords="1110,196,1258,236"/>
-<area shape="poly" title=" " alt="" coords="681,135,866,158,1096,193,1096,198,865,163,681,140"/>
-<area shape="poly" title=" " alt="" coords="822,206,682,155,683,150,823,201"/>
-<area shape="poly" title=" " alt="" coords="832,231,748,286,745,281,829,227"/>
-<area shape="rect" title=" " alt="" coords="815,291,939,317"/>
-<area shape="poly" title=" " alt="" coords="854,228,871,277,866,279,849,230"/>
-<area shape="rect" title=" " alt="" coords="964,284,1105,324"/>
-<area shape="poly" title=" " alt="" coords="874,226,982,276,980,281,872,231"/>
+<area shape="poly" title=" " alt="" coords="581,146,641,192,637,197,578,150"/>
+<area shape="rect" title=" " alt="" coords="641,291,788,317"/>
+<area shape="poly" title=" " alt="" coords="643,141,687,161,707,176,724,195,732,215,734,238,727,279,721,278,729,238,727,217,719,197,704,180,685,165,640,146"/>
+<area shape="rect" href="logger_8h.html" title=" " alt="" coords="785,203,903,229"/>
+<area shape="poly" title=" " alt="" coords="611,146,787,197,785,202,610,151"/>
+<area shape="rect" title=" " alt="" coords="927,196,1075,236"/>
+<area shape="poly" title=" " alt="" coords="642,142,914,193,913,198,641,147"/>
+<area shape="poly" title=" " alt="" coords="811,206,638,154,639,149,813,201"/>
+<area shape="poly" title=" " alt="" coords="828,231,745,286,742,281,825,227"/>
+<area shape="rect" title=" " alt="" coords="813,291,937,317"/>
+<area shape="poly" title=" " alt="" coords="851,228,868,277,863,279,846,230"/>
+<area shape="rect" title=" " alt="" coords="961,284,1103,324"/>
+<area shape="poly" title=" " alt="" coords="870,226,979,276,977,281,868,231"/>
 </map>
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
-<tr class="memitem:namespacemantis" id="r_namespacemantis"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html">mantis</a></td></tr>
-<tr class="memdesc:namespacemantis"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="router_8h.html">router.h</a> <br /></td></tr>
+<tr class="memitem:namespacemb" id="r_namespacemb"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html">mb</a></td></tr>
+<tr class="memdesc:namespacemb"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="router_8h.html">router.h</a> <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a3b035e6242171c178e93e4f5e29fb18e" id="r_a3b035e6242171c178e93e4f5e29fb18e"><td class="memItemLeft" align="right" valign="top">fs::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#a3b035e6242171c178e93e4f5e29fb18e">mantis::joinPaths</a> (const std::string &amp;path1, const std::string &amp;path2)</td></tr>
-<tr class="memdesc:a3b035e6242171c178e93e4f5e29fb18e"><td class="mdescLeft">&#160;</td><td class="mdescRight"><blockquote class="doxtable">
+<tr class="memitem:ab4f69b96288179f54aed408599cd564d" id="r_ab4f69b96288179f54aed408599cd564d"><td class="memItemLeft" align="right" valign="top">fs::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ab4f69b96288179f54aed408599cd564d">mb::joinPaths</a> (const std::string &amp;path1, const std::string &amp;path2)</td></tr>
+<tr class="memdesc:ab4f69b96288179f54aed408599cd564d"><td class="mdescLeft">&#160;</td><td class="mdescRight"><blockquote class="doxtable">
 <p>&zwj;JSON convenience for the nlomann::json namespace </p>
 </blockquote>
  <br /></td></tr>
-<tr class="separator:a3b035e6242171c178e93e4f5e29fb18e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe97209493d2bc0086c3678010342477" id="r_abe97209493d2bc0086c3678010342477"><td class="memItemLeft" align="right" valign="top">fs::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#abe97209493d2bc0086c3678010342477">mantis::resolvePath</a> (const std::string &amp;input_path)</td></tr>
-<tr class="separator:abe97209493d2bc0086c3678010342477"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7198d676b24903590c1462d7af4958a7" id="r_a7198d676b24903590c1462d7af4958a7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#a7198d676b24903590c1462d7af4958a7">mantis::createDirs</a> (const fs::path &amp;path)</td></tr>
-<tr class="memdesc:a7198d676b24903590c1462d7af4958a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create directory, given a path.  <br /></td></tr>
-<tr class="separator:a7198d676b24903590c1462d7af4958a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab35751b3a0762476bf6d955eacc1a6c1" id="r_ab35751b3a0762476bf6d955eacc1a6c1"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemantis.html#ab35751b3a0762476bf6d955eacc1a6c1">mantis::dirFromPath</a> (const std::string &amp;path)</td></tr>
-<tr class="memdesc:ab35751b3a0762476bf6d955eacc1a6c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a created/existing directory from a path.  <br /></td></tr>
-<tr class="separator:ab35751b3a0762476bf6d955eacc1a6c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:ab4f69b96288179f54aed408599cd564d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fd9558152f1d09d1bef041445bfa53f" id="r_a3fd9558152f1d09d1bef041445bfa53f"><td class="memItemLeft" align="right" valign="top">fs::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a3fd9558152f1d09d1bef041445bfa53f">mb::resolvePath</a> (const std::string &amp;input_path)</td></tr>
+<tr class="separator:a3fd9558152f1d09d1bef041445bfa53f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ffe08183ace9bad82bb563de7e2b162" id="r_a3ffe08183ace9bad82bb563de7e2b162"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a3ffe08183ace9bad82bb563de7e2b162">mb::createDirs</a> (const fs::path &amp;path)</td></tr>
+<tr class="memdesc:a3ffe08183ace9bad82bb563de7e2b162"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create directory, given a path.  <br /></td></tr>
+<tr class="separator:a3ffe08183ace9bad82bb563de7e2b162"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3fc0ede6c1f09686dcd3611ca307c78" id="r_ac3fc0ede6c1f09686dcd3611ca307c78"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ac3fc0ede6c1f09686dcd3611ca307c78">mb::dirFromPath</a> (const std::string &amp;path)</td></tr>
+<tr class="memdesc:ac3fc0ede6c1f09686dcd3611ca307c78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a created/existing directory from a path.  <br /></td></tr>
+<tr class="separator:ac3fc0ede6c1f09686dcd3611ca307c78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

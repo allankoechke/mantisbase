@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['json_0',['json',['../namespacemantis.html#a0255780f56da02614156f7ef7cd3d3a3',1,'mantis::json'],['../mantis_8h.html#ab701e3ac61a85b337ec5c1abaad6742d',1,'json:&#160;mantis.h']]]
+  ['handlerfn_0',['HandlerFn',['../namespacemb.html#ae160f2b0075e55c0f7c0988279983f78',1,'mb']]],
+  ['handlerresponse_1',['HandlerResponse',['../namespacemb.html#adf14f234c6ec1371dde363714c0a546e',1,'mb']]],
+  ['handlerwithcontentreaderfn_2',['HandlerWithContentReaderFn',['../namespacemb.html#ac74c76fe24192fde8f728c74c624f668',1,'mb']]]
 ];

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['📂_20example_20project_20structure_0',['📂 Example Project Structure',['../embedding.html#autotoc_md109',1,'']]],
-  ['📂_20file_20handling_1',['📂 File Handling',['../index.html#autotoc_md180',1,'']]]
+  ['🔐_20authentication_0',['🔐 Authentication',['../rest_api.html#autotoc_md27',1,'']]],
+  ['🔐_20using_20tokens_1',['🔐 Using Tokens',['../auth_api.html#autotoc_md58',1,'']]]
 ];

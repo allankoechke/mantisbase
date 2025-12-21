@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['quit_0',['quit',['../classmantis_1_1MantisApp.html#ab39effc30bd0f450d04e5ac1ff0f1a2d',1,'mantis::MantisApp']]]
+  ['queryfromcols_0',['queryFromCols',['../classmb_1_1Entity.html#a989ceb00a45ae7cbc505ca9538ff6499',1,'mb::Entity']]],
+  ['quit_1',['quit',['../classmb_1_1MantisBase.html#a101567ba238672d54c65e5aa346bf710',1,'mb::MantisBase']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['dbtype_0',['DbType',['../namespacemantis.html#a9b66d60c6176ce653dfa970027ec5e23',1,'mantis']]]
+  ['loglevel_0',['LogLevel',['../namespacemb.html#a45b395bbdb082a2a10815855bad98c81',1,'mb']]]
 ];

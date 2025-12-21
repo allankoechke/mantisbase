@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mantis App: Running in Docker</title>
+<title>MantisBase: Running in Docker</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,9 +26,8 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="mantis.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Mantis App<span id="projectnumber">&#160;v0.2.12</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.0</span>
    </div>
   </td>
  </tr>
@@ -95,30 +94,95 @@ $(document).ready(function(){initNavTree('docker.html',''); initResizable(); });
   <div class="headertitle"><div class="title">Running in Docker</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md118"></a>
-Dockerizing MantisApp</h1>
-<p>There are many benefits of running applications in docker containers or generally, containeralization technologies. As such, <code>mantisapp</code> offers docker ready container support, with some limitations.</p>
-<h1><a class="anchor" id="autotoc_md119"></a>
-Limitations</h1>
-<p>Docker support is limited to platform build, as such, provided builds are for <code>linux-amd64</code>, if you need <code>ARM</code> builds, you will need to build the project from source for now. </p><blockquote class="doxtable">
-<p>&zwj;Other platform support will be added, be sure to check project development for news. For now, we are focussing on building the core functionality till we have a stable base. </p>
-</blockquote>
-<h1><a class="anchor" id="autotoc_md120"></a>
-Dockerfile</h1>
-<p>The repo provides a ready <code>Dockerfile</code> in the /docker container, which ready to go container. To run the container:</p>
-<div class="fragment"><div class="line">docker build -t mantisapp .</div>
-<div class="line">docker run -p 7070:80 --rm mantisapp</div>
-</div><!-- fragment --><p>This will build then start the container, running on local port <code>7070</code> and exposed on port <code>80</code> within the container. The only catch here is, for every container restart, the dynamic data added is cleared out. To fix this, we need to mount a directory to our docker container.</p>
-<p>Of interest, mount a directory to the following:</p><ul>
-<li><code>/mantis/data</code> for storing database files, logs, assets, etc.</li>
-<li><code>/mantis/public</code> for any public site static data that should be served</li>
-<li><code>/mantis/scripts</code> for any extensibility scripts. The entrypoint is a file <code>index.mantis.js</code> in this directory.</li>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md142"></a>
+Dockerizing MantisBase</h1>
+<p>MantisBase provides Docker support for easy deployment and containerization. This guide covers building and running MantisBase in Docker containers.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md144"></a>
+Limitations</h2>
+<p>Docker builds are currently available for <code>linux-amd64</code> platform only. For ARM builds, you will need to build the project from source.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md146"></a>
+Building and Running</h2>
+<h3><a class="anchor" id="autotoc_md147"></a>
+Using Dockerfile</h3>
+<p>The repository includes a <code>Dockerfile</code> in the <code>/docker</code> directory. To build and run:</p>
+<div class="fragment"><div class="line">docker build -t mantisbase -f docker/Dockerfile .</div>
+<div class="line">docker run -p 7070:7070 --rm mantisbase</div>
+</div><!-- fragment --><p>This builds the image and starts the container, exposing MantisBase on port <code>80</code>.</p>
+<h3><a class="anchor" id="autotoc_md148"></a>
+Persistent Data</h3>
+<p>By default, container restarts will clear all data. To persist data, mount volumes to the following directories:</p>
+<ul>
+<li><code>/mb/data</code> - Database files, logs, and uploaded files</li>
+<li><code>/mb/public</code> - Static files to serve</li>
+<li><code>/mb/scripts</code> - JavaScript extension scripts (entry point: <code>index.mantis.js</code>)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md121"></a>
-Docker Compose</h1>
-<p>To package all into a simple interface, we can make use of <code>docker compose</code> file provided. This adds the file mounting out of the box if needed.</p>
-<div class="fragment"><div class="line">docker compose up --build</div>
-</div><!-- fragment --><p>The command builds the image before running it. </p>
+<p><b>Example with volumes:</b></p>
+<div class="fragment"><div class="line">docker run -p 7070:80 \</div>
+<div class="line">  -v $(pwd)/data:/mb/data \</div>
+<div class="line">  -v $(pwd)/public:/mb/public \</div>
+<div class="line">  -v $(pwd)/scripts:/mb/scripts \</div>
+<div class="line">  --rm mantisbase</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md150"></a>
+Docker Compose</h2>
+<p>A <code>docker-compose.yaml</code> file is provided for easier management:</p>
+<div class="fragment"><div class="line">docker compose -f docker/docker-compose.yaml up --build</div>
+</div><!-- fragment --><p>This builds the image and starts the container with volume mounts configured.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md152"></a>
+Configuration</h2>
+<p>You can configure MantisBase using environment variables or by mounting a configuration file. The container respects the same configuration options as the CLI:</p>
+<ul>
+<li><code>MANTIS_JWT_SECRET</code> - JWT secret key for token signing</li>
+<li>Database connection via command-line arguments or JSON config</li>
+</ul>
+<hr  />
+<h2><a class="anchor" id="autotoc_md154"></a>
+Accessing the API</h2>
+<p>Once the container is running, access the API at:</p>
+<ul>
+<li>API Endpoints: <code><a href="http://localhost:7070/api/v1/">http://localhost:7070/api/v1/</a></code></li>
+<li>Admin Dashboard: <code><a href="http://localhost:7070/mb">http://localhost:7070/mb</a></code></li>
+<li>Health Check: <code><a href="http://localhost:7070/api/v1/health">http://localhost:7070/api/v1/health</a></code></li>
+</ul>
+<hr  />
+<h2><a class="anchor" id="autotoc_md156"></a>
+Example: Full Setup with PostgreSQL</h2>
+<div class="fragment"><div class="line">version: &#39;3.8&#39;</div>
+<div class="line">services:</div>
+<div class="line">  mantisbase:</div>
+<div class="line">    build:</div>
+<div class="line">      context: .</div>
+<div class="line">      dockerfile: docker/Dockerfile</div>
+<div class="line">    ports:</div>
+<div class="line">      - &quot;7070:7070&quot;</div>
+<div class="line">    volumes:</div>
+<div class="line">      - ./data:/mb/data</div>
+<div class="line">      - ./public:/mb/public</div>
+<div class="line">      - ./scripts:/mb/scripts</div>
+<div class="line">    environment:</div>
+<div class="line">      - MANTIS_JWT_SECRET=your-secret-key</div>
+<div class="line">    command: mantisbase --database PSQL --connection &quot;dbname=mantis host=postgres port=5432 user=postgres password=postgres&quot; serve</div>
+<div class="line">    depends_on:</div>
+<div class="line">      - postgres</div>
+<div class="line">  </div>
+<div class="line">  postgres:</div>
+<div class="line">    image: postgres:15</div>
+<div class="line">    environment:</div>
+<div class="line">      POSTGRES_DB: mantis</div>
+<div class="line">      POSTGRES_USER: postgres</div>
+<div class="line">      POSTGRES_PASSWORD: postgres</div>
+<div class="line">    volumes:</div>
+<div class="line">      - postgres_data:/var/lib/postgresql/data</div>
+<div class="line"> </div>
+<div class="line">volumes:</div>
+<div class="line">  postgres_data:</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md158"></a>
+Summary</h2>
+<p>Docker provides an easy way to deploy MantisBase with consistent environments. Use volume mounts to persist data and configure the container using environment variables or command-line arguments. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

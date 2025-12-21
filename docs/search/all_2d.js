@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['📐_20core_20principles_0',['📐 Core Principles',['../architecture.html#autotoc_md76',1,'']]]
+  ['🗃️_20schema_20management_20api_0',['🗃️ Schema Management API',['../rest_api.html#autotoc_md35',1,'']]]
 ];

@@ -24,84 +24,52 @@
 */
 var NAVTREE =
 [
-  [ "Mantis App", "index.html", [
-    [ "Getting Started", "index.html", "index" ],
-    [ "Setting Up Mantis", "setup.html", null ],
+  [ "MantisBase", "index.html", [
+    [ "Quick Start Guide", "index.html", null ],
+    [ "Setting Up MantisBase", "setup.html", null ],
     [ "Command Line Usage", "cli.html", [
-      [ "🧭 mantisapp CLI Reference", "cli.html#autotoc_md8", [
-        [ "⚙️ Global Options", "cli.html#autotoc_md10", null ],
-        [ "🚀 serve Command", "cli.html#autotoc_md12", null ],
-        [ "👤 admins Command", "cli.html#autotoc_md14", null ],
-        [ "🛠️ migrate Command *(WIP)*", "cli.html#autotoc_md16", null ],
-        [ "</blockquote>", "cli.html#autotoc_md17", null ],
-        [ "🔄 sync Command *(Reserved)*", "cli.html#autotoc_md18", null ],
-        [ "📝 Notes", "cli.html#autotoc_md20", null ],
-        [ "📚 See Also", "cli.html#autotoc_md22", null ]
+      [ "🧭 mantisbase CLI Reference", "cli.html#autotoc_md9", [
+        [ "⚙️ Global Options", "cli.html#autotoc_md11", null ],
+        [ "🚀 serve Command", "cli.html#autotoc_md13", null ],
+        [ "👤 admins Command", "cli.html#autotoc_md15", null ],
+        [ "🛠️ migrate Command *(WIP)*", "cli.html#autotoc_md17", null ],
+        [ "</blockquote>", "cli.html#autotoc_md18", null ],
+        [ "📚 See Also", "cli.html#autotoc_md19", null ]
       ] ]
     ] ],
     [ "REST API Reference Guide", "rest_api.html", null ],
+    [ "Authentication API", "auth_api.html", null ],
     [ "API Access Rules", "rest_api_rules.html", null ],
-    [ "Architecture", "architecture.html", [
-      [ "Mantis Architecture Overview", "architecture.html#autotoc_md74", [
-        [ "📐 Core Principles", "architecture.html#autotoc_md76", null ],
-        [ "🧱 High-Level Architecture", "architecture.html#autotoc_md78", null ],
-        [ "🧩 Components", "architecture.html#autotoc_md80", [
-          [ "1. <strong>Database Layer</strong>", "architecture.html#autotoc_md81", null ],
-          [ "2. <strong>API Router</strong>", "architecture.html#autotoc_md82", null ],
-          [ "3. <strong>Authentication Module</strong>", "architecture.html#autotoc_md83", null ],
-          [ "4. <strong>Middleware System</strong>", "architecture.html#autotoc_md84", null ],
-          [ "5. <strong>Sync Engine</strong>", "architecture.html#autotoc_md85", null ],
-          [ "6. <strong>Static File Server</strong>", "architecture.html#autotoc_md86", null ],
-          [ "7. <strong>System Tables</strong>", "architecture.html#autotoc_md87", null ]
-        ] ],
-        [ "🔄 Sync Model", "architecture.html#autotoc_md89", null ],
-        [ "⚙️ Deployment Modes", "architecture.html#autotoc_md91", [
-          [ "➕ Embeddable Library", "architecture.html#autotoc_md92", null ],
-          [ "🚀 Standalone Binary", "architecture.html#autotoc_md93", null ]
-        ] ],
-        [ "📁 File Structure Overview", "architecture.html#autotoc_md95", null ],
-        [ "📌 Extensibility Ideas", "architecture.html#autotoc_md97", null ],
-        [ "🏁 Conclusion", "architecture.html#autotoc_md99", null ]
-      ] ]
-    ] ],
-    [ "Embedding Mantis", "embedding.html", null ],
+    [ "Embedding MantisBase", "embedding.html", null ],
     [ "Running in Docker", "docker.html", [
-      [ "Dockerizing MantisApp", "docker.html#autotoc_md118", null ],
-      [ "Limitations", "docker.html#autotoc_md119", null ],
-      [ "Dockerfile", "docker.html#autotoc_md120", null ],
-      [ "Docker Compose", "docker.html#autotoc_md121", null ]
-    ] ],
-    [ "Engine Sync", "sync.html", [
-      [ "Mantis Sync Engine Design (NOT IMPLEMENTED YET!)", "sync.html#autotoc_md122", [
-        [ "🔄 Sync Model Overview", "sync.html#autotoc_md124", null ],
-        [ "⚙️ Sync Workflow", "sync.html#autotoc_md126", [
-          [ "1. <strong>Change Detection</strong>", "sync.html#autotoc_md127", null ],
-          [ "2. <strong>Conflict Resolution</strong>", "sync.html#autotoc_md128", null ],
-          [ "3. <strong>Transport Layer</strong>", "sync.html#autotoc_md129", null ],
-          [ "4. <strong>Sync Tables</strong>", "sync.html#autotoc_md130", null ]
+      [ "Dockerizing MantisBase", "docker.html#autotoc_md142", [
+        [ "Limitations", "docker.html#autotoc_md144", null ],
+        [ "Building and Running", "docker.html#autotoc_md146", [
+          [ "Using Dockerfile", "docker.html#autotoc_md147", null ],
+          [ "Persistent Data", "docker.html#autotoc_md148", null ]
         ] ],
-        [ "🔐 Security", "sync.html#autotoc_md132", null ],
-        [ "🧪 Sync Testing", "sync.html#autotoc_md134", null ],
-        [ "🔧 Configuration Example", "sync.html#autotoc_md136", null ],
-        [ "📌 Sync Customization", "sync.html#autotoc_md138", null ],
-        [ "🏁 Summary", "sync.html#autotoc_md140", null ]
+        [ "Docker Compose", "docker.html#autotoc_md150", null ],
+        [ "Configuration", "docker.html#autotoc_md152", null ],
+        [ "Accessing the API", "docker.html#autotoc_md154", null ],
+        [ "Example: Full Setup with PostgreSQL", "docker.html#autotoc_md156", null ],
+        [ "Summary", "docker.html#autotoc_md158", null ]
       ] ]
     ] ],
-    [ "Handling Files in Mantis", "files.html", null ],
+    [ "Handling Files in MantisBase", "files.html", null ],
     [ "Healthcheck Endpoint", "healthcheck.html", null ],
-    [ "Scripting in Mantis", "scripting.html", [
-      [ "Scripting", "scripting.html#autotoc_md152", [
-        [ "Application", "scripting.html#autotoc_md153", null ],
-        [ "Database", "scripting.html#autotoc_md154", [
-          [ "Session", "scripting.html#autotoc_md155", null ]
+    [ "Scripting in MantisBase", "scripting.html", [
+      [ "Scripting", "scripting.html#autotoc_md187", [
+        [ "Application", "scripting.html#autotoc_md188", null ],
+        [ "Database", "scripting.html#autotoc_md189", [
+          [ "Session", "scripting.html#autotoc_md190", null ]
         ] ],
-        [ "Router", "scripting.html#autotoc_md156", null ],
-        [ "Requests", "scripting.html#autotoc_md157", [
-          [ "Middlewares", "scripting.html#autotoc_md158", null ],
-          [ "MantisRequest Methods/Properties", "scripting.html#autotoc_md159", null ],
-          [ "MantisResponse Methods/Properties", "scripting.html#autotoc_md160", null ]
+        [ "Router", "scripting.html#autotoc_md191", null ],
+        [ "Requests", "scripting.html#autotoc_md192", [
+          [ "Middlewares", "scripting.html#autotoc_md193", null ],
+          [ "MantisRequest Methods/Properties", "scripting.html#autotoc_md194", null ],
+          [ "MantisResponse Methods/Properties", "scripting.html#autotoc_md195", null ]
         ] ],
-        [ "Utils (utility functions)", "scripting.html#autotoc_md161", null ]
+        [ "Utils (utility functions)", "scripting.html#autotoc_md196", null ]
       ] ]
     ] ],
     [ "Namespaces", "namespaces.html", [
@@ -109,7 +77,6 @@ var NAVTREE =
       [ "Namespace Members", "namespacemembers.html", [
         [ "All", "namespacemembers.html", null ],
         [ "Functions", "namespacemembers_func.html", null ],
-        [ "Variables", "namespacemembers_vars.html", null ],
         [ "Typedefs", "namespacemembers_type.html", null ],
         [ "Enumerations", "namespacemembers_enum.html", null ]
       ] ]
@@ -129,7 +96,6 @@ var NAVTREE =
       [ "File Members", "globals.html", [
         [ "All", "globals.html", null ],
         [ "Functions", "globals_func.html", null ],
-        [ "Typedefs", "globals_type.html", null ],
         [ "Macros", "globals_defs.html", null ]
       ] ]
     ] ]
@@ -138,11 +104,10 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"annotated.html",
-"classmantis_1_1MantisRequest.html#aaa71b9831c06e33c3881da6c522b2f60",
-"classmantis_1_1TableUnit.html#aa1181122430ff57cc1d69bd93bb7f2e5",
-"namespacemantis.html#a634042b7708af2536b4a3978eba873f7",
-"tables__routes_8cpp.html#a6d52b503c1252a454522f24685ea9da2"
+"access__rules_8cpp.html",
+"classmb_1_1EntitySchemaField.html#a8f530ff66d257feff3ea13cabfe2b56e",
+"classmb_1_1MantisResponse.html#a878043bf4ca23e77ec318d47647969a9",
+"mantisbase_8h_source.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

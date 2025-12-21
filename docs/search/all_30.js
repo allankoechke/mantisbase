@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['📦_20integration_20options_0',['📦 Integration Options',['../embedding.html#autotoc_md104',1,'']]]
+  ['🛠️_20migrate_20command_20wip_0',['🛠️ migrate Command *(WIP)*',['../cli.html#autotoc_md17',1,'']]]
 ];

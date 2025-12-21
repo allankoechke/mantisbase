@@ -1,17 +1,17 @@
 var searchData=
 [
-  ['table_0',['Table',['../structmantis_1_1Table.html#a610dba40dfb0e82e58b6b83504568d16',1,'mantis::Table']]],
-  ['tableid_1',['tableId',['../classmantis_1_1TableUnit.html#a94a9bc4c788355db25e9750321696e10',1,'mantis::TableUnit']]],
-  ['tablename_2',['tableName',['../classmantis_1_1TableUnit.html#a1520cf8d4d4f293d8aa8e142ed0a9e1f',1,'mantis::TableUnit']]],
-  ['tabletype_3',['tableType',['../classmantis_1_1TableUnit.html#aa1181122430ff57cc1d69bd93bb7f2e5',1,'mantis::TableUnit']]],
-  ['tableunit_4',['tableunit',['../classmantis_1_1TableUnit.html#a6e8e0ba71ae56c483d130c454813572b',1,'mantis::TableUnit::TableUnit(std::string tableName, std::string tableId, std::string tableType=&quot;base&quot;)'],['../classmantis_1_1TableUnit.html#aa227fe9cbf2ce9c18d4f14ae162018c7',1,'mantis::TableUnit::TableUnit(const json &amp;schema=json::object())']]],
-  ['tmtostr_5',['tmToStr',['../namespacemantis.html#a8cd8688b947de5ab538aa285a49a5e18',1,'mantis']]],
-  ['to_5fjson_6',['to_json',['../structmantis_1_1Field.html#a1a7dcdb9c31f25421ecaf71b14af6572',1,'mantis::Field::to_json()'],['../structmantis_1_1Table.html#acc92452ba2e6c3fe10468492f13f623c',1,'mantis::Table::to_json() const']]],
-  ['to_5fsql_7',['to_sql',['../structmantis_1_1Table.html#a837ff767357a7e73b3e6550a3f9118c3',1,'mantis::Table']]],
-  ['tolowercase_8',['toLowerCase',['../namespacemantis.html#acbd04202feeade10ac601e3bc4d00feb',1,'mantis']]],
-  ['tosocitype_9',['tosocitype',['../structmantis_1_1Field.html#acb556a5259b5eb673de65b6921e55416',1,'mantis::Field::toSociType(const FieldType &amp;f_type)'],['../structmantis_1_1Field.html#a21a47f45e40738182402dea9ecfd24ef',1,'mantis::Field::toSociType() const']]],
-  ['touppercase_10',['toUpperCase',['../namespacemantis.html#aa0aa0dffb82adecf81cc50947b7b7f1f',1,'mantis']]],
-  ['trace_11',['trace',['../classmantis_1_1LoggingUnit.html#a26670a051e71dda6eeb10ad79f2326a1',1,'mantis::LoggingUnit']]],
-  ['trim_12',['trim',['../namespacemantis.html#a842ffce0f72c6aed85cdfa2c1f0615f5',1,'mantis']]],
-  ['tryparsejsonstr_13',['tryParseJsonStr',['../namespacemantis.html#a8ecebf53d24d9678f7005d0b4ee8da6d',1,'mantis']]]
+  ['tableexists_0',['tableexists',['../classmb_1_1EntitySchema.html#a7763e733e91eaad68bc12f36b6af4773',1,'mb::EntitySchema::tableExists(const EntitySchema &amp;table)'],['../classmb_1_1EntitySchema.html#aafdfffd7a5aeaba0341d58e21b56dd35',1,'mb::EntitySchema::tableExists(const std::string &amp;table_name)']]],
+  ['tmtostr_1',['tmToStr',['../namespacemb.html#a71ef440b705eab6ad8dfd505e6e62664',1,'mb']]],
+  ['to_5fhex_5flower_2',['to_hex_lower',['../namespacemb.html#afbdb50841a708d1561b194591ac68784',1,'mb']]],
+  ['toddl_3',['toDDL',['../classmb_1_1EntitySchema.html#aa8066e7d302e42a6a687049dc15f3cef',1,'mb::EntitySchema']]],
+  ['todefaultsqlvalue_4',['toDefaultSqlValue',['../classmb_1_1EntitySchema.html#a8bfcfdcf710418eb6fcdfad7f85fb658',1,'mb::EntitySchema']]],
+  ['toentity_5',['toEntity',['../classmb_1_1EntitySchema.html#ab9c9717265d32e90a0073468c8c7c4b0',1,'mb::EntitySchema']]],
+  ['tojson_6',['tojson',['../classmb_1_1AccessRule.html#a2c3716680c87caea5d06c7901238bf1e',1,'mb::AccessRule::toJSON()'],['../classmb_1_1EntitySchema.html#a1db33a7e0128a4aaf662f0b61269dae0',1,'mb::EntitySchema::toJSON()'],['../classmb_1_1EntitySchemaField.html#a008e06878a341a387e92c0c1d4e1c98d',1,'mb::EntitySchemaField::toJSON()']]],
+  ['tolowercase_7',['toLowerCase',['../namespacemb.html#a610ae91c5e525b5899cf9445107360e9',1,'mb']]],
+  ['tosocitype_8',['tosocitype',['../classmb_1_1EntitySchemaField.html#ae6c5bb64dba8d05147f2858e62613da6',1,'mb::EntitySchemaField::toSociType() const'],['../classmb_1_1EntitySchemaField.html#a3c551f4b233f737b9185c6973ddcfb0b',1,'mb::EntitySchemaField::toSociType(const std::string &amp;type)']]],
+  ['touppercase_9',['toUpperCase',['../namespacemb.html#abe6b794953335d0601b9fe55af49027f',1,'mb']]],
+  ['trace_10',['trace',['../classmb_1_1LogsMgr.html#a61b167d50fea9afddf6754b947d3bf44',1,'mb::LogsMgr']]],
+  ['trim_11',['trim',['../namespacemb.html#a409c1fc8483d2c71f13abd04598f4db2',1,'mb']]],
+  ['tryparsejsonstr_12',['tryParseJsonStr',['../namespacemb.html#acbb7d92fa5a0b643308cec05f16d86bd',1,'mb']]],
+  ['type_13',['type',['../classmb_1_1EntitySchemaField.html#a638b6d84ac73fc4c75492b902a43923a',1,'mb::EntitySchemaField::type()'],['../classmb_1_1EntitySchema.html#ab34abb1145d1b45e9ee261d055722b8b',1,'mb::EntitySchema::type()'],['../classmb_1_1Entity.html#a3d1fc7eab6f53ba13ab62a35310f452b',1,'mb::Entity::type()']]]
 ];

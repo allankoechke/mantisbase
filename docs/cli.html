@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mantis App: Command Line Usage</title>
+<title>MantisBase: Command Line Usage</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,9 +26,8 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="mantis.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Mantis App<span id="projectnumber">&#160;v0.2.12</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.0</span>
    </div>
   </td>
  </tr>
@@ -95,19 +94,19 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
   <div class="headertitle"><div class="title">Command Line Usage</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>MantisApp has a comprehensive CLI tool built on top of <code>argparse</code>, particularly useful in:</p><ul>
+<div class="textblock"><p>MantisBase has a comprehensive CLI tool built on top of <code>argparse</code>, particularly useful in:</p><ul>
 <li>Setting up Admin user accounts</li>
 <li>Starting server</li>
 <li>Initiating migrations (up or down)</li>
 <li>etc.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md8"></a>
-🧭 mantisapp CLI Reference</h1>
-<p>The <code>mantisapp</code> binary provides a modular command-line interface to manage and run the Mantis backend.</p>
+<h1><a class="anchor" id="autotoc_md9"></a>
+🧭 mantisbase CLI Reference</h1>
+<p>The <code>mantisbase</code> binary provides a modular command-line interface to manage and run the MantisBase backend.</p>
 <p>You can run it in multiple modes:</p>
-<div class="fragment"><div class="line">./mantisapp [options] &lt;command&gt; [command-options]</div>
+<div class="fragment"><div class="line">./mantisbase [options] &lt;command&gt; [command-options]</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="autotoc_md11"></a>
 ⚙️ Global Options</h2>
 <p>These options apply regardless of the command:</p>
 <table class="markdownTable">
@@ -127,7 +126,7 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <td class="markdownTableBodyNone"><code>--dev</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Enable development mode with verbose logging   </td><td class="markdownTableBodyNone">*(disabled)*   </td></tr>
 </table>
 <hr  />
-<h2><a class="anchor" id="autotoc_md12"></a>
+<h2><a class="anchor" id="autotoc_md13"></a>
 🚀 serve Command</h2>
 <p>Start the HTTP server.</p>
 <div class="fragment"><div class="line">./mantisapp serve [options]</div>
@@ -139,36 +138,33 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>--host &lt;host&gt;</code>   </td><td class="markdownTableBodyNone"><code>-h</code>   </td><td class="markdownTableBodyNone">Host address to bind the server   </td><td class="markdownTableBodyNone"><code>0.0.0.0</code>    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--host &lt;host&gt;</code>   </td><td class="markdownTableBodyNone"><code>-h</code>   </td><td class="markdownTableBodyNone">Host address to bind the server   </td><td class="markdownTableBodyNone"><code>0.0.0.0</code>   </td></tr>
+<td class="markdownTableBodyNone"><code>--poolSize &lt;size&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Host address to bind the server   </td><td class="markdownTableBodyNone"></td></tr>
 </table>
 <p><b>Example:</b></p>
-<div class="fragment"><div class="line">./mantisapp serve -p 7070 -h 127.0.0.1</div>
+<div class="fragment"><div class="line">./mantisbase serve -p 7070 -h 127.0.0.1</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md14"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 👤 admins Command</h2>
 <p>Add or remove admin users.</p>
-<div class="fragment"><div class="line">./mantisapp admins --add &lt;email&gt;</div>
-<div class="line">./mantisapp admins --rm &lt;email or id&gt;</div>
-</div><!-- fragment --><blockquote class="doxtable">
-<p>&zwj;Only one of <code>--add</code> or <code>--rm</code> can be used at a time. </p>
-</blockquote>
-<table class="markdownTable">
+<div class="fragment"><div class="line">./mantisbase admins add &lt;email&gt; &lt;password&gt;</div>
+<div class="line">./mantisbase admins rm &lt;email or id&gt;</div>
+</div><!-- fragment --><table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--add &lt;email&gt;</code>   </td><td class="markdownTableBodyNone">Create a new admin user. Prompts for password.    </td></tr>
+<td class="markdownTableBodyNone"><code>add &lt;email&gt; &lt;password&gt;</code>   </td><td class="markdownTableBodyNone">Create a new admin user.    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>--rm &lt;id/email&gt;</code>   </td><td class="markdownTableBodyNone">Remove an existing admin by ID or email.   </td></tr>
+<td class="markdownTableBodyNone"><code>rm &lt;id/email&gt;</code>   </td><td class="markdownTableBodyNone">Remove an existing admin by ID or email.   </td></tr>
 </table>
 <p><b>Example:</b></p>
-<div class="fragment"><div class="line">./mantisapp admins --add admin@example.com</div>
-</div><!-- fragment --><p> You'll be prompted to enter and confirm the admin's password. If successful, you can use the credentials to log in on the admin dashboard or authenticate requests.</p>
+<div class="fragment"><div class="line">./mantisbase admins add admin@example.com 123456789</div>
+</div><!-- fragment --><p> If successful, you can use the credentials to log in on the admin dashboard or authenticate requests.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md16"></a>
+<h2><a class="anchor" id="autotoc_md17"></a>
 🛠️ migrate Command *(WIP)*</h2>
 <p>Handles schema migrations.</p>
-<div class="fragment"><div class="line">./mantisapp migrate --up &lt;file&gt;</div>
-<div class="line">./mantisapp migrate --down &lt;file&gt;</div>
+<div class="fragment"><div class="line">./mantisbase migrate --up &lt;file&gt;</div>
+<div class="line">./mantisbase migrate --down &lt;file&gt;</div>
 </div><!-- fragment --><table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Description    </th></tr>
@@ -180,27 +176,15 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <blockquote class="doxtable">
 <p>&zwj;Migration functionality is in early development. </p>
 </blockquote>
-<h2><a class="anchor" id="autotoc_md17"></a>
-&lt;/blockquote&gt;</h2>
 <h2><a class="anchor" id="autotoc_md18"></a>
-🔄 sync Command *(Reserved)*</h2>
-<p>Placeholder for future sync-layer CLI.</p>
-<div class="fragment"><div class="line">./mantisapp sync</div>
-</div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md20"></a>
-📝 Notes</h2>
-<ul>
-<li>You must run <code>mantisapp</code> from a terminal.</li>
-<li>For admin creation, passwords are securely prompted at runtime.</li>
-<li>All commands support <code>--dev</code> for verbose debug logs.</li>
-</ul>
-<hr  />
-<h2><a class="anchor" id="autotoc_md22"></a>
+&lt;/blockquote&gt;</h2>
+<h2><a class="anchor" id="autotoc_md19"></a>
 📚 See Also</h2>
 <ul>
 <li><a class="el" href="QuickStart_8md.html">Quick Start</a></li>
-<li><a class="el" href="05_8embedding_8md.html">Embedding Mantis</a></li>
+<li><a class="el" href="05_8embedding_8md.html">Embedding MantisBase</a></li>
 <li><a class="el" href="02_8api_8md.html">REST API Reference</a></li>
+<li><a class="el" href="02_8auth_8md.html">Authentication API</a></li>
 </ul>
 <hr  />
  </div></div><!-- contents -->

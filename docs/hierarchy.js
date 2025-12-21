@@ -1,40 +1,31 @@
 var hierarchy =
 [
-    [ "mantis::ContextStore", "classmantis_1_1ContextStore.html", null ],
-    [ "mantis::CrudInterface< T >", "classmantis_1_1CrudInterface.html", null ],
-    [ "mantis::CrudInterface< json >", "classmantis_1_1CrudInterface.html", [
-      [ "mantis::TableUnit", "classmantis_1_1TableUnit.html", [
-        [ "mantis::SysTablesUnit", "classmantis_1_1SysTablesUnit.html", null ]
-      ] ]
+    [ "mb::AccessRule", "classmb_1_1AccessRule.html", null ],
+    [ "mb::Auth", "classmb_1_1Auth.html", null ],
+    [ "mb::ContextStore", "classmb_1_1ContextStore.html", null ],
+    [ "mb::Database", "classmb_1_1Database.html", null ],
+    [ "mb::DukCtx", "classmb_1_1DukCtx.html", null ],
+    [ "mb::Entity", "classmb_1_1Entity.html", null ],
+    [ "mb::EntitySchema", "classmb_1_1EntitySchema.html", null ],
+    [ "mb::EntitySchemaField", "classmb_1_1EntitySchemaField.html", null ],
+    [ "std::exception", null, [
+      [ "mb::MantisException", "classmb_1_1MantisException.html", null ]
     ] ],
-    [ "mantis::DatabaseUnit", "classmantis_1_1DatabaseUnit.html", null ],
-    [ "mantis::DuktapeImpl", "classmantis_1_1DuktapeImpl.html", null ],
-    [ "mantis::ExprEvaluator", "structmantis_1_1ExprEvaluator.html", null ],
-    [ "mantis::Field", "structmantis_1_1Field.html", null ],
-    [ "mantis::FileUnit", "classmantis_1_1FileUnit.html", null ],
-    [ "mantis::FuncLogger", "classmantis_1_1FuncLogger.html", null ],
-    [ "mantis::HttpUnit", "classmantis_1_1HttpUnit.html", null ],
-    [ "mantis::JwtUnit", "classmantis_1_1JwtUnit.html", null ],
+    [ "mb::Expr", "structmb_1_1Expr.html", null ],
+    [ "mb::Files", "classmb_1_1Files.html", null ],
+    [ "mb::FuncLogger", "classmb_1_1FuncLogger.html", null ],
+    [ "mb::KVStore", "classmb_1_1KVStore.html", null ],
     [ "soci::logger_impl", null, [
-      [ "mantis::MantisLoggerImpl", "classmantis_1_1MantisLoggerImpl.html", null ]
+      [ "mb::MantisLoggerImpl", "classmb_1_1MantisLoggerImpl.html", null ]
     ] ],
-    [ "mantis::LoggingUnit", "classmantis_1_1LoggingUnit.html", null ],
-    [ "mantis::MantisApp", "classmantis_1_1MantisApp.html", null ],
-    [ "mantis::MantisRequest", "classmantis_1_1MantisRequest.html", null ],
-    [ "mantis::MantisResponse", "classmantis_1_1MantisResponse.html", null ],
-    [ "mantis::RouteHandler", "structmantis_1_1RouteHandler.html", null ],
-    [ "mantis::RouteKeyHash", "structmantis_1_1RouteKeyHash.html", null ],
-    [ "mantis::RouteRegistry", "classmantis_1_1RouteRegistry.html", null ],
-    [ "mantis::RouterUnit", "classmantis_1_1RouterUnit.html", null ],
-    [ "mantis::SettingsUnit", "classmantis_1_1SettingsUnit.html", null ],
-    [ "mantis::Table", "structmantis_1_1Table.html", [
-      [ "mantis::AuthTable", "structmantis_1_1AuthTable.html", [
-        [ "mantis::AdminTable", "structmantis_1_1AdminTable.html", null ]
-      ] ],
-      [ "mantis::BaseTable", "structmantis_1_1BaseTable.html", [
-        [ "mantis::SystemTable", "structmantis_1_1SystemTable.html", null ]
-      ] ],
-      [ "mantis::ViewTable", "structmantis_1_1ViewTable.html", null ]
-    ] ],
-    [ "mantis::Validator", "classmantis_1_1Validator.html", null ]
+    [ "mb::LogsMgr", "classmb_1_1LogsMgr.html", null ],
+    [ "mb::MantisBase", "classmb_1_1MantisBase.html", null ],
+    [ "mb::MantisContentReader", "classmb_1_1MantisContentReader.html", null ],
+    [ "mb::MantisRequest", "classmb_1_1MantisRequest.html", null ],
+    [ "mb::MantisResponse", "classmb_1_1MantisResponse.html", null ],
+    [ "mb::RouteHandler", "structmb_1_1RouteHandler.html", null ],
+    [ "mb::RouteKeyHash", "structmb_1_1RouteKeyHash.html", null ],
+    [ "mb::Router", "classmb_1_1Router.html", null ],
+    [ "mb::RouteRegistry", "classmb_1_1RouteRegistry.html", null ],
+    [ "mb::Validators", "classmb_1_1Validators.html", null ]
 ];

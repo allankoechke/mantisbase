@@ -1,22 +1,13 @@
 var searchData=
 [
-  ['up_20mantis_0',['Setting Up Mantis',['../setup.html',1,'']]],
-  ['update_1',['update',['../classmantis_1_1CrudInterface.html#abb3fabb2a6c3d2af19713107952514fd',1,'mantis::CrudInterface::update()'],['../classmantis_1_1SysTablesUnit.html#ae99aa2fe743f9a57d99ed451f93edce6',1,'mantis::SysTablesUnit::update()'],['../classmantis_1_1TableUnit.html#a3bae0ee69c4c82ad91553015195fc603',1,'mantis::TableUnit::update()']]],
-  ['updaterecord_2',['updaterecord',['../classmantis_1_1SysTablesUnit.html#ae90c6020a00a647148e474f2b694c86d',1,'mantis::SysTablesUnit::updateRecord()'],['../classmantis_1_1TableUnit.html#a604402a842ba3015dc73ed006fd7331a',1,'mantis::TableUnit::updateRecord()']]],
-  ['updateroute_3',['updateRoute',['../classmantis_1_1RouterUnit.html#ab83eb5ac38e30bc7f925798dbc51f969',1,'mantis::RouterUnit']]],
-  ['updateroutecache_4',['updateRouteCache',['../classmantis_1_1RouterUnit.html#ab4f9537b6f3257947f1a7d312478309b',1,'mantis::RouterUnit']]],
-  ['updaterule_5',['updaterule',['../structmantis_1_1Table.html#aee240c84db4ade76ebc1b39f1937a866',1,'mantis::Table::updateRule'],['../classmantis_1_1TableUnit.html#a23a3ee7b0cd72e3522c1ecefd5a2682b',1,'mantis::TableUnit::updateRule()']]],
-  ['updating_20existing_20table_20rules_6',['Updating Existing Table Rules',['../rest_api_rules.html#autotoc_md57',1,'']]],
-  ['updating_20files_20in_20records_7',['Updating Files in Records',['../files.html#autotoc_md143',1,'']]],
-  ['url_8',['🌐 Base URL',['../rest_api.html#autotoc_md25',1,'']]],
-  ['usage_9',['usage',['../rest_api_rules.html#autotoc_md70',1,'Advanced Usage'],['../cli.html',1,'Command Line Usage'],['../healthcheck.html#autotoc_md151',1,'Usage']]],
-  ['use_20consistent_20field_20names_10',['2. Use Consistent Field Names',['../rest_api_rules.html#autotoc_md65',1,'']]],
-  ['use_20mantis_20as_20a_20submodule_11',['🛠️ Advanced: Use Mantis as a Submodule',['../embedding.html#autotoc_md113',1,'']]],
-  ['usernamefield_12',['usernameField',['../structmantis_1_1AuthTable.html#a25641f8730af2450b33f41b7543a4a38',1,'mantis::AuthTable']]],
-  ['using_20docker_13',['4. Using Docker',['../index.html#autotoc_md172',1,'']]],
-  ['using_20pre_20built_20binaries_14',['1. Using Pre-built Binaries',['../index.html#autotoc_md168',1,'']]],
-  ['using_20precompiled_20binaries_15',['⚡️ Using Precompiled Binaries',['../setup.html#autotoc_md2',1,'']]],
-  ['utility_20functions_16',['Utils (utility functions)',['../scripting.html#autotoc_md161',1,'']]],
-  ['utils_20utility_20functions_17',['Utils (utility functions)',['../scripting.html#autotoc_md161',1,'']]],
-  ['utils_2eh_18',['utils.h',['../utils_8h.html',1,'']]]
+  ['warn_0',['warn',['../classmb_1_1LogsMgr.html#a3c82a6c0977f160f275a89d83d407066',1,'mb::LogsMgr::warn()'],['../namespacemb.html#a45b395bbdb082a2a10815855bad98c81a32bd8a1db2275458673903bdb84cb277',1,'mb::WARN']]],
+  ['what_1',['what',['../classmb_1_1MantisException.html#abe2cf6964063bedc9be612e7ec5365ce',1,'mb::MantisException']]],
+  ['what_20is_20mantisbase_2',['What is MantisBase?',['../index.html#autotoc_md198',1,'']]],
+  ['why_20embed_20mantisbase_3',['Why Embed MantisBase?',['../embedding.html#autotoc_md111',1,'']]],
+  ['wip_4',['🛠️ migrate Command *(WIP)*',['../cli.html#autotoc_md17',1,'']]],
+  ['with_20entities_5',['Working with Entities',['../embedding.html#autotoc_md129',1,'']]],
+  ['with_20files_6',['Creating Records with Files',['../files.html#autotoc_md162',1,'']]],
+  ['with_20postgresql_7',['Example: Full Setup with PostgreSQL',['../docker.html#autotoc_md156',1,'']]],
+  ['working_20with_20entities_8',['Working with Entities',['../embedding.html#autotoc_md129',1,'']]],
+  ['writefiles_9',['writeFiles',['../classmb_1_1MantisContentReader.html#a541f9a8c336f4e02878306bcb8bb236e',1,'mb::MantisContentReader']]]
 ];

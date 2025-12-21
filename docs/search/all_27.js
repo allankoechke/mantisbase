@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['🏁_20conclusion_0',['🏁 Conclusion',['../architecture.html#autotoc_md99',1,'']]],
-  ['🏁_20summary_1',['🏁 summary',['../rest_api.html#autotoc_md42',1,'🏁 Summary'],['../sync.html#autotoc_md140',1,'🏁 Summary']]]
+  ['📄_20authentication_20endpoints_0',['📄 Authentication Endpoints',['../auth_api.html#autotoc_md48',1,'']]],
+  ['📄_20entity_20endpoints_1',['📄 Entity Endpoints',['../rest_api.html#autotoc_md24',1,'']]]
 ];

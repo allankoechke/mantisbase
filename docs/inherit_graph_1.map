@@ -1,7 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classmantis_1_1CrudInterface.html" title=" " alt="" coords="5,5,168,45"/>
-<area shape="rect" id="Node000001" href="$classmantis_1_1TableUnit.html" title="Class to model the behaviour of a table in database." alt="" coords="216,13,352,38"/>
-<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="182,23,216,23,216,28,182,28"/>
-<area shape="rect" id="Node000002" href="$classmantis_1_1SysTablesUnit.html" title="Class to manage tables metadata like access rules, name, etc." alt="" coords="400,13,567,38"/>
-<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="366,23,400,23,400,28,366,28"/>
+<area shape="rect" id="Node000000" href="$classmb_1_1Auth.html" title="JWT token creation and verification utilities." alt="" coords="5,5,87,31"/>
 </map>

@@ -1,18 +1,8 @@
 var searchData=
 [
-  ['layer_20strong_0',['layer strong',['../architecture.html#autotoc_md81',1,'1. &lt;strong&gt;Database Layer&lt;/strong&gt;'],['../sync.html#autotoc_md129',1,'3. &lt;strong&gt;Transport Layer&lt;/strong&gt;']]],
-  ['level_20architecture_1',['🧱 High-Level Architecture',['../architecture.html#autotoc_md78',1,'']]],
-  ['library_2',['➕ Embeddable Library',['../architecture.html#autotoc_md92',1,'']]],
-  ['library_20strong_3',['&lt;strong&gt;As a Static or Shared Library&lt;/strong&gt;',['../embedding.html#autotoc_md105',1,'']]],
-  ['limitations_4',['Limitations',['../docker.html#autotoc_md119',1,'']]],
-  ['line_20usage_5',['Command Line Usage',['../cli.html',1,'']]],
-  ['list_6',['list',['../classmantis_1_1CrudInterface.html#ab0c3e66024e491b6b4e5bb19b606ff63',1,'mantis::CrudInterface::list()'],['../classmantis_1_1SysTablesUnit.html#a8a9b61841e0afefcb250f2be9f43f749',1,'mantis::SysTablesUnit::list()'],['../classmantis_1_1TableUnit.html#a0bd0bc213913ddcc6cc32ed903ca9ff7',1,'mantis::TableUnit::list(const json &amp;opts) override']]],
-  ['list_5frecords_7',['list_records',['../classmantis_1_1TableUnit.html#af201253f7b84d2c0c8f5dc1a24bb1563',1,'mantis::TableUnit']]],
-  ['listen_8',['listen',['../classmantis_1_1HttpUnit.html#ab79d396b33678132ce0747d9b39ba4ab',1,'mantis::HttpUnit::listen()'],['../classmantis_1_1RouterUnit.html#aa4ec6ba53565a334f2dede9e060fa302',1,'mantis::RouterUnit::listen()']]],
-  ['listrule_9',['listrule',['../structmantis_1_1Table.html#aef4d75f51a603d595baa8b87e48dff83',1,'mantis::Table::listRule'],['../classmantis_1_1TableUnit.html#a5fd00682fbcf6d187c6a2952df92ee2d',1,'mantis::TableUnit::listRule()']]],
-  ['log_10',['log',['../classmantis_1_1MantisApp.html#a413ca02b3eb0174a13e6dbb8aafa5c36',1,'mantis::MantisApp::log()'],['../namespacemantis.html#ae32fb5a6aeb988dd0ab354f811874d86',1,'mantis::Log']]],
-  ['logging_2ecpp_11',['logging.cpp',['../logging_8cpp.html',1,'']]],
-  ['logging_2eh_12',['logging.h',['../logging_8h.html',1,'']]],
-  ['loggingunit_13',['loggingunit',['../classmantis_1_1LoggingUnit.html#a8424de8648a39b0911e2134492305ada',1,'mantis::LoggingUnit::LoggingUnit()'],['../classmantis_1_1LoggingUnit.html',1,'mantis::LoggingUnit']]],
-  ['loglevel_14',['loglevel',['../namespacemantis.html#ac8fcce3e8202c1c2a90a006d99cc9690',1,'mantis::LogLevel'],['../namespacemantis.html#ada8131e8cb8fbce16294534a4a808d07',1,'mantis::LogLevel']]]
+  ['name_0',['name',['../classmb_1_1Entity.html#ac2fbf51307b6240ac9fb6ff8af16923c',1,'mb::Entity::name()'],['../classmb_1_1EntitySchema.html#a325c84653d838d8242331cb7dc12dc3e',1,'mb::EntitySchema::name()'],['../classmb_1_1EntitySchemaField.html#a53f5229eb9d9796cf62e6bee07671d1d',1,'mb::EntitySchemaField::name()']]],
+  ['names_1',['2. Use Consistent Field Names',['../rest_api_rules.html#autotoc_md100',1,'']]],
+  ['next_20steps_2',['next steps',['../setup.html#autotoc_md7',1,'📚 Next Steps'],['../index.html#autotoc_md228',1,'Next Steps']]],
+  ['notes_3',['notes',['../embedding.html#autotoc_md137',1,'Notes'],['../files.html#autotoc_md172',1,'Notes']]],
+  ['now_5funix_5fms_4',['now_unix_ms',['../namespacemb.html#a2fd7144c279c7b00f80a9f3e81df1a11',1,'mb']]]
 ];
