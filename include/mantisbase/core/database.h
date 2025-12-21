@@ -60,7 +60,7 @@ namespace mb {
         /**
          * @brief Close all database connections and destroy connection pool.
          */
-        void disconnect() const;
+        void disconnect();
 
         /**
          * @brief Create system tables (mb_tables, mb_admins, etc.).
@@ -121,6 +121,7 @@ namespace mb {
         void writeCheckpoint() const;
 
         std::unique_ptr<soci::connection_pool> m_connPool;
+        const MantisBase& mbApp;
     };
 
     /**

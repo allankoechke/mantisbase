@@ -44,18 +44,22 @@ TEST(DatabaseTest, CheckSystemSchemaMigrated) {
 }
 
 TEST(DatabaseTest, EntityOperations) {
-    auto& mApp = TestFixture::app();
+    const auto& mApp = TestFixture::app();
     
     // Check that we can get system entities
-    EXPECT_NO_THROW(mApp.entity("mb_admins"));
-    EXPECT_NO_THROW(mApp.entity("mb_schemas"));
-    
-    auto admin_entity = mApp.entity("mb_admins");
+    EXPECT_NO_THROW(auto _ = mApp.entity("mb_admins"));
+    EXPECT_THROW(auto _ = mApp.entity("mb_tables"), mb::MantisException);
+
+    const auto admin_entity = mApp.entity("mb_admins");
     EXPECT_TRUE(admin_entity.isSystem());
     EXPECT_EQ(admin_entity.type(), "auth");
     
     // Check entity methods
     EXPECT_TRUE(admin_entity.hasField("id"));
+    EXPECT_TRUE(admin_entity.hasField("password"));
     EXPECT_TRUE(admin_entity.hasField("email"));
-    EXPECT_FALSE(admin_entity.isEmpty());
+    EXPECT_TRUE(admin_entity.hasField("name"));
+    EXPECT_TRUE(admin_entity.hasField("created"));
+    EXPECT_TRUE(admin_entity.hasField("updated"));
+    // EXPECT_TRUE(admin_entity.isEmpty()); // When created, the table is empty
 }

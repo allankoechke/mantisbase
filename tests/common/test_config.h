@@ -38,7 +38,7 @@ namespace TestConfig {
      * @brief Check if rate limiting should be disabled in tests
      */
     inline bool isRateLimitingDisabled() {
-        static bool disabled = mb::getEnvOrDefault("TEST_DISABLE_RATE_LIMIT", "0") == "1";
+        static bool disabled = mb::getEnvOrDefault("MB_DISABLE_RATE_LIMIT", "0") == "1";
         return disabled;
     }
     
@@ -46,7 +46,7 @@ namespace TestConfig {
      * @brief Get admin email for tests
      */
     inline std::string getAdminEmail() {
-        return mb::getEnvOrDefault("TEST_ADMIN_EMAIL", "admin@test.com");
+        return mb::getEnvOrDefault("MB_TEST_ADMIN_EMAIL", "admin@test.com");
     }
     
     /**

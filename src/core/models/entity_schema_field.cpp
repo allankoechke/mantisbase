@@ -8,6 +8,13 @@ namespace mb {
         : m_name(std::move(field_name)),
           m_type(std::move(field_type)),
           m_constraints(defaultConstraints()) {
+        if (field_name == "password") {
+            m_constraints["validator"] = "@password";
+            m_constraints["min_value"] = 8;
+        } else if (field_name == "email") {
+            m_constraints["email"] = "@email";
+            m_constraints["min_value"] = 5;
+        }
     }
 
     EntitySchemaField::EntitySchemaField(const nlohmann::json &field_schema)

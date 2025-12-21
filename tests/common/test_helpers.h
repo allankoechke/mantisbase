@@ -47,7 +47,8 @@ namespace TestHelpers {
                     {"email", TestConfig::getAdminEmail()},
                     {"password", TestConfig::getTestPassword()}
                 };
-                admin_entity.create(admin_data);
+                auto r = admin_entity.create(admin_data);
+                // std::cout << "Created record: " << r.dump() << std::endl;
             }
             
             // Login to get token
@@ -57,12 +58,13 @@ namespace TestHelpers {
                 {"password", TestConfig::getTestPassword()}
             };
             
-            auto loginRes = client.Post("/api/v1/auth/login", login.dump(), "application/json");
+            auto loginRes = client.Post("/api/v1/auth/login",
+                login.dump(), "application/json");
             
             if (loginRes && loginRes->status == 200) {
                 auto response = nlohmann::json::parse(loginRes->body);
-                if (response.contains("token")) {
-                    return response["token"].get<std::string>();
+                if (response.contains("data") && response["data"].contains("token")) {
+                    return response["data"]["token"].get<std::string>();
                 }
             }
         } catch (const std::exception& e) {
@@ -87,7 +89,8 @@ namespace TestHelpers {
                     {"password", TestConfig::getTestPassword()}
                 };
                 
-                client.Post("/api/v1/auth/setup/admin", headers, setupAdmin.dump(), "application/json");
+                client.Post("/api/v1/auth/setup/admin", headers,
+                    setupAdmin.dump(), "application/json");
                 
                 // Login to get token
                 nlohmann::json login = {
@@ -96,12 +99,13 @@ namespace TestHelpers {
                     {"password", TestConfig::getTestPassword()}
                 };
                 
-                auto loginRes = client.Post("/api/v1/auth/login", login.dump(), "application/json");
+                auto loginRes = client.Post("/api/v1/auth/login",
+                    login.dump(), "application/json");
                 
                 if (loginRes && loginRes->status == 200) {
                     auto response = nlohmann::json::parse(loginRes->body);
-                    if (response.contains("token")) {
-                        return response["token"].get<std::string>();
+                    if (response.contains("data") && response["data"].contains("token")) {
+                        return response["data"]["token"].get<std::string>();
                     }
                 }
             } catch (...) {

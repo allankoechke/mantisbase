@@ -63,7 +63,7 @@ TEST(EntitySchema, EntitySchemaAuthType) {
 
 TEST(EntitySchema, EntitySchemaViewType) {
     // View Type
-    mb::EntitySchema view{"test", "view"};
+    const mb::EntitySchema view{"test", "view"};
 
     EXPECT_EQ(view.type(), "view");
     EXPECT_EQ(view.name(), "test");
@@ -130,7 +130,7 @@ TEST(EntitySchema, EntitySchemaJSONConversion) {
     auto json = schema.toJSON();
     EXPECT_EQ(json["name"], "test");
     EXPECT_EQ(json["type"], "base");
-    EXPECT_EQ(json["list"]["mode"], "public");
+    EXPECT_EQ(json["rules"]["list"]["mode"], "public");
     EXPECT_TRUE(json.contains("fields"));
     
     // Create from JSON

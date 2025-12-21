@@ -362,14 +362,14 @@ namespace mb {
 
         void createEntityRoutes() const;
 
+
+        static const std::vector<EntitySchemaField> &defaultBaseFieldsSchema();
+        static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
+
     private:
         static std::string getFieldType(const std::string &type, std::shared_ptr<soci::session> sql);
 
         void addFieldsIfNotExist(const std::string &type);
-
-        static const std::vector<EntitySchemaField> &defaultBaseFieldsSchema();
-
-        static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
 
         std::string m_name;
         std::string m_type;

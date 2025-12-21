@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+
+#include "mantisbase/core/models/entity_schema.h"
 #include "mantisbase/core/models/entity_schema_field.h"
 
 TEST(EntitySchemaField, BasicConstructor) {
@@ -56,13 +58,13 @@ TEST(EntitySchemaField, Constraints) {
     // Add constraint
     nlohmann::json newConstraints = {
         {"validator", "@password"},
-        {"minLength", 8}
+        {"min_value", 8}
     };
     field.setConstraints(newConstraints);
     
     auto updated = field.constraints();
     EXPECT_EQ(updated["validator"], "@password");
-    EXPECT_EQ(updated["minLength"], 8);
+    EXPECT_EQ(updated["min_value"], 8);
 }
 
 TEST(EntitySchemaField, ToJSON) {
@@ -84,18 +86,18 @@ TEST(EntitySchemaField, UpdateWith) {
     nlohmann::json updates = {
         {"required", true},
         {"unique", true},
-        {"type", "text"}
+        {"type", "json"}
     };
     
     field.updateWith(updates);
     
     EXPECT_TRUE(field.required());
     EXPECT_TRUE(field.isUnique());
-    EXPECT_EQ(field.type(), "text");
+    EXPECT_EQ(field.type(), "json");
 }
 
 TEST(EntitySchemaField, DefaultBaseFields) {
-    auto fields = mb::EntitySchemaField::defaultBaseFields();
+    auto fields = mb::EntitySchema::defaultBaseFieldsSchema();
     
     EXPECT_FALSE(fields.empty());
     
@@ -113,7 +115,7 @@ TEST(EntitySchemaField, DefaultBaseFields) {
 }
 
 TEST(EntitySchemaField, DefaultAuthFields) {
-    auto fields = mb::EntitySchemaField::defaultAuthFields();
+    auto fields = mb::EntitySchema::defaultAuthFieldsSchema();
     
     EXPECT_FALSE(fields.empty());
     
@@ -134,13 +136,22 @@ TEST(EntitySchemaField, DefaultAuthFields) {
 
 TEST(EntitySchemaField, ValidFieldTypes) {
     EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("string"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("number"));
     EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("date"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("boolean"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("bool"));
     EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("file"));
     EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("files"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int8"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("uint8"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int16"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("uint16"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int32"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("uint32"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int64"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("uint64"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("json"));
     
     EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("invalid"));
+    EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("number"));
     EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType(""));
 }
 

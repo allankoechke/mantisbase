@@ -45,8 +45,13 @@ namespace mb {
     EntitySchema EntitySchema::fromSchema(const json &entity_schema) {
         EntitySchema eSchema;
 
-        if (!entity_schema.contains("name") || !entity_schema.contains("type"))
-            throw MantisException(400, "Missing required fields `name` and `type` in schema!");
+        logger::trace("Creating Entity Schema from JSON\n\t- {}", entity_schema.dump());
+
+        if (!entity_schema.contains("name") || !entity_schema["name"].is_string() || entity_schema["name"].empty())
+            throw MantisException(400, "Missing required entity `name` in schema!", entity_schema.dump());
+
+        if (!entity_schema.contains("type") || !entity_schema["type"].is_string() || entity_schema["type"].empty())
+            throw MantisException(400, "Missing required entity `type` in schema!", entity_schema.dump());
 
         const auto _name = entity_schema.at("name").get<std::string>();
         const auto _type = entity_schema.at("type").get<std::string>();

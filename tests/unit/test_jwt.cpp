@@ -5,46 +5,29 @@
 #include "mantisbase/core/auth.h"
 #include "mantisbase/mantisbase.h"
 #include <nlohmann/json.hpp>
-#include <filesystem>
 #include "../test_fixure.h"
 #include "../common/test_config.h"
-
-namespace fs = std::filesystem;
 
 class JWTTestFixture : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Create unique test directory for each test
-        testDir = fs::temp_directory_path() / "mantisbase_test_jwt" / mb::generateShortId();
-        fs::create_directories(testDir);
-        fs::permissions(testDir, fs::perms::owner_all, fs::perm_options::replace);
-        
-        // Initialize MantisBase for JWT secret key
-        config["database"] = "SQLITE";
-        config["dataDir"] = testDir.string();
-        config["serve"] = {{"port", 0}, {"host", "0.0.0.0"}}; // Port 0 = don't start server
-        
-        app = &mb::MantisBase::create(config);
+        // Use the existing MantisBase instance from the test environment
+        // JWT tests use the shared instance initialized by MantisBaseTestEnvironment
+        // This ensures all tests use the same MantisBase singleton
+        app = &mb::MantisBase::instance();
     }
     
     void TearDown() override {
-        if (app) {
-            app->close();
-        }
-        // Cleanup test directory
-        if (fs::exists(testDir)) {
-            fs::remove_all(testDir);
-        }
+        // Don't close the shared instance - let the test environment handle cleanup
+        // The MantisBase instance is managed by MantisBaseTestEnvironment
     }
     
-    fs::path testDir;
-    mb::json config;
     mb::MantisBase* app = nullptr;
 };
 
 TEST_F(JWTTestFixture, CreateValidToken) {
     const nlohmann::json claims = {{"id", "123"}, {"entity", "users"}};
-    std::string token = mb::Auth::createToken(claims, 3600);
+    const std::string token = mb::Auth::createToken(claims, 3600);
     
     EXPECT_FALSE(token.empty());
     EXPECT_GT(token.length(), 20); // JWT tokens are typically long
@@ -62,7 +45,7 @@ TEST_F(JWTTestFixture, CreateTokenMissingFields) {
 
 TEST_F(JWTTestFixture, VerifyValidToken) {
     const nlohmann::json claims = {{"id", "123"}, {"entity", "users"}};
-    std::string token = mb::Auth::createToken(claims, 3600);
+    const std::string token = mb::Auth::createToken(claims, 3600);
     
     EXPECT_FALSE(token.empty());
     
