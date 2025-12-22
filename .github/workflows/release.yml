@@ -63,9 +63,9 @@ jobs:
         run: >
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
           -G "MinGW Makefiles"
-          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_CXX_COMPILER="C:\ProgramData\mingw64\mingw64\bin\g++.exe"
           -DCMAKE_C_COMPILER="C:\ProgramData\mingw64\mingw64\bin\gcc.exe"
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DMANTIS_BUILD_TESTS=true
           -S ${{ github.workspace }}
 
@@ -73,8 +73,8 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: >
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DMANTIS_BUILD_TESTS=true
           -S ${{ github.workspace }}
