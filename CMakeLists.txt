@@ -22,8 +22,17 @@ else()
 
     # For static builds, embed libstdgcc and libstdc++ to avoid binary loading fails
     # due to mismatch libstd* libs.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
-    message("-- Building Mantis static libs")
+    if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        # Windows MinGW: fully static link to avoid DLL dependencies
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+        message("-- Building Mantis static libs (Windows MinGW fully static)")
+    else()
+        # Linux/Unix: static link only runtime libraries
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+        message("-- Building Mantis static libs")
+    endif()
 endif()
 
 set( MANTIS_SOURCES
