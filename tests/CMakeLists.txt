@@ -60,7 +60,7 @@ if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif ()
 
 target_link_libraries(mantisbase_tests PRIVATE
-        mantisbase_lib
+        mantisbase
         GTest::gtest
         GTest::gtest_main
         GTest::gmock_main

@@ -6,12 +6,12 @@ target_compile_options(duktape PRIVATE
 )
 
 # Link to libs
-target_link_libraries(mantisbase_lib
+target_link_libraries(mantisbase
         PUBLIC duktape
 )
 
 # Include directories
-target_include_directories(mantisbase_lib
+target_include_directories(mantisbase
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/duktape
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/dukglue/include

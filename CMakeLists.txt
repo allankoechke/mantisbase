@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(MantisBase VERSION 0.3.1)
+project(MantisBase VERSION 0.3.2)
 set(CMAKE_CXX_STANDARD 20)
 
 # Set output directories to match SOCI's
@@ -87,18 +87,17 @@ set( MANTIS_SOURCES
 )
 
 # Add library
-add_library(mantisbase_lib ${MANTIS_LIB_TYPE} ${MANTIS_SOURCES})
+add_library(mantisbase ${MANTIS_LIB_TYPE} ${MANTIS_SOURCES})
 
 # Add main executable
 add_executable(mantisbase_app src/main.cpp)
 
-# Ensure resultant name is always `mantisbase` despite targets names for consistency
-set_target_properties(mantisbase_lib PROPERTIES OUTPUT_NAME mantisbase)
+# Ensure resultant name is always `mantisbase` for the app despite targets names for consistency
 set_target_properties(mantisbase_app PROPERTIES OUTPUT_NAME mantisbase)
 
 if(MANTIS_SCRIPTING_ENABLED)
     message("-- Enabling Mantis Scripting via Duktape")
-    target_compile_definitions(mantis PRIVATE MANTIS_SCRIPTING_ENABLED=1)
+    target_compile_definitions(mantisbase PRIVATE MANTIS_SCRIPTING_ENABLED=1)
 endif (MANTIS_SCRIPTING_ENABLED)
 
 # Add httplib
@@ -140,7 +139,7 @@ include(cmake/add-asan.cmake)
 include(cmake/add-duktape.cmake)
 
 # Include directories
-target_include_directories(mantisbase_lib
+target_include_directories(mantisbase
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/httplib-cpp
@@ -151,7 +150,7 @@ target_include_directories(mantisbase_lib
 )
 
 target_link_libraries(mantisbase_app
-    PRIVATE mantisbase_lib
+    PRIVATE mantisbase
 )
 
 # Check if Doxygen is installed, then build docs
@@ -174,7 +173,7 @@ configure_file(
 )
 
 # Link to libs
-target_link_libraries(mantisbase_lib
+target_link_libraries(mantisbase
         PUBLIC
         httplib::httplib
         spdlog::spdlog
