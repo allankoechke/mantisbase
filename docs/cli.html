@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.0</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.1</span>
    </div>
   </td>
  </tr>
@@ -123,7 +123,9 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>--scriptsDir &lt;dir&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Path to JavaScript files for extending Mantis functionality   </td><td class="markdownTableBodyNone"><code>./scripts</code>    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>--dev</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Enable development mode with verbose logging   </td><td class="markdownTableBodyNone">*(disabled)*   </td></tr>
+<td class="markdownTableBodyNone"><code>--dev</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Enable development mode with verbose logging   </td><td class="markdownTableBodyNone">*(disabled)*    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>--poolSize &lt;size&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Number of database pools to create   </td><td class="markdownTableBodyNone">(depends on db)   </td></tr>
 </table>
 <hr  />
 <h2><a class="anchor" id="autotoc_md13"></a>
@@ -136,9 +138,7 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>--port &lt;port&gt;</code>   </td><td class="markdownTableBodyNone"><code>-p</code>   </td><td class="markdownTableBodyNone">Port to bind the server to   </td><td class="markdownTableBodyNone"><code>7070</code>    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>--host &lt;host&gt;</code>   </td><td class="markdownTableBodyNone"><code>-h</code>   </td><td class="markdownTableBodyNone">Host address to bind the server   </td><td class="markdownTableBodyNone"><code>0.0.0.0</code>    </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--poolSize &lt;size&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Host address to bind the server   </td><td class="markdownTableBodyNone"></td></tr>
+<td class="markdownTableBodyNone"><code>--host &lt;host&gt;</code>   </td><td class="markdownTableBodyNone"><code>-h</code>   </td><td class="markdownTableBodyNone">Host address to bind the server   </td><td class="markdownTableBodyNone"><code>0.0.0.0</code>   </td></tr>
 </table>
 <p><b>Example:</b></p>
 <div class="fragment"><div class="line">./mantisbase serve -p 7070 -h 127.0.0.1</div>
