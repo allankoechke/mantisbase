@@ -19,18 +19,26 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-20.04, windows-2019, ubuntu-20.04-arm64]
         build_type: [Release]
         c_compiler: [gcc]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             c_compiler: gcc
             cpp_compiler: g++
-            platform: linux
-          - os: windows-latest
+            platform: linux-x86_64
+            arch: x86_64
+            gcc_version: "10"
+          - os: ubuntu-20.04-arm64
+            c_compiler: gcc
+            cpp_compiler: g++
+            platform: linux-arm64
+            arch: arm64
+          - os: windows-2019
             c_compiler: gcc
             cpp_compiler: g++
             platform: windows
+            arch: x86_64
 
     steps:
       - uses: actions/checkout@v4
@@ -38,17 +46,30 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
-      - name: Install dependencies on Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y libzstd-dev && sudo apt install libpq-dev
+      - name: Install GCC 10 on Ubuntu 20.04
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y gcc-10 g++-10 libzstd-dev libpq-dev
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+
+      - name: Install dependencies on Ubuntu ARM64
+        if: matrix.os == 'ubuntu-20.04-arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libzstd-dev libpq-dev
 
       - name: Install MinGW
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2019'
         run: |
           choco install mingw --no-progress
 
       - name: Add MinGW to PATH
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2019'
         run: |
           echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
 
@@ -59,7 +80,7 @@ jobs:
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
       - name: Configure CMake (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2019'
         run: >
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
           -G "MinGW Makefiles"
@@ -69,15 +90,15 @@ jobs:
           -DMANTIS_BUILD_TESTS=true
           -S ${{ github.workspace }}
 
-      - name: Configure CMake (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: >
-          cmake -B ${{ steps.strings.outputs.build-output-dir }}
-          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DMANTIS_BUILD_TESTS=true
-          -S ${{ github.workspace }}
+      - name: Configure CMake (Linux)
+        if: matrix.os != 'windows-2019'
+        run: |
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DMANTIS_BUILD_TESTS=true \
+            -S ${{ github.workspace }}
 
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
@@ -86,17 +107,16 @@ jobs:
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: ctest --build-config ${{ matrix.build_type }}
 
-      - name: Zip the build output
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'ubuntu-latest'
+      - name: Zip the build output (Linux)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-2019'
         run: |
           cd ${{ github.workspace }}/build/bin
-          rm mantisbase_tests
+          rm -f mantisbase_tests
           mkdir -p zip
           zip -r zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip mantisbase*
-        shell: bash
 
       - name: Zip the build output (Windows)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-2019'
         shell: pwsh
         run: |
           del "${{ steps.strings.outputs.build-output-dir }}\bin\mantisbase_tests.exe"
@@ -123,16 +143,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}_linux.zip
+          pattern: mantisbase_${{ github.ref_name }}_*.zip
           path: ./artifacts
-          
-      - uses: actions/download-artifact@v4
-        with:
-          name: mantisbase_${{ github.ref_name }}_windows.zip
-          path: ./artifacts
+          merge-multiple: true
 
       - name: Show artifact contents
-        run: ls -R ./artifacts
+        run: ls -lh ./artifacts/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
