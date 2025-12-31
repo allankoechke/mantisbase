@@ -88,6 +88,30 @@ namespace mb {
             setConstraints(field_schema["constraints"].get<nlohmann::json>());
         }
 
+        // Foreign Key Object
+        if (field_schema.contains("foreign_key")) {
+            if (field_schema["foreign_key"].is_null()) {
+            // Explicitly remove foreign key if set to null
+            removeForeignKey();
+        } else {
+            if (!field_schema["foreign_key"].is_object())
+                throw MantisException(400, "Expected an object for `foreign_key` property.");
+
+            const auto &fk = field_schema["foreign_key"];
+            if (!fk.contains("table") || !fk["table"].is_string() || fk["table"].get<std::string>().empty())
+                throw MantisException(400, "Foreign key `table` is required and must be a non-empty string.");
+
+            const std::string fkTable = fk["table"].get<std::string>();
+            const std::string fkColumn = fk.contains("column") && fk["column"].is_string() 
+                ? fk["column"].get<std::string>() : "id";
+            const std::string fkOnUpdate = fk.contains("on_update") && fk["on_update"].is_string()
+                ? fk["on_update"].get<std::string>() : "RESTRICT";
+            const std::string fkOnDelete = fk.contains("on_delete") && fk["on_delete"].is_string()
+                ? fk["on_delete"].get<std::string>() : "RESTRICT";
+
+            setForeignKey(fkTable, fkColumn, fkOnUpdate, fkOnDelete);
+        }
+
         return *this;
     }
 
@@ -146,6 +170,66 @@ namespace mb {
         return *this;
     }
 
+    bool EntitySchemaField::isForeignKey() const {
+        return !m_foreignKeyTable.empty();
+    }
+
+    std::string EntitySchemaField::foreignKeyTable() const {
+        return m_foreignKeyTable;
+    }
+
+    std::string EntitySchemaField::foreignKeyColumn() const {
+        return m_foreignKeyColumn;
+    }
+
+    std::string EntitySchemaField::foreignKeyOnUpdate() const {
+        return m_foreignKeyOnUpdate;
+    }
+
+    std::string EntitySchemaField::foreignKeyOnDelete() const {
+        return m_foreignKeyOnDelete;
+    }
+
+    EntitySchemaField &EntitySchemaField::setForeignKey(const std::string &table, 
+                                                         const std::string &column,
+                                                         const std::string &onUpdate,
+                                                         const std::string &onDelete) {
+        if (table.empty()) {
+            throw MantisException(400, "Foreign key reference table cannot be empty!");
+        }
+
+        // Validate update/delete policies
+        const std::vector<std::string> validPolicies = {"CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT"};
+        std::string upperUpdate = onUpdate;
+        std::string upperDelete = onDelete;
+        toUpperCase(upperUpdate);
+        toUpperCase(upperDelete);
+
+        if (std::ranges::find(validPolicies, upperUpdate) == validPolicies.end()) {
+            throw MantisException(400, "Invalid foreign key update policy: " + onUpdate + 
+                ". Must be one of: CASCADE, SET NULL, RESTRICT, NO ACTION, SET DEFAULT");
+        }
+
+        if (std::ranges::find(validPolicies, upperDelete) == validPolicies.end()) {
+            throw MantisException(400, "Invalid foreign key delete policy: " + onDelete + 
+                ". Must be one of: CASCADE, SET NULL, RESTRICT, NO ACTION, SET DEFAULT");
+        }
+
+        m_foreignKeyTable = table;
+        m_foreignKeyColumn = column.empty() ? "id" : column;
+        m_foreignKeyOnUpdate = upperUpdate;
+        m_foreignKeyOnDelete = upperDelete;
+        return *this;
+    }
+
+    EntitySchemaField &EntitySchemaField::removeForeignKey() {
+        m_foreignKeyTable.clear();
+        m_foreignKeyColumn = "id";
+        m_foreignKeyOnUpdate = "RESTRICT";
+        m_foreignKeyOnDelete = "RESTRICT";
+        return *this;
+    }
+
     nlohmann::json EntitySchemaField::constraints() const { return m_constraints; }
 
     nlohmann::json EntitySchemaField::constraint(const std::string &key) const {
@@ -185,7 +269,7 @@ namespace mb {
     }
 
     nlohmann::json EntitySchemaField::toJSON() const {
-        return {
+        nlohmann::json json_obj = {
             {"id", genFieldId(m_name)},
             {"name", m_name},
             {"type", m_type},
@@ -195,6 +279,18 @@ namespace mb {
             {"unique", m_isUnique},
             {"constraints", m_constraints}
         };
+
+        // Add foreign key information if present
+        if (isForeignKey()) {
+            json_obj["foreign_key"] = {
+                {"table", m_foreignKeyTable},
+                {"column", m_foreignKeyColumn},
+                {"on_update", m_foreignKeyOnUpdate},
+                {"on_delete", m_foreignKeyOnDelete}
+            };
+        }
+
+        return json_obj;
     }
 
     soci::db_type EntitySchemaField::toSociType() const {

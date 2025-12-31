@@ -443,9 +443,12 @@ namespace mb {
 
     std::string EntitySchema::toDDL() const {
         const auto sql = MantisBase::instance().db().session();
+        const auto db_type = sql->get_backend()->get_backend_name();
 
         std::ostringstream ddl;
         ddl << "CREATE TABLE IF NOT EXISTS " << m_name << " (";
+        
+        // First, add all column definitions
         for (size_t i = 0; i < m_fields.size(); ++i) {
             if (i > 0) ddl << ", ";
             const auto field = m_fields[i];
@@ -460,6 +463,26 @@ namespace mb {
             if (field.constraints().contains("default_value") && !field.constraints()["default_value"].is_null())
                 ddl << " DEFAULT " << toDefaultSqlValue(field.type(), field.constraints()["default_value"]);
         }
+
+        // Add foreign key constraints
+        for (const auto &field : m_fields) {
+            if (field.isForeignKey()) {
+                ddl << ", FOREIGN KEY (" << field.name() << ") "
+                    << "REFERENCES " << field.foreignKeyTable() 
+                    << "(" << field.foreignKeyColumn() << ")";
+                
+                // Add ON UPDATE clause
+                if (field.foreignKeyOnUpdate() != "NO ACTION") {
+                    ddl << " ON UPDATE " << field.foreignKeyOnUpdate();
+                }
+                
+                // Add ON DELETE clause
+                if (field.foreignKeyOnDelete() != "NO ACTION") {
+                    ddl << " ON DELETE " << field.foreignKeyOnDelete();
+                }
+            }
+        }
+        
         ddl << ");";
 
         return ddl.str();
@@ -557,6 +580,54 @@ namespace mb {
             for (const auto &field: table_schema.fields()) {
                 if (auto err = field.validate(); err.has_value())
                     return err.value();
+
+                // Validate foreign key references
+                if (field.isForeignKey()) {
+                    const std::string refTable = field.foreignKeyTable();
+                    const std::string refColumn = field.foreignKeyColumn();
+
+                    // Check if referenced table exists
+                    if (tableExists(refTable)) {
+                        // Check if referenced column exists in the referenced table
+                        try {
+                            const auto refTableData = getTable(EntitySchema::genEntityId(refTable));
+                            if (!refTableData.contains("schema")) {
+                                return "Invalid schema data for referenced table: `" + refTable + "`";
+                            }
+                            
+                            EntitySchema refEntity = EntitySchema::fromSchema(refTableData["schema"]);
+                            
+                            if (!refEntity.hasField(refColumn)) {
+                                return "Foreign key references non-existent column `" + refColumn + 
+                                       "` in table `" + refTable + "`";
+                            }
+
+                            // Validate that field type is compatible with referenced column type
+                            const auto &refField = refEntity.field(refColumn);
+                            // For foreign keys, typically the field should be the same type as the referenced column
+                            // or at least a compatible type (e.g., both string types, both integer types)
+                            // This is a basic check - more sophisticated type compatibility could be added
+                            if (field.type() != refField.type() && 
+                                !(field.type() == "string" && refField.type() == "string")) {
+                                // Allow string types to reference string types, but warn about type mismatches
+                                // The database will enforce this more strictly
+                                logger::warn("Foreign key field `{}` type `{}` may not match referenced column `{}` type `{}` in table `{}`",
+                                            field.name(), field.type(), refColumn, refField.type(), refTable);
+                            }
+                        } catch (const MantisException &e) {
+                            // If table exists but we can't get its schema, that's an error
+                            return "Error validating foreign key reference: " + std::string(e.what());
+                        } catch (const std::exception &e) {
+                            return "Error validating foreign key reference: " + std::string(e.what());
+                        }
+                    } else {
+                        // Table doesn't exist yet - this might be okay if tables are being created in sequence
+                        // The database will enforce the constraint when the DDL is executed
+                        logger::warn("Foreign key references table `{}` which does not exist yet. "
+                                    "Ensure the referenced table is created before this table.",
+                                    refTable);
+                    }
+                }
             }
 
             // Check that base fields are present
