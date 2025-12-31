@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-20.04, windows-2019, ubuntu-20.04-arm64]
+        os: [ubuntu-20.04, windows-2022, ubuntu-20.04-arm64]
         build_type: [Release]
         c_compiler: [gcc]
         include:
@@ -34,7 +34,7 @@ jobs:
             cpp_compiler: g++
             platform: linux-arm64
             arch: arm64
-          - os: windows-2019
+          - os: windows-2022
             c_compiler: gcc
             cpp_compiler: g++
             platform: windows
@@ -64,17 +64,17 @@ jobs:
           sudo apt-get install -y libzstd-dev libpq-dev
 
       - name: Install MinGW
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-2022'
         run: |
           choco install mingw --no-progress
 
       - name: Add MinGW to PATH
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-2022'
         run: |
           echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
 
       - name: Verify MinGW installation
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-2022'
         shell: pwsh
         run: |
           $mingwPath = "C:\ProgramData\mingw64\mingw64\bin"
@@ -98,7 +98,7 @@ jobs:
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
       - name: Configure CMake (Windows)
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-2022'
         # run: >
         #   cmake -B ${{ steps.strings.outputs.build-output-dir }}
         #   -G "MinGW Makefiles"
@@ -136,7 +136,7 @@ jobs:
             -S ${{ github.workspace }}
 
       - name: Configure CMake (Linux)
-        if: matrix.os != 'windows-2019'
+        if: matrix.os != 'windows-2022'
         run: |
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
@@ -153,7 +153,7 @@ jobs:
         run: ctest --build-config ${{ matrix.build_type }}
 
       - name: Zip the build output (Linux)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-2019'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-2022'
         run: |
           cd ${{ github.workspace }}/build/bin
           rm -f mantisbase_tests
@@ -161,7 +161,7 @@ jobs:
           zip -r zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip mantisbase*
 
       - name: Zip the build output (Windows)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-2019'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-2022'
         shell: pwsh
         run: |
           del "${{ steps.strings.outputs.build-output-dir }}\bin\mantisbase_tests.exe"
