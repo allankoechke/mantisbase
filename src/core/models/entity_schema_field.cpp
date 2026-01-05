@@ -91,25 +91,29 @@ namespace mb {
         // Foreign Key Object
         if (field_schema.contains("foreign_key")) {
             if (field_schema["foreign_key"].is_null()) {
-            // Explicitly remove foreign key if set to null
-            removeForeignKey();
-        } else {
-            if (!field_schema["foreign_key"].is_object())
-                throw MantisException(400, "Expected an object for `foreign_key` property.");
+                // Explicitly remove foreign key if set to null
+                removeForeignKey();
+            } else {
+                if (!field_schema["foreign_key"].is_object())
+                    throw MantisException(400, "Expected an object for `foreign_key` property.");
 
-            const auto &fk = field_schema["foreign_key"];
-            if (!fk.contains("table") || !fk["table"].is_string() || fk["table"].get<std::string>().empty())
-                throw MantisException(400, "Foreign key `table` is required and must be a non-empty string.");
+                const auto &fk = field_schema["foreign_key"];
+                if (!fk.contains("table") || !fk["table"].is_string() || fk["table"].get<std::string>().empty())
+                    throw MantisException(400, "Foreign key `table` is required and must be a non-empty string.");
 
-            const std::string fkTable = fk["table"].get<std::string>();
-            const std::string fkColumn = fk.contains("column") && fk["column"].is_string() 
-                ? fk["column"].get<std::string>() : "id";
-            const std::string fkOnUpdate = fk.contains("on_update") && fk["on_update"].is_string()
-                ? fk["on_update"].get<std::string>() : "RESTRICT";
-            const std::string fkOnDelete = fk.contains("on_delete") && fk["on_delete"].is_string()
-                ? fk["on_delete"].get<std::string>() : "RESTRICT";
+                const std::string fkTable = fk["table"].get<std::string>();
+                const std::string fkColumn = fk.contains("column") && fk["column"].is_string()
+                                                 ? fk["column"].get<std::string>()
+                                                 : "id";
+                const std::string fkOnUpdate = fk.contains("on_update") && fk["on_update"].is_string()
+                                                   ? fk["on_update"].get<std::string>()
+                                                   : "RESTRICT";
+                const std::string fkOnDelete = fk.contains("on_delete") && fk["on_delete"].is_string()
+                                                   ? fk["on_delete"].get<std::string>()
+                                                   : "RESTRICT";
 
-            setForeignKey(fkTable, fkColumn, fkOnUpdate, fkOnDelete);
+                setForeignKey(fkTable, fkColumn, fkOnUpdate, fkOnDelete);
+            }
         }
 
         return *this;
@@ -119,7 +123,9 @@ namespace mb {
         return EntitySchemaField::genFieldId(m_name);
     }
 
-    std::string EntitySchemaField::name() const { return m_name; }
+    std::string EntitySchemaField::name() const {
+        return m_name;
+    }
 
     EntitySchemaField &EntitySchemaField::setName(const std::string &name) {
         if (trim(name).empty())
@@ -129,7 +135,9 @@ namespace mb {
         return *this;
     }
 
-    std::string EntitySchemaField::type() const { return m_type; }
+    std::string EntitySchemaField::type() const {
+        return m_type;
+    }
 
     EntitySchemaField &EntitySchemaField::setType(const std::string &type) {
         if (type.empty())
@@ -142,28 +150,36 @@ namespace mb {
         return *this;
     }
 
-    bool EntitySchemaField::required() const { return m_required; }
+    bool EntitySchemaField::required() const {
+        return m_required;
+    }
 
     EntitySchemaField &EntitySchemaField::setRequired(const bool required) {
         m_required = required;
         return *this;
     }
 
-    bool EntitySchemaField::isPrimaryKey() const { return m_primaryKey; }
+    bool EntitySchemaField::isPrimaryKey() const {
+        return m_primaryKey;
+    }
 
     EntitySchemaField &EntitySchemaField::setIsPrimaryKey(const bool pk) {
         m_primaryKey = pk;
         return *this;
     }
 
-    bool EntitySchemaField::isSystem() const { return m_isSystem; }
+    bool EntitySchemaField::isSystem() const {
+        return m_isSystem;
+    }
 
     EntitySchemaField &EntitySchemaField::setIsSystem(const bool system) {
         m_isSystem = system;
         return *this;
     }
 
-    bool EntitySchemaField::isUnique() const { return m_isUnique; }
+    bool EntitySchemaField::isUnique() const {
+        return m_isUnique;
+    }
 
     EntitySchemaField &EntitySchemaField::setIsUnique(const bool unique) {
         m_isUnique = unique;
@@ -190,29 +206,31 @@ namespace mb {
         return m_foreignKeyOnDelete;
     }
 
-    EntitySchemaField &EntitySchemaField::setForeignKey(const std::string &table, 
-                                                         const std::string &column,
-                                                         const std::string &onUpdate,
-                                                         const std::string &onDelete) {
+    EntitySchemaField &EntitySchemaField::setForeignKey(const std::string &table,
+                                                        const std::string &column,
+                                                        const std::string &onUpdate,
+                                                        const std::string &onDelete) {
         if (table.empty()) {
             throw MantisException(400, "Foreign key reference table cannot be empty!");
         }
 
         // Validate update/delete policies
-        const std::vector<std::string> validPolicies = {"CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT"};
+        const std::vector<std::string> validPolicies = {
+            "CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT"
+        };
         std::string upperUpdate = onUpdate;
         std::string upperDelete = onDelete;
         toUpperCase(upperUpdate);
         toUpperCase(upperDelete);
 
         if (std::ranges::find(validPolicies, upperUpdate) == validPolicies.end()) {
-            throw MantisException(400, "Invalid foreign key update policy: " + onUpdate + 
-                ". Must be one of: CASCADE, SET NULL, RESTRICT, NO ACTION, SET DEFAULT");
+            throw MantisException(400, "Invalid foreign key update policy: " + onUpdate +
+                                       ". Must be one of: CASCADE, SET NULL, RESTRICT, NO ACTION, SET DEFAULT");
         }
 
         if (std::ranges::find(validPolicies, upperDelete) == validPolicies.end()) {
-            throw MantisException(400, "Invalid foreign key delete policy: " + onDelete + 
-                ". Must be one of: CASCADE, SET NULL, RESTRICT, NO ACTION, SET DEFAULT");
+            throw MantisException(400, "Invalid foreign key delete policy: " + onDelete +
+                                       ". Must be one of: CASCADE, SET NULL, RESTRICT, NO ACTION, SET DEFAULT");
         }
 
         m_foreignKeyTable = table;
@@ -230,7 +248,9 @@ namespace mb {
         return *this;
     }
 
-    nlohmann::json EntitySchemaField::constraints() const { return m_constraints; }
+    nlohmann::json EntitySchemaField::constraints() const {
+        return m_constraints;
+    }
 
     nlohmann::json EntitySchemaField::constraint(const std::string &key) const {
         // logger::trace("Field `{}`, Constraints: \n\t> ", m_name, m_constraints.dump());
@@ -348,7 +368,7 @@ namespace mb {
         return "mbf_" + std::to_string(std::hash<std::string>{}(id));
     }
 
-    const nlohmann::json & EntitySchemaField::defaultConstraints() {
+    const nlohmann::json &EntitySchemaField::defaultConstraints() {
         static const nlohmann::json default_constraints = {
             {"min_value", nullptr},
             {"max_value", nullptr},
