@@ -3,10 +3,10 @@
 //
 
 #include "../../../include/mantisbase/core/models/validators.h"
-#include "../../../include/mantisbase/core/mantisbase.h"
+#include "../../../include/mantisbase/mantisbase.h"
 #include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/utils.h"
-#include "../../../include/mantisbase/utils/logger.h"
+#include "../../../include/mantisbase/core/logger.h"
 #include <soci/soci.h>
 
 namespace mb {
