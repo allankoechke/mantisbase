@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-20.04, windows, ubuntu-20.04-arm64]
+        os: [ubuntu-20.04, windows-latest, ubuntu-20.04-arm64]
         build_type: [Release]
         c_compiler: [gcc]
         include:
@@ -34,10 +34,10 @@ jobs:
             cpp_compiler: g++
             platform: linux-arm64
             arch: arm64
-          - os: windows
+          - os: windows-latest
             c_compiler: gcc
             cpp_compiler: g++
-            platform: windows
+            platform: windows-latest
             arch: x86_64
 
     steps:
@@ -64,17 +64,17 @@ jobs:
           sudo apt-get install -y libzstd-dev libpq-dev
 
       - name: Install MinGW
-        if: matrix.os == 'windows'
+        if: matrix.os == 'windows-latest'
         run: |
           choco install mingw --no-progress
 
       - name: Add MinGW to PATH
-        if: matrix.os == 'windows'
+        if: matrix.os == 'windows-latest'
         run: |
           echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
 
       - name: Verify MinGW installation
-        if: matrix.os == 'windows'
+        if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           $mingwPath = "C:\ProgramData\mingw64\mingw64\bin"
@@ -97,8 +97,8 @@ jobs:
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-      - name: Configure CMake (Windows)
-        if: matrix.os == 'windows'
+      - name: Configure CMake (Windows-latest)
+        if: matrix.os == 'windows-latest'
         # run: >
         #   cmake -B ${{ steps.strings.outputs.build-output-dir }}
         #   -G "MinGW Makefiles"
@@ -136,7 +136,7 @@ jobs:
             -S ${{ github.workspace }}
 
       - name: Configure CMake (Linux)
-        if: matrix.os != 'windows'
+        if: matrix.os != 'windows-latest'
         run: |
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
@@ -153,15 +153,15 @@ jobs:
         run: ctest --build-config ${{ matrix.build_type }}
 
       - name: Zip the build output (Linux)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
         run: |
           cd ${{ github.workspace }}/build/bin
           rm -f mantisbase_tests
           mkdir -p zip
           zip -r zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip mantisbase*
 
-      - name: Zip the build output (Windows)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows'
+      - name: Zip the build output (Windows-latest)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           del "${{ steps.strings.outputs.build-output-dir }}\bin\mantisbase_tests.exe"
