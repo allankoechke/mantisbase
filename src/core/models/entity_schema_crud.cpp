@@ -80,9 +80,6 @@ namespace mb {
             std::tm created_tm = *std::localtime(&t);
 
             // Execute DDL & Save to DB
-            // logger::trace("Creating table with data with schema: \n{}", schema.dump(4));
-
-            // Insert to mb_tables
             *sql << "INSERT INTO mb_tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",
                     soci::use(id), soci::use(schema), soci::use(created_tm), soci::use(created_tm);
 
@@ -176,7 +173,6 @@ namespace mb {
 
             // Get db type
             const auto db_type = MantisBase::instance().dbType();
-
             const auto new_schema_fields = new_schema.contains("fields") && new_schema["fields"].is_array()
                                                ? new_schema["fields"]
                                                : json::array();
@@ -412,8 +408,8 @@ namespace mb {
 
             std::string old_id = old_entity.id();
             std::string new_id = new_entity.id();
-            json new_schema = new_entity.toJSON();
-            *sql << query, soci::use(new_id), soci::use(new_schema),
+            json updated_schema = new_entity.toJSON();
+            *sql << query, soci::use(new_id), soci::use(updated_schema),
                     soci::use(updated_tm), soci::use(old_id);
 
             // Write out any pending changes ...
@@ -422,14 +418,14 @@ namespace mb {
 
             json record;
             record["id"] = new_entity.id();
-            record["schema"] = new_schema;
+            record["schema"] = updated_schema;
             record["created"] = tmToStr(created_tm);
             record["updated"] = tmToStr(updated_tm);
 
             // Wrap in new try catch block to suppress any errors here to avoid rollbacks
             try {
                 // Update cache & subsequently the routes ...
-                MantisBase::instance().router().updateSchemaCache(old_entity.name(), new_schema);
+                MantisBase::instance().router().updateSchemaCache(old_entity.name(), updated_schema);
 
                 // Only trigger routes to be reloaded if table name changes.
                 if (old_entity.name() != new_entity.name()) {
@@ -437,7 +433,7 @@ namespace mb {
                     Files::renameDir(old_entity.name(), new_entity.name());
                 }
             } catch (std::exception &e) {
-                logger::critical("Error updating entity schema\n\t- {}", e.what());
+                logger::critical("Error updating entity schema cache\n\t- {}", e.what());
             }
 
             return record;

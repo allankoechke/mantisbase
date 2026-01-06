@@ -134,6 +134,13 @@ namespace mb {
         const json &schemaCache(const std::string &table_name) const;
 
         /**
+         * @brief Check whether schema cache for given name exists.
+         * @param table_name Table name to lookup
+         * @return true if found, false otherwise.
+         */
+        bool hasSchemaCache(const std::string &table_name) const;
+
+        /**
          * @brief Get cached entity by table name.
          * @param table_name Table name to lookup
          * @return Entity instance from cache

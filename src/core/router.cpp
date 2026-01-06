@@ -199,6 +199,10 @@ namespace mb {
         return m_entityMap.at(table_name).schema();
     }
 
+    bool Router::hasSchemaCache(const std::string &table_name) const {
+        return m_entityMap.contains(table_name);
+    }
+
     Entity Router::schemaCacheEntity(const std::string &table_name) const {
         if (!m_entityMap.contains(table_name)) {
             throw MantisException(404, "Entity schema for `" + table_name + "` was not found!");

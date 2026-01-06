@@ -174,7 +174,7 @@ namespace mb {
 
     std::optional<std::string> Validators::foreignKeyConstraintCheck(const json &field, const json &body) {
         TRACE_MANTIS_FUNC();
-        
+
         // Check if field has a foreign key constraint
         if (!field.contains("foreign_key") || field["foreign_key"].is_null()) {
             return std::nullopt;
@@ -186,58 +186,39 @@ namespace mb {
         }
 
         const auto &field_name = field["name"].get<std::string>();
-        
+
         // Skip validation if field is not present in body (will be handled by required check)
         if (!body.contains(field_name) || body[field_name].is_null()) {
             return std::nullopt;
         }
 
-        const std::string refTable = fk.contains("table") && fk["table"].is_string() 
-            ? fk["table"].get<std::string>() : "";
-        const std::string refColumn = fk.contains("column") && fk["column"].is_string()
-            ? fk["column"].get<std::string>() : "id";
+        const std::string refTable = fk.contains("entity") && fk["entity"].is_string()
+                                         ? fk["entity"].get<std::string>()
+                                         : "";
+        const std::string refColumn = fk.contains("field") && fk["field"].is_string()
+                                          ? fk["field"].get<std::string>()
+                                          : "id";
 
         if (refTable.empty()) {
             return std::nullopt; // Invalid foreign key definition, but schema validation should catch this
         }
 
         // Get the foreign key value from the body
-        const auto fkValue = body[field_name];
-        
+        const auto &fkValue = body[field_name];
+
         // If the value is null/empty and the field is not required, that's okay
         if (fkValue.is_null() || (fkValue.is_string() && fkValue.get<std::string>().empty())) {
             return std::nullopt;
         }
 
-        // Convert the value to string for the query
-        std::string fkValueStr;
-        if (fkValue.is_string()) {
-            fkValueStr = fkValue.get<std::string>();
-        } else if (fkValue.is_number()) {
-            fkValueStr = std::to_string(fkValue.get<double>());
-        } else {
-            fkValueStr = fkValue.dump();
+        // Check if the referenced record exists
+        const auto &app = MantisBase::instance();
+        if (!app.hasEntity(refTable)) {
+            return std::format("Foreign Key ref table `{}` does not exist!", refTable);
         }
 
-        // Check if the referenced record exists
-        try {
-            const auto sql = MantisBase::instance().db().session();
-            int count = 0;
-
-            // TODO validate refTable and refColumn are valid
-            
-            // Query to check if the referenced record exists
-            std::string query = "SELECT COUNT(*) FROM " + refTable + " WHERE " + refColumn + " = :value";
-            *sql << query, soci::use(fkValueStr), soci::into(count);
-            
-            if (count == 0) {
-                return std::format("Foreign key constraint violation: Referenced record with {} = '{}' does not exist in table '{}'",
-                                  refColumn, fkValueStr, refTable);
-            }
-        } catch (const std::exception &e) {
-            // If there's an error checking the foreign key, log it but don't fail validation
-            // The database will enforce the constraint anyway
-            logger::warn("Error validating foreign key constraint for field '{}': {}", field_name, e.what());
+        if (const auto &entity = app.entity(refTable); !entity.hasField(refColumn)) {
+            return std::format("Foreign key ref column `{}` does not exist in `{}` entity!", refColumn, refTable);
         }
 
         return std::nullopt;

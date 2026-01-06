@@ -270,13 +270,7 @@ namespace mb {
     private:
         std::string m_id, m_name, m_type;
         bool m_required = false, m_primaryKey = false, m_isSystem = false, m_isUnique = false;
-        nlohmann::json m_constraints{};
-        
-        // Foreign key properties
-        std::string m_foreignKeyTable;
-        std::string m_foreignKeyColumn = "id";
-        std::string m_foreignKeyOnUpdate = "RESTRICT";
-        std::string m_foreignKeyOnDelete = "RESTRICT";
+        nlohmann::json m_constraints{}, m_foreignKey{};
     };
 } // mb
 

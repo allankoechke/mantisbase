@@ -293,6 +293,10 @@ namespace mb {
         return entity_obj;
     }
 
+    bool MantisBase::hasEntity(const std::string &entity_name) const {
+        return m_router->hasSchemaCache(entity_name);
+    }
+
     duk_context *MantisBase::ctx() const {
         return m_dukCtx;
     }

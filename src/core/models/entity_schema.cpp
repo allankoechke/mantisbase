@@ -472,12 +472,12 @@ namespace mb {
                     << "(" << field.foreignKeyColumn() << ")";
                 
                 // Add ON UPDATE clause
-                if (field.foreignKeyOnUpdate() != "NO ACTION") {
+                if (field.foreignKeyOnUpdate() != "NO ACTION" && !field.foreignKeyOnUpdate().empty()) {
                     ddl << " ON UPDATE " << field.foreignKeyOnUpdate();
                 }
                 
                 // Add ON DELETE clause
-                if (field.foreignKeyOnDelete() != "NO ACTION") {
+                if (field.foreignKeyOnDelete() != "NO ACTION" && field.foreignKeyOnDelete().empty()) {
                     ddl << " ON DELETE " << field.foreignKeyOnDelete();
                 }
             }

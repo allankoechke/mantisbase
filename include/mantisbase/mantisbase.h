@@ -241,6 +241,15 @@ namespace mb
          */
         [[nodiscard]] Entity entity(const std::string& entity_name) const;
 
+        /**
+         * @brief Check if table schema encapsulated by an `Entity` object from given the table name exists.
+         * If table does not exist yet, return false.
+         *
+         * @param entity_name Name of the table of interest
+         * @return true if entity exists, false otherwise.
+         */
+        [[nodiscard]] bool hasEntity(const std::string& entity_name) const;
+
         /// Get the duktape context
         [[nodiscard]] duk_context* ctx() const;
 

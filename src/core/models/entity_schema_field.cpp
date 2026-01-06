@@ -187,23 +187,26 @@ namespace mb {
     }
 
     bool EntitySchemaField::isForeignKey() const {
-        return !m_foreignKeyTable.empty();
+        return !m_foreignKey.empty()
+        && m_foreignKey.contains("entity")
+        && m_foreignKey["entity"].is_string()
+        && !m_foreignKey["entity"].get<std::string>().empty();
     }
 
     std::string EntitySchemaField::foreignKeyTable() const {
-        return m_foreignKeyTable;
+        return m_foreignKey.contains("entity") ? m_foreignKey["entity"].get<std::string>() : "";
     }
 
     std::string EntitySchemaField::foreignKeyColumn() const {
-        return m_foreignKeyColumn;
+        return m_foreignKey.contains("field") ? m_foreignKey["field"].get<std::string>() : "";
     }
 
     std::string EntitySchemaField::foreignKeyOnUpdate() const {
-        return m_foreignKeyOnUpdate;
+        return m_foreignKey.contains("on_update") ? m_foreignKey["on_update"].get<std::string>() : "";
     }
 
     std::string EntitySchemaField::foreignKeyOnDelete() const {
-        return m_foreignKeyOnDelete;
+        return m_foreignKey.contains("on_delete") ? m_foreignKey["on_delete"].get<std::string>() : "";
     }
 
     EntitySchemaField &EntitySchemaField::setForeignKey(const std::string &table,
@@ -214,12 +217,23 @@ namespace mb {
             throw MantisException(400, "Foreign key reference table cannot be empty!");
         }
 
+        // Validate entity exists which is being referenced
+        if (!MantisBase::instance().hasEntity(table)) {
+            throw MantisException(400, std::format("Entity `{}` being referenced was not found!", table));
+        }
+
+        if (const auto entity = MantisBase::instance().entity(table); !entity.hasField(column.empty() ? "id" : column)) {
+            throw MantisException(400, std::format("Invalid entity column name `{}` in the entity.", column));
+        }
+
         // Validate update/delete policies
         const std::vector<std::string> validPolicies = {
             "CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT"
         };
+
         std::string upperUpdate = onUpdate;
         std::string upperDelete = onDelete;
+
         toUpperCase(upperUpdate);
         toUpperCase(upperDelete);
 
@@ -233,18 +247,16 @@ namespace mb {
                                        ". Must be one of: CASCADE, SET NULL, RESTRICT, NO ACTION, SET DEFAULT");
         }
 
-        m_foreignKeyTable = table;
-        m_foreignKeyColumn = column.empty() ? "id" : column;
-        m_foreignKeyOnUpdate = upperUpdate;
-        m_foreignKeyOnDelete = upperDelete;
+        m_foreignKey["entity"] = table;
+        m_foreignKey["field"] = column.empty() ? "id" : column;
+        m_foreignKey["on_update"] = upperUpdate;
+        m_foreignKey["on_delete"] = upperDelete;
+
         return *this;
     }
 
     EntitySchemaField &EntitySchemaField::removeForeignKey() {
-        m_foreignKeyTable.clear();
-        m_foreignKeyColumn = "id";
-        m_foreignKeyOnUpdate = "RESTRICT";
-        m_foreignKeyOnDelete = "RESTRICT";
+        m_foreignKey = nullptr; // Reset the object
         return *this;
     }
 
@@ -253,7 +265,6 @@ namespace mb {
     }
 
     nlohmann::json EntitySchemaField::constraint(const std::string &key) const {
-        // logger::trace("Field `{}`, Constraints: \n\t> ", m_name, m_constraints.dump());
         if (!m_constraints.contains(key)) {
             throw MantisException(404, "No constraint found for key `" + key + "`");
         }
@@ -302,12 +313,7 @@ namespace mb {
 
         // Add foreign key information if present
         if (isForeignKey()) {
-            json_obj["foreign_key"] = {
-                {"table", m_foreignKeyTable},
-                {"column", m_foreignKeyColumn},
-                {"on_update", m_foreignKeyOnUpdate},
-                {"on_delete", m_foreignKeyOnDelete}
-            };
+            json_obj["foreign_key"] = m_foreignKey;
         }
 
         return json_obj;

@@ -30,7 +30,7 @@ jobs:
             arch: x86_64
             gcc_version: "10"
           - os: ubuntu-20.04-arm64
-            c_compiler: gcc
+            c_compiler: gcc                                                                                1j
             cpp_compiler: g++
             platform: linux-arm64
             arch: arm64
