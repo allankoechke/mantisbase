@@ -457,17 +457,33 @@ namespace mb {
                     << " "
                     << getFieldType(field.type(), sql);
 
-            if (field.isPrimaryKey()) ddl << " PRIMARY KEY";
+            // Note: PRIMARY KEY and UNIQUE constraints are added as table-level constraints
+            // below to ensure they have explicit names for later updates/deletes
             if (field.required()) ddl << " NOT NULL";
-            if (field.isUnique()) ddl << " UNIQUE";
             if (field.constraints().contains("default_value") && !field.constraints()["default_value"].is_null())
                 ddl << " DEFAULT " << toDefaultSqlValue(field.type(), field.constraints()["default_value"]);
         }
 
-        // Add foreign key constraints
+        // Handle all constraints at once to ensure they have explicit names for later updates/deletes
         for (const auto &field : m_fields) {
+            // Add PRIMARY KEY constraints with explicit names
+            if (field.isPrimaryKey()) {
+                std::string constraintName = "pk_" + field.name();
+                ddl << ", CONSTRAINT " << constraintName << " PRIMARY KEY (" << field.name() << ")";
+            }
+
+            // Add UNIQUE constraints with explicit names
+            if (field.isUnique()) {
+                std::string constraintName = "uniq_" + field.name();
+                ddl << ", CONSTRAINT " << constraintName << " UNIQUE (" << field.name() << ")";
+            }
+
+            // Add foreign key constraints with explicit constraint names
             if (field.isForeignKey()) {
-                ddl << ", FOREIGN KEY (" << field.name() << ") "
+                // Generate constraint name: fk_<table>_<column>
+                std::string constraintName = "fk_" + m_name + "_" + field.name();
+                
+                ddl << ", CONSTRAINT " << constraintName << " FOREIGN KEY (" << field.name() << ") "
                     << "REFERENCES " << field.foreignKeyTable() 
                     << "(" << field.foreignKeyColumn() << ")";
                 
@@ -477,7 +493,7 @@ namespace mb {
                 }
                 
                 // Add ON DELETE clause
-                if (field.foreignKeyOnDelete() != "NO ACTION" && field.foreignKeyOnDelete().empty()) {
+                if (field.foreignKeyOnDelete() != "NO ACTION" && !field.foreignKeyOnDelete().empty()) {
                     ddl << " ON DELETE " << field.foreignKeyOnDelete();
                 }
             }
@@ -583,49 +599,50 @@ namespace mb {
 
                 // Validate foreign key references
                 if (field.isForeignKey()) {
-                    const std::string refTable = field.foreignKeyTable();
-                    const std::string refColumn = field.foreignKeyColumn();
+                    const std::string refEntity = field.foreignKeyTable();
+                    const std::string refField = field.foreignKeyColumn();
 
-                    // Check if referenced table exists
-                    if (tableExists(refTable)) {
-                        // Check if referenced column exists in the referenced table
+                    // Check if referenced entity exists
+                    // TODO 
+                    if (tableExists(refEntity)) {
+                        // Check if referenced field exists in the referenced entity
                         try {
-                            const auto refTableData = getTable(EntitySchema::genEntityId(refTable));
-                            if (!refTableData.contains("schema")) {
-                                return "Invalid schema data for referenced table: `" + refTable + "`";
+                            const auto refEntityData = getTable(EntitySchema::genEntityId(refEntity));
+                            if (!refEntityData.contains("schema")) {
+                                return "Invalid schema data for referenced entity: `" + refEntity + "`";
                             }
                             
-                            EntitySchema refEntity = EntitySchema::fromSchema(refTableData["schema"]);
+                            EntitySchema refEntitySchema = EntitySchema::fromSchema(refEntityData["schema"]);
                             
-                            if (!refEntity.hasField(refColumn)) {
-                                return "Foreign key references non-existent column `" + refColumn + 
-                                       "` in table `" + refTable + "`";
+                            if (!refEntitySchema.hasField(refField)) {
+                                return "Foreign key references non-existent field `" + refField + 
+                                       "` in entity `" + refEntity + "`";
                             }
 
-                            // Validate that field type is compatible with referenced column type
-                            const auto &refField = refEntity.field(refColumn);
-                            // For foreign keys, typically the field should be the same type as the referenced column
+                            // Validate that field type is compatible with referenced field type
+                            const auto &refFieldSchema = refEntitySchema.field(refField);
+                            // For foreign keys, typically the field should be the same type as the referenced field
                             // or at least a compatible type (e.g., both string types, both integer types)
                             // This is a basic check - more sophisticated type compatibility could be added
-                            if (field.type() != refField.type() && 
-                                !(field.type() == "string" && refField.type() == "string")) {
+                            if (field.type() != refFieldSchema.type() && 
+                                !(field.type() == "string" && refFieldSchema.type() == "string")) {
                                 // Allow string types to reference string types, but warn about type mismatches
                                 // The database will enforce this more strictly
-                                logger::warn("Foreign key field `{}` type `{}` may not match referenced column `{}` type `{}` in table `{}`",
-                                            field.name(), field.type(), refColumn, refField.type(), refTable);
+                                logger::warn("Foreign key field `{}` type `{}` may not match referenced field `{}` type `{}` in entity `{}`",
+                                            field.name(), field.type(), refField, refFieldSchema.type(), refEntity);
                             }
                         } catch (const MantisException &e) {
-                            // If table exists but we can't get its schema, that's an error
+                            // If entity exists but we can't get its schema, that's an error
                             return "Error validating foreign key reference: " + std::string(e.what());
                         } catch (const std::exception &e) {
                             return "Error validating foreign key reference: " + std::string(e.what());
                         }
                     } else {
-                        // Table doesn't exist yet - this might be okay if tables are being created in sequence
+                        // Entity doesn't exist yet - this might be okay if entities are being created in sequence
                         // The database will enforce the constraint when the DDL is executed
-                        logger::warn("Foreign key references table `{}` which does not exist yet. "
-                                    "Ensure the referenced table is created before this table.",
-                                    refTable);
+                        logger::warn("Foreign key references entity `{}` which does not exist yet. "
+                                    "Ensure the referenced entity is created before this entity.",
+                                    refEntity);
                     }
                 }
             }
