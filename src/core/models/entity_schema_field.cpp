@@ -98,12 +98,12 @@ namespace mb {
                     throw MantisException(400, "Expected an object for `foreign_key` property.");
 
                 const auto &fk = field_schema["foreign_key"];
-                if (!fk.contains("table") || !fk["table"].is_string() || fk["table"].get<std::string>().empty())
-                    throw MantisException(400, "Foreign key `table` is required and must be a non-empty string.");
+                if (!fk.contains("entity") || !fk["entity"].is_string() || fk["entity"].get<std::string>().empty())
+                    throw MantisException(400, "Foreign key `entity` is required and must be a non-empty string.");
 
-                const std::string fkTable = fk["table"].get<std::string>();
-                const std::string fkColumn = fk.contains("column") && fk["column"].is_string()
-                                                 ? fk["column"].get<std::string>()
+                const std::string fkTable = fk["entity"].get<std::string>();
+                const std::string fkColumn = fk.contains("field") && fk["field"].is_string()
+                                                 ? fk["field"].get<std::string>()
                                                  : "id";
                 const std::string fkOnUpdate = fk.contains("on_update") && fk["on_update"].is_string()
                                                    ? fk["on_update"].get<std::string>()
