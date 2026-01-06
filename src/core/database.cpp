@@ -25,28 +25,28 @@ namespace mb {
 
     bool Database::connect(const std::string &conn_str) {
         // If pool size is invalid, just return
-        if (MantisBase::instance().poolSize() <= 0)
+        if (mbApp.poolSize() <= 0)
             throw std::runtime_error("Session pool size must be greater than 0");
 
         // All databases apart from SQLite should pass in a connection string
-        if (MantisBase::instance().dbType() != "sqlite3" && conn_str.empty())
+        if (mbApp.dbType() != "sqlite3" && conn_str.empty())
             throw std::runtime_error("Connection string for database connection is required!");
 
         try {
             // Create connection pool instance
-            m_connPool = std::make_unique<soci::connection_pool>(MantisBase::instance().poolSize());
+            m_connPool = std::make_unique<soci::connection_pool>(mbApp.poolSize());
 
-            const auto db_type = MantisBase::instance().dbType();
+            const auto db_type = mbApp.dbType();
 
-            auto pool_size = static_cast<size_t>(MantisBase::instance().poolSize());
+            auto pool_size = static_cast<size_t>(mbApp.poolSize());
             // Populate the pools with db connections
             for (std::size_t i = 0; i < pool_size; ++i) {
-                std::cout << std::format("Creating db session for index `{}/{}`\n", i, pool_size);
+                logger::trace("Creating db session for index `{}/{}`", i, pool_size);
 
                 if (db_type == "sqlite3") {
                     // For SQLite, lets explicitly define location and name of the database
                     // we intend to use within the `dataDir`
-                    auto sqlite_db_path = joinPaths(MantisBase::instance().dataDir(), "mantis.db").string();
+                    auto sqlite_db_path = joinPaths(mbApp.dataDir(), "mantis.db").string();
                     soci::session &sql = m_connPool->at(i);
 
                     auto sqlite_conn_str = std::format(
@@ -55,7 +55,7 @@ namespace mb {
                     sql.set_logger(new MantisLoggerImpl()); // Set custom query logger
 
                     // Log SQL insert values in DevMode only!
-                    if (MantisBase::instance().isDevMode())
+                    if (mbApp.isDevMode())
                         sql.set_query_context_logging_mode(soci::log_context::always);
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
@@ -79,8 +79,6 @@ namespace mb {
                         sql.set_query_context_logging_mode(soci::log_context::always);
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
-
-                    break;
 #else
                     logger::warn("Database Connection for `PostgreSQL` has not been implemented yet!");
                     return false;
@@ -215,7 +213,7 @@ namespace mb {
 
         // Enable this write checkpoint for SQLite databases ONLY
         try {
-            if (MantisBase::instance().dbType() == "sqlite3") {
+            if (mbApp.dbType() == "sqlite3") {
                 try {
                     // Write out the WAL data to db file & truncate it
                     if (const auto sql = session(); sql->is_connected()) {
