@@ -143,7 +143,7 @@ namespace mb {
 
             return std::nullopt;
         } catch (const std::exception &e) {
-            logger::trace(fmt::format("Required Constraints Exception: {}", e.what()));
+            LogOrigin::trace("Validation Exception", fmt::format("Required Constraints Exception: {}", e.what()));
             return std::nullopt;
         }
     }

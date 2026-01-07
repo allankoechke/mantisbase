@@ -58,49 +58,143 @@ namespace mb {
          */
         static void initDb(const std::string &data_dir = "");
 
-        // Overloaded methods with JSON data parameter
-        // These take a formatted message string and optional JSON data
-        static void trace(const std::string &msg, const json &data = json::object());
+        // Logging methods with structured format:
+        // - origin: Component/system origin (System, Auth, Database, Entity, EntitySchema, etc.)
+        // - message: Short message (e.g., "Auth Failed", "Database Connected")
+        // - details: Long description of the message
+        // - data: Optional JSON object/array with additional data
+        static void trace(const std::string &origin, const std::string &message, const std::string &details = "", const json &data = json::object());
 
-        static void info(const std::string &msg, const json &data = json::object());
+        static void info(const std::string &origin, const std::string &message, const std::string &details = "", const json &data = json::object());
 
-        static void debug(const std::string &msg, const json &data = json::object());
+        static void debug(const std::string &origin, const std::string &message, const std::string &details = "", const json &data = json::object());
 
-        static void warn(const std::string &msg, const json &data = json::object());
+        static void warn(const std::string &origin, const std::string &message, const std::string &details = "", const json &data = json::object());
 
-        static void critical(const std::string &msg, const json &data = json::object());
+        static void critical(const std::string &origin, const std::string &message, const std::string &details = "", const json &data = json::object());
 
     private:
         template<typename... Args>
-        static void trace(fmt::format_string<Args...> msg, Args &&... args) {
+        static void trace_spdlog(fmt::format_string<Args...> msg, Args &&... args) {
             spdlog::trace(msg, std::forward<Args>(args)...);
         }
 
         template<typename... Args>
-        static void info(fmt::format_string<Args...> msg, Args &&... args) {
+        static void info_spdlog(fmt::format_string<Args...> msg, Args &&... args) {
             spdlog::info(msg, std::forward<Args>(args)...);
         }
 
         template<typename... Args>
-        static void debug(fmt::format_string<Args...> msg, Args &&... args) {
+        static void debug_spdlog(fmt::format_string<Args...> msg, Args &&... args) {
             spdlog::debug(msg, std::forward<Args>(args)...);
         }
 
         template<typename... Args>
-        static void warn(fmt::format_string<Args...> msg, Args &&... args) {
+        static void warn_spdlog(fmt::format_string<Args...> msg, Args &&... args) {
             spdlog::warn(msg, std::forward<Args>(args)...);
         }
 
         template<typename... Args>
-        static void critical(fmt::format_string<Args...> msg, Args &&... args) {
+        static void critical_spdlog(fmt::format_string<Args...> msg, Args &&... args) {
             spdlog::critical(msg, std::forward<Args>(args)...);
         }
 
-        static void logToDatabase(const std::string &level, const std::string &message,
-                                  const json &data = json::object());
+        static void logToDatabase(const std::string &level, const std::string &origin, const std::string &message, 
+                                  const std::string &details, const json &data = json::object());
     };
 
     using logger = Logger;
+
+    /**
+     * @brief Utility logger functions for each component/system.
+     * These functions automatically pass the origin parameter.
+     */
+    namespace LogOrigin {
+        // System logging
+        inline void trace(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::trace("System", message, details, data);
+        }
+        inline void info(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::info("System", message, details, data);
+        }
+        inline void debug(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::debug("System", message, details, data);
+        }
+        inline void warn(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::warn("System", message, details, data);
+        }
+        inline void critical(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::critical("System", message, details, data);
+        }
+
+        // Auth logging
+        inline void authTrace(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::trace("Auth", message, details, data);
+        }
+        inline void authInfo(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::info("Auth", message, details, data);
+        }
+        inline void authDebug(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::debug("Auth", message, details, data);
+        }
+        inline void authWarn(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::warn("Auth", message, details, data);
+        }
+        inline void authCritical(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::critical("Auth", message, details, data);
+        }
+
+        // Database logging
+        inline void dbTrace(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::trace("Database", message, details, data);
+        }
+        inline void dbInfo(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::info("Database", message, details, data);
+        }
+        inline void dbDebug(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::debug("Database", message, details, data);
+        }
+        inline void dbWarn(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::warn("Database", message, details, data);
+        }
+        inline void dbCritical(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::critical("Database", message, details, data);
+        }
+
+        // Entity logging
+        inline void entityTrace(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::trace("Entity", message, details, data);
+        }
+        inline void entityInfo(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::info("Entity", message, details, data);
+        }
+        inline void entityDebug(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::debug("Entity", message, details, data);
+        }
+        inline void entityWarn(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::warn("Entity", message, details, data);
+        }
+        inline void entityCritical(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::critical("Entity", message, details, data);
+        }
+
+        // EntitySchema logging
+        inline void entitySchemaTrace(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::trace("EntitySchema", message, details, data);
+        }
+        inline void entitySchemaInfo(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::info("EntitySchema", message, details, data);
+        }
+        inline void entitySchemaDebug(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::debug("EntitySchema", message, details, data);
+        }
+        inline void entitySchemaWarn(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::warn("EntitySchema", message, details, data);
+        }
+        inline void entitySchemaCritical(const std::string &message, const std::string &details = "", const json &data = json::object()) {
+            Logger::critical("EntitySchema", message, details, data);
+        }
+    }
 
     /**
      * @brief A class for tracing function execution [entry, exit]

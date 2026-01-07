@@ -41,7 +41,7 @@ namespace mb {
             auto pool_size = static_cast<size_t>(mbApp.poolSize());
             // Populate the pools with db connections
             for (std::size_t i = 0; i < pool_size; ++i) {
-                logger::trace(fmt::format("Creating db session for index `{}/{}`", i, pool_size));
+                LogOrigin::dbTrace("Session Creation", fmt::format("Creating db session for index `{}/{}`", i, pool_size));
 
                 if (db_type == "sqlite3") {
                     // For SQLite, lets explicitly define location and name of the database
@@ -80,22 +80,22 @@ namespace mb {
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
 #else
-                    logger::warn("Database Connection for `PostgreSQL` has not been implemented yet!");
+                    LogOrigin::dbWarn("PostgreSQL Not Implemented", "Database Connection for `PostgreSQL` has not been implemented yet!");
                     return false;
 #endif
                 } else if (db_type == "mysql") {
-                    logger::warn("Database Connection for `MySQL` not implemented yet!");
+                    LogOrigin::dbWarn("MySQL Not Implemented", "Database Connection for `MySQL` not implemented yet!");
                     return false;
                 } else {
-                    logger::warn(fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));
+                    LogOrigin::dbWarn("Database Type Not Implemented", fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));
                     return false;
                 }
             }
         } catch (const std::exception &e) {
-            logger::critical(fmt::format("Database Connection error: {}", e.what()));
+            LogOrigin::dbCritical("Connection Error", fmt::format("Database Connection error: {}", e.what()));
             return false;
         } catch (...) {
-            logger::critical("Database Connection error: Unknown Error");
+            LogOrigin::dbCritical("Connection Error", "Database Connection error: Unknown Error");
             return false;
         }
 
@@ -122,13 +122,13 @@ namespace mb {
             try {
                 if (soci::session &sess = m_connPool->at(i); sess.is_connected()) {
                     sess.close();
-                    logger::debug(fmt::format("DB Shutdown: Closing soci::session object  {} of {} connections", i + 1, pool_size));
+                    LogOrigin::dbDebug("Session Shutdown", fmt::format("DB Shutdown: Closing soci::session object  {} of {} connections", i + 1, pool_size));
                 } else {
-                    logger::debug(fmt::format("DB Shutdown: soci::session object at index `{}` of {} connections is not connected.",
+                    LogOrigin::dbDebug("Session Shutdown", fmt::format("DB Shutdown: soci::session object at index `{}` of {} connections is not connected.",
                                   i + 1, pool_size));
                 }
             } catch (const soci::soci_error &e) {
-                logger::critical(fmt::format("Database disconnection soci::error at index `{}`: {}", i, e.what()));
+                LogOrigin::dbCritical("Disconnection Error", fmt::format("Database disconnection soci::error at index `{}`: {}", i, e.what()));
             } catch (...) {
                 // Ignore other errors during session close
             }
@@ -137,7 +137,7 @@ namespace mb {
         // Reset the connection pool
         m_connPool.reset();
 
-        logger::debug("DB Shutdown: Session disconnection completed.");
+        LogOrigin::dbDebug("Shutdown Complete", "DB Shutdown: Session disconnection completed.");
     }
 
     bool Database::createSysTables() const {
@@ -184,7 +184,7 @@ namespace mb {
             return true;
         } catch (std::exception &e) {
             tr.rollback();
-            logger::critical(fmt::format("Create System Tables Failed: {}", e.what()));
+            LogOrigin::dbCritical("System Tables Creation Failed", fmt::format("Create System Tables Failed: {}", e.what()));
             return false;
         }
     }
@@ -220,7 +220,7 @@ namespace mb {
                         *sql << "PRAGMA wal_checkpoint(TRUNCATE)";
                     }
                 } catch (std::exception &e) {
-                    logger::critical(fmt::format("Database Connection SOCI::Error: {}", e.what()));
+                    LogOrigin::dbCritical("SOCI Connection Error", fmt::format("Database Connection SOCI::Error: {}", e.what()));
                 }
             }
         } catch (...) {
@@ -263,7 +263,7 @@ namespace mb {
         const int nargs = duk_get_top(ctx);
 
         if (nargs < 1) {
-            logger::critical("[JS] Expected at least 1 argument (query string)");
+            LogOrigin::dbCritical("Invalid Arguments", "[JS] Expected at least 1 argument (query string)");
             duk_error(ctx, DUK_ERR_TYPE_ERROR, "Expected at least 1 argument (query string)");
             return DUK_RET_TYPE_ERROR;
         }
@@ -278,7 +278,7 @@ namespace mb {
         try {
             for (int i = 1; i < nargs; i++) {
                 if (!duk_is_object(ctx, i)) {
-                    logger::critical("[JS] Arguments after query must be objects.");
+                    LogOrigin::dbCritical("Invalid Arguments", "[JS] Arguments after query must be objects.");
                     duk_error(ctx, DUK_ERR_TYPE_ERROR, "Arguments after query must be objects");
                     return DUK_RET_TYPE_ERROR;
                 }
@@ -297,54 +297,54 @@ namespace mb {
                     // Parse into nlohmann::json
                     json_obj = nlohmann::json::parse(json_str);
                 } catch (const std::exception &e) {
-                    logger::critical(fmt::format("[JS] Parsing exception: {}", e.what()));
+                    LogOrigin::dbCritical("Parsing Exception", fmt::format("[JS] Parsing exception: {}", e.what()));
                 } catch (const char *e) {
-                    logger::critical("[JS] Unknown Parsing exception");
+                    LogOrigin::dbCritical("Parsing Exception", "[JS] Unknown Parsing exception");
                 }
-                logger::trace(fmt::format("After Parsing, object? `{}`", json_obj.dump()));
+                LogOrigin::dbTrace("Parsing Complete", fmt::format("After Parsing, object? `{}`", json_obj.dump()));
 
                 for (auto &[key, value]: json_obj.items()) {
                     if (value.is_string()) {
                         auto str_val = value.get<std::string>();
-                        logger::trace(fmt::format("[JS] Str Value: `{}` - `{}`", key, str_val));
+                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Str Value: `{}` - `{}`", key, str_val));
                         vals.set(key, str_val);
-                        logger::trace("[JS] After Set Value");
-                        logger::trace(fmt::format("[JS] After Set Value To: `{}`", vals.get<std::string>(key)));
+                        LogOrigin::dbTrace("Value Binding", "[JS] After Set Value");
+                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] After Set Value To: `{}`", vals.get<std::string>(key)));
                     } else if (value.is_number_integer()) {
                         int int_val = value.get<int>();
-                        logger::trace(fmt::format("[JS] Int Value: `{}`", int_val));
+                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Int Value: `{}`", int_val));
                         vals.set(key, int_val);
                     } else if (value.is_number_float()) {
                         double double_val = value.get<double>();
-                        logger::trace(fmt::format("[JS] Double Value: `{}`", double_val));
+                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Double Value: `{}`", double_val));
                         vals.set(key, double_val);
                     } else if (value.is_boolean()) {
                         bool bool_val = value.get<bool>();
-                        logger::trace("[JS] Bool Value: `{}`", bool_val);
+                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Bool Value: `{}`", bool_val));
                         vals.set(key, bool_val);
                     } else if (value.is_null()) {
                         std::optional<int> val;
-                        logger::trace("[JS] Null Value: `null`");
+                        LogOrigin::dbTrace("Value Binding", "[JS] Null Value: `null`");
                         vals.set(key, val, soci::i_null);
                     } else if (value.is_object() || value.is_array()) {
-                        logger::trace(fmt::format("[JS] JSON Value: `{}`", value.dump()));
+                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] JSON Value: `{}`", value.dump()));
                         vals.set(key, value);
                     } else {
                         auto err = std::format("Could not cast type at {} to DB supported types.", (i - 1));
-                        logger::critical(fmt::format("[JS] Casting Value > {}", err));
+                        LogOrigin::dbCritical("Value Casting Error", fmt::format("[JS] Casting Value > {}", err));
                         duk_error(ctx, DUK_ERR_TYPE_ERROR, err.c_str());
                         return DUK_RET_TYPE_ERROR;
                     }
                 }
             }
         } catch (const std::exception &e) {
-            logger::critical(fmt::format("[JS] Getting Binding Values Failed: Why? {}", e.what()));
+            LogOrigin::dbCritical("Binding Values Failed", fmt::format("[JS] Getting Binding Values Failed: Why? {}", e.what()));
         }
 
         // Get SQL Session
         auto sql = session();
 
-        logger::trace(fmt::format("[JS] soci::value binding? {}", nargs - 1));
+        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] soci::value binding? {}", nargs - 1));
 
         // Execute SQL Statement
         soci::row data_row;
@@ -359,7 +359,7 @@ namespace mb {
             results.push_back(obj);
         }
 
-        logger::trace(fmt::format("[JS] Results: {}", results.dump()));
+        LogOrigin::dbTrace("Query Results", fmt::format("[JS] Results: {}", results.dump()));
 
         if (results.empty()) {
             // Return null

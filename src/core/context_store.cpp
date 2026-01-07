@@ -15,35 +15,35 @@ namespace mb
             const auto i = "ContextStore::Dump";
             if (value.type() == typeid(std::string))
             {
-                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<std::string>(value)));
+                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<std::string>(value)));
             }
             else if (value.type() == typeid(const char*))
             {
-                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<const char*>(value)));
+                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<const char*>(value)));
             }
             else if (value.type() == typeid(int))
             {
-                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<int>(value)));
+                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<int>(value)));
             }
             else if (value.type() == typeid(double))
             {
-                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<double>(value)));
+                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<double>(value)));
             }
             else if (value.type() == typeid(float))
             {
-                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<float>(value)));
+                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<float>(value)));
             }
             else if (value.type() == typeid(bool))
             {
-                logger::debug(fmt::format("{} - {}: {}", i, key, (std::any_cast<bool>(value) ? "true" : "false")));
+                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, (std::any_cast<bool>(value) ? "true" : "false")));
             }
             else if (value.type() == typeid(json))
             {
-                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<json>(value).dump()));
+                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<json>(value).dump()));
             }
             else
             {
-                logger::debug(fmt::format("{} - {}: {}", i, key, "<Unknown Type>"));
+                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, "<Unknown Type>"));
             }
         }
     }
@@ -97,7 +97,7 @@ namespace mb
         {
             // Unsupported type - throw error
             // Maybe supported later in future
-            logger::warn("Unsupported type stored for key `{}`", key);
+            LogOrigin::warn("Unsupported Type", fmt::format("Unsupported type stored for key `{}`", key));
             duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported type stored for key '%s'", key.c_str());
         }
 
@@ -148,7 +148,7 @@ namespace mb
         default:
             {
                 // Unsupported type - throw error
-                logger::warn("Unsupported type stored for key `{}`", key);
+                LogOrigin::warn("Unsupported Type", fmt::format("Unsupported type stored for key `{}`", key));
                 duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported type stored for key '%s'", key.c_str());
             }
         }

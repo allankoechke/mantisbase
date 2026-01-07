@@ -55,24 +55,85 @@ namespace mb {
     }
 
     void LogDatabase::createTable() const {
-        *m_session << R"(
-            CREATE TABLE IF NOT EXISTS mb_logs (
-                id text PRIMARY KEY,
-                timestamp TEXT NOT NULL,
-                level TEXT NOT NULL,
-                message TEXT NOT NULL,
-                data TEXT,
-                created_at INTEGER NOT NULL
-            )
-        )";
+        // Check if table exists and has old schema
+        bool needs_migration = false;
+        try {
+            int count = 0;
+            *m_session << "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='mb_logs'", soci::into(count);
+            if (count > 0) {
+                // Check if old columns exist
+                soci::rowset<soci::row> rs = (m_session->prepare << "PRAGMA table_info(mb_logs)");
+                bool has_topic = false;
+                bool has_origin = false;
+                for (const auto& r : rs) {
+                    std::string col_name = r.get<std::string>(1);
+                    if (col_name == "topic") has_topic = true;
+                    if (col_name == "origin") has_origin = true;
+                }
+                if (has_topic && !has_origin) {
+                    needs_migration = true;
+                }
+            }
+        } catch (...) {
+            // Table might not exist, continue with creation
+        }
+
+        if (needs_migration) {
+            // Migrate old schema to new schema
+            *m_session << R"(
+                CREATE TABLE IF NOT EXISTS mb_logs_new (
+                    id text PRIMARY KEY,
+                    timestamp TEXT NOT NULL,
+                    level TEXT NOT NULL,
+                    origin TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    details TEXT,
+                    data TEXT,
+                    created_at INTEGER NOT NULL
+                )
+            )";
+            
+            // Copy data from old table to new (mapping topic->message, description->details, adding origin)
+            *m_session << R"(
+                INSERT INTO mb_logs_new (id, timestamp, level, origin, message, details, data, created_at)
+                SELECT id, timestamp, level, 
+                       COALESCE(topic, 'System') as origin,
+                       COALESCE(topic, 'Unknown') as message,
+                       COALESCE(description, '') as details,
+                       COALESCE(data, '') as data,
+                       created_at
+                FROM mb_logs
+            )";
+            
+            // Drop old table and rename new one
+            *m_session << "DROP TABLE mb_logs";
+            *m_session << "ALTER TABLE mb_logs_new RENAME TO mb_logs";
+        } else {
+            // Create new table schema
+            *m_session << R"(
+                CREATE TABLE IF NOT EXISTS mb_logs (
+                    id text PRIMARY KEY,
+                    timestamp TEXT NOT NULL,
+                    level TEXT NOT NULL,
+                    origin TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    details TEXT,
+                    data TEXT,
+                    created_at INTEGER NOT NULL
+                )
+            )";
+        }
 
         // Create indexes for better query performance
         *m_session << "CREATE INDEX IF NOT EXISTS idx_mb_logs_timestamp ON mb_logs(timestamp)";
         *m_session << "CREATE INDEX IF NOT EXISTS idx_mb_logs_level ON mb_logs(level)";
+        *m_session << "CREATE INDEX IF NOT EXISTS idx_mb_logs_origin ON mb_logs(origin)";
+        *m_session << "CREATE INDEX IF NOT EXISTS idx_mb_logs_message ON mb_logs(message)";
         *m_session << "CREATE INDEX IF NOT EXISTS idx_mb_logs_created_at ON mb_logs(created_at)";
     }
 
-    bool LogDatabase::insertLog(const std::string &level, const std::string &message, const json &data) {
+    bool LogDatabase::insertLog(const std::string &level, const std::string &origin, const std::string &message, 
+                                 const std::string &details, const json &data) {
         try {
             // Get current timestamp
             const auto now = std::chrono::system_clock::now();
@@ -99,10 +160,10 @@ namespace mb {
                 std::lock_guard lock(m_dbMutexLock);
 
                 // Insert log entry
-                *m_session << "INSERT INTO mb_logs (id, timestamp, level, message, data, created_at) "
-                        "VALUES (:id, :timestamp, :level, :message, :data, :created_at)", soci::use(id),
-                        soci::use(timestamp), soci::use(level), soci::use(message),
-                        soci::use(data_str), soci::use(created_at);
+                *m_session << "INSERT INTO mb_logs (id, timestamp, level, origin, message, details, data, created_at) "
+                        "VALUES (:id, :timestamp, :level, :origin, :message, :details, :data, :created_at)", 
+                        soci::use(id), soci::use(timestamp), soci::use(level), soci::use(origin), 
+                        soci::use(message), soci::use(details), soci::use(data_str), soci::use(created_at);
             }
 
             return true;
@@ -131,7 +192,7 @@ namespace mb {
                 conditions.emplace_back("level = :level");
             }
             if (!search_filter.empty()) {
-                conditions.emplace_back("message LIKE :search");
+                conditions.emplace_back("(message LIKE :search OR details LIKE :search)");
             }
             if (!start_date.empty()) {
                 conditions.emplace_back("timestamp >= :start_date");
@@ -151,7 +212,7 @@ namespace mb {
 
             // Validate sort_by to prevent SQL injection
             std::string valid_sort_by = "timestamp";
-            if (sort_by == "level" || sort_by == "message" || sort_by == "timestamp" || sort_by == "created_at") {
+            if (sort_by == "level" || sort_by == "origin" || sort_by == "message" || sort_by == "details" || sort_by == "timestamp" || sort_by == "created_at") {
                 valid_sort_by = sort_by;
             }
 
@@ -162,7 +223,7 @@ namespace mb {
             int offset = (page - 1) * page_size;
 
             // Build query with proper WHERE clause (inputs validated, safe to use)
-            std::string query = "SELECT id, timestamp, level, message, data, created_at FROM mb_logs";
+            std::string query = "SELECT id, timestamp, level, origin, message, details, data, created_at FROM mb_logs";
 
             // Build WHERE clause with actual values (after validation, safe)
             if (!conditions.empty()) {
@@ -181,7 +242,7 @@ namespace mb {
                         escaped.replace(pos, 1, "''");
                         pos += 2;
                     }
-                    query += (first ? "" : " AND ") + std::string("message LIKE '%") + escaped + "%'";
+                    query += (first ? "" : " AND ") + std::string("(message LIKE '%") + escaped + "%' OR details LIKE '%" + escaped + "%')";
                     first = false;
                 }
                 if (!start_date.empty()) {
@@ -219,10 +280,12 @@ namespace mb {
                 log_entry["id"] = r.get<std::string>(0);
                 log_entry["timestamp"] = r.get<std::string>(1);
                 log_entry["level"] = r.get<std::string>(2);
-                log_entry["message"] = r.get<std::string>(3);
+                log_entry["origin"] = r.get<std::string>(3);
+                log_entry["message"] = r.get<std::string>(4);
+                log_entry["details"] = r.get<std::string>(5);
                 log_entry["data"] = json::object();
 
-                if (auto data_str = r.get<std::string>(4); !trim(data_str).empty()) {
+                if (auto data_str = r.get<std::string>(6); !trim(data_str).empty()) {
                     try {
                         log_entry["data"] = json::parse(data_str);
                     } catch (...) {
@@ -230,7 +293,7 @@ namespace mb {
                     }
                 }
 
-                log_entry["created_at"] = r.get<long long>(5);
+                log_entry["created_at"] = r.get<long long>(7);
                 logs_array.push_back(log_entry);
             }
 
@@ -261,7 +324,7 @@ namespace mb {
                 conditions.emplace_back("level = :level");
             }
             if (!search_filter.empty()) {
-                conditions.emplace_back("message LIKE :search");
+                conditions.emplace_back("(message LIKE :search OR details LIKE :search)");
             }
             if (!start_date.empty()) {
                 conditions.emplace_back("timestamp >= :start_date");
@@ -297,7 +360,7 @@ namespace mb {
                         escaped.replace(pos, 1, "''");
                         pos += 2;
                     }
-                    query += (first ? "" : " AND ") + std::string("message LIKE '%") + escaped + "%'";
+                    query += (first ? "" : " AND ") + std::string("(message LIKE '%") + escaped + "%' OR details LIKE '%" + escaped + "%')";
                     first = false;
                 }
                 if (!start_date.empty()) {

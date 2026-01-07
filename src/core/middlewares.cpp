@@ -118,14 +118,14 @@ namespace mb {
                                                   : entity.deleteRule();
 
                 if (rule.mode() == "public") {
-                    logger::trace("Public access, no auth required!");
+                    LogOrigin::authTrace("Public Access", "Public access, no auth required!");
                     // Open to all
                     return HandlerResponse::Unhandled;
                 }
 
                 // For empty mode (admin only)
                 if (rule.mode().empty()) {
-                    logger::trace("Restricted access, admin auth required!");
+                    LogOrigin::authTrace("Admin Access Required", "Restricted access, admin auth required!");
 
                     // Require at least one valid auth on any table
                     auto verification = req.getOr<json>("verification", json::object());
@@ -167,7 +167,7 @@ namespace mb {
                 }
 
                 if (rule.mode() == "auth" || (auth["entity"].is_string() && auth["entity"].get<std::string>() == "mb_admins")) {
-                    logger::trace("Restricted access, admin/user auth required!");
+                    LogOrigin::authTrace("User/Admin Access Required", "Restricted access, admin/user auth required!");
 
                     // Require at least one valid auth on any table
                     auto verification = req.getOr<json>("verification", json::object());
@@ -208,7 +208,7 @@ namespace mb {
                 }
 
                 if (rule.mode() == "custom") {
-                    logger::trace(fmt::format("Restricted access, custom expression `{}` to be evaluated", rule.expr()));
+                    LogOrigin::authTrace("Custom Expression Access", fmt::format("Restricted access, custom expression `{}` to be evaluated", rule.expr()));
 
                     // Evaluate expression
                     const std::string expr = rule.expr();
@@ -356,7 +356,7 @@ namespace mb {
                              });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {
-                logger::critical(fmt::format("Error authenticating as admin: {}", e.what()));
+                LogOrigin::authCritical("Admin Authentication Error", fmt::format("Error authenticating as admin: {}", e.what()));
                 // Send auth error
                 res.sendJSON(500, {
                                  {"data", json::object()},
@@ -438,7 +438,7 @@ namespace mb {
                 if (identifier.empty()) {
                     // If we can't identify the client, allow the request
                     // (could also deny, but allowing is safer for legitimate users)
-                    logger::warn("Rate limit: Unable to identify client, allowing request");
+                    LogOrigin::warn("Rate Limit Client Unknown", "Rate limit: Unable to identify client, allowing request");
                     return HandlerResponse::Unhandled;
                 }
                 
@@ -495,7 +495,7 @@ namespace mb {
                         )}
                     });
                     
-                    logger::warn(fmt::format("Rate limit exceeded for identifier: {} ({} requests in {}s window)",
+                    LogOrigin::warn("Rate Limit Exceeded", fmt::format("Rate limit exceeded for identifier: {} ({} requests in {}s window)",
                                 identifier, entry.requests.size(), window_seconds));
                     
                     return HandlerResponse::Handled;
@@ -527,7 +527,7 @@ namespace mb {
                 return HandlerResponse::Unhandled;
                 
             } catch (const std::exception &e) {
-                logger::critical(fmt::format("Rate limit middleware error: {}", e.what()));
+                LogOrigin::critical("Rate Limit Middleware Error", fmt::format("Rate limit middleware error: {}", e.what()));
                 // On error, allow the request to proceed (fail open)
                 return HandlerResponse::Unhandled;
             }

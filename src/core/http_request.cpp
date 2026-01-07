@@ -30,7 +30,7 @@ std::string MantisRequest::getRemoteAddr() const {
     }
 
     // Invalid IP in header, log warning and fall through
-    logger::warn(fmt::format("Invalid IP address in X-Forwarded-For header: {}", forwarded));
+    LogOrigin::warn("Invalid IP Header", fmt::format("Invalid IP address in X-Forwarded-For header: {}", forwarded));
   }
 
   // Fallback to direct connection IP
@@ -40,7 +40,7 @@ std::string MantisRequest::getRemoteAddr() const {
   }
 
   // If all else fails, return empty string (caller should handle)
-  logger::warn("Unable to determine valid client IP address");
+  LogOrigin::warn("IP Detection Failed", "Unable to determine valid client IP address");
   return direct_ip;
 }
 

@@ -51,11 +51,14 @@ namespace mb {
         /**
          * @brief Insert a log entry into the database.
          * @param level Log level (trace, debug, info, warn, critical)
-         * @param message Log message
+         * @param origin Component/system origin (System, Auth, Database, Entity, EntitySchema, etc.)
+         * @param message Short message (e.g., "Auth Failed", "Database Connected")
+         * @param details Long description of the message
          * @param data Optional JSON data associated with the log
          * @return true if insert successful, false otherwise
          */
-        bool insertLog(const std::string& level, const std::string& message, const json& data = json::object());
+        bool insertLog(const std::string& level, const std::string& origin, const std::string& message, 
+                       const std::string& details, const json& data = json::object());
 
         /**
          * @brief Get logs with pagination, filtering, and sorting.

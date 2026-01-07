@@ -107,7 +107,7 @@ namespace mb {
                              }
                 );
             } catch (const MantisException &e) {
-                logger::critical(fmt::format("Error creating entity schema\n\t— {}", e.what()));
+                LogOrigin::entitySchemaCritical("Schema Creation Error", fmt::format("Error creating entity schema\n\t— {}", e.what()));
 
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
@@ -116,7 +116,7 @@ namespace mb {
                              }
                 );
             } catch (const std::exception &e) {
-                logger::critical(fmt::format("Error creating entity schema\n\t- {}", e.what()));
+                LogOrigin::entitySchemaCritical("Schema Creation Error", fmt::format("Error creating entity schema\n\t— {}", e.what()));
 
                 res.sendJSON(500, {
                                  {"data", json::object()},

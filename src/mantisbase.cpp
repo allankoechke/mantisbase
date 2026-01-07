@@ -18,8 +18,8 @@ namespace mb {
     MantisBase::~MantisBase() {
         if (!m_toStartServer) {
             std::cout << std::endl;
-            logger::info(
-                "Exitting, nothing else to do. Did you intend to run the server? Try `mantisapp serve` instead.");
+            LogOrigin::info(
+                "Exiting Application", "Exitting, nothing else to do. Did you intend to run the server? Try `mantisapp serve` instead.");
         }
 
         // Terminate any shared pointers
@@ -187,7 +187,7 @@ namespace mb {
         instance().close();
 
         if (exitCode != 0)
-            logger::critical(fmt::format("Exiting Application with Code = {}", exitCode));
+            LogOrigin::critical("Application Exit", fmt::format("Exiting Application with Code = {}", exitCode));
 
         std::exit(exitCode);
     }
@@ -198,43 +198,43 @@ namespace mb {
             return;
         }
 
-        logger::trace("[MB] Starting closing all units ...");
+        LogOrigin::trace("Shutdown Started", "[MB] Starting closing all units ...");
         try {
             if (m_router) {
-                logger::trace("[MB] Starting Router closing ...");
+                LogOrigin::trace("Router Shutdown", "[MB] Starting Router closing ...");
                 m_router->close();
-                logger::trace("[MB] Finished Router closing ...");
+                LogOrigin::trace("Router Shutdown", "[MB] Finished Router closing ...");
             }
 
             if (m_kvStore) {
-                logger::trace("[MB] Starting KV Store closing ...");
+                LogOrigin::trace("KV Store Shutdown", "[MB] Starting KV Store closing ...");
                 // m_kvStore.reset();
-                logger::trace("[MB] Finished KV Store closing ...");
+                LogOrigin::trace("KV Store Shutdown", "[MB] Finished KV Store closing ...");
             }
 
             if (m_database) {
-                logger::trace("[MB] Starting DB closing ...");
+                LogOrigin::trace("Database Shutdown", "[MB] Starting DB closing ...");
                 m_database->disconnect();
-                logger::trace("[MB] Finished DB Store closing ...");
+                LogOrigin::trace("Database Shutdown", "[MB] Finished DB Store closing ...");
             }
 
             if (m_router) {
-                logger::trace("[MB] Resetting router instance ...");
+                LogOrigin::trace("Router Reset", "[MB] Resetting router instance ...");
                 // m_router.reset();
-                logger::trace("[MB] Resetting router instance [OK] ...");
+                LogOrigin::trace("Router Reset", "[MB] Resetting router instance [OK] ...");
             }
 
             if (m_opts) {
-                logger::trace("[MB] Resetting opts instance [OK] ...");
+                LogOrigin::trace("Options Reset", "[MB] Resetting opts instance [OK] ...");
                 // m_opts.reset();
-                logger::trace("[MB] Resetting opts instance [OK] ...");
+                LogOrigin::trace("Options Reset", "[MB] Resetting opts instance [OK] ...");
             }
         } catch (const std::exception &e) {
             std::cerr << "[MB]  Error during reset: " << e.what() << std::endl;
         }
 
         m_isCreated.store(false);
-        logger::debug("[MB] Finished closing all units");
+        LogOrigin::debug("Shutdown Complete", "[MB] Finished closing all units");
     }
 
     int MantisBase::run() {
@@ -315,7 +315,7 @@ namespace mb {
             const auto token = Auth::createToken(claims, 30 * 60); // Token valid for 30mins
 
             const std::string url = std::format("http://localhost:{}/mb/setup?token={}", m_port, token);
-            logger::info(fmt::format(
+            LogOrigin::info("Admin Setup", fmt::format(
                 "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins add <email> <password>\n",
                 url));
 
@@ -326,14 +326,14 @@ namespace mb {
 #elif __linux__
             const std::string command = "xdg-open " + url;
 #else
-            logger::critical("Unsupported platform");
+            LogOrigin::critical("Unsupported Platform", "Unsupported platform");
 #endif
 
             if (int result = std::system(command.c_str()); result != 0) {
-                logger::info(fmt::format("Could not open browser, result code: {}", result));
+                LogOrigin::info("Browser Open Failed", fmt::format("Could not open browser, result code: {}", result));
             }
         } catch (const std::exception &e) {
-            logger::critical(fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));
+            LogOrigin::critical("Admin Dashboard Failed", fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));
         }
 
         std::cout << std::endl;
@@ -392,7 +392,7 @@ namespace mb {
             return;
 
         m_port = port;
-        logger::debug(fmt::format("Setting Server Port to {}", port));
+        LogOrigin::debug("Server Configuration", fmt::format("Setting Server Port to {}", port));
     }
 
     std::string MantisBase::host() const {
@@ -404,7 +404,7 @@ namespace mb {
             return;
 
         m_host = host;
-        logger::debug(fmt::format("Setting Server Host to {}", host));
+        LogOrigin::debug("Server Configuration", fmt::format("Setting Server Host to {}", host));
     }
 
     int MantisBase::poolSize() const {
@@ -533,7 +533,7 @@ namespace mb {
 
     void MantisApp::loadAndExecuteScript(const std::string &filePath) const {
         if (!fs::exists(fs::path(filePath))) {
-            logger::trace(fmt::format("Executing a file that does not exist, path `{}`", filePath));
+            LogOrigin::trace("File Execution", fmt::format("Executing a file that does not exist, path `{}`", filePath));
             return;
         }
 
@@ -546,7 +546,7 @@ namespace mb {
         try {
             dukglue_peval<void>(m_dukCtx, scriptContent.c_str());
         } catch (const DukErrorException &e) {
-            logger::critical(fmt::format("Error loading file at {} \n\tError: {}", filePath, e.what()));
+            LogOrigin::critical("File Load Error", fmt::format("Error loading file at {} \n\tError: {}", filePath, e.what()));
         }
     }
 

@@ -47,13 +47,13 @@ namespace mb
             const auto err = std::format("Route for {} {} not found!", method, path);
             // We didn't find that route, return error
             res["error"] = err;
-            logger::warn(fmt::format("{}", err));
+            LogOrigin::warn("Route Not Found", fmt::format("{}", err));
             return res;
         }
 
         // Remove item found at the iterator
         routes.erase(it);
-        logger::info(fmt::format("Route for {} {} erased!", method, path));
+        LogOrigin::info("Route Removed", fmt::format("Route for {} {} erased!", method, path));
         return res;
     }
 }

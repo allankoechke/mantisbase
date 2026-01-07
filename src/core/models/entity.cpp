@@ -6,7 +6,7 @@
 
 namespace mb {
     Entity::Entity(const nlohmann::json &schema) {
-        logger::trace("Creating Entity from JSON Schema", schema);
+        LogOrigin::entityTrace("Entity Creation", "Creating Entity from JSON Schema", schema);
 
         if (!schema.contains("name") || !schema["name"].is_string() || schema["name"].empty())
             throw MantisException(400, "Missing required entity `name` in schema!", schema.dump());
@@ -504,7 +504,7 @@ namespace mb {
                     soci::use(id), soci::into(_nid);
             return sql->got_data();
         } catch (soci::soci_error &e) {
-            logger::trace(fmt::format("TablesUnit::RecordExists error: {}", e.what()));
+            LogOrigin::entityTrace("Record Exists Error", fmt::format("TablesUnit::RecordExists error: {}", e.what()));
             return false;
         }
     }
@@ -529,7 +529,7 @@ namespace mb {
             if (hasField(col_name).has_value()) {
                 valid_columns.push_back(col_name);
             } else {
-                logger::warn(fmt::format("Invalid column name '{}' in queryFromCols for entity '{}'", col_name, name()));
+                LogOrigin::entityWarn("Invalid Column", fmt::format("Invalid column name '{}' in queryFromCols for entity '{}'", col_name, name()));
             }
         }
 

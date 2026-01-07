@@ -36,7 +36,7 @@ namespace mb {
             return dukglue_peval<bool>(ctx.get(), expr.c_str());
         } catch (const DukErrorException &e) {
             // Handle evaluation errors
-            logger::critical(fmt::format("Error evaluating expression `{}`, error: {}", expr, e.what()));
+            LogOrigin::critical("Expression Evaluation Error", fmt::format("Error evaluating expression `{}`, error: {}", expr, e.what()));
             return false;
         }
     }

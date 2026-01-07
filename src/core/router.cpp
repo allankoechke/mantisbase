@@ -95,7 +95,7 @@ namespace mb {
         try {
             // Check if server can bind to port before launching
             if (!svr.is_valid()) {
-                logger::critical("Server is not valid. Maybe port is in use or permissions issue.\n");
+                LogOrigin::critical("Server Invalid", "Server is not valid. Maybe port is in use or permissions issue.");
                 return false;
             }
 
@@ -130,7 +130,7 @@ namespace mb {
             });
 
             if (!svr.listen(host, port)) {
-                logger::critical(fmt::format("Error: Failed to bind to {}:{}", host, port));
+                LogOrigin::critical("Server Bind Failed", fmt::format("Error: Failed to bind to {}:{}", host, port));
                 notifier.join();
                 return false;
             }
@@ -138,9 +138,9 @@ namespace mb {
             notifier.join();
             return true;
         } catch (const std::exception &e) {
-            logger::critical(fmt::format("Failed to start server: {}", e.what()));
+            LogOrigin::critical("Server Start Failed", fmt::format("Failed to start server: {}", e.what()));
         } catch (...) {
-            logger::critical("Failed to start server: Unknown Error");
+            LogOrigin::critical("Server Start Failed", "Failed to start server: Unknown Error");
         }
 
         return false;
@@ -150,7 +150,7 @@ namespace mb {
         if (svr.is_running()) {
             svr.stop();
             m_entityMap.clear();
-            logger::info("HTTP Server Stopped.");
+            LogOrigin::info("Server Stopped", "HTTP Server Stopped.");
         }
     }
 
@@ -159,21 +159,21 @@ namespace mb {
     }
 
     void Router::Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
-        logger::info(fmt::format("Creating route [ GET ] {}", path));
+        LogOrigin::info("Route Created", fmt::format("Creating route [ GET ] {}", path));
         m_routeRegistry.add("GET", path, handler, middlewares);
         globalRouteHandler("GET", path);
     }
 
     void Router::Post(const std::string &path, const HandlerWithContentReaderFn &handler,
                       const Middlewares &middlewares) {
-        logger::info(fmt::format("Creating route [ POST ] {}", path));
+        LogOrigin::info("Route Created", fmt::format("Creating route [ POST ] {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         globalRouteHandlerWithReader("POST", path);
     }
 
     void Router::Post(const std::string &path, const HandlerFn &handler,
                       const Middlewares &middlewares) {
-        logger::info(fmt::format("Creating route [ POST ] {}", path));
+        LogOrigin::info("Route Created", fmt::format("Creating route [ POST ] {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         globalRouteHandler("POST", path);
     }
@@ -390,7 +390,7 @@ namespace mb {
 
         // Add /public static file serving directory
         if (const auto mount_ok = svr.set_mount_point("/", mApp.publicDir()); !mount_ok) {
-            logger::critical(fmt::format("Failed to setup mount point directory for '/' at '{}'",
+            LogOrigin::critical("Mount Point Setup Failed", fmt::format("Failed to setup mount point directory for '/' at '{}'",
                              mApp.publicDir()));
         }
     }
@@ -409,7 +409,7 @@ namespace mb {
                 }
 
                 if (!fs.exists(path)) {
-                    logger::trace(fmt::format("{} path does not exists", path));
+                    LogOrigin::trace("Path Missing", fmt::format("{} path does not exists", path));
 
                     // fallback to index.html for React routes
                     path = "/public/index.html";
@@ -426,18 +426,18 @@ namespace mb {
 
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(404);
-                    logger::critical(fmt::format("Error processing /admin response: {}", e.what()));
+                    LogOrigin::critical("Admin Response Error", fmt::format("Error processing /admin response: {}", e.what()));
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
                 res.setReason(e.what());
-                logger::critical(fmt::format("Error processing /admin request: {}", e.what()));
+                LogOrigin::critical("Admin Request Error", fmt::format("Error processing /admin request: {}", e.what()));
             }
         };
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
-        logger::trace("Registering /api/files/:entity/:file GET endpoint ...");
+        LogOrigin::trace("Endpoint Registration", "Registering /api/files/:entity/:file GET endpoint ...");
         return [](const MantisRequest &req, MantisResponse &res) {
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");

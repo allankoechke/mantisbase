@@ -139,7 +139,7 @@ namespace mb {
 
         // Initialize log database now that data directory is set
         logger::initDb(dataDir());
-        logger::info(fmt::format("Initializing mantisbase v{}", appVersion()));
+        LogOrigin::info("Initialization", fmt::format("Initializing mantisbase v{}", appVersion()));
 
         const auto scripts_dir = dirFromPath(_scriptsDir);
         setScriptsDir(scripts_dir.empty() ? dirFromPath("scripts") : scripts_dir);
@@ -173,7 +173,7 @@ namespace mb {
         }
 
         if (!m_database->isConnected()) {
-            logger::critical("Database was not opened!");
+            LogOrigin::dbCritical("Database Not Opened", "Database was not opened!");
             quit(-1, "Database opening failed!");
         }
 
@@ -200,13 +200,13 @@ namespace mb {
 
                 if (const auto val_err = Validators::validatePreset("email", email);
                     val_err.has_value()) {
-                    logger::critical(fmt::format("Error validating admin email: {}", val_err.value()));
+                    LogOrigin::authCritical("Email Validation Failed", fmt::format("Error validating admin email: {}", val_err.value()));
                     quit(-1, "Email validation failed!");
                 }
 
                 if (const auto val_pswd_err = Validators::validatePreset("password", password);
                     val_pswd_err.has_value()) {
-                    logger::critical(fmt::format("Error validating email: {}", val_pswd_err.value()));
+                    LogOrigin::authCritical("Password Validation Failed", fmt::format("Error validating password: {}", val_pswd_err.value()));
                     quit(-1, "Email validation failed!");
                 }
 
@@ -217,35 +217,35 @@ namespace mb {
                     const auto admin_user = admin_entity.create({{"email", email}, {"password", password}});
 
                     // Admin User was created!
-                    logger::info(fmt::format("Admin account created, use '{}' to access the `/mb` dashboard.",
+                    LogOrigin::authInfo("Admin Created", fmt::format("Admin account created, use '{}' to access the `/mb` dashboard.",
                                  admin_user.at("email").get<std::string>()));
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    logger::critical(fmt::format("Failed to created Admin user: {}", e.what()));
+                    LogOrigin::authCritical("Admin Creation Failed", fmt::format("Failed to created Admin user: {}", e.what()));
                     quit(500, e.what());
                 }
             } else if (admins_command.is_subcommand_used("rm")) {
                 std::string identifier = rm_command.get("identifier");
                 // Process rm command - identifier could be email or GUID
                 if (identifier.empty()) {
-                    logger::critical("Invalid admin `email` or `id` provided!");
+                    LogOrigin::authCritical("Invalid Admin Identifier", "Invalid admin `email` or `id` provided!");
                     quit(400, "");
                 }
 
                 auto admin_entity = entity("mb_admins");
                 auto resp = admin_entity.queryFromCols(identifier, {"id", "email"});
                 if (!resp.has_value()) {
-                    logger::critical(fmt::format("Admin not found matching id/email on '{}'",
+                    LogOrigin::authCritical("Admin Not Found", fmt::format("Admin not found matching id/email on '{}'",
                                      identifier));
                     quit(404, "");
                 }
 
                 try {
                     admin_entity.remove(resp.value().at("id").get<std::string>());
-                    logger::info("Admin removed successfully.");
+                    LogOrigin::authInfo("Admin Removed", "Admin removed successfully.");
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    logger::critical(fmt::format("Failed to remove admin account: {}", e.what()));
+                    LogOrigin::authCritical("Admin Removal Failed", fmt::format("Failed to remove admin account: {}", e.what()));
                     quit(500, e.what());
                 }
             } else {
@@ -254,7 +254,7 @@ namespace mb {
             }
         } else if (program.is_subcommand_used("migrate")) {
             // Do migration stuff here
-            logger::info("Migration CMD support has not been implemented yet! ");
+            LogOrigin::info("Migration Not Implemented", "Migration CMD support has not been implemented yet! ");
 
             if (admins_command.is_subcommand_used("load")) {
                 std::string file = load_command.get("file");
