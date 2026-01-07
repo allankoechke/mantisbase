@@ -162,9 +162,9 @@ namespace mb {
 
         /**
          * @brief Remove schema from cache.
-         * @param table_name Table name to remove
+         * @param entity_name Table name to remove
          */
-        void removeSchemaCache(const std::string &table_name);
+        void removeSchemaCache(const std::string &entity_name);
 
         // ----------- UTILS METHODS ----------- //
         /**
@@ -185,7 +185,7 @@ namespace mb {
         static std::string getMimeType(const std::string &path);
 
         // ----------- REQ/RES METHODS ----------- //
-        std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute() const;
+        static std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute() ;
 
         static std::function<void(const MantisRequest &, MantisResponse &)> fileServingHandler();
 
@@ -208,6 +208,8 @@ namespace mb {
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogout();
 
         std::function<void(MantisRequest &, MantisResponse &)> handleSetupAdmin();
+
+        static std::function<void(const MantisRequest &, MantisResponse &)> handleLogs();
 
         // Member Variables
         MantisBase &mApp;

@@ -9,7 +9,7 @@ namespace mb {
             auto res = json::parse(json_str);
             return res;
         } catch (const std::exception &e) {
-            logger::critical("JSON parse error: {}", e.what());
+            logger::critical(fmt::format("JSON parse error: {}", e.what()));
             return std::nullopt;
         }
     }

@@ -4,7 +4,7 @@
  */
 
 #include "../../include/mantisbase/core/files.h"
-#include "../../include/mantisbase/core/logger.h"
+#include "../../include/mantisbase/core/logger/logger.h"
 #include "../../include/mantisbase/mantisbase.h"
 
 #include <fstream>
@@ -25,7 +25,7 @@ namespace mb {
         }
 
         if (const auto dir_path = dirPath(entity_name); !fs::exists(dir_path)) {
-            logger::trace("Creating Dir: {}", dir_path);
+            logger::trace(fmt::format("Creating Dir: {}", dir_path));
             fs::create_directories(dir_path);
         }
     }
@@ -43,8 +43,8 @@ namespace mb {
                 std::format("New entity name `{}` is not a valid SQL table name format!", new_entity_name));
         }
 
-        logger::trace("Renaming folder name from `files/{}` to `files/{}`",
-            old_entity_name, new_entity_name);
+        logger::trace(fmt::format("Renaming folder name from `files/{}` to `files/{}`",
+            old_entity_name, new_entity_name));
 
         // Rename folder if it exists, else, create it
         if (const auto old_path = dirPath(old_entity_name); fs::exists(old_path))
@@ -55,9 +55,9 @@ namespace mb {
     }
 
     void Files::deleteDir(const std::string &entity_name) {
-        logger::trace("Dropping dir files/{}/* completed.", entity_name);
+        logger::trace(fmt::format("Dropping dir files/{}/* started.", entity_name));
         fs::remove_all(dirPath(entity_name));
-        logger::trace("Dropping dir files/{}/* completed.", entity_name);
+        logger::trace(fmt::format("Dropping dir files/{}/* completed.", entity_name));
     }
 
     std::optional<std::string> Files::getFilePath(const std::string &entity_name, const std::string &filename) {
@@ -120,14 +120,14 @@ namespace mb {
         try {
             // Remove the file, only if it exists
             if (const auto path = filePath(entity_name, filename); fs::exists(path)) {
-                logger::trace("Removing file at `<data dir>/{}/{}`", entity_name, filename);
+                logger::trace(fmt::format("Removing file at `<data dir>/{}/{}`", entity_name, filename));
                 fs::remove(path);
                 return true;
             }
 
-            logger::warn("Missing file: `files/{}/{}`.", entity_name, filename);
+            logger::warn(fmt::format("Missing file: `files/{}/{}`.", entity_name, filename));
         } catch (const std::exception &e) {
-            logger::critical("Error removing file\n\t{}", e.what());
+            logger::critical(fmt::format("Error removing file\n\t{}", e.what()));
         }
 
         return false;
@@ -145,7 +145,7 @@ namespace mb {
             const auto path = filePath(entity_name, filename);
             return fs::exists(path);
         } catch (const std::exception &e) {
-            logger::critical("Error removing file\n\t- {}", e.what());
+            logger::critical(fmt::format("Error removing file\n\t- {}", e.what()));
             return false;
         }
     }

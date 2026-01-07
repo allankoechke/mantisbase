@@ -27,16 +27,9 @@ namespace mb {
 
         // Destroy duk context
         duk_destroy_heap(m_dukCtx);
-
-        // if (m_logger) {
-        //     logger::trace("[MB] Resetting logger instance, BYE!");
-        //     m_logger.reset();
-        // }
     }
 
     void MantisBase::init(const int argc, char *argv[]) {
-        logger::info("Initializing MantisBase, v{}", appVersion());
-
         // Set that the object was created successfully, now initializing
         m_isCreated = true;
 
@@ -182,7 +175,7 @@ namespace mb {
             quit(-1, "Failed to create database directories!");
 
         // Create instance objects
-        m_logger = std::make_unique<LogsMgr>();
+        m_logger = std::make_unique<Logger>();
         m_database = std::make_unique<Database>(); // depends on log()
         m_router = std::make_unique<Router>(); // depends on db() & http()
         m_kvStore = std::make_unique<KVStore>(); // depends on db(), router() & http()
@@ -194,7 +187,7 @@ namespace mb {
         instance().close();
 
         if (exitCode != 0)
-            logger::critical("Exiting Application with Code = {}", exitCode);
+            logger::critical(fmt::format("Exiting Application with Code = {}", exitCode));
 
         std::exit(exitCode);
     }
@@ -267,7 +260,7 @@ namespace mb {
         return *m_database;
     }
 
-    LogsMgr &MantisBase::log() const {
+    Logger &MantisBase::log() const {
         return *m_logger;
     }
 
@@ -322,9 +315,9 @@ namespace mb {
             const auto token = Auth::createToken(claims, 30 * 60); // Token valid for 30mins
 
             const std::string url = std::format("http://localhost:{}/mb/setup?token={}", m_port, token);
-            logger::info(
+            logger::info(fmt::format(
                 "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins add <email> <password>\n",
-                url);
+                url));
 
 #ifdef _WIN32
             const std::string command = "start " + url;
@@ -337,10 +330,10 @@ namespace mb {
 #endif
 
             if (int result = std::system(command.c_str()); result != 0) {
-                logger::info("Could not open browser, result code: {}", result);
+                logger::info(fmt::format("Could not open browser, result code: {}", result));
             }
         } catch (const std::exception &e) {
-            logger::critical("Failed to spin admin dashboard\n\t— {}", e.what());
+            logger::critical(fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));
         }
 
         std::cout << std::endl;
@@ -399,7 +392,7 @@ namespace mb {
             return;
 
         m_port = port;
-        logger::debug("Setting Server Port to {}", port);
+        logger::debug(fmt::format("Setting Server Port to {}", port));
     }
 
     std::string MantisBase::host() const {
@@ -411,7 +404,7 @@ namespace mb {
             return;
 
         m_host = host;
-        logger::debug("Setting Server Host to {}", host);
+        logger::debug(fmt::format("Setting Server Host to {}", host));
     }
 
     int MantisBase::poolSize() const {
@@ -540,7 +533,7 @@ namespace mb {
 
     void MantisApp::loadAndExecuteScript(const std::string &filePath) const {
         if (!fs::exists(fs::path(filePath))) {
-            logger::trace("Executing a file that does not exist, path `{}`", filePath);
+            logger::trace(fmt::format("Executing a file that does not exist, path `{}`", filePath));
             return;
         }
 
@@ -553,7 +546,7 @@ namespace mb {
         try {
             dukglue_peval<void>(m_dukCtx, scriptContent.c_str());
         } catch (const DukErrorException &e) {
-            logger::critical("Error loading file at {} \n\tError: {}", filePath, e.what());
+            logger::critical(fmt::format("Error loading file at {} \n\tError: {}", filePath, e.what()));
         }
     }
 

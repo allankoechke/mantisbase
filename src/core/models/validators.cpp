@@ -6,7 +6,7 @@
 #include "../../../include/mantisbase/mantisbase.h"
 #include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/utils.h"
-#include "../../../include/mantisbase/core/logger.h"
+#include "../../../include/mantisbase/core/logger/logger.h"
 #include <soci/soci.h>
 
 namespace mb {
@@ -143,7 +143,7 @@ namespace mb {
 
             return std::nullopt;
         } catch (const std::exception &e) {
-            logger::trace("Required Constraints Exception: {}", e.what());
+            logger::trace(fmt::format("Required Constraints Exception: {}", e.what()));
             return std::nullopt;
         }
     }

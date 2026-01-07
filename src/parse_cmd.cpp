@@ -3,7 +3,7 @@
 //
 
 #include "../include/mantisbase/mantisbase.h"
-#include "../include/mantisbase/core/logger.h"
+#include "../include/mantisbase/core/logger/logger.h"
 #include "../include/mantisbase/mantis.h"
 
 #include <argparse/argparse.hpp>
@@ -116,9 +116,9 @@ namespace mb {
         // Get main program args
         auto db = program.present<std::string>("--database").value_or("sqlite");
         const auto connString = program.present<std::string>("--connection").value_or("");
-        const auto dataDir = program.present<std::string>("--dataDir").value_or("data");
-        const auto pubDir = program.present<std::string>("--publicDir").value_or("public");
-        const auto scriptsDir = program.present<std::string>("--scriptsDir").value_or("scripts");
+        const auto _dataDir = program.present<std::string>("--dataDir").value_or("data");
+        const auto _pubDir = program.present<std::string>("--publicDir").value_or("public");
+        const auto _scriptsDir = program.present<std::string>("--scriptsDir").value_or("scripts");
         const auto pools = program.present<int>("--poolSize").value_or(-1);
 
         // Set trace mode if flag is set
@@ -131,13 +131,17 @@ namespace mb {
         // If directory paths are not valid, we default back to the
         // default directory for the respective items (`public`, `data` and `scripts`)
         // relative to the application binary.
-        const auto pub_dir = dirFromPath(pubDir);
+        const auto pub_dir = dirFromPath(_pubDir);
         setPublicDir(pub_dir.empty() ? dirFromPath("public") : pub_dir);
 
-        const auto data_dir = dirFromPath(dataDir);
+        const auto data_dir = dirFromPath(_dataDir);
         setDataDir(data_dir.empty() ? dirFromPath("data") : data_dir);
 
-        const auto scripts_dir = dirFromPath(scriptsDir);
+        // Initialize log database now that data directory is set
+        logger::initDb(dataDir());
+        logger::info(fmt::format("Initializing mantisbase v{}", appVersion()));
+
+        const auto scripts_dir = dirFromPath(_scriptsDir);
         setScriptsDir(scripts_dir.empty() ? dirFromPath("scripts") : scripts_dir);
 
         // Ensure objects are first created, taking into account the cmd args passed in
@@ -196,13 +200,13 @@ namespace mb {
 
                 if (const auto val_err = Validators::validatePreset("email", email);
                     val_err.has_value()) {
-                    logger::critical("Error validating admin email: {}", val_err.value());
+                    logger::critical(fmt::format("Error validating admin email: {}", val_err.value()));
                     quit(-1, "Email validation failed!");
                 }
 
                 if (const auto val_pswd_err = Validators::validatePreset("password", password);
                     val_pswd_err.has_value()) {
-                    logger::critical("Error validating email: {}", val_pswd_err.value());
+                    logger::critical(fmt::format("Error validating email: {}", val_pswd_err.value()));
                     quit(-1, "Email validation failed!");
                 }
 
@@ -213,11 +217,11 @@ namespace mb {
                     const auto admin_user = admin_entity.create({{"email", email}, {"password", password}});
 
                     // Admin User was created!
-                    logger::info("Admin account created, use '{}' to access the `/admin` dashboard.",
-                                 admin_user.at("email").get<std::string>());
+                    logger::info(fmt::format("Admin account created, use '{}' to access the `/mb` dashboard.",
+                                 admin_user.at("email").get<std::string>()));
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    logger::critical("Failed to created Admin user: {}", e.what());
+                    logger::critical(fmt::format("Failed to created Admin user: {}", e.what()));
                     quit(500, e.what());
                 }
             } else if (admins_command.is_subcommand_used("rm")) {
@@ -231,8 +235,8 @@ namespace mb {
                 auto admin_entity = entity("mb_admins");
                 auto resp = admin_entity.queryFromCols(identifier, {"id", "email"});
                 if (!resp.has_value()) {
-                    logger::critical("Admin not found matching id/email on '{}'",
-                                     identifier);
+                    logger::critical(fmt::format("Admin not found matching id/email on '{}'",
+                                     identifier));
                     quit(404, "");
                 }
 
@@ -241,7 +245,7 @@ namespace mb {
                     logger::info("Admin removed successfully.");
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    logger::critical("Failed to remove admin account: {}", e.what());
+                    logger::critical(fmt::format("Failed to remove admin account: {}", e.what()));
                     quit(500, e.what());
                 }
             } else {

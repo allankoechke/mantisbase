@@ -1,6 +1,6 @@
 #include "../../include/mantisbase/core/context_store.h"
 #include "../../include/mantisbase/mantisbase.h"
-#include "../../include/mantisbase/core/logger.h"
+#include "../../include/mantisbase/core/logger/logger.h"
 
 #ifdef MANTIS_ENABLE_SCRIPTING
     #include <dukglue/dukglue.h>
@@ -15,35 +15,35 @@ namespace mb
             const auto i = "ContextStore::Dump";
             if (value.type() == typeid(std::string))
             {
-                logger::debug("{} - {}: {}", i, key, std::any_cast<std::string>(value));
+                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<std::string>(value)));
             }
             else if (value.type() == typeid(const char*))
             {
-                logger::debug("{} - {}: {}", i, key, std::any_cast<const char*>(value));
+                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<const char*>(value)));
             }
             else if (value.type() == typeid(int))
             {
-                logger::debug("{} - {}: {}", i, key, std::any_cast<int>(value));
+                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<int>(value)));
             }
             else if (value.type() == typeid(double))
             {
-                logger::debug("{} - {}: {}", i, key, std::any_cast<double>(value));
+                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<double>(value)));
             }
             else if (value.type() == typeid(float))
             {
-                logger::debug("{} - {}: {}", i, key, std::any_cast<float>(value));
+                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<float>(value)));
             }
             else if (value.type() == typeid(bool))
             {
-                logger::debug("{} - {}: {}", i, key, (std::any_cast<bool>(value) ? "true" : "false"));
+                logger::debug(fmt::format("{} - {}: {}", i, key, (std::any_cast<bool>(value) ? "true" : "false")));
             }
             else if (value.type() == typeid(json))
             {
-                logger::debug("{} - {}: {}", i, key, std::any_cast<json>(value).dump());
+                logger::debug(fmt::format("{} - {}: {}", i, key, std::any_cast<json>(value).dump()));
             }
             else
             {
-                logger::debug("{} - {}: {}", i, key, "<Unknown Type>");
+                logger::debug(fmt::format("{} - {}: {}", i, key, "<Unknown Type>"));
             }
         }
     }

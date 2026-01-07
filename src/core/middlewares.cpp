@@ -208,7 +208,7 @@ namespace mb {
                 }
 
                 if (rule.mode() == "custom") {
-                    logger::trace("Restricted access, custom expression `{}` to be evaluated", rule.expr());
+                    logger::trace(fmt::format("Restricted access, custom expression `{}` to be evaluated", rule.expr()));
 
                     // Evaluate expression
                     const std::string expr = rule.expr();
@@ -356,7 +356,7 @@ namespace mb {
                              });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {
-                logger::critical("Error authenticating as admin: {}", e.what());
+                logger::critical(fmt::format("Error authenticating as admin: {}", e.what()));
                 // Send auth error
                 res.sendJSON(500, {
                                  {"data", json::object()},
@@ -495,8 +495,8 @@ namespace mb {
                         )}
                     });
                     
-                    logger::warn("Rate limit exceeded for identifier: {} ({} requests in {}s window)", 
-                                identifier, entry.requests.size(), window_seconds);
+                    logger::warn(fmt::format("Rate limit exceeded for identifier: {} ({} requests in {}s window)",
+                                identifier, entry.requests.size(), window_seconds));
                     
                     return HandlerResponse::Handled;
                 }
@@ -527,7 +527,7 @@ namespace mb {
                 return HandlerResponse::Unhandled;
                 
             } catch (const std::exception &e) {
-                logger::critical("Rate limit middleware error: {}", e.what());
+                logger::critical(fmt::format("Rate limit middleware error: {}", e.what()));
                 // On error, allow the request to proceed (fail open)
                 return HandlerResponse::Unhandled;
             }

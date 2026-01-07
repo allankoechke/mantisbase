@@ -1,5 +1,5 @@
 #include "../../include/mantisbase/core/route_registry.h"
-#include "../../include/mantisbase/core/logger.h"
+#include "../../include/mantisbase/core/logger/logger.h"
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/core/http.h"
 #include "../../include/mantisbase/core/http.h"
@@ -47,13 +47,13 @@ namespace mb
             const auto err = std::format("Route for {} {} not found!", method, path);
             // We didn't find that route, return error
             res["error"] = err;
-            logger::warn("{}", err);
+            logger::warn(fmt::format("{}", err));
             return res;
         }
 
         // Remove item found at the iterator
         routes.erase(it);
-        logger::info("Route for {} {} erased!", method, path);
+        logger::info(fmt::format("Route for {} {} erased!", method, path));
         return res;
     }
 }

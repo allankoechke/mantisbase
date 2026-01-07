@@ -45,7 +45,7 @@ namespace mb {
     EntitySchema EntitySchema::fromSchema(const json &entity_schema) {
         EntitySchema eSchema;
 
-        logger::trace("Creating Entity Schema from JSON\n\t- {}", entity_schema.dump());
+        logger::trace(fmt::format("Creating Entity Schema from JSON\n\t- {}", entity_schema.dump()));
 
         if (!entity_schema.contains("name") || !entity_schema["name"].is_string() || entity_schema["name"].empty())
             throw MantisException(400, "Missing required entity `name` in schema!", entity_schema.dump());
@@ -628,8 +628,8 @@ namespace mb {
                                 !(field.type() == "string" && refFieldSchema.type() == "string")) {
                                 // Allow string types to reference string types, but warn about type mismatches
                                 // The database will enforce this more strictly
-                                logger::warn("Foreign key field `{}` type `{}` may not match referenced field `{}` type `{}` in entity `{}`",
-                                            field.name(), field.type(), refField, refFieldSchema.type(), refEntity);
+                                logger::warn(fmt::format("Foreign key field `{}` type `{}` may not match referenced field `{}` type `{}` in entity `{}`",
+                                            field.name(), field.type(), refField, refFieldSchema.type(), refEntity));
                             }
                         } catch (const MantisException &e) {
                             // If entity exists but we can't get its schema, that's an error
@@ -640,9 +640,9 @@ namespace mb {
                     } else {
                         // Entity doesn't exist yet - this might be okay if entities are being created in sequence
                         // The database will enforce the constraint when the DDL is executed
-                        logger::warn("Foreign key references entity `{}` which does not exist yet. "
+                        logger::warn(fmt::format("Foreign key references entity `{}` which does not exist yet. "
                                     "Ensure the referenced entity is created before this entity.",
-                                    refEntity);
+                                    refEntity));
                     }
                 }
             }

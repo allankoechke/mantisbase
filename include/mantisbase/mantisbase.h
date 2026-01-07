@@ -224,7 +224,7 @@ namespace mb
         /// Get the database unit object
         [[nodiscard]] Database& db() const;
         /// Get the logging unit object
-        [[nodiscard]] LogsMgr& log() const;
+        [[nodiscard]] Logger& log() const;
         /// Get the commandline parser object
         [[nodiscard]] argparse::ArgumentParser& cmd() const;
         /// Get the router object instance.
@@ -364,7 +364,7 @@ namespace mb
         bool m_launchAdminPanel = false;
         bool m_isDevMode = false;
 
-        std::unique_ptr<LogsMgr> m_logger;
+        std::unique_ptr<Logger> m_logger;
         std::unique_ptr<Database> m_database;
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KVStore> m_kvStore;

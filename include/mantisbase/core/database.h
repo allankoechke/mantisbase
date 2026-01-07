@@ -17,7 +17,7 @@
 
 #include "../mantisbase.h"
 #include "../utils/utils.h"
-#include "logger.h"
+#include "logger/logger.h"
 
 namespace mb {
     using json = nlohmann::json;
@@ -136,7 +136,7 @@ namespace mb {
          */
         void start_query(std::string const &query) override {
             logger_impl::start_query(query);
-            logger::trace("$ sql << {}", query);
+            logger::trace(fmt::format("$ sql << {}", query));
             // logger::trace("$ sql << {}\n\t└── Values ({})", query, params);
         }
 

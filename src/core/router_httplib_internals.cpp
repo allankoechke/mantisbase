@@ -30,20 +30,20 @@ namespace mb {
                 end_time - req.start_time_).count();
 
             if (res.status < 400) {
-                logger::info("{} {:<7} {}  - Status: {}  - Time: {}ms",
-                             req.version, req.method, req.path, res.status, duration_ms);
+                logger::info(fmt::format("{} {:<7} {}  - Status: {}  - Time: {}ms",
+                             req.version, req.method, req.path, res.status, duration_ms));
             } else {
                 // Decompress if content is compressed
                 if (res.body.empty()) {
-                    logger::info("{} {:<7} {}  - Status: {}  - Time: {}ms",
-                                 req.version, req.method, req.path, res.status, duration_ms);
+                    logger::info(fmt::format("{} {:<7} {}  - Status: {}  - Time: {}ms",
+                                 req.version, req.method, req.path, res.status, duration_ms));
                 } else {
                     // Get the compression encoding
                     const std::string encoding = res.get_header_value("Content-Encoding");
 
                     auto body = encoding.empty() ? res.body : decompressResponseBody(res.body, encoding);
-                    logger::info("{} {:<7} {}  - Status: {}  - Time: {}ms\n\t└──Body: {}",
-                                 req.version, req.method, req.path, res.status, duration_ms, body);
+                    logger::info(fmt::format("{} {:<7} {}  - Status: {}  - Time: {}ms\n\t└──Body: {}",
+                                 req.version, req.method, req.path, res.status, duration_ms, body));
                 }
             }
         };
@@ -140,7 +140,7 @@ namespace mb {
                                  });
                     auto _body = body;
                     _body.erase("password");
-                    logger::warn("No user found matching given data: \n\t- {}", _body.dump());
+                    logger::warn(fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
                     return;
                 }
 
@@ -227,7 +227,7 @@ namespace mb {
             TRACE_MANTIS_FUNC();
             try {
                 auto auth = req.getOr("auth", json::object());
-logger::trace("Auth Data: {}", auth.dump());
+logger::trace(fmt::format("Auth Data: {}", auth.dump()));
 
                 // Require at least one valid auth on any table
                 auto verification = req.getOr<json>("verification", json::object());
@@ -294,7 +294,7 @@ logger::trace("Auth Data: {}", auth.dump());
                 // Validate request body
                 if (const auto v_err = Validators::validateRequestBody(admin_entity.schema(), body);
                     v_err.has_value()) {
-                    logger::critical("Error validating request body\n\t— {}", v_err.value());
+                    logger::critical(fmt::format("Error validating request body\n\t— {}", v_err.value()));
 
                     res.sendJSON(400, {
                                      {"data", json::object()},

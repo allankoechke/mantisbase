@@ -34,8 +34,8 @@ namespace mb
         }
         catch (const fs::filesystem_error& e)
         {
-            logger::critical("Filesystem error while creating directory '{}', reason: {}",
-                          path.string(), e.what());
+            logger::critical(fmt::format("Filesystem error while creating directory '{}', reason: {}",
+                          path.string(), e.what()));
             return false;
         }
     }

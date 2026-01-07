@@ -30,7 +30,7 @@ std::string MantisRequest::getRemoteAddr() const {
     }
 
     // Invalid IP in header, log warning and fall through
-    logger::warn("Invalid IP address in X-Forwarded-For header: {}", forwarded);
+    logger::warn(fmt::format("Invalid IP address in X-Forwarded-For header: {}", forwarded));
   }
 
   // Fallback to direct connection IP

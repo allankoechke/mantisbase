@@ -38,10 +38,13 @@ endif()
 set( MANTIS_SOURCES
         src/mantisbase.cpp
         src/core/database.cpp
-        src/core/logger.cpp
         src/core/router.cpp
         src/core/route_registry.cpp
         src/core/auth.cpp
+
+        # Logging
+        src/core/logger/logger.cpp
+        src/core/logger/log_database.cpp
 
         # Expression evaluator
         src/core/expr_evaluator.cpp

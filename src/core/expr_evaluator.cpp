@@ -1,5 +1,5 @@
 #include "../../include/mantisbase/core/expr_evaluator.h"
-#include "../../include/mantisbase/core/logger.h"
+#include "../../include/mantisbase/core/logger/logger.h"
 
 #include <httplib.h>
 
@@ -36,7 +36,7 @@ namespace mb {
             return dukglue_peval<bool>(ctx.get(), expr.c_str());
         } catch (const DukErrorException &e) {
             // Handle evaluation errors
-            logger::critical("Error evaluating expression `{}`, error: {}", expr, e.what());
+            logger::critical(fmt::format("Error evaluating expression `{}`, error: {}", expr, e.what()));
             return false;
         }
     }
