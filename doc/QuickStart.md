@@ -127,6 +127,16 @@ curl -X POST http://localhost:7070/api/v1/schemas \
   }'
 ```
 
+**Entity Types:**
+- **`base`** - Standard database table with fields (most common)
+- **`auth`** - Authentication entity with built-in password and user management
+- **`view`** - SQL view based on a query (read-only, requires `view_query` instead of `fields`)
+
+**Entity Name Rules:**
+- Must be alphanumeric characters and underscores only (`a-z`, `A-Z`, `0-9`, `_`)
+- Maximum 64 characters
+- Names are automatically validated to prevent SQL injection
+
 ### 4. Use Your Auto-generated API
 
 Once created, your entity automatically has REST endpoints:
@@ -264,9 +274,10 @@ All entities automatically get these endpoints:
 - `PATCH /api/v1/schemas/:id` - Update schema
 - `DELETE /api/v1/schemas/:id` - Delete schema
 
-### Other Endpoints
+### System Endpoints
 
 - `GET /api/v1/health` - Health check
+- `GET /api/v1/sys/logs` - System logs (admin only, see [API Reference](02.api.md#-system-endpoints))
 - `GET /api/files/<entity>/<filename>` - Serve files
 - `GET /mb` - Admin dashboard
 
