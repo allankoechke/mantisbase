@@ -55,62 +55,8 @@ namespace mb {
     }
 
     void LogDatabase::createTable() const {
-        // Check if table exists and has old schema
-        bool needs_migration = false;
-        try {
-            int count = 0;
-            *m_session << "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='mb_logs'", soci::into(count);
-            if (count > 0) {
-                // Check if old columns exist
-                soci::rowset<soci::row> rs = (m_session->prepare << "PRAGMA table_info(mb_logs)");
-                bool has_topic = false;
-                bool has_origin = false;
-                for (const auto& r : rs) {
-                    std::string col_name = r.get<std::string>(1);
-                    if (col_name == "topic") has_topic = true;
-                    if (col_name == "origin") has_origin = true;
-                }
-                if (has_topic && !has_origin) {
-                    needs_migration = true;
-                }
-            }
-        } catch (...) {
-            // Table might not exist, continue with creation
-        }
-
-        if (needs_migration) {
-            // Migrate old schema to new schema
-            *m_session << R"(
-                CREATE TABLE IF NOT EXISTS mb_logs_new (
-                    id text PRIMARY KEY,
-                    timestamp TEXT NOT NULL,
-                    level TEXT NOT NULL,
-                    origin TEXT NOT NULL,
-                    message TEXT NOT NULL,
-                    details TEXT,
-                    data TEXT,
-                    created_at INTEGER NOT NULL
-                )
-            )";
-            
-            // Copy data from old table to new (mapping topic->message, description->details, adding origin)
-            *m_session << R"(
-                INSERT INTO mb_logs_new (id, timestamp, level, origin, message, details, data, created_at)
-                SELECT id, timestamp, level, 
-                       COALESCE(topic, 'System') as origin,
-                       COALESCE(topic, 'Unknown') as message,
-                       COALESCE(description, '') as details,
-                       COALESCE(data, '') as data,
-                       created_at
-                FROM mb_logs
-            )";
-            
-            // Drop old table and rename new one
-            *m_session << "DROP TABLE mb_logs";
-            *m_session << "ALTER TABLE mb_logs_new RENAME TO mb_logs";
-        } else {
-            // Create new table schema
-            *m_session << R"(
+        // Create new table schema
+        *m_session << R"(
                 CREATE TABLE IF NOT EXISTS mb_logs (
                     id text PRIMARY KEY,
                     timestamp TEXT NOT NULL,
@@ -122,7 +68,6 @@ namespace mb {
                     created_at INTEGER NOT NULL
                 )
             )";
-        }
 
         // Create indexes for better query performance
         *m_session << "CREATE INDEX IF NOT EXISTS idx_mb_logs_timestamp ON mb_logs(timestamp)";
@@ -132,8 +77,8 @@ namespace mb {
         *m_session << "CREATE INDEX IF NOT EXISTS idx_mb_logs_created_at ON mb_logs(created_at)";
     }
 
-    bool LogDatabase::insertLog(const std::string &level, const std::string &origin, const std::string &message, 
-                                 const std::string &details, const json &data) {
+    bool LogDatabase::insertLog(const std::string &level, const std::string &origin, const std::string &message,
+                                const std::string &details, const json &data) {
         try {
             // Get current timestamp
             const auto now = std::chrono::system_clock::now();
@@ -152,7 +97,8 @@ namespace mb {
                 now.time_since_epoch()).count();
 
 
-            { // Local scope
+            {
+                // Local scope
                 // Serialize data JSON
                 std::string data_str = data.empty() ? "" : data.dump();
                 auto id = generate_uuidv7();
@@ -161,8 +107,8 @@ namespace mb {
 
                 // Insert log entry
                 *m_session << "INSERT INTO mb_logs (id, timestamp, level, origin, message, details, data, created_at) "
-                        "VALUES (:id, :timestamp, :level, :origin, :message, :details, :data, :created_at)", 
-                        soci::use(id), soci::use(timestamp), soci::use(level), soci::use(origin), 
+                        "VALUES (:id, :timestamp, :level, :origin, :message, :details, :data, :created_at)",
+                        soci::use(id), soci::use(timestamp), soci::use(level), soci::use(origin),
                         soci::use(message), soci::use(details), soci::use(data_str), soci::use(created_at);
             }
 
@@ -186,33 +132,13 @@ namespace mb {
 
         try {
             // Build WHERE clause
-            std::vector<std::string> conditions;
-
-            if (!level_filter.empty()) {
-                conditions.emplace_back("level = :level");
-            }
-            if (!search_filter.empty()) {
-                conditions.emplace_back("(message LIKE :search OR details LIKE :search)");
-            }
-            if (!start_date.empty()) {
-                conditions.emplace_back("timestamp >= :start_date");
-            }
-            if (!end_date.empty()) {
-                conditions.emplace_back("timestamp <= :end_date");
-            }
-
-            // if (!conditions.empty()) {
-            //     std::string where_clause;
-            //     where_clause = "WHERE ";
-            //     for (size_t i = 0; i < conditions.size(); ++i) {
-            //         if (i > 0) where_clause += " AND ";
-            //         where_clause += conditions[i];
-            //     }
-            // }
+            bool has_conditions = !level_filter.empty() || !search_filter.empty() || !start_date.empty() || !end_date.
+                                  empty();
 
             // Validate sort_by to prevent SQL injection
             std::string valid_sort_by = "timestamp";
-            if (sort_by == "level" || sort_by == "origin" || sort_by == "message" || sort_by == "details" || sort_by == "timestamp" || sort_by == "created_at") {
+            if (sort_by == "level" || sort_by == "origin" || sort_by == "message" || sort_by == "details" || sort_by ==
+                "timestamp" || sort_by == "created_at") {
                 valid_sort_by = sort_by;
             }
 
@@ -226,12 +152,17 @@ namespace mb {
             std::string query = "SELECT id, timestamp, level, origin, message, details, data, created_at FROM mb_logs";
 
             // Build WHERE clause with actual values (after validation, safe)
-            if (!conditions.empty()) {
+            if (has_conditions) {
                 query += " WHERE ";
                 bool first = true;
                 if (!level_filter.empty()) {
-                    // level_filter is validated to be one of: trace, debug, info, warn, critical
-                    query += (first ? "" : " AND ") + std::string("level = '") + level_filter + "'";
+                    if (level_filter.starts_with('>')) {
+                        query += (first ? "" : " AND ") + buildMinLogWhereCondition(level_filter.substr(1));;
+                    } else {
+                        // level_filter is validated to be one of: trace, debug, info, warn, critical
+                        query += (first ? "" : " AND ") + std::string("level = '") + level_filter + "'";
+                    }
+
                     first = false;
                 }
                 if (!search_filter.empty()) {
@@ -242,7 +173,8 @@ namespace mb {
                         escaped.replace(pos, 1, "''");
                         pos += 2;
                     }
-                    query += (first ? "" : " AND ") + std::string("(message LIKE '%") + escaped + "%' OR details LIKE '%" + escaped + "%')";
+                    query += (first ? "" : " AND ") + std::string("(message LIKE '%") + escaped +
+                            "%' OR details LIKE '%" + escaped + "%')";
                     first = false;
                 }
                 if (!start_date.empty()) {
@@ -312,91 +244,6 @@ namespace mb {
         return result;
     }
 
-    int LogDatabase::getLogCount(const std::string &level_filter,
-                                 const std::string &search_filter,
-                                 const std::string &start_date,
-                                 const std::string &end_date) {
-        try {
-            // Build WHERE clause (same as getLogs)
-            std::vector<std::string> conditions;
-
-            if (!level_filter.empty()) {
-                conditions.emplace_back("level = :level");
-            }
-            if (!search_filter.empty()) {
-                conditions.emplace_back("(message LIKE :search OR details LIKE :search)");
-            }
-            if (!start_date.empty()) {
-                conditions.emplace_back("timestamp >= :start_date");
-            }
-            if (!end_date.empty()) {
-                conditions.emplace_back("timestamp <= :end_date");
-            }
-
-            // TODO check on where clause??
-            // if (!conditions.empty()) {
-            //     std::string where_clause;
-            //     where_clause = "WHERE ";
-            //     for (size_t i = 0; i < conditions.size(); ++i) {
-            //         if (i > 0) where_clause += " AND ";
-            //         where_clause += conditions[i];
-            //     }
-            // }
-
-            // Build COUNT query with WHERE clause (inputs validated, safe)
-            std::string query = "SELECT COUNT(*) FROM mb_logs";
-
-            if (!conditions.empty()) {
-                query += " WHERE ";
-                bool first = true;
-                if (!level_filter.empty()) {
-                    query += (first ? "" : " AND ") + std::string("level = '") + level_filter + "'";
-                    first = false;
-                }
-                if (!search_filter.empty()) {
-                    std::string escaped = search_filter;
-                    size_t pos = 0;
-                    while ((pos = escaped.find("'", pos)) != std::string::npos) {
-                        escaped.replace(pos, 1, "''");
-                        pos += 2;
-                    }
-                    query += (first ? "" : " AND ") + std::string("(message LIKE '%") + escaped + "%' OR details LIKE '%" + escaped + "%')";
-                    first = false;
-                }
-                if (!start_date.empty()) {
-                    std::string escaped = start_date;
-                    size_t pos = 0;
-                    while ((pos = escaped.find("'", pos)) != std::string::npos) {
-                        escaped.replace(pos, 1, "''");
-                        pos += 2;
-                    }
-                    query += (first ? "" : " AND ") + std::string("timestamp >= '") + escaped + "'";
-                    first = false;
-                }
-                if (!end_date.empty()) {
-                    std::string escaped = end_date;
-                    size_t pos = 0;
-                    while ((pos = escaped.find("'", pos)) != std::string::npos) {
-                        escaped.replace(pos, 1, "''");
-                        pos += 2;
-                    }
-                    query += (first ? "" : " AND ") + std::string("timestamp <= '") + escaped + "'";
-                    first = false;
-                }
-            }
-
-            int count = 0;
-            soci::row r;
-
-            std::lock_guard<std::mutex> lock(m_dbMutexLock);
-            *m_session << query, soci::into(count);
-
-            return count;
-        } catch (const std::exception &e) {
-            return 0;
-        }
-    }
-
     void LogDatabase::cleanupThread() {
         // Run cleanup every hour
         const auto cleanup_interval = std::chrono::hours(1);
@@ -411,7 +258,7 @@ namespace mb {
 
     void LogDatabase::deleteOldLogs(const int days) {
         try {
-            std::lock_guard<std::mutex> lock(m_dbMutexLock);
+            std::lock_guard lock(m_dbMutexLock);
 
             // Calculate cutoff timestamp (5 days ago)
             const auto cutoff = std::chrono::system_clock::now() - std::chrono::hours(24 * days);
@@ -432,5 +279,28 @@ namespace mb {
             // Use spdlog directly to avoid recursion
             spdlog::error("Failed to delete old logs: {}", e.what());
         }
+    }
+
+    std::string LogDatabase::buildMinLogWhereCondition(const std::string &level) {
+        std::stringstream ss;
+        bool first = true;
+
+        ss << "(";
+
+        for (const auto &l: m_logLevels) {
+            if (first) {
+                ss << std::format("level = '{}'", l);
+                first = false;
+                if (l == level) break;
+                continue;
+            }
+
+            ss << std::format(" OR level = '{}'", l);
+            if (l == level) break;
+        }
+
+        ss << ")";
+
+        return ss.str();
     }
 }

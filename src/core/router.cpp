@@ -95,7 +95,8 @@ namespace mb {
         try {
             // Check if server can bind to port before launching
             if (!svr.is_valid()) {
-                LogOrigin::critical("Server Invalid", "Server is not valid. Maybe port is in use or permissions issue.");
+                LogOrigin::critical("Server Invalid",
+                                    "Server is not valid. Maybe port is in use or permissions issue.");
                 return false;
             }
 
@@ -390,8 +391,9 @@ namespace mb {
 
         // Add /public static file serving directory
         if (const auto mount_ok = svr.set_mount_point("/", mApp.publicDir()); !mount_ok) {
-            LogOrigin::critical("Mount Point Setup Failed", fmt::format("Failed to setup mount point directory for '/' at '{}'",
-                             mApp.publicDir()));
+            LogOrigin::critical("Mount Point Setup Failed", fmt::format(
+                                    "Failed to setup mount point directory for '/' at '{}'",
+                                    mApp.publicDir()));
         }
     }
 
@@ -426,12 +428,14 @@ namespace mb {
 
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(404);
-                    LogOrigin::critical("Admin Response Error", fmt::format("Error processing /admin response: {}", e.what()));
+                    LogOrigin::critical("Admin Response Error",
+                                        fmt::format("Error processing /admin response: {}", e.what()));
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
                 res.setReason(e.what());
-                LogOrigin::critical("Admin Request Error", fmt::format("Error processing /admin request: {}", e.what()));
+                LogOrigin::critical("Admin Request Error",
+                                    fmt::format("Error processing /admin request: {}", e.what()));
             }
         };
     }
@@ -502,7 +506,7 @@ namespace mb {
             try {
                 TRACE_FUNC(f);
                 // Get log database instance
-                auto& logsDb = logger::getLogsDb();
+                auto &logsDb = logger::getLogsDb();
                 if (!logger::isDbInitialized) {
                     json response;
                     response["error"] = "Log database not initialized";
@@ -516,6 +520,7 @@ namespace mb {
                 int page = 1;
                 int page_size = 50;
                 std::string level_filter;
+                std::string min_level_filter;
                 std::string search_filter;
                 std::string start_date;
                 std::string end_date;
@@ -546,11 +551,23 @@ namespace mb {
                 // Get level filter
                 if (req.hasQueryParam("level")) {
                     level_filter = req.getQueryParamValue("level");
+
                     // Validate level
-                    if (level_filter != "trace" && level_filter != "debug" && 
-                        level_filter != "info" && level_filter != "warn" && 
+                    if (level_filter != "trace" && level_filter != "debug" &&
+                        level_filter != "info" && level_filter != "warn" &&
                         level_filter != "critical") {
                         level_filter.clear();
+                    }
+                }
+
+                if (req.hasQueryParam("min_level")) {
+                    min_level_filter = req.getQueryParamValue("min_level");
+
+                    // Validate level
+                    if (min_level_filter != "trace" && min_level_filter != "debug" &&
+                        min_level_filter != "info" && min_level_filter != "warn" &&
+                        min_level_filter != "critical") {
+                        min_level_filter.clear();
                     }
                 }
 
@@ -571,30 +588,30 @@ namespace mb {
                 if (req.hasQueryParam("sort_by")) {
                     std::string sort_param = req.getQueryParamValue("sort_by");
                     // Validate sort_by to prevent SQL injection
-                    if (sort_param == "level" || sort_param == "message" ||
+                    if (sort_param == "level" || sort_param == "origin" || sort_param == "message" ||
                         sort_param == "timestamp" || sort_param == "created_at") {
                         sort_by = sort_param;
                     }
                 }
 
                 if (req.hasQueryParam("sort_order")) {
-                    std::string order = req.getQueryParamValue("sort_order");
-                    if (order == "asc" || order == "desc") {
+                    if (std::string order = req.getQueryParamValue("sort_order"); order == "asc" || order == "desc") {
                         sort_order = order;
                     }
                 }
 
+                if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
+
                 // Fetch logs
                 json result = logsDb.getLogs(page, page_size, level_filter,
-                                            search_filter, start_date, end_date,
-                                            sort_by, sort_order);
+                                             search_filter, start_date, end_date,
+                                             sort_by, sort_order);
 
                 json response;
                 response["error"] = "";
                 response["status"] = 200;
                 response["data"] = result;
                 res.sendJSON(200, result);
-
             } catch (const MantisException &e) {
                 json response;
                 response["error"] = e.what();

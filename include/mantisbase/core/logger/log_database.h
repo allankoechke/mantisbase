@@ -33,7 +33,6 @@ namespace mb {
     public:
         /**
          * @brief Construct LogDatabase instance.
-         * @param data_dir Directory where log database will be stored
          */
         explicit LogDatabase();
 
@@ -79,20 +78,6 @@ namespace mb {
                      const std::string& end_date = "",
                      const std::string& sort_by = "timestamp",
                      const std::string& sort_order = "desc");
-
-        /**
-         * @brief Get total count of logs matching filters.
-         * @param level_filter Optional level filter
-         * @param search_filter Optional message search filter
-         * @param start_date Optional start date filter
-         * @param end_date Optional end date filter
-         * @return Total count
-         */
-        int getLogCount(const std::string& level_filter = "",
-                       const std::string& search_filter = "",
-                       const std::string& start_date = "",
-                       const std::string& end_date = "");
-
     private:
         /**
          * @brief Create the logs table if it doesn't exist.
@@ -110,11 +95,15 @@ namespace mb {
          */
         void deleteOldLogs(int days = 5);
 
+        static std::string buildMinLogWhereCondition(const std::string& level);
+
         std::string m_dataDir;
         std::unique_ptr<soci::session> m_session;
         std::thread m_cleanupThread;
         std::atomic<bool> m_running;
         std::mutex m_dbMutexLock;
+
+        inline static const std::vector<std::string> m_logLevels{ "critical", "warn", "info", "debug", "trace"};
     };
 }
 
