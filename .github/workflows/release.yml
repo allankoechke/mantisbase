@@ -28,9 +28,8 @@ jobs:
             cpp_compiler: g++
             platform: linux-x86_64
             arch: x86_64
-            # gcc_version: "10"
           - os: ubuntu-latest-arm64
-            c_compiler: gcc                                                                                1j
+            c_compiler: gcc
             cpp_compiler: g++
             platform: linux-arm64
             arch: arm64
@@ -88,14 +87,6 @@ jobs:
 
       - name: Configure CMake (Windows-latest)
         if: matrix.os == 'windows-latest'
-        # run: >
-        #   cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        #   -G "MinGW Makefiles"
-        #   -DCMAKE_CXX_COMPILER="C:\ProgramData\mingw64\mingw64\bin\g++.exe"
-        #   -DCMAKE_C_COMPILER="C:\ProgramData\mingw64\mingw64\bin\gcc.exe"
-        #   -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        #   -DMANTIS_BUILD_TESTS=true
-        #   -S ${{ github.workspace }}
         shell: pwsh
         run: |
           $mingwBin = "C:\ProgramData\mingw64\mingw64\bin"
