@@ -12,6 +12,8 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <memory>
+
+#include "log_database.h"
 #include "../../utils/utils.h"
 
 namespace mb {
@@ -39,7 +41,7 @@ namespace mb {
     public:
         Logger() = default;
 
-        ~Logger() = default;
+        ~Logger();
 
         inline static bool isDbInitialized = false;
 

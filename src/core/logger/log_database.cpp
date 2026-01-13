@@ -15,13 +15,8 @@ namespace mb {
     }
 
     LogDatabase::~LogDatabase() {
-        m_running = false;
-        if (m_cleanupThread.joinable()) {
-            m_cleanupThread.join();
-        }
-        if (m_session) {
-            m_session->close();
-        }
+        if (m_running)
+            shutdown();
     }
 
     bool LogDatabase::init(const std::string &data_dir) {
@@ -51,6 +46,20 @@ namespace mb {
             // Use spdlog directly to avoid recursion
             spdlog::error("Failed to initialize log database: {}", e.what());
             return false;
+        }
+    }
+
+    void LogDatabase::shutdown() {
+        m_running = false;
+        if (m_cleanupThread.joinable()) {
+            std::cout << "Joining cleanup thread ...\n";
+            m_cleanupThread.join();
+            std::cout << "Joined cleanup thread ...\n";
+        }
+        if (m_session) {
+            std::cout << "Closing db session ...\n";
+            m_session->close();
+            std::cout << "Closed db session ...\n";
         }
     }
 

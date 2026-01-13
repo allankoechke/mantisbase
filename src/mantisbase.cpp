@@ -175,7 +175,6 @@ namespace mb {
             quit(-1, "Failed to create database directories!");
 
         // Create instance objects
-        m_logger = std::make_unique<Logger>();
         m_database = std::make_unique<Database>(); // depends on log()
         m_router = std::make_unique<Router>(); // depends on db() & http()
         m_kvStore = std::make_unique<KVStore>(); // depends on db(), router() & http()
@@ -258,10 +257,6 @@ namespace mb {
 
     Database &MantisBase::db() const {
         return *m_database;
-    }
-
-    Logger &MantisBase::log() const {
-        return *m_logger;
     }
 
     argparse::ArgumentParser &MantisBase::cmd() const {

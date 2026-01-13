@@ -128,7 +128,8 @@ namespace mb
          * @param reason User-friendly reason for the exit.
          * @return `exitCode` value.
          */
-        static int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
+        static int quit(const int& exitCode, const std::string& reason = "Something went wrong!");
+        static int quit(const int& exitCode = 0);
 
         /**
          * @brief Retrieve HTTP Listening port.
@@ -223,8 +224,6 @@ namespace mb
 
         /// Get the database unit object
         [[nodiscard]] Database& db() const;
-        /// Get the logging unit object
-        [[nodiscard]] Logger& log() const;
         /// Get the commandline parser object
         [[nodiscard]] argparse::ArgumentParser& cmd() const;
         /// Get the router object instance.
@@ -364,7 +363,6 @@ namespace mb
         bool m_launchAdminPanel = false;
         bool m_isDevMode = false;
 
-        std::unique_ptr<Logger> m_logger;
         std::unique_ptr<Database> m_database;
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KVStore> m_kvStore;

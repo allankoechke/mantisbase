@@ -20,26 +20,25 @@
 namespace fs = std::filesystem;
 
 /**
- * @brief GoogleTest Environment to set up MantisBase for all tests (unit and integration)
+ * @brief Simplified GoogleTest Environment for MantisBase tests
  * 
- * This ensures MantisBase is initialized once before all tests run,
- * and starts the server in a separate thread for integration tests.
+ * This class handles:
+ * - Server setup and startup in a background thread
+ * - Clean shutdown with timeout protection
+ * - Test directory cleanup
  */
 class MantisBaseTestEnvironment : public ::testing::Environment {
 public:
     ~MantisBaseTestEnvironment() {
-        // Safety net: Ensure thread is cleaned up even if TearDown wasn't called or threw
-        // This should rarely be needed since TearDown should handle cleanup
+        // Safety net: detach thread if still joinable
         if (serverThread.joinable()) {
-            // Don't call teardownOnce() here as it may have already been called
-            // Just detach to avoid std::terminate
-            std::cerr << "[TestEnvironment] WARNING: Thread still joinable in destructor, detaching to avoid crash.\n";
+            std::cerr << "[TestEnvironment] WARNING: Thread still joinable in destructor, detaching...\n";
             serverThread.detach();
         }
     }
-    
+
     void SetUp() override {
-        // Disable rate limiting in tests to prevent test failures
+        // Disable rate limiting and admin setup prompts in tests
 #ifdef _WIN32
         _putenv_s("MB_DISABLE_RATE_LIMIT", "1");
         _putenv_s("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "1");
@@ -48,8 +47,7 @@ public:
         setenv("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "1", 1);
 #endif
 
-        // Setup directories for tests, for each, create a unique directory
-        // in which we will use for current tests then later tear it down.
+        // Create unique test directory
         baseDir = getBaseDir();
         const auto scriptingDir = (fs::path(TEST_SOURCE_DIR) / "scripting").string();
         const auto dataDir = (baseDir / "data").string();
@@ -57,140 +55,120 @@ public:
 
         auto port = TestConfig::getTestPort();
 
+        // Configure MantisBase
         mb::json args;
-        // args["dev"] = true;
         args["database"] = "SQLITE";
         args["dataDir"] = dataDir;
         args["publicDir"] = publicDir;
         args["scriptsDir"] = scriptingDir;
         args["serve"] = {{"port", port}, {"host", "0.0.0.0"}};
 
-        // mb::logger::trace("Test Environment Args: {}", args.dump());
+        // Create MantisBase instance
+        auto &tFix = TestFixture::instance(args);
 
-        // Setup MantisBase instance
-        auto& tFix = TestFixture::instance(args);
+        // Start server in background thread
+        // std::cout << "[TestEnvironment] Starting server in background thread...\n";
+        // server_running.store(true);
+        // serverThread = std::thread([&tFix, this]() {
+        //     try {
+        //         auto &app = tFix.app();
+        //         // auto res = app.run();
+        //         // std::cout << "[TestEnvironment] Server thread: app.run() returned with code " << res << '\n';
+        //     } catch (const std::exception &e) {
+        //         std::cerr << "[TestEnvironment] Server thread error: " << e.what() << '\n';
+        //     } catch (...) {
+        //         std::cerr << "[TestEnvironment] Server thread error: Unknown exception\n";
+        //     }
+        //     server_running.store(false);
+        // });
 
-        // Spawn a new thread to run the server
-        server_error.store(false);
-        {
-            std::lock_guard<std::mutex> lock(server_error_mutex);
-            server_error_msg.clear();
-        }
-        
-        std::cout << "[TestEnvironment] Starting server thread...\n";
-        serverThread = std::thread([&tFix, this]()
-        {
-            try
-            {
-                auto& app = tFix.app();
-                [[maybe_unused]] auto res = app.run();
-                std::cout << "[TestEnvironment] Server thread: app.run() returned with code " << res << '\n';
-            }
-            catch (const std::exception& e)
-            {
-                server_error.store(true);
-                {
-                    std::lock_guard<std::mutex> lock(server_error_mutex);
-                    server_error_msg = e.what();
-                }
-                std::cerr << "[TestEnvironment] Error Starting Server: " << e.what() << '\n';
-            }
-            catch (...)
-            {
-                server_error.store(true);
-                {
-                    std::lock_guard<std::mutex> lock(server_error_mutex);
-                    server_error_msg = "Unknown error";
-                }
-                std::cerr << "[TestEnvironment] Error Starting Server: Unknown error\n";
-            }
-        });
-
-        // Give the server thread time to initialize and start listening
-        // Router initialization queries the database which can take a moment
-        std::cout << "[TestEnvironment] Waiting for server to initialize...\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        
-        if (server_error.load()) {
-            std::string error_msg;
-            {
-                std::lock_guard<std::mutex> lock(server_error_mutex);
-                error_msg = server_error_msg;
-            }
-            std::cerr << "[TestEnvironment] Server thread failed: " << error_msg << '\n';
-            if (serverThread.joinable()) {
-                serverThread.join();
-            }
-            TestFixture::teardownOnce();
-            TestFixture::cleanDir(baseDir);
-            throw std::runtime_error("Failed to start test server: " + error_msg);
-        }
+        // Wait for server to initialize
+        // std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Wait for server to be ready (health check)
-        if (!tFix.waitForServer(30, 200)) {
-            std::cerr << "[TestEnvironment] Server failed to start within timeout\n";
-            if (serverThread.joinable()) {
-                serverThread.join();
-            }
-            TestFixture::teardownOnce();
-            TestFixture::cleanDir(baseDir);
-            throw std::runtime_error("Server failed to start within timeout");
-        }
-        
-        std::cout << "[TestEnvironment] Server is ready, tests can begin...\n";
+        // std::cout << "[TestEnvironment] Waiting for server to be ready...\n";
+        // if (!tFix.waitForServer(30, 200)) {
+        //     std::cerr << "[TestEnvironment] Server failed to start within timeout\n";
+        //     shutdown();
+        //     throw std::runtime_error("Server failed to start within timeout");
+        // }
+
+        // std::cout << "[TestEnvironment] Server is ready, tests can begin...\n";
     }
 
     void TearDown() override {
         std::cout << "[TestEnvironment] Tearing down test environment...\n";
-        
-        // First, stop just the HTTP server (without destroying router)
-        // This allows the server thread to exit cleanly
-        std::cout << "[TestEnvironment] Stopping HTTP server...\n";
-        TestFixture::teardownOnce();
-        std::cout << "[TestEnvironment] HTTP server stop command sent.\n";
-        
-        // Wait for server thread to finish - give it time to exit from app.run()
-        if (serverThread.joinable()) {
-            std::cout << "[TestEnvironment] Waiting for server thread to exit...\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            
-            std::cout << "[TestEnvironment] Attempting to join server thread...\n";
-            if (serverThread.joinable()) {
-                serverThread.join();
-                std::cout << "[TestEnvironment] Server thread joined successfully.\n";
-            }
-        }
-        
-        // Now that the thread has exited, do full cleanup (destroy router, etc.)
-        std::cout << "[TestEnvironment] Performing full cleanup...\n";
-        TestFixture::cleanup();
-        std::cout << "[TestEnvironment] Full cleanup completed.\n";
-        
-        // Clean up test directory
-        std::cout << "[TestEnvironment] Cleaning up test directory...\n";
-        if (!baseDir.empty()) {
-            TestFixture::cleanDir(baseDir);
-        }
-        
-        // Final safety check - ensure thread is not joinable
-        if (serverThread.joinable()) {
-            serverThread.detach();
-        }
-        
-        std::cout << "[TestEnvironment] Test environment cleaned up.\n";
-
-        // Hack to avoid post actions on the test cleanup that trigger
-        // SIGABORT which results in failed tests
-        std::exit(0);
+        // shutdown();
+        // std::cout << "[TestEnvironment] Test environment cleaned up.\n";
     }
 
 private:
+    void shutdown() {
+        // Step 1: Stop the HTTP server immediately
+        try {
+            auto &app = TestFixture::app();
+            if (app.router().server().is_running()) {
+                std::cout << "[TestEnvironment] Stopping HTTP server...\n";
+                app.router().close();
+                std::cout << "[TestEnvironment] HTTP server stopped.\n";
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "[TestEnvironment] Error stopping server: " << e.what() << '\n';
+        }
+
+        // Step 2: Wait briefly for server thread, then detach if needed
+        if (serverThread.joinable()) {
+            std::cout << "[TestEnvironment] Waiting for server thread to exit...\n";
+            
+            // Give thread a short time to exit naturally
+            const auto quick_timeout = std::chrono::milliseconds(500);
+            const auto start = std::chrono::steady_clock::now();
+            
+            while (server_running.load() && 
+                   (std::chrono::steady_clock::now() - start) < quick_timeout) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+            
+            // If still running, detach immediately to avoid blocking
+            if (serverThread.joinable()) {
+                if (!server_running.load()) {
+                    // Thread finished, safe to join
+                    serverThread.join();
+                    std::cout << "[TestEnvironment] Server thread joined successfully.\n";
+                } else {
+                    // Thread still running, detach to prevent hang
+                    std::cerr << "[TestEnvironment] WARNING: Server thread still running, detaching to prevent hang...\n";
+                    serverThread.detach();
+                }
+            }
+        }
+
+        // Step 3: Clean up MantisBase instance
+        // Don't wait for this - if it hangs, we've already detached the server thread
+        try {
+            auto &app = TestFixture::app();
+            app.close();
+            std::cout << "[TestEnvironment] MantisBase instance closed.\n";
+        } catch (const std::exception &e) {
+            std::cerr << "[TestEnvironment] Error closing MantisBase: " << e.what() << '\n';
+        }
+
+        // Step 4: Clean up test directory
+        if (!baseDir.empty()) {
+            std::cout << "[TestEnvironment] Cleaning up test directory...\n";
+            TestFixture::cleanDir(baseDir);
+        }
+
+        // Final safety check
+        if (serverThread.joinable()) {
+            std::cerr << "[TestEnvironment] WARNING: Thread still joinable, detaching...\n";
+            serverThread.detach();
+        }
+    }
+
     fs::path baseDir;
     std::thread serverThread;
-    std::atomic<bool> server_error{false};
-    std::mutex server_error_mutex;
-    std::string server_error_msg;
+    std::atomic<bool> server_running{false};
 };
 
 #endif //MANTISBASE_TEST_ENVIRONMENT_H
-

@@ -11,6 +11,10 @@
 #include "mantisbase/core/models/validators.h"
 
 namespace mb {
+    int MantisBase::quit(const int &exitCode) {
+        std::exit(exitCode);
+    }
+
     void MantisBase::parseArgs() {
         // Main program parser with global arguments
         argparse::ArgumentParser program("mantisbase", appVersion());

@@ -47,6 +47,8 @@ namespace mb {
          */
         bool init(const std::string& data_dir = "");
 
+        void shutdown();
+
         /**
          * @brief Insert a log entry into the database.
          * @param level Log level (trace, debug, info, warn, critical)
