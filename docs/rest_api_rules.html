@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.1</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
    </div>
   </td>
  </tr>
@@ -96,11 +96,11 @@ $(document).ready(function(){initNavTree('rest_api_rules.html',''); initResizabl
 <div class="contents">
 <div class="textblock"><p>MantisBase uses a mode-based access control system with optional JavaScript expression evaluation for fine-grained permissions. Each entity schema defines five access rules that control who can perform CRUD operations.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md64"></a>
+<h2><a class="anchor" id="autotoc_md99"></a>
 Overview</h2>
 <p>Access rules in MantisBase use a combination of <b>modes</b> and <b>expressions</b> to control endpoint access. Rules are defined per entity and evaluated automatically by the <code>hasAccess()</code> middleware on all entity endpoints.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md66"></a>
+<h2><a class="anchor" id="autotoc_md101"></a>
 Rule Types</h2>
 <p>Every entity supports five access rule types, one for each CRUD operation:</p>
 <table class="markdownTable">
@@ -122,9 +122,9 @@ Rule Types</h2>
 <li>**<code>expr</code>** - JavaScript expression (only evaluated when <code>mode</code> is <code>"custom"</code>)</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md68"></a>
+<h2><a class="anchor" id="autotoc_md103"></a>
 Access Modes</h2>
-<h3><a class="anchor" id="autotoc_md69"></a>
+<h3><a class="anchor" id="autotoc_md104"></a>
 Empty Mode (Admin Only)</h3>
 <p>When <code>mode</code> is empty or not set, the endpoint requires admin authentication:</p>
 <div class="fragment"><div class="line">{</div>
@@ -132,7 +132,7 @@ Empty Mode (Admin Only)</h3>
 <div class="line">  &quot;expr&quot;: &quot;&quot;</div>
 <div class="line">}</div>
 </div><!-- fragment --><p><b>Behavior:</b> Only users authenticated as admins (<code>mb_admins</code> entity) can access the endpoint.</p>
-<h3><a class="anchor" id="autotoc_md70"></a>
+<h3><a class="anchor" id="autotoc_md105"></a>
 Public Mode</h3>
 <p>When <code>mode</code> is <code>"public"</code>, the endpoint is open to everyone:</p>
 <div class="fragment"><div class="line">{</div>
@@ -140,7 +140,7 @@ Public Mode</h3>
 <div class="line">  &quot;expr&quot;: &quot;&quot;</div>
 <div class="line">}</div>
 </div><!-- fragment --><p><b>Behavior:</b> No authentication required. Anyone can access the endpoint.</p>
-<h3><a class="anchor" id="autotoc_md71"></a>
+<h3><a class="anchor" id="autotoc_md106"></a>
 Auth Mode</h3>
 <p>When <code>mode</code> is <code>"auth"</code>, any valid authentication is accepted:</p>
 <div class="fragment"><div class="line">{</div>
@@ -148,7 +148,7 @@ Auth Mode</h3>
 <div class="line">  &quot;expr&quot;: &quot;&quot;</div>
 <div class="line">}</div>
 </div><!-- fragment --><p><b>Behavior:</b> User must be authenticated (from any entity table), but no additional checks are performed.</p>
-<h3><a class="anchor" id="autotoc_md72"></a>
+<h3><a class="anchor" id="autotoc_md107"></a>
 Custom Mode</h3>
 <p>When <code>mode</code> is <code>"custom"</code>, the <code>expr</code> JavaScript expression is evaluated:</p>
 <div class="fragment"><div class="line">{</div>
@@ -159,10 +159,10 @@ Custom Mode</h3>
 <p>If you want to tie authenticated users to specific entity, use expression such as;</p>
 <div class="fragment"><div class="line">auth.entity == &#39;your entity name&#39;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md74"></a>
+<h2><a class="anchor" id="autotoc_md109"></a>
 Expression Evaluation</h2>
 <p>When using <code>mode: "custom"</code>, expressions are evaluated using <b>Duktape</b>, a lightweight JavaScript engine. Expressions have access to two main context objects:</p>
-<h3><a class="anchor" id="autotoc_md75"></a>
+<h3><a class="anchor" id="autotoc_md110"></a>
 Authentication Context (&lt;tt&gt;auth&lt;/tt&gt;)</h3>
 <p>Contains information about the authenticated user:</p>
 <div class="fragment"><div class="line">auth.type      // &quot;guest&quot;, &quot;user&quot;, or &quot;admin&quot;</div>
@@ -180,7 +180,7 @@ Authentication Context (&lt;tt&gt;auth&lt;/tt&gt;)</h3>
 <div class="line">auth.user.email</div>
 <div class="line">auth.user.verified</div>
 <div class="line">auth.user.role</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md76"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md111"></a>
 Request Context (&lt;tt&gt;req&lt;/tt&gt;)</h3>
 <p>Contains data from the current HTTP request:</p>
 <div class="fragment"><div class="line">req.remoteAddr    // Client IP address</div>
@@ -193,36 +193,36 @@ Request Context (&lt;tt&gt;req&lt;/tt&gt;)</h3>
 <div class="line">req.body.user_id</div>
 <div class="line">req.body.status</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md78"></a>
+<h2><a class="anchor" id="autotoc_md113"></a>
 Rule Examples</h2>
-<h3><a class="anchor" id="autotoc_md79"></a>
+<h3><a class="anchor" id="autotoc_md114"></a>
 Public Access</h3>
 <p>Make an endpoint accessible to everyone:</p>
 <div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;list&quot;: {&quot;mode&quot;: &quot;public&quot;, &quot;expr&quot;: &quot;&quot;},</div>
 <div class="line">  &quot;get&quot;: {&quot;mode&quot;: &quot;public&quot;, &quot;expr&quot;: &quot;&quot;}</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md80"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md115"></a>
 Admin Only</h3>
 <p>Restrict access to admins only:</p>
 <div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;delete&quot;: {&quot;mode&quot;: &quot;&quot;, &quot;expr&quot;: &quot;&quot;}</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md81"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md116"></a>
 Authenticated Users Only</h3>
 <p>Allow any authenticated user:</p>
 <div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;add&quot;: {&quot;mode&quot;: &quot;auth&quot;, &quot;expr&quot;: &quot;&quot;},</div>
 <div class="line">  &quot;update&quot;: {&quot;mode&quot;: &quot;auth&quot;, &quot;expr&quot;: &quot;&quot;}</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md82"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md117"></a>
 Ownership-Based Rules</h3>
 <p>Allow users to access only their own records:</p>
 <div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;get&quot;: {&quot;mode&quot;: &quot;custom&quot;, &quot;expr&quot;: &quot;auth.id == req.body.user_id&quot;},</div>
 <div class="line">  &quot;update&quot;: {&quot;mode&quot;: &quot;custom&quot;, &quot;expr&quot;: &quot;auth.id == req.body.author_id&quot;}</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md83"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md118"></a>
 Role-Based Rules</h3>
 <p>Check user properties from the database:</p>
 <div class="fragment"><div class="line">{</div>
@@ -231,7 +231,7 @@ Role-Based Rules</h3>
 <div class="line">    &quot;expr&quot;: &quot;auth.user.verified == true &amp;&amp; auth.user.role == &#39;premium&#39;&quot;</div>
 <div class="line">  }</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md84"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md119"></a>
 Complex Conditional Rules</h3>
 <p>Combine multiple conditions:</p>
 <div class="fragment"><div class="line">{</div>
@@ -245,9 +245,9 @@ Complex Conditional Rules</h3>
 <div class="line">  }</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md86"></a>
+<h2><a class="anchor" id="autotoc_md121"></a>
 Setting Rules via API</h2>
-<h3><a class="anchor" id="autotoc_md87"></a>
+<h3><a class="anchor" id="autotoc_md122"></a>
 During Schema Creation</h3>
 <div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;name&quot;: &quot;posts&quot;,</div>
@@ -265,7 +265,7 @@ During Schema Creation</h3>
 <div class="line">    &quot;delete&quot;: {&quot;mode&quot;: &quot;&quot;, &quot;expr&quot;: &quot;&quot;}</div>
 <div class="line">  }</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md88"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md123"></a>
 Updating Existing Rules</h3>
 <div class="fragment"><div class="line">PATCH /api/v1/schemas/posts</div>
 <div class="line"> </div>
@@ -277,7 +277,7 @@ Updating Existing Rules</h3>
 <div class="line">  }</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md90"></a>
+<h2><a class="anchor" id="autotoc_md125"></a>
 Expression Limitations</h2>
 <p>Since expressions are evaluated using Duktape (a lightweight JavaScript engine), there are some limitations:</p>
 <ul>
@@ -286,7 +286,7 @@ Expression Limitations</h2>
 <li><b>Isolated context</b> - Each evaluation runs in a fresh context</li>
 <li><b>Boolean result</b> - Expression must evaluate to a boolean value</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md91"></a>
+<h3><a class="anchor" id="autotoc_md126"></a>
 Supported Operations</h3>
 <ul>
 <li><b>Comparison</b>: <code>==</code>, <code>!=</code>, <code>===</code>, <code>!==</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></li>
@@ -295,7 +295,7 @@ Supported Operations</h3>
 <li><b>Grouping</b>: <code>()</code> for precedence</li>
 <li><b>Property access</b>: <code>auth.user.email</code>, <code>req.body.title</code></li>
 </ul>
-<h3><a class="anchor" id="autotoc_md92"></a>
+<h3><a class="anchor" id="autotoc_md127"></a>
 Common Patterns</h3>
 <div class="fragment"><div class="line">// Check authentication</div>
 <div class="line">auth.id != &quot;&quot; &amp;&amp; auth.id != null</div>
@@ -312,18 +312,18 @@ Common Patterns</h3>
 <div class="line">// Complex conditions</div>
 <div class="line">(auth.entity == &quot;mb_admins&quot;) || (auth.id == req.body.owner_id &amp;&amp; auth.user.active == true)</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md94"></a>
+<h2><a class="anchor" id="autotoc_md129"></a>
 Default Behavior</h2>
-<h3><a class="anchor" id="autotoc_md95"></a>
+<h3><a class="anchor" id="autotoc_md130"></a>
 System Tables</h3>
 <p>System tables (like <code>mb_tables</code>, <code>mb_admins</code>) always require admin authentication regardless of configured rules.</p>
-<h3><a class="anchor" id="autotoc_md96"></a>
+<h3><a class="anchor" id="autotoc_md131"></a>
 Empty Expressions</h3>
 <p>When <code>mode</code> is <code>"custom"</code> but <code>expr</code> is empty, the expression evaluates to <code>false</code>, denying access. But always admins will still have access despite this.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md98"></a>
+<h2><a class="anchor" id="autotoc_md133"></a>
 Best Practices</h2>
-<h3><a class="anchor" id="autotoc_md99"></a>
+<h3><a class="anchor" id="autotoc_md134"></a>
 1. Start Restrictive</h3>
 <p>Begin with strict rules and gradually relax them:</p>
 <div class="fragment"><div class="line">// Start with admin-only</div>
@@ -334,7 +334,7 @@ Best Practices</h2>
 <div class="line"> </div>
 <div class="line">// Finally, add custom conditions</div>
 <div class="line">{&quot;mode&quot;: &quot;custom&quot;, &quot;expr&quot;: &quot;auth.user.verified == true&quot;}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md100"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md135"></a>
 2. Use Consistent Field Names</h3>
 <p>Establish consistent naming for ownership fields across your entities:</p>
 <div class="fragment"><div class="line">// Good: consistent naming</div>
@@ -343,7 +343,7 @@ Best Practices</h2>
 <div class="line">auth.id == req.body.created_by</div>
 <div class="line"> </div>
 <div class="line">// Avoid: inconsistent naming</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md101"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md136"></a>
 3. Validate User Data Exists</h3>
 <p>Always check if user data exists before accessing properties:</p>
 <div class="fragment"><div class="line">// Good: check existence first</div>
@@ -351,7 +351,7 @@ Best Practices</h2>
 <div class="line"> </div>
 <div class="line">// Bad: may throw error if user is null</div>
 <div class="line">auth.user.verified == true</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md102"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md137"></a>
 4. Test Edge Cases</h3>
 <p>Test your rules with:</p><ul>
 <li>Unauthenticated users (guests)</li>
@@ -360,9 +360,9 @@ Best Practices</h2>
 <li>Users with missing or null properties</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md104"></a>
+<h2><a class="anchor" id="autotoc_md139"></a>
 Troubleshooting</h2>
-<h3><a class="anchor" id="autotoc_md105"></a>
+<h3><a class="anchor" id="autotoc_md140"></a>
 Access Denied Errors</h3>
 <ol type="1">
 <li><b>Check authentication</b>: Verify the user is properly authenticated</li>
@@ -371,7 +371,7 @@ Access Denied Errors</h3>
 <li><b>Check user data</b>: Ensure <code>auth.user</code> exists and has expected properties</li>
 <li><b>Check logs</b>: Look for expression evaluation errors in server logs</li>
 </ol>
-<h3><a class="anchor" id="autotoc_md106"></a>
+<h3><a class="anchor" id="autotoc_md141"></a>
 Expression Evaluation Errors</h3>
 <p>If an expression fails to evaluate:</p><ul>
 <li>Check for syntax errors (missing quotes, parentheses, etc.)</li>
@@ -379,7 +379,7 @@ Expression Evaluation Errors</h3>
 <li>Ensure boolean result (expressions must return true/false)</li>
 <li>Check server logs for detailed error messages</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md107"></a>
+<h3><a class="anchor" id="autotoc_md142"></a>
 Common Mistakes</h3>
 <div class="fragment"><div class="line">// Wrong: comparing with == instead of !=</div>
 <div class="line">auth.id == &quot;&quot;  // This checks if ID is empty (usually wrong)</div>
@@ -393,7 +393,7 @@ Common Mistakes</h3>
 <div class="line">// Right: check parent first</div>
 <div class="line">auth.user &amp;&amp; auth.user.email</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md109"></a>
+<h2><a class="anchor" id="autotoc_md144"></a>
 Summary</h2>
 <p>MantisBase access rules provide flexible, mode-based access control with optional JavaScript expression evaluation. Use modes for simple cases (<code>public</code>, <code>auth</code>, empty for admin) and custom expressions for complex, fine-grained permissions. </p>
 </div></div><!-- contents -->

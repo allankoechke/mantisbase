@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.1</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
    </div>
   </td>
  </tr>
@@ -155,6 +155,27 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af33415739ce2bb7f54eeb2cb27053f8d" id="r_af33415739ce2bb7f54eeb2cb27053f8d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#af33415739ce2bb7f54eeb2cb27053f8d">setIsUnique</a> (bool unique)</td></tr>
 <tr class="memdesc:af33415739ce2bb7f54eeb2cb27053f8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set unique constraint (fluent interface).  <br /></td></tr>
 <tr class="separator:af33415739ce2bb7f54eeb2cb27053f8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acad8ff7285e15863a82b71a6b62ce248" id="r_acad8ff7285e15863a82b71a6b62ce248"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#acad8ff7285e15863a82b71a6b62ce248">isForeignKey</a> () const</td></tr>
+<tr class="memdesc:acad8ff7285e15863a82b71a6b62ce248"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if field is a foreign key.  <br /></td></tr>
+<tr class="separator:acad8ff7285e15863a82b71a6b62ce248"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a326b664eba56579bddbe737c6f9a92e9" id="r_a326b664eba56579bddbe737c6f9a92e9"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a326b664eba56579bddbe737c6f9a92e9">foreignKeyTable</a> () const</td></tr>
+<tr class="memdesc:a326b664eba56579bddbe737c6f9a92e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get foreign key reference table name.  <br /></td></tr>
+<tr class="separator:a326b664eba56579bddbe737c6f9a92e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45386c9e097dff214f9a5ef4b311bcda" id="r_a45386c9e097dff214f9a5ef4b311bcda"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a45386c9e097dff214f9a5ef4b311bcda">foreignKeyColumn</a> () const</td></tr>
+<tr class="memdesc:a45386c9e097dff214f9a5ef4b311bcda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get foreign key reference column name.  <br /></td></tr>
+<tr class="separator:a45386c9e097dff214f9a5ef4b311bcda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0241de1d3a2743f06533f1625b3fb5c" id="r_af0241de1d3a2743f06533f1625b3fb5c"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#af0241de1d3a2743f06533f1625b3fb5c">foreignKeyOnUpdate</a> () const</td></tr>
+<tr class="memdesc:af0241de1d3a2743f06533f1625b3fb5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get foreign key update policy.  <br /></td></tr>
+<tr class="separator:af0241de1d3a2743f06533f1625b3fb5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7905074855ed76ea8cd3a3e59b75b5d8" id="r_a7905074855ed76ea8cd3a3e59b75b5d8"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a7905074855ed76ea8cd3a3e59b75b5d8">foreignKeyOnDelete</a> () const</td></tr>
+<tr class="memdesc:a7905074855ed76ea8cd3a3e59b75b5d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get foreign key delete policy.  <br /></td></tr>
+<tr class="separator:a7905074855ed76ea8cd3a3e59b75b5d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af13e3d0aee86e0c9552a9609a545ef0c" id="r_af13e3d0aee86e0c9552a9609a545ef0c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#af13e3d0aee86e0c9552a9609a545ef0c">setForeignKey</a> (const std::string &amp;table, const std::string &amp;column=&quot;id&quot;, const std::string &amp;onUpdate=&quot;RESTRICT&quot;, const std::string &amp;onDelete=&quot;RESTRICT&quot;)</td></tr>
+<tr class="memdesc:af13e3d0aee86e0c9552a9609a545ef0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set foreign key reference (fluent interface).  <br /></td></tr>
+<tr class="separator:af13e3d0aee86e0c9552a9609a545ef0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4917d298668d709f6e2737fad46bc25e" id="r_a4917d298668d709f6e2737fad46bc25e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a4917d298668d709f6e2737fad46bc25e">removeForeignKey</a> ()</td></tr>
+<tr class="memdesc:a4917d298668d709f6e2737fad46bc25e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove foreign key constraint (fluent interface).  <br /></td></tr>
+<tr class="separator:a4917d298668d709f6e2737fad46bc25e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f530ff66d257feff3ea13cabfe2b56e" id="r_a8f530ff66d257feff3ea13cabfe2b56e"><td class="memItemLeft" align="right" valign="top">nlohmann::json&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a8f530ff66d257feff3ea13cabfe2b56e">constraints</a> () const</td></tr>
 <tr class="memdesc:a8f530ff66d257feff3ea13cabfe2b56e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all field constraints.  <br /></td></tr>
 <tr class="separator:a8f530ff66d257feff3ea13cabfe2b56e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -458,6 +479,86 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a45386c9e097dff214f9a5ef4b311bcda" name="a45386c9e097dff214f9a5ef4b311bcda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45386c9e097dff214f9a5ef4b311bcda">&#9670;&#160;</a></span>foreignKeyColumn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::EntitySchemaField::foreignKeyColumn </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get foreign key reference column name. </p>
+<dl class="section return"><dt>Returns</dt><dd>Reference column name, defaults to "id" if not specified </dd></dl>
+
+</div>
+</div>
+<a id="a7905074855ed76ea8cd3a3e59b75b5d8" name="a7905074855ed76ea8cd3a3e59b75b5d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7905074855ed76ea8cd3a3e59b75b5d8">&#9670;&#160;</a></span>foreignKeyOnDelete()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::EntitySchemaField::foreignKeyOnDelete </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get foreign key delete policy. </p>
+<dl class="section return"><dt>Returns</dt><dd>Delete policy ("CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT") </dd></dl>
+
+</div>
+</div>
+<a id="af0241de1d3a2743f06533f1625b3fb5c" name="af0241de1d3a2743f06533f1625b3fb5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0241de1d3a2743f06533f1625b3fb5c">&#9670;&#160;</a></span>foreignKeyOnUpdate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::EntitySchemaField::foreignKeyOnUpdate </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get foreign key update policy. </p>
+<dl class="section return"><dt>Returns</dt><dd>Update policy ("CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT") </dd></dl>
+
+</div>
+</div>
+<a id="a326b664eba56579bddbe737c6f9a92e9" name="a326b664eba56579bddbe737c6f9a92e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a326b664eba56579bddbe737c6f9a92e9">&#9670;&#160;</a></span>foreignKeyTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::EntitySchemaField::foreignKeyTable </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get foreign key reference table name. </p>
+<dl class="section return"><dt>Returns</dt><dd>Reference table name, empty if not a foreign key </dd></dl>
+
+</div>
+</div>
 <a id="a6540d35413623c6a3fd54e6621de7294" name="a6540d35413623c6a3fd54e6621de7294"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6540d35413623c6a3fd54e6621de7294">&#9670;&#160;</a></span>genFieldId()</h2>
 
@@ -510,6 +611,26 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Get field unique identifier. </p>
 <dl class="section return"><dt>Returns</dt><dd>Field ID string </dd></dl>
+
+</div>
+</div>
+<a id="acad8ff7285e15863a82b71a6b62ce248" name="acad8ff7285e15863a82b71a6b62ce248"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acad8ff7285e15863a82b71a6b62ce248">&#9670;&#160;</a></span>isForeignKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::EntitySchemaField::isForeignKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check if field is a foreign key. </p>
+<dl class="section return"><dt>Returns</dt><dd>true if foreign key </dd></dl>
 
 </div>
 </div>
@@ -646,6 +767,26 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a4917d298668d709f6e2737fad46bc25e" name="a4917d298668d709f6e2737fad46bc25e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4917d298668d709f6e2737fad46bc25e">&#9670;&#160;</a></span>removeForeignKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp; mb::EntitySchemaField::removeForeignKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove foreign key constraint (fluent interface). </p>
+<dl class="section return"><dt>Returns</dt><dd>Reference to self for chaining </dd></dl>
+
+</div>
+</div>
 <a id="adebcd9adf5314a52fbf88dc291168cb0" name="adebcd9adf5314a52fbf88dc291168cb0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adebcd9adf5314a52fbf88dc291168cb0">&#9670;&#160;</a></span>required()</h2>
 
@@ -686,6 +827,58 @@ Static Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">opts</td><td>JSON object with constraint values </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Reference to self for chaining </dd></dl>
+
+</div>
+</div>
+<a id="af13e3d0aee86e0c9552a9609a545ef0c" name="af13e3d0aee86e0c9552a9609a545ef0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af13e3d0aee86e0c9552a9609a545ef0c">&#9670;&#160;</a></span>setForeignKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp; mb::EntitySchemaField::setForeignKey </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>table</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>column</em> = <code>&quot;id&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>onUpdate</em> = <code>&quot;RESTRICT&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>onDelete</em> = <code>&quot;RESTRICT&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set foreign key reference (fluent interface). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">table</td><td>Reference table name </td></tr>
+    <tr><td class="paramname">column</td><td>Reference column name (defaults to "id") </td></tr>
+    <tr><td class="paramname">onUpdate</td><td>Update policy (defaults to "RESTRICT") </td></tr>
+    <tr><td class="paramname">onDelete</td><td>Delete policy (defaults to "RESTRICT") </td></tr>
   </table>
   </dd>
 </dl>

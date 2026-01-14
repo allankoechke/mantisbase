@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['🛠️_20migrate_20command_20wip_0',['🛠️ migrate Command *(WIP)*',['../cli.html#autotoc_md17',1,'']]]
+  ['🚀_20running_20mantisbase_0',['🚀 Running MantisBase',['../setup.html#autotoc_md5',1,'']]],
+  ['🚀_20serve_20command_1',['🚀 serve Command',['../cli.html#autotoc_md13',1,'']]]
 ];

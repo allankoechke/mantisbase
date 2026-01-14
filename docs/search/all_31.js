@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🛡️_20middlewares_0',['🛡️ Middlewares',['../rest_api.html#autotoc_md29',1,'']]]
+  ['🚪_20logout_0',['🚪 Logout',['../auth_api.html#autotoc_md89',1,'']]]
 ];

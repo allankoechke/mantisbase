@@ -42,34 +42,34 @@ var NAVTREE =
     [ "API Access Rules", "rest_api_rules.html", null ],
     [ "Embedding MantisBase", "embedding.html", null ],
     [ "Running in Docker", "docker.html", [
-      [ "Dockerizing MantisBase", "docker.html#autotoc_md142", [
-        [ "Limitations", "docker.html#autotoc_md144", null ],
-        [ "Building and Running", "docker.html#autotoc_md146", [
-          [ "Using Dockerfile", "docker.html#autotoc_md147", null ],
-          [ "Persistent Data", "docker.html#autotoc_md148", null ]
+      [ "Dockerizing MantisBase", "docker.html#autotoc_md177", [
+        [ "Limitations", "docker.html#autotoc_md179", null ],
+        [ "Building and Running", "docker.html#autotoc_md181", [
+          [ "Using Dockerfile", "docker.html#autotoc_md182", null ],
+          [ "Persistent Data", "docker.html#autotoc_md183", null ]
         ] ],
-        [ "Docker Compose", "docker.html#autotoc_md150", null ],
-        [ "Configuration", "docker.html#autotoc_md152", null ],
-        [ "Accessing the API", "docker.html#autotoc_md154", null ],
-        [ "Example: Full Setup with PostgreSQL", "docker.html#autotoc_md156", null ],
-        [ "Summary", "docker.html#autotoc_md158", null ]
+        [ "Docker Compose", "docker.html#autotoc_md185", null ],
+        [ "Configuration", "docker.html#autotoc_md187", null ],
+        [ "Accessing the API", "docker.html#autotoc_md189", null ],
+        [ "Example: Full Setup with PostgreSQL", "docker.html#autotoc_md191", null ],
+        [ "Summary", "docker.html#autotoc_md193", null ]
       ] ]
     ] ],
     [ "Handling Files in MantisBase", "files.html", null ],
     [ "Healthcheck Endpoint", "healthcheck.html", null ],
     [ "Scripting in MantisBase", "scripting.html", [
-      [ "Scripting", "scripting.html#autotoc_md187", [
-        [ "Application", "scripting.html#autotoc_md188", null ],
-        [ "Database", "scripting.html#autotoc_md189", [
-          [ "Session", "scripting.html#autotoc_md190", null ]
+      [ "Scripting", "scripting.html#autotoc_md222", [
+        [ "Application", "scripting.html#autotoc_md223", null ],
+        [ "Database", "scripting.html#autotoc_md224", [
+          [ "Session", "scripting.html#autotoc_md225", null ]
         ] ],
-        [ "Router", "scripting.html#autotoc_md191", null ],
-        [ "Requests", "scripting.html#autotoc_md192", [
-          [ "Middlewares", "scripting.html#autotoc_md193", null ],
-          [ "MantisRequest Methods/Properties", "scripting.html#autotoc_md194", null ],
-          [ "MantisResponse Methods/Properties", "scripting.html#autotoc_md195", null ]
+        [ "Router", "scripting.html#autotoc_md226", null ],
+        [ "Requests", "scripting.html#autotoc_md227", [
+          [ "Middlewares", "scripting.html#autotoc_md228", null ],
+          [ "MantisRequest Methods/Properties", "scripting.html#autotoc_md229", null ],
+          [ "MantisResponse Methods/Properties", "scripting.html#autotoc_md230", null ]
         ] ],
-        [ "Utils (utility functions)", "scripting.html#autotoc_md196", null ]
+        [ "Utils (utility functions)", "scripting.html#autotoc_md231", null ]
       ] ]
     ] ],
     [ "Namespaces", "namespaces.html", [
@@ -105,9 +105,9 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "access__rules_8cpp.html",
-"classmb_1_1EntitySchemaField.html#a8f530ff66d257feff3ea13cabfe2b56e",
-"classmb_1_1MantisResponse.html#a878043bf4ca23e77ec318d47647969a9",
-"mantisbase_8h_source.html"
+"classmb_1_1EntitySchemaField.html#a53f5229eb9d9796cf62e6bee07671d1d",
+"classmb_1_1MantisResponse.html",
+"http__request_8cpp.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

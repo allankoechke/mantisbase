@@ -10,7 +10,7 @@ var searchData=
   ['tolowercase_7',['toLowerCase',['../namespacemb.html#a610ae91c5e525b5899cf9445107360e9',1,'mb']]],
   ['tosocitype_8',['tosocitype',['../classmb_1_1EntitySchemaField.html#ae6c5bb64dba8d05147f2858e62613da6',1,'mb::EntitySchemaField::toSociType() const'],['../classmb_1_1EntitySchemaField.html#a3c551f4b233f737b9185c6973ddcfb0b',1,'mb::EntitySchemaField::toSociType(const std::string &amp;type)']]],
   ['touppercase_9',['toUpperCase',['../namespacemb.html#abe6b794953335d0601b9fe55af49027f',1,'mb']]],
-  ['trace_10',['trace',['../classmb_1_1LogsMgr.html#a61b167d50fea9afddf6754b947d3bf44',1,'mb::LogsMgr']]],
+  ['trace_10',['trace',['../classmb_1_1Logger.html#a24fdf7bd99f6f446781467bf5a4bd066',1,'mb::Logger']]],
   ['trim_11',['trim',['../namespacemb.html#a409c1fc8483d2c71f13abd04598f4db2',1,'mb']]],
   ['tryparsejsonstr_12',['tryParseJsonStr',['../namespacemb.html#acbb7d92fa5a0b643308cec05f16d86bd',1,'mb']]],
   ['type_13',['type',['../classmb_1_1EntitySchemaField.html#a638b6d84ac73fc4c75492b902a43923a',1,'mb::EntitySchemaField::type()'],['../classmb_1_1EntitySchema.html#ab34abb1145d1b45e9ee261d055722b8b',1,'mb::EntitySchema::type()'],['../classmb_1_1Entity.html#a3d1fc7eab6f53ba13ab62a35310f452b',1,'mb::Entity::type()']]]

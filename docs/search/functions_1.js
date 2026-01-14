@@ -18,6 +18,6 @@ var searchData=
   ['createsystables_15',['createSysTables',['../classmb_1_1Database.html#a8a4763d92a9fe78ed3493f6cb04e9297',1,'mb::Database']]],
   ['createtable_16',['createTable',['../classmb_1_1EntitySchema.html#a8b097bcabfa0bceda36cb9e130749886',1,'mb::EntitySchema']]],
   ['createtoken_17',['createToken',['../classmb_1_1Auth.html#a37e71e7d29fc994f7f183810f7ee0c0d',1,'mb::Auth']]],
-  ['critical_18',['critical',['../classmb_1_1LogsMgr.html#a74021c77960805a5debd50b225af7ae3',1,'mb::LogsMgr']]],
+  ['critical_18',['critical',['../classmb_1_1Logger.html#a3d5e18ca0bacee615c2423524a760427',1,'mb::Logger']]],
   ['ctx_19',['ctx',['../classmb_1_1MantisBase.html#a0d5d8e6c73ad4d3340b3af719ba1a47c',1,'mb::MantisBase']]]
 ];

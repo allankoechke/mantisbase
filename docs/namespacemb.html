@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.1</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
    </div>
   </td>
  </tr>
@@ -92,6 +92,7 @@ $(document).ready(function(){initNavTree('namespacemb.html',''); initResizable()
 
 <div class="header">
   <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
@@ -103,6 +104,12 @@ $(document).ready(function(){initNavTree('namespacemb.html',''); initResizable()
 <p><a class="el" href="router_8h.html">router.h</a>  
 <a href="namespacemb.html#details">More...</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacemb_1_1LogOrigin" id="r_namespacemb_1_1LogOrigin"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb_1_1LogOrigin.html">LogOrigin</a></td></tr>
+<tr class="memdesc:namespacemb_1_1LogOrigin"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility logger functions for each component/system. These functions automatically pass the origin parameter. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1AccessRule.html">AccessRule</a></td></tr>
@@ -139,7 +146,10 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KVStore.html">KVStore</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manages application settings.  <a href="classmb_1_1KVStore.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1LogsMgr.html">LogsMgr</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1LogDatabase.html">LogDatabase</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manages SQLite database for application logs.  <a href="classmb_1_1LogDatabase.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html">Logger</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html">MantisBase</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> entry point.  <a href="classmb_1_1MantisBase.html#details">More...</a><br /></td></tr>
@@ -153,7 +163,7 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisException.html">MantisException</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisLoggerImpl.html">MantisLoggerImpl</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logger implementation for soci, allowing us to override the default logging behaviour with our own custom logger.  <a href="classmb_1_1MantisLoggerImpl.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmb_1_1Logger.html">Logger</a> implementation for soci, allowing us to override the default logging behaviour with our own custom logger.  <a href="classmb_1_1MantisLoggerImpl.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A wrapper class around <code>httplib::Request</code> offering a consistent API and allowing for easy wrapper methods compatible with <code>Duktape</code> API requirements for scripting.  <a href="classmb_1_1MantisRequest.html#details">More...</a><br /></td></tr>
@@ -183,8 +193,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:ac7d3dfe501576fab5dc51f2aa478f367"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a446ef66d54a9e41b35ecb0ab9294f923" id="r_a446ef66d54a9e41b35ecb0ab9294f923"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="namespacemb.html#a45b395bbdb082a2a10815855bad98c81">mb::LogLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a446ef66d54a9e41b35ecb0ab9294f923">LogLevel</a></td></tr>
 <tr class="separator:a446ef66d54a9e41b35ecb0ab9294f923"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14effe21dc8d1a10e86e0f4fa9836b7b" id="r_a14effe21dc8d1a10e86e0f4fa9836b7b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a14effe21dc8d1a10e86e0f4fa9836b7b">logger</a> = <a class="el" href="classmb_1_1LogsMgr.html">LogsMgr</a></td></tr>
-<tr class="separator:a14effe21dc8d1a10e86e0f4fa9836b7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3e66720967ad1024382229e4e245120" id="r_aa3e66720967ad1024382229e4e245120"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aa3e66720967ad1024382229e4e245120">logger</a> = <a class="el" href="classmb_1_1Logger.html">Logger</a></td></tr>
+<tr class="separator:aa3e66720967ad1024382229e4e245120"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5343a89a02116de84a79039bb8acdd21" id="r_a5343a89a02116de84a79039bb8acdd21"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a5343a89a02116de84a79039bb8acdd21">Record</a> = nlohmann::json</td></tr>
 <tr class="memdesc:a5343a89a02116de84a79039bb8acdd21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Single database record as JSON object.  <br /></td></tr>
 <tr class="separator:a5343a89a02116de84a79039bb8acdd21"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -448,14 +458,14 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a14effe21dc8d1a10e86e0f4fa9836b7b" name="a14effe21dc8d1a10e86e0f4fa9836b7b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14effe21dc8d1a10e86e0f4fa9836b7b">&#9670;&#160;</a></span>logger</h2>
+<a id="aa3e66720967ad1024382229e4e245120" name="aa3e66720967ad1024382229e4e245120"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3e66720967ad1024382229e4e245120">&#9670;&#160;</a></span>logger</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="namespacemb.html#a14effe21dc8d1a10e86e0f4fa9836b7b">mb::logger</a> = typedef <a class="el" href="classmb_1_1LogsMgr.html">LogsMgr</a></td>
+          <td class="memname">using <a class="el" href="namespacemb.html#aa3e66720967ad1024382229e4e245120">mb::logger</a> = typedef <a class="el" href="classmb_1_1Logger.html">Logger</a></td>
         </tr>
       </table>
 </div><div class="memdoc">

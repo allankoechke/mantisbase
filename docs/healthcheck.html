@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.1</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
    </div>
   </td>
  </tr>
@@ -96,11 +96,11 @@ $(document).ready(function(){initNavTree('healthcheck.html',''); initResizable()
 <div class="contents">
 <div class="textblock"><p>The healthcheck endpoint provides a simple way to verify that the MantisBase server is running and responsive. It is useful for monitoring tools, load balancers, and deployment scripts.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md176"></a>
+<h2><a class="anchor" id="autotoc_md211"></a>
 Endpoint</h2>
 <div class="fragment"><div class="line">GET /api/v1/health</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md178"></a>
+<h2><a class="anchor" id="autotoc_md213"></a>
 Response</h2>
 <p>A successful request returns a JSON response with the following structure:</p>
 <div class="fragment"><div class="line">{</div>
@@ -113,7 +113,7 @@ Response</h2>
 </ul>
 <p>The HTTP status code for a healthy response is <code>200 OK</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md180"></a>
+<h2><a class="anchor" id="autotoc_md215"></a>
 Example</h2>
 <p><b>Request:</b></p>
 <div class="fragment"><div class="line">curl http://localhost:7070/api/v1/health</div>
@@ -123,11 +123,11 @@ Example</h2>
 <div class="line">  &quot;uptime&quot;: 12345</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md182"></a>
+<h2><a class="anchor" id="autotoc_md217"></a>
 Error Handling</h2>
 <p>If the server encounters an error while processing the healthcheck, it may return a <code>500 Internal Server Error</code> with an appropriate error message.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md184"></a>
+<h2><a class="anchor" id="autotoc_md219"></a>
 Usage</h2>
 <ul>
 <li>Verify server availability and responsiveness</li>
@@ -146,7 +146,7 @@ Usage</h2>
 <div class="line">  initialDelaySeconds: 30</div>
 <div class="line">  periodSeconds: 10</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md186"></a>
+<h2><a class="anchor" id="autotoc_md221"></a>
 Summary</h2>
 <p>The healthcheck endpoint provides a simple, lightweight way to monitor MantisBase server status and uptime, making it easy to integrate with various monitoring and orchestration systems. </p>
 </div></div><!-- contents -->

@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.1</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
    </div>
   </td>
  </tr>
@@ -144,6 +144,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2b28b5c9521895ae6fcf278ae61813af" id="r_a2b28b5c9521895ae6fcf278ae61813af"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a2b28b5c9521895ae6fcf278ae61813af">schemaCache</a> (const std::string &amp;table_name) const</td></tr>
 <tr class="memdesc:a2b28b5c9521895ae6fcf278ae61813af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get cached schema JSON by table name.  <br /></td></tr>
 <tr class="separator:a2b28b5c9521895ae6fcf278ae61813af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf58352dbab6b95d4c025276830e049d" id="r_aaf58352dbab6b95d4c025276830e049d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aaf58352dbab6b95d4c025276830e049d">hasSchemaCache</a> (const std::string &amp;table_name) const</td></tr>
+<tr class="memdesc:aaf58352dbab6b95d4c025276830e049d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether schema cache for given name exists.  <br /></td></tr>
+<tr class="separator:aaf58352dbab6b95d4c025276830e049d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a9f50ee4e617c65296a641a123f80b2" id="r_a1a9f50ee4e617c65296a641a123f80b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Entity.html">Entity</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a1a9f50ee4e617c65296a641a123f80b2">schemaCacheEntity</a> (const std::string &amp;table_name) const</td></tr>
 <tr class="memdesc:a1a9f50ee4e617c65296a641a123f80b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get cached entity by table name.  <br /></td></tr>
 <tr class="separator:a1a9f50ee4e617c65296a641a123f80b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -153,9 +156,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a28a492e40b98020d800db095f5f40c81" id="r_a28a492e40b98020d800db095f5f40c81"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a28a492e40b98020d800db095f5f40c81">updateSchemaCache</a> (const std::string &amp;old_entity_name, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;new_schema)</td></tr>
 <tr class="memdesc:a28a492e40b98020d800db095f5f40c81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update cached schema.  <br /></td></tr>
 <tr class="separator:a28a492e40b98020d800db095f5f40c81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86f4b5d2bb949fceb7fdf546f7e25e31" id="r_a86f4b5d2bb949fceb7fdf546f7e25e31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a86f4b5d2bb949fceb7fdf546f7e25e31">removeSchemaCache</a> (const std::string &amp;table_name)</td></tr>
-<tr class="memdesc:a86f4b5d2bb949fceb7fdf546f7e25e31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove schema from cache.  <br /></td></tr>
-<tr class="separator:a86f4b5d2bb949fceb7fdf546f7e25e31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b21c2af0d269b349271246e4d3accc2" id="r_a1b21c2af0d269b349271246e4d3accc2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a1b21c2af0d269b349271246e4d3accc2">removeSchemaCache</a> (const std::string &amp;entity_name)</td></tr>
+<tr class="memdesc:a1b21c2af0d269b349271246e4d3accc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove schema from cache.  <br /></td></tr>
+<tr class="separator:a1b21c2af0d269b349271246e4d3accc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d378dff36a7f2d3814e8fd1b1320584" id="r_a1d378dff36a7f2d3814e8fd1b1320584"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a1d378dff36a7f2d3814e8fd1b1320584">decompressResponseBody</a> (const std::string &amp;body, const std::string &amp;encoding)</td></tr>
 <tr class="memdesc:a1d378dff36a7f2d3814e8fd1b1320584"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decompress response body based on encoding.  <br /></td></tr>
 <tr class="separator:a1d378dff36a7f2d3814e8fd1b1320584"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -390,6 +393,33 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="aaf58352dbab6b95d4c025276830e049d" name="aaf58352dbab6b95d4c025276830e049d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf58352dbab6b95d4c025276830e049d">&#9670;&#160;</a></span>hasSchemaCache()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::Router::hasSchemaCache </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>table_name</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check whether schema cache for given name exists. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">table_name</td><td>Table name to lookup </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if found, false otherwise. </dd></dl>
+
+</div>
+</div>
 <a id="a76ffe4c6fa5657af43a8a776d03de6a3" name="a76ffe4c6fa5657af43a8a776d03de6a3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a76ffe4c6fa5657af43a8a776d03de6a3">&#9670;&#160;</a></span>initialize()</h2>
 
@@ -606,8 +636,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a86f4b5d2bb949fceb7fdf546f7e25e31" name="a86f4b5d2bb949fceb7fdf546f7e25e31"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a86f4b5d2bb949fceb7fdf546f7e25e31">&#9670;&#160;</a></span>removeSchemaCache()</h2>
+<a id="a1b21c2af0d269b349271246e4d3accc2" name="a1b21c2af0d269b349271246e4d3accc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b21c2af0d269b349271246e4d3accc2">&#9670;&#160;</a></span>removeSchemaCache()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -616,7 +646,7 @@ Public Member Functions</h2></td></tr>
           <td class="memname">void mb::Router::removeSchemaCache </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>table_name</em></td><td>)</td>
+          <td class="paramname"><em>entity_name</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -625,7 +655,7 @@ Public Member Functions</h2></td></tr>
 <p>Remove schema from cache. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">table_name</td><td>Table name to remove </td></tr>
+    <tr><td class="paramname">entity_name</td><td>Table name to remove </td></tr>
   </table>
   </dd>
 </dl>

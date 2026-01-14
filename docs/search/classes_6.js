@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['logsmgr_0',['LogsMgr',['../classmb_1_1LogsMgr.html',1,'mb']]]
+  ['logdatabase_0',['LogDatabase',['../classmb_1_1LogDatabase.html',1,'mb']]],
+  ['logger_1',['Logger',['../classmb_1_1Logger.html',1,'mb']]]
 ];

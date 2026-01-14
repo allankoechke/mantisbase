@@ -15,10 +15,11 @@ var hierarchy =
     [ "mb::Files", "classmb_1_1Files.html", null ],
     [ "mb::FuncLogger", "classmb_1_1FuncLogger.html", null ],
     [ "mb::KVStore", "classmb_1_1KVStore.html", null ],
+    [ "mb::LogDatabase", "classmb_1_1LogDatabase.html", null ],
+    [ "mb::Logger", "classmb_1_1Logger.html", null ],
     [ "soci::logger_impl", null, [
       [ "mb::MantisLoggerImpl", "classmb_1_1MantisLoggerImpl.html", null ]
     ] ],
-    [ "mb::LogsMgr", "classmb_1_1LogsMgr.html", null ],
     [ "mb::MantisBase", "classmb_1_1MantisBase.html", null ],
     [ "mb::MantisContentReader", "classmb_1_1MantisContentReader.html", null ],
     [ "mb::MantisRequest", "classmb_1_1MantisRequest.html", null ],

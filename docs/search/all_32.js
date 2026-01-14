@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🧩_20installation_20options_0',['🧩 Installation Options',['../setup.html#autotoc_md0',1,'']]]
+  ['🛠️_20migrate_20command_20wip_0',['🛠️ migrate Command *(WIP)*',['../cli.html#autotoc_md17',1,'']]]
 ];

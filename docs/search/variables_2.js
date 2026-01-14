@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['middlewares_0',['middlewares',['../structmb_1_1RouteHandler.html#ac45649482810180ded7480c24a830756',1,'mb::RouteHandler']]]
+  ['isdbinitialized_0',['isDbInitialized',['../classmb_1_1Logger.html#a4b01ad34a6068370f7b0131c12ceb10b',1,'mb::Logger']]]
 ];

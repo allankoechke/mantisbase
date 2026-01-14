@@ -1,5 +1,6 @@
 var namespacemb =
 [
+    [ "LogOrigin", "namespacemb_1_1LogOrigin.html", null ],
     [ "AccessRule", "classmb_1_1AccessRule.html", "classmb_1_1AccessRule" ],
     [ "Auth", "classmb_1_1Auth.html", null ],
     [ "ContextStore", "classmb_1_1ContextStore.html", "classmb_1_1ContextStore" ],
@@ -12,7 +13,8 @@ var namespacemb =
     [ "Files", "classmb_1_1Files.html", null ],
     [ "FuncLogger", "classmb_1_1FuncLogger.html", "classmb_1_1FuncLogger" ],
     [ "KVStore", "classmb_1_1KVStore.html", "classmb_1_1KVStore" ],
-    [ "LogsMgr", "classmb_1_1LogsMgr.html", "classmb_1_1LogsMgr" ],
+    [ "LogDatabase", "classmb_1_1LogDatabase.html", "classmb_1_1LogDatabase" ],
+    [ "Logger", "classmb_1_1Logger.html", "classmb_1_1Logger" ],
     [ "MantisBase", "classmb_1_1MantisBase.html", "classmb_1_1MantisBase" ],
     [ "MantisContentReader", "classmb_1_1MantisContentReader.html", "classmb_1_1MantisContentReader" ],
     [ "MantisException", "classmb_1_1MantisException.html", "classmb_1_1MantisException" ],
@@ -28,7 +30,7 @@ var namespacemb =
     [ "HandlerResponse", "namespacemb.html#adf14f234c6ec1371dde363714c0a546e", null ],
     [ "HandlerWithContentReaderFn", "namespacemb.html#ac74c76fe24192fde8f728c74c624f668", null ],
     [ "json", "namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d", null ],
-    [ "logger", "namespacemb.html#a14effe21dc8d1a10e86e0f4fa9836b7b", null ],
+    [ "logger", "namespacemb.html#aa3e66720967ad1024382229e4e245120", null ],
     [ "LogLevel", "namespacemb.html#a446ef66d54a9e41b35ecb0ab9294f923", null ],
     [ "Method", "namespacemb.html#ae79700c1a37575b76080e98b09dfa1cc", null ],
     [ "MiddlewareFn", "namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12", null ],

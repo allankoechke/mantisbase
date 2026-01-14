@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🚪_20logout_0',['🚪 Logout',['../auth_api.html#autotoc_md54',1,'']]]
+  ['🗃️_20schema_20management_20api_0',['🗃️ Schema Management API',['../rest_api.html#autotoc_md35',1,'']]]
 ];

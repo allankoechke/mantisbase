@@ -5,7 +5,7 @@ var searchData=
   ['db_2',['db',['../classmb_1_1MantisBase.html#acf263b88b0d221f9bc539714668b7d4b',1,'mb::MantisBase']]],
   ['dbdatetostring_3',['dbDateToString',['../namespacemb.html#a49a5d0beca12bf0c7d5e3fef0d201f0b',1,'mb']]],
   ['dbtype_4',['dbType',['../classmb_1_1MantisBase.html#a2a9a711b0c3c33ecdd2a0e2e4cd5e570',1,'mb::MantisBase']]],
-  ['debug_5',['debug',['../classmb_1_1LogsMgr.html#a89c7033af0bfd28b644aaa71aaf0b59c',1,'mb::LogsMgr']]],
+  ['debug_5',['debug',['../classmb_1_1Logger.html#a07237c4b0b77b6c9d19c3644d48d1087',1,'mb::Logger']]],
   ['decompressresponsebody_6',['decompressResponseBody',['../classmb_1_1Router.html#a1d378dff36a7f2d3814e8fd1b1320584',1,'mb::Router']]],
   ['defaultauthfields_7',['defaultAuthFields',['../classmb_1_1EntitySchemaField.html#a103f22fe03972194c877caade48bb03a',1,'mb::EntitySchemaField']]],
   ['defaultauthfieldsschema_8',['defaultAuthFieldsSchema',['../classmb_1_1EntitySchema.html#aad7a9638dcad4c02f4c440c6b12d839e',1,'mb::EntitySchema']]],

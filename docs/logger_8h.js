@@ -1,13 +1,13 @@
 var logger_8h =
 [
-    [ "mb::LogsMgr", "classmb_1_1LogsMgr.html", "classmb_1_1LogsMgr" ],
+    [ "mb::Logger", "classmb_1_1Logger.html", "classmb_1_1Logger" ],
     [ "mb::FuncLogger", "classmb_1_1FuncLogger.html", "classmb_1_1FuncLogger" ],
     [ "MANTIS_FUNC", "logger_8h.html#a3521250381df84ba6fafafe4c91dfa2b", null ],
     [ "TRACE_CLASS_METHOD", "logger_8h.html#a558f262c132aae0f82c218213dd1ed0d", null ],
     [ "TRACE_FUNC", "logger_8h.html#a2bd25b02f3af4554e146781a198b7b20", null ],
     [ "TRACE_MANTIS_FUNC", "logger_8h.html#aae847e6e848e51374f49fd526abc9063", null ],
     [ "TRACE_METHOD", "logger_8h.html#a3a73b1da6eb70a6a459b223bb995d567", null ],
-    [ "logger", "logger_8h.html#a14effe21dc8d1a10e86e0f4fa9836b7b", null ],
+    [ "logger", "logger_8h.html#aa3e66720967ad1024382229e4e245120", null ],
     [ "LogLevel", "logger_8h.html#a446ef66d54a9e41b35ecb0ab9294f923", null ],
     [ "LogLevel", "logger_8h.html#a45b395bbdb082a2a10815855bad98c81", [
       [ "TRACE", "logger_8h.html#a45b395bbdb082a2a10815855bad98c81a2d3e4144aa384b18849ab9a8abad74d6", null ],
