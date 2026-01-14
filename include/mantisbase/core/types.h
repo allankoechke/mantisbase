@@ -25,7 +25,7 @@ namespace mb {
 
     class KVStore;
     class Database;
-    class LogsMgr;
+    class Logger;
     class Router;
     class Files;
 

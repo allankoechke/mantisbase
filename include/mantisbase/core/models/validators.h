@@ -33,6 +33,8 @@ namespace mb {
 
         static std::optional<std::string> validatorConstraintCheck(const json &field, const json &body);
 
+        static std::optional<std::string> foreignKeyConstraintCheck(const json &field, const json &body);
+
         static std::optional<std::string> viewTypeSQLCheck(const json &body);
 
         static std::optional<std::string> validateTableSchema(const json &entity_schema);

@@ -18,10 +18,10 @@ namespace mb {
         if (m_parsed) return;
 
         if (isMultipartFormData()) {
-            logger::trace("Reading request as Multipart!");
+            LogOrigin::trace("Content Reading", "Reading request as Multipart!");
             readMultipart();
         } else {
-            logger::trace("Reading request as JSON!");
+            LogOrigin::trace("Content Reading", "Reading request as JSON!");
             readJSON();
         }
 

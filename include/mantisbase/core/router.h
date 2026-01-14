@@ -134,6 +134,13 @@ namespace mb {
         const json &schemaCache(const std::string &table_name) const;
 
         /**
+         * @brief Check whether schema cache for given name exists.
+         * @param table_name Table name to lookup
+         * @return true if found, false otherwise.
+         */
+        bool hasSchemaCache(const std::string &table_name) const;
+
+        /**
          * @brief Get cached entity by table name.
          * @param table_name Table name to lookup
          * @return Entity instance from cache
@@ -155,9 +162,9 @@ namespace mb {
 
         /**
          * @brief Remove schema from cache.
-         * @param table_name Table name to remove
+         * @param entity_name Table name to remove
          */
-        void removeSchemaCache(const std::string &table_name);
+        void removeSchemaCache(const std::string &entity_name);
 
         // ----------- UTILS METHODS ----------- //
         /**
@@ -178,7 +185,7 @@ namespace mb {
         static std::string getMimeType(const std::string &path);
 
         // ----------- REQ/RES METHODS ----------- //
-        std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute() const;
+        static std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute() ;
 
         static std::function<void(const MantisRequest &, MantisResponse &)> fileServingHandler();
 
@@ -201,6 +208,8 @@ namespace mb {
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogout();
 
         std::function<void(MantisRequest &, MantisResponse &)> handleSetupAdmin();
+
+        static std::function<void(const MantisRequest &, MantisResponse &)> handleLogs();
 
         // Member Variables
         MantisBase &mApp;

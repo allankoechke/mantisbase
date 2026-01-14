@@ -87,7 +87,7 @@ namespace mb
 
             if (ec)
             {
-                logger::trace("Token verification failed: {}", ec.message());
+                LogOrigin::authTrace("Token Verification Failed", fmt::format("Token verification failed: {}", ec.message()));
                 result["error"] = ec.message();
                 return result;
             }

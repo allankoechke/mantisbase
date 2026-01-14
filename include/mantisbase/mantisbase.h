@@ -128,7 +128,8 @@ namespace mb
          * @param reason User-friendly reason for the exit.
          * @return `exitCode` value.
          */
-        static int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
+        static int quit(const int& exitCode, const std::string& reason = "Something went wrong!");
+        static int quit(const int& exitCode = 0);
 
         /**
          * @brief Retrieve HTTP Listening port.
@@ -223,8 +224,6 @@ namespace mb
 
         /// Get the database unit object
         [[nodiscard]] Database& db() const;
-        /// Get the logging unit object
-        [[nodiscard]] LogsMgr& log() const;
         /// Get the commandline parser object
         [[nodiscard]] argparse::ArgumentParser& cmd() const;
         /// Get the router object instance.
@@ -240,6 +239,15 @@ namespace mb
          * @return Entity object for the selected table
          */
         [[nodiscard]] Entity entity(const std::string& entity_name) const;
+
+        /**
+         * @brief Check if table schema encapsulated by an `Entity` object from given the table name exists.
+         * If table does not exist yet, return false.
+         *
+         * @param entity_name Name of the table of interest
+         * @return true if entity exists, false otherwise.
+         */
+        [[nodiscard]] bool hasEntity(const std::string& entity_name) const;
 
         /// Get the duktape context
         [[nodiscard]] duk_context* ctx() const;
@@ -355,7 +363,6 @@ namespace mb
         bool m_launchAdminPanel = false;
         bool m_isDevMode = false;
 
-        std::unique_ptr<LogsMgr> m_logger;
         std::unique_ptr<Database> m_database;
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KVStore> m_kvStore;

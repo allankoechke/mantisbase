@@ -17,6 +17,7 @@
 #include "../include/mantisbase/core/exceptions.h"
 #include "../include/mantisbase/core/middlewares.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
+#include "../include/mantisbase/core/logger/log_database.h"
 
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
@@ -94,7 +95,8 @@ namespace mb {
         try {
             // Check if server can bind to port before launching
             if (!svr.is_valid()) {
-                logger::critical("Server is not valid. Maybe port is in use or permissions issue.\n");
+                LogOrigin::critical("Server Invalid",
+                                    "Server is not valid. Maybe port is in use or permissions issue.");
                 return false;
             }
 
@@ -129,7 +131,7 @@ namespace mb {
             });
 
             if (!svr.listen(host, port)) {
-                logger::critical("Error: Failed to bind to {}:{}", host, port);
+                LogOrigin::critical("Server Bind Failed", fmt::format("Error: Failed to bind to {}:{}", host, port));
                 notifier.join();
                 return false;
             }
@@ -137,9 +139,9 @@ namespace mb {
             notifier.join();
             return true;
         } catch (const std::exception &e) {
-            logger::critical("Failed to start server: {}", e.what());
+            LogOrigin::critical("Server Start Failed", fmt::format("Failed to start server: {}", e.what()));
         } catch (...) {
-            logger::critical("Failed to start server: Unknown Error");
+            LogOrigin::critical("Server Start Failed", "Failed to start server: Unknown Error");
         }
 
         return false;
@@ -149,7 +151,7 @@ namespace mb {
         if (svr.is_running()) {
             svr.stop();
             m_entityMap.clear();
-            logger::info("HTTP Server Stopped.");
+            LogOrigin::info("Server Stopped", "HTTP Server Stopped.");
         }
     }
 
@@ -158,18 +160,21 @@ namespace mb {
     }
 
     void Router::Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
+        LogOrigin::info("Route Created", fmt::format("Creating route [ GET ] {}", path));
         m_routeRegistry.add("GET", path, handler, middlewares);
         globalRouteHandler("GET", path);
     }
 
     void Router::Post(const std::string &path, const HandlerWithContentReaderFn &handler,
                       const Middlewares &middlewares) {
+        LogOrigin::info("Route Created", fmt::format("Creating route [ POST ] {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         globalRouteHandlerWithReader("POST", path);
     }
 
     void Router::Post(const std::string &path, const HandlerFn &handler,
                       const Middlewares &middlewares) {
+        LogOrigin::info("Route Created", fmt::format("Creating route [ POST ] {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         globalRouteHandler("POST", path);
     }
@@ -197,6 +202,10 @@ namespace mb {
         }
 
         return m_entityMap.at(table_name).schema();
+    }
+
+    bool Router::hasSchemaCache(const std::string &table_name) const {
+        return m_entityMap.contains(table_name);
     }
 
     Entity Router::schemaCacheEntity(const std::string &table_name) const {
@@ -369,8 +378,12 @@ namespace mb {
         router.Post("/api/v1/auth/login", handleAuthLogin(), {rateLimit(5, 60, false)});
         router.Post("/api/v1/auth/refresh", handleAuthRefresh());
         router.Post("/api/v1/auth/logout", handleAuthLogout());
+
         // Rate limit admin setup: 3 attempts per hour per IP (very strict for security)
         router.Post("/api/v1/auth/setup/admin", handleSetupAdmin(), {rateLimit(3, 3600, false)});
+
+        // Logs endpoint - requires admin authentication
+        router.Get("/api/v1/sys/logs", handleLogs(), {requireAdminAuth()});
 
         // Add entity schema routes
         // GET|POST|PATCH|DELETE `/api/v1/schemas*`
@@ -378,12 +391,13 @@ namespace mb {
 
         // Add /public static file serving directory
         if (const auto mount_ok = svr.set_mount_point("/", mApp.publicDir()); !mount_ok) {
-            logger::critical("Failed to setup mount point directory for '/' at '{}'",
-                             mApp.publicDir());
+            LogOrigin::critical("Mount Point Setup Failed", fmt::format(
+                                    "Failed to setup mount point directory for '/' at '{}'",
+                                    mApp.publicDir()));
         }
     }
 
-    std::function<void(const MantisRequest &, MantisResponse &)> Router::handleAdminDashboardRoute() const {
+    std::function<void(const MantisRequest &, MantisResponse &)> Router::handleAdminDashboardRoute() {
         return [](const MantisRequest &req, MantisResponse &res) {
             try {
                 const auto fs = cmrc::mantis::get_filesystem();
@@ -397,7 +411,7 @@ namespace mb {
                 }
 
                 if (!fs.exists(path)) {
-                    logger::trace("{} path does not exists", path);
+                    LogOrigin::trace("Path Missing", fmt::format("{} path does not exists", path));
 
                     // fallback to index.html for React routes
                     path = "/public/index.html";
@@ -414,18 +428,20 @@ namespace mb {
 
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(404);
-                    logger::critical("Error processing /admin response: {}", e.what());
+                    LogOrigin::critical("Admin Response Error",
+                                        fmt::format("Error processing /admin response: {}", e.what()));
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
                 res.setReason(e.what());
-                logger::critical("Error processing /admin request: {}", e.what());
+                LogOrigin::critical("Admin Request Error",
+                                    fmt::format("Error processing /admin request: {}", e.what()));
             }
         };
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
-        logger::trace("Registering /api/files/:entity/:file GET endpoint ...");
+        LogOrigin::trace("Endpoint Registration", "Registering /api/files/:entity/:file GET endpoint ...");
         return [](const MantisRequest &req, MantisResponse &res) {
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");
@@ -482,5 +498,133 @@ namespace mb {
         if (path.ends_with(".png")) return "image/png";
         if (path.ends_with(".svg")) return "image/svg+xml";
         return "application/octet-stream";
+    }
+
+    std::function<void(const MantisRequest &, MantisResponse &)> Router::handleLogs() {
+        const auto f = MANTIS_FUNC();
+        return [f](const MantisRequest &req, MantisResponse &res) {
+            try {
+                TRACE_FUNC(f);
+                // Get log database instance
+                auto &logsDb = logger::getLogsDb();
+                if (!logger::isDbInitialized) {
+                    json response;
+                    response["error"] = "Log database not initialized";
+                    response["status"] = 503;
+                    response["data"] = json::object();
+                    res.sendJSON(503, response);
+                    return;
+                }
+
+                // Parse query parameters
+                int page = 1;
+                int page_size = 50;
+                std::string level_filter;
+                std::string min_level_filter;
+                std::string search_filter;
+                std::string start_date;
+                std::string end_date;
+                std::string sort_by = "timestamp";
+                std::string sort_order = "desc";
+
+                // Get page parameter
+                if (req.hasQueryParam("page")) {
+                    try {
+                        page = std::stoi(req.getQueryParamValue("page"));
+                        if (page < 1) page = 1;
+                    } catch (...) {
+                        page = 1;
+                    }
+                }
+
+                // Get page_size parameter
+                if (req.hasQueryParam("page_size")) {
+                    try {
+                        page_size = std::stoi(req.getQueryParamValue("page_size"));
+                        if (page_size < 1) page_size = 1;
+                        if (page_size > 1000) page_size = 1000; // Limit to 1000
+                    } catch (...) {
+                        page_size = 50;
+                    }
+                }
+
+                // Get level filter
+                if (req.hasQueryParam("level")) {
+                    level_filter = req.getQueryParamValue("level");
+
+                    // Validate level
+                    if (level_filter != "trace" && level_filter != "debug" &&
+                        level_filter != "info" && level_filter != "warn" &&
+                        level_filter != "critical") {
+                        level_filter.clear();
+                    }
+                }
+
+                if (req.hasQueryParam("min_level")) {
+                    min_level_filter = req.getQueryParamValue("min_level");
+
+                    // Validate level
+                    if (min_level_filter != "trace" && min_level_filter != "debug" &&
+                        min_level_filter != "info" && min_level_filter != "warn" &&
+                        min_level_filter != "critical") {
+                        min_level_filter.clear();
+                    }
+                }
+
+                // Get search filter
+                if (req.hasQueryParam("search")) {
+                    search_filter = req.getQueryParamValue("search");
+                }
+
+                // Get date filters
+                if (req.hasQueryParam("start_date")) {
+                    start_date = req.getQueryParamValue("start_date");
+                }
+                if (req.hasQueryParam("end_date")) {
+                    end_date = req.getQueryParamValue("end_date");
+                }
+
+                // Get sort parameters
+                if (req.hasQueryParam("sort_by")) {
+                    std::string sort_param = req.getQueryParamValue("sort_by");
+                    // Validate sort_by to prevent SQL injection
+                    if (sort_param == "level" || sort_param == "origin" || sort_param == "message" ||
+                        sort_param == "timestamp" || sort_param == "created_at") {
+                        sort_by = sort_param;
+                    }
+                }
+
+                if (req.hasQueryParam("sort_order")) {
+                    if (std::string order = req.getQueryParamValue("sort_order"); order == "asc" || order == "desc") {
+                        sort_order = order;
+                    }
+                }
+
+                if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
+
+                // Fetch logs
+                json result = logsDb.getLogs(page, page_size, level_filter,
+                                             search_filter, start_date, end_date,
+                                             sort_by, sort_order);
+
+                json response;
+                response["error"] = "";
+                response["status"] = 200;
+                response["data"] = result;
+                res.sendJSON(200, result);
+            } catch (const MantisException &e) {
+                json response;
+                response["error"] = e.what();
+                response["status"] = 500;
+                response["data"] = json::object();
+                res.sendJSON(500, response);
+            } catch (const std::exception &e) {
+                json response;
+                response["error"] = std::string("Failed to fetch logs: ") + e.what();
+                response["status"] = 500;
+                response["data"] = json::object();
+                res.sendJSON(500, response);
+            }
+        };
     }
 }

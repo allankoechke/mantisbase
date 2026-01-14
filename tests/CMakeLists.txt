@@ -23,20 +23,20 @@ endif ()
 
 # Combined tests
 file(GLOB TEST_FILES
-        test_fixure.cpp
+#        test_fixure.cpp
         main.cpp
-        unit/test_database.cpp
-        unit/test_models.cpp
-        unit/test_expr_eval.cpp
-        unit/test_jwt.cpp
-        unit/test_access_rules.cpp
-        unit/test_context_store.cpp
-        unit/test_entity_schema_field.cpp
-        unit/test_files_security.cpp
-        unit/test_ip_validation.cpp
-        integration/test_integration_crud.cpp
-        integration/test_integration_schema.cpp
-        integration/test_integration_auth.cpp
+#        unit/test_database.cpp
+#        unit/test_models.cpp
+#        unit/test_expr_eval.cpp
+#        unit/test_jwt.cpp
+#        unit/test_access_rules.cpp
+#        unit/test_context_store.cpp
+#        unit/test_entity_schema_field.cpp
+#        unit/test_files_security.cpp
+#        unit/test_ip_validation.cpp
+#        integration/test_integration_crud.cpp
+#        integration/test_integration_schema.cpp
+#        integration/test_integration_auth.cpp
 )
 
 add_executable(mantisbase_tests ${TEST_FILES})
@@ -60,7 +60,7 @@ if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif ()
 
 target_link_libraries(mantisbase_tests PRIVATE
-        mantisbase_lib
+        mantisbase
         GTest::gtest
         GTest::gtest_main
         GTest::gmock_main

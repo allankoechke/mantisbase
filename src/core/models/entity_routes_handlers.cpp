@@ -7,7 +7,6 @@ namespace mb {
     HandlerFn Entity::getOneRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
-        logger::trace("Creating GET /api/v1/entities/{}/:id", entity_name);
 
         HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
             try {
@@ -60,7 +59,6 @@ namespace mb {
     HandlerFn Entity::getManyRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
-        logger::trace("Creating GET /api/v1/entities/{}", entity_name);
 
         HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
             try {
@@ -135,7 +133,6 @@ namespace mb {
     HandlerWithContentReaderFn Entity::postRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
-        logger::trace("Creating POST /api/v1/entities/{}", entity_name);
 
         HandlerWithContentReaderFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res,
                                                            MantisContentReader &reader) {
@@ -205,7 +202,6 @@ namespace mb {
     HandlerWithContentReaderFn Entity::patchRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
-        logger::trace("Creating PATCH /api/v1/entities/{}/:id", entity_name);
 
         HandlerWithContentReaderFn handler = [entity_name](MantisRequest &req, MantisResponse &res,
                                                            MantisContentReader &reader) {
@@ -274,7 +270,6 @@ namespace mb {
     HandlerFn Entity::deleteRouteHandler() const {
         // Capture entity name, currently we get an error if we capture `this` directly.
         const std::string entity_name = name();
-        logger::trace("Creating DELETE /api/v1/entities/{}/:id", entity_name);
 
         HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
             try {

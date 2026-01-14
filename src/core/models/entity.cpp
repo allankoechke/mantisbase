@@ -6,7 +6,7 @@
 
 namespace mb {
     Entity::Entity(const nlohmann::json &schema) {
-        logger::trace("Creating Entity from JSON Schema\n\t- {}", schema.dump());
+        LogOrigin::entityTrace("Entity Creation", "Creating Entity from JSON Schema", schema);
 
         if (!schema.contains("name") || !schema["name"].is_string() || schema["name"].empty())
             throw MantisException(400, "Missing required entity `name` in schema!", schema.dump());
@@ -54,8 +54,6 @@ namespace mb {
             if (!m_schema.contains("fields"))
                 m_schema["fields"] = json::array();
         }
-
-        // logger::trace("Creating Entity\n: {}", m_schema.dump());
     }
 
     Entity::Entity(const std::string &name, const std::string &type)
@@ -194,7 +192,7 @@ namespace mb {
             }
 
             // Create the SQL Query
-            std::string sql_query = "INSERT INTO " + name() + "(" + columns + ") VALUES (" + placeholders + ")";
+            std::string sql_query = std::format("INSERT INTO {} ({}) VALUES ({})", name(), columns, placeholders);
 
             // Bind soci::values to entity values
             auto vals = json2SociValue(new_record, fields());
@@ -208,7 +206,7 @@ namespace mb {
 
             // Query back the created record and send it back to the client
             soci::row r;
-            *sql << "SELECT * FROM " + name() + " WHERE id = :id", soci::use(id), soci::into(r);
+            *sql << std::format("SELECT * FROM {} WHERE id = :id", name()), soci::use(id), soci::into(r);
             auto added_row = sociRow2Json(r, fields());
 
             // Remove user password from the response
@@ -262,7 +260,7 @@ namespace mb {
         const auto sql = MantisBase::instance().db().session();
 
         soci::row r; // To hold read data
-        *sql << "SELECT * FROM " + name() + " WHERE id = :id", soci::use(id), soci::into(r);
+        *sql << std::format("SELECT * FROM {} WHERE id = :id", name()), soci::use(id), soci::into(r);
 
         // If no data was found, return a std::nullopt
         if (!sql->got_data()) return std::nullopt; // 404
@@ -396,7 +394,7 @@ namespace mb {
             }
 
             // Create the SQL Query
-            std::string sql_query = "UPDATE " + name() + " SET " + columns + " WHERE id = :old_id";
+            std::string sql_query = std::format("UPDATE {} SET {} WHERE id = :old_id", name(), columns);
 
             // Bind soci::values to entity values, throws an error if it fails
             auto vals = json2SociValue(data, fields());
@@ -412,7 +410,7 @@ namespace mb {
 
             // Query back the created record and send it back to the client
             soci::row r;
-            *sql << "SELECT * FROM " + name() + " WHERE id = :id", soci::use(id), soci::into(r);
+            *sql << std::format("SELECT * FROM {} WHERE id = :id", name()), soci::use(id), soci::into(r);
             Record new_record = sociRow2Json(r, fields());
 
             // Redact passwords
@@ -435,7 +433,7 @@ namespace mb {
 
         // Check if item exists of given id
         soci::row row;
-        const std::string sqlStr = ("SELECT * FROM " + name() + " WHERE id = :id LIMIT 1");
+        const std::string sqlStr = std::format("SELECT * FROM {} WHERE id = :id LIMIT 1", name());
         *sql << sqlStr, soci::use(id), soci::into(row);
 
         if (!sql->got_data()) {
@@ -443,7 +441,7 @@ namespace mb {
         }
 
         // Remove from DB
-        *sql << "DELETE FROM " + name() + " WHERE id = :id", soci::use(id);
+        *sql << std::format("DELETE FROM {} WHERE id = :id", name()), soci::use(id);
         tr.commit();
 
         // Parse row to JSON
@@ -478,7 +476,7 @@ namespace mb {
         try {
             const auto sql = MantisBase::instance().db().session();
             int count = 0;
-            *sql << "SELECT COUNT(id) FROM " + name(), soci::into(count);
+            *sql << std::format("SELECT COUNT(id) FROM {}", name()), soci::into(count);
             return count;
         } catch (std::exception &e) {
             throw MantisException(500, e.what());
@@ -490,7 +488,7 @@ namespace mb {
             const auto& sql = MantisBase::instance().db().session();
             int dummy = 0;
             soci::indicator ind = soci::i_null;
-            *sql << "SELECT 1 FROM " + name() + " LIMIT 1",
+            *sql << std::format("SELECT 1 FROM {} LIMIT 1", name()),
                     soci::into(dummy, ind);
             return ind == soci::i_null;
         } catch (const std::exception& e) {
@@ -502,11 +500,11 @@ namespace mb {
         try {
             std::string _nid;
             const auto sql = MantisBase::instance().db().session();
-            *sql << "SELECT id FROM " + name() + " WHERE id = :id LIMIT 1",
+            *sql << std::format("SELECT id FROM {} WHERE id = :id LIMIT 1", name()),
                     soci::use(id), soci::into(_nid);
             return sql->got_data();
         } catch (soci::soci_error &e) {
-            logger::trace("TablesUnit::RecordExists error: {}", e.what());
+            LogOrigin::entityTrace("Record Exists Error", e.what());
             return false;
         }
     }
@@ -531,7 +529,7 @@ namespace mb {
             if (hasField(col_name).has_value()) {
                 valid_columns.push_back(col_name);
             } else {
-                logger::warn("Invalid column name '{}' in queryFromCols for entity '{}'", col_name, name());
+                LogOrigin::entityWarn("Invalid Column", fmt::format("Invalid column name '{}' in queryFromCols for entity '{}'", col_name, name()));
             }
         }
 
@@ -546,7 +544,7 @@ namespace mb {
             where_clause += valid_columns[i] + " = :value";
         }
 
-        const std::string query = "SELECT * FROM " + name() + " WHERE " + where_clause + " LIMIT 1";
+        const std::string query = std::format("SELECT * FROM {} WHERE {} LIMIT 1", name(), where_clause);
 
         // Run query
         soci::row r;

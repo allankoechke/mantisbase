@@ -18,9 +18,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-stringop-overflow")
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/wolfssl)
 
-target_include_directories(mantisbase_lib  PUBLIC
+target_include_directories(mantisbase  PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/wolfssl
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/wolfssl/wolfssl
 )
 
-target_link_libraries(mantisbase_lib PRIVATE wolfssl)
+target_link_libraries(mantisbase PRIVATE wolfssl)

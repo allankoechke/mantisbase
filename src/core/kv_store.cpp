@@ -21,7 +21,7 @@ namespace mb
         }
         catch (const std::exception& e)
         {
-            logger::critical("Error setting up settings routes: {}", e.what());
+            LogOrigin::critical("Route Setup Error", fmt::format("Error setting up settings routes: {}", e.what()));
             return false;
         }
 
@@ -40,7 +40,7 @@ namespace mb
         if (sql->got_data())
         {
             m_configs = settings;
-            logger::trace("Config Values: ", m_configs.dump());
+            LogOrigin::trace("Config Loaded", fmt::format("Config Values: {}", m_configs.dump()));
         }
         // Create base data to config settings
         else

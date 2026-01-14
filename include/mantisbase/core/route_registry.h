@@ -18,7 +18,7 @@
 
 #include "../utils/utils.h"
 #include  "types.h"
-#include "logger.h"
+#include "logger/logger.h"
 
 namespace mb
 {

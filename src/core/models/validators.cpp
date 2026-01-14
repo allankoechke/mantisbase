@@ -3,6 +3,11 @@
 //
 
 #include "../../../include/mantisbase/core/models/validators.h"
+#include "../../../include/mantisbase/mantisbase.h"
+#include "../../../include/mantisbase/core/exceptions.h"
+#include "../../../include/mantisbase/utils/utils.h"
+#include "../../../include/mantisbase/core/logger/logger.h"
+#include <soci/soci.h>
 
 namespace mb {
     std::unordered_map<std::string, json> Validators::presets = {
@@ -138,7 +143,7 @@ namespace mb {
 
             return std::nullopt;
         } catch (const std::exception &e) {
-            logger::trace("Required Constraints Exception: {}", e.what());
+            LogOrigin::trace("Validation Exception", fmt::format("Required Constraints Exception: {}", e.what()));
             return std::nullopt;
         }
     }
@@ -162,6 +167,58 @@ namespace mb {
                     return std::nullopt;
                 }
             }
+        }
+
+        return std::nullopt;
+    }
+
+    std::optional<std::string> Validators::foreignKeyConstraintCheck(const json &field, const json &body) {
+        TRACE_MANTIS_FUNC();
+
+        // Check if field has a foreign key constraint
+        if (!field.contains("foreign_key") || field["foreign_key"].is_null()) {
+            return std::nullopt;
+        }
+
+        const auto &fk = field["foreign_key"];
+        if (!fk.is_object()) {
+            return std::nullopt;
+        }
+
+        const auto &field_name = field["name"].get<std::string>();
+
+        // Skip validation if field is not present in body (will be handled by required check)
+        if (!body.contains(field_name) || body[field_name].is_null()) {
+            return std::nullopt;
+        }
+
+        const std::string refTable = fk.contains("entity") && fk["entity"].is_string()
+                                         ? fk["entity"].get<std::string>()
+                                         : "";
+        const std::string refColumn = fk.contains("field") && fk["field"].is_string()
+                                          ? fk["field"].get<std::string>()
+                                          : "id";
+
+        if (refTable.empty()) {
+            return std::nullopt; // Invalid foreign key definition, but schema validation should catch this
+        }
+
+        // Get the foreign key value from the body
+        const auto &fkValue = body[field_name];
+
+        // If the value is null/empty and the field is not required, that's okay
+        if (fkValue.is_null() || (fkValue.is_string() && fkValue.get<std::string>().empty())) {
+            return std::nullopt;
+        }
+
+        // Check if the referenced record exists
+        const auto &app = MantisBase::instance();
+        if (!app.hasEntity(refTable)) {
+            return std::format("Foreign Key ref table `{}` does not exist!", refTable);
+        }
+
+        if (const auto &entity = app.entity(refTable); !entity.hasField(refColumn)) {
+            return std::format("Foreign key ref column `{}` does not exist in `{}` entity!", refColumn, refTable);
         }
 
         return std::nullopt;
@@ -258,6 +315,9 @@ namespace mb {
 
                 // VALIDATOR CONSTRAINT CHECK
                 if (const auto err = validatorConstraintCheck(field, body); err.has_value()) return err;
+
+                // FOREIGN KEY CONSTRAINT CHECK
+                if (const auto err = foreignKeyConstraintCheck(field, body); err.has_value()) return err;
             }
         }
 
@@ -297,6 +357,9 @@ namespace mb {
 
                 // VALIDATOR CONSTRAINT CHECK
                 if (const auto err = validatorConstraintCheck(field, body); err.has_value()) return err;
+
+                // FOREIGN KEY CONSTRAINT CHECK
+                if (const auto err = foreignKeyConstraintCheck(field, body); err.has_value()) return err;
             }
         }
 

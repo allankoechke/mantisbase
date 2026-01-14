@@ -86,6 +86,16 @@ curl -X POST http://localhost:7070/api/v1/schemas \
   }'
 ```
 
+**Entity Name Rules:**
+- Entity names must be alphanumeric characters and underscores only
+- Maximum length: 64 characters
+- Names are validated automatically to prevent SQL injection
+
+**Entity Types:**
+- **`base`** - Standard database table with fields
+- **`auth`** - Authentication entity with built-in password and user management fields
+- **`view`** - SQL view based on a query (read-only, no fields)
+
 ### 4. Use Your API
 
 Once created, your entity automatically gets REST endpoints:
@@ -205,6 +215,11 @@ Standalone authentication endpoints:
 - `POST /api/v1/auth/setup/admin` - Create initial admin
 
 See [Authentication API](doc/02.auth.md) for details.
+
+### System Endpoints
+
+- `GET /api/v1/health` - Health check
+- `GET /api/v1/sys/logs` - System logs with filtering and pagination (admin only)
 
 ### Access Control
 

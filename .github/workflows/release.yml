@@ -26,11 +26,13 @@ jobs:
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
-            platform: linux
+            platform: linux-x86_64
+            arch: x86_64
           - os: windows-latest
             c_compiler: gcc
             cpp_compiler: g++
-            platform: windows
+            platform: windows-latest
+            arch: x86_64
 
     steps:
       - uses: actions/checkout@v4
@@ -39,8 +41,10 @@ jobs:
           fetch-depth: 1
 
       - name: Install dependencies on Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y libzstd-dev && sudo apt install libpq-dev
+        if: matrix.os != 'windows-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libzstd-dev libpq-dev
 
       - name: Install MinGW
         if: matrix.os == 'windows-latest'
@@ -52,32 +56,69 @@ jobs:
         run: |
           echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
 
+      - name: Verify MinGW installation
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $mingwPath = "C:\ProgramData\mingw64\mingw64\bin"
+          if (Test-Path "$mingwPath\gcc.exe") {
+            Write-Host "✓ GCC found at $mingwPath\gcc.exe"
+          } else {
+            Write-Host "✗ GCC not found at $mingwPath\gcc.exe"
+            Get-ChildItem "C:\ProgramData\mingw64" -Recurse -Filter "gcc.exe" | Select-Object -First 1 FullName
+          }
+          if (Test-Path "$mingwPath\mingw32-make.exe") {
+            Write-Host "✓ Make found at $mingwPath\mingw32-make.exe"
+          } else {
+            Write-Host "✗ Make not found, searching..."
+            Get-ChildItem "C:\ProgramData\mingw64" -Recurse -Filter "mingw32-make.exe" | Select-Object -First 1 FullName
+          }
+
       - name: Set reusable strings
         id: strings
         shell: bash
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-      - name: Configure CMake (Windows)
+      - name: Configure CMake (Windows-latest)
         if: matrix.os == 'windows-latest'
-        run: >
-          cmake -B ${{ steps.strings.outputs.build-output-dir }}
-          -G "MinGW Makefiles"
-          -DCMAKE_CXX_COMPILER="C:\ProgramData\mingw64\mingw64\bin\g++.exe"
-          -DCMAKE_C_COMPILER="C:\ProgramData\mingw64\mingw64\bin\gcc.exe"
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DMANTIS_BUILD_TESTS=true
-          -S ${{ github.workspace }}
+        shell: pwsh
+        run: |
+          $mingwBin = "C:\ProgramData\mingw64\mingw64\bin"
+          $makePath = Join-Path $mingwBin "mingw32-make.exe"
+          
+          # Check if make exists, if not try alternative locations
+          if (-not (Test-Path $makePath)) {
+            $makePath = "C:\mingw64\bin\mingw32-make.exe"
+            if (-not (Test-Path $makePath)) {
+              # Try to find it
+              $found = Get-ChildItem "C:\ProgramData\mingw64" -Recurse -Filter "mingw32-make.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+              if ($found) {
+                $makePath = $found.FullName
+              }
+            }
+          }
+          
+          Write-Host "Using make at: $makePath"
+          
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} `
+            -G "MinGW Makefiles" `
+            -DCMAKE_CXX_COMPILER="$mingwBin\g++.exe" `
+            -DCMAKE_C_COMPILER="$mingwBin\gcc.exe" `
+            -DCMAKE_MAKE_PROGRAM="$makePath" `
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+            -DMANTIS_BUILD_TESTS=true `
+            -S ${{ github.workspace }}
 
-      - name: Configure CMake (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: >
-          cmake -B ${{ steps.strings.outputs.build-output-dir }}
-          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DMANTIS_BUILD_TESTS=true
-          -S ${{ github.workspace }}
+      - name: Configure CMake (Linux)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DMANTIS_BUILD_TESTS=true \
+            -S ${{ github.workspace }}
 
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
@@ -86,16 +127,15 @@ jobs:
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: ctest --build-config ${{ matrix.build_type }}
 
-      - name: Zip the build output
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'ubuntu-latest'
+      - name: Zip the build output (Linux)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
         run: |
           cd ${{ github.workspace }}/build/bin
-          rm mantisbase_tests
+          rm -f mantisbase_tests
           mkdir -p zip
           zip -r zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip mantisbase*
-        shell: bash
 
-      - name: Zip the build output (Windows)
+      - name: Zip the build output (Windows-latest)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
         shell: pwsh
         run: |
@@ -123,16 +163,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}_linux.zip
+          pattern: mantisbase_${{ github.ref_name }}_*.zip
           path: ./artifacts
-          
-      - uses: actions/download-artifact@v4
-        with:
-          name: mantisbase_${{ github.ref_name }}_windows.zip
-          path: ./artifacts
+          merge-multiple: true
 
       - name: Show artifact contents
-        run: ls -R ./artifacts
+        run: ls -lh ./artifacts/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1

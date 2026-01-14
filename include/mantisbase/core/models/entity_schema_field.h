@@ -146,6 +146,55 @@ namespace mb {
         EntitySchemaField &setIsUnique(bool unique);
 
         /**
+         * @brief Check if field is a foreign key.
+         * @return true if foreign key
+         */
+        [[nodiscard]] bool isForeignKey() const;
+
+        /**
+         * @brief Get foreign key reference table name.
+         * @return Reference table name, empty if not a foreign key
+         */
+        [[nodiscard]] std::string foreignKeyTable() const;
+
+        /**
+         * @brief Get foreign key reference column name.
+         * @return Reference column name, defaults to "id" if not specified
+         */
+        [[nodiscard]] std::string foreignKeyColumn() const;
+
+        /**
+         * @brief Get foreign key update policy.
+         * @return Update policy ("CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT")
+         */
+        [[nodiscard]] std::string foreignKeyOnUpdate() const;
+
+        /**
+         * @brief Get foreign key delete policy.
+         * @return Delete policy ("CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT")
+         */
+        [[nodiscard]] std::string foreignKeyOnDelete() const;
+
+        /**
+         * @brief Set foreign key reference (fluent interface).
+         * @param table Reference table name
+         * @param column Reference column name (defaults to "id")
+         * @param onUpdate Update policy (defaults to "RESTRICT")
+         * @param onDelete Delete policy (defaults to "RESTRICT")
+         * @return Reference to self for chaining
+         */
+        EntitySchemaField &setForeignKey(const std::string &table, 
+                                         const std::string &column = "id",
+                                         const std::string &onUpdate = "RESTRICT",
+                                         const std::string &onDelete = "RESTRICT");
+
+        /**
+         * @brief Remove foreign key constraint (fluent interface).
+         * @return Reference to self for chaining
+         */
+        EntitySchemaField &removeForeignKey();
+
+        /**
          * @brief Get all field constraints.
          * @return JSON object with constraints (min, max, validator, etc.)
          */
@@ -221,7 +270,7 @@ namespace mb {
     private:
         std::string m_id, m_name, m_type;
         bool m_required = false, m_primaryKey = false, m_isSystem = false, m_isUnique = false;
-        nlohmann::json m_constraints{};
+        nlohmann::json m_constraints{}, m_foreignKey{};
     };
 } // mb
 

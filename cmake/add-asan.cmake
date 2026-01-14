@@ -3,7 +3,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInf
         include(cmake/asan.cmake)
         set(ENABLE_ASAN ON)
 
-        enable_asan_for_target(mantisbase_lib)
+        enable_asan_for_target(mantisbase)
         enable_asan_for_target(mantisbase_app)
     endif()
 endif()

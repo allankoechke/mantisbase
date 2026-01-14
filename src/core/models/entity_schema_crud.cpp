@@ -80,9 +80,6 @@ namespace mb {
             std::tm created_tm = *std::localtime(&t);
 
             // Execute DDL & Save to DB
-            // logger::trace("Creating table with data with schema: \n{}", schema.dump(4));
-
-            // Insert to mb_tables
             *sql << "INSERT INTO mb_tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",
                     soci::use(id), soci::use(schema), soci::use(created_tm), soci::use(created_tm);
 
@@ -104,15 +101,15 @@ namespace mb {
 
                 // Add created table to the routes
                 MantisBase::instance().router().addSchemaCache(schema);
-            } catch (const std::exception& e) {
-                logger::critical("Could not parse entity after creation\n\t- {}", e.what());
+            } catch (const std::exception &e) {
+                LogOrigin::entitySchemaCritical("Parse Error", fmt::format("Could not parse entity after creation\n\t- {}", e.what()));
             }
 
             return obj;
-        } catch (const MantisException& e) {
+        } catch (const MantisException &e) {
             tr.rollback();
             throw;
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             tr.rollback();
             throw;
         }
@@ -176,7 +173,6 @@ namespace mb {
 
             // Get db type
             const auto db_type = MantisBase::instance().dbType();
-
             const auto new_schema_fields = new_schema.contains("fields") && new_schema["fields"].is_array()
                                                ? new_schema["fields"]
                                                : json::array();
@@ -202,8 +198,78 @@ namespace mb {
                         auto entity_name = old_entity.name();
                         auto old_name = old_field.name();
                         auto new_name = new_field.name();
+
+                        // Rename the column
                         *sql << "ALTER TABLE :table_name RENAME COLUMN :old_field_name TO :new_field_name",
                                 soci::use(entity_name), soci::use(old_name), soci::use(new_name);
+
+                        // Rename constraints to match the new field name
+                        // ------------- SQLite ----------------- //
+                        if (db_type == "sqlite3") {
+                            // SQLite doesn't support renaming constraints directly
+                            // Constraints will need to be dropped and recreated if needed
+                            LogOrigin::entitySchemaWarn("Field Renamed", fmt::format(
+                                "Field renamed from `{}` to `{}` in SQLite. Constraint names may not match. "
+                                "Consider recreating constraints if needed.", old_name, new_name));
+                        }
+
+                        // ------------- POSTGRESQL ----------------- //
+                        else if (db_type == "postgresql") {
+                            // Rename PRIMARY KEY constraint
+                            if (old_field.isPrimaryKey()) {
+                                std::string oldConstraint = "pk_" + old_name;
+                                std::string newConstraint = "pk_" + new_name;
+                                try {
+                                    *sql << "ALTER TABLE :table RENAME CONSTRAINT :old_constraint TO :new_constraint;",
+                                            soci::use(entity_name), soci::use(oldConstraint), soci::use(newConstraint);
+                                } catch (...) {
+                                    // Constraint might not exist with that name, ignore
+                                }
+                            }
+
+                            // Rename UNIQUE constraint
+                            if (old_field.isUnique()) {
+                                std::string oldConstraint = "uniq_" + old_name;
+                                std::string newConstraint = "uniq_" + new_name;
+                                try {
+                                    *sql << "ALTER TABLE :table RENAME CONSTRAINT :old_constraint TO :new_constraint;",
+                                            soci::use(entity_name), soci::use(oldConstraint), soci::use(newConstraint);
+                                } catch (...) {
+                                    // Constraint might not exist with that name, ignore
+                                }
+                            }
+
+                            // Rename FOREIGN KEY constraint
+                            if (old_field.isForeignKey()) {
+                                std::string oldConstraint = "fk_" + entity_name + "_" + old_name;
+                                std::string newConstraint = "fk_" + entity_name + "_" + new_name;
+                                try {
+                                    *sql << "ALTER TABLE :table RENAME CONSTRAINT :old_constraint TO :new_constraint;",
+                                            soci::use(entity_name), soci::use(oldConstraint), soci::use(newConstraint);
+                                } catch (...) {
+                                    // Constraint might not exist with that name, ignore
+                                }
+                            }
+                        }
+
+                        // ------------- MYSQL ----------------- //
+                        else if (db_type == "mysql") {
+                            // MySQL doesn't support RENAME CONSTRAINT directly
+                            // We need to drop and recreate constraints
+                            // For PRIMARY KEY, MySQL uses a special syntax
+                            if (old_field.isPrimaryKey()) {
+                                // MySQL PRIMARY KEY doesn't have a name we can rename
+                                // The constraint is automatically updated when column is renamed
+                                // But we should note this for consistency
+                            }
+
+                            // For UNIQUE and FOREIGN KEY, we need to drop and recreate
+                            // This will be handled by the constraint change detection logic below
+                            // which will see the field name change and update accordingly
+                            LogOrigin::entitySchemaWarn("Field Renamed", fmt::format(
+                                "Field renamed from `{}` to `{}` in MySQL. UNIQUE and FOREIGN KEY constraints "
+                                "will be recreated with new names.", old_name, new_name));
+                        }
                     }
 
                     // Check if `required` flag was updated
@@ -260,7 +326,7 @@ namespace mb {
                             auto table = old_entity.name();
                             auto column = new_field.name();
 
-                            if (new_field.required()) {
+                            if (new_field.isPrimaryKey()) {
                                 *sql << "ALTER TABLE :table ADD CONSTRAINT pk_:column PRIMARY KEY (:column);",
                                         soci::use(table), soci::use(column), soci::use(column);
                             } else {
@@ -273,7 +339,7 @@ namespace mb {
                         else {
                             auto table = old_entity.name();
                             auto column = new_field.name();
-                            if (new_field.required()) {
+                            if (new_field.isPrimaryKey()) {
                                 *sql << "ALTER TABLE :table ADD PRIMARY KEY (:column);",
                                         soci::use(table), soci::use(column);
                             } else {
@@ -291,31 +357,27 @@ namespace mb {
 
                         // ------------- POSTGRESQL ----------------- //
                         if (db_type == "postgresql") {
+                            auto table = old_entity.name();
+                            auto column = new_field.name();
                             if (new_field.isUnique()) {
-                                auto table = old_entity.name();
-                                auto column = new_field.name();
-                                *sql << "ALTER TABLE :table DROP CONSTRAINT uniq_:column;",
-                                        soci::use(table), soci::use(column);
-                            } else {
-                                auto table = old_entity.name();
-                                auto column = new_field.name();
                                 *sql << "ALTER TABLE :table ADD CONSTRAINT uniq_:column UNIQUE (:column);",
                                         soci::use(table), soci::use(column), soci::use(column);
+                            } else {
+                                *sql << "ALTER TABLE :table DROP CONSTRAINT uniq_:column;",
+                                        soci::use(table), soci::use(column);
                             }
                         }
 
                         // ------------- MYSQL ----------------- //
                         else {
+                            auto table = old_entity.name();
+                            auto column = new_field.name();
                             if (new_field.isUnique()) {
-                                auto table = old_entity.name();
-                                auto column = new_field.name();
-                                *sql << "ALTER TABLE :table DROP INDEX uniq_:column;",
-                                        soci::use(table), soci::use(column);
-                            } else {
-                                auto table = old_entity.name();
-                                auto column = new_field.name();
                                 *sql << "ALTER TABLE :table ADD CONSTRAINT uniq_:column UNIQUE (:column);",
                                         soci::use(table), soci::use(column), soci::use(column);
+                            } else {
+                                *sql << "ALTER TABLE :table DROP INDEX uniq_:column;",
+                                        soci::use(table), soci::use(column);
                             }
                         }
                     }
@@ -362,6 +424,108 @@ namespace mb {
                             }
                         }
                     }
+
+                    // Handle foreign key changes
+                    bool fkChanged = false;
+                    if (old_field.isForeignKey() != new_field.isForeignKey()) {
+                        fkChanged = true;
+                    } else if (old_field.isForeignKey() && new_field.isForeignKey()) {
+                        // Check if foreign key properties changed
+                        if (old_field.foreignKeyTable() != new_field.foreignKeyTable() ||
+                            old_field.foreignKeyColumn() != new_field.foreignKeyColumn() ||
+                            old_field.foreignKeyOnUpdate() != new_field.foreignKeyOnUpdate() ||
+                            old_field.foreignKeyOnDelete() != new_field.foreignKeyOnDelete()) {
+                            fkChanged = true;
+                        }
+                    }
+
+                    if (fkChanged) {
+                        // ------------- SQLite ----------------- //
+                        if (db_type == "sqlite3") {
+                            throw MantisException(500,
+                                                  "Adding, modifying, or removing foreign key constraints is not supported on SQLite databases. "
+                                                  "SQLite has limited ALTER TABLE support and requires table recreation for foreign key changes.");
+                        }
+
+                        auto table = old_entity.name();
+                        auto column = new_field.name();
+                        std::string constraintName = "fk_" + table + "_" + column;
+
+                        // ------------- POSTGRESQL ----------------- //
+                        if (db_type == "postgresql") {
+                            // Drop existing constraint if it exists
+                            if (old_field.isForeignKey()) {
+                                try {
+                                    std::string dropQuery =
+                                            "ALTER TABLE " + table + " DROP CONSTRAINT IF EXISTS " + constraintName +
+                                            ";";
+                                    *sql << dropQuery;
+                                } catch (...) {
+                                    // Constraint might not exist, ignore
+                                }
+                            }
+
+                            // Add new constraint if foreign key is set
+                            if (new_field.isForeignKey()) {
+                                std::string refTable = new_field.foreignKeyTable();
+                                std::string refColumn = new_field.foreignKeyColumn();
+                                std::string onUpdate = new_field.foreignKeyOnUpdate();
+                                std::string onDelete = new_field.foreignKeyOnDelete();
+
+                                std::ostringstream fkQuery;
+                                fkQuery << "ALTER TABLE " << table << " ADD CONSTRAINT " << constraintName
+                                        << " FOREIGN KEY (" << column << ") REFERENCES " << refTable
+                                        << "(" << refColumn << ")";
+
+                                if (onUpdate != "NO ACTION" && !onUpdate.empty()) {
+                                    fkQuery << " ON UPDATE " << onUpdate;
+                                }
+                                if (onDelete != "NO ACTION" && !onDelete.empty()) {
+                                    fkQuery << " ON DELETE " << onDelete;
+                                }
+                                fkQuery << ";";
+
+                                *sql << fkQuery.str();
+                            }
+                        }
+
+                        // ------------- MYSQL ----------------- //
+                        else if (db_type == "mysql") {
+                            // Drop existing constraint if it exists
+                            if (old_field.isForeignKey()) {
+                                try {
+                                    std::string dropQuery =
+                                            "ALTER TABLE " + table + " DROP FOREIGN KEY " + constraintName + ";";
+                                    *sql << dropQuery;
+                                } catch (...) {
+                                    // Constraint might not exist, ignore
+                                }
+                            }
+
+                            // Add new constraint if foreign key is set
+                            if (new_field.isForeignKey()) {
+                                std::string refTable = new_field.foreignKeyTable();
+                                std::string refColumn = new_field.foreignKeyColumn();
+                                std::string onUpdate = new_field.foreignKeyOnUpdate();
+                                std::string onDelete = new_field.foreignKeyOnDelete();
+
+                                std::ostringstream fkQuery;
+                                fkQuery << "ALTER TABLE " << table << " ADD CONSTRAINT " << constraintName
+                                        << " FOREIGN KEY (" << column << ") REFERENCES " << refTable
+                                        << "(" << refColumn << ")";
+
+                                if (onUpdate != "NO ACTION" && !onUpdate.empty()) {
+                                    fkQuery << " ON UPDATE " << onUpdate;
+                                }
+                                if (onDelete != "NO ACTION" && !onDelete.empty()) {
+                                    fkQuery << " ON DELETE " << onDelete;
+                                }
+                                fkQuery << ";";
+
+                                *sql << fkQuery.str();
+                            }
+                        }
+                    }
                 }
                 // Field does not exist in the entity yet, create one.
                 else {
@@ -379,6 +543,60 @@ namespace mb {
                         query += toDefaultSqlValue(new_field.type(), def_val);
                     }
                     *sql << query;
+
+                    // Add foreign key constraint if present
+                    if (new_field.isForeignKey()) {
+                        // ------------- SQLite ----------------- //
+                        if (db_type == "sqlite3") {
+                            throw MantisException(500,
+                                                  "Adding foreign key constraints to existing tables is not supported on SQLite databases. "
+                                                  "SQLite has limited ALTER TABLE support and requires table recreation for foreign key changes.");
+                        }
+
+                        auto table = old_entity.name();
+                        auto column = new_field.name();
+                        std::string constraintName = "fk_" + table + "_" + column;
+                        std::string refTable = new_field.foreignKeyTable();
+                        std::string refColumn = new_field.foreignKeyColumn();
+                        std::string onUpdate = new_field.foreignKeyOnUpdate();
+                        std::string onDelete = new_field.foreignKeyOnDelete();
+
+                        // ------------- POSTGRESQL ----------------- //
+                        if (db_type == "postgresql") {
+                            std::ostringstream fkQuery;
+                            fkQuery << "ALTER TABLE " << table << " ADD CONSTRAINT " << constraintName
+                                    << " FOREIGN KEY (" << column << ") REFERENCES " << refTable
+                                    << "(" << refColumn << ")";
+
+                            if (onUpdate != "NO ACTION" && !onUpdate.empty()) {
+                                fkQuery << " ON UPDATE " << onUpdate;
+                            }
+                            if (onDelete != "NO ACTION" && !onDelete.empty()) {
+                                fkQuery << " ON DELETE " << onDelete;
+                            }
+                            fkQuery << ";";
+
+                            *sql << fkQuery.str();
+                        }
+
+                        // ------------- MYSQL ----------------- //
+                        else if (db_type == "mysql") {
+                            std::ostringstream fkQuery;
+                            fkQuery << "ALTER TABLE " << table << " ADD CONSTRAINT " << constraintName
+                                    << " FOREIGN KEY (" << column << ") REFERENCES " << refTable
+                                    << "(" << refColumn << ")";
+
+                            if (onUpdate != "NO ACTION" && !onUpdate.empty()) {
+                                fkQuery << " ON UPDATE " << onUpdate;
+                            }
+                            if (onDelete != "NO ACTION" && !onDelete.empty()) {
+                                fkQuery << " ON DELETE " << onDelete;
+                            }
+                            fkQuery << ";";
+
+                            *sql << fkQuery.str();
+                        }
+                    }
                 }
             }
 
@@ -399,7 +617,54 @@ namespace mb {
 
             // --------- Handle Name Changes -------------------- //
             if (old_entity.name() != new_entity.name()) {
-                *sql << "ALTER TABLE " + old_entity.name() + " RENAME TO " + new_entity.name();
+                std::string old_table_name = old_entity.name();
+                std::string new_table_name = new_entity.name();
+
+                // Rename the table
+                *sql << "ALTER TABLE " + old_table_name + " RENAME TO " + new_table_name;
+
+                // Rename foreign key constraints in this table to match the new table name
+                // ------------- SQLite ----------------- //
+                if (db_type == "sqlite3") {
+                    // SQLite doesn't support renaming constraints directly
+                    LogOrigin::entitySchemaWarn("Table Renamed", fmt::format(
+                        "Table renamed from `{}` to `{}` in SQLite. Foreign key constraint names may not match. "
+                        "Consider recreating constraints if needed.", old_table_name, new_table_name));
+                }
+
+                // ------------- POSTGRESQL ----------------- //
+                else if (db_type == "postgresql") {
+                    // Rename all foreign key constraints in the renamed table
+                    for (const auto &field: new_entity.fields()) {
+                        if (field.isForeignKey()) {
+                            std::string oldConstraint = "fk_" + old_table_name + "_" + field.name();
+                            std::string newConstraint = "fk_" + new_table_name + "_" + field.name();
+                            try {
+                                *sql << "ALTER TABLE :table RENAME CONSTRAINT :old_constraint TO :new_constraint;",
+                                        soci::use(new_table_name), soci::use(oldConstraint), soci::use(newConstraint);
+                            } catch (...) {
+                                // Constraint might not exist with that name (e.g., legacy table), ignore
+                            }
+                        }
+                    }
+                }
+
+                // ------------- MYSQL ----------------- //
+                else if (db_type == "mysql") {
+                    // MySQL doesn't support RENAME CONSTRAINT directly
+                    // Foreign key constraints will need to be dropped and recreated
+                    // However, MySQL automatically updates REFERENCES clauses when referenced table is renamed
+                    // The constraint names in this table (fk_<table>_<column>) will be outdated
+                    // but MySQL will still work. For consistency, we could drop and recreate them,
+                    // but that's complex and might fail if there are data integrity issues.
+                    LogOrigin::entitySchemaWarn("Table Renamed", fmt::format("Table renamed from `{}` to `{}` in MySQL. Foreign key constraint names (`fk_{}_{}`) will be outdated but will still function. Consider recreating constraints for consistency.",
+                                 old_table_name, new_table_name, old_table_name, "{column}"));
+                }
+
+                // Note: Foreign keys in OTHER tables that reference this renamed table
+                // are automatically updated by the database when the table is renamed.
+                // The REFERENCES clause is updated, but constraint names in those other tables
+                // (which follow pattern fk_<referencing_table>_<column>) don't need to change.
             }
 
             // Get updated timestamp
@@ -412,8 +677,8 @@ namespace mb {
 
             std::string old_id = old_entity.id();
             std::string new_id = new_entity.id();
-            json new_schema = new_entity.toJSON();
-            *sql << query, soci::use(new_id), soci::use(new_schema),
+            json updated_schema = new_entity.toJSON();
+            *sql << query, soci::use(new_id), soci::use(updated_schema),
                     soci::use(updated_tm), soci::use(old_id);
 
             // Write out any pending changes ...
@@ -422,14 +687,14 @@ namespace mb {
 
             json record;
             record["id"] = new_entity.id();
-            record["schema"] = new_schema;
+            record["schema"] = updated_schema;
             record["created"] = tmToStr(created_tm);
             record["updated"] = tmToStr(updated_tm);
 
             // Wrap in new try catch block to suppress any errors here to avoid rollbacks
             try {
                 // Update cache & subsequently the routes ...
-                MantisBase::instance().router().updateSchemaCache(old_entity.name(), new_schema);
+                MantisBase::instance().router().updateSchemaCache(old_entity.name(), updated_schema);
 
                 // Only trigger routes to be reloaded if table name changes.
                 if (old_entity.name() != new_entity.name()) {
@@ -437,17 +702,17 @@ namespace mb {
                     Files::renameDir(old_entity.name(), new_entity.name());
                 }
             } catch (std::exception &e) {
-                logger::critical("Error updating entity schema\n\t- {}", e.what());
+                LogOrigin::entitySchemaCritical("Cache Update Error", fmt::format("Error updating entity schema cache\n\t- {}", e.what()));
             }
 
             return record;
         } catch (const MantisException &e) {
             tr.rollback();
-            logger::critical("Error Updating EntitySchema\n\t- {}", e.what());
+            LogOrigin::entitySchemaCritical("Update Error", fmt::format("Error Updating EntitySchema\n\t- {}", e.what()));
             throw;
         } catch (const std::exception &e) {
             tr.rollback();
-            logger::critical("Error Updating EntitySchema\n\t- {}", e.what());
+            LogOrigin::entitySchemaCritical("Update Error", fmt::format("Error Updating EntitySchema\n\t- {}", e.what()));
             throw MantisException(500, e.what());
         }
     }
@@ -486,11 +751,11 @@ namespace mb {
             tr.commit();
         } catch (const MantisException &e) {
             tr.rollback();
-            logger::critical("Error dropping table schema: {}", e.what());
+            LogOrigin::entitySchemaCritical("Drop Error", fmt::format("Error dropping table schema: {}", e.what()));
             throw;
         } catch (const std::exception &e) {
             tr.rollback();
-            logger::critical("Error dropping table schema: {}", e.what());
+            LogOrigin::entitySchemaCritical("Drop Error", fmt::format("Error dropping table schema: {}", e.what()));
             throw MantisException(500, e.what());
         }
     }
@@ -513,7 +778,7 @@ namespace mb {
             *sql << query, soci::use(table_name, "name"), soci::into(db_data);
             return sql->got_data();
         } catch (const std::exception &e) {
-            logger::critical("Error checking table in database: {}", e.what());
+            LogOrigin::entitySchemaCritical("Table Check Error", fmt::format("Error checking table in database: {}", e.what()));
             throw MantisException(500, e.what());
         }
     }
