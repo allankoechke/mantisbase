@@ -23,7 +23,7 @@ namespace mb {
 
     namespace fs = std::filesystem;
 
-    class KVStore;
+    class KeyValStore;
     class Database;
     class Logger;
     class Router;

@@ -214,7 +214,7 @@ namespace mb {
             return added_row;
         } catch (...) {
             // Handles anything else
-            // logger::critical("Error executing Entity::create()");
+            // logEntry::critical("Error executing Entity::create()");
             throw; // rethrow unknown exception
         }
     }

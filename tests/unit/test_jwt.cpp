@@ -5,21 +5,21 @@
 #include "mantisbase/core/auth.h"
 #include "mantisbase/mantisbase.h"
 #include <nlohmann/json.hpp>
-#include "../test_fixure.h"
+#include "../common/test_environment.h"
 #include "../common/test_config.h"
 
 class JWTTestFixture : public ::testing::Test {
 protected:
     void SetUp() override {
         // Use the existing MantisBase instance from the test environment
-        // JWT tests use the shared instance initialized by MantisBaseTestEnvironment
+        // JWT tests use the shared instance initialized by MbTestEnv
         // This ensures all tests use the same MantisBase singleton
         app = &mb::MantisBase::instance();
     }
     
     void TearDown() override {
         // Don't close the shared instance - let the test environment handle cleanup
-        // The MantisBase instance is managed by MantisBaseTestEnvironment
+        // The MantisBase instance is managed by MbTestEnv
     }
     
     mb::MantisBase* app = nullptr;

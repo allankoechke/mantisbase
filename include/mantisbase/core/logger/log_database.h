@@ -13,6 +13,7 @@
 #include <memory>
 #include <thread>
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 #include <nlohmann/json.hpp>
 
@@ -34,7 +35,7 @@ namespace mb {
         /**
          * @brief Construct LogDatabase instance.
          */
-        explicit LogDatabase();
+        LogDatabase();
 
         /**
          * @brief Destructor - stops cleanup thread and closes database.
@@ -46,8 +47,6 @@ namespace mb {
          * @return true if initialization successful, false otherwise
          */
         bool init(const std::string& data_dir = "");
-
-        void shutdown();
 
         /**
          * @brief Insert a log entry into the database.
@@ -82,6 +81,11 @@ namespace mb {
                      const std::string& sort_order = "desc");
     private:
         /**
+         * @brief Shutdown and clean up log database.
+         */
+        void shutdown();
+
+        /**
          * @brief Create the logs table if it doesn't exist.
          */
         void createTable() const;
@@ -103,6 +107,7 @@ namespace mb {
         std::unique_ptr<soci::session> m_session;
         std::thread m_cleanupThread;
         std::atomic<bool> m_running;
+        std::condition_variable m_cv;
         std::mutex m_dbMutexLock;
 
         inline static const std::vector<std::string> m_logLevels{ "critical", "warn", "info", "debug", "trace"};

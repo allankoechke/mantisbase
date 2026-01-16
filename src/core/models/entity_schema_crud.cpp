@@ -147,7 +147,7 @@ namespace mb {
                 for (const auto &field: new_schema["fields"]) {
                     if (field.contains("op") && field["op"].is_string() && !field["op"].empty()) {
                         auto id = field.contains("id") ? field["id"].get<std::string>() : "";
-                        // logger::trace("Field id: {}", id);
+                        // logEntry::trace("Field id: {}", id);
 
                         if (id.empty()) {
                             throw MantisException(400, "Expected an `id` in field for `op` operations.");

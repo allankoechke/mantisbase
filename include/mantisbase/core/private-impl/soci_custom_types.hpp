@@ -64,7 +64,7 @@ namespace soci {
             try {
                 jb = json::parse(s); // or however you parse JSON
             } catch (const std::exception &e) {
-                mb::logger::critical("System", "Parse Error", fmt::format("Failed to parse JSON value from DB.\n\t- {}", e.what()));
+                mb::logEntry::critical("System", "Parse Error", fmt::format("Failed to parse JSON value from DB.\n\t- {}", e.what()));
                 throw mb::MantisException(500, "Failed to parse JSON value from DB.", e.what());
             }
         }

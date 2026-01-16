@@ -270,7 +270,7 @@ namespace mb {
 
         // First argument is the SQL query
         const char *query = duk_require_string(ctx, 0);
-        // logger::trace("[JS] SQL Query: `{}`", query);
+        // logEntry::trace("[JS] SQL Query: `{}`", query);
 
         // Collect remaining arguments (bind parameters)
         soci::values vals;

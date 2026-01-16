@@ -11,10 +11,6 @@
 #include "mantisbase/core/models/validators.h"
 
 namespace mb {
-    int MantisBase::quit(const int &exitCode) {
-        std::exit(exitCode);
-    }
-
     void MantisBase::parseArgs() {
         // Main program parser with global arguments
         argparse::ArgumentParser program("mantisbase", appVersion());
@@ -112,7 +108,7 @@ namespace mb {
             // Parse safely — strings are now owned by `m_cmdArgs`
             program.parse_args(static_cast<int>(argv.size()), argv.data());
         } catch (const std::exception &err) {
-            std::cerr << err.what() << std::endl;
+            std::cerr << std::endl << err.what() << std::endl;
             std::cout << program << std::endl;
             quit(500, err.what());
         }
@@ -128,7 +124,7 @@ namespace mb {
         // Set trace mode if flag is set
         if (program.get<bool>("--dev")) {
             // Print developer messages - set it to trace for now
-            logger::setLogLevel(LogLevel::TRACE);
+            Logger::setLogLevel(LogLevel::TRACE);
             m_isDevMode = true;
         }
 
@@ -142,7 +138,7 @@ namespace mb {
         setDataDir(data_dir.empty() ? dirFromPath("data") : data_dir);
 
         // Initialize log database now that data directory is set
-        logger::initDb(dataDir());
+        Logger::initDb(dataDir());
         LogOrigin::info("Initialization", fmt::format("Initializing mantisbase v{}", appVersion()));
 
         const auto scripts_dir = dirFromPath(_scriptsDir);

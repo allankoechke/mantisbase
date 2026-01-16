@@ -506,8 +506,8 @@ namespace mb {
             try {
                 TRACE_FUNC(f);
                 // Get log database instance
-                auto &logsDb = logger::getLogsDb();
-                if (!logger::isDbInitialized) {
+                auto &logsDb = MantisBase::instance().logs().logsDb();
+                if (!Logger::isDbInitialized) {
                     json response;
                     response["error"] = "Log database not initialized";
                     response["status"] = 503;

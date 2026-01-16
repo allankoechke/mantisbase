@@ -15,8 +15,10 @@ namespace mb {
     }
 
     LogDatabase::~LogDatabase() {
-        if (m_running)
+        if (m_running.load()) {
+            Logger::isDbInitialized.store(false);
             shutdown();
+        }
     }
 
     bool LogDatabase::init(const std::string &data_dir) {
@@ -38,7 +40,7 @@ namespace mb {
             createTable();
 
             // Start cleanup thread
-            m_running = true;
+            m_running.store(true);
             m_cleanupThread = std::thread(&LogDatabase::cleanupThread, this);
 
             return true;
@@ -50,20 +52,22 @@ namespace mb {
     }
 
     void LogDatabase::shutdown() {
-        m_running = false;
-        if (m_cleanupThread.joinable()) {
-            std::cout << "Joining cleanup thread ...\n";
-            m_cleanupThread.join();
-            std::cout << "Joined cleanup thread ...\n";
-        }
+        m_running.store(false);
+        m_cv.notify_all();
+
+        if (m_cleanupThread.joinable()) m_cleanupThread.join();
         if (m_session) {
-            std::cout << "Closing db session ...\n";
             m_session->close();
-            std::cout << "Closed db session ...\n";
+            m_session.reset();
         }
     }
 
     void LogDatabase::createTable() const {
+        if (!m_session) {
+            std::cerr << "LogDatabase::createTable: Session is NULL" << std::endl;
+            return;
+        }
+
         // Create new table schema
         *m_session << R"(
                 CREATE TABLE IF NOT EXISTS mb_logs (
@@ -89,6 +93,11 @@ namespace mb {
     bool LogDatabase::insertLog(const std::string &level, const std::string &origin, const std::string &message,
                                 const std::string &details, const json &data) {
         try {
+            if (!m_session) {
+                std::cerr << "LogDatabase::insertLog: Insert error, session is NULL" << std::endl;
+                return false;
+            }
+
             // Get current timestamp
             const auto now = std::chrono::system_clock::now();
             const auto time_t = std::chrono::system_clock::to_time_t(now);
@@ -136,6 +145,11 @@ namespace mb {
                               const std::string &end_date,
                               const std::string &sort_by,
                               const std::string &sort_order) {
+        if (!m_session) {
+            std::cerr << "LogDatabase::getLogs: Fetch error, session is NULL" << std::endl;
+            return json::object();
+        }
+
         json result = json::object();
         json logs_array = json::array();
 
@@ -257,16 +271,23 @@ namespace mb {
         // Run cleanup every hour
         const auto cleanup_interval = std::chrono::hours(1);
 
-        while (m_running) {
-            std::this_thread::sleep_for(cleanup_interval);
-            if (m_running) {
-                deleteOldLogs(5);
+        while (m_running.load()) {
+            {
+                std::unique_lock<std::mutex> lock(m_dbMutexLock);
+                m_cv.wait_for(lock, std::chrono::milliseconds(cleanup_interval));
             }
+
+            deleteOldLogs(5);
         }
     }
 
     void LogDatabase::deleteOldLogs(const int days) {
         try {
+            if (!m_session) {
+                std::cerr << "LogDatabase::deleteOldLogs: Delete error, session is NULL" << std::endl;
+                return;
+            }
+
             std::lock_guard lock(m_dbMutexLock);
 
             // Calculate cutoff timestamp (5 days ago)

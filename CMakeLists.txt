@@ -87,7 +87,6 @@ set( MANTIS_SOURCES
         # src/core/private-impl/duktape_wrapper.cpp
 
         src/core/exceptions.cpp
-        include/mantisbase/core/realtime.h
         src/core/realtime.cpp
 )
 

@@ -13,7 +13,7 @@
 
 namespace mb
 {
-    bool KVStore::setupRoutes()
+    bool KeyValStore::setupRoutes()
     {
         try
         {
@@ -29,7 +29,7 @@ namespace mb
         return true;
     }
 
-    void KVStore::migrate()
+    void KeyValStore::migrate()
     {
         const auto sql = MantisBase::instance().db().session();
 
@@ -39,6 +39,7 @@ namespace mb
         *sql << "SELECT value FROM __settings WHERE id = :id LIMIT 1", soci::use(id), soci::into(settings);
         if (sql->got_data())
         {
+            // TODO redact any sensitive values ...
             m_configs = settings;
             LogOrigin::trace("Config Loaded", fmt::format("Config Values: {}", m_configs.dump()));
         }
@@ -69,7 +70,7 @@ namespace mb
         }
     }
 
-    HandlerResponse KVStore::hasAccess(MantisRequest& req, MantisResponse& res) const
+    HandlerResponse KeyValStore::hasAccess(MantisRequest& req, MantisResponse& res) const
     {
         // Get the auth var from the context, resort to empty object if it's not set.
         auto& auth = req.getOr<json>("auth", json::object());
@@ -170,12 +171,12 @@ namespace mb
         return REQUEST_HANDLED;
     }
 
-    json& KVStore::configs()
+    json& KeyValStore::configs()
     {
         return m_configs;
     }
 
-    json KVStore::initSettingsConfig()
+    json KeyValStore::initSettingsConfig()
     {
         // Get app session
         const auto sql = MantisBase::instance().db().session();
@@ -193,7 +194,7 @@ namespace mb
         return json::object();
     }
 
-    void KVStore::setupConfigRoutes()
+    void KeyValStore::setupConfigRoutes()
     {
         // TRACE_CLASS_METHOD()
 
