@@ -121,7 +121,7 @@ namespace mb {
         void writeCheckpoint() const;
 
         std::unique_ptr<soci::connection_pool> m_connPool;
-        const MantisBase& mbApp;
+        const MantisBase &mbApp;
     };
 
     /**

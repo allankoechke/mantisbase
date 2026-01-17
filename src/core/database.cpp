@@ -228,7 +228,8 @@ namespace mb {
             // This can happen during shutdown when instance is being torn down
         }
     }
-#ifdef MANTIS_SCRIPTING_ENABLED
+
+    #ifdef MANTIS_SCRIPTING_ENABLED
     void DatabaseUnit::registerDuktapeMethods() {
         const auto ctx = MantisApp::instance().ctx();
 

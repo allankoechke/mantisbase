@@ -2,6 +2,7 @@
 #include "../include/mantisbase/config.hpp"
 #include "../include/mantisbase/core/models/entity.h"
 #include "../include/mantisbase/core/kv_store.h"
+#include "../include/mantisbase/core/realtime.h"
 
 #include <cmrc/cmrc.hpp>
 #include <fstream>
@@ -174,6 +175,7 @@ namespace mb {
 
         // Create instance objects
         m_database = std::make_unique<Database>(); // depends on log()
+        m_realtime = std::make_unique<RealtimeDB>(); // depends on db()
         m_router = std::make_unique<Router>(); // depends on db() & http()
         m_kvStore = std::make_unique<KeyValStore>(); // depends on db(), router() & http()
         m_opts = std::make_unique<argparse::ArgumentParser>();
@@ -256,6 +258,9 @@ namespace mb {
 
     Logger &MantisBase::logs() const {
         return *m_logger;
+    }
+    RealtimeDB & MantisBase::rt() const {
+        return *m_realtime;
     }
 
     Entity MantisBase::entity(const std::string &entity_name) const {

@@ -11,6 +11,7 @@
 #ifndef MANTISBASE_APP_H
 #define MANTISBASE_APP_H
 
+#include <memory>
 #include <string>
 #include <filesystem>
 #include <chrono>
@@ -22,6 +23,7 @@
 
 namespace mb
 {
+    class RealtimeDB;
     /**
      * @brief MantisBase entry point.
      *
@@ -231,6 +233,8 @@ namespace mb
         [[nodiscard]] KeyValStore& settings() const;
         /// Get the logs unit object
         [[nodiscard]] Logger& logs() const;
+        /// Get the realtime unit object
+        [[nodiscard]] RealtimeDB& rt() const;
 
         /**
          * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
@@ -366,6 +370,7 @@ namespace mb
 
         std::unique_ptr<Logger> m_logger;
         std::unique_ptr<Database> m_database;
+        std::unique_ptr<RealtimeDB> m_realtime;
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;

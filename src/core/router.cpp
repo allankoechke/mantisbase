@@ -18,6 +18,7 @@
 #include "../include/mantisbase/core/middlewares.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
 #include "../include/mantisbase/core/logger/log_database.h"
+#include "../include/mantisbase/core/realtime.h"
 
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
@@ -50,7 +51,7 @@ namespace mb {
             svr.stop();
     }
 
-    bool Router::initialize() {
+    bool Router::init() {
         {
             const auto sql = mApp.db().session();
             const soci::rowset rows = (sql->prepare << "SELECT schema FROM mb_tables");
@@ -108,6 +109,9 @@ namespace mb {
 
             // If we don't have admin accounts, spin up admin dashboard
             bool launch_admin_setup = admin_entity.isEmpty();
+
+            // Start rt worker
+            mApp.rt().runWorker();
 
             // Launch logging/browser in separate thread after listen starts
             std::thread notifier([host, port, launch_admin_setup]() -> void {

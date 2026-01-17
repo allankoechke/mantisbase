@@ -4,13 +4,16 @@
 #include <httplib.h>
 
 namespace mb {
-    std::optional<json> tryParseJsonStr(const std::string &json_str) {
+    std::optional<json> tryParseJsonStr(const std::string &json_str, std::optional<json> default_value) {
         try {
-            auto res = json::parse(json_str);
-            return res;
+            if (trim(json_str).empty())
+                return default_value.has_value() ? default_value.value() : json::object();
+            return json::parse(json_str);
         } catch (const std::exception &e) {
-            LogOrigin::critical("JSON Parse Error", fmt::format("JSON parse error: {}", e.what()));
-            return std::nullopt;
+            LogOrigin::critical("JSON Parse Error",
+                                fmt::format("JSON parse error: {}", e.what())
+            );
+            return default_value;
         }
     }
 

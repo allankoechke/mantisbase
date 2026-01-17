@@ -8,6 +8,7 @@
 #include <soci/soci.h>
 
 #include "mantisbase/core/exceptions.h"
+#include "mantisbase/core/realtime.h"
 
 namespace mb {
     nlohmann::json EntitySchema::listTables(const json &) {
@@ -85,6 +86,11 @@ namespace mb {
 
             // Create actual SQL table
             *sql << new_table.toDDL();
+
+            // Add hooks for this table
+            MantisBase::instance().rt().addDbHooks(Entity{schema}, sql);
+
+            // Commit changes
             tr.commit();
 
             // Create response object
@@ -137,6 +143,8 @@ namespace mb {
             EntitySchema new_entity{old_entity}; // New table data
             assert(old_entity == new_entity); // These two objects should be same
             new_entity.updateWith(new_schema);
+
+
 
             // Validate new object
             if (auto err = new_entity.validate(); err.has_value())
@@ -696,8 +704,14 @@ namespace mb {
                 // Update cache & subsequently the routes ...
                 MantisBase::instance().router().updateSchemaCache(old_entity.name(), updated_schema);
 
+                // Add hooks for this table
+                MantisBase::instance().rt().addDbHooks(new_entity.toEntity(), sql);
+
                 // Only trigger routes to be reloaded if table name changes.
                 if (old_entity.name() != new_entity.name()) {
+                    // Add hooks for this table
+                    MantisBase::instance().rt().dropDbHooks(old_entity.name(), sql);
+
                     // Update file table folder name
                     Files::renameDir(old_entity.name(), new_entity.name());
                 }
@@ -741,6 +755,9 @@ namespace mb {
             // Remove from DB
             *sql << "DELETE FROM mb_tables WHERE id = :id", soci::use(table_id);
             *sql << "DROP TABLE IF EXISTS " + entity_name;
+
+            // Drop hooks for this table
+            MantisBase::instance().rt().dropDbHooks(entity_name, sql);
 
             // Delete files directory
             Files::deleteDir(entity_name);

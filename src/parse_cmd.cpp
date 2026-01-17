@@ -8,6 +8,7 @@
 
 #include <argparse/argparse.hpp>
 
+#include "mantisbase/core/realtime.h"
 #include "mantisbase/core/models/validators.h"
 
 namespace mb {
@@ -166,20 +167,25 @@ namespace mb {
         // Initialize database connection & Migration
         if (!m_database->connect(connString)) {
             // Connection to database failed
-            quit(-1, "Database connection failed, exiting!");
+            quit(500, "Database connection failed, exiting!");
         }
         if (!m_database->createSysTables()) {
-            quit(-1, "Database migration failed, exiting!");
+            quit(500, "Database migration failed, exiting!");
         }
 
         if (!m_database->isConnected()) {
             LogOrigin::dbCritical("Database Not Opened", "Database was not opened!");
-            quit(-1, "Database opening failed!");
+            quit(500, "Database opening failed!");
+        }
+
+        if (!m_realtime->init()) {
+            LogOrigin::dbCritical("Database Not Opened", "Realtime Db Mgr failed to instantiate.");
+            quit(500, "Realtime Db Mgr failed to instantiate.");
         }
 
         // Initialize router here to ensure schemas are loaded
-        if (!m_router->initialize())
-            quit(-1, "Failed to initialize router!");
+        if (!m_router->init())
+            quit(500, "Failed to initialize router!");
 
         // Check which commands were used
         if (program.is_subcommand_used("serve")) {

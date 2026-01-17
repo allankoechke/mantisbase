@@ -1,78 +1,77 @@
 #ifndef MANTISBASE_REALTIME_H
 #define MANTISBASE_REALTIME_H
+
+#include <condition_variable>
+#include <functional>
+#include <memory>
+#include <mutex>
 #include <string>
+#include <thread>
 
 #include "mantisbase/mantis.h"
+#include "nlohmann/json.hpp"
+
+namespace soci {
+    class session;
+}
 
 namespace mb {
     // Forward declarations
     class MantisBase;
     class Entity;
+    class RtDbWorker;
 
     struct Changelog {
         uint id = 0;
         int timestamp = 0;
         std::string type = "NULL", entity, row_id;
-        json old_data = json::object(), new_data = json::object();
+        nlohmann::json old_data = nlohmann::json::object(), new_data = nlohmann::json::object();
     };
 
     class RealtimeDB {
     public:
         RealtimeDB();
+        [[nodiscard]] bool init() const;
 
-        void init() const;
+        void addDbHooks(const std::string &entity_name) const;
+        void addDbHooks(const Entity &entity) const;
+        static void addDbHooks(const Entity &entity, const std::shared_ptr<soci::session>& sess) ;
 
-        void addDbHooks(const std::string &entity_name);
+        void dropDbHooks(const std::string &entity_name) const;
+        static void dropDbHooks(const std::string &entity_name, const std::shared_ptr<soci::session>& sess) ;
 
-        void dropDbHooks(const std::string &entity_name);
+        void runWorker();
 
     private:
+        void workerHandler(const nlohmann::json& items);
+
         static std::string buildTriggerObject(const Entity &entity, const std::string &action /*"NEW" or "OLD"*/);
 
         const MantisBase &mApp;
+        std::unique_ptr<RtDbWorker> m_rtDbWorker;
     };
 
     class RtDbWorker {
     public:
-        using RtCallback = std::function<void(Changelog)>;
+        using RtCallback = std::function<void(json)>;
 
-        explicit RtDbWorker()
-            : m_running(true),
-              th(&RtDbWorker::run, this) {
-        }
+        RtDbWorker();
+        ~RtDbWorker();
 
-        ~RtDbWorker() {
-            m_running.store(false);
-            cv.notify_all();
-            if (th.joinable())
-                th.join();
-        }
-
-        void addCallback(const RtCallback &cb) {
-            m_callback = cb;
-        }
+        void addCallback(const RtCallback &cb);
 
     private:
-        void run() {
-            int value = 0;
-            while (m_running.load()) {
-                {
-                    std::unique_lock<std::mutex> lock(mtx);
-                    cv.wait_for(lock, std::chrono::milliseconds(200));
-                }
-                Changelog changelog;
-                auto sql = MantisBase::instance().db().session();
-                // *sql << "SELECT * from mb_change_log LIMIT 1", soci::use(changelog);
-                m_callback(changelog);
-            }
-        }
+        void run();
 
-    private:
+        int last_id = -1; // Last db ID to be queried, only query newer than this
+        std::string last_ts = getCurrentTimestampUTC(); // When last is not set, use timestamp value in UTC
+
         RtCallback m_callback;
         std::atomic<bool> m_running;
         std::thread th;
         std::mutex mtx;
         std::condition_variable cv;
+        std::unique_ptr<soci::session> write_session;
     };
 }
 

@@ -49,7 +49,7 @@ namespace mb {
          * @brief Initialize router: create system tables and admin routes.
          * @return true if initialization successful
          */
-        bool initialize();
+        bool init();
 
         /**
          * @brief Start HTTP server and begin listening for connections.
@@ -210,6 +210,7 @@ namespace mb {
         std::function<void(MantisRequest &, MantisResponse &)> handleSetupAdmin();
 
         static std::function<void(const MantisRequest &, MantisResponse &)> handleLogs();
+
 
         // Member Variables
         MantisBase &mApp;

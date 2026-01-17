@@ -122,6 +122,7 @@ namespace mb {
     /**
      * @brief Attempt to parse a JSON string.
      * @param json_str JSON string to parse
+     * @param default_value Optional default value if conversion fails
      * @return A JSON Object if successful, else a `std::nullopt`
      *
      * @code
@@ -131,7 +132,7 @@ namespace mb {
      * }
      * @endcode
      */
-    std::optional<json> tryParseJsonStr(const std::string &json_str);
+    std::optional<json> tryParseJsonStr(const std::string &json_str, std::optional<json> default_value = std::nullopt);
 
     /**
      * @brief Convert given string value to boolean type.
@@ -284,6 +285,15 @@ namespace mb {
     // ----------------------------------------------------------------- //
     // AUTH UTILS
     // ----------------------------------------------------------------- //
+
+    inline std::string getCurrentTimestampUTC() {
+        const std::time_t now = std::time(nullptr);
+        const std::tm* utc = std::gmtime(&now);  // Use UTC time
+
+        char buffer[20];
+        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", utc);
+        return std::string{ buffer };
+    }
 
     /**
      * @brief Convert c++ std::tm date/time value to ISO formatted string.
