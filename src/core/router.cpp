@@ -388,9 +388,7 @@ namespace mb {
         router.Post("/api/v1/auth/refresh", handleAuthRefresh());
         router.Post("/api/v1/auth/logout", handleAuthLogout());
 
-        // Realtime endpoints
-        router.Get("/api/v1/realtime", m_sseMgr->handleSSESession());
-        router.Post("/api/v1/realtime", m_sseMgr->handleSSESessionUpdate());
+        SSEMgr::createRoutes();
 
         // Rate limit admin setup: 3 attempts per hour per IP (very strict for security)
         router.Post("/api/v1/auth/setup/admin", handleSetupAdmin(), {rateLimit(3, 3600, false)});

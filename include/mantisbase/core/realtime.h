@@ -21,14 +21,9 @@ namespace mb {
     class Entity;
     class RtDbWorker;
 
-    using RtCallback = std::function<void(const nlohmann::json&)>;
+    using json = nlohmann::json;
 
-    struct Changelog {
-        uint id = 0;
-        int timestamp = 0;
-        std::string type = "NULL", entity, row_id;
-        nlohmann::json old_data = nlohmann::json::object(), new_data = nlohmann::json::object();
-    };
+    using RtCallback = std::function<void(const json&)>;
 
     class RealtimeDB {
     public:
@@ -46,8 +41,6 @@ namespace mb {
         void stopWorker() const;
 
     private:
-        void workerHandler(const nlohmann::json& items);
-
         static std::string buildTriggerObject(const Entity &entity, const std::string &action /*"NEW" or "OLD"*/);
 
         const MantisBase &mApp;

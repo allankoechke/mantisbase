@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
+#include <queue>
 #include <set>
 #include <thread>
 #include <unordered_map>
@@ -14,31 +15,53 @@
 namespace mb {
     using json = nlohmann::json;
 
-    struct SSESession {
-        std::string session_id;
-        std::function<void(const json &)> send_callback;
-        std::set<std::string> topics;
-        std::atomic<bool> active{true};
-        std::chrono::steady_clock::time_point last_activity;
+    // Session that queues events to be sent
+    class SSESession {
+        std::string m_clientID;
+        std::set<std::string> m_topics;
+        std::string authToken;
 
-        SSESession(
-            std::string id,
-            std::function<void(const json &)> cb,
-            std::set<std::string> t,
-            bool a,
-            std::chrono::steady_clock::time_point tp
-        ) : session_id(std::move(id)),
-            send_callback(std::move(cb)),
-            topics(std::move(t)),
-            active(a),
-            last_activity(tp) {
-        }
+        std::mutex m_queueMutex;
+        std::condition_variable m_queueCV;
+        std::queue<std::pair<std::string, json> > m_eventQueue; // <event_type, data>
 
-        SSESession(SSESession &&) = default;
+        std::atomic<bool> m_isActive;
+        std::chrono::steady_clock::time_point m_lastActivity;
+
+    public:
+        SSESession(const std::string &sessionId,
+                   const std::set<std::string> &topics);
+
+        // Queue an event to be sent
+        void queueEvent(const std::string &eventType, const json &data);
+
+        // Wait for next event with timeout
+        bool waitForEvent(std::string &eventType, json &data,
+                          std::chrono::milliseconds timeout);
+
+        bool isInterestedIn(const json &change_event) const;
+
+        json formatEvent(const json &change_event) const;
+
+        void updateActivity();
+
+        void updateTopics(std::set<std::string> &topics);
+
+        auto getLastActivity() const;
+
+        void close();
+
+        bool isActive() const;
+
+        const std::string &getClientID() const;
+
+        const std::set<std::string> &getTopics() const;
+
+        void setTopics(const std::set<std::string> &topics);
     };
 
     class SSEMgr {
-        std::unordered_map<std::string, SSESession> m_sessions;
+        std::unordered_map<std::string, std::shared_ptr<SSESession>> m_sessions;
         std::mutex m_sessions_mutex;
         std::condition_variable m_cv;
         std::thread m_cleanup_thread;
@@ -46,34 +69,36 @@ namespace mb {
 
     public:
         SSEMgr() = default;
-
         ~SSEMgr();
 
-        std::string createSession(
-            const std::function<void(const json &)> &callback,
-            const std::set<std::string> &initial_topics);
+        static void createRoutes();
+        std::string createSession(const std::set<std::string> &initial_topics);
 
-        SSESession &fetchSession(const std::string &session_id);
-
+        std::shared_ptr<SSESession> fetchSession(const std::string &session_id);
         void removeSession(const std::string &session_id);
 
-        bool updateTopics(const std::string &session_id,
-                          const std::set<std::string> &topics);
-
         void updateActivity(const std::string &session_id);
+        std::shared_ptr<mb::SSESession> getSession(const std::string &sessionId);
+
+        void broadcastChange(const json &change_event);
+        size_t getSessionCount();
 
         void start();
-
         void stop();
 
-        static std::function<void(const MantisRequest &, MantisResponse &)> handleSSESession();
-
-        static std::function<void(const MantisRequest &, MantisResponse &)> handleSSESessionUpdate();
+        static std::function<void(MantisRequest &, MantisResponse &)> handleSSESession();
+        static std::function<void(MantisRequest &, MantisResponse &)> handleSSESessionUpdate();
 
     private:
-        void cleanupIdleSessions();
+        static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> validateSubTopics(bool is_updating = false);
 
-        static bool shouldSendToClient(const json &data, const std::set<std::string> &topics);
+        static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> validateHasAccess();
+
+        static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> updateAuthTokenForSSE();
+
+        static std::string generateClientID();
+
+        void cleanupIdleSessions();
     };
 }
 

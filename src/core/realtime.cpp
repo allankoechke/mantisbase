@@ -7,7 +7,8 @@
 #include "soci/sqlite3/soci-sqlite3.h"
 
 mb::RealtimeDB::RealtimeDB()
-: mApp(mb::MantisBase::instance()) {}
+    : mApp(mb::MantisBase::instance()) {
+}
 
 bool mb::RealtimeDB::init() const {
     try {
@@ -106,7 +107,7 @@ void mb::RealtimeDB::dropDbHooks(const std::string &entity_name, const std::shar
     *sess << std::format("DROP TRIGGER IF EXISTS mb_{}_delete_trigger", entity_name);
 }
 
-void mb::RealtimeDB::runWorker(const RtCallback& callback) {
+void mb::RealtimeDB::runWorker(const RtCallback &callback) {
     if (!m_rtDbWorker) {
         m_rtDbWorker = std::make_unique<RtDbWorker>();
         m_rtDbWorker->addCallback(callback);
@@ -117,10 +118,6 @@ void mb::RealtimeDB::stopWorker() const {
     if (m_rtDbWorker) {
         m_rtDbWorker->stopWorker();
     }
-}
-
-void mb::RealtimeDB::workerHandler(const nlohmann::json &items) {
-    std::cout << "\n\n-- NEW DATA\n\t> " << items.dump(4) << std::endl;
 }
 
 std::string mb::RealtimeDB::buildTriggerObject(const Entity &entity, const std::string &action) {
@@ -161,7 +158,7 @@ mb::RtDbWorker::RtDbWorker()
             "Realtime Db Worker",
             "Failed to connect to mantis.db database for auditing",
             e.what()
-            );
+        );
     }
 }
 
@@ -192,12 +189,12 @@ void mb::RtDbWorker::run() {
 
     while (m_running.load()) {
         {
-            std::unique_lock<std::mutex> lock(mtx);
+            std::unique_lock lock(mtx);
             cv.wait_for(lock, sleep_for);
         }
 
         try {
-            soci::rowset<soci::row> row_set
+            soci::rowset row_set
                     = last_id < 0
                           ? (
                               write_session->prepare <<
@@ -227,8 +224,8 @@ void mb::RtDbWorker::run() {
                     {"type", row.get<std::string>(2)},
                     {"entity", row.get<std::string>(3)},
                     {"row_id", row.get<std::string>(4)},
-                    {"old_data", od},
-                    {"new_data", nd}
+                    {"old_data", od.empty() ? nullptr : od},
+                    {"new_data", nd.empty() ? nullptr : nd},
                 });
             }
 
@@ -236,7 +233,7 @@ void mb::RtDbWorker::run() {
                 // Get last element's `id`
                 last_id = res.at(res.size() - 1)["id"].get<int>();
 
-                emptyPollCount=0;
+                emptyPollCount = 0;
                 sleep_for = std::chrono::milliseconds(100);
             } else {
                 emptyPollCount++;
@@ -266,7 +263,6 @@ void mb::RtDbWorker::run() {
             // Call only when we have data
             if (m_callback && !res.empty())
                 m_callback(res);
-
         } catch (std::exception &e) {
             logEntry::critical("Realtime Db Worker", e.what());
         }
