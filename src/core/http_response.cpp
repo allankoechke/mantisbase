@@ -9,6 +9,8 @@ namespace mb
     {
     }
 
+    httplib::Response & MantisResponse::getResponse() const { return m_res; }
+
     int MantisResponse::getStatus() const
     {
         return m_res.status;

@@ -21,6 +21,8 @@ namespace mb {
     class Entity;
     class RtDbWorker;
 
+    using RtCallback = std::function<void(const nlohmann::json&)>;
+
     struct Changelog {
         uint id = 0;
         int timestamp = 0;
@@ -40,7 +42,8 @@ namespace mb {
         void dropDbHooks(const std::string &entity_name) const;
         static void dropDbHooks(const std::string &entity_name, const std::shared_ptr<soci::session>& sess) ;
 
-        void runWorker();
+        void runWorker(const RtCallback& callback);
+        void stopWorker() const;
 
     private:
         void workerHandler(const nlohmann::json& items);
@@ -53,12 +56,11 @@ namespace mb {
 
     class RtDbWorker {
     public:
-        using RtCallback = std::function<void(json)>;
-
         RtDbWorker();
         ~RtDbWorker();
 
         void addCallback(const RtCallback &cb);
+        void stopWorker();
 
     private:
         void run();

@@ -88,6 +88,7 @@ set( MANTIS_SOURCES
 
         src/core/exceptions.cpp
         src/core/realtime.cpp
+        src/core/sse.cpp
 )
 
 # Add library

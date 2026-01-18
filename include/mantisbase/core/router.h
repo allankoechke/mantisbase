@@ -17,6 +17,8 @@
 #include  "types.h"
 
 namespace mb {
+    class SSEMgr;
+
     /**
      * @brief HTTP router for managing routes and request handling.
      *
@@ -67,6 +69,8 @@ namespace mb {
          * @return Reference to HTTP server
          */
         httplib::Server &server();
+
+        SSEMgr& sseMgr() const;
 
         // ----------- HTTP METHODS ----------- //
         /**
@@ -216,6 +220,7 @@ namespace mb {
         MantisBase &mApp;
         httplib::Server svr;
         RouteRegistry m_routeRegistry;
+        std::unique_ptr<SSEMgr> m_sseMgr;
         // std::vector<nlohmann::json> m_schemas;
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
         std::vector<HandlerFn> m_postRoutingMiddlewares;

@@ -19,6 +19,7 @@
 #include "../include/mantisbase/core/models/entity_schema.h"
 #include "../include/mantisbase/core/logger/log_database.h"
 #include "../include/mantisbase/core/realtime.h"
+#include "../include/mantisbase/core/sse.h"
 
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
@@ -26,7 +27,8 @@ CMRC_DECLARE(mantis);
 namespace mb {
     Router::Router()
         : mApp(MantisBase::instance()),
-          m_entitySchema(std::make_unique<EntitySchema>()) {
+          m_entitySchema(std::make_unique<EntitySchema>()),
+          m_sseMgr(std::make_unique<SSEMgr>()) {
         // Let's fix timing initialization, set the start time to current time
         svr.set_pre_routing_handler(preRoutingHandler());
 
@@ -110,8 +112,7 @@ namespace mb {
             // If we don't have admin accounts, spin up admin dashboard
             bool launch_admin_setup = admin_entity.isEmpty();
 
-            // Start rt worker
-            mApp.rt().runWorker();
+            m_sseMgr->start();
 
             // Launch logging/browser in separate thread after listen starts
             std::thread notifier([host, port, launch_admin_setup]() -> void {
@@ -161,6 +162,10 @@ namespace mb {
 
     httplib::Server &Router::server() {
         return svr;
+    }
+
+    SSEMgr & Router::sseMgr() const {
+        return *m_sseMgr;
     }
 
     void Router::Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
@@ -382,6 +387,10 @@ namespace mb {
         router.Post("/api/v1/auth/login", handleAuthLogin(), {rateLimit(5, 60, false)});
         router.Post("/api/v1/auth/refresh", handleAuthRefresh());
         router.Post("/api/v1/auth/logout", handleAuthLogout());
+
+        // Realtime endpoints
+        router.Get("/api/v1/realtime", m_sseMgr->handleSSESession());
+        router.Post("/api/v1/realtime", m_sseMgr->handleSSESessionUpdate());
 
         // Rate limit admin setup: 3 attempts per hour per IP (very strict for security)
         router.Post("/api/v1/auth/setup/admin", handleSetupAdmin(), {rateLimit(3, 3600, false)});

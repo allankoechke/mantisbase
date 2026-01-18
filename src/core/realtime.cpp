@@ -106,12 +106,16 @@ void mb::RealtimeDB::dropDbHooks(const std::string &entity_name, const std::shar
     *sess << std::format("DROP TRIGGER IF EXISTS mb_{}_delete_trigger", entity_name);
 }
 
-void mb::RealtimeDB::runWorker() {
+void mb::RealtimeDB::runWorker(const RtCallback& callback) {
     if (!m_rtDbWorker) {
         m_rtDbWorker = std::make_unique<RtDbWorker>();
-        m_rtDbWorker->addCallback([this](const json &records) {
-            workerHandler(records);
-        });
+        m_rtDbWorker->addCallback(callback);
+    }
+}
+
+void mb::RealtimeDB::stopWorker() const {
+    if (m_rtDbWorker) {
+        m_rtDbWorker->stopWorker();
     }
 }
 
@@ -162,11 +166,7 @@ mb::RtDbWorker::RtDbWorker()
 }
 
 mb::RtDbWorker::~RtDbWorker() {
-    m_running.store(false);
-    cv.notify_all();
-
-    if (th.joinable())
-        th.join();
+    stopWorker();
 
     // Close audit session
     if (write_session && write_session->is_connected()) {
@@ -176,6 +176,14 @@ mb::RtDbWorker::~RtDbWorker() {
 
 void mb::RtDbWorker::addCallback(const RtCallback &cb) {
     m_callback = cb;
+}
+
+void mb::RtDbWorker::stopWorker() {
+    m_running.store(false);
+    cv.notify_all();
+
+    if (th.joinable())
+        th.join();
 }
 
 void mb::RtDbWorker::run() {
