@@ -249,31 +249,41 @@ std::string mb::RealtimeDB::buildTriggerObject(const Entity &entity, const std::
 }
 
 mb::RtDbWorker::RtDbWorker()
-    : m_running(true),
-      th(&RtDbWorker::run, this) {
+    : m_running(true) {
     m_db_type = MantisBase::instance().dbType();
     if (m_db_type == "sqlite3") {
         if (!initSQLite())
             throw MantisException(500, "Worker: SQLite db instantiation failed!");
+
+        logEntry::info("RTDb Worker",
+                       "SQLite Database Status",
+                       std::format("DB Connection should be active: {}", (isDbRunning() ? "true" : "false")));
     }
 
 #ifdef MANTIS_HAS_POSTGRESQL
     else if (m_db_type == "postgresql") {
         if (!initPSQL())
             throw MantisException(500, "Worker: PostgreSQL db instantiation failed!");
+
+        logEntry::info("RTDb Worker",
+                       "PSQL Database Status",
+                       std::format("DB Connection should be active: {}", (isDbRunning() ? "true" : "false")));
     }
 #endif
     else {
         throw MantisException(500, std::format("Worker: Database type `{}` is not supported!", m_db_type));
     }
+
+    // Setup the thread only after database has been fully initialized
+    th = std::thread(&RtDbWorker::run, this);
 }
 
 mb::RtDbWorker::~RtDbWorker() {
     stopWorker();
 
     // Close audit session
-    if (write_session && write_session->is_connected()) {
-        write_session->close();
+    if (sql_ro && sql_ro->is_connected()) {
+        sql_ro->close();
     }
 
 #ifdef MANTIS_HAS_POSTGRESQL
@@ -286,7 +296,7 @@ mb::RtDbWorker::~RtDbWorker() {
 }
 
 bool mb::RtDbWorker::isDbRunning() const {
-    if (m_db_type == "sqlite3") return write_session && write_session->is_connected();
+    if (m_db_type == "sqlite3") return sql_ro && sql_ro->is_connected();
 #ifdef MANTIS_HAS_POSTGRESQL
     if (m_db_type == "postgresql")
         return psql && PQstatus(psql.get()) == CONNECTION_OK;
@@ -311,10 +321,14 @@ void mb::RtDbWorker::run() {
         throw MantisException(500, "Worker: Database is not running!");
     }
 
-    if (m_db_type == "sqlite3") runSQlite();
+    if (m_db_type == "sqlite3")
+        runSQlite();
+
 #ifdef MANTIS_HAS_POSTGRESQL
-    else if (m_db_type == "postgresql") runPostgreSQL();
+    else if (m_db_type == "postgresql")
+        runPostgreSQL();
 #endif
+
     else
         logEntry::critical("RTDb Worker", "Unsupported database",
                            std::format("Unsupported database type `{}`", m_db_type));
@@ -334,13 +348,13 @@ void mb::RtDbWorker::runSQlite() {
             soci::rowset row_set
                     = last_id < 0
                           ? (
-                              write_session->prepare <<
+                              sql_ro->prepare <<
                               "SELECT id, timestamp, type, entity, row_id, old_data, new_data from mb_change_log "
                               "WHERE timestamp > :ts ORDER BY id ASC LIMIT 100"
                               , soci::use(last_ts)
                           )
                           : (
-                              write_session->prepare <<
+                              sql_ro->prepare <<
                               "SELECT id, timestamp, type, entity, row_id, old_data, new_data from mb_change_log "
                               "WHERE id > :last_id ORDER BY id ASC LIMIT 100"
                               , soci::use(last_id)
@@ -496,11 +510,11 @@ bool mb::RtDbWorker::initSQLite() {
         auto sqlite_conn_str = std::format(
             "db={} timeout=30 mode=ro shared_cache=true synchronous=normal", audit_db_path);
 
-        write_session = std::make_unique<soci::session>(soci::sqlite3, sqlite_conn_str);
+        sql_ro = std::make_unique<soci::session>(soci::sqlite3, sqlite_conn_str);
 
         // Enable WAL mode for better concurrency
-        *write_session << "PRAGMA journal_mode=WAL";
-        *write_session << "PRAGMA synchronous=NORMAL";
+        *sql_ro << "PRAGMA journal_mode=WAL";
+        *sql_ro << "PRAGMA synchronous=NORMAL";
         return true;
     } catch (std::exception &e) {
         logEntry::critical(

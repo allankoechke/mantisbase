@@ -99,7 +99,7 @@ namespace mb {
         std::thread th;
         std::mutex mtx;
         std::condition_variable cv;
-        std::unique_ptr<soci::session> write_session;
+        std::unique_ptr<soci::session> sql_ro;
 
 #ifdef MANTIS_HAS_POSTGRESQL
         std::unique_ptr<PGconn, decltype(&PQfinish)> psql{nullptr, &PQfinish};
