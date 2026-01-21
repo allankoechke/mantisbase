@@ -13,8 +13,6 @@
 #include <soci/postgresql/soci-postgresql.h>
 #endif
 
-// #define __file__ "core/tables/sys_tables.cpp"
-
 namespace mb {
     Database::Database() : m_connPool(nullptr), mbApp(MantisBase::instance()) {
     }
@@ -38,20 +36,25 @@ namespace mb {
 
             const auto db_type = mbApp.dbType();
 
+            m_connStr = conn_str;
+
+            if (db_type=="sqlite3") {
+                // For SQLite, lets explicitly define location and name of the database
+                // we intend to use within the `dataDir`
+                auto sqlite_db_path = joinPaths(mbApp.dataDir(), "mantis.db").string();
+                m_connStr = std::format("db={} timeout=30 shared_cache=true synchronous=normal foreign_keys=on",
+                                           sqlite_db_path);
+            }
+
             auto pool_size = static_cast<size_t>(mbApp.poolSize());
             // Populate the pools with db connections
             for (std::size_t i = 0; i < pool_size; ++i) {
-                LogOrigin::dbTrace("Session Creation", fmt::format("Creating db session for index `{}/{}`", i, pool_size));
+                LogOrigin::dbTrace("Session Creation",
+                                   fmt::format("Creating db session for index `{}/{}`", i, pool_size));
 
                 if (db_type == "sqlite3") {
-                    // For SQLite, lets explicitly define location and name of the database
-                    // we intend to use within the `dataDir`
-                    auto sqlite_db_path = joinPaths(mbApp.dataDir(), "mantis.db").string();
                     soci::session &sql = m_connPool->at(i);
-
-                    auto sqlite_conn_str = std::format(
-                        "db={} timeout=30 shared_cache=true synchronous=normal foreign_keys=on", sqlite_db_path);
-                    sql.open(soci::sqlite3, sqlite_conn_str);
+                    sql.open(soci::sqlite3, m_connStr);
                     sql.set_logger(new MantisLoggerImpl()); // Set custom query logger
 
                     // Log SQL insert values in DevMode only!
@@ -71,7 +74,7 @@ namespace mb {
                     ///> With Config: "dbname=mydatabase user=myuser password=mypass singlerows=true"
 
                     soci::session &sql = m_connPool->at(i);
-                    sql.open(soci::postgresql, conn_str);
+                    sql.open(soci::postgresql, m_connStr);
                     sql.set_logger(new MantisLoggerImpl()); // Set custom query logger
 
                     // Log SQL insert values in DevMode only!
@@ -80,14 +83,16 @@ namespace mb {
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
 #else
-                    LogOrigin::dbWarn("PostgreSQL Not Implemented", "Database Connection for `PostgreSQL` has not been implemented yet!");
+                    LogOrigin::dbWarn("PostgreSQL Not Implemented",
+                                      "Database Connection for `PostgreSQL` has not been implemented yet!");
                     return false;
 #endif
                 } else if (db_type == "mysql") {
                     LogOrigin::dbWarn("MySQL Not Implemented", "Database Connection for `MySQL` not implemented yet!");
                     return false;
                 } else {
-                    LogOrigin::dbWarn("Database Type Not Implemented", fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));
+                    LogOrigin::dbWarn("Database Type Not Implemented",
+                                      fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));
                     return false;
                 }
             }
@@ -103,6 +108,8 @@ namespace mb {
 
         return true;
     }
+
+    const std::string & Database::connectionStr() const { return m_connStr; }
 
     void Database::disconnect() {
         // Make disconnect() safe to call multiple times and handle null/invalid states
@@ -122,13 +129,17 @@ namespace mb {
             try {
                 if (soci::session &sess = m_connPool->at(i); sess.is_connected()) {
                     sess.close();
-                    LogOrigin::dbDebug("Session Shutdown", fmt::format("DB Shutdown: Closing soci::session object  {} of {} connections", i + 1, pool_size));
+                    LogOrigin::dbDebug("Session Shutdown",
+                                       fmt::format("DB Shutdown: Closing soci::session object  {} of {} connections",
+                                                   i + 1, pool_size));
                 } else {
-                    LogOrigin::dbDebug("Session Shutdown", fmt::format("DB Shutdown: soci::session object at index `{}` of {} connections is not connected.",
-                                  i + 1, pool_size));
+                    LogOrigin::dbDebug("Session Shutdown", fmt::format(
+                                           "DB Shutdown: soci::session object at index `{}` of {} connections is not connected.",
+                                           i + 1, pool_size));
                 }
             } catch (const soci::soci_error &e) {
-                LogOrigin::dbCritical("Disconnection Error", fmt::format("Database disconnection soci::error at index `{}`: {}", i, e.what()));
+                LogOrigin::dbCritical("Disconnection Error",
+                                      fmt::format("Database disconnection soci::error at index `{}`: {}", i, e.what()));
             } catch (...) {
                 // Ignore other errors during session close
             }
@@ -184,7 +195,8 @@ namespace mb {
             return true;
         } catch (std::exception &e) {
             tr.rollback();
-            LogOrigin::dbCritical("System Tables Creation Failed", fmt::format("Create System Tables Failed: {}", e.what()));
+            LogOrigin::dbCritical("System Tables Creation Failed",
+                                  fmt::format("Create System Tables Failed: {}", e.what()));
             return false;
         }
     }
@@ -220,7 +232,8 @@ namespace mb {
                         *sql << "PRAGMA wal_checkpoint(TRUNCATE)";
                     }
                 } catch (std::exception &e) {
-                    LogOrigin::dbCritical("SOCI Connection Error", fmt::format("Database Connection SOCI::Error: {}", e.what()));
+                    LogOrigin::dbCritical("SOCI Connection Error",
+                                          fmt::format("Database Connection SOCI::Error: {}", e.what()));
                 }
             }
         } catch (...) {
@@ -229,7 +242,7 @@ namespace mb {
         }
     }
 
-    #ifdef MANTIS_SCRIPTING_ENABLED
+#ifdef MANTIS_SCRIPTING_ENABLED
     void DatabaseUnit::registerDuktapeMethods() {
         const auto ctx = MantisApp::instance().ctx();
 
@@ -310,7 +323,8 @@ namespace mb {
                         LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Str Value: `{}` - `{}`", key, str_val));
                         vals.set(key, str_val);
                         LogOrigin::dbTrace("Value Binding", "[JS] After Set Value");
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] After Set Value To: `{}`", vals.get<std::string>(key)));
+                        LogOrigin::dbTrace("Value Binding",
+                                           fmt::format("[JS] After Set Value To: `{}`", vals.get<std::string>(key)));
                     } else if (value.is_number_integer()) {
                         int int_val = value.get<int>();
                         LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Int Value: `{}`", int_val));
@@ -339,7 +353,8 @@ namespace mb {
                 }
             }
         } catch (const std::exception &e) {
-            LogOrigin::dbCritical("Binding Values Failed", fmt::format("[JS] Getting Binding Values Failed: Why? {}", e.what()));
+            LogOrigin::dbCritical("Binding Values Failed",
+                                  fmt::format("[JS] Getting Binding Values Failed: Why? {}", e.what()));
         }
 
         // Get SQL Session
