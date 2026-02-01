@@ -16,7 +16,6 @@
 
 #include <condition_variable>
 #include <functional>
-#include <libpq-fe.h>
 #include <memory>
 #include <mutex>
 #include <string>
