@@ -233,7 +233,7 @@ namespace mb
         [[nodiscard]] KeyValStore& settings() const;
         /// Get the logs unit object
         [[nodiscard]] Logger& logs() const;
-        /// Get the realtime unit object
+        /// Get the realtime unit (SQLite/PostgreSQL change detection for SSE /api/v1/realtime).
         [[nodiscard]] RealtimeDB& rt() const;
 
         /**

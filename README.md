@@ -14,6 +14,7 @@
 MantisBase is a lightweight C++ library that provides a complete backend solution with:
 - **Auto-generated REST APIs** - Create database tables and get instant REST endpoints
 - **Built-in Authentication** - JWT-based auth with access control rules
+- **Realtime Database Updates** - SSE (Server-Sent Events) for live changes on SQLite and PostgreSQL
 - **Admin Dashboard** - Web interface for managing your data
 - **File Uploads** - Handle file storage and serving
 - **JavaScript Extensions** - Extend functionality with scripts
@@ -216,6 +217,15 @@ Standalone authentication endpoints:
 
 See [Authentication API](doc/02.auth.md) for details.
 
+### Realtime (SSE)
+
+Subscribe to live database changes over Server-Sent Events:
+
+- `GET /api/v1/realtime?topics=...` - Open an SSE connection (comma-separated list of entity topics)
+- `POST /api/v1/realtime` - Update topics or clear topics for an existing session (JSON: `client_id`, `topics`)
+
+Works with both SQLite and PostgreSQL. See [API Reference – Realtime](doc/02.api.md#-realtime-api) for event formats and examples.
+
 ### System Endpoints
 
 - `GET /api/v1/health` - Health check
@@ -322,7 +332,7 @@ mantisbase/
 
 - [Quick Start Guide](doc/QuickStart.md) - Get started quickly
 - [CLI Reference](doc/01.cmd.md) - Command-line options
-- [API Reference](doc/02.api.md) - REST API documentation
+- [API Reference](doc/02.api.md) - REST API documentation (entities, schemas, realtime/SSE)
 - [Authentication API](doc/02.auth.md) - Auth endpoints
 - [Access Rules](doc/03.rules.md) - Permission system
 - [Embedding Guide](doc/05.embedding.md) - Use as a library
