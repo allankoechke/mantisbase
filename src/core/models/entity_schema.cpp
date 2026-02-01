@@ -98,10 +98,10 @@ namespace mb {
             is_array()) {
             // For each defined field, create the field schema and push to the fields array ...
             for (const auto &field: entity_schema["fields"]) {
-                // logger::trace("Field\n\t- {}", field.dump());
+                // logEntry::trace("Field\n\t- {}", field.dump());
                 auto field_name = field["name"].get<std::string>();
                 if (!eSchema.hasField(field_name)) {
-                    // logger::trace("Adding entity field: {}", field.dump());
+                    // logEntry::trace("Adding entity field: {}", field.dump());
                     eSchema.addField(EntitySchemaField(field));
                 } else {
                     eSchema.field(field_name).updateWith(field);
@@ -232,7 +232,7 @@ namespace mb {
             }
 
             setHasApi(new_data.at("has_api").get<bool>());
-    }
+        }
 
         if (new_data.contains("rules")) {
             auto rules = new_data["rules"];
@@ -281,7 +281,8 @@ namespace mb {
                             continue;
                         }
 
-                        throw MantisException(400, "Field `op` expected `remove` or `delete` value but found `" + op + "`");
+                        throw MantisException(
+                            400, "Field `op` expected `remove` or `delete` value but found `" + op + "`");
                     }
 
                     f.updateWith(field);
@@ -447,7 +448,7 @@ namespace mb {
 
         std::ostringstream ddl;
         ddl << "CREATE TABLE IF NOT EXISTS " << m_name << " (";
-        
+
         // First, add all column definitions
         for (size_t i = 0; i < m_fields.size(); ++i) {
             if (i > 0) ddl << ", ";
@@ -465,40 +466,42 @@ namespace mb {
         }
 
         // Handle all constraints at once to ensure they have explicit names for later updates/deletes
-        for (const auto &field : m_fields) {
+        for (const auto &field: m_fields) {
             // Add PRIMARY KEY constraints with explicit names
             if (field.isPrimaryKey()) {
-                std::string constraintName = "pk_" + field.name();
+                // Generate constraint name: pk_<table>_<column>
+                std::string constraintName = std::format("pk_{}_{}", m_name, field.name());
                 ddl << ", CONSTRAINT " << constraintName << " PRIMARY KEY (" << field.name() << ")";
             }
 
             // Add UNIQUE constraints with explicit names
             if (field.isUnique()) {
-                std::string constraintName = "uniq_" + field.name();
+                // Generate constraint name: uniq_<table>_<column>
+                std::string constraintName = std::format("uniq_{}_{}", m_name, field.name());
                 ddl << ", CONSTRAINT " << constraintName << " UNIQUE (" << field.name() << ")";
             }
 
             // Add foreign key constraints with explicit constraint names
             if (field.isForeignKey()) {
                 // Generate constraint name: fk_<table>_<column>
-                std::string constraintName = "fk_" + m_name + "_" + field.name();
-                
+                std::string constraintName = std::format("fk_{}_{}", m_name, field.name());
+
                 ddl << ", CONSTRAINT " << constraintName << " FOREIGN KEY (" << field.name() << ") "
-                    << "REFERENCES " << field.foreignKeyTable() 
-                    << "(" << field.foreignKeyColumn() << ")";
-                
+                        << "REFERENCES " << field.foreignKeyTable()
+                        << "(" << field.foreignKeyColumn() << ")";
+
                 // Add ON UPDATE clause
                 if (field.foreignKeyOnUpdate() != "NO ACTION" && !field.foreignKeyOnUpdate().empty()) {
                     ddl << " ON UPDATE " << field.foreignKeyOnUpdate();
                 }
-                
+
                 // Add ON DELETE clause
                 if (field.foreignKeyOnDelete() != "NO ACTION" && !field.foreignKeyOnDelete().empty()) {
                     ddl << " ON DELETE " << field.foreignKeyOnDelete();
                 }
             }
         }
-        
+
         ddl << ");";
 
         return ddl.str();
@@ -570,7 +573,7 @@ namespace mb {
             }
         }
 
-        // logger::trace("Entity Schema {}", str);
+        // logEntry::trace("Entity Schema {}", str);
 
         return str;
     }
@@ -611,11 +614,11 @@ namespace mb {
                             if (!refEntityData.contains("schema")) {
                                 return "Invalid schema data for referenced entity: `" + refEntity + "`";
                             }
-                            
+
                             EntitySchema refEntitySchema = EntitySchema::fromSchema(refEntityData["schema"]);
-                            
+
                             if (!refEntitySchema.hasField(refField)) {
-                                return "Foreign key references non-existent field `" + refField + 
+                                return "Foreign key references non-existent field `" + refField +
                                        "` in entity `" + refEntity + "`";
                             }
 
@@ -624,12 +627,14 @@ namespace mb {
                             // For foreign keys, typically the field should be the same type as the referenced field
                             // or at least a compatible type (e.g., both string types, both integer types)
                             // This is a basic check - more sophisticated type compatibility could be added
-                            if (field.type() != refFieldSchema.type() && 
+                            if (field.type() != refFieldSchema.type() &&
                                 !(field.type() == "string" && refFieldSchema.type() == "string")) {
                                 // Allow string types to reference string types, but warn about type mismatches
                                 // The database will enforce this more strictly
-                                LogOrigin::entitySchemaWarn("Foreign Key Type Mismatch", fmt::format("Foreign key field `{}` type `{}` may not match referenced field `{}` type `{}` in entity `{}`",
-                                            field.name(), field.type(), refField, refFieldSchema.type(), refEntity));
+                                LogOrigin::entitySchemaWarn("Foreign Key Type Mismatch", fmt::format(
+                                                                "Foreign key field `{}` type `{}` may not match referenced field `{}` type `{}` in entity `{}`",
+                                                                field.name(), field.type(), refField,
+                                                                refFieldSchema.type(), refEntity));
                             }
                         } catch (const MantisException &e) {
                             // If entity exists but we can't get its schema, that's an error
@@ -640,9 +645,10 @@ namespace mb {
                     } else {
                         // Entity doesn't exist yet - this might be okay if entities are being created in sequence
                         // The database will enforce the constraint when the DDL is executed
-                        LogOrigin::entitySchemaWarn("Foreign Key Reference Missing", fmt::format("Foreign key references entity `{}` which does not exist yet. "
-                                    "Ensure the referenced entity is created before this entity.",
-                                    refEntity));
+                        LogOrigin::entitySchemaWarn("Foreign Key Reference Missing", fmt::format(
+                                                        "Foreign key references entity `{}` which does not exist yet. "
+                                                        "Ensure the referenced entity is created before this entity.",
+                                                        refEntity));
                     }
                 }
             }

@@ -11,6 +11,7 @@
 #ifndef MANTISBASE_APP_H
 #define MANTISBASE_APP_H
 
+#include <memory>
 #include <string>
 #include <filesystem>
 #include <chrono>
@@ -22,6 +23,7 @@
 
 namespace mb
 {
+    class RealtimeDB;
     /**
      * @brief MantisBase entry point.
      *
@@ -128,8 +130,7 @@ namespace mb
          * @param reason User-friendly reason for the exit.
          * @return `exitCode` value.
          */
-        static int quit(const int& exitCode, const std::string& reason = "Something went wrong!");
-        static int quit(const int& exitCode = 0);
+        static int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
 
         /**
          * @brief Retrieve HTTP Listening port.
@@ -228,8 +229,12 @@ namespace mb
         [[nodiscard]] argparse::ArgumentParser& cmd() const;
         /// Get the router object instance.
         [[nodiscard]] Router& router() const;
-        /// Get the settings unit object
-        [[nodiscard]] KVStore& settings() const;
+        /// Get the KeyValue unit object
+        [[nodiscard]] KeyValStore& settings() const;
+        /// Get the logs unit object
+        [[nodiscard]] Logger& logs() const;
+        /// Get the realtime unit object
+        [[nodiscard]] RealtimeDB& rt() const;
 
         /**
          * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
@@ -363,9 +368,11 @@ namespace mb
         bool m_launchAdminPanel = false;
         bool m_isDevMode = false;
 
+        std::unique_ptr<Logger> m_logger;
         std::unique_ptr<Database> m_database;
+        std::unique_ptr<RealtimeDB> m_realtime;
         std::unique_ptr<Router> m_router;
-        std::unique_ptr<KVStore> m_kvStore;
+        std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
         duk_context* m_dukCtx; // For duktape context
     };

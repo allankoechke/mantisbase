@@ -332,6 +332,8 @@ namespace mb {
          */
         ~MantisResponse() = default;
 
+        httplib::Response &getResponse() const;
+
         /**
          * @brief Get HTTP status code.
          * @return Status code (e.g., 200, 404, 500)

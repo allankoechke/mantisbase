@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(MantisBase VERSION 0.3.2)
+project(MantisBase VERSION 0.3.3)
 set(CMAKE_CXX_STANDARD 20)
 
 # Set output directories to match SOCI's
@@ -87,6 +87,8 @@ set( MANTIS_SOURCES
         # src/core/private-impl/duktape_wrapper.cpp
 
         src/core/exceptions.cpp
+        src/core/realtime.cpp
+        src/core/sse.cpp
 )
 
 # Add library

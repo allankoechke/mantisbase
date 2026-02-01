@@ -17,6 +17,8 @@
 #include  "types.h"
 
 namespace mb {
+    class SSEMgr;
+
     /**
      * @brief HTTP router for managing routes and request handling.
      *
@@ -49,7 +51,7 @@ namespace mb {
          * @brief Initialize router: create system tables and admin routes.
          * @return true if initialization successful
          */
-        bool initialize();
+        bool init();
 
         /**
          * @brief Start HTTP server and begin listening for connections.
@@ -67,6 +69,8 @@ namespace mb {
          * @return Reference to HTTP server
          */
         httplib::Server &server();
+
+        SSEMgr& sseMgr() const;
 
         // ----------- HTTP METHODS ----------- //
         /**
@@ -211,10 +215,12 @@ namespace mb {
 
         static std::function<void(const MantisRequest &, MantisResponse &)> handleLogs();
 
+
         // Member Variables
         MantisBase &mApp;
         httplib::Server svr;
         RouteRegistry m_routeRegistry;
+        std::unique_ptr<SSEMgr> m_sseMgr;
         // std::vector<nlohmann::json> m_schemas;
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
         std::vector<HandlerFn> m_postRoutingMiddlewares;

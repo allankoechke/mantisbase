@@ -2,28 +2,27 @@
 #include "../include/mantisbase/config.hpp"
 #include "../include/mantisbase/core/models/entity.h"
 #include "../include/mantisbase/core/kv_store.h"
+#include "../include/mantisbase/core/realtime.h"
 
 #include <cmrc/cmrc.hpp>
 #include <fstream>
+#include <memory>
 
 namespace mb {
     MantisBase::MantisBase()
         : m_dbType("sqlite3"),
-          m_startTime(std::chrono::steady_clock::now())
+          m_startTime(std::chrono::steady_clock::now()),
+          m_logger(std::make_unique<Logger>())
           , m_dukCtx(duk_create_heap_default()) {
-        // Enable Multi Sinks
-        logger::init();
     }
 
     MantisBase::~MantisBase() {
         if (!m_toStartServer) {
             std::cout << std::endl;
             LogOrigin::info(
-                "Exiting Application", "Exitting, nothing else to do. Did you intend to run the server? Try `mantisapp serve` instead.");
+                "Exiting Application",
+                "Nothing else to do. Did you intend to run the server? Try `mantisbase serve` instead.");
         }
-
-        // Terminate any shared pointers
-        close();
 
         // Destroy duk context
         duk_destroy_heap(m_dukCtx);
@@ -31,7 +30,7 @@ namespace mb {
 
     void MantisBase::init(const int argc, char *argv[]) {
         // Set that the object was created successfully, now initializing
-        m_isCreated = true;
+        m_isCreated.store(true);
 
         // Store cmd args into our member vector
         m_cmdArgs.reserve(argc);
@@ -48,7 +47,7 @@ namespace mb {
 
     MantisBase &MantisBase::instance() {
         auto &app_instance = getInstanceImpl();
-        if (!app_instance.m_isCreated)
+        if (!app_instance.m_isCreated.load())
             throw std::runtime_error("MantisBase not created yet");
 
         return app_instance;
@@ -56,7 +55,7 @@ namespace mb {
 
     MantisBase &MantisBase::create(const int argc, char **argv) {
         auto &app = getInstanceImpl();
-        if (app.m_isCreated)
+        if (app.m_isCreated.load())
             throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
 
         // Initialize the app with passed in args
@@ -68,10 +67,10 @@ namespace mb {
 
     MantisBase &MantisBase::create(const json &config) {
         auto &app = getInstanceImpl();
-        if (app.m_isCreated)
+        if (app.m_isCreated.load())
             throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
 
-        // logger::trace("MantisBase Config: {}", config.dump());
+        // logEntry::trace("MantisBase Config: {}", config.dump());
 
         app.m_cmdArgs.emplace_back("mantisbase"); // Arg[0] should be the app name
 
@@ -82,7 +81,7 @@ namespace mb {
             app.m_cmdArgs.push_back(config.at("database").get<std::string>());
         }
 
-        // --connection "dbname=mantis host=127.0.0.1 username=duser password=1235"
+        // --connection "dbname=mantis host=127.0.0.1 username=user password=1235"
         if (config.contains("connection")) {
             app.m_cmdArgs.emplace_back("--connection");
             app.m_cmdArgs.push_back(config.at("connection").get<std::string>());
@@ -166,8 +165,8 @@ namespace mb {
     }
 
     MantisBase &MantisBase::getInstanceImpl() {
-        static MantisBase s_instance;
-        return s_instance;
+        static std::unique_ptr<MantisBase> s_instance(new MantisBase());
+        return *s_instance;
     }
 
     void MantisBase::init_units() {
@@ -176,8 +175,9 @@ namespace mb {
 
         // Create instance objects
         m_database = std::make_unique<Database>(); // depends on log()
+        m_realtime = std::make_unique<RealtimeDB>(); // depends on db()
         m_router = std::make_unique<Router>(); // depends on db() & http()
-        m_kvStore = std::make_unique<KVStore>(); // depends on db(), router() & http()
+        m_kvStore = std::make_unique<KeyValStore>(); // depends on db(), router() & http()
         m_opts = std::make_unique<argparse::ArgumentParser>();
     }
 
@@ -186,7 +186,8 @@ namespace mb {
         instance().close();
 
         if (exitCode != 0)
-            LogOrigin::critical("Application Exit", fmt::format("Exiting Application with Code = {}", exitCode));
+            LogOrigin::critical("Application Exit",
+                fmt::format("Exiting Application with Code = {}", exitCode));
 
         std::exit(exitCode);
     }
@@ -199,34 +200,19 @@ namespace mb {
 
         LogOrigin::trace("Shutdown Started", "[MB] Starting closing all units ...");
         try {
-            if (m_router) {
-                LogOrigin::trace("Router Shutdown", "[MB] Starting Router closing ...");
+            if (m_router && m_router->server().is_running()) {
                 m_router->close();
-                LogOrigin::trace("Router Shutdown", "[MB] Finished Router closing ...");
-            }
-
-            if (m_kvStore) {
-                LogOrigin::trace("KV Store Shutdown", "[MB] Starting KV Store closing ...");
-                // m_kvStore.reset();
-                LogOrigin::trace("KV Store Shutdown", "[MB] Finished KV Store closing ...");
-            }
-
-            if (m_database) {
-                LogOrigin::trace("Database Shutdown", "[MB] Starting DB closing ...");
-                m_database->disconnect();
-                LogOrigin::trace("Database Shutdown", "[MB] Finished DB Store closing ...");
-            }
-
-            if (m_router) {
-                LogOrigin::trace("Router Reset", "[MB] Resetting router instance ...");
-                // m_router.reset();
                 LogOrigin::trace("Router Reset", "[MB] Resetting router instance [OK] ...");
             }
 
-            if (m_opts) {
-                LogOrigin::trace("Options Reset", "[MB] Resetting opts instance [OK] ...");
-                // m_opts.reset();
-                LogOrigin::trace("Options Reset", "[MB] Resetting opts instance [OK] ...");
+            if (m_kvStore) {
+                // m_kvStore.close();
+                // LogOrigin::trace("KV Store Shutdown", "[MB] Finished KV Store closing ...");
+            }
+
+            if (m_database && m_database->isConnected()) {
+                m_database->disconnect();
+                LogOrigin::trace("Database Shutdown", "[MB] Finished DB Store closing ...");
             }
         } catch (const std::exception &e) {
             std::cerr << "[MB]  Error during reset: " << e.what() << std::endl;
@@ -267,8 +253,15 @@ namespace mb {
         return *m_router;
     }
 
-    KVStore &MantisBase::settings() const {
+    KeyValStore &MantisBase::settings() const {
         return *m_kvStore;
+    }
+
+    Logger &MantisBase::logs() const {
+        return *m_logger;
+    }
+    RealtimeDB & MantisBase::rt() const {
+        return *m_realtime;
     }
 
     Entity MantisBase::entity(const std::string &entity_name) const {
@@ -292,7 +285,7 @@ namespace mb {
     void MantisBase::openBrowserOnStart() const {
         // Skip spinning the default browser on first boot
         // Useful for tests
-        if (getEnvOrDefault("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "1") == "1") return;
+        if (getEnvOrDefault("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "0") == "1") return;
 
         std::cout << std::endl;
 
@@ -311,8 +304,8 @@ namespace mb {
 
             const std::string url = std::format("http://localhost:{}/mb/setup?token={}", m_port, token);
             LogOrigin::info("Admin Setup", fmt::format(
-                "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins add <email> <password>\n",
-                url));
+                                "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins add <email> <password>\n",
+                                url));
 
 #ifdef _WIN32
             const std::string command = "start " + url;
@@ -328,7 +321,8 @@ namespace mb {
                 LogOrigin::info("Browser Open Failed", fmt::format("Could not open browser, result code: {}", result));
             }
         } catch (const std::exception &e) {
-            LogOrigin::critical("Admin Dashboard Failed", fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));
+            LogOrigin::critical("Admin Dashboard Failed",
+                                fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));
         }
 
         std::cout << std::endl;
@@ -355,6 +349,7 @@ namespace mb {
         // This is the default secret key, override it through environment variable
         // MANTIS_JWT_SECRET, recommended to override this key
         // TODO add commandline input for overriding the key
+        // or explictly require that key to be set before we boot.
         return getEnvOrDefault("MANTIS_JWT_SECRET", "<our-very-secret-JWT-key>");
     }
 
@@ -528,7 +523,8 @@ namespace mb {
 
     void MantisApp::loadAndExecuteScript(const std::string &filePath) const {
         if (!fs::exists(fs::path(filePath))) {
-            LogOrigin::trace("File Execution", fmt::format("Executing a file that does not exist, path `{}`", filePath));
+            LogOrigin::trace("File Execution",
+                             fmt::format("Executing a file that does not exist, path `{}`", filePath));
             return;
         }
 
@@ -541,7 +537,8 @@ namespace mb {
         try {
             dukglue_peval<void>(m_dukCtx, scriptContent.c_str());
         } catch (const DukErrorException &e) {
-            LogOrigin::critical("File Load Error", fmt::format("Error loading file at {} \n\tError: {}", filePath, e.what()));
+            LogOrigin::critical("File Load Error",
+                                fmt::format("Error loading file at {} \n\tError: {}", filePath, e.what()));
         }
     }
 

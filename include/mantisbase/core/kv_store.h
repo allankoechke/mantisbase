@@ -19,10 +19,12 @@ namespace mb
     /**
      * @brief Manages application settings
      */
-    class KVStore
+    class KeyValStore
     {
     public:
-        KVStore() = default;
+        KeyValStore() = default;
+
+        void close() {}
 
         /**
          * @brief Initialize and set up routes for fetching settings data

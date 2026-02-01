@@ -56,6 +56,8 @@ namespace mb {
          * @return true if connection successful, false otherwise
          */
         bool connect(const std::string &conn_str);
+        const std::string& connectionStr() const;
+
 
         /**
          * @brief Close all database connections and destroy connection pool.
@@ -120,8 +122,9 @@ namespace mb {
          */
         void writeCheckpoint() const;
 
+        std::string m_connStr;
         std::unique_ptr<soci::connection_pool> m_connPool;
-        const MantisBase& mbApp;
+        const MantisBase &mbApp;
     };
 
     /**

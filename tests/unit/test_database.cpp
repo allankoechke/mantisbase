@@ -4,14 +4,14 @@
 
 #include <gtest/gtest.h>
 #include <mantisbase/mantis.h>
-#include "../test_fixure.h"
+#include "../common/test_environment.h"
 
 TEST(DatabaseTest, TestDatabaseConnected) {
-    EXPECT_TRUE(TestFixture::app().db().isConnected());
+    EXPECT_TRUE(mb::MantisBase::instance().db().isConnected());
 }
 
 TEST(DatabaseTest, CheckSystemSchemaMigrated) {
-    auto& mApp = TestFixture::app();
+    auto& mApp = mb::MantisBase::instance();
     auto admin_entity = mApp.entity("mb_admins");
 
     EXPECT_EQ(admin_entity.type(), "auth");
@@ -44,7 +44,7 @@ TEST(DatabaseTest, CheckSystemSchemaMigrated) {
 }
 
 TEST(DatabaseTest, EntityOperations) {
-    const auto& mApp = TestFixture::app();
+    const auto& mApp = mb::MantisBase::instance();
     
     // Check that we can get system entities
     EXPECT_NO_THROW(auto _ = mApp.entity("mb_admins"));

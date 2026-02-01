@@ -66,7 +66,7 @@ namespace mb {
                 // Set type to user since token is valid, but user record may be invalid
                 auth["type"] = "user";
 
-                // logger::trace("Authenticated on entity {} as user with id {}", user_table, user_id);
+                // logEntry::trace("Authenticated on entity {} as user with id {}", user_table, user_id);
 
                 try {
                     const auto user_entity = MantisBase::instance().entity(user_table);
@@ -303,7 +303,7 @@ namespace mb {
             try {
                 // Require admin authentication
                 auto verification = req.getOr<json>("verification", json::object());
-                // logger::trace("Verification: {}", verification.dump());
+                // logEntry::trace("Verification: {}", verification.dump());
 
                 if (verification.empty()) {
                     // Send auth error
@@ -320,7 +320,7 @@ namespace mb {
                                 verification["verified"].get<bool>();
                 if (ok) {
                     auto auth = req.getOr<json>("auth", json::object());
-                    // logger::trace("Ver User Auth: {}", auth.dump());
+                    // logEntry::trace("Ver User Auth: {}", auth.dump());
 
                     // Check if verified user object is valid, if not throw auth error
                     if (auth["user"].is_null() || !auth["user"].is_object()) {
@@ -332,7 +332,7 @@ namespace mb {
                         return HandlerResponse::Handled;
                     }
 
-                    // logger::trace("Auth: {}", auth.dump());
+                    // logEntry::trace("Auth: {}", auth.dump());
                     // Ensure the auth user was for admin table
                     if (auth["entity"].get<std::string>() == "mb_admins") {
                         return HandlerResponse::Unhandled;

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <httplib.h>
 #include <nlohmann/json.hpp>
-#include "../test_fixure.h"
+#include "../common/test_environment.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
 
@@ -9,7 +9,7 @@ class IntegrationCRUDTest : public ::testing::Test {
 protected:
     void SetUp() override {
         // Server is already started in main.cpp, just get client
-        const auto &fixture = TestFixture::instance(mb::json{});
+        auto& fixture = MbTestEnv::instance();
         client = std::make_unique<httplib::Client>(fixture.client());
 
         // Create admin token for schema operations

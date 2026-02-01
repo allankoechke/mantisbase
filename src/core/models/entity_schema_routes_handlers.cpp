@@ -91,7 +91,7 @@ namespace mb {
                     return;
                 }
 
-                // logger::trace("Create Entity Schema: \n\tSchema: {}", body.dump());
+                // logEntry::trace("Create Entity Schema: \n\tSchema: {}", body.dump());
 
                 const auto eSchema = EntitySchema::fromSchema(body);
                 auto _ = eSchema.dump();
