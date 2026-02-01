@@ -81,7 +81,7 @@ namespace mb {
             app.m_cmdArgs.push_back(config.at("database").get<std::string>());
         }
 
-        // --connection "dbname=mantis host=127.0.0.1 username=duser password=1235"
+        // --connection "dbname=mantis host=127.0.0.1 username=user password=1235"
         if (config.contains("connection")) {
             app.m_cmdArgs.emplace_back("--connection");
             app.m_cmdArgs.push_back(config.at("connection").get<std::string>());
@@ -186,7 +186,8 @@ namespace mb {
         instance().close();
 
         if (exitCode != 0)
-            LogOrigin::critical("Application Exit", fmt::format("Exiting Application with Code = {}", exitCode));
+            LogOrigin::critical("Application Exit",
+                fmt::format("Exiting Application with Code = {}", exitCode));
 
         std::exit(exitCode);
     }
@@ -284,7 +285,7 @@ namespace mb {
     void MantisBase::openBrowserOnStart() const {
         // Skip spinning the default browser on first boot
         // Useful for tests
-        if (getEnvOrDefault("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "1") == "1") return;
+        if (getEnvOrDefault("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "0") == "1") return;
 
         std::cout << std::endl;
 

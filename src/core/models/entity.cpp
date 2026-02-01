@@ -529,7 +529,8 @@ namespace mb {
             if (hasField(col_name).has_value()) {
                 valid_columns.push_back(col_name);
             } else {
-                LogOrigin::entityWarn("Invalid Column", fmt::format("Invalid column name '{}' in queryFromCols for entity '{}'", col_name, name()));
+                LogOrigin::entityWarn("Invalid Column",
+                    fmt::format("Invalid column name '{}' in queryFromCols for entity '{}'", col_name, name()));
             }
         }
 
@@ -539,16 +540,18 @@ namespace mb {
 
         // Build dynamic WHERE clause
         std::string where_clause;
+        soci::values bind_values;
         for (size_t i = 0; i < valid_columns.size(); ++i) {
             if (i > 0) where_clause += " OR ";
-            where_clause += valid_columns[i] + " = :value";
+            where_clause += std::format("{0} = :{0}{1}", valid_columns[i], i);
+            bind_values.set(std::format("{0}{1}", valid_columns[i], i), value);
         }
 
         const std::string query = std::format("SELECT * FROM {} WHERE {} LIMIT 1", name(), where_clause);
 
         // Run query
         soci::row r;
-        *sql << query, soci::use(value), soci::into(r);
+        *sql << query, soci::use(bind_values), soci::into(r);
 
         if (sql->got_data())
             return sociRow2Json(r, fields());

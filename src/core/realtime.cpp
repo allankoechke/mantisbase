@@ -15,7 +15,8 @@ bool mb::RealtimeDB::init() const {
         const auto &sql = mApp.db().session();
 
         // Create rt changelog table in the AUDIT database
-        *sql << R"(
+        if (sql->get_backend_name() == "sqlite3") {
+            *sql << R"(
             CREATE TABLE IF NOT EXISTS mb_change_log (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp   DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -25,11 +26,30 @@ bool mb::RealtimeDB::init() const {
                 old_data    TEXT,
                 new_data    TEXT
             )
-        )";
+            )";
+        }
+
+#ifdef MANTIS_HAS_POSTGRESQL
+        else {
+            *sql << R"(
+            CREATE TABLE IF NOT EXISTS mb_change_log (
+                id          SERIAL PRIMARY KEY,
+                timestamp   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                type        TEXT NOT NULL,
+                entity      TEXT NOT NULL,
+                row_id      TEXT NOT NULL,
+                old_data    TEXT,
+                new_data    TEXT
+            )
+            )";
+        }
+#endif
 
         // Create indexes on the audit database
-        *sql << "CREATE INDEX IF NOT EXISTS idx_change_log_id ON mb_change_log(id)";
         *sql << "CREATE INDEX IF NOT EXISTS idx_change_log_timestamp ON mb_change_log(timestamp)";
+        *sql << "CREATE INDEX IF NOT EXISTS idx_change_log_type ON mb_change_log(type)";
+        *sql << "CREATE INDEX IF NOT EXISTS idx_change_log_entity ON mb_change_log(entity)";
+        *sql << "CREATE INDEX IF NOT EXISTS idx_change_log_row_id ON mb_change_log(row_id)";
 
 #ifdef MANTIS_HAS_POSTGRESQL
         // For PostgreSQL, create the hook function
@@ -72,8 +92,7 @@ void mb::RealtimeDB::addDbHooks(const Entity &entity, const std::shared_ptr<soci
     // First drop any existing hooks
     dropDbHooks(entity_name, sess);
 
-    const auto db_type = sess->get_backend_name();
-    if (db_type == "sqlite3") {
+    if (const auto db_type = sess->get_backend_name(); db_type == "sqlite3") {
         auto old_obj = buildTriggerObject(entity, "OLD");
         auto new_obj = buildTriggerObject(entity, "NEW");
 
@@ -103,7 +122,7 @@ void mb::RealtimeDB::addDbHooks(const Entity &entity, const std::shared_ptr<soci
     }
 
 #ifdef MANTIS_HAS_POSTGRESQL
-    else if (entity_name == "postgresql") {
+    else if (db_type == "postgresql") {
         // Create INSERT trigger
         *sess << std::format(R"(
             CREATE TRIGGER mb_{0}_insert_notify
@@ -145,8 +164,7 @@ void mb::RealtimeDB::dropDbHooks(const std::string &entity_name, const std::shar
         throw MantisException(400, "Invalid Entity name.");
     }
 
-    const auto db_type = sess->get_backend_name();
-    if (db_type == "sqlite3") {
+    if (const auto db_type = sess->get_backend_name(); db_type == "sqlite3") {
         *sess << std::format("DROP TRIGGER IF EXISTS mb_{}_insert_trigger",
                              entity_name);
         *sess << std::format("DROP TRIGGER IF EXISTS mb_{}_update_trigger",
@@ -155,7 +173,7 @@ void mb::RealtimeDB::dropDbHooks(const std::string &entity_name, const std::shar
                              entity_name);
     }
 #ifdef MANTIS_HAS_POSTGRESQL
-    else if (entity_name == "postgresql") {
+    else if (db_type == "postgresql") {
         *sess << std::format("DROP TRIGGER IF EXISTS mb_{0}_insert_notify ON {0}",
                              entity_name);
         *sess << std::format("DROP TRIGGER IF EXISTS mb_{0}_update_notify ON {0}",
