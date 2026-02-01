@@ -1,9 +1,21 @@
+/**
+ * @file realtime.h
+ * @brief Realtime database change detection for SQLite and PostgreSQL.
+ *
+ * Provides live change notifications for entity tables so that SSE (Server-Sent Events)
+ * and other consumers can broadcast insert, update, and delete events. Supported backends:
+ * - **SQLite**: Polling-based change detection.
+ * - **PostgreSQL**: LISTEN/NOTIFY with triggers.
+ *
+ * Used in conjunction with sse.h to power the /api/v1/realtime SSE endpoint.
+ * @see sse.h
+ */
+
 #ifndef MANTISBASE_REALTIME_H
 #define MANTISBASE_REALTIME_H
 
 #include <condition_variable>
 #include <functional>
-#include <libpq-fe.h>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -29,26 +41,40 @@ namespace mb {
 
     using json = nlohmann::json;
 
+    /** Callback invoked with a batch of change events (each event is a JSON object). */
     using RtCallback = std::function<void(const json &)>;
 
+    /**
+     * Realtime database change detection and notification.
+     * Initializes DB-specific hooks (triggers for PostgreSQL, polling for SQLite)
+     * and runs a worker that invokes the registered callback with change events.
+     */
     class RealtimeDB {
     public:
         RealtimeDB();
 
+        /** Initialize realtime for the current database backend. Must be called after DB is ready. */
         [[nodiscard]] bool init() const;
 
+        /** Register change hooks for an entity by name. */
         void addDbHooks(const std::string &entity_name) const;
 
+        /** Register change hooks for an entity. */
         void addDbHooks(const Entity &entity) const;
 
+        /** Register change hooks for an entity on a given session (static, for schema creation). */
         static void addDbHooks(const Entity &entity, const std::shared_ptr<soci::session> &sess);
 
+        /** Remove change hooks for an entity by name. */
         void dropDbHooks(const std::string &entity_name) const;
 
+        /** Remove change hooks for an entity on a given session (static). */
         static void dropDbHooks(const std::string &entity_name, const std::shared_ptr<soci::session> &sess);
 
+        /** Start the realtime worker; callback receives change events. */
         void runWorker(const RtCallback &callback);
 
+        /** Stop the realtime worker. */
         void stopWorker() const;
 
     private:
@@ -63,6 +89,7 @@ namespace mb {
         std::unique_ptr<RtDbWorker> m_rtDbWorker;
     };
 
+    /** Internal worker that polls (SQLite) or listens (PostgreSQL) for DB changes. */
     class RtDbWorker {
     public:
         RtDbWorker();
