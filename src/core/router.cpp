@@ -153,6 +153,11 @@ namespace mb {
     }
 
     void Router::close() {
+        // Stop SSE manager first before the router
+        if (m_sseMgr->isRunning())
+            m_sseMgr->stop();
+
+        // Stop router and clear out objects
         if (svr.is_running()) {
             svr.stop();
             m_entityMap.clear();
@@ -164,7 +169,7 @@ namespace mb {
         return svr;
     }
 
-    SSEMgr & Router::sseMgr() const {
+    SSEMgr &Router::sseMgr() const {
         return *m_sseMgr;
     }
 

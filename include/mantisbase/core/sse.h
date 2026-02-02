@@ -110,6 +110,7 @@ namespace mb {
 
         void start();
         void stop();
+        bool isRunning() const;
 
         static std::function<void(MantisRequest &, MantisResponse &)> handleSSESession();
         static std::function<void(MantisRequest &, MantisResponse &)> handleSSESessionUpdate();

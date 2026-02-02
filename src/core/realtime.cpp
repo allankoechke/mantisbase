@@ -298,19 +298,6 @@ mb::RtDbWorker::RtDbWorker()
 
 mb::RtDbWorker::~RtDbWorker() {
     stopWorker();
-
-    // Close audit session
-    if (sql_ro && sql_ro->is_connected()) {
-        sql_ro->close();
-    }
-
-#if MANTIS_HAS_POSTGRESQL
-    if (psql) {
-        // PQfinish(m_pgConn);
-        // m_pgConn = nullptr;
-        psql.reset();
-    }
-#endif
 }
 
 bool mb::RtDbWorker::isDbRunning() const {
@@ -332,6 +319,19 @@ void mb::RtDbWorker::stopWorker() {
 
     if (th.joinable())
         th.join();
+
+    // Close audit session
+    if (sql_ro && sql_ro->is_connected()) {
+        sql_ro->close();
+    }
+
+#if MANTIS_HAS_POSTGRESQL
+    if (psql) {
+        // PQfinish(m_pgConn);
+        // m_pgConn = nullptr;
+        psql.reset();
+    }
+#endif
 }
 
 void mb::RtDbWorker::run() {
