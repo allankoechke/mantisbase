@@ -240,6 +240,8 @@ void mb::SSEMgr::stop() {
     }
 }
 
+bool mb::SSEMgr::isRunning() const {return m_running.load();}
+
 std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handleSSESession() {
     return [](mb::MantisRequest &req, const mb::MantisResponse &res) {
         res.setHeader("Cache-Control", "no-cache");
