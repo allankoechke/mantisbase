@@ -545,6 +545,7 @@ bool mb::RtDbWorker::initSQLite() {
     return false;
 }
 
+#if MANTIS_HAS_POSTGRESQL
 bool mb::RtDbWorker::initPSQL() {
     const auto &conn_str = MantisBase::instance().db().connectionStr();
     // Create PSQL object ...
@@ -575,3 +576,4 @@ bool mb::RtDbWorker::initPSQL() {
                    "Connected and listening on channel 'mb_db_changes'");
     return true;
 }
+#endif
