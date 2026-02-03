@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -127,64 +127,68 @@ $(document).ready(function(){initNavTree('database_8h_source.html',''); initResi
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <a class="code hl_function" href="classmb_1_1Database.html#a16f8063e970020fd99e50c6f0f253ff5">~Database</a>();</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1Database.html#aa6539c4e6e5584226b9f504a331c58c6">connect</a>(<span class="keyword">const</span> std::string &amp;conn_str);</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1Database.html#a485a62e7c137825297917d22aab541b4">disconnect</a>();</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1Database.html#a8a4763d92a9fe78ed3493f6cb04e9297">createSysTables</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        [[nodiscard]] std::shared_ptr&lt;soci::session&gt; <a class="code hl_function" href="classmb_1_1Database.html#adab239578ae50538286bc0755d0d4974">session</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        [[nodiscard]] soci::connection_pool &amp;<a class="code hl_function" href="classmb_1_1Database.html#af2870d7587b4d2926b0848022cdcd8e2">connectionPool</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1Database.html#ac874bd78ae6b938d39e4f3a2b86e90da">isConnected</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">#ifdef MANTIS_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> registerDuktapeMethods();</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="preprocessor">#ifdef MANTIS_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        duk_ret_t query(duk_context *ctx);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>        <span class="keywordtype">void</span> writeCheckpoint() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        std::unique_ptr&lt;soci::connection_pool&gt; m_connPool;</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        <span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a>&amp; mbApp;</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    };</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keyword">const</span> std::string&amp; <a class="code hl_function" href="classmb_1_1Database.html#a17d6a7ddb4fb811ed7fa6bdef1bdaf95">connectionStr</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1Database.html#a485a62e7c137825297917d22aab541b4">disconnect</a>();</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1Database.html#a8a4763d92a9fe78ed3493f6cb04e9297">createSysTables</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        [[nodiscard]] std::shared_ptr&lt;soci::session&gt; <a class="code hl_function" href="classmb_1_1Database.html#adab239578ae50538286bc0755d0d4974">session</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        [[nodiscard]] soci::connection_pool &amp;<a class="code hl_function" href="classmb_1_1Database.html#af2870d7587b4d2926b0848022cdcd8e2">connectionPool</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1Database.html#ac874bd78ae6b938d39e4f3a2b86e90da">isConnected</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">#ifdef MANTIS_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> registerDuktapeMethods();</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="preprocessor">#ifdef MANTIS_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        duk_ret_t query(duk_context *ctx);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        <span class="keywordtype">void</span> writeCheckpoint() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        std::string m_connStr;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        std::unique_ptr&lt;soci::connection_pool&gt; m_connPool;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        <span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;mbApp;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    };</div>
 </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
-<div class="foldopen" id="foldopen00131" data-start="{" data-end="};">
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="classmb_1_1MantisLoggerImpl.html">  131</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classmb_1_1MantisLoggerImpl.html">MantisLoggerImpl</a> : <span class="keyword">public</span> soci::logger_impl {</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keyword">public</span>:</div>
-<div class="foldopen" id="foldopen00137" data-start="{" data-end="}">
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="classmb_1_1MantisLoggerImpl.html#a9a8e360dfb38f2d73c906c34bff7ee30">  137</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1MantisLoggerImpl.html#a9a8e360dfb38f2d73c906c34bff7ee30">start_query</a>(std::string <span class="keyword">const</span> &amp;query)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>            logger_impl::start_query(query);</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>            LogOrigin::dbTrace(fmt::format(<span class="stringliteral">&quot;$ sql &lt;&lt; {}&quot;</span>, query));</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        }</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="foldopen" id="foldopen00134" data-start="{" data-end="};">
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="classmb_1_1MantisLoggerImpl.html">  134</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classmb_1_1MantisLoggerImpl.html">MantisLoggerImpl</a> : <span class="keyword">public</span> soci::logger_impl {</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00140" data-start="{" data-end="}">
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="classmb_1_1MantisLoggerImpl.html#a9a8e360dfb38f2d73c906c34bff7ee30">  140</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1MantisLoggerImpl.html#a9a8e360dfb38f2d73c906c34bff7ee30">start_query</a>(std::string <span class="keyword">const</span> &amp;query)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>            logger_impl::start_query(query);</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>            LogOrigin::dbTrace(fmt::format(<span class="stringliteral">&quot;$ sql &lt;&lt; {}&quot;</span>, query));</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        }</div>
 </div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        logger_impl *do_clone()<span class="keyword"> const override </span>{</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>            <span class="keywordflow">return</span> <span class="keyword">new</span> <a class="code hl_class" href="classmb_1_1MantisLoggerImpl.html">MantisLoggerImpl</a>();</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        }</div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    };</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        logger_impl *do_clone()<span class="keyword"> const override </span>{</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>            <span class="keywordflow">return</span> <span class="keyword">new</span> <a class="code hl_class" href="classmb_1_1MantisLoggerImpl.html">MantisLoggerImpl</a>();</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        }</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    };</div>
 </div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>} <span class="comment">// mb</span></div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="preprocessor">#endif </span><span class="comment">//DATABASE_H</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>} <span class="comment">// mb</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span><span class="preprocessor">#endif </span><span class="comment">//DATABASE_H</span></div>
 <div class="ttc" id="aclassmb_1_1Database_html"><div class="ttname"><a href="classmb_1_1Database.html">mb::Database</a></div><div class="ttdoc">Database connection and session management.</div><div class="ttdef"><b>Definition</b> database.h:39</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_a16f8063e970020fd99e50c6f0f253ff5"><div class="ttname"><a href="classmb_1_1Database.html#a16f8063e970020fd99e50c6f0f253ff5">mb::Database::~Database</a></div><div class="ttdeci">~Database()</div><div class="ttdoc">Destructor (disconnects from database).</div><div class="ttdef"><b>Definition</b> database.cpp:22</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_a485a62e7c137825297917d22aab541b4"><div class="ttname"><a href="classmb_1_1Database.html#a485a62e7c137825297917d22aab541b4">mb::Database::disconnect</a></div><div class="ttdeci">void disconnect()</div><div class="ttdoc">Close all database connections and destroy connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:107</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_a8a4763d92a9fe78ed3493f6cb04e9297"><div class="ttname"><a href="classmb_1_1Database.html#a8a4763d92a9fe78ed3493f6cb04e9297">mb::Database::createSysTables</a></div><div class="ttdeci">bool createSysTables() const</div><div class="ttdoc">Create system tables (mb_tables, mb_admins, etc.).</div><div class="ttdef"><b>Definition</b> database.cpp:143</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_aa6539c4e6e5584226b9f504a331c58c6"><div class="ttname"><a href="classmb_1_1Database.html#aa6539c4e6e5584226b9f504a331c58c6">mb::Database::connect</a></div><div class="ttdeci">bool connect(const std::string &amp;conn_str)</div><div class="ttdoc">Connect to database and initialize connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:26</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_ac874bd78ae6b938d39e4f3a2b86e90da"><div class="ttname"><a href="classmb_1_1Database.html#ac874bd78ae6b938d39e4f3a2b86e90da">mb::Database::isConnected</a></div><div class="ttdeci">bool isConnected() const</div><div class="ttdoc">Check if database is connected.</div><div class="ttdef"><b>Definition</b> database.cpp:200</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_adab239578ae50538286bc0755d0d4974"><div class="ttname"><a href="classmb_1_1Database.html#adab239578ae50538286bc0755d0d4974">mb::Database::session</a></div><div class="ttdeci">std::shared_ptr&lt; soci::session &gt; session() const</div><div class="ttdoc">Get a database session from the connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:192</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_af2870d7587b4d2926b0848022cdcd8e2"><div class="ttname"><a href="classmb_1_1Database.html#af2870d7587b4d2926b0848022cdcd8e2">mb::Database::connectionPool</a></div><div class="ttdeci">soci::connection_pool &amp; connectionPool() const</div><div class="ttdoc">Get access to the underlying connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:196</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_af43e18e9d1f9cdfacbb45dcfb7e585a4"><div class="ttname"><a href="classmb_1_1Database.html#af43e18e9d1f9cdfacbb45dcfb7e585a4">mb::Database::Database</a></div><div class="ttdeci">Database()</div><div class="ttdoc">Construct database instance.</div><div class="ttdef"><b>Definition</b> database.cpp:19</div></div>
-<div class="ttc" id="aclassmb_1_1MantisBase_html"><div class="ttname"><a href="classmb_1_1MantisBase.html">mb::MantisBase</a></div><div class="ttdoc">MantisBase entry point.</div><div class="ttdef"><b>Definition</b> mantisbase.h:38</div></div>
-<div class="ttc" id="aclassmb_1_1MantisLoggerImpl_html"><div class="ttname"><a href="classmb_1_1MantisLoggerImpl.html">mb::MantisLoggerImpl</a></div><div class="ttdoc">Logger implementation for soci, allowing us to override the default logging behaviour with our own cu...</div><div class="ttdef"><b>Definition</b> database.h:131</div></div>
-<div class="ttc" id="aclassmb_1_1MantisLoggerImpl_html_a9a8e360dfb38f2d73c906c34bff7ee30"><div class="ttname"><a href="classmb_1_1MantisLoggerImpl.html#a9a8e360dfb38f2d73c906c34bff7ee30">mb::MantisLoggerImpl::start_query</a></div><div class="ttdeci">void start_query(std::string const &amp;query) override</div><div class="ttdoc">Called before query is executed by soci, we can log the query here.</div><div class="ttdef"><b>Definition</b> database.h:137</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_a16f8063e970020fd99e50c6f0f253ff5"><div class="ttname"><a href="classmb_1_1Database.html#a16f8063e970020fd99e50c6f0f253ff5">mb::Database::~Database</a></div><div class="ttdeci">~Database()</div><div class="ttdoc">Destructor (disconnects from database).</div><div class="ttdef"><b>Definition</b> database.cpp:20</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_a17d6a7ddb4fb811ed7fa6bdef1bdaf95"><div class="ttname"><a href="classmb_1_1Database.html#a17d6a7ddb4fb811ed7fa6bdef1bdaf95">mb::Database::connectionStr</a></div><div class="ttdeci">const std::string &amp; connectionStr() const</div><div class="ttdef"><b>Definition</b> database.cpp:112</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_a485a62e7c137825297917d22aab541b4"><div class="ttname"><a href="classmb_1_1Database.html#a485a62e7c137825297917d22aab541b4">mb::Database::disconnect</a></div><div class="ttdeci">void disconnect()</div><div class="ttdoc">Close all database connections and destroy connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:114</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_a8a4763d92a9fe78ed3493f6cb04e9297"><div class="ttname"><a href="classmb_1_1Database.html#a8a4763d92a9fe78ed3493f6cb04e9297">mb::Database::createSysTables</a></div><div class="ttdeci">bool createSysTables() const</div><div class="ttdoc">Create system tables (mb_tables, mb_admins, etc.).</div><div class="ttdef"><b>Definition</b> database.cpp:154</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_aa6539c4e6e5584226b9f504a331c58c6"><div class="ttname"><a href="classmb_1_1Database.html#aa6539c4e6e5584226b9f504a331c58c6">mb::Database::connect</a></div><div class="ttdeci">bool connect(const std::string &amp;conn_str)</div><div class="ttdoc">Connect to database and initialize connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:24</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_ac874bd78ae6b938d39e4f3a2b86e90da"><div class="ttname"><a href="classmb_1_1Database.html#ac874bd78ae6b938d39e4f3a2b86e90da">mb::Database::isConnected</a></div><div class="ttdeci">bool isConnected() const</div><div class="ttdoc">Check if database is connected.</div><div class="ttdef"><b>Definition</b> database.cpp:212</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_adab239578ae50538286bc0755d0d4974"><div class="ttname"><a href="classmb_1_1Database.html#adab239578ae50538286bc0755d0d4974">mb::Database::session</a></div><div class="ttdeci">std::shared_ptr&lt; soci::session &gt; session() const</div><div class="ttdoc">Get a database session from the connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:204</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_af2870d7587b4d2926b0848022cdcd8e2"><div class="ttname"><a href="classmb_1_1Database.html#af2870d7587b4d2926b0848022cdcd8e2">mb::Database::connectionPool</a></div><div class="ttdeci">soci::connection_pool &amp; connectionPool() const</div><div class="ttdoc">Get access to the underlying connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:208</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_af43e18e9d1f9cdfacbb45dcfb7e585a4"><div class="ttname"><a href="classmb_1_1Database.html#af43e18e9d1f9cdfacbb45dcfb7e585a4">mb::Database::Database</a></div><div class="ttdeci">Database()</div><div class="ttdoc">Construct database instance.</div><div class="ttdef"><b>Definition</b> database.cpp:17</div></div>
+<div class="ttc" id="aclassmb_1_1MantisBase_html"><div class="ttname"><a href="classmb_1_1MantisBase.html">mb::MantisBase</a></div><div class="ttdoc">MantisBase entry point.</div><div class="ttdef"><b>Definition</b> mantisbase.h:40</div></div>
+<div class="ttc" id="aclassmb_1_1MantisLoggerImpl_html"><div class="ttname"><a href="classmb_1_1MantisLoggerImpl.html">mb::MantisLoggerImpl</a></div><div class="ttdoc">Logger implementation for soci, allowing us to override the default logging behaviour with our own cu...</div><div class="ttdef"><b>Definition</b> database.h:134</div></div>
+<div class="ttc" id="aclassmb_1_1MantisLoggerImpl_html_a9a8e360dfb38f2d73c906c34bff7ee30"><div class="ttname"><a href="classmb_1_1MantisLoggerImpl.html#a9a8e360dfb38f2d73c906c34bff7ee30">mb::MantisLoggerImpl::start_query</a></div><div class="ttdeci">void start_query(std::string const &amp;query) override</div><div class="ttdoc">Called before query is executed by soci, we can log the query here.</div><div class="ttdef"><b>Definition</b> database.h:140</div></div>
 <div class="ttc" id="alogger_8h_html"><div class="ttname"><a href="logger_8h.html">logger.h</a></div></div>
 <div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdoc">router.h</div><div class="ttdef"><b>Definition</b> auth.h:15</div></div>
 <div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> context_store.h:18</div></div>

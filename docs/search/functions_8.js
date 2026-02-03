@@ -1,7 +1,29 @@
 var searchData=
 [
-  ['joinpaths_0',['joinPaths',['../namespacemb.html#ab4f69b96288179f54aed408599cd564d',1,'mb']]],
-  ['json2socivalue_1',['json2SociValue',['../namespacemb.html#af19135d42f1c2efb554a7d759fb8b47d',1,'mb']]],
-  ['jsonbody_2',['jsonBody',['../classmb_1_1MantisContentReader.html#aae539c5f088dc1e90b9ea35b6fbd124d',1,'mb::MantisContentReader']]],
-  ['jwtsecretkey_3',['jwtSecretKey',['../classmb_1_1MantisBase.html#a946560e16179566a7155ae16202aa697',1,'mb::MantisBase']]]
+  ['id_0',['id',['../classmb_1_1EntitySchema.html#af6bcf925f4add868731bb5b41642fac3',1,'mb::EntitySchema::id()'],['../classmb_1_1EntitySchemaField.html#addf3dfbbf3688bae741aca42e5bafca2',1,'mb::EntitySchemaField::id()'],['../classmb_1_1Entity.html#aa77642c6979f60660f5d79b4d6ee167b',1,'mb::Entity::id()']]],
+  ['info_1',['info',['../classmb_1_1Logger.html#a306d55c017819b325b86a3d340221556',1,'mb::Logger']]],
+  ['init_2',['init',['../classmb_1_1LogDatabase.html#a05a19617bdc5f335670dfcb5cd96d444',1,'mb::LogDatabase::init()'],['../classmb_1_1RealtimeDB.html#a1752e25861b4ff5163fa8448098ecac7',1,'mb::RealtimeDB::init()'],['../classmb_1_1Router.html#ae149eebd50d577cdf9c2b7c6581d9626',1,'mb::Router::init()']]],
+  ['initdb_3',['initDb',['../classmb_1_1Logger.html#ac155db0fa06b1b274ba99c25667b9174',1,'mb::Logger']]],
+  ['insertlog_4',['insertLog',['../classmb_1_1LogDatabase.html#a62f8816e7d3af12fb3adc3a19c853a35',1,'mb::LogDatabase']]],
+  ['instance_5',['instance',['../classmb_1_1MantisBase.html#aca64db86aff60b0a0730260576d3a0e0',1,'mb::MantisBase']]],
+  ['invalidchar_6',['invalidChar',['../namespacemb.html#aa98dbdb983996e7b60b25c3e0f8eac98',1,'mb']]],
+  ['isactive_7',['isActive',['../classmb_1_1SSESession.html#ae1f7cf3911a26c416130702747fae003',1,'mb::SSESession']]],
+  ['iscanonicalpath_8',['isCanonicalPath',['../classmb_1_1Files.html#a043937fa5d3866b715a29706bdf3a78c',1,'mb::Files']]],
+  ['isconnected_9',['isConnected',['../classmb_1_1Database.html#ac874bd78ae6b938d39e4f3a2b86e90da',1,'mb::Database']]],
+  ['isdbrunning_10',['isDbRunning',['../classmb_1_1RtDbWorker.html#ac9c87b94da1e5f7121c99fe14fa35ffa',1,'mb::RtDbWorker']]],
+  ['isdevmode_11',['isDevMode',['../classmb_1_1MantisBase.html#a2718eb7c7053903a94b116dd50b7e6d0',1,'mb::MantisBase']]],
+  ['isempty_12',['isEmpty',['../classmb_1_1Entity.html#abf34755610231b029770fde363542897',1,'mb::Entity']]],
+  ['isforeignkey_13',['isForeignKey',['../classmb_1_1EntitySchemaField.html#acad8ff7285e15863a82b71a6b62ce248',1,'mb::EntitySchemaField']]],
+  ['isinterestedin_14',['isInterestedIn',['../classmb_1_1SSESession.html#a687c22179696b7d60a8d9277a1ed1484',1,'mb::SSESession']]],
+  ['ismultipartformdata_15',['ismultipartformdata',['../classmb_1_1MantisRequest.html#a9e15ab3f408f42ef2e17f93b40f84907',1,'mb::MantisRequest::isMultipartFormData()'],['../classmb_1_1MantisContentReader.html#aec4e27532aff7b84d81fd5065e60cba8',1,'mb::MantisContentReader::isMultipartFormData()']]],
+  ['isprimarykey_16',['isPrimaryKey',['../classmb_1_1EntitySchemaField.html#a9ddca96161d7dd32a30666ff1aad1162',1,'mb::EntitySchemaField']]],
+  ['isrunning_17',['isRunning',['../classmb_1_1SSEMgr.html#a139fc7c836e388dde952c3b4bfd80f7c',1,'mb::SSEMgr']]],
+  ['issystem_18',['issystem',['../classmb_1_1Entity.html#a452e109c1c529349ec5ae69659da14b8',1,'mb::Entity::isSystem()'],['../classmb_1_1EntitySchema.html#af7bbff9f330f6231cf7719f73a5a58fa',1,'mb::EntitySchema::isSystem()'],['../classmb_1_1EntitySchemaField.html#ab4135a613bd0422036b62ee3a7d3762d',1,'mb::EntitySchemaField::isSystem() const']]],
+  ['isunique_19',['isUnique',['../classmb_1_1EntitySchemaField.html#abbe7ffd2ccd31c3751cfec9504d249de',1,'mb::EntitySchemaField']]],
+  ['isvalidentityname_20',['isValidEntityName',['../classmb_1_1EntitySchema.html#aedd8aff065fcf0026aaa3770066d2f13',1,'mb::EntitySchema']]],
+  ['isvalidentitytype_21',['isValidEntityType',['../classmb_1_1EntitySchema.html#aab89276d8527e9de9285e3183cc8af32',1,'mb::EntitySchema']]],
+  ['isvalidfieldtype_22',['isValidFieldType',['../classmb_1_1EntitySchemaField.html#a8435e9b5d3538c551acf5d51b00f62ae',1,'mb::EntitySchemaField']]],
+  ['isvalidip_23',['isValidIP',['../namespacemb.html#a65eb364a52f818ded81fe4256c9b74fa',1,'mb']]],
+  ['isvalidipv4_24',['isValidIPv4',['../namespacemb.html#ae82806bf179419d9e5dc249e39c200e1',1,'mb']]],
+  ['isvalidipv6_25',['isValidIPv6',['../namespacemb.html#a00f860404d17bfa8ba311ed9b227dad8',1,'mb']]]
 ];

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['🔐_20authentication_0',['🔐 Authentication',['../rest_api.html#autotoc_md27',1,'']]],
-  ['🔐_20using_20tokens_1',['🔐 Using Tokens',['../auth_api.html#autotoc_md93',1,'']]]
+  ['🔄_20refresh_20token_0',['🔄 Refresh Token',['../auth_api.html#autotoc_md95',1,'']]]
 ];

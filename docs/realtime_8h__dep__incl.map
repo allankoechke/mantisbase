@@ -1,0 +1,15 @@
+<map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/realtime.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/realtime.h">
+<area shape="rect" id="Node000001" title="Realtime database change detection for SQLite and PostgreSQL." alt="" coords="517,5,751,60"/>
+<area shape="rect" id="Node000002" href="$sse_8h.html" title="Server&#45;Sent Events (SSE) manager for the realtime API." alt="" coords="5,108,239,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="505,62,252,111,239,113,238,108,251,105,504,56"/>
+<area shape="rect" id="Node000004" href="$entity__schema__crud_8cpp.html" title=" " alt="" coords="263,108,488,163"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="555,67,444,110,442,105,553,62"/>
+<area shape="rect" id="Node000005" href="$realtime_8cpp.html" title=" " alt="" coords="513,115,755,155"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="637,74,637,115,631,115,631,74"/>
+<area shape="rect" id="Node000006" href="$mantisbase_8cpp.html" title=" " alt="" coords="779,115,1011,155"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="715,62,847,113,845,118,714,67"/>
+<area shape="rect" id="Node000007" href="$parse__cmd_8cpp.html" title=" " alt="" coords="1035,115,1262,155"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="765,56,1024,105,1060,113,1059,118,1023,111,764,61"/>
+<area shape="rect" id="Node000003" href="$sse_8cpp.html" title=" " alt="" coords="9,211,235,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="125,176,125,211,119,211,119,176"/>
+</map>

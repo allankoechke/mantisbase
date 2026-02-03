@@ -1,23 +1,8 @@
 var searchData=
 [
-  ['field_0',['field',['../classmb_1_1EntitySchema.html#a6f3b3df7444255ecc5badb14cda61b59',1,'mb::EntitySchema::field()'],['../classmb_1_1Entity.html#a68fc1d809fd9ecb011ffae8db4bd71fb',1,'mb::Entity::field()']]],
-  ['fieldbyid_1',['fieldById',['../classmb_1_1EntitySchema.html#ac5ad1ea9b9638e5631a8bcf63e49779d',1,'mb::EntitySchema']]],
-  ['fields_2',['fields',['../classmb_1_1Entity.html#a06b6989436a0acdbab7856c029de221f',1,'mb::Entity::fields()'],['../classmb_1_1EntitySchema.html#aff7d5893936eca2b12c851a924781c99',1,'mb::EntitySchema::fields()']]],
-  ['fileexists_3',['fileExists',['../classmb_1_1Files.html#a9342956f1835fc4e62bc64f41ac91ca9',1,'mb::Files']]],
-  ['filepath_4',['filePath',['../classmb_1_1Files.html#aa6364ca26900db340e8152f49af53a82',1,'mb::Files']]],
-  ['filesbasedir_5',['filesBaseDir',['../classmb_1_1Files.html#ac077cfd439dd4096de7237d3ca9ad05b',1,'mb::Files']]],
-  ['filesmetadata_6',['filesMetadata',['../classmb_1_1MantisContentReader.html#a5c04034d6f78d360bdcc606b0b98b1c2',1,'mb::MantisContentReader']]],
-  ['find_7',['find',['../classmb_1_1RouteRegistry.html#a8af23c11906981ab71df27f6ee4902db',1,'mb::RouteRegistry']]],
-  ['findfield_8',['findField',['../classmb_1_1Entity.html#a8d72725bf705ed2c8c14b2731729d43b',1,'mb::Entity']]],
-  ['findpreset_9',['findPreset',['../classmb_1_1Validators.html#a90dc7338139f73c97368d441738b86ec',1,'mb::Validators']]],
-  ['foreignkeycolumn_10',['foreignKeyColumn',['../classmb_1_1EntitySchemaField.html#a45386c9e097dff214f9a5ef4b311bcda',1,'mb::EntitySchemaField']]],
-  ['foreignkeyconstraintcheck_11',['foreignKeyConstraintCheck',['../classmb_1_1Validators.html#a7b6e671f48f0440828f7ad01c602c2bc',1,'mb::Validators']]],
-  ['foreignkeyondelete_12',['foreignKeyOnDelete',['../classmb_1_1EntitySchemaField.html#a7905074855ed76ea8cd3a3e59b75b5d8',1,'mb::EntitySchemaField']]],
-  ['foreignkeyonupdate_13',['foreignKeyOnUpdate',['../classmb_1_1EntitySchemaField.html#af0241de1d3a2743f06533f1625b3fb5c',1,'mb::EntitySchemaField']]],
-  ['foreignkeytable_14',['foreignKeyTable',['../classmb_1_1EntitySchemaField.html#a326b664eba56579bddbe737c6f9a92e9',1,'mb::EntitySchemaField']]],
-  ['formdata_15',['formData',['../classmb_1_1MantisContentReader.html#ac41fc41848e7c7225455ed2b56b606d1',1,'mb::MantisContentReader']]],
-  ['fromentity_16',['fromEntity',['../classmb_1_1EntitySchema.html#a581573db76a202f27a7dc30cffba3d29',1,'mb::EntitySchema']]],
-  ['fromjson_17',['fromJSON',['../classmb_1_1AccessRule.html#aef002a0f2bf98c4f3d8a8c2c575bdaa9',1,'mb::AccessRule']]],
-  ['fromschema_18',['fromSchema',['../classmb_1_1EntitySchema.html#ab1a4b3a2d4e6bc3ecf64edfe2eb63f4c',1,'mb::EntitySchema']]],
-  ['funclogger_19',['FuncLogger',['../classmb_1_1FuncLogger.html#ac99c66e271fcde2dd46fcb86a278e71c',1,'mb::FuncLogger']]]
+  ['entity_0',['entity',['../classmb_1_1Entity.html#a5636ba006f4060a5a001f18c1905e30d',1,'mb::Entity::Entity(const nlohmann::json &amp;schema)'],['../classmb_1_1Entity.html#a174cc1f2ba1366bdfb58afb6dd249814',1,'mb::Entity::Entity(const std::string &amp;name, const std::string &amp;type)'],['../classmb_1_1MantisBase.html#a1043575a422c2c536b1022593bb977d2',1,'mb::MantisBase::entity()']]],
+  ['entityschema_1',['entityschema',['../classmb_1_1EntitySchema.html#afe18d737844d081696dd52cbed998398',1,'mb::EntitySchema::EntitySchema()=default'],['../classmb_1_1EntitySchema.html#a813c48ec23da48604c3919ac2fc22fdc',1,'mb::EntitySchema::EntitySchema(const std::string &amp;entity_name, const std::string &amp;entity_type=&quot;base&quot;)'],['../classmb_1_1EntitySchema.html#aba597aa890e644b165e0a5d0b8e04f17',1,'mb::EntitySchema::EntitySchema(const EntitySchema &amp;)'],['../classmb_1_1EntitySchema.html#a15fd2f97444d3cd69b193518f58d6ff7',1,'mb::EntitySchema::EntitySchema(EntitySchema &amp;&amp;) noexcept=default']]],
+  ['entityschemafield_2',['entityschemafield',['../classmb_1_1EntitySchemaField.html#ae3a273e277829fb6aa0cb71254075e4f',1,'mb::EntitySchemaField::EntitySchemaField(std::string field_name, std::string field_type)'],['../classmb_1_1EntitySchemaField.html#a7a9189251397485237f318f349ebc140',1,'mb::EntitySchemaField::EntitySchemaField(const nlohmann::json &amp;field_schema)'],['../classmb_1_1EntitySchemaField.html#af5fbd5f763eb129e50d8e8bab5717292',1,'mb::EntitySchemaField::EntitySchemaField(const EntitySchemaField &amp;other)']]],
+  ['eval_3',['eval',['../structmb_1_1Expr.html#a12a96b90ba9370e005ba6646fc7f39da',1,'mb::Expr']]],
+  ['expr_4',['expr',['../classmb_1_1AccessRule.html#ae273785c70448a7aa5883add0f80c4c8',1,'mb::AccessRule']]]
 ];

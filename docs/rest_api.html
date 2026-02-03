@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -94,7 +94,7 @@ $(document).ready(function(){initNavTree('rest_api.html',''); initResizable(); }
   <div class="headertitle"><div class="title">REST API Reference Guide</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>MantisBase provides auto-generated RESTful APIs for interacting with database entities. This document covers the entity endpoints, schema management, and request handling.</p>
+<div class="textblock"><p>MantisBase provides auto-generated RESTful APIs for interacting with database entities. This document covers the entity endpoints, schema management, realtime (SSE) API for live database change notifications (SQLite and PostgreSQL), and request handling.</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md22"></a>
 🌐 Base URL</h2>
@@ -681,11 +681,145 @@ Error Responses</h4>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
 <h2><a class="anchor" id="autotoc_md69"></a>
+📡 Realtime API</h2>
+<p>MantisBase provides <b>realtime database change notifications</b> over <b>Server-Sent Events (SSE)</b> for both SQLite and PostgreSQL backends. Clients subscribe to topics (entity names and optionally specific row IDs) and receive live <code>insert</code>, <code>update</code>, and <code>delete</code> events as they occur.</p>
+<h3><a class="anchor" id="autotoc_md70"></a>
+Endpoints</h3>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Method   </th><th class="markdownTableHeadNone">Endpoint   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/realtime</code>   </td><td class="markdownTableBodyNone">Open an SSE connection. Requires <code>topics</code> query parameter.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/realtime</code>   </td><td class="markdownTableBodyNone">Update topics for an existing session or clear topics to disconnect. Requires JSON body.   </td></tr>
+</table>
+<h3><a class="anchor" id="autotoc_md71"></a>
+GET /api/v1/realtime — Open SSE connection</h3>
+<p>Establishes a long-lived SSE stream. Pass a comma-separated list of <b>topics</b> in the query string.</p>
+<p><b>Query parameters</b></p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Parameter   </th><th class="markdownTableHeadNone">Type   </th><th class="markdownTableHeadNone">Required   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>topics</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">Yes   </td><td class="markdownTableBodyNone">Comma-separated list of topics. Each topic is an entity name (e.g. <code>posts</code>) or <code>entity:row_id</code> (e.g. <code>posts:019c1b81-364b-7000-8120-b5416b2c42c2</code>) for a specific row.   </td></tr>
+</table>
+<p><b>Example</b></p>
+<div class="fragment"><div class="line">curl -N -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
+<div class="line">  &quot;http://localhost:7070/api/v1/realtime?topics=posts,users,posts:019c1b81-364b-7000-8120-b5416b2c42c2&quot;</div>
+</div><!-- fragment --><p><b>Response</b></p>
+<ul>
+<li><b>Content-Type:</b> <code>text/event-stream</code></li>
+<li><b>Connection:</b> keep-alive</li>
+</ul>
+<p>The stream sends events in SSE format. Each event has an <code>event</code> type and a <code>data</code> line (JSON).</p>
+<h3><a class="anchor" id="autotoc_md72"></a>
+POST /api/v1/realtime — Update or disconnect session</h3>
+<p>Updates the list of topics for an existing SSE session, or clears topics to effectively disconnect. Requires the <code>client_id</code> (session identifier) returned in the <code>connected</code> event from the GET request.</p>
+<p><b>Request body (JSON)</b></p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Field   </th><th class="markdownTableHeadNone">Type   </th><th class="markdownTableHeadNone">Required   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>client_id</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">Yes   </td><td class="markdownTableBodyNone">Session ID returned when the SSE connection was established.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>topics</code>   </td><td class="markdownTableBodyNone">array   </td><td class="markdownTableBodyNone">Yes   </td><td class="markdownTableBodyNone">New list of topics. Each topic is an entity name or <code>entity:row_id</code>. Pass an empty array to clear subscriptions and disconnect.   </td></tr>
+</table>
+<p><b>Example: Update topics</b></p>
+<div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/realtime \</div>
+<div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{</div>
+<div class="line">    &quot;client_id&quot;: &quot;sse_1769987962000_0abc1&quot;,</div>
+<div class="line">    &quot;topics&quot;: [&quot;posts&quot;, &quot;comments&quot;]</div>
+<div class="line">  }&#39;</div>
+</div><!-- fragment --><p><b>Example: Clear topics (disconnect)</b></p>
+<div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/realtime \</div>
+<div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{&quot;client_id&quot;: &quot;sse_1769987962000_0abc1&quot;, &quot;topics&quot;: []}&#39;</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md73"></a>
+SSE event types</h3>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Event   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>connected</code>   </td><td class="markdownTableBodyNone">Sent once when the SSE connection is established. Contains <code>client_id</code>, <code>topics</code>, and <code>timestamp</code>.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>ping</code>   </td><td class="markdownTableBodyNone">Keep-alive sent periodically (e.g. every ~30 s). Contains <code>timestamp</code>.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>change</code>   </td><td class="markdownTableBodyNone">A database change (insert, update, or delete) for a subscribed topic.   </td></tr>
+</table>
+<h3><a class="anchor" id="autotoc_md74"></a>
+Event data format</h3>
+<p><b>connected</b></p>
+<div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;client_id&quot;: &quot;sse_1769987962000_0abc1&quot;,</div>
+<div class="line">  &quot;topics&quot;: [&quot;posts&quot;, &quot;users&quot;],</div>
+<div class="line">  &quot;timestamp&quot;: 1769987962</div>
+<div class="line">}</div>
+</div><!-- fragment --><p><b>ping</b></p>
+<div class="fragment"><div class="line">{&quot;timestamp&quot;: 1769988043}</div>
+</div><!-- fragment --><p><b>change</b></p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Field   </th><th class="markdownTableHeadNone">Type   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>action</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">One of <code>insert</code>, <code>update</code>, <code>delete</code>.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>entity</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">Entity (table) name.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>row_id</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">ID of the affected row.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>topic</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">Topic that matched (entity or <code>entity:row_id</code>).    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>timestamp</code>   </td><td class="markdownTableBodyNone">number   </td><td class="markdownTableBodyNone">Unix timestamp of the change.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>data</code>   </td><td class="markdownTableBodyNone">object | null   </td><td class="markdownTableBodyNone">For <code>insert</code> and <code>update</code>, the row payload; for <code>delete</code>, <code>null</code>.   </td></tr>
+</table>
+<p><b>Example change (insert)</b></p>
+<div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;action&quot;: &quot;insert&quot;,</div>
+<div class="line">  &quot;data&quot;: {</div>
+<div class="line">    &quot;created&quot;: &quot;2026-02-02T02:19:38&quot;,</div>
+<div class="line">    &quot;id&quot;: &quot;019c1b81-364b-7000-8120-b5416b2c42c2&quot;,</div>
+<div class="line">    &quot;updated&quot;: &quot;2026-02-02T02:19:38&quot;</div>
+<div class="line">  },</div>
+<div class="line">  &quot;entity&quot;: &quot;test&quot;,</div>
+<div class="line">  &quot;row_id&quot;: &quot;019c1b81-364b-7000-8120-b5416b2c42c2&quot;,</div>
+<div class="line">  &quot;timestamp&quot;: 1769988013,</div>
+<div class="line">  &quot;topic&quot;: &quot;test&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p><b>Example change (delete)</b></p>
+<div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;action&quot;: &quot;delete&quot;,</div>
+<div class="line">  &quot;data&quot;: null,</div>
+<div class="line">  &quot;entity&quot;: &quot;test&quot;,</div>
+<div class="line">  &quot;row_id&quot;: &quot;019c1b81-1501-7000-9d65-1541c14f99b7&quot;,</div>
+<div class="line">  &quot;timestamp&quot;: 1769988013,</div>
+<div class="line">  &quot;topic&quot;: &quot;test&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md75"></a>
+Access control</h3>
+<p>Realtime endpoints use the same access rules as entity <code>list</code> and <code>get</code>:</p>
+<ul>
+<li>Subscribing to an entity (e.g. <code>posts</code>) requires <b>list</b> access on that entity.</li>
+<li>Subscribing to a specific row (e.g. <code>posts:&amp;lt;id&amp;gt;</code>) requires <b>get</b> access.</li>
+</ul>
+<p>Invalid or unauthorized topics result in <code>400</code> or <code>403</code> responses.</p>
+<h3><a class="anchor" id="autotoc_md76"></a>
+Backend support</h3>
+<p>Realtime is supported for:</p>
+<ul>
+<li><b>SQLite</b> — Change detection via polling.</li>
+<li><b>PostgreSQL</b> — Change detection via <code>LISTEN</code>/<code>NOTIFY</code> and triggers.</li>
+</ul>
+<hr  />
+<h2><a class="anchor" id="autotoc_md78"></a>
 🎛️ Admin Dashboard</h2>
 <p>The MantisBase Admin Dashboard is a comprehensive web-based interface accessible at <code>/mb</code> (e.g., <code><a href="http://localhost:7070/mb">http://localhost:7070/mb</a></code>). It provides a visual alternative to the REST API for managing your backend.</p>
-<h3><a class="anchor" id="autotoc_md70"></a>
+<h3><a class="anchor" id="autotoc_md79"></a>
 Dashboard Features</h3>
-<h4><a class="anchor" id="autotoc_md71"></a>
+<h4><a class="anchor" id="autotoc_md80"></a>
 Entity Management</h4>
 <ul>
 <li><b>Browse Entities</b> - View all entities (tables) in your database</li>
@@ -694,7 +828,7 @@ Entity Management</h4>
 <li><b>Edit Records</b> - Update existing records inline</li>
 <li><b>Delete Records</b> - Remove records with confirmation</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md72"></a>
+<h4><a class="anchor" id="autotoc_md81"></a>
 Schema Management</h4>
 <ul>
 <li><b>Schema Builder</b> - Create and configure entity schemas visually</li>
@@ -703,7 +837,7 @@ Schema Management</h4>
 <li><b>Foreign Key Setup</b> - Configure relationships between entities</li>
 <li><b>View Entity Support</b> - Create and manage SQL view entities</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md73"></a>
+<h4><a class="anchor" id="autotoc_md82"></a>
 Data Exploration</h4>
 <ul>
 <li><b>Search &amp; Filter</b> - Quickly find records with built-in search</li>
@@ -711,21 +845,21 @@ Data Exploration</h4>
 <li><b>Sorting</b> - Sort records by any column</li>
 <li><b>Real-time Updates</b> - See changes reflected immediately</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md74"></a>
+<h4><a class="anchor" id="autotoc_md83"></a>
 User Management</h4>
 <ul>
 <li><b>Authentication Entities</b> - Manage auth-type entities</li>
 <li><b>User Accounts</b> - View and manage user accounts</li>
 <li><b>Admin Accounts</b> - Manage admin users</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md75"></a>
+<h4><a class="anchor" id="autotoc_md84"></a>
 System Management</h4>
 <ul>
 <li><b>Logs Viewer</b> - Access system logs directly from the dashboard</li>
 <li><b>Health Status</b> - Monitor system health</li>
 <li><b>Configuration</b> - View and manage system settings</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md76"></a>
+<h3><a class="anchor" id="autotoc_md85"></a>
 Accessing the Dashboard</h3>
 <ol type="1">
 <li><b>Create an Admin Account</b> (if not already created): <div class="fragment"><div class="line">./mantisbase admins add admin@example.com your_password</div>
@@ -734,7 +868,7 @@ Accessing the Dashboard</h3>
 </div><!-- fragment --></li>
 <li><b>Login</b> with your admin credentials</li>
 </ol>
-<h3><a class="anchor" id="autotoc_md77"></a>
+<h3><a class="anchor" id="autotoc_md86"></a>
 Dashboard Requirements</h3>
 <ul>
 <li><b>Admin Authentication Required</b> - Only users authenticated as admins can access the dashboard</li>
@@ -742,10 +876,7 @@ Dashboard Requirements</h3>
 <li><b>JavaScript Enabled</b> - The dashboard requires JavaScript to function</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md79"></a>
-🏁 Summary</h2>
-<p>MantisBase provides zero-setup REST APIs for all your entities. With automatic authentication, access control, schema management, built-in validation, foreign key relationships, system logging, and a comprehensive admin dashboard, it's ready to use out of the box. </p>
-</div></div><!-- contents -->
+ </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
 <!-- start footer part -->

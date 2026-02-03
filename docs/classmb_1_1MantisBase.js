@@ -13,6 +13,7 @@ var classmb_1_1MantisBase =
     [ "hasEntity", "classmb_1_1MantisBase.html#a1ee293d71f01befec02f0673df35ff7c", null ],
     [ "host", "classmb_1_1MantisBase.html#a7020dfe16c1f842ea6d0bd60dbc97b4c", null ],
     [ "isDevMode", "classmb_1_1MantisBase.html#a2718eb7c7053903a94b116dd50b7e6d0", null ],
+    [ "logs", "classmb_1_1MantisBase.html#a88d15e3b53782c25098fa6eee95db4fd", null ],
     [ "openBrowserOnStart", "classmb_1_1MantisBase.html#afa68eac2d23ffcdc15365f511fabd4b4", null ],
     [ "operator=", "classmb_1_1MantisBase.html#a73d92079ffb633ecc9ad16108311062d", null ],
     [ "operator=", "classmb_1_1MantisBase.html#ac17cea059446e81e375a9293656b28a2", null ],
@@ -20,6 +21,7 @@ var classmb_1_1MantisBase =
     [ "port", "classmb_1_1MantisBase.html#a2c7a2835dcafa6caf374cbce4771d67d", null ],
     [ "publicDir", "classmb_1_1MantisBase.html#a616493c105acd0717ed9b8f65bfcf074", null ],
     [ "router", "classmb_1_1MantisBase.html#aaa93f1df96bfd253eebeb4ccda53cb29", null ],
+    [ "rt", "classmb_1_1MantisBase.html#a470ee74c61556ca8105993f8df49dac1", null ],
     [ "run", "classmb_1_1MantisBase.html#a5ecacc1acdffc4ad1150b4e36f60ce77", null ],
     [ "scriptsDir", "classmb_1_1MantisBase.html#ab4fbbb70975385b90a919a22939b007d", null ],
     [ "setDataDir", "classmb_1_1MantisBase.html#a40cc1a0324b9a18e9736673285f121a2", null ],
@@ -28,6 +30,6 @@ var classmb_1_1MantisBase =
     [ "setPort", "classmb_1_1MantisBase.html#a797bcb2d6d6d3593f6b7315559162a1f", null ],
     [ "setPublicDir", "classmb_1_1MantisBase.html#a690d93d89a3782e3a1cbb589ce6641aa", null ],
     [ "setScriptsDir", "classmb_1_1MantisBase.html#aa8b6e850493fb1a0cb7bce9712974327", null ],
-    [ "settings", "classmb_1_1MantisBase.html#aa517892c9d1a06079f580439ff8429e3", null ],
+    [ "settings", "classmb_1_1MantisBase.html#a4ccd43ffc1a92afadb6b01f23a5681dc", null ],
     [ "startTime", "classmb_1_1MantisBase.html#a7298d7f3b9b35b20963d204db94e9e66", null ]
 ];

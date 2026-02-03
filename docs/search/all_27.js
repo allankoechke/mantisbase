@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['📄_20authentication_20endpoints_0',['📄 Authentication Endpoints',['../auth_api.html#autotoc_md83',1,'']]],
-  ['📄_20entity_20endpoints_1',['📄 Entity Endpoints',['../rest_api.html#autotoc_md24',1,'']]]
+  ['📁_20file_20handling_0',['📁 File Handling',['../rest_api.html#autotoc_md45',1,'']]]
 ];

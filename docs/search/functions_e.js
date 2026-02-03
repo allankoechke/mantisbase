@@ -1,11 +1,7 @@
 var searchData=
 [
-  ['parseformdatatoentity_0',['parseFormDataToEntity',['../classmb_1_1MantisContentReader.html#a1d04282842ba8f26a63444d827d79b81',1,'mb::MantisContentReader']]],
-  ['patch_1',['patch',['../classmb_1_1Router.html#a1b5c006a734bb393af9d80d92999afbf',1,'mb::Router::Patch(const std::string &amp;path, const HandlerWithContentReaderFn &amp;handler, const Middlewares &amp;middlewares={})'],['../classmb_1_1Router.html#adf04e0afecc80260f66a59dd15110db2',1,'mb::Router::Patch(const std::string &amp;path, const HandlerFn &amp;handler, const Middlewares &amp;middlewares={})']]],
-  ['patchroutehandler_2',['patchroutehandler',['../classmb_1_1Entity.html#a40f65d1b36c5a5ee1f4b7b9020929fbd',1,'mb::Entity::patchRouteHandler()'],['../classmb_1_1EntitySchema.html#a3f9311b12a1c0bf4f5e381a4e63bad3c',1,'mb::EntitySchema::patchRouteHandler()']]],
-  ['poolsize_3',['poolSize',['../classmb_1_1MantisBase.html#a42f68fc19ac295725c181f30c8b7a648',1,'mb::MantisBase']]],
-  ['port_4',['port',['../classmb_1_1MantisBase.html#a2c7a2835dcafa6caf374cbce4771d67d',1,'mb::MantisBase']]],
-  ['post_5',['post',['../classmb_1_1Router.html#ab3e0a75c3b5eed98d1041ed49b233951',1,'mb::Router::Post(const std::string &amp;path, const HandlerWithContentReaderFn &amp;handler, const Middlewares &amp;middlewares={})'],['../classmb_1_1Router.html#ac76b0ecb14b11681c9f3e4e0602bd57c',1,'mb::Router::Post(const std::string &amp;path, const HandlerFn &amp;handler, const Middlewares &amp;middlewares={})']]],
-  ['postroutehandler_6',['postroutehandler',['../classmb_1_1Entity.html#a08d4358353dfec7232421c54f52fda09',1,'mb::Entity::postRouteHandler()'],['../classmb_1_1EntitySchema.html#a89750cc9f68a22487dd9cb280685f650',1,'mb::EntitySchema::postRouteHandler()']]],
-  ['publicdir_7',['publicDir',['../classmb_1_1MantisBase.html#a616493c105acd0717ed9b8f65bfcf074',1,'mb::MantisBase']]]
+  ['openbrowseronstart_0',['openBrowserOnStart',['../classmb_1_1MantisBase.html#afa68eac2d23ffcdc15365f511fabd4b4',1,'mb::MantisBase']]],
+  ['operator_28_29_1',['operator()',['../structmb_1_1RouteKeyHash.html#a052b066b98873b11001033ba2fcb6d3b',1,'mb::RouteKeyHash']]],
+  ['operator_3d_2',['operator=',['../classmb_1_1EntitySchema.html#a3c0d206a0d09bc599dfa6dfd046f2ce9',1,'mb::EntitySchema::operator=(const EntitySchema &amp;)'],['../classmb_1_1EntitySchema.html#a6747a8bff3afa7dc08441208ea51d221',1,'mb::EntitySchema::operator=(EntitySchema &amp;&amp;) noexcept=default'],['../classmb_1_1MantisBase.html#a73d92079ffb633ecc9ad16108311062d',1,'mb::MantisBase::operator=(const MantisBase &amp;)=delete'],['../classmb_1_1MantisBase.html#ac17cea059446e81e375a9293656b28a2',1,'mb::MantisBase::operator=(MantisBase &amp;&amp;)=delete']]],
+  ['operator_3d_3d_3',['operator==',['../classmb_1_1EntitySchema.html#af0bdf8938edd9de1c040c576b91fc527',1,'mb::EntitySchema::operator==()'],['../classmb_1_1EntitySchemaField.html#a9216401fcc2ff20adf68c15e8a0ff0da',1,'mb::EntitySchemaField::operator==()']]]
 ];

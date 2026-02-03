@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -94,14 +94,14 @@ $(document).ready(function(){initNavTree('scripting.html',''); initResizable(); 
   <div class="headertitle"><div class="title">Scripting in MantisBase</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md222"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md230"></a>
 Scripting</h1>
 <p>On server run execution, MantisBase searches for a script file named <code>index.mantis.js</code> as an entry point into loading scripts into context. Once file is executed, ay actions are evaluated and methods stored for subsequent invokation by the C++ engine as needed. This is important for tasks like requests that reqires signature registration then when a new request comes in, we will route the request to the Javascript handler and/or middlewares.</p>
 <p>The file <code>index.mantis.js</code> is expected to be in the global apps scripts directory which is set either by:</p><ul>
 <li>By default, relative to the <code>mantisapp</code> binary in a directory called <code>scripts</code></li>
 <li>We can override this directory by setting the desired directory using the cmd arg <code>--scriptsDir /some/path</code>. See CMD options in the docs for more information.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md223"></a>
+<h2><a class="anchor" id="autotoc_md231"></a>
 Application</h2>
 <p>Mantis exposes a global object <code>app</code> that provides access to the following properties. Despite them being both <code>READ</code> and <code>WRITE</code>, note that some of these properties are evaluated only once when initializing, as such, update to the values will not have any impact.</p><ul>
 <li><code>app.host</code>:Get HTTP server host, by default <code>0.0.0.0</code>.</li>
@@ -120,7 +120,7 @@ Application</h2>
 <li><code>app.db()</code>: Get the database unit instance.</li>
 <li><code>app.router()</code>: Get the router unit instance.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md224"></a>
+<h2><a class="anchor" id="autotoc_md232"></a>
 Database</h2>
 <p>The <code>DatabaseUnit</code> object returned from the <code>app.db()</code> method exposes the following methods and properties: </p><div class="fragment"><div class="line">const db = app.db() // Get db unit instance</div>
 </div><!-- fragment --><ul>
@@ -137,7 +137,7 @@ Database</h2>
 <div class="line">const r = db.query(&quot;SELECT * FROM __settings WHERE id = :id&quot;, { id: &quot;12509202836555480207&quot; });</div>
 <div class="line">// db.query(&quot;SELECT * FROM __settings WHERE id = :id &amp;&amp; updated = :updated&quot;, { id: &quot;12509202836555480207&quot; }, { updated: &quot;2025-10-24 01:32:49&quot; });</div>
 <div class="line">console.log(&quot;Settings:  &quot;, r.id); // `r` may be null if not found.</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md225"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md233"></a>
 Session</h3>
 <p>The session method returns an instance that exposes the following methods and properties: </p><div class="fragment"><div class="line">const sess = db.session() // Lease a session for executing db actions</div>
 </div><!-- fragment --><ul>
@@ -155,7 +155,7 @@ Session</h3>
 <li><code>sess.getBackendName</code></li>
 <li><code>sess.emptyBlob</code></li>
 </ul>
-<h2><a class="anchor" id="autotoc_md226"></a>
+<h2><a class="anchor" id="autotoc_md234"></a>
 Router</h2>
 <p>The router instance allows binding handlers and optional middlewares to given routes from JavaScript.</p><ul>
 <li><code>app.router().addRoute(method, path, handler, [middlewares])</code>: Create a route for a given HTTP method, on a given <em>path</em> with the given handler function with optional middleware functions.</li>
@@ -171,7 +171,7 @@ Router</h2>
 <div class="line">    // ...</div>
 <div class="line">    return true</div>
 <div class="line">}) </div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md227"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md235"></a>
 Requests</h2>
 <p>To add a new request endpoint in JS, Mantis exposes a <code>addRoute</code> method having the following signature:</p>
 <div class="fragment"><div class="line">app.router().addRoute(method, path, function_handler) </div>
@@ -195,7 +195,7 @@ Requests</h2>
 <div class="line">}) </div>
 </div><!-- fragment --><p>To access the request metadata as well as set response metadata, the handler or middleware method passes in two arguments, the request object (shown as <code>req</code> above) and the response object (shown as <code>res</code> above).</p>
 <p>The <code>req</code> object maps to <code>MantisRequest</code> and <code>res</code> maps to <code>MantisResponse</code> class in C++.</p>
-<h3><a class="anchor" id="autotoc_md228"></a>
+<h3><a class="anchor" id="autotoc_md236"></a>
 Middlewares</h3>
 <p>Middlewares in Mantis carries the same function signature as the request handler with just one tiny difference. The middlewares return a <code>bool</code> type, indicating whether or not the middleware executed successfully. That is;</p><ul>
 <li>Return <code>true</code>: Middleware execution succeeded, proceed to the next handler and or handler.</li>
@@ -218,7 +218,7 @@ Middlewares</h3>
 </div><!-- fragment --><blockquote class="doxtable">
 <p>&zwj;Warning Note that, middlewares are executed from the first to the last in that order. That is, <code>app.router().addRoute(...., middleware_1, middleware_2, function(req, res){ return true}, ...)</code> executing from <code>middleware_1</code> to <code>middleware_n</code> the finally invoking the handler. </p>
 </blockquote>
-<h3><a class="anchor" id="autotoc_md229"></a>
+<h3><a class="anchor" id="autotoc_md237"></a>
 MantisRequest Methods/Properties</h3>
 <ul>
 <li><code>req.hasHeader("Authorization")</code>: return true/false</li>
@@ -247,7 +247,7 @@ MantisRequest Methods/Properties</h3>
 <li><code>req.get("key")</code>: Get a value from the context store given the <code>key</code>.</li>
 <li><code>req.getOr("key", "default value")</code>: Returns a value if <code>key</code> is in the context store else the default value.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md230"></a>
+<h3><a class="anchor" id="autotoc_md238"></a>
 MantisResponse Methods/Properties</h3>
 <ul>
 <li><code>res.hasHeader("Authorization")</code>: Check if a header <code>key</code> exists in the request header. Returns true or false.</li>
@@ -274,7 +274,7 @@ MantisResponse Methods/Properties</h3>
 <li><code>res.location</code> (get or set redirect location value)</li>
 <li><code>res.reason</code> (get or set reason value)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md231"></a>
+<h2><a class="anchor" id="autotoc_md239"></a>
 Utils (utility functions)</h2>
 <p>Mantis exposes an object <code>utils</code> which has the following utility functions.</p><ul>
 <li><code>utils.generateTimeBasedId()</code></li>

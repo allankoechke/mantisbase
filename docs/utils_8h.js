@@ -6,6 +6,7 @@ var utils_8h =
     [ "generateReadableTimeId", "utils_8h.html#af1b47490bcd171b34e7371a721ec4d82", null ],
     [ "generateShortId", "utils_8h.html#ab5004cdfdf21f04cf630c15f7f191bac", null ],
     [ "generateTimeBasedId", "utils_8h.html#a4bbd6b13fd498f212dd8f5d7b7565e2e", null ],
+    [ "getCurrentTimestampUTC", "utils_8h.html#aadfd14faa4a1190f3ef60a73fee241e7", null ],
     [ "getEnvOrDefault", "utils_8h.html#a98ec5c96bf449442fcf900d7061e7406", null ],
     [ "hashPassword", "utils_8h.html#ab16eec531440dbc19ec0880549d0638e", null ],
     [ "invalidChar", "utils_8h.html#aa98dbdb983996e7b60b25c3e0f8eac98", null ],
@@ -25,6 +26,6 @@ var utils_8h =
     [ "toLowerCase", "utils_8h.html#a610ae91c5e525b5899cf9445107360e9", null ],
     [ "toUpperCase", "utils_8h.html#abe6b794953335d0601b9fe55af49027f", null ],
     [ "trim", "utils_8h.html#a409c1fc8483d2c71f13abd04598f4db2", null ],
-    [ "tryParseJsonStr", "utils_8h.html#acbb7d92fa5a0b643308cec05f16d86bd", null ],
+    [ "tryParseJsonStr", "utils_8h.html#aa3ea2b27da77ae3202f7d32ef7f88b80", null ],
     [ "verifyPassword", "utils_8h.html#aa3085c18b75188b1e46d16c21ab2e58b", null ]
 ];

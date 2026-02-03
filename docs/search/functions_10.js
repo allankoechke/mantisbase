@@ -1,27 +1,6 @@
 var searchData=
 [
-  ['ratelimit_0',['rateLimit',['../namespacemb.html#a735b4776576110b750e5446ce05e8d81',1,'mb']]],
-  ['read_1',['read',['../classmb_1_1Entity.html#a8b9e38d73795ad46ef0d417a8cca44d6',1,'mb::Entity']]],
-  ['reader_2',['reader',['../classmb_1_1MantisContentReader.html#a5671d9e6e48ffc45cdd5b5b755463ee9',1,'mb::MantisContentReader']]],
-  ['recordexists_3',['recordExists',['../classmb_1_1Entity.html#a222119e5753c44bc49479aa31947e2cc',1,'mb::Entity']]],
-  ['registerduktapemethods_4',['registerduktapemethods',['../classmb_1_1MantisRequest.html#a5b8efbf0568dbebccbf59d112055ebaa',1,'mb::MantisRequest::registerDuktapeMethods()'],['../classmb_1_1MantisResponse.html#a46ceb26ad7ba78c86e69b26502c10fc6',1,'mb::MantisResponse::registerDuktapeMethods()']]],
-  ['registerutilstoduktapeengine_5',['registerUtilsToDuktapeEngine',['../namespacemb.html#a429a89b3d31cbe5133f65a4c5f94f406',1,'mb']]],
-  ['remove_6',['remove',['../classmb_1_1Entity.html#afe53f12d5948f490e7c4ccd6615742d1',1,'mb::Entity::remove()'],['../classmb_1_1RouteRegistry.html#aa0f1d98d8fec98cc41da8daede8a828f',1,'mb::RouteRegistry::remove()']]],
-  ['removefield_7',['removeField',['../classmb_1_1EntitySchema.html#ac9c93c8deb29947a23eae5060162dbeb',1,'mb::EntitySchema']]],
-  ['removefile_8',['removeFile',['../classmb_1_1Files.html#a619cf18cc8329c94bde55cceaf6099de',1,'mb::Files']]],
-  ['removefiles_9',['removeFiles',['../classmb_1_1Files.html#a18fab5cc96ca2eefe279a534c633e89d',1,'mb::Files']]],
-  ['removeforeignkey_10',['removeForeignKey',['../classmb_1_1EntitySchemaField.html#a4917d298668d709f6e2737fad46bc25e',1,'mb::EntitySchemaField']]],
-  ['removeschemacache_11',['removeSchemaCache',['../classmb_1_1Router.html#a1b21c2af0d269b349271246e4d3accc2',1,'mb::Router']]],
-  ['renamedir_12',['renameDir',['../classmb_1_1Files.html#aac3dc22d8c81e37523be520de2b0b8d3',1,'mb::Files']]],
-  ['requireadminauth_13',['requireAdminAuth',['../namespacemb.html#ab7c5922d7edd2da97857b5383049101f',1,'mb']]],
-  ['requireadminorentityauth_14',['requireAdminOrEntityAuth',['../namespacemb.html#a87d6b4b4d0f26734624b2802248fa9e7',1,'mb']]],
-  ['required_15',['required',['../classmb_1_1EntitySchemaField.html#adebcd9adf5314a52fbf88dc291168cb0',1,'mb::EntitySchemaField']]],
-  ['requiredconstraintcheck_16',['requiredConstraintCheck',['../classmb_1_1Validators.html#af63cafdda5b5a88cd7d3883bf36350ef',1,'mb::Validators']]],
-  ['requireentityauth_17',['requireEntityAuth',['../namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc',1,'mb']]],
-  ['requireexpreval_18',['requireExprEval',['../namespacemb.html#ab6a5c1472a256eb0e8174e1f0765624d',1,'mb']]],
-  ['requireguestonly_19',['requireGuestOnly',['../namespacemb.html#aa278b4b6ee2546434b11e162893f3bac',1,'mb']]],
-  ['resolvepath_20',['resolvePath',['../namespacemb.html#a3fd9558152f1d09d1bef041445bfa53f',1,'mb']]],
-  ['router_21',['router',['../classmb_1_1Router.html#ab74f5a2f19c832dd0208261b4ee51329',1,'mb::Router::Router()'],['../classmb_1_1MantisBase.html#aaa93f1df96bfd253eebeb4ccda53cb29',1,'mb::MantisBase::router()']]],
-  ['rules_22',['rules',['../classmb_1_1Entity.html#a6a98ee912a8e6c32200a3fa4e2666de3',1,'mb::Entity']]],
-  ['run_23',['run',['../classmb_1_1MantisBase.html#a5ecacc1acdffc4ad1150b4e36f60ce77',1,'mb::MantisBase']]]
+  ['queryfromcols_0',['queryFromCols',['../classmb_1_1Entity.html#a989ceb00a45ae7cbc505ca9538ff6499',1,'mb::Entity']]],
+  ['queueevent_1',['queueEvent',['../classmb_1_1SSESession.html#a6b53ec4991543aba285ac800c8afe628',1,'mb::SSESession']]],
+  ['quit_2',['quit',['../classmb_1_1MantisBase.html#a101567ba238672d54c65e5aa346bf710',1,'mb::MantisBase']]]
 ];

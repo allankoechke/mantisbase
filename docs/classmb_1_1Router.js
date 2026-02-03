@@ -8,7 +8,7 @@ var classmb_1_1Router =
     [ "Delete", "classmb_1_1Router.html#ac2acc8d159beb665b6bb1a43f8b72ebf", null ],
     [ "Get", "classmb_1_1Router.html#a3d2d6b3f6b968c4b784abd35d2dcb1ad", null ],
     [ "hasSchemaCache", "classmb_1_1Router.html#aaf58352dbab6b95d4c025276830e049d", null ],
-    [ "initialize", "classmb_1_1Router.html#a76ffe4c6fa5657af43a8a776d03de6a3", null ],
+    [ "init", "classmb_1_1Router.html#ae149eebd50d577cdf9c2b7c6581d9626", null ],
     [ "listen", "classmb_1_1Router.html#a81eac97d693020860c9cf686a7349246", null ],
     [ "Patch", "classmb_1_1Router.html#adf04e0afecc80260f66a59dd15110db2", null ],
     [ "Patch", "classmb_1_1Router.html#a1b5c006a734bb393af9d80d92999afbf", null ],
@@ -18,5 +18,6 @@ var classmb_1_1Router =
     [ "schemaCache", "classmb_1_1Router.html#a2b28b5c9521895ae6fcf278ae61813af", null ],
     [ "schemaCacheEntity", "classmb_1_1Router.html#a1a9f50ee4e617c65296a641a123f80b2", null ],
     [ "server", "classmb_1_1Router.html#ad46c17ea6bd32b5c2e09b637c77cb67b", null ],
+    [ "sseMgr", "classmb_1_1Router.html#aba0eb0e15e01a6085fb0a6bf9e8b0fd4", null ],
     [ "updateSchemaCache", "classmb_1_1Router.html#a28a492e40b98020d800db095f5f40c81", null ]
 ];

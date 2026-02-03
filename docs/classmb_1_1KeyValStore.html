@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MantisBase: mb::KVStore Class Reference</title>
+<title>MantisBase: mb::KeyValStore Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -65,7 +65,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(document).ready(function(){initNavTree('classmb_1_1KVStore.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('classmb_1_1KeyValStore.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -93,38 +93,40 @@ $(document).ready(function(){initNavTree('classmb_1_1KVStore.html',''); initResi
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="classmb_1_1KVStore-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">mb::KVStore Class Reference</div></div>
+<a href="classmb_1_1KeyValStore-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">mb::KeyValStore Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
 <p>Manages application settings.  
- <a href="classmb_1_1KVStore.html#details">More...</a></p>
+ <a href="classmb_1_1KeyValStore.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="kv__store_8h_source.html">kv_store.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ac48c44e67558cd52a38ae4362bdb4575" id="r_ac48c44e67558cd52a38ae4362bdb4575"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KVStore.html#ac48c44e67558cd52a38ae4362bdb4575">KVStore</a> ()=default</td></tr>
-<tr class="separator:ac48c44e67558cd52a38ae4362bdb4575"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba0e5f0a7fca833417bf3c56ccad7745" id="r_aba0e5f0a7fca833417bf3c56ccad7745"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KVStore.html#aba0e5f0a7fca833417bf3c56ccad7745">setupRoutes</a> ()</td></tr>
-<tr class="memdesc:aba0e5f0a7fca833417bf3c56ccad7745"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize and set up routes for fetching settings data.  <br /></td></tr>
-<tr class="separator:aba0e5f0a7fca833417bf3c56ccad7745"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ac08923ac4aaa342310fe1bfe2b6ea1" id="r_a7ac08923ac4aaa342310fe1bfe2b6ea1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KVStore.html#a7ac08923ac4aaa342310fe1bfe2b6ea1">migrate</a> ()</td></tr>
-<tr class="memdesc:a7ac08923ac4aaa342310fe1bfe2b6ea1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize migration, create base data for setting fields.  <br /></td></tr>
-<tr class="separator:a7ac08923ac4aaa342310fe1bfe2b6ea1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00bc0c3e487bc38c83ce15623049decb" id="r_a00bc0c3e487bc38c83ce15623049decb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#adf14f234c6ec1371dde363714c0a546e">HandlerResponse</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KVStore.html#a00bc0c3e487bc38c83ce15623049decb">hasAccess</a> (<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;req, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;res) const</td></tr>
-<tr class="memdesc:a00bc0c3e487bc38c83ce15623049decb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate if request is authenticated and has permission to access this route.  <br /></td></tr>
-<tr class="separator:a00bc0c3e487bc38c83ce15623049decb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a892d24d79ad9e04d06fee26f81ca50ed" id="r_a892d24d79ad9e04d06fee26f81ca50ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KVStore.html#a892d24d79ad9e04d06fee26f81ca50ed">configs</a> ()</td></tr>
-<tr class="memdesc:a892d24d79ad9e04d06fee26f81ca50ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current config data instance.  <br /></td></tr>
-<tr class="separator:a892d24d79ad9e04d06fee26f81ca50ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaabdfbd298cdc3a53d7d57891436f88b" id="r_aaabdfbd298cdc3a53d7d57891436f88b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#aaabdfbd298cdc3a53d7d57891436f88b">KeyValStore</a> ()=default</td></tr>
+<tr class="separator:aaabdfbd298cdc3a53d7d57891436f88b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b76aac66f0e2258e8759aecb8b9ab1e" id="r_a6b76aac66f0e2258e8759aecb8b9ab1e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a6b76aac66f0e2258e8759aecb8b9ab1e">close</a> ()</td></tr>
+<tr class="separator:a6b76aac66f0e2258e8759aecb8b9ab1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1dd206d008ac644fd5f5774cfbc9e262" id="r_a1dd206d008ac644fd5f5774cfbc9e262"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a1dd206d008ac644fd5f5774cfbc9e262">setupRoutes</a> ()</td></tr>
+<tr class="memdesc:a1dd206d008ac644fd5f5774cfbc9e262"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize and set up routes for fetching settings data.  <br /></td></tr>
+<tr class="separator:a1dd206d008ac644fd5f5774cfbc9e262"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebaf937e9b5190be0661868008c66c62" id="r_aebaf937e9b5190be0661868008c66c62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#aebaf937e9b5190be0661868008c66c62">migrate</a> ()</td></tr>
+<tr class="memdesc:aebaf937e9b5190be0661868008c66c62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize migration, create base data for setting fields.  <br /></td></tr>
+<tr class="separator:aebaf937e9b5190be0661868008c66c62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeee2629219031a10b973e16c35af2bd6" id="r_aeee2629219031a10b973e16c35af2bd6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#adf14f234c6ec1371dde363714c0a546e">HandlerResponse</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#aeee2629219031a10b973e16c35af2bd6">hasAccess</a> (<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;req, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;res) const</td></tr>
+<tr class="memdesc:aeee2629219031a10b973e16c35af2bd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate if request is authenticated and has permission to access this route.  <br /></td></tr>
+<tr class="separator:aeee2629219031a10b973e16c35af2bd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ac258e348fb581c2e6e0df5f5d67e6a" id="r_a5ac258e348fb581c2e6e0df5f5d67e6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a5ac258e348fb581c2e6e0df5f5d67e6a">configs</a> ()</td></tr>
+<tr class="memdesc:a5ac258e348fb581c2e6e0df5f5d67e6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current config data instance.  <br /></td></tr>
+<tr class="separator:a5ac258e348fb581c2e6e0df5f5d67e6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Manages application settings. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ac48c44e67558cd52a38ae4362bdb4575" name="ac48c44e67558cd52a38ae4362bdb4575"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac48c44e67558cd52a38ae4362bdb4575">&#9670;&#160;</a></span>KVStore()</h2>
+<a id="aaabdfbd298cdc3a53d7d57891436f88b" name="aaabdfbd298cdc3a53d7d57891436f88b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaabdfbd298cdc3a53d7d57891436f88b">&#9670;&#160;</a></span>KeyValStore()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -133,7 +135,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">mb::KVStore::KVStore </td>
+          <td class="memname">mb::KeyValStore::KeyValStore </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -149,14 +151,39 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a892d24d79ad9e04d06fee26f81ca50ed" name="a892d24d79ad9e04d06fee26f81ca50ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a892d24d79ad9e04d06fee26f81ca50ed">&#9670;&#160;</a></span>configs()</h2>
+<a id="a6b76aac66f0e2258e8759aecb8b9ab1e" name="a6b76aac66f0e2258e8759aecb8b9ab1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b76aac66f0e2258e8759aecb8b9ab1e">&#9670;&#160;</a></span>close()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::KeyValStore::close </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5ac258e348fb581c2e6e0df5f5d67e6a" name="a5ac258e348fb581c2e6e0df5f5d67e6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ac258e348fb581c2e6e0df5f5d67e6a">&#9670;&#160;</a></span>configs()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp; mb::KVStore::configs </td>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp; mb::KeyValStore::configs </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -169,14 +196,14 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a00bc0c3e487bc38c83ce15623049decb" name="a00bc0c3e487bc38c83ce15623049decb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a00bc0c3e487bc38c83ce15623049decb">&#9670;&#160;</a></span>hasAccess()</h2>
+<a id="aeee2629219031a10b973e16c35af2bd6" name="aeee2629219031a10b973e16c35af2bd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeee2629219031a10b973e16c35af2bd6">&#9670;&#160;</a></span>hasAccess()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemb.html#adf14f234c6ec1371dde363714c0a546e">HandlerResponse</a> mb::KVStore::hasAccess </td>
+          <td class="memname"><a class="el" href="namespacemb.html#adf14f234c6ec1371dde363714c0a546e">HandlerResponse</a> mb::KeyValStore::hasAccess </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;&#160;</td>
           <td class="paramname"><em>req</em>, </td>
@@ -209,14 +236,14 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a7ac08923ac4aaa342310fe1bfe2b6ea1" name="a7ac08923ac4aaa342310fe1bfe2b6ea1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7ac08923ac4aaa342310fe1bfe2b6ea1">&#9670;&#160;</a></span>migrate()</h2>
+<a id="aebaf937e9b5190be0661868008c66c62" name="aebaf937e9b5190be0661868008c66c62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebaf937e9b5190be0661868008c66c62">&#9670;&#160;</a></span>migrate()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void mb::KVStore::migrate </td>
+          <td class="memname">void mb::KeyValStore::migrate </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -228,14 +255,14 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aba0e5f0a7fca833417bf3c56ccad7745" name="aba0e5f0a7fca833417bf3c56ccad7745"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba0e5f0a7fca833417bf3c56ccad7745">&#9670;&#160;</a></span>setupRoutes()</h2>
+<a id="a1dd206d008ac644fd5f5774cfbc9e262" name="a1dd206d008ac644fd5f5774cfbc9e262"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1dd206d008ac644fd5f5774cfbc9e262">&#9670;&#160;</a></span>setupRoutes()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool mb::KVStore::setupRoutes </td>
+          <td class="memname">bool mb::KeyValStore::setupRoutes </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -257,7 +284,7 @@ Public Member Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="namespacemb.html">mb</a></li><li class="navelem"><a class="el" href="classmb_1_1KVStore.html">KVStore</a></li>
+    <li class="navelem"><a class="el" href="namespacemb.html">mb</a></li><li class="navelem"><a class="el" href="classmb_1_1KeyValStore.html">KeyValStore</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>

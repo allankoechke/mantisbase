@@ -5,7 +5,7 @@ var searchData=
   ['key_20relationships_2',['Foreign Key Relationships',['../rest_api.html#autotoc_md53',1,'']]],
   ['key_20structure_3',['Foreign Key Structure',['../rest_api.html#autotoc_md54',1,'']]],
   ['key_20validation_4',['Foreign Key Validation',['../rest_api.html#autotoc_md57',1,'']]],
-  ['kv_5fstore_2ecpp_5',['kv_store.cpp',['../kv__store_8cpp.html',1,'']]],
-  ['kv_5fstore_2eh_6',['kv_store.h',['../kv__store_8h.html',1,'']]],
-  ['kvstore_7',['kvstore',['../classmb_1_1KVStore.html',1,'mb::KVStore'],['../classmb_1_1KVStore.html#ac48c44e67558cd52a38ae4362bdb4575',1,'mb::KVStore::KVStore()']]]
+  ['keyvalstore_5',['keyvalstore',['../classmb_1_1KeyValStore.html',1,'mb::KeyValStore'],['../classmb_1_1KeyValStore.html#aaabdfbd298cdc3a53d7d57891436f88b',1,'mb::KeyValStore::KeyValStore()']]],
+  ['kv_5fstore_2ecpp_6',['kv_store.cpp',['../kv__store_8cpp.html',1,'']]],
+  ['kv_5fstore_2eh_7',['kv_store.h',['../kv__store_8h.html',1,'']]]
 ];

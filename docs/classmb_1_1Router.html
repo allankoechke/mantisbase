@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -111,9 +111,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac177f14d5c6593ff2d46cdf02f784ea6" id="r_ac177f14d5c6593ff2d46cdf02f784ea6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ac177f14d5c6593ff2d46cdf02f784ea6">~Router</a> ()</td></tr>
 <tr class="memdesc:ac177f14d5c6593ff2d46cdf02f784ea6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <br /></td></tr>
 <tr class="separator:ac177f14d5c6593ff2d46cdf02f784ea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76ffe4c6fa5657af43a8a776d03de6a3" id="r_a76ffe4c6fa5657af43a8a776d03de6a3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a76ffe4c6fa5657af43a8a776d03de6a3">initialize</a> ()</td></tr>
-<tr class="memdesc:a76ffe4c6fa5657af43a8a776d03de6a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize router: create system tables and admin routes.  <br /></td></tr>
-<tr class="separator:a76ffe4c6fa5657af43a8a776d03de6a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae149eebd50d577cdf9c2b7c6581d9626" id="r_ae149eebd50d577cdf9c2b7c6581d9626"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ae149eebd50d577cdf9c2b7c6581d9626">init</a> ()</td></tr>
+<tr class="memdesc:ae149eebd50d577cdf9c2b7c6581d9626"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize router: create system tables and admin routes.  <br /></td></tr>
+<tr class="separator:ae149eebd50d577cdf9c2b7c6581d9626"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81eac97d693020860c9cf686a7349246" id="r_a81eac97d693020860c9cf686a7349246"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a81eac97d693020860c9cf686a7349246">listen</a> ()</td></tr>
 <tr class="memdesc:a81eac97d693020860c9cf686a7349246"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start HTTP server and begin listening for connections.  <br /></td></tr>
 <tr class="separator:a81eac97d693020860c9cf686a7349246"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -123,6 +123,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad46c17ea6bd32b5c2e09b637c77cb67b" id="r_ad46c17ea6bd32b5c2e09b637c77cb67b"><td class="memItemLeft" align="right" valign="top">httplib::Server &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ad46c17ea6bd32b5c2e09b637c77cb67b">server</a> ()</td></tr>
 <tr class="memdesc:ad46c17ea6bd32b5c2e09b637c77cb67b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying httplib::Server instance.  <br /></td></tr>
 <tr class="separator:ad46c17ea6bd32b5c2e09b637c77cb67b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba0eb0e15e01a6085fb0a6bf9e8b0fd4" id="r_aba0eb0e15e01a6085fb0a6bf9e8b0fd4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1SSEMgr.html">SSEMgr</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aba0eb0e15e01a6085fb0a6bf9e8b0fd4">sseMgr</a> () const</td></tr>
+<tr class="separator:aba0eb0e15e01a6085fb0a6bf9e8b0fd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d2d6b3f6b968c4b784abd35d2dcb1ad" id="r_a3d2d6b3f6b968c4b784abd35d2dcb1ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a3d2d6b3f6b968c4b784abd35d2dcb1ad">Get</a> (const std::string &amp;path, const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares={})</td></tr>
 <tr class="memdesc:a3d2d6b3f6b968c4b784abd35d2dcb1ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register GET route.  <br /></td></tr>
 <tr class="separator:a3d2d6b3f6b968c4b784abd35d2dcb1ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -175,7 +177,7 @@ Public Member Functions</h2></td></tr>
 <div class="line">router.Post(<span class="stringliteral">&quot;/posts&quot;</span>, handler, {<a class="code hl_function" href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">requireAdminAuth</a>()});</div>
 <div class="ttc" id="aclassmb_1_1MantisRequest_html"><div class="ttname"><a href="classmb_1_1MantisRequest.html">mb::MantisRequest</a></div><div class="ttdoc">A wrapper class around httplib::Request offering a consistent API and allowing for easy wrapper metho...</div><div class="ttdef"><b>Definition</b> http.h:42</div></div>
 <div class="ttc" id="aclassmb_1_1MantisResponse_html"><div class="ttname"><a href="classmb_1_1MantisResponse.html">mb::MantisResponse</a></div><div class="ttdoc">Wrapper around httplib::Response for consistent API.</div><div class="ttdef"><b>Definition</b> http.h:318</div></div>
-<div class="ttc" id="aclassmb_1_1MantisResponse_html_af104ef1181023634e19eac48c5f1a34f"><div class="ttname"><a href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">mb::MantisResponse::sendJSON</a></div><div class="ttdeci">void sendJSON(int statusCode=200, const json &amp;data=json::object()) const</div><div class="ttdoc">Send JSON response.</div><div class="ttdef"><b>Definition</b> http_response.cpp:143</div></div>
+<div class="ttc" id="aclassmb_1_1MantisResponse_html_af104ef1181023634e19eac48c5f1a34f"><div class="ttname"><a href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">mb::MantisResponse::sendJSON</a></div><div class="ttdeci">void sendJSON(int statusCode=200, const json &amp;data=json::object()) const</div><div class="ttdoc">Send JSON response.</div><div class="ttdef"><b>Definition</b> http_response.cpp:145</div></div>
 <div class="ttc" id="anamespacemb_html_ab7c5922d7edd2da97857b5383049101f"><div class="ttname"><a href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">mb::requireAdminAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireAdminAuth()</div><div class="ttdoc">Require admin authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:299</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ab74f5a2f19c832dd0208261b4ee51329" name="ab74f5a2f19c832dd0208261b4ee51329"></a>
@@ -420,14 +422,14 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a76ffe4c6fa5657af43a8a776d03de6a3" name="a76ffe4c6fa5657af43a8a776d03de6a3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a76ffe4c6fa5657af43a8a776d03de6a3">&#9670;&#160;</a></span>initialize()</h2>
+<a id="ae149eebd50d577cdf9c2b7c6581d9626" name="ae149eebd50d577cdf9c2b7c6581d9626"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae149eebd50d577cdf9c2b7c6581d9626">&#9670;&#160;</a></span>init()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool mb::Router::initialize </td>
+          <td class="memname">bool mb::Router::init </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -733,6 +735,23 @@ Public Member Functions</h2></td></tr>
 
 <p>Get underlying httplib::Server instance. </p>
 <dl class="section return"><dt>Returns</dt><dd>Reference to HTTP server </dd></dl>
+
+</div>
+</div>
+<a id="aba0eb0e15e01a6085fb0a6bf9e8b0fd4" name="aba0eb0e15e01a6085fb0a6bf9e8b0fd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba0eb0e15e01a6085fb0a6bf9e8b0fd4">&#9670;&#160;</a></span>sseMgr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1SSEMgr.html">SSEMgr</a> &amp; mb::Router::sseMgr </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

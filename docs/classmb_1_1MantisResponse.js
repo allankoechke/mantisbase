@@ -8,6 +8,7 @@ var classmb_1_1MantisResponse =
     [ "getHeaderValueU64", "classmb_1_1MantisResponse.html#ae586033e199b95075cd0c1625792f024", null ],
     [ "getLocation", "classmb_1_1MantisResponse.html#a397118714dab5432c31ca6cbbecc7882", null ],
     [ "getReason", "classmb_1_1MantisResponse.html#afbb2ba7b50c6cb8cced1c63b8b7402b1", null ],
+    [ "getResponse", "classmb_1_1MantisResponse.html#a9ecb8eec14c9d1bf88c94c117e3d7dc1", null ],
     [ "getStatus", "classmb_1_1MantisResponse.html#ac9608b04cea2a860591acc50f2978ba4", null ],
     [ "getTrailerValue", "classmb_1_1MantisResponse.html#ac623990969d60a2e61135106025ed5ca", null ],
     [ "getTrailerValueCount", "classmb_1_1MantisResponse.html#ae45a43def7dcfaccd86a5e34cc45d84d", null ],

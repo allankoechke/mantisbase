@@ -14,7 +14,9 @@ var dir_aebb8dcc11953d78e620bbef0b9e2183 =
     [ "http_response.cpp", "http__response_8cpp.html", "http__response_8cpp" ],
     [ "kv_store.cpp", "kv__store_8cpp.html", null ],
     [ "middlewares.cpp", "middlewares_8cpp.html", "middlewares_8cpp" ],
+    [ "realtime.cpp", "realtime_8cpp.html", null ],
     [ "route_registry.cpp", "route__registry_8cpp.html", "route__registry_8cpp" ],
     [ "router.cpp", "router_8cpp.html", "router_8cpp" ],
-    [ "router_httplib_internals.cpp", "router__httplib__internals_8cpp.html", null ]
+    [ "router_httplib_internals.cpp", "router__httplib__internals_8cpp.html", null ],
+    [ "sse.cpp", "sse_8cpp.html", null ]
 ];

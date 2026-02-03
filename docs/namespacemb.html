@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -106,6 +106,8 @@ $(document).ready(function(){initNavTree('namespacemb.html',''); initResizable()
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
+<tr class="memitem:namespacemb_1_1logEntry" id="r_namespacemb_1_1logEntry"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb_1_1logEntry.html">logEntry</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacemb_1_1LogOrigin" id="r_namespacemb_1_1LogOrigin"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb_1_1LogOrigin.html">LogOrigin</a></td></tr>
 <tr class="memdesc:namespacemb_1_1LogOrigin"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility logger functions for each component/system. These functions automatically pass the origin parameter. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -143,8 +145,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1FuncLogger.html">FuncLogger</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A class for tracing function execution [entry, exit] useful in following execution flow.  <a href="classmb_1_1FuncLogger.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KVStore.html">KVStore</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manages application settings.  <a href="classmb_1_1KVStore.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html">KeyValStore</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manages application settings.  <a href="classmb_1_1KeyValStore.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1LogDatabase.html">LogDatabase</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manages SQLite database for application logs.  <a href="classmb_1_1LogDatabase.html#details">More...</a><br /></td></tr>
@@ -171,6 +173,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wrapper around httplib::Response for consistent API.  <a href="classmb_1_1MantisResponse.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RealtimeDB.html">RealtimeDB</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmb_1_1RouteHandler.html">RouteHandler</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Struct encompassing the list of middlewares and the handler function registered to a specific route.  <a href="structmb_1_1RouteHandler.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,6 +184,12 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">HTTP router for managing routes and request handling.  <a href="classmb_1_1Router.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html">RouteRegistry</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RtDbWorker.html">RtDbWorker</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html">SSEMgr</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html">SSESession</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Validators.html">Validators</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -193,14 +203,14 @@ Typedefs</h2></td></tr>
 <tr class="separator:ac7d3dfe501576fab5dc51f2aa478f367"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a446ef66d54a9e41b35ecb0ab9294f923" id="r_a446ef66d54a9e41b35ecb0ab9294f923"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="namespacemb.html#a45b395bbdb082a2a10815855bad98c81">mb::LogLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a446ef66d54a9e41b35ecb0ab9294f923">LogLevel</a></td></tr>
 <tr class="separator:a446ef66d54a9e41b35ecb0ab9294f923"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa3e66720967ad1024382229e4e245120" id="r_aa3e66720967ad1024382229e4e245120"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aa3e66720967ad1024382229e4e245120">logger</a> = <a class="el" href="classmb_1_1Logger.html">Logger</a></td></tr>
-<tr class="separator:aa3e66720967ad1024382229e4e245120"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5343a89a02116de84a79039bb8acdd21" id="r_a5343a89a02116de84a79039bb8acdd21"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a5343a89a02116de84a79039bb8acdd21">Record</a> = nlohmann::json</td></tr>
 <tr class="memdesc:a5343a89a02116de84a79039bb8acdd21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Single database record as JSON object.  <br /></td></tr>
 <tr class="separator:a5343a89a02116de84a79039bb8acdd21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1617ef3fcc5a5fcfef00c1be2096e87d" id="r_a1617ef3fcc5a5fcfef00c1be2096e87d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a1617ef3fcc5a5fcfef00c1be2096e87d">Records</a> = std::vector&lt; <a class="el" href="namespacemb.html#a5343a89a02116de84a79039bb8acdd21">Record</a> &gt;</td></tr>
 <tr class="memdesc:a1617ef3fcc5a5fcfef00c1be2096e87d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collection of database records.  <br /></td></tr>
 <tr class="separator:a1617ef3fcc5a5fcfef00c1be2096e87d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28e20403eb1d552d6415d942ff44f48d" id="r_a28e20403eb1d552d6415d942ff44f48d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a28e20403eb1d552d6415d942ff44f48d">RtCallback</a> = std::function&lt; void(const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;)&gt;</td></tr>
+<tr class="separator:a28e20403eb1d552d6415d942ff44f48d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf14f234c6ec1371dde363714c0a546e" id="r_adf14f234c6ec1371dde363714c0a546e"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#adf14f234c6ec1371dde363714c0a546e">HandlerResponse</a> = httplib::Server::HandlerResponse</td></tr>
 <tr class="separator:adf14f234c6ec1371dde363714c0a546e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae160f2b0075e55c0f7c0988279983f78" id="r_ae160f2b0075e55c0f7c0988279983f78"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> = std::function&lt; void(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt;</td></tr>
@@ -317,9 +327,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a409c1fc8483d2c71f13abd04598f4db2" id="r_a409c1fc8483d2c71f13abd04598f4db2"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a409c1fc8483d2c71f13abd04598f4db2">trim</a> (const std::string &amp;s)</td></tr>
 <tr class="memdesc:a409c1fc8483d2c71f13abd04598f4db2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trims leading and trailing whitespaces from a string.  <br /></td></tr>
 <tr class="separator:a409c1fc8483d2c71f13abd04598f4db2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acbb7d92fa5a0b643308cec05f16d86bd" id="r_acbb7d92fa5a0b643308cec05f16d86bd"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#acbb7d92fa5a0b643308cec05f16d86bd">tryParseJsonStr</a> (const std::string &amp;json_str)</td></tr>
-<tr class="memdesc:acbb7d92fa5a0b643308cec05f16d86bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attempt to parse a JSON string.  <br /></td></tr>
-<tr class="separator:acbb7d92fa5a0b643308cec05f16d86bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3ea2b27da77ae3202f7d32ef7f88b80" id="r_aa3ea2b27da77ae3202f7d32ef7f88b80"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aa3ea2b27da77ae3202f7d32ef7f88b80">tryParseJsonStr</a> (const std::string &amp;json_str, std::optional&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt; default_value=std::nullopt)</td></tr>
+<tr class="memdesc:aa3ea2b27da77ae3202f7d32ef7f88b80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attempt to parse a JSON string.  <br /></td></tr>
+<tr class="separator:aa3ea2b27da77ae3202f7d32ef7f88b80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae77a8e2cd17097b492084ae16ef26fee" id="r_ae77a8e2cd17097b492084ae16ef26fee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ae77a8e2cd17097b492084ae16ef26fee">strToBool</a> (const std::string &amp;value)</td></tr>
 <tr class="memdesc:ae77a8e2cd17097b492084ae16ef26fee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert given string value to boolean type.  <br /></td></tr>
 <tr class="separator:ae77a8e2cd17097b492084ae16ef26fee"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -355,6 +365,8 @@ Functions</h2></td></tr>
 <tr class="memitem:aa3085c18b75188b1e46d16c21ab2e58b" id="r_aa3085c18b75188b1e46d16c21ab2e58b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aa3085c18b75188b1e46d16c21ab2e58b">verifyPassword</a> (const std::string &amp;password, const std::string &amp;stored_hash)</td></tr>
 <tr class="memdesc:aa3085c18b75188b1e46d16c21ab2e58b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verifies user password if it matches the given hashed password.  <br /></td></tr>
 <tr class="separator:aa3085c18b75188b1e46d16c21ab2e58b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aadfd14faa4a1190f3ef60a73fee241e7" id="r_aadfd14faa4a1190f3ef60a73fee241e7"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aadfd14faa4a1190f3ef60a73fee241e7">getCurrentTimestampUTC</a> ()</td></tr>
+<tr class="separator:aadfd14faa4a1190f3ef60a73fee241e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71ef440b705eab6ad8dfd505e6e62664" id="r_a71ef440b705eab6ad8dfd505e6e62664"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a71ef440b705eab6ad8dfd505e6e62664">tmToStr</a> (const std::tm &amp;t)</td></tr>
 <tr class="memdesc:a71ef440b705eab6ad8dfd505e6e62664"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert c++ std::tm date/time value to ISO formatted string.  <br /></td></tr>
 <tr class="separator:a71ef440b705eab6ad8dfd505e6e62664"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -455,20 +467,6 @@ Functions</h2></td></tr>
 
 <p>Shorten JSON namespace. </p>
 <p>&lt; Use shorthand <code>fs</code> to refer to the <code>std::filesystem</code> </p>
-
-</div>
-</div>
-<a id="aa3e66720967ad1024382229e4e245120" name="aa3e66720967ad1024382229e4e245120"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3e66720967ad1024382229e4e245120">&#9670;&#160;</a></span>logger</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="namespacemb.html#aa3e66720967ad1024382229e4e245120">mb::logger</a> = typedef <a class="el" href="classmb_1_1Logger.html">Logger</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
 </div>
 </div>
@@ -611,6 +609,21 @@ Functions</h2></td></tr>
 <p>&zwj;Shorthand notation for the request's method, path pair. </p>
 </blockquote>
 </p>
+
+</div>
+</div>
+<a id="a28e20403eb1d552d6415d942ff44f48d" name="a28e20403eb1d552d6415d942ff44f48d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28e20403eb1d552d6415d942ff44f48d">&#9670;&#160;</a></span>RtCallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="namespacemb.html#a28e20403eb1d552d6415d942ff44f48d">mb::RtCallback</a> = typedef std::function&lt;void(const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;)&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Callback invoked with a batch of change events (each event is a JSON object). </p>
 
 </div>
 </div>
@@ -927,6 +940,31 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="aadfd14faa4a1190f3ef60a73fee241e7" name="aadfd14faa4a1190f3ef60a73fee241e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aadfd14faa4a1190f3ef60a73fee241e7">&#9670;&#160;</a></span>getCurrentTimestampUTC()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::getCurrentTimestampUTC </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a98ec5c96bf449442fcf900d7061e7406" name="a98ec5c96bf449442fcf900d7061e7406"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a98ec5c96bf449442fcf900d7061e7406">&#9670;&#160;</a></span>getEnvOrDefault()</h2>
 
@@ -1124,7 +1162,7 @@ Functions</h2></td></tr>
 <div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="namespacemb.html#ae82806bf179419d9e5dc249e39c200e1">isValidIPv4</a>(<span class="stringliteral">&quot;192.168.1.1&quot;</span>)) {</div>
 <div class="line">    <span class="comment">// Valid IPv4 format</span></div>
 <div class="line">}</div>
-<div class="ttc" id="anamespacemb_html_ae82806bf179419d9e5dc249e39c200e1"><div class="ttname"><a href="namespacemb.html#ae82806bf179419d9e5dc249e39c200e1">mb::isValidIPv4</a></div><div class="ttdeci">bool isValidIPv4(const std::string &amp;ip)</div><div class="ttdoc">Validates if a string is a valid IPv4 address.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:196</div></div>
+<div class="ttc" id="anamespacemb_html_ae82806bf179419d9e5dc249e39c200e1"><div class="ttname"><a href="namespacemb.html#ae82806bf179419d9e5dc249e39c200e1">mb::isValidIPv4</a></div><div class="ttdeci">bool isValidIPv4(const std::string &amp;ip)</div><div class="ttdoc">Validates if a string is a valid IPv4 address.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:199</div></div>
 </div><!-- fragment --> 
 </div>
 </div>
@@ -1519,7 +1557,7 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 <dl class="section return"><dt>Returns</dt><dd>Converted integer or default value</dd></dl>
 <div class="fragment"><div class="line"><span class="keywordtype">int</span> page = <a class="code hl_function" href="namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d">safe_stoi</a>(req.getQueryParam(<span class="stringliteral">&quot;page&quot;</span>), 1);  <span class="comment">// Defaults to 1 if invalid</span></div>
 <div class="line"><span class="keywordtype">int</span> limit = <a class="code hl_function" href="namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d">safe_stoi</a>(req.getQueryParam(<span class="stringliteral">&quot;limit&quot;</span>), 100);  <span class="comment">// Defaults to 100 if invalid</span></div>
-<div class="ttc" id="anamespacemb_html_a3a428d170b1c8c2100c9ba7fda3b6f0d"><div class="ttname"><a href="namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d">mb::safe_stoi</a></div><div class="ttdeci">int safe_stoi(const std::string &amp;s, const int default_val)</div><div class="ttdoc">Safely convert string to integer with default fallback.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:188</div></div>
+<div class="ttc" id="anamespacemb_html_a3a428d170b1c8c2100c9ba7fda3b6f0d"><div class="ttname"><a href="namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d">mb::safe_stoi</a></div><div class="ttdeci">int safe_stoi(const std::string &amp;s, const int default_val)</div><div class="ttdoc">Safely convert string to integer with default fallback.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:191</div></div>
 </div><!-- fragment --> 
 </div>
 </div>
@@ -1696,7 +1734,7 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 <div class="fragment"><div class="line"><span class="keyword">auto</span> parts = <a class="code hl_function" href="namespacemb.html#a2496b58c49de9a3a1758c8fc6fee2996">splitString</a>(<span class="stringliteral">&quot;Hello, John!&quot;</span>, <span class="stringliteral">&quot;,&quot;</span>);</div>
 <div class="line">std::cout &lt;&lt; parts.size() &lt;&lt; std::endl;</div>
 <div class="line"><span class="comment">// &gt; Should be a vector of two strings `Hello` and ` World`</span></div>
-<div class="ttc" id="anamespacemb_html_a2496b58c49de9a3a1758c8fc6fee2996"><div class="ttname"><a href="namespacemb.html#a2496b58c49de9a3a1758c8fc6fee2996">mb::splitString</a></div><div class="ttdeci">std::vector&lt; std::string &gt; splitString(const std::string &amp;input, const std::string &amp;delimiter)</div><div class="ttdoc">Split given string based on given delimiter.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:90</div></div>
+<div class="ttc" id="anamespacemb_html_a2496b58c49de9a3a1758c8fc6fee2996"><div class="ttname"><a href="namespacemb.html#a2496b58c49de9a3a1758c8fc6fee2996">mb::splitString</a></div><div class="ttdeci">std::vector&lt; std::string &gt; splitString(const std::string &amp;input, const std::string &amp;delimiter)</div><div class="ttdoc">Split given string based on given delimiter.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:93</div></div>
 </div><!-- fragment --> 
 </div>
 </div>
@@ -1891,8 +1929,8 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 
 </div>
 </div>
-<a id="acbb7d92fa5a0b643308cec05f16d86bd" name="acbb7d92fa5a0b643308cec05f16d86bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acbb7d92fa5a0b643308cec05f16d86bd">&#9670;&#160;</a></span>tryParseJsonStr()</h2>
+<a id="aa3ea2b27da77ae3202f7d32ef7f88b80" name="aa3ea2b27da77ae3202f7d32ef7f88b80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3ea2b27da77ae3202f7d32ef7f88b80">&#9670;&#160;</a></span>tryParseJsonStr()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1901,8 +1939,18 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
           <td class="memname">std::optional&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt; mb::tryParseJsonStr </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>json_str</em></td><td>)</td>
+          <td class="paramname"><em>json_str</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">std::optional&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt;&#160;</td>
+          <td class="paramname"><em>default_value</em> = <code>std::nullopt</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1911,15 +1959,16 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">json_str</td><td>JSON string to parse </td></tr>
+    <tr><td class="paramname">default_value</td><td>Optional default value if conversion fails </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A JSON Object if successful, else a <code>std::nullopt</code></dd></dl>
-<div class="fragment"><div class="line"><span class="keyword">auto</span> user = <a class="code hl_function" href="namespacemb.html#acbb7d92fa5a0b643308cec05f16d86bd">tryParseJsonStr</a>(<span class="stringliteral">&quot;{\&quot;name\&quot;: \&quot;John Doe\&quot;}&quot;</span>);</div>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> user = <a class="code hl_function" href="namespacemb.html#aa3ea2b27da77ae3202f7d32ef7f88b80">tryParseJsonStr</a>(<span class="stringliteral">&quot;{\&quot;name\&quot;: \&quot;John Doe\&quot;}&quot;</span>);</div>
 <div class="line"><span class="keywordflow">if</span>(user.has_value()) {</div>
 <div class="line">     <span class="comment">// Do something ...</span></div>
 <div class="line">}</div>
-<div class="ttc" id="anamespacemb_html_acbb7d92fa5a0b643308cec05f16d86bd"><div class="ttname"><a href="namespacemb.html#acbb7d92fa5a0b643308cec05f16d86bd">mb::tryParseJsonStr</a></div><div class="ttdeci">std::optional&lt; json &gt; tryParseJsonStr(const std::string &amp;json_str)</div><div class="ttdoc">Attempt to parse a JSON string.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:7</div></div>
+<div class="ttc" id="anamespacemb_html_aa3ea2b27da77ae3202f7d32ef7f88b80"><div class="ttname"><a href="namespacemb.html#aa3ea2b27da77ae3202f7d32ef7f88b80">mb::tryParseJsonStr</a></div><div class="ttdeci">std::optional&lt; json &gt; tryParseJsonStr(const std::string &amp;json_str, std::optional&lt; json &gt; default_value=std::nullopt)</div><div class="ttdoc">Attempt to parse a JSON string.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:7</div></div>
 </div><!-- fragment --> 
 </div>
 </div>

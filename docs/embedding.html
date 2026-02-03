@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -96,7 +96,7 @@ $(document).ready(function(){initNavTree('embedding.html',''); initResizable(); 
 <div class="contents">
 <div class="textblock"><p>MantisBase is designed as a lightweight C++ library that can be embedded directly into your desktop, mobile, or embedded application. This guide explains how to integrate MantisBase into your project and configure it.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md146"></a>
+<h2><a class="anchor" id="autotoc_md154"></a>
 Why Embed MantisBase?</h2>
 <ul>
 <li>Add full-featured local storage and REST API support to your Qt, Slint, or CLI app</li>
@@ -105,23 +105,23 @@ Why Embed MantisBase?</h2>
 <li>No separate server deployment required</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md148"></a>
+<h2><a class="anchor" id="autotoc_md156"></a>
 Dependencies</h2>
 <p>On Linux, MantisBase depends on ZSTD and libpq for PostgreSQL support:</p>
 <div class="fragment"><div class="line">sudo apt-get install -y libzstd-dev</div>
 <div class="line">sudo apt install libpq-dev</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md150"></a>
+<h2><a class="anchor" id="autotoc_md158"></a>
 Integration</h2>
-<h3><a class="anchor" id="autotoc_md151"></a>
+<h3><a class="anchor" id="autotoc_md159"></a>
 As a Static or Shared Library</h3>
 <p>Add MantisBase as a submodule or include it in your CMake project:</p>
 <div class="fragment"><div class="line">add_subdirectory(mantisbase)</div>
 <div class="line">target_link_libraries(your_app PRIVATE mantisbase)</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md153"></a>
+<h2><a class="anchor" id="autotoc_md161"></a>
 Basic Usage</h2>
-<h3><a class="anchor" id="autotoc_md154"></a>
+<h3><a class="anchor" id="autotoc_md162"></a>
 Using Command-Line Arguments</h3>
 <p>The simplest way to embed MantisBase is using command-line arguments:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -131,11 +131,11 @@ Using Command-Line Arguments</h3>
 <div class="line">    <span class="keyword">auto</span>&amp; app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a>(argc, argv);</div>
 <div class="line">    <span class="keywordflow">return</span> app.run();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassmb_1_1MantisBase_html_a4d7db711bdbc3422e44c2138b71a155c"><div class="ttname"><a href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a></div><div class="ttdeci">static MantisBase &amp; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:57</div></div>
+<div class="ttc" id="aclassmb_1_1MantisBase_html_a4d7db711bdbc3422e44c2138b71a155c"><div class="ttname"><a href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a></div><div class="ttdeci">static MantisBase &amp; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:56</div></div>
 <div class="ttc" id="amain_8cpp_html_a638b85ceffac097c2aa79b76ba8c055e"><div class="ttname"><a href="main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e">main</a></div><div class="ttdeci">int main(const int argc, char *argv[])</div><div class="ttdoc">MantisApp standalone entrypoint.</div><div class="ttdef"><b>Definition</b> main.cpp:16</div></div>
 <div class="ttc" id="amantisbase_8h_html"><div class="ttname"><a href="mantisbase_8h.html">mantisbase.h</a></div><div class="ttdoc">The main application for mantisbase.</div></div>
 </div><!-- fragment --><p>This allows your application to accept standard MantisBase CLI arguments like <code>--port</code>, <code>--host</code>, <code>--database</code>, etc.</p>
-<h3><a class="anchor" id="autotoc_md155"></a>
+<h3><a class="anchor" id="autotoc_md163"></a>
 Using JSON Configuration</h3>
 <p>For more control when embedding, use JSON configuration:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -157,7 +157,7 @@ Using JSON Configuration</h3>
 <div class="line">    <span class="keywordflow">return</span> app.run();</div>
 <div class="line">}</div>
 <div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> context_store.h:18</div></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md156"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md164"></a>
 Minimal Configuration</h3>
 <p>You can also create an instance with default settings:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -169,7 +169,7 @@ Minimal Configuration</h3>
 <div class="line">    <span class="keywordflow">return</span> app.run();</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md158"></a>
+<h2><a class="anchor" id="autotoc_md166"></a>
 Configuration Options</h2>
 <p>The JSON configuration supports the following options:</p>
 <div class="fragment"><div class="line">{</div>
@@ -187,7 +187,7 @@ Configuration Options</h2>
 <div class="line">}</div>
 </div><!-- fragment --><p>All options are optional and will use sensible defaults if omitted.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md160"></a>
+<h2><a class="anchor" id="autotoc_md168"></a>
 Adding Custom Routes</h2>
 <p>You can add custom API endpoints using the router:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -222,12 +222,12 @@ Adding Custom Routes</h2>
 <div class="ttc" id="aclassmb_1_1MantisRequest_html"><div class="ttname"><a href="classmb_1_1MantisRequest.html">mb::MantisRequest</a></div><div class="ttdoc">A wrapper class around httplib::Request offering a consistent API and allowing for easy wrapper metho...</div><div class="ttdef"><b>Definition</b> http.h:42</div></div>
 <div class="ttc" id="aclassmb_1_1MantisRequest_html_acc5060d875c76ef1177d77426f4b33b4"><div class="ttname"><a href="classmb_1_1MantisRequest.html#acc5060d875c76ef1177d77426f4b33b4">mb::MantisRequest::getOr</a></div><div class="ttdeci">T &amp; getOr(const std::string &amp;key, T default_value)</div><div class="ttdoc">Get value from context store or return default.</div><div class="ttdef"><b>Definition</b> http.h:288</div></div>
 <div class="ttc" id="aclassmb_1_1MantisResponse_html"><div class="ttname"><a href="classmb_1_1MantisResponse.html">mb::MantisResponse</a></div><div class="ttdoc">Wrapper around httplib::Response for consistent API.</div><div class="ttdef"><b>Definition</b> http.h:318</div></div>
-<div class="ttc" id="aclassmb_1_1MantisResponse_html_af104ef1181023634e19eac48c5f1a34f"><div class="ttname"><a href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">mb::MantisResponse::sendJSON</a></div><div class="ttdeci">void sendJSON(int statusCode=200, const json &amp;data=json::object()) const</div><div class="ttdoc">Send JSON response.</div><div class="ttdef"><b>Definition</b> http_response.cpp:143</div></div>
+<div class="ttc" id="aclassmb_1_1MantisResponse_html_af104ef1181023634e19eac48c5f1a34f"><div class="ttname"><a href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">mb::MantisResponse::sendJSON</a></div><div class="ttdeci">void sendJSON(int statusCode=200, const json &amp;data=json::object()) const</div><div class="ttdoc">Send JSON response.</div><div class="ttdef"><b>Definition</b> http_response.cpp:145</div></div>
 <div class="ttc" id="amiddlewares_8h_html"><div class="ttname"><a href="middlewares_8h.html">middlewares.h</a></div><div class="ttdoc">Middleware functions for request processing.</div></div>
 <div class="ttc" id="anamespacemb_html_ab7c5922d7edd2da97857b5383049101f"><div class="ttname"><a href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">mb::requireAdminAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireAdminAuth()</div><div class="ttdoc">Require admin authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:299</div></div>
 <div class="ttc" id="anamespacemb_html_ae3903a4fb6e5f572be9884d6768da4fc"><div class="ttname"><a href="namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc">mb::requireEntityAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireEntityAuth(const std::string &amp;entity_name)</div><div class="ttdoc">Require entity-specific authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:381</div></div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md162"></a>
+<h2><a class="anchor" id="autotoc_md170"></a>
 Accessing Database</h2>
 <p>You can access the database directly for custom operations:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -253,7 +253,7 @@ Accessing Database</h2>
 <div class="line">    <span class="keywordflow">return</span> app.run();</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md164"></a>
+<h2><a class="anchor" id="autotoc_md172"></a>
 Working with Entities</h2>
 <p>You can interact with entities programmatically:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -290,7 +290,7 @@ Working with Entities</h2>
 <div class="line">    <span class="keywordflow">return</span> app.run();</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md166"></a>
+<h2><a class="anchor" id="autotoc_md174"></a>
 Project Structure</h2>
 <p>A typical embedded project structure:</p>
 <div class="fragment"><div class="line">your-app/</div>
@@ -301,7 +301,7 @@ Project Structure</h2>
 <div class="line">├── scripts/           # JavaScript extensions (optional)</div>
 <div class="line">└── mantisbase/        # MantisBase submodule</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md168"></a>
+<h2><a class="anchor" id="autotoc_md176"></a>
 Using as a Submodule</h2>
 <p>Add MantisBase as a git submodule:</p>
 <div class="fragment"><div class="line">git submodule add https://github.com/allankoechke/mantisbase.git</div>
@@ -310,7 +310,7 @@ Using as a Submodule</h2>
 <div class="fragment"><div class="line">add_subdirectory(mantisbase)</div>
 <div class="line">target_link_libraries(your_app PRIVATE mantisbase)</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md170"></a>
+<h2><a class="anchor" id="autotoc_md178"></a>
 Testing Embedded APIs</h2>
 <p>Once your app is running, test the APIs:</p>
 <div class="fragment"><div class="line"># Test entity endpoints</div>
@@ -323,7 +323,7 @@ Testing Embedded APIs</h2>
 <div class="line">curl -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
 <div class="line">     http://localhost:7070/api/v1/entities/posts</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md172"></a>
+<h2><a class="anchor" id="autotoc_md180"></a>
 Notes</h2>
 <ul>
 <li>MantisBase APIs respect all access rules and authentication even in embedded mode</li>
@@ -333,7 +333,7 @@ Notes</h2>
 <li>Schema management endpoints are at <code>/api/v1/schemas/*</code> (admin only)</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md174"></a>
+<h2><a class="anchor" id="autotoc_md182"></a>
 Complete Example</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;<a class="code" href="middlewares_8h.html">mantisbase/core/middlewares.h</a>&gt;</span></div>
@@ -357,7 +357,7 @@ Complete Example</h2>
 <div class="line">    <span class="keywordflow">return</span> app.run();</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md176"></a>
+<h2><a class="anchor" id="autotoc_md184"></a>
 Summary</h2>
 <p>By embedding MantisBase, you gain powerful backend features including database storage, authentication, and REST APIs without requiring a separate server deployment. The library integrates seamlessly into your C++ application with minimal configuration. </p>
 </div></div><!-- contents -->

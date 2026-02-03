@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <p><b>A lightweight, pluggable Backend-as-a-Service (BaaS) library built in C++</b><br  />
  Portable. Embeddable. Built for speed and extensibility. </p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md233"></a>
+<h2><a class="anchor" id="autotoc_md241"></a>
 What is MantisBase?</h2>
 <p>MantisBase is a C++ library that provides a complete backend solution. Create database tables and instantly get REST APIs, authentication, file handling, and an admin dashboard - all in a single lightweight binary.</p>
 <p><b>Key Features:</b></p><ul>
@@ -113,9 +113,9 @@ What is MantisBase?</h2>
 <li>Embeddable in your C++ applications</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md235"></a>
+<h2><a class="anchor" id="autotoc_md243"></a>
 Installation</h2>
-<h3><a class="anchor" id="autotoc_md236"></a>
+<h3><a class="anchor" id="autotoc_md244"></a>
 Quick Start (Pre-built Binaries)</h3>
 <ol type="1">
 <li><b>Download</b> the latest release from <a href="https://github.com/allankoechke/mantisbase/releases">GitHub Releases</a></li>
@@ -125,7 +125,7 @@ Quick Start (Pre-built Binaries)</h3>
 <div class="fragment"><div class="line">./mantisbase serve</div>
 </div><!-- fragment --><p>The server starts on <code><a href="http://localhost:7070">http://localhost:7070</a></code>.</p>
 <p><b>Linux Dependencies:</b> </p><div class="fragment"><div class="line">sudo apt-get install -y libzstd-dev libpq-dev</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md237"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md245"></a>
 Build from Source</h3>
 <div class="fragment"><div class="line">git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git</div>
 <div class="line">cd mantisbase</div>
@@ -134,13 +134,13 @@ Build from Source</h3>
 <div class="line">./build/mantisbase serve</div>
 </div><!-- fragment --><p>See <a class="el" href="00_8installation_8md.html">Installation Guide</a> for more details.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md239"></a>
+<h2><a class="anchor" id="autotoc_md247"></a>
 First Steps</h2>
-<h3><a class="anchor" id="autotoc_md240"></a>
+<h3><a class="anchor" id="autotoc_md248"></a>
 1. Create an Admin Account</h3>
 <p>Before using the admin dashboard, create an admin user:</p>
 <div class="fragment"><div class="line">./mantisbase admins --add admin@example.com admin_password_bjb12!</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md241"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md249"></a>
 2. Access the Admin Dashboard</h3>
 <p>Open your browser and go to:</p>
 <div class="fragment"><div class="line">http://localhost:7070/mb</div>
@@ -155,7 +155,7 @@ First Steps</h2>
 </ul>
 <p><img src="mantisbase-admin.png" alt="MantisBase Admin Dashboard" class="inline"/></p>
 <p>The dashboard is the <b>recommended way</b> to interact with MantisBase during development, as it provides a complete GUI alternative to the REST API and makes it easy to explore and manage your data.</p>
-<h3><a class="anchor" id="autotoc_md242"></a>
+<h3><a class="anchor" id="autotoc_md250"></a>
 3. Create Your First Entity</h3>
 <p>You can create entities (tables) via the admin dashboard or using the API:</p>
 <p><b>Using the Admin Dashboard (Recommended):</b></p><ol type="1">
@@ -195,7 +195,7 @@ First Steps</h2>
 <li>Maximum 64 characters</li>
 <li>Names are automatically validated to prevent SQL injection</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md243"></a>
+<h3><a class="anchor" id="autotoc_md251"></a>
 4. Use Your Auto-generated API</h3>
 <p>Once created, your entity automatically has REST endpoints:</p>
 <div class="fragment"><div class="line"># List all posts</div>
@@ -220,9 +220,9 @@ First Steps</h2>
 <div class="line">curl -X DELETE http://localhost:7070/api/v1/entities/posts/&lt;id&gt; \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md245"></a>
+<h2><a class="anchor" id="autotoc_md253"></a>
 Authentication</h2>
-<h3><a class="anchor" id="autotoc_md246"></a>
+<h3><a class="anchor" id="autotoc_md254"></a>
 User Login</h3>
 <p>MantisBase provides standalone authentication endpoints:</p>
 <div class="fragment"><div class="line"># Login (identity can be email or user ID)</div>
@@ -235,14 +235,14 @@ User Login</h3>
 <div class="line">  }&#39;</div>
 <div class="line"> </div>
 <div class="line"># Response: {&quot;token&quot;: &quot;eyJhbGc...&quot;, &quot;user&quot;: {...}}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md247"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md255"></a>
 Using Tokens</h3>
 <p>Include the token in all authenticated requests:</p>
 <div class="fragment"><div class="line">curl -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
 <div class="line">  http://localhost:7070/api/v1/entities/posts</div>
 </div><!-- fragment --><p>See <a class="el" href="02_8auth_8md.html">Authentication API</a> for all auth endpoints.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md249"></a>
+<h2><a class="anchor" id="autotoc_md257"></a>
 Access Control</h2>
 <p>Each entity can define access rules for each operation:</p>
 <ul>
@@ -263,7 +263,7 @@ Access Control</h2>
 <div class="line">}</div>
 </div><!-- fragment --><p>See <a class="el" href="03_8rules_8md.html">Access Rules</a> for detailed documentation.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md251"></a>
+<h2><a class="anchor" id="autotoc_md259"></a>
 File Handling</h2>
 <p>Upload files using multipart/form-data:</p>
 <div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/entities/posts \</div>
@@ -274,9 +274,9 @@ File Handling</h2>
 <div class="fragment"><div class="line">http://localhost:7070/api/files/posts/photo.jpg</div>
 </div><!-- fragment --><p>See <a class="el" href="11_8files_8md.html">File Handling</a> for details.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md253"></a>
+<h2><a class="anchor" id="autotoc_md261"></a>
 API Endpoints Overview</h2>
-<h3><a class="anchor" id="autotoc_md254"></a>
+<h3><a class="anchor" id="autotoc_md262"></a>
 Entity Endpoints</h3>
 <p>All entities automatically get these endpoints:</p>
 <ul>
@@ -286,7 +286,7 @@ Entity Endpoints</h3>
 <li><code>PATCH /api/v1/entities/&lt;entity&gt;/:id</code> - Update record</li>
 <li><code>DELETE /api/v1/entities/&lt;entity&gt;/:id</code> - Delete record</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md255"></a>
+<h3><a class="anchor" id="autotoc_md263"></a>
 Authentication Endpoints</h3>
 <ul>
 <li><code>POST /api/v1/auth/login</code> - User login</li>
@@ -294,7 +294,7 @@ Authentication Endpoints</h3>
 <li><code>POST /api/v1/auth/logout</code> - Logout</li>
 <li><code>POST /api/v1/auth/setup/admin</code> - Create initial admin</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md256"></a>
+<h3><a class="anchor" id="autotoc_md264"></a>
 Schema Management (Admin Only)</h3>
 <ul>
 <li><code>GET /api/v1/schemas</code> - List all schemas</li>
@@ -303,7 +303,7 @@ Schema Management (Admin Only)</h3>
 <li><code>PATCH /api/v1/schemas/:id</code> - Update schema</li>
 <li><code>DELETE /api/v1/schemas/:id</code> - Delete schema</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md257"></a>
+<h3><a class="anchor" id="autotoc_md265"></a>
 System Endpoints</h3>
 <ul>
 <li><code>GET /api/v1/health</code> - Health check</li>
@@ -313,9 +313,9 @@ System Endpoints</h3>
 </ul>
 <p>See <a class="el" href="02_8api_8md.html">API Reference</a> for complete documentation.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md259"></a>
+<h2><a class="anchor" id="autotoc_md267"></a>
 Configuration</h2>
-<h3><a class="anchor" id="autotoc_md260"></a>
+<h3><a class="anchor" id="autotoc_md268"></a>
 Command-Line Options</h3>
 <div class="fragment"><div class="line"># Custom port and host</div>
 <div class="line">mantisbase serve --port 8080 --host 0.0.0.0</div>
@@ -330,13 +330,13 @@ Command-Line Options</h3>
 <div class="line"> </div>
 <div class="line"># Custom directories</div>
 <div class="line">mantisbase --dataDir ./data --publicDir ./public --scriptsDir ./scripts serve</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md261"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md269"></a>
 Environment Variables</h3>
 <div class="fragment"><div class="line"># Set JWT secret (important for production)</div>
 <div class="line">export MANTIS_JWT_SECRET=your-secret-key-here</div>
 </div><!-- fragment --><p>See <a class="el" href="01_8cmd_8md.html">CLI Reference</a> for all options.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md263"></a>
+<h2><a class="anchor" id="autotoc_md271"></a>
 Next Steps</h2>
 <p>Now that you have MantisBase running:</p>
 <ol type="1">
@@ -348,7 +348,7 @@ Next Steps</h2>
 <li><b>Embed in Your App</b> - Use MantisBase as a library in your C++ project</li>
 </ol>
 <hr  />
-<h2><a class="anchor" id="autotoc_md265"></a>
+<h2><a class="anchor" id="autotoc_md273"></a>
 Documentation</h2>
 <ul>
 <li><a class="el" href="00_8installation_8md.html">Installation Guide</a> - Detailed installation instructions</li>
@@ -362,22 +362,22 @@ Documentation</h2>
 <li><a class="el" href="06_8docker_8md.html">Docker Guide</a> - Running in containers</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md267"></a>
+<h2><a class="anchor" id="autotoc_md275"></a>
 Common Use Cases</h2>
-<h3><a class="anchor" id="autotoc_md268"></a>
+<h3><a class="anchor" id="autotoc_md276"></a>
 Desktop Application Backend</h3>
 <p>Embed MantisBase in your Qt, Slint, or native C++ desktop app to provide local data storage and REST APIs.</p>
-<h3><a class="anchor" id="autotoc_md269"></a>
+<h3><a class="anchor" id="autotoc_md277"></a>
 Development Server</h3>
 <p>Use MantisBase as a quick backend for frontend development, prototyping, or testing.</p>
-<h3><a class="anchor" id="autotoc_md270"></a>
+<h3><a class="anchor" id="autotoc_md278"></a>
 Embedded Device</h3>
 <p>Run MantisBase on embedded devices to provide a local API server with data persistence.</p>
-<h3><a class="anchor" id="autotoc_md271"></a>
+<h3><a class="anchor" id="autotoc_md279"></a>
 Microservice</h3>
 <p>Deploy MantisBase as a standalone microservice for specific data management needs.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md273"></a>
+<h2><a class="anchor" id="autotoc_md281"></a>
 Getting Help</h2>
 <ul>
 <li><b>Documentation</b>: Check the <a href=".">docs directory</a> for detailed guides</li>
@@ -385,7 +385,7 @@ Getting Help</h2>
 <li><b>Examples</b>: See the <a href="../examples">examples directory</a> for code samples</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md275"></a>
+<h2><a class="anchor" id="autotoc_md283"></a>
 Summary</h2>
 <p>MantisBase provides everything you need for a backend in a single C++ library:</p><ul>
 <li>Create tables and get instant REST APIs</li>

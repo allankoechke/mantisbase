@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -114,6 +114,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa6539c4e6e5584226b9f504a331c58c6" id="r_aa6539c4e6e5584226b9f504a331c58c6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Database.html#aa6539c4e6e5584226b9f504a331c58c6">connect</a> (const std::string &amp;conn_str)</td></tr>
 <tr class="memdesc:aa6539c4e6e5584226b9f504a331c58c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connect to database and initialize connection pool.  <br /></td></tr>
 <tr class="separator:aa6539c4e6e5584226b9f504a331c58c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17d6a7ddb4fb811ed7fa6bdef1bdaf95" id="r_a17d6a7ddb4fb811ed7fa6bdef1bdaf95"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Database.html#a17d6a7ddb4fb811ed7fa6bdef1bdaf95">connectionStr</a> () const</td></tr>
+<tr class="separator:a17d6a7ddb4fb811ed7fa6bdef1bdaf95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a485a62e7c137825297917d22aab541b4" id="r_a485a62e7c137825297917d22aab541b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Database.html#a485a62e7c137825297917d22aab541b4">disconnect</a> ()</td></tr>
 <tr class="memdesc:a485a62e7c137825297917d22aab541b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close all database connections and destroy connection pool.  <br /></td></tr>
 <tr class="separator:a485a62e7c137825297917d22aab541b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -138,8 +140,8 @@ Public Member Functions</h2></td></tr>
 <div class="line"><span class="keyword">auto</span> <a class="code hl_function" href="classmb_1_1Database.html#adab239578ae50538286bc0755d0d4974">session</a> = db.<a class="code hl_function" href="classmb_1_1Database.html#adab239578ae50538286bc0755d0d4974">session</a>();</div>
 <div class="line">*<a class="code hl_function" href="classmb_1_1Database.html#adab239578ae50538286bc0755d0d4974">session</a> &lt;&lt; <span class="stringliteral">&quot;SELECT * FROM users&quot;</span>, soci::into(rows);</div>
 <div class="ttc" id="aclassmb_1_1Database_html"><div class="ttname"><a href="classmb_1_1Database.html">mb::Database</a></div><div class="ttdoc">Database connection and session management.</div><div class="ttdef"><b>Definition</b> database.h:39</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_aa6539c4e6e5584226b9f504a331c58c6"><div class="ttname"><a href="classmb_1_1Database.html#aa6539c4e6e5584226b9f504a331c58c6">mb::Database::connect</a></div><div class="ttdeci">bool connect(const std::string &amp;conn_str)</div><div class="ttdoc">Connect to database and initialize connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:26</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html_adab239578ae50538286bc0755d0d4974"><div class="ttname"><a href="classmb_1_1Database.html#adab239578ae50538286bc0755d0d4974">mb::Database::session</a></div><div class="ttdeci">std::shared_ptr&lt; soci::session &gt; session() const</div><div class="ttdoc">Get a database session from the connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:192</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_aa6539c4e6e5584226b9f504a331c58c6"><div class="ttname"><a href="classmb_1_1Database.html#aa6539c4e6e5584226b9f504a331c58c6">mb::Database::connect</a></div><div class="ttdeci">bool connect(const std::string &amp;conn_str)</div><div class="ttdoc">Connect to database and initialize connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:24</div></div>
+<div class="ttc" id="aclassmb_1_1Database_html_adab239578ae50538286bc0755d0d4974"><div class="ttname"><a href="classmb_1_1Database.html#adab239578ae50538286bc0755d0d4974">mb::Database::session</a></div><div class="ttdeci">std::shared_ptr&lt; soci::session &gt; session() const</div><div class="ttdoc">Get a database session from the connection pool.</div><div class="ttdef"><b>Definition</b> database.cpp:204</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af43e18e9d1f9cdfacbb45dcfb7e585a4" name="af43e18e9d1f9cdfacbb45dcfb7e585a4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af43e18e9d1f9cdfacbb45dcfb7e585a4">&#9670;&#160;</a></span>Database()</h2>
@@ -228,6 +230,23 @@ Public Member Functions</h2></td></tr>
 
 <p>Get access to the underlying connection pool. </p>
 <dl class="section return"><dt>Returns</dt><dd>Reference to soci::connection_pool </dd></dl>
+
+</div>
+</div>
+<a id="a17d6a7ddb4fb811ed7fa6bdef1bdaf95" name="a17d6a7ddb4fb811ed7fa6bdef1bdaf95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17d6a7ddb4fb811ed7fa6bdef1bdaf95">&#9670;&#160;</a></span>connectionStr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::string &amp; mb::Database::connectionStr </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

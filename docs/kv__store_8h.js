@@ -1,4 +1,4 @@
 var kv__store_8h =
 [
-    [ "mb::KVStore", "classmb_1_1KVStore.html", "classmb_1_1KVStore" ]
+    [ "mb::KeyValStore", "classmb_1_1KeyValStore.html", "classmb_1_1KeyValStore" ]
 ];

@@ -12,7 +12,7 @@ var annotated_dup =
       [ "Expr", "structmb_1_1Expr.html", null ],
       [ "Files", "classmb_1_1Files.html", null ],
       [ "FuncLogger", "classmb_1_1FuncLogger.html", "classmb_1_1FuncLogger" ],
-      [ "KVStore", "classmb_1_1KVStore.html", "classmb_1_1KVStore" ],
+      [ "KeyValStore", "classmb_1_1KeyValStore.html", "classmb_1_1KeyValStore" ],
       [ "LogDatabase", "classmb_1_1LogDatabase.html", "classmb_1_1LogDatabase" ],
       [ "Logger", "classmb_1_1Logger.html", "classmb_1_1Logger" ],
       [ "MantisBase", "classmb_1_1MantisBase.html", "classmb_1_1MantisBase" ],
@@ -21,10 +21,14 @@ var annotated_dup =
       [ "MantisLoggerImpl", "classmb_1_1MantisLoggerImpl.html", "classmb_1_1MantisLoggerImpl" ],
       [ "MantisRequest", "classmb_1_1MantisRequest.html", "classmb_1_1MantisRequest" ],
       [ "MantisResponse", "classmb_1_1MantisResponse.html", "classmb_1_1MantisResponse" ],
+      [ "RealtimeDB", "classmb_1_1RealtimeDB.html", "classmb_1_1RealtimeDB" ],
       [ "RouteHandler", "structmb_1_1RouteHandler.html", "structmb_1_1RouteHandler" ],
       [ "RouteKeyHash", "structmb_1_1RouteKeyHash.html", "structmb_1_1RouteKeyHash" ],
       [ "Router", "classmb_1_1Router.html", "classmb_1_1Router" ],
       [ "RouteRegistry", "classmb_1_1RouteRegistry.html", "classmb_1_1RouteRegistry" ],
+      [ "RtDbWorker", "classmb_1_1RtDbWorker.html", "classmb_1_1RtDbWorker" ],
+      [ "SSEMgr", "classmb_1_1SSEMgr.html", "classmb_1_1SSEMgr" ],
+      [ "SSESession", "classmb_1_1SSESession.html", "classmb_1_1SSESession" ],
       [ "Validators", "classmb_1_1Validators.html", null ]
     ] ]
 ];

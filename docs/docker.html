@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
    </div>
   </td>
  </tr>
@@ -94,23 +94,23 @@ $(document).ready(function(){initNavTree('docker.html',''); initResizable(); });
   <div class="headertitle"><div class="title">Running in Docker</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md177"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md185"></a>
 Dockerizing MantisBase</h1>
 <p>MantisBase provides Docker support for easy deployment and containerization. This guide covers building and running MantisBase in Docker containers.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md179"></a>
+<h2><a class="anchor" id="autotoc_md187"></a>
 Limitations</h2>
 <p>Docker builds are currently available for <code>linux-amd64</code> platform only. For ARM builds, you will need to build the project from source.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md181"></a>
+<h2><a class="anchor" id="autotoc_md189"></a>
 Building and Running</h2>
-<h3><a class="anchor" id="autotoc_md182"></a>
+<h3><a class="anchor" id="autotoc_md190"></a>
 Using Dockerfile</h3>
 <p>The repository includes a <code>Dockerfile</code> in the <code>/docker</code> directory. To build and run:</p>
 <div class="fragment"><div class="line">docker build -t mantisbase -f docker/Dockerfile .</div>
 <div class="line">docker run -p 7070:7070 --rm mantisbase</div>
 </div><!-- fragment --><p>This builds the image and starts the container, exposing MantisBase on port <code>80</code>.</p>
-<h3><a class="anchor" id="autotoc_md183"></a>
+<h3><a class="anchor" id="autotoc_md191"></a>
 Persistent Data</h3>
 <p>By default, container restarts will clear all data. To persist data, mount volumes to the following directories:</p>
 <ul>
@@ -125,13 +125,13 @@ Persistent Data</h3>
 <div class="line">  -v $(pwd)/scripts:/mb/scripts \</div>
 <div class="line">  --rm mantisbase</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md185"></a>
+<h2><a class="anchor" id="autotoc_md193"></a>
 Docker Compose</h2>
 <p>A <code>docker-compose.yaml</code> file is provided for easier management:</p>
 <div class="fragment"><div class="line">docker compose -f docker/docker-compose.yaml up --build</div>
 </div><!-- fragment --><p>This builds the image and starts the container with volume mounts configured.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md187"></a>
+<h2><a class="anchor" id="autotoc_md195"></a>
 Configuration</h2>
 <p>You can configure MantisBase using environment variables or by mounting a configuration file. The container respects the same configuration options as the CLI:</p>
 <ul>
@@ -139,7 +139,7 @@ Configuration</h2>
 <li>Database connection via command-line arguments or JSON config</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md189"></a>
+<h2><a class="anchor" id="autotoc_md197"></a>
 Accessing the API</h2>
 <p>Once the container is running, access the API at:</p>
 <ul>
@@ -148,7 +148,7 @@ Accessing the API</h2>
 <li>Health Check: <code><a href="http://localhost:7070/api/v1/health">http://localhost:7070/api/v1/health</a></code></li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md191"></a>
+<h2><a class="anchor" id="autotoc_md199"></a>
 Example: Full Setup with PostgreSQL</h2>
 <div class="fragment"><div class="line">version: &#39;3.8&#39;</div>
 <div class="line">services:</div>
@@ -180,7 +180,7 @@ Example: Full Setup with PostgreSQL</h2>
 <div class="line">volumes:</div>
 <div class="line">  postgres_data:</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md193"></a>
+<h2><a class="anchor" id="autotoc_md201"></a>
 Summary</h2>
 <p>Docker provides an easy way to deploy MantisBase with consistent environments. Use volume mounts to persist data and configure the container using environment variables or command-line arguments. </p>
 </div></div><!-- contents -->
