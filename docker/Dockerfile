@@ -1,6 +1,6 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
-ARG MANTIS_VERSION=0.3.1
+ARG MANTIS_VERSION=0.3.3
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /mb
 
-RUN wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/releases/download/v${MANTIS_VERSION}/mantisbase_v${MANTIS_VERSION}_linux.zip \
+RUN wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/releases/download/v${MANTIS_VERSION}/mantisbase_v${MANTIS_VERSION}_linux-x86_64.zip \
     && unzip /tmp/mantisbase.zip -d /mb \
     && chmod +x /mb/mantisbase \
     && rm /tmp/mantisbase.zip
