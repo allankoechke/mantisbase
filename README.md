@@ -1,4 +1,4 @@
-<p align="center">
+ <p align="center">
   <img src="assets/mantisbase-banner.jpg" alt="MantisBase Cover" width="100%" />
 </p>
 
@@ -171,8 +171,7 @@ See [Embedding Guide](doc/05.embedding.md) for details.
 ### Option 4: Docker
 
 ```bash
-docker build -t mantisbase -f docker/Dockerfile .
-docker run -p 7070:80 mantisbase
+docker run -p 7070:80 allankoech/mantisbase
 ```
 
 See [Docker Guide](doc/06.docker.md) for details.
