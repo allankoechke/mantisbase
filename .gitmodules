@@ -1,31 +1,41 @@
 [submodule "3rdParty/json"]
 	path = 3rdParty/json
 	url = https://github.com/nlohmann/json.git
+	shallow = true
 [submodule "3rdParty/httplib-cpp"]
 	path = 3rdParty/httplib-cpp
 	url = https://github.com/allankoechke/httplib-cpp.git
+	shallow = true
 [submodule "3rdParty/soci"]
 	path = 3rdParty/soci
 	url = https://github.com/allankoechke/soci.git
+	shallow = true
 [submodule "3rdParty/spdlog"]
 	path = 3rdParty/spdlog
 	url = https://github.com/gabime/spdlog.git
+	shallow = true
 [submodule "3rdParty/cmrc"]
 	path = 3rdParty/cmrc
 	url = https://github.com/vector-of-bool/cmrc.git
+	shallow = true
 [submodule "3rdParty/dukglue"]
 	path = 3rdParty/dukglue
 	url = https://github.com/Aloshi/dukglue.git
+	shallow = true
 [submodule "3rdParty/bcrypt-cpp"]
 	path = 3rdParty/bcrypt-cpp
 	url = https://github.com/allankoechke/Bcrypt.cpp.git
+	shallow = true
 [submodule "3rdParty/jwt-cpp"]
 	path = 3rdParty/jwt-cpp
 	url = https://github.com/Thalhammer/jwt-cpp.git
+	shallow = true
 [submodule "3rdParty/wolfssl"]
 	path = 3rdParty/wolfssl
 	url = https://github.com/wolfSSL/wolfssl.git
+	shallow = true
 [submodule "3rdParty/mb-admin"]
 	path = 3rdParty/mb-admin
-	url = git@github.com:allankoechke/mantisbase-admin.git
+	url = https://github.com/allankoechke/mantisbase-admin.git
 	branch = mb-admin
+	shallow = true
