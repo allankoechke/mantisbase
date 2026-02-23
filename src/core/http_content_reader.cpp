@@ -53,6 +53,9 @@ namespace mb {
         for (const auto &form_data: m_formData) {
             //
             if (!form_data.filename.empty()) {
+                if (getEnvOrDefault("MB_DISABLE_FILE_UPLOADS", "0") == "1") {
+                    throw MantisException(403, "File uploads are disabled.");
+                }
                 if (!entity.hasField(form_data.name)) {
                     throw MantisException(
                         400,
