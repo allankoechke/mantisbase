@@ -47,15 +47,17 @@ namespace mb {
             return;
         }
 
+        const bool uploads_disabled = getEnvOrDefault("MB_DISABLE_FILE_UPLOADS", "0") == "1";
         json json_body{}, json_files{};
 
         // Process uploaded files and form fields
         for (const auto &form_data: m_formData) {
             //
             if (!form_data.filename.empty()) {
-                if (getEnvOrDefault("MB_DISABLE_FILE_UPLOADS", "0") == "1") {
+                if (uploads_disabled) {
                     throw MantisException(403, "File uploads are disabled.");
                 }
+                
                 if (!entity.hasField(form_data.name)) {
                     throw MantisException(
                         400,
