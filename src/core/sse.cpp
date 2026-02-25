@@ -327,15 +327,15 @@ std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handl
                         if (!sendSSE(eventType, data)) {
                             break; // Failed to send, connection lost
                         }
+
+                        // Update activity
+                        sse_mgr.updateActivity(client_id);
                     } else {
                         // Timeout - send ping to keep connection alive
                         if (!sendSSE("ping", {{"timestamp", std::time(nullptr)}})) {
                             break; // Failed to send ping, connection lost
                         }
                     }
-
-                    // Update activity
-                    sse_mgr.updateActivity(client_id);
                 }
 
                 // Clean up when client disconnects
