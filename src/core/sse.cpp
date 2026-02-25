@@ -18,15 +18,13 @@ mb::SSESession::SSESession(
     const json &verification)
     : m_clientID(client_id),
       m_topics(topics),
-      m_auth(sanitizeAuthForStorage(auth)),
-      m_verification(verification),
       m_isActive(true),
       m_lastActivity(std::chrono::steady_clock::now()) {
 }
 
 void mb::SSESession::queueEvent(const std::string &eventType, const json &data) {
     std::lock_guard<std::mutex> lock(m_queueMutex);
-    m_eventQueue.push({eventType, data});
+    m_eventQueue.emplace(eventType, data);
     m_queueCV.notify_one();
 }
 
@@ -129,22 +127,6 @@ void mb::SSESession::setTopics(const std::set<std::string> &topics) {
     m_topics = topics;
 }
 
-void mb::SSESession::setAuthDetails(const json &auth, const json &verification) {
-    std::lock_guard lock(m_authMutex);
-    m_auth = sanitizeAuthForStorage(auth);
-    m_verification = verification;
-}
-
-mb::json mb::SSESession::getAuth() const {
-    std::lock_guard lock(m_authMutex);
-    return m_auth;
-}
-
-mb::json mb::SSESession::getVerification() const {
-    std::lock_guard lock(m_authMutex);
-    return m_verification;
-}
-
 mb::SSEMgr::~SSEMgr() { stop(); }
 
 void mb::SSEMgr::createRoutes() {
@@ -170,13 +152,11 @@ void mb::SSEMgr::createRoutes() {
     );
 }
 
-std::string mb::SSEMgr::createSession(const std::set<std::string> &initial_topics,
-                                       const json &auth,
-                                       const json &verification) {
+std::string mb::SSEMgr::createSession(const std::set<std::string> &initial_topics) {
     std::lock_guard lock(m_sessions_mutex);
 
     std::string client_id = generateClientID();
-    const auto session = std::make_shared<SSESession>(client_id, initial_topics, auth, verification);
+    const auto session = std::make_shared<SSESession>(client_id, initial_topics);
     m_sessions[client_id] = session;
 
     logEntry::info("SSE Manager",
@@ -324,7 +304,7 @@ std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handl
                 };
 
                 // Create session with stored auth details for later re-validation
-                std::string client_id = sse_mgr.createSession(topics, auth, verification);
+                std::string client_id = sse_mgr.createSession(topics);
 
                 const auto session = sse_mgr.getSession(client_id);
                 if (!session) return false;
@@ -385,7 +365,6 @@ std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handl
 
         if (const auto session = sse_mgr.getSession(client_id); session) {
             session->setTopics(new_topics);
-            session->setAuthDetails(auth, verification);
             res.sendJSON(200, {
                              {"error", ""},
                              {

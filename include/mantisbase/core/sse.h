@@ -35,9 +35,6 @@ namespace mb {
     class SSESession {
         std::string m_clientID;
         std::set<std::string> m_topics;
-        mutable json m_auth;           ///< Auth context (user, id, entity, type); token is NOT stored to avoid leakage
-        mutable json m_verification;   ///< Last token verification result (verified, claims, exp); no secrets
-        mutable std::mutex m_authMutex; ///< Protects m_auth and m_verification
 
         std::mutex m_queueMutex;
         std::condition_variable m_queueCV;
@@ -82,14 +79,6 @@ namespace mb {
         const std::set<std::string> &getTopics() const;
 
         void setTopics(const std::set<std::string> &topics);
-
-        /** Update stored auth details (e.g. when client updates topics or refreshes token). */
-        void setAuthDetails(const json &auth, const json &verification);
-
-        /** Stored auth context for re-validation (user valid, permissions, token expiry via verification.exp). */
-        json getAuth() const;
-        /** Last token verification result (contains claims, exp, verified; no token stored). */
-        json getVerification() const;
     };
 
     /** Manages SSE sessions, routes realtime change events, and registers GET/POST /api/v1/realtime. */
@@ -107,9 +96,7 @@ namespace mb {
         /** Register GET and POST /api/v1/realtime routes. */
         static void createRoutes();
         /** Create a new SSE session with the given topics and optional auth details; returns client_id (session id). */
-        std::string createSession(const std::set<std::string> &initial_topics,
-                                  const json &auth = json::object(),
-                                  const json &verification = json::object());
+        std::string createSession(const std::set<std::string> &initial_topics);
 
         std::shared_ptr<SSESession> fetchSession(const std::string &session_id);
         /** Remove session and close it (disconnect). */
