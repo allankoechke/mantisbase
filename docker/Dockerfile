@@ -1,6 +1,6 @@
 FROM debian:trixie-slim
 
-ARG MB_VERSION=0.3.3
+ARG MB_VERSION=0.3.4
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
