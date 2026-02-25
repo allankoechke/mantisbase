@@ -306,9 +306,18 @@ See [CLI Reference](doc/01.cmd.md) for all options.
 
 ### Environment Variables
 
+All runtime configuration uses the `MB_*` prefix:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MB_JWT_SECRET` | JWT secret key for token signing (set in production) | (built-in default) |
+| `MB_DISABLE_FILE_UPLOADS` | Set to `1` to disable file uploads | `0` |
+| `MB_DISABLE_ADMIN_ON_FIRST_BOOT` | Set to `1` to skip creating admin on first boot | `0` |
+| `MB_DISABLE_RATE_LIMIT` | Set to `1` to disable rate limiting | (enabled) |
+
 ```bash
 # Set JWT secret (important for production)
-export MANTIS_JWT_SECRET=your-secret-key-here
+export MB_JWT_SECRET=your-secret-key-here
 ```
 
 ---

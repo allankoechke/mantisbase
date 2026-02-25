@@ -309,7 +309,7 @@ mantisbase --dataDir ./data --publicDir ./public --scriptsDir ./scripts serve
 
 ```bash
 # Set JWT secret (important for production)
-export MANTIS_JWT_SECRET=your-secret-key-here
+export MB_JWT_SECRET=your-secret-key-here
 ```
 
 See [CLI Reference](01.cmd.md) for all options.

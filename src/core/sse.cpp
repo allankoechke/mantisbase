@@ -2,11 +2,24 @@
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/utils/uuidv7.h"
 
+namespace {
+    /** Strip token from auth before storing in session to avoid leaking credentials in memory. */
+    mb::json sanitizeAuthForStorage(const mb::json &auth) {
+        mb::json out = auth;
+        out["token"] = nullptr; // Never persist the raw token in session
+        return out;
+    }
+}
+
 mb::SSESession::SSESession(
     const std::string &client_id,
-    const std::set<std::string> &topics)
+    const std::set<std::string> &topics,
+    const json &auth,
+    const json &verification)
     : m_clientID(client_id),
       m_topics(topics),
+      m_auth(sanitizeAuthForStorage(auth)),
+      m_verification(verification),
       m_isActive(true),
       m_lastActivity(std::chrono::steady_clock::now()) {
 }
@@ -116,6 +129,22 @@ void mb::SSESession::setTopics(const std::set<std::string> &topics) {
     m_topics = topics;
 }
 
+void mb::SSESession::setAuthDetails(const json &auth, const json &verification) {
+    std::lock_guard lock(m_authMutex);
+    m_auth = sanitizeAuthForStorage(auth);
+    m_verification = verification;
+}
+
+mb::json mb::SSESession::getAuth() const {
+    std::lock_guard lock(m_authMutex);
+    return m_auth;
+}
+
+mb::json mb::SSESession::getVerification() const {
+    std::lock_guard lock(m_authMutex);
+    return m_verification;
+}
+
 mb::SSEMgr::~SSEMgr() { stop(); }
 
 void mb::SSEMgr::createRoutes() {
@@ -141,11 +170,13 @@ void mb::SSEMgr::createRoutes() {
     );
 }
 
-std::string mb::SSEMgr::createSession(const std::set<std::string> &initial_topics) {
+std::string mb::SSEMgr::createSession(const std::set<std::string> &initial_topics,
+                                       const json &auth,
+                                       const json &verification) {
     std::lock_guard lock(m_sessions_mutex);
 
     std::string client_id = generateClientID();
-    const auto session = std::make_shared<SSESession>(client_id, initial_topics);
+    const auto session = std::make_shared<SSESession>(client_id, initial_topics, auth, verification);
     m_sessions[client_id] = session;
 
     logEntry::info("SSE Manager",
@@ -269,9 +300,12 @@ std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handl
             return;
         }
 
+        const json auth = req.getOr<json>("auth", json::object());
+        const json verification = req.getOr<json>("verification", json::object());
+
         res.getResponse().set_chunked_content_provider(
             "text/event-stream",
-            [topics](size_t, const httplib::DataSink &sink) -> bool {
+            [topics, auth, verification](size_t, const httplib::DataSink &sink) -> bool {
                 auto &sse_mgr = MantisBase::instance().router().sseMgr();
 
                 // Helper to send SSE event
@@ -289,8 +323,8 @@ std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handl
                     return sink.write(message.data(), message.size());
                 };
 
-                // Create session
-                std::string client_id = sse_mgr.createSession(topics);
+                // Create session with stored auth details for later re-validation
+                std::string client_id = sse_mgr.createSession(topics, auth, verification);
 
                 const auto session = sse_mgr.getSession(client_id);
                 if (!session) return false;
@@ -334,12 +368,10 @@ std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handl
 
 std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handleSSESessionUpdate() {
     return [](mb::MantisRequest &req, mb::MantisResponse &res) {
-        // Get the auth var from the context, resort to empty object if it's not set.
         auto topics = req.getOr<json>("topics", json::array());
-        auto client_id = req.getOr<json>("client_id", std::string{});
-
-        // Get the auth var from the context, resort to empty object if it's not set.
+        auto client_id = req.getOr<std::string>("client_id", std::string{});
         auto auth = req.getOr<json>("auth", json::object());
+        auto verification = req.getOr<json>("verification", json::object());
 
         auto &sse_mgr = MantisBase::instance().router().sseMgr();
 
@@ -352,7 +384,8 @@ std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handl
         }
 
         if (const auto session = sse_mgr.getSession(client_id); session) {
-            session->setTopics(topics);
+            session->setTopics(new_topics);
+            session->setAuthDetails(auth, verification);
             res.sendJSON(200, {
                              {"error", ""},
                              {
