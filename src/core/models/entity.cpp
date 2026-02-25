@@ -310,7 +310,7 @@ namespace mb {
                 auto schema = findField(key);
                 if (!schema.has_value()) continue;
 
-                columns += columns.empty() ? (key + " = :" + key) : (", " + key + " = :" + key);
+                columns += columns.empty() ? std::format("{0} = :{0}", key) : std::format(", {0} = :{0}", key);
                 updateFields.push_back(key);
 
                 // Track file fields for use later on
