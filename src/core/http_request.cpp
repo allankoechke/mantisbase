@@ -124,7 +124,7 @@ bool MantisRequest::isMultipartFormData() const {
   return m_req.is_multipart_form_data();
 }
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
 void MantisRequest::registerDuktapeMethods() {
   // Get Duktape Context
   const auto ctx = MantisApp::instance().ctx();
@@ -226,7 +226,7 @@ std::pair<nlohmann::json, std::string> MantisRequest::getBodyAsJson() const {
   }
 }
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
 DukValue MantisRequest::get_duk(const std::string &key) {
   return m_store.get_duk(key);
 }

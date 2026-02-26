@@ -1,25 +1,22 @@
-//
-// Created by allan on 07/10/2025.
-//
+#ifndef MB_HTTP_H
+#define MB_HTTP_H
 
-#ifndef MANTISAPP_DUKTAPE_CUSTOM_TYPES_H
-#define MANTISAPP_DUKTAPE_CUSTOM_TYPES_H
+
 #include "exceptions.h"
 #include "models/entity.h"
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
 #endif
 
-#include <mantisbase/core/route_registry.h>
-#include <mantisbase/core/context_store.h>
+#include "route_registry.h"
+#include "context_store.h"
 #include "../utils/utils.h"
 #include "types.h"
-
 #include <fstream>
 
 namespace mb {
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
     class DuktapeImpl {
     public:
         static duk_ret_t nativeConsoleInfo(duk_context *ctx);
@@ -290,7 +287,7 @@ namespace mb {
         }
 
     private:
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
         // Context Methods for setting and getting context values
         DukValue get_duk(const std::string &key);
         DukValue getOr_duk(const std::string &key, const DukValue &default_value);
@@ -514,7 +511,7 @@ namespace mb {
          * @endcode
          */
         void sendJSON(int statusCode = 200, const json &data = json::object()) const;
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
         /**
          * @brief Send JSON response from Duktape value (for JavaScript).
          * @param statusCode HTTP status code
@@ -589,4 +586,4 @@ namespace mb {
     };
 } // mb
 
-#endif //MANTISAPP_DUKTAPE_CUSTOM_TYPES_H
+#endif //MB_HTTP_H

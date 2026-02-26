@@ -8,7 +8,7 @@
 
 namespace mb {
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> getAuthToken() {
-        std::string msg = MANTIS_FUNC();
+        std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, MantisResponse &_) {
             TRACE_FUNC(msg);
             // If we have an auth header, extract it into the ctx, else
@@ -34,7 +34,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hydrateContextData() {
-        std::string msg = MANTIS_FUNC();
+        std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             // Get the auth var from the context, resort to empty object if it's not set.
@@ -83,7 +83,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const std::string &entity_name) {
-        std::string msg = MANTIS_FUNC();
+        std::string msg = MB_FUNC();
         return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             try {
@@ -272,7 +272,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr) {
-        std::string msg = MANTIS_FUNC();
+        std::string msg = MB_FUNC();
         return [expr, msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             return REQUEST_PENDING;
@@ -280,7 +280,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireGuestOnly() {
-        std::string msg = MANTIS_FUNC();
+        std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             const auto auth = req.getOr<json>("auth", json::object());
@@ -297,7 +297,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminAuth() {
-        std::string msg = MANTIS_FUNC();
+        std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, const MantisResponse &res) {
             TRACE_FUNC(msg);
             try {
@@ -370,7 +370,7 @@ namespace mb {
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
         const std::string &entity_name) {
-        std::string msg = MANTIS_FUNC();
+        std::string msg = MB_FUNC();
         return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             return REQUEST_PENDING;
@@ -379,7 +379,7 @@ namespace mb {
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)>
     requireEntityAuth(const std::string &entity_name) {
-        std::string msg = MANTIS_FUNC();
+        std::string msg = MB_FUNC();
         return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             return REQUEST_PENDING;
@@ -405,7 +405,7 @@ namespace mb {
         int max_requests, 
         int window_seconds, 
         bool use_user_id) {
-        std::string msg = MANTIS_FUNC();
+        std::string msg = MB_FUNC();
         
         return [max_requests, window_seconds, use_user_id, msg](
             MantisRequest &req, MantisResponse &res) {

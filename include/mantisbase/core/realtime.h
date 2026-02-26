@@ -24,7 +24,7 @@
 #include "mantisbase/mantis.h"
 #include "nlohmann/json.hpp"
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
 #include <soci/postgresql/soci-postgresql.h>
 #include <libpq-fe.h>
 #endif
@@ -78,7 +78,7 @@ namespace mb {
         void stopWorker() const;
 
     private:
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
         // Create the notification trigger function
         static void createNotifyFunction(soci::session &sql);
 #endif
@@ -107,13 +107,13 @@ namespace mb {
 
         void runSQlite();
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
         void runPostgreSQL();
 #endif
 
         bool initSQLite();
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
         bool initPSQL();
 #endif
 
@@ -128,7 +128,7 @@ namespace mb {
         std::condition_variable cv;
         std::unique_ptr<soci::session> sql_ro;
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
         std::unique_ptr<PGconn, decltype(&PQfinish)> psql{nullptr, &PQfinish};
 #endif
     };

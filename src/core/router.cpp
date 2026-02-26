@@ -517,7 +517,7 @@ namespace mb {
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::handleLogs() {
-        const auto f = MANTIS_FUNC();
+        const auto f = MB_FUNC();
         return [f](const MantisRequest &req, MantisResponse &res) {
             try {
                 TRACE_FUNC(f);

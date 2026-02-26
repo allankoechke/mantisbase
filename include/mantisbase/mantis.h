@@ -6,8 +6,8 @@
  * It includes core components, models, utilities, and third-party dependencies.
  */
 
-#ifndef MANTIS_H
-#define MANTIS_H
+#ifndef MB_MANTIS_H
+#define MB_MANTIS_H
 
 // Utility functions
 #include "utils/utils.h"
@@ -53,4 +53,4 @@ namespace mb {
 
 #include <httplib.h>
 
-#endif //MANTIS_H
+#endif // MB_MANTIS_H

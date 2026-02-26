@@ -6,8 +6,8 @@
  * Created by allan on 11/05/2025.
  */
 
-#ifndef MANTIS_UTILS_H
-#define MANTIS_UTILS_H
+#ifndef MB_UTILS_H
+#define MB_UTILS_H
 
 #include <string>
 #include <filesystem>
@@ -20,7 +20,7 @@
 
 #include "../core/logger/logger.h"
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
 #include "dukglue/dukvalue.h"
 #endif
 
@@ -375,9 +375,9 @@ namespace mb {
      */
     bool isValidIP(const std::string &ip);
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
     void registerUtilsToDuktapeEngine();
 #endif
 }
 
-#endif // MANTIS_UTILS_H
+#endif // MB_UTILS_H

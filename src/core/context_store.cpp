@@ -2,7 +2,7 @@
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/core/logger/logger.h"
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
     #include <dukglue/dukglue.h>
 #endif
 
@@ -53,7 +53,7 @@ namespace mb
         return data.contains(key);
     }
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
     DukValue ContextStore::get_duk(const std::string& key)
     {
         const auto it = data.find(key);

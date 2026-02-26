@@ -1,5 +1,5 @@
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    if(NOT WIN32 AND MANTIS_BUILD_WITH_ASAN) # For now, only enable ASAN for non-windows based builds
+    if(NOT WIN32 AND MB_BUILD_WITH_ASAN) # For now, only enable ASAN for non-windows based builds
         include(cmake/asan.cmake)
         set(ENABLE_ASAN ON)
 

@@ -1,0 +1,63 @@
+name: Publish documentation
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or tag to build docs from (default: default branch)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  upload-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Install Doxygen (Ubuntu)
+        run: sudo apt-get install -y doxygen graphviz
+
+      - name: Configure CMake
+        run: cmake -B build -S .
+
+      - name: Build Doxygen Docs
+        run: cmake --build build --target doc
+
+      - name: Switch to pages branch and sync docs
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Fetch and checkout the 'gh-pages' branch (or create if missing)
+          git fetch origin gh-pages || true
+          git switch gh-pages || git checkout --orphan gh-pages
+
+          # Copy CNAME record before deleting the directory (if present)
+          cp docs/CNAME build/docs/html/ 2>/dev/null || true
+
+          # Clean and copy new docs
+          rm -rf docs
+          mkdir -p docs
+          cp -r build/docs/html/* docs/
+
+          # Commit and push
+          git add docs
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "CI: Update Doxygen Docs"
+            git push origin gh-pages
+          fi
