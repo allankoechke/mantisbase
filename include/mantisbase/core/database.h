@@ -11,7 +11,7 @@
 #include <nlohmann/json.hpp>
 #include <mantisbase/core/private-impl/soci_custom_types.hpp>
 
-#ifdef MANTIS_SCRIPTING_ENABLED
+#ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
 #endif
 
@@ -92,7 +92,7 @@ namespace mb {
          */
         [[nodiscard]] bool isConnected() const;
 
-#ifdef MANTIS_SCRIPTING_ENABLED
+#ifdef MB_SCRIPTING_ENABLED
         static void registerDuktapeMethods();
 #endif
 
@@ -113,7 +113,7 @@ namespace mb {
          * @return Execution status of the query. The objects returned (JSON Object or JSON Array) are
          * pushed directly to the JS context
          */
-#ifdef MANTIS_SCRIPTING_ENABLED
+#ifdef MB_SCRIPTING_ENABLED
         duk_ret_t query(duk_context *ctx);
 #endif
 

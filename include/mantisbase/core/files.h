@@ -6,8 +6,8 @@
  * Files are stored in entity-specific directories under the application's data directory.
  */
 
-#ifndef MANTIS_FILES_H
-#define MANTIS_FILES_H
+#ifndef MB_FILES_H
+#define MB_FILES_H
 
 #include <optional>
 #include <string>
@@ -178,4 +178,4 @@ namespace mb
     };
 } // mb
 
-#endif // MANTIS_FILES_H
+#endif // MB_FILES_H

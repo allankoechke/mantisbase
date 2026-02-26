@@ -8,7 +8,7 @@
 #include <nlohmann/json.hpp>
 #include "../utils/utils.h"
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
 #endif
 
@@ -118,7 +118,7 @@ namespace mb
             return std::any_cast<T&>(data.at(key));
         }
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
         DukValue get_duk(const std::string& key);
 
         /**

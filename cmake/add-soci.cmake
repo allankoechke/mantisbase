@@ -1,15 +1,15 @@
 # For configuration help for SOCI,
 # check https://github.com/allankoechke/soci/blob/master/docs/installation.md
 
-option(MANTIS_HAS_POSTGRESQL "Has PostgreSQL Backend Support" OFF)
+option(MB_HAS_POSTGRESQL "Has PostgreSQL Backend Support" OFF)
 
 if(UNIX)
     message("-- Adding PostgreSQL backend support")
-    set(MANTIS_HAS_POSTGRESQL ON CACHE BOOL "" FORCE)
-    add_compile_definitions(MANTIS_HAS_POSTGRESQL=1)
+    set(MB_HAS_POSTGRESQL ON CACHE BOOL "" FORCE)
+    add_compile_definitions(MB_HAS_POSTGRESQL=1)
 else(UNIX)
-    add_compile_definitions(MANTIS_HAS_POSTGRESQL=0)
-    set(MANTIS_HAS_POSTGRESQL OFF CACHE BOOL "" FORCE)
+    add_compile_definitions(MB_HAS_POSTGRESQL=0)
+    set(MB_HAS_POSTGRESQL OFF CACHE BOOL "" FORCE)
 endif()
 
 # Critical: Set SOCI_SHARED before adding subdirectory
@@ -29,11 +29,11 @@ set ( SOCI_DB2 OFF CACHE BOOL "Disable DB2 backend" FORCE )
 set ( SOCI_FIREBIRD OFF CACHE BOOL "Disable Firebird backend" FORCE )
 set ( SOCI_EMPTY OFF CACHE BOOL "Disable empty backend" FORCE )
 
-if(MANTIS_HAS_POSTGRESQL)
+if(MB_HAS_POSTGRESQL)
     set ( SOCI_POSTGRESQL ON CACHE BOOL "Enable PostgreSQL backend" FORCE )
-else(MANTIS_HAS_POSTGRESQL)
+else(MB_HAS_POSTGRESQL)
     set ( SOCI_POSTGRESQL OFF CACHE BOOL "Disable PostgreSQL backend" FORCE )
-endif(MANTIS_HAS_POSTGRESQL)
+endif(MB_HAS_POSTGRESQL)
 
 # Add SOCI subdirectory - this should generate soci-config.h
 add_subdirectory ( ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/soci )
@@ -44,14 +44,14 @@ target_link_libraries ( mantisbase
         soci_sqlite3
 )
 
-if(MANTIS_HAS_POSTGRESQL)
+if(MB_HAS_POSTGRESQL)
     target_link_libraries ( mantisbase
             PUBLIC
             soci_postgresql
             pq
             dl
     )
-endif(MANTIS_HAS_POSTGRESQL)
+endif(MB_HAS_POSTGRESQL)
 
 # Include directories
 target_include_directories ( mantisbase

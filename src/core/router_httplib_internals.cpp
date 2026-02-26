@@ -224,7 +224,7 @@ namespace mb {
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleSetupAdmin() {
         return [](MantisRequest &req, const MantisResponse &res) {
-            TRACE_MANTIS_FUNC();
+            TRACE_MB_FUNC();
             try {
                 auto auth = req.getOr("auth", json::object());
                 LogOrigin::authTrace("Auth Data", fmt::format("Auth Data: {}", auth.dump()));

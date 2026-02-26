@@ -306,7 +306,7 @@ namespace mb
         [[nodiscard]]
         bool ensureDirsAreCreated() const; /// Ensures we created all required directories
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
         /**
          * @brief Initialize JS engine and register Mantis functions to JS
          */

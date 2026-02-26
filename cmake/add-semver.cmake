@@ -9,11 +9,11 @@ execute_process(
 )
 
 # Suffix for pre-release or metadata (e.g., "-dev", "+gabcdef")
-set(MANTIS_VERSION_SUFFIX "-dev+g${GIT_COMMIT_HASH}")
-set(MANTIS_GIT_COMMIT "${GIT_COMMIT_HASH}")
+set(MB_VERSION_SUFFIX "-dev+g${GIT_COMMIT_HASH}")
+set(MB_GIT_COMMIT "${GIT_COMMIT_HASH}")
 
 # Fallback if not in a Git repo
 if(NOT GIT_COMMIT_HASH)
-    set(MANTIS_VERSION_SUFFIX "")
-    set(MANTIS_GIT_COMMIT "unknown")
+    set(MB_VERSION_SUFFIX "")
+    set(MB_GIT_COMMIT "unknown")
 endif()

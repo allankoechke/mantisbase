@@ -6,8 +6,8 @@
  * automatic cleanup of old records.
  */
 
-#ifndef MANTIS_LOG_DATABASE_H
-#define MANTIS_LOG_DATABASE_H
+#ifndef MB_LOG_DATABASE_H
+#define MB_LOG_DATABASE_H
 
 #include <string>
 #include <memory>
@@ -114,5 +114,5 @@ namespace mb {
     };
 }
 
-#endif // MANTIS_LOG_DATABASE_H
+#endif // MB_LOG_DATABASE_H
 

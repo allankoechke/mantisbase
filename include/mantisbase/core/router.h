@@ -3,8 +3,8 @@
  * @brief Router file for higher level route registration and removal *
  */
 
-#ifndef MANTIS_SERVER_H
-#define MANTIS_SERVER_H
+#ifndef MB_ROUTER_H
+#define MB_ROUTER_H
 
 #include <memory>
 #include <vector>
@@ -229,4 +229,4 @@ namespace mb {
     };
 } // mb
 
-#endif // MANTIS_SERVER_H
+#endif // MB_ROUTER_H

@@ -47,7 +47,7 @@ namespace mb {
 
     // TODO check for empty body fields before checking if they satisfy constraints
     std::optional<std::string> Validators::validatePreset(const std::string &key, const std::string &value) {
-        TRACE_MANTIS_FUNC();
+        TRACE_MB_FUNC();
         if (key.empty())
             throw MantisException(500, "Validator key can't be empty!");
 
@@ -68,7 +68,7 @@ namespace mb {
     }
 
     std::optional<std::string> Validators::minimumConstraintCheck(const json &field, const json &body) {
-        TRACE_MANTIS_FUNC();
+        TRACE_MB_FUNC();
         if (!field["constraints"]["min_value"].is_null()) {
             const auto &min_value = field["constraints"]["min_value"].get<double>();
             const auto &field_name = field["name"].get<std::string>();
@@ -98,7 +98,7 @@ namespace mb {
     }
 
     std::optional<std::string> Validators::maximumConstraintCheck(const json &field, const json &body) {
-        TRACE_MANTIS_FUNC();
+        TRACE_MB_FUNC();
         if (!field["constraints"]["max_value"].is_null()) {
             const auto max_value = field["constraints"]["max_value"].get<double>();
             const auto &field_name = field["name"].get<std::string>();
@@ -128,7 +128,7 @@ namespace mb {
     }
 
     std::optional<std::string> Validators::requiredConstraintCheck(const json &field, const json &body) {
-        TRACE_MANTIS_FUNC();
+        TRACE_MB_FUNC();
 
         try {
             // Get the required flag and the field name
@@ -149,7 +149,7 @@ namespace mb {
     }
 
     std::optional<std::string> Validators::validatorConstraintCheck(const json &field, const json &body) {
-        TRACE_MANTIS_FUNC();
+        TRACE_MB_FUNC();
         if (field["constraints"]["validator"].is_string()) {
             const auto &pattern = field["constraints"]["validator"].get<std::string>();
             const auto &field_name = field["name"].get<std::string>();
@@ -173,7 +173,7 @@ namespace mb {
     }
 
     std::optional<std::string> Validators::foreignKeyConstraintCheck(const json &field, const json &body) {
-        TRACE_MANTIS_FUNC();
+        TRACE_MB_FUNC();
 
         // Check if field has a foreign key constraint
         if (!field.contains("foreign_key") || field["foreign_key"].is_null()) {
@@ -225,7 +225,7 @@ namespace mb {
     }
 
     std::optional<std::string> Validators::viewTypeSQLCheck(const json &body) {
-        TRACE_MANTIS_FUNC();
+        TRACE_MB_FUNC();
         if (!body.contains("view_query") || body["view_query"].is_null() || trim(body["view_query"].get<std::string>()).
             empty()) {
             return "View tables require a valid SQL View query!";
@@ -291,7 +291,7 @@ namespace mb {
     }
 
     std::optional<std::string> Validators::validateRequestBody(const Entity &entity, const json &body) {
-        TRACE_MANTIS_FUNC();
+        TRACE_MB_FUNC();
         // If the table type is of view type, check that the SQL is passed in ...
         if (entity.type() == "view") {
             if (const auto err = viewTypeSQLCheck(body); err.has_value()) return err;
@@ -326,7 +326,7 @@ namespace mb {
     }
 
     std::optional<std::string> Validators::validateUpdateRequestBody(const Entity &entity, const json &body) {
-        TRACE_MANTIS_FUNC();
+        TRACE_MB_FUNC();
         // If the table type is of view type, check that the SQL is passed in ...
         if (entity.type() == "view") {
             if (const auto err = viewTypeSQLCheck(body); err.has_value()) return err;

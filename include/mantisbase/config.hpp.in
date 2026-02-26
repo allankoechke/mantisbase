@@ -1,28 +1,28 @@
 #ifndef CONFIG_HPP_IN_H
 #define CONFIG_HPP_IN_H
 
-#define MANTIS_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
-#define MANTIS_VERSION_MINOR @PROJECT_VERSION_MINOR@
-#define MANTIS_VERSION_PATCH @PROJECT_VERSION_PATCH@
-#define MANTIS_VERSION_SUFFIX "@MANTIS_VERSION_SUFFIX@"
-#define MANTIS_GIT_COMMIT "@MANTIS_GIT_COMMIT@"
-#define MANTIS_VERSION "@PROJECT_VERSION@@MANTIS_VERSION_SUFFIX@"
+#define MB_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define MB_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define MB_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define MB_VERSION_SUFFIX "@MB_VERSION_SUFFIX@"
+#define MB_GIT_COMMIT "@MB_GIT_COMMIT@"
+#define MB_VERSION "@PROJECT_VERSION@@MB_VERSION_SUFFIX@"
 
 namespace mb {
     inline const char* getVersionString() {
-        return MANTIS_VERSION;
+        return MB_VERSION;
     }
 
     inline const char* getGitCommit() {
-        return MANTIS_GIT_COMMIT;
+        return MB_GIT_COMMIT;
     }
 
     inline constexpr std::tuple<int, int, int> getVersionTuple() {
-        return { MANTIS_VERSION_MAJOR, MANTIS_VERSION_MINOR, MANTIS_VERSION_PATCH };
+        return { MB_VERSION_MAJOR, MB_VERSION_MINOR, MB_VERSION_PATCH };
     }
 
     inline constexpr bool isVersionAtLeast(int major, int minor, int patch) {
-        return std::tuple(MANTIS_VERSION_MAJOR, MANTIS_VERSION_MINOR, MANTIS_VERSION_PATCH)
+        return std::tuple(MB_VERSION_MAJOR, MB_VERSION_MINOR, MB_VERSION_PATCH)
              >= std::tuple(major, minor, patch);
     }
 } // namespace mb

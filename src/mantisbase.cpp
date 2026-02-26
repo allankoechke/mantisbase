@@ -40,7 +40,7 @@ namespace mb {
 
         parseArgs(); // Parse args & start units
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
         initJSEngine(); // Initialize JS engine
 #endif
     }
@@ -226,7 +226,7 @@ namespace mb {
         // Set server start time
         m_startTime = std::chrono::steady_clock::now();
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
         // Load start script for Mantis
         loadStartScript();
 #endif
@@ -358,15 +358,15 @@ namespace mb {
     }
 
     int MantisBase::appMinorVersion() {
-        return MANTIS_VERSION_MINOR;
+        return MB_VERSION_MINOR;
     }
 
     int MantisBase::appMajorVersion() {
-        return MANTIS_VERSION_MAJOR;
+        return MB_VERSION_MAJOR;
     }
 
     int MantisBase::appPatchVersion() {
-        return MANTIS_VERSION_PATCH;
+        return MB_VERSION_PATCH;
     }
 
     std::string MantisBase::dbType() const {
@@ -455,7 +455,7 @@ namespace mb {
         return true;
     }
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
     void MantisApp::initJSEngine() {
         // TRACE_CLASS_METHOD();
 

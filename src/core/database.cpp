@@ -9,7 +9,7 @@
 
 #include "mantisbase/core/models/entity_schema.h"
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
 #include <soci/postgresql/soci-postgresql.h>
 #endif
 
@@ -67,7 +67,7 @@ namespace mb {
                     sql << "PRAGMA journal_mode=WAL";
                     sql << "PRAGMA wal_autocheckpoint=500"; // Checkpoint every 500 pages
                 } else if (db_type == "postgresql") {
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
                     // Connection Options
                     ///> Basic: "dbname=mydb user=scott password=tiger"
                     ///> With Host: "host=localhost port=5432 dbname=test user=postgres password=postgres");
@@ -242,7 +242,7 @@ namespace mb {
         }
     }
 
-#ifdef MANTIS_SCRIPTING_ENABLED
+#ifdef MB_SCRIPTING_ENABLED
     void DatabaseUnit::registerDuktapeMethods() {
         const auto ctx = MantisApp::instance().ctx();
 
@@ -269,7 +269,7 @@ namespace mb {
 #endif
 
 
-#ifdef MANTIS_SCRIPTING_ENABLED
+#ifdef MB_SCRIPTING_ENABLED
     duk_ret_t DatabaseUnit::query(duk_context *ctx) {
         // TRACE_CLASS_METHOD();
 

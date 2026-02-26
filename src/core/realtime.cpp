@@ -29,7 +29,7 @@ bool mb::RealtimeDB::init() const {
             )";
         }
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
         else {
             *sql << R"(
             CREATE TABLE IF NOT EXISTS mb_change_log (
@@ -51,7 +51,7 @@ bool mb::RealtimeDB::init() const {
         *sql << "CREATE INDEX IF NOT EXISTS idx_change_log_entity ON mb_change_log(entity)";
         *sql << "CREATE INDEX IF NOT EXISTS idx_change_log_row_id ON mb_change_log(row_id)";
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
         // For PostgreSQL, create the hook function
         if (sql->get_backend_name() == "postgresql") {
             createNotifyFunction(*sql);
@@ -121,7 +121,7 @@ void mb::RealtimeDB::addDbHooks(const Entity &entity, const std::shared_ptr<soci
             "\n\tEND;", entity_name, old_obj);
     }
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
     else if (db_type == "postgresql") {
         // Create INSERT trigger
         *sess << std::format(R"(
@@ -172,7 +172,7 @@ void mb::RealtimeDB::dropDbHooks(const std::string &entity_name, const std::shar
         *sess << std::format("DROP TRIGGER IF EXISTS mb_{}_delete_trigger",
                              entity_name);
     }
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
     else if (db_type == "postgresql") {
         *sess << std::format("DROP TRIGGER IF EXISTS mb_{0}_insert_notify ON {0}",
                              entity_name);
@@ -202,7 +202,7 @@ void mb::RealtimeDB::stopWorker() const {
     }
 }
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
 void mb::RealtimeDB::createNotifyFunction(soci::session &sql) {
     sql << R"(
             CREATE OR REPLACE FUNCTION mb_notify_changes()
@@ -278,7 +278,7 @@ mb::RtDbWorker::RtDbWorker()
                        std::format("DB Connection should be active: {}", (isDbRunning() ? "true" : "false")));
     }
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
     else if (m_db_type == "postgresql") {
         if (!initPSQL())
             throw MantisException(500, "Worker: PostgreSQL db instantiation failed!");
@@ -302,7 +302,7 @@ mb::RtDbWorker::~RtDbWorker() {
 
 bool mb::RtDbWorker::isDbRunning() const {
     if (m_db_type == "sqlite3") return sql_ro && sql_ro->is_connected();
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
     if (m_db_type == "postgresql")
         return psql && PQstatus(psql.get()) == CONNECTION_OK;
 #endif
@@ -325,7 +325,7 @@ void mb::RtDbWorker::stopWorker() {
         sql_ro->close();
     }
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
     if (psql) {
         // PQfinish(m_pgConn);
         // m_pgConn = nullptr;
@@ -342,7 +342,7 @@ void mb::RtDbWorker::run() {
     if (m_db_type == "sqlite3")
         runSQlite();
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
     else if (m_db_type == "postgresql")
         runPostgreSQL();
 #endif
@@ -438,7 +438,7 @@ void mb::RtDbWorker::runSQlite() {
     }
 }
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
 void mb::RtDbWorker::runPostgreSQL() {
     const auto sleep_for = std::chrono::milliseconds(500);
 
@@ -545,7 +545,7 @@ bool mb::RtDbWorker::initSQLite() {
     return false;
 }
 
-#if MANTIS_HAS_POSTGRESQL
+#if MB_HAS_POSTGRESQL
 bool mb::RtDbWorker::initPSQL() {
     const auto &conn_str = MantisBase::instance().db().connectionStr();
     // Create PSQL object ...

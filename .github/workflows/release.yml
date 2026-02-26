@@ -1,164 +1,20 @@
-name: CMake Multiple Platforms
+name: Release
 
 on:
   push:
-    branches: [ "master", "v0.3.x" ]
     tags:
       - 'v*'
-  pull_request:
-      branches: [ "master", "v0.3.x" ]
 
 permissions:
   contents: write
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        build_type: [Release]
-        c_compiler: [gcc]
-        include:
-          - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-            platform: linux-x86_64
-            arch: x86_64
-          - os: windows-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-            platform: windows-latest
-            arch: x86_64
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 1
-
-      - name: Install dependencies on Ubuntu
-        if: matrix.os != 'windows-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libzstd-dev libpq-dev
-
-      - name: Install MinGW
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install mingw --no-progress
-
-      - name: Add MinGW to PATH
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
-
-      - name: Verify MinGW installation
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          $mingwPath = "C:\ProgramData\mingw64\mingw64\bin"
-          if (Test-Path "$mingwPath\gcc.exe") {
-            Write-Host "✓ GCC found at $mingwPath\gcc.exe"
-          } else {
-            Write-Host "✗ GCC not found at $mingwPath\gcc.exe"
-            Get-ChildItem "C:\ProgramData\mingw64" -Recurse -Filter "gcc.exe" | Select-Object -First 1 FullName
-          }
-          if (Test-Path "$mingwPath\mingw32-make.exe") {
-            Write-Host "✓ Make found at $mingwPath\mingw32-make.exe"
-          } else {
-            Write-Host "✗ Make not found, searching..."
-            Get-ChildItem "C:\ProgramData\mingw64" -Recurse -Filter "mingw32-make.exe" | Select-Object -First 1 FullName
-          }
-
-      - name: Set reusable strings
-        id: strings
-        shell: bash
-        run: |
-          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
-      - name: Configure CMake (Windows-latest)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          $mingwBin = "C:\ProgramData\mingw64\mingw64\bin"
-          $makePath = Join-Path $mingwBin "mingw32-make.exe"
-          
-          # Check if make exists, if not try alternative locations
-          if (-not (Test-Path $makePath)) {
-            $makePath = "C:\mingw64\bin\mingw32-make.exe"
-            if (-not (Test-Path $makePath)) {
-              # Try to find it
-              $found = Get-ChildItem "C:\ProgramData\mingw64" -Recurse -Filter "mingw32-make.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-              if ($found) {
-                $makePath = $found.FullName
-              }
-            }
-          }
-          
-          Write-Host "Using make at: $makePath"
-          
-          cmake -B ${{ steps.strings.outputs.build-output-dir }} `
-            -G "MinGW Makefiles" `
-            -DCMAKE_CXX_COMPILER="$mingwBin\g++.exe" `
-            -DCMAKE_C_COMPILER="$mingwBin\gcc.exe" `
-            -DCMAKE_MAKE_PROGRAM="$makePath" `
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
-            -DMANTIS_BUILD_TESTS=true `
-            -S ${{ github.workspace }}
-
-      - name: Configure CMake (Linux)
-        if: matrix.os != 'windows-latest'
-        run: |
-          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
-            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
-            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DMANTIS_BUILD_TESTS=true \
-            -S ${{ github.workspace }}
-
-      - name: Build
-        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
-
-      - name: Test
-        working-directory: ${{ steps.strings.outputs.build-output-dir }}
-        run: ctest --build-config ${{ matrix.build_type }}
-
-      - name: Zip the build output (Linux)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
-        run: |
-          cd ${{ github.workspace }}/build/bin
-          rm -f mantisbase_tests
-          mkdir -p zip
-          zip -r zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip mantisbase*
-
-      - name: Zip the build output (Windows-latest)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          del "${{ steps.strings.outputs.build-output-dir }}\bin\mantisbase_tests.exe"
-          $BinPath = "${{ steps.strings.outputs.build-output-dir }}\bin"
-          $ZipPath = "$BinPath\zip"
-          $ZipFile = "$ZipPath\mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip"
-
-          New-Item -ItemType Directory -Force -Path $ZipPath | Out-Null
-          Compress-Archive -Path "$BinPath\mantisbase*.exe" -DestinationPath $ZipFile -Force
-
-      - name: Upload zipped artifact
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v4
-        with:
-          name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip
-          path: |
-            ${{ github.workspace }}/build/bin/zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip
+    uses: ./.github/workflows/build-matrix.yml
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - uses: actions/download-artifact@v4
@@ -180,51 +36,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  upload-docs:
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 1
-
-      - name: Install Doxygen (Ubuntu)
-        run: sudo apt-get install -y doxygen graphviz
-
-      - name: Configure CMake
-        run: cmake -B build -S .
-
-      - name: Build Doxygen Docs
-        run: cmake --build build --target doc
-
-      - name: Switch to pages branch and sync docs
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-  
-          # Fetch and checkout the 'gh-pages' branch (or create if missing)
-          git fetch origin gh-pages || true
-          git switch gh-pages || git checkout --orphan gh-pages
-          
-          # Copy CNAME record before deleting the directory
-          cp docs/CNAME build/docs/html/
-          
-          # Clean and copy new docs
-          rm -rf docs
-          mkdir -p docs
-          cp -r build/docs/html/* docs/
-  
-          # Commit and push
-          git add docs
-
-          if git diff --cached --quiet; then
-            echo "✅ No changes to commit."
-          else          
-            git commit -m "CI: Update Doxygen Docs"
-            git push origin gh-pages
-          fi
+  docker:
+    needs: release
+    uses: ./.github/workflows/docker-publish.yml
+    with:
+      version: ${{ github.ref_name }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

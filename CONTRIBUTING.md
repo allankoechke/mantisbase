@@ -57,8 +57,8 @@ MantisBase uses CMake with the following key dependencies: README.md:46-53
 - bcrypt-cpp: Password hashing
 - argparse: Command-line parsing
 - Build Options
-  - *MANTIS_SHARED_DEPS*: Build dependencies as shared libraries (default: ON)
-  - *MANTIS_BUILD_TESTS*: Enable test compilation (default: ON)
+  - *MB_SHARED_DEPS*: Build dependencies as shared libraries (default: ON)
+  - *MB_BUILD_TESTS*: Enable test compilation (default: ON)
 
 ### 🧪 Testing
 Run tests after building:

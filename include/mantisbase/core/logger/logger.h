@@ -5,8 +5,8 @@
  * Created by allan on 12/05/2025.
  */
 
-#ifndef MANTIS_LOGGER_H
-#define MANTIS_LOGGER_H
+#ifndef MB_LOGGER_H
+#define MB_LOGGER_H
 
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
@@ -341,10 +341,10 @@ inline std::string getFile(const std::string &path) {
     return p.filename().string();
 }
 
-#define MANTIS_FUNC() std::format("{} - {}()", getFile(__FILE__), __FUNCTION__)
+#define MB_FUNC() std::format("{} - {}()", getFile(__FILE__), __FUNCTION__)
 #define TRACE_FUNC(x) mb::FuncLogger _logger(x);
-#define TRACE_MANTIS_FUNC() try{ mb::FuncLogger _logger(MANTIS_FUNC()); } catch(...){}
+#define TRACE_MB_FUNC() try{ mb::FuncLogger _logger(MB_FUNC()); } catch(...){}
 #define TRACE_CLASS_METHOD() mb::FuncLogger _logger(std::format("{} {}::{}()", getFile(__FILE__), "", __FUNCTION__));
 #define TRACE_METHOD() mb::FuncLogger _logger(std::format("{} {}()", getFile(__FILE__), __FUNCTION__));
 
-#endif //MANTIS_LOGGER_H
+#endif // MB_LOGGER_H

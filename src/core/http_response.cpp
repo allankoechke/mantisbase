@@ -147,7 +147,7 @@ namespace mb
         send(statusCode, data.dump(), "application/json");
     }
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
     void MantisResponse::sendJson(const int statusCode, const DukValue& data) const
     {
         const auto ctx = MantisApp::instance().ctx();
@@ -180,7 +180,7 @@ namespace mb
         m_res.status = statusCode;
     }
 
-#ifdef MANTIS_ENABLE_SCRIPTING
+#ifdef MB_SCRIPTING_ENABLED
     void MantisResponse::registerDuktapeMethods()
     {
         // Get Duktape context
