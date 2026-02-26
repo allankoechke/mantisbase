@@ -56,7 +56,7 @@ var searchData=
   ['socirow2json_53',['sociRow2Json',['../namespacemb.html#a2e69aaf5d4768b1c2c03a6b83db5e223',1,'mb']]],
   ['splitstring_54',['splitString',['../namespacemb.html#a2496b58c49de9a3a1758c8fc6fee2996',1,'mb']]],
   ['ssemgr_55',['ssemgr',['../classmb_1_1SSEMgr.html#acdd50c73fe9dbdb72071d2075f0e2048',1,'mb::SSEMgr::SSEMgr()'],['../classmb_1_1Router.html#aba0eb0e15e01a6085fb0a6bf9e8b0fd4',1,'mb::Router::sseMgr()']]],
-  ['ssesession_56',['SSESession',['../classmb_1_1SSESession.html#a8d416cb58b61165bc7fbdcf146737f5c',1,'mb::SSESession']]],
+  ['ssesession_56',['SSESession',['../classmb_1_1SSESession.html#ac2b4289ba3bfbdca2177eefcd79cb168',1,'mb::SSESession']]],
   ['start_57',['start',['../classmb_1_1SSEMgr.html#ac69abfdb95bc09495c1c819f3c372b1f',1,'mb::SSEMgr']]],
   ['start_5fquery_58',['start_query',['../classmb_1_1MantisLoggerImpl.html#a9a8e360dfb38f2d73c906c34bff7ee30',1,'mb::MantisLoggerImpl']]],
   ['starttime_59',['startTime',['../classmb_1_1MantisBase.html#a7298d7f3b9b35b20963d204db94e9e66',1,'mb::MantisBase']]],

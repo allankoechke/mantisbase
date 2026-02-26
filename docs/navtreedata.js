@@ -51,25 +51,24 @@ var NAVTREE =
         [ "Docker Compose", "docker.html#autotoc_md193", null ],
         [ "Configuration", "docker.html#autotoc_md195", null ],
         [ "Accessing the API", "docker.html#autotoc_md197", null ],
-        [ "Example: Full Setup with PostgreSQL", "docker.html#autotoc_md199", null ],
-        [ "Summary", "docker.html#autotoc_md201", null ]
+        [ "Example: Full Setup with PostgreSQL", "docker.html#autotoc_md199", null ]
       ] ]
     ] ],
     [ "Handling Files in MantisBase", "files.html", null ],
     [ "Healthcheck Endpoint", "healthcheck.html", null ],
     [ "Scripting in MantisBase", "scripting.html", [
-      [ "Scripting", "scripting.html#autotoc_md230", [
-        [ "Application", "scripting.html#autotoc_md231", null ],
-        [ "Database", "scripting.html#autotoc_md232", [
-          [ "Session", "scripting.html#autotoc_md233", null ]
+      [ "Scripting", "scripting.html#autotoc_md226", [
+        [ "Application", "scripting.html#autotoc_md227", null ],
+        [ "Database", "scripting.html#autotoc_md228", [
+          [ "Session", "scripting.html#autotoc_md229", null ]
         ] ],
-        [ "Router", "scripting.html#autotoc_md234", null ],
-        [ "Requests", "scripting.html#autotoc_md235", [
-          [ "Middlewares", "scripting.html#autotoc_md236", null ],
-          [ "MantisRequest Methods/Properties", "scripting.html#autotoc_md237", null ],
-          [ "MantisResponse Methods/Properties", "scripting.html#autotoc_md238", null ]
+        [ "Router", "scripting.html#autotoc_md230", null ],
+        [ "Requests", "scripting.html#autotoc_md231", [
+          [ "Middlewares", "scripting.html#autotoc_md232", null ],
+          [ "MantisRequest Methods/Properties", "scripting.html#autotoc_md233", null ],
+          [ "MantisResponse Methods/Properties", "scripting.html#autotoc_md234", null ]
         ] ],
-        [ "Utils (utility functions)", "scripting.html#autotoc_md239", null ]
+        [ "Utils (utility functions)", "scripting.html#autotoc_md235", null ]
       ] ]
     ] ],
     [ "Namespaces", "namespaces.html", [
@@ -108,7 +107,7 @@ var NAVTREEINDEX =
 "classmb_1_1EntitySchemaField.html#a4d0db00e18029856efbce370839ed923",
 "classmb_1_1MantisRequest.html#af4336e00080825774c2701b96a0f3019",
 "docker.html#autotoc_md197",
-"scripting.html#autotoc_md233"
+"scripting.html#autotoc_md230"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

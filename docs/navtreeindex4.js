@@ -1,12 +1,11 @@
 var NAVTREEINDEX4 =
 {
-"scripting.html#autotoc_md233":[10,0,1,0],
-"scripting.html#autotoc_md234":[10,0,2],
-"scripting.html#autotoc_md235":[10,0,3],
-"scripting.html#autotoc_md236":[10,0,3,0],
-"scripting.html#autotoc_md237":[10,0,3,1],
-"scripting.html#autotoc_md238":[10,0,3,2],
-"scripting.html#autotoc_md239":[10,0,4],
+"scripting.html#autotoc_md230":[10,0,2],
+"scripting.html#autotoc_md231":[10,0,3],
+"scripting.html#autotoc_md232":[10,0,3,0],
+"scripting.html#autotoc_md233":[10,0,3,1],
+"scripting.html#autotoc_md234":[10,0,3,2],
+"scripting.html#autotoc_md235":[10,0,4],
 "setup.html":[1],
 "soci__wrappers_8h.html":[13,0,1,0,1,0],
 "soci__wrappers_8h.html#a2e69aaf5d4768b1c2c03a6b83db5e223":[13,0,1,0,1,0,2],

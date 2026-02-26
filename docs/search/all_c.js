@@ -2,7 +2,7 @@ var searchData=
 [
   ['genentityid_0',['genEntityId',['../classmb_1_1EntitySchema.html#a92bd6f5e4cc3976fcda7a97b71bf9205',1,'mb::EntitySchema']]],
   ['generate_5fuuidv7_1',['generate_uuidv7',['../namespacemb.html#ad67ff06c25bb2ccdd5f52404e51405f9',1,'mb']]],
-  ['generated_20api_2',['4. Use Your Auto-generated API',['../index.html#autotoc_md251',1,'']]],
+  ['generated_20api_2',['4. Use Your Auto-generated API',['../index.html#autotoc_md247',1,'']]],
   ['generatereadabletimeid_3',['generateReadableTimeId',['../namespacemb.html#af1b47490bcd171b34e7371a721ec4d82',1,'mb']]],
   ['generateshortid_4',['generateShortId',['../namespacemb.html#ab5004cdfdf21f04cf630c15f7f191bac',1,'mb']]],
   ['generatetimebasedid_5',['generateTimeBasedId',['../namespacemb.html#a4bbd6b13fd498f212dd8f5d7b7565e2e',1,'mb']]],
@@ -46,7 +46,7 @@ var searchData=
   ['getsessioncount_43',['getSessionCount',['../classmb_1_1SSEMgr.html#a61d223e639b54bf4ec088d6c905df9f3',1,'mb::SSEMgr']]],
   ['getstatus_44',['getStatus',['../classmb_1_1MantisResponse.html#ac9608b04cea2a860591acc50f2978ba4',1,'mb::MantisResponse']]],
   ['gettable_45',['getTable',['../classmb_1_1EntitySchema.html#ace51c5ed330f93c06a361b8a688996f3',1,'mb::EntitySchema']]],
-  ['getting_20help_46',['Getting Help',['../index.html#autotoc_md281',1,'']]],
+  ['getting_20help_46',['Getting Help',['../index.html#autotoc_md277',1,'']]],
   ['gettopics_47',['getTopics',['../classmb_1_1SSESession.html#ac958aae34b3f554d1d3e7109b2321164',1,'mb::SSESession']]],
   ['gettrailervalue_48',['gettrailervalue',['../classmb_1_1MantisResponse.html#ac623990969d60a2e61135106025ed5ca',1,'mb::MantisResponse::getTrailerValue()'],['../classmb_1_1MantisRequest.html#adb67d4e1f3a1ea4a94f7c001b53e62d0',1,'mb::MantisRequest::getTrailerValue()']]],
   ['gettrailervaluecount_49',['gettrailervaluecount',['../classmb_1_1MantisResponse.html#ae45a43def7dcfaccd86a5e34cc45d84d',1,'mb::MantisResponse::getTrailerValueCount()'],['../classmb_1_1MantisRequest.html#a7cee88321983b115324d20a93c51bf1a',1,'mb::MantisRequest::getTrailerValueCount()']]],

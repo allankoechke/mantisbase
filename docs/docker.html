@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.4</span>
    </div>
   </td>
  </tr>
@@ -107,10 +107,17 @@ Building and Running</h2>
 <h3><a class="anchor" id="autotoc_md190"></a>
 Using Dockerfile</h3>
 <p>The repository includes a <code>Dockerfile</code> in the <code>/docker</code> directory. To build and run:</p>
-<div class="fragment"><div class="line">docker build -t mantisbase -f docker/Dockerfile .</div>
-<div class="line">docker run -p 7070:7070 --rm mantisbase</div>
-</div><!-- fragment --><p>This builds the image and starts the container, exposing MantisBase on port <code>80</code>.</p>
-<h3><a class="anchor" id="autotoc_md191"></a>
+<div class="fragment"><div class="line"># Build (optionally set MB_VERSION for a specific release)</div>
+<div class="line">docker build -t mantisbase -f docker/Dockerfile --build-arg MB_VERSION=0.3.4 .</div>
+<div class="line">docker run -p 7070:80 --rm mantisbase</div>
+</div><!-- fragment --><p>This builds the image and starts the container, exposing MantisBase on port <code>80</code>. Pass environment variables with <code>-e</code>:</p>
+<div class="fragment"><div class="line">docker run -p 7070:80 \</div>
+<div class="line">  -e MB_JWT_SECRET=your-secret-key-here \</div>
+<div class="line">  -v $(pwd)/data:/mb/data \</div>
+<div class="line">  -v $(pwd)/public:/mb/public \</div>
+<div class="line">  -v $(pwd)/scripts:/mb/scripts \</div>
+<div class="line">  --rm mantisbase</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md191"></a>
 Persistent Data</h3>
 <p>By default, container restarts will clear all data. To persist data, mount volumes to the following directories:</p>
 <ul>
@@ -128,16 +135,29 @@ Persistent Data</h3>
 <h2><a class="anchor" id="autotoc_md193"></a>
 Docker Compose</h2>
 <p>A <code>docker-compose.yaml</code> file is provided for easier management:</p>
-<div class="fragment"><div class="line">docker compose -f docker/docker-compose.yaml up --build</div>
-</div><!-- fragment --><p>This builds the image and starts the container with volume mounts configured.</p>
+<div class="fragment"><div class="line">cd docker</div>
+<div class="line"># Optional: set MB_JWT_SECRET and MB_VERSION in .env or export before running</div>
+<div class="line">docker compose -f docker-compose.yaml up --build</div>
+</div><!-- fragment --><p>This builds the image (using <code>MB_VERSION</code> build arg, default <code>0.3.4</code>) and starts the container with volume mounts configured. Set <code>MB_JWT_SECRET</code> and other <code>MB_*</code> variables in a <code>.env</code> file in the same directory or pass them when running <code>docker compose</code>.</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md195"></a>
 Configuration</h2>
-<p>You can configure MantisBase using environment variables or by mounting a configuration file. The container respects the same configuration options as the CLI:</p>
-<ul>
-<li><code>MANTIS_JWT_SECRET</code> - JWT secret key for token signing</li>
-<li>Database connection via command-line arguments or JSON config</li>
-</ul>
+<p>You can configure MantisBase using environment variables or by mounting a configuration file. The container respects the same configuration options as the CLI. All environment variables use the **<code>MB_*</code>** prefix:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Variable   </th><th class="markdownTableHeadNone">Description   </th><th class="markdownTableHeadNone">Default    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>MB_JWT_SECRET</code>   </td><td class="markdownTableBodyNone">JWT secret key for token signing (set in production)   </td><td class="markdownTableBodyNone">(built-in default)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>MB_VERSION</code>   </td><td class="markdownTableBodyNone">Build-time only: release version to download (Dockerfile <code>ARG</code>)   </td><td class="markdownTableBodyNone"><code>0.3.4</code>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>MB_DISABLE_FILE_UPLOADS</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> to disable file uploads   </td><td class="markdownTableBodyNone"><code>0</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>MB_DISABLE_ADMIN_ON_FIRST_BOOT</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> to skip creating admin on first boot   </td><td class="markdownTableBodyNone"><code>0</code>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>MB_DISABLE_RATE_LIMIT</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> to disable rate limiting   </td><td class="markdownTableBodyNone">(enabled)   </td></tr>
+</table>
+<p>Database connection is configured via command-line arguments or JSON config (e.g. <code>--database PSQL --connection "..."</code>).</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md197"></a>
 Accessing the API</h2>
@@ -150,24 +170,27 @@ Accessing the API</h2>
 <hr  />
 <h2><a class="anchor" id="autotoc_md199"></a>
 Example: Full Setup with PostgreSQL</h2>
-<div class="fragment"><div class="line">version: &#39;3.8&#39;</div>
-<div class="line">services:</div>
+<div class="fragment"><div class="line">services:</div>
 <div class="line">  mantisbase:</div>
 <div class="line">    build:</div>
 <div class="line">      context: .</div>
 <div class="line">      dockerfile: docker/Dockerfile</div>
+<div class="line">      args:</div>
+<div class="line">        MB_VERSION: &quot;0.3.4&quot;</div>
+<div class="line">    image: mantisbase:latest</div>
+<div class="line">    restart: unless-stopped</div>
 <div class="line">    ports:</div>
-<div class="line">      - &quot;7070:7070&quot;</div>
+<div class="line">      - &quot;7070:80&quot;</div>
 <div class="line">    volumes:</div>
 <div class="line">      - ./data:/mb/data</div>
 <div class="line">      - ./public:/mb/public</div>
 <div class="line">      - ./scripts:/mb/scripts</div>
 <div class="line">    environment:</div>
-<div class="line">      - MANTIS_JWT_SECRET=your-secret-key</div>
-<div class="line">    command: mantisbase --database PSQL --connection &quot;dbname=mantis host=postgres port=5432 user=postgres password=postgres&quot; serve</div>
+<div class="line">      MB_JWT_SECRET: &quot;your-secret-key&quot;</div>
+<div class="line">    command: [&quot;--database&quot;, &quot;PSQL&quot;, &quot;--connection&quot;, &quot;dbname=mantis host=postgres port=5432 user=postgres password=postgres&quot;, &quot;serve&quot;, &quot;-p&quot;, &quot;80&quot;]</div>
 <div class="line">    depends_on:</div>
 <div class="line">      - postgres</div>
-<div class="line">  </div>
+<div class="line"> </div>
 <div class="line">  postgres:</div>
 <div class="line">    image: postgres:15</div>
 <div class="line">    environment:</div>
@@ -179,11 +202,7 @@ Example: Full Setup with PostgreSQL</h2>
 <div class="line"> </div>
 <div class="line">volumes:</div>
 <div class="line">  postgres_data:</div>
-</div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md201"></a>
-Summary</h2>
-<p>Docker provides an easy way to deploy MantisBase with consistent environments. Use volume mounts to persist data and configure the container using environment variables or command-line arguments. </p>
-</div></div><!-- contents -->
+</div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
 <!-- start footer part -->

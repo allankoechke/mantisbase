@@ -2,7 +2,6 @@ var NAVTREEINDEX3 =
 {
 "docker.html#autotoc_md197":[7,0,4],
 "docker.html#autotoc_md199":[7,0,5],
-"docker.html#autotoc_md201":[7,0,6],
 "dukglue__utils__bindings_8cpp.html":[13,0,2,1,2],
 "dukglue__utils__bindings_8cpp.html#a429a89b3d31cbe5133f65a4c5f94f406":[13,0,2,1,2,0],
 "duktape__wrapper_8cpp.html":[13,0,2,0,2,0],
@@ -247,7 +246,8 @@ var NAVTREEINDEX3 =
 "router_8h_source.html":[13,0,1,0,0,13],
 "router__httplib__internals_8cpp.html":[13,0,2,0,17],
 "scripting.html":[10],
-"scripting.html#autotoc_md230":[10,0],
-"scripting.html#autotoc_md231":[10,0,0],
-"scripting.html#autotoc_md232":[10,0,1]
+"scripting.html#autotoc_md226":[10,0],
+"scripting.html#autotoc_md227":[10,0,0],
+"scripting.html#autotoc_md228":[10,0,1],
+"scripting.html#autotoc_md229":[10,0,1,0]
 };

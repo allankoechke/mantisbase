@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.3</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.4</span>
    </div>
   </td>
  </tr>
@@ -102,8 +102,8 @@ $(document).ready(function(){initNavTree('classmb_1_1SSESession.html',''); initR
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a8d416cb58b61165bc7fbdcf146737f5c" id="r_a8d416cb58b61165bc7fbdcf146737f5c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a8d416cb58b61165bc7fbdcf146737f5c">SSESession</a> (const std::string &amp;sessionId, const std::set&lt; std::string &gt; &amp;topics)</td></tr>
-<tr class="separator:a8d416cb58b61165bc7fbdcf146737f5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2b4289ba3bfbdca2177eefcd79cb168" id="r_ac2b4289ba3bfbdca2177eefcd79cb168"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#ac2b4289ba3bfbdca2177eefcd79cb168">SSESession</a> (const std::string &amp;sessionId, const std::set&lt; std::string &gt; &amp;topics, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;auth=json::object(), const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;verification=json::object())</td></tr>
+<tr class="separator:ac2b4289ba3bfbdca2177eefcd79cb168"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b53ec4991543aba285ac800c8afe628" id="r_a6b53ec4991543aba285ac800c8afe628"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a6b53ec4991543aba285ac800c8afe628">queueEvent</a> (const std::string &amp;eventType, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data)</td></tr>
 <tr class="separator:a6b53ec4991543aba285ac800c8afe628"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a016d7ae390daf8e1f5b1887c4939e735" id="r_a016d7ae390daf8e1f5b1887c4939e735"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a016d7ae390daf8e1f5b1887c4939e735">waitForEvent</a> (std::string &amp;eventType, <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data, std::chrono::milliseconds timeout)</td></tr>
@@ -130,10 +130,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a92236779d461a3474fcf511f6354a6c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Per-client SSE session: holds subscribed topics and queues events (change, ping). </p>
+<div class="textblock"><p>Per-client SSE session: holds subscribed topics, auth details, and queues events (change, ping). </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a8d416cb58b61165bc7fbdcf146737f5c" name="a8d416cb58b61165bc7fbdcf146737f5c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d416cb58b61165bc7fbdcf146737f5c">&#9670;&#160;</a></span>SSESession()</h2>
+<a id="ac2b4289ba3bfbdca2177eefcd79cb168" name="ac2b4289ba3bfbdca2177eefcd79cb168"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2b4289ba3bfbdca2177eefcd79cb168">&#9670;&#160;</a></span>SSESession()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -148,7 +148,19 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::set&lt; std::string &gt; &amp;&#160;</td>
-          <td class="paramname"><em>topics</em>&#160;</td>
+          <td class="paramname"><em>topics</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td>
+          <td class="paramname"><em>auth</em> = <code>json::object()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td>
+          <td class="paramname"><em>verification</em> = <code>json::object()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>

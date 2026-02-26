@@ -1,6 +1,6 @@
 var classmb_1_1SSESession =
 [
-    [ "SSESession", "classmb_1_1SSESession.html#a8d416cb58b61165bc7fbdcf146737f5c", null ],
+    [ "SSESession", "classmb_1_1SSESession.html#ac2b4289ba3bfbdca2177eefcd79cb168", null ],
     [ "close", "classmb_1_1SSESession.html#afd2722a3c1c12ef1e17209c4a310ef2d", null ],
     [ "formatEvent", "classmb_1_1SSESession.html#a0dfe5a3edcc372032e454419ae916232", null ],
     [ "getClientID", "classmb_1_1SSESession.html#a039fee58690ceab1fc6ebfc9d9d81540", null ],
