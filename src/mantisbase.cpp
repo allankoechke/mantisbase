@@ -347,10 +347,10 @@ namespace mb {
 
     std::string MantisBase::jwtSecretKey() {
         // This is the default secret key, override it through environment variable
-        // MANTIS_JWT_SECRET, recommended to override this key
+        // MB_JWT_SECRET, recommended to override this key
         // TODO add commandline input for overriding the key
         // or explictly require that key to be set before we boot.
-        return getEnvOrDefault("MANTIS_JWT_SECRET", "<our-very-secret-JWT-key>");
+        return getEnvOrDefault("MB_JWT_SECRET", "<our-very-secret-JWT-key>");
     }
 
     std::string MantisBase::appVersion() {

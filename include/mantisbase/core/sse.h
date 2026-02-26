@@ -31,11 +31,10 @@
 namespace mb {
     using json = nlohmann::json;
 
-    /** Per-client SSE session: holds subscribed topics and queues events (change, ping). */
+    /** Per-client SSE session: holds subscribed topics, auth details, and queues events (change, ping). */
     class SSESession {
         std::string m_clientID;
         std::set<std::string> m_topics;
-        std::string authToken;
 
         std::mutex m_queueMutex;
         std::condition_variable m_queueCV;
@@ -46,7 +45,9 @@ namespace mb {
 
     public:
         SSESession(const std::string &sessionId,
-                   const std::set<std::string> &topics);
+                   const std::set<std::string> &topics,
+                   const json &auth = json::object(),
+                   const json &verification = json::object());
 
         // Queue an event to be sent
         /** Queue an event (e.g. "change", "ping") to be sent to the client. */
@@ -94,7 +95,7 @@ namespace mb {
 
         /** Register GET and POST /api/v1/realtime routes. */
         static void createRoutes();
-        /** Create a new SSE session with the given topics; returns client_id (session id). */
+        /** Create a new SSE session with the given topics and optional auth details; returns client_id (session id). */
         std::string createSession(const std::set<std::string> &initial_topics);
 
         std::shared_ptr<SSESession> fetchSession(const std::string &session_id);

@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        MB_VERSION: "0.3.4"
     image: mantisbase:latest
     restart: unless-stopped
     ports:
@@ -11,3 +13,9 @@ services:
       - ./data:/mb/data
       - ./www:/mb/public
       - ./scripts:/mb/scripts
+    # See doc/06.docker.md for all MB_* variables. Set via .env or here.
+    environment:
+      MB_JWT_SECRET: ${MB_JWT_SECRET:-}
+      # MB_DISABLE_FILE_UPLOADS: "0"
+      # MB_DISABLE_ADMIN_ON_FIRST_BOOT: "0"
+      # MB_DISABLE_RATE_LIMIT: "0"
