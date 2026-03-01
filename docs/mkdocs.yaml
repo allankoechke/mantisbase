@@ -6,20 +6,15 @@ theme:
   name: material
   custom_dir: content/overrides
   features:
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.indexes
+    - navigation.footer
   palette:
-    # Palette toggle for light mode
-    - scheme: default
-      primary: red
-      accent: red
-      toggle:
-        icon: material/brightness-7 
-        name: Switch to dark mode
-
-    # Palette toggle for dark mode
+    # Palette for dark mode
     - scheme: slate
-      primary: red
-      accent: red
+      primary: grey
+      accent: teal
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -46,15 +41,18 @@ extra_javascript:
   - https://cdn.jsdelivr.net/npm/tablesort@5.3.0/src/sorts/tablesort.number.js
   - javascripts/tablesort.js
 nav:
-  - index.md
-  - guides/installation.md
-  - guides/cmd.md
-  - guides/api.md
-  - guides/auth.md
-  - guides/embedding.md
-  - guides/docker.md
-  - guides/rules.md
-  - guides/files.md
-  - guides/healthcheck.md
-  - guides/scripting.md
-  - api/index.md
+  - Home: index.md
+  - "Getting Started":
+      - guides/installation.md
+      - guides/docker.md
+  - "Guides":
+      - guides/cmd.md
+      - guides/api.md
+      - guides/auth.md
+      - guides/embedding.md
+      - guides/rules.md
+      - guides/files.md
+      - guides/healthcheck.md
+      - guides/scripting.md
+  - "C++ API Reference":
+      - api/index.md

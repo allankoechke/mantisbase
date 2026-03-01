@@ -1,4 +1,4 @@
-@mainpage Quick Start Guide
+# Quick Start Guide
 
 <p align="center">
   <img src="./guides/assets/mantisbase-banner.png" alt="MantisBase Cover" width="100%" />
