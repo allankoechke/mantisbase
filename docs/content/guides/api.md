@@ -1,10 +1,10 @@
-@page rest_api REST API Reference Guide
+# REST API Reference Guide
 
 MantisBase provides auto-generated RESTful APIs for interacting with database entities. This document covers the entity endpoints, schema management, realtime (SSE) API for live database change notifications (SQLite and PostgreSQL), and request handling.
 
 ---
 
-## 🌐 Base URL
+## Base URL
 
 When MantisBase is running locally:
 
@@ -20,7 +20,7 @@ mantisbase serve -p 8000 -h 127.0.0.1
 
 ---
 
-## 📄 Entity Endpoints
+## Entity Endpoints
 
 MantisBase automatically exposes CRUD endpoints for each entity (table or view):
 
@@ -60,7 +60,7 @@ curl -X DELETE http://localhost:7070/api/v1/entities/users/123 \
 
 ---
 
-## 🔐 Authentication
+## Authentication
 
 All entity endpoints require authentication via JWT tokens. Include the token in the `Authorization` header:
 
@@ -68,11 +68,11 @@ All entity endpoints require authentication via JWT tokens. Include the token in
 Authorization: Bearer <token>
 ```
 
-For authentication endpoints, see [Authentication API](02.auth.md).
+For authentication endpoints, see [Authentication API](auth.md).
 
 ---
 
-## 🛡️ Middlewares
+## Middlewares
 
 Middlewares are functions that run before your route handler, allowing you to add authentication, authorization, and request processing logic.
 
@@ -180,7 +180,7 @@ router.Get("/api/v1/me", [](MantisRequest& req, MantisResponse& res) {
 
 ---
 
-## 🗃️ Schema Management API
+## Schema Management API
 
 Schema management endpoints allow you to create, read, update, and delete entity schemas. **These endpoints require admin authentication only.**
 
@@ -303,7 +303,7 @@ curl -X PATCH http://localhost:7070/api/v1/schemas/posts \
 
 ---
 
-## 🎛️ Query Parameters [PENDING]
+## Query Parameters [PENDING]
 
 Future support for filtering, sorting, and pagination:
 
@@ -313,7 +313,7 @@ GET /api/v1/entities/tasks?status=done&limit=10&offset=20&sort=-created_at
 
 ---
 
-## ⚙️ Custom Endpoints
+##  Custom Endpoints
 
 You can create custom API endpoints using the router:
 
@@ -323,11 +323,11 @@ router.Get("/api/v1/custom", [](MantisRequest& req, MantisResponse& res) {
 }, {requireAdminAuth()});
 ```
 
-Check the [Embedding Guide](05.embedding.md) for more details.
+Check the [Embedding Guide](embedding.md) for more details.
 
 ---
 
-## 📁 File Handling
+##  File Handling
 
 Files uploaded via multipart/form-data are stored and can be accessed at:
 
@@ -335,11 +335,11 @@ Files uploaded via multipart/form-data are stored and can be accessed at:
 GET /api/files/<entity>/<filename>
 ```
 
-See [File Handling](11.files.md) for more details.
+See [File Handling](files.md) for more details.
 
 ---
 
-## 🔍 Entity Types and Validation
+## Entity Types and Validation
 
 ### Entity Types
 
@@ -528,7 +528,7 @@ For example, a foreign key on `post_id` in the `comments` table would create a c
 
 ---
 
-## 📊 System Endpoints
+## System Endpoints
 
 ### Logs Endpoint
 
@@ -647,7 +647,7 @@ When using `min_level`, all logs at that level and above are included. For examp
 
 ---
 
-## 📡 Realtime API
+## Realtime API
 
 MantisBase provides **realtime database change notifications** over **Server-Sent Events (SSE)** for both SQLite and PostgreSQL backends. Clients subscribe to topics (entity names and optionally specific row IDs) and receive live `insert`, `update`, and `delete` events as they occur.
 
@@ -799,7 +799,7 @@ Realtime is supported for:
 
 ---
 
-## 🎛️ Admin Dashboard
+## Admin Dashboard
 
 The MantisBase Admin Dashboard is a comprehensive web-based interface accessible at `/mb` (e.g., `http://localhost:7070/mb`). It provides a visual alternative to the REST API for managing your backend.
 

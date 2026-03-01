@@ -1,25 +1,25 @@
-@page setup Setting Up MantisBase
+# Setting Up MantisBase
 
 Getting started with **MantisBase** is simple. You can use the prebuilt binaries for a quick start, or embed the source code directly into your own C++ project.
 
-## 🧩 Installation Options
+## Installation Options
 
 MantisBase is available in two formats:
 
-- ✅ **Precompiled binaries** for **Windows** and **Linux** (64-bit)
+- **Precompiled binaries** for **Windows** and **Linux** (64-bit)
     - You can find them in the [Releases section](https://github.com/allankoechke/mantisbase/releases).
   > _Currently, only 64-bit builds for Linux and Windows are provided. Support for other platforms is planned for future versions._
 
-- 💻 **Source code** for embedding into your own C++ application
-    - See the [Embedding Mantis](05.embedding.md) guide for details.
+- **Source code** for embedding into your own C++ application
+    - See the [Embedding Mantis](embedding.md) guide for details.
 
 ---
 
-## ⚡️ Using Precompiled Binaries
+## Using Precompiled Binaries
 
 Each release includes zipped binaries named like:
 
-### 🔧 Setup Steps:
+### Setup Steps:
 
 1. **Download** the appropriate zip file from [Releases](https://github.com/allankoechke/mantisbase/releases).
 2. **Extract** it using your preferred archive tool.
@@ -29,7 +29,7 @@ Place the binary wherever you want, then run it directly from the terminal.
 
 ---
 
-## 🚀 Running MantisBase
+## Running MantisBase
 
 Once extracted, run the app like this:
 
@@ -39,7 +39,7 @@ Once extracted, run the app like this:
 
 This starts the MantisBase server on port 7070, bound to localhost. You can now access its REST API or embedded dashboard.
 
-## 🎛️ Admin Dashboard
+## Admin Dashboard
 
 MantisBase includes a powerful web-based admin dashboard that provides a visual interface for managing your data. The dashboard is **essential** for development and data management:
 
@@ -48,13 +48,11 @@ MantisBase includes a powerful web-based admin dashboard that provides a visual 
 - **Access Control Configuration** - Set up access rules visually
 - **Real-time Data Exploration** - Browse your data with search, filtering, and pagination
 
-![MantisBase Admin Dashboard](mantisbase-admin.png)
+![MantisBase Admin Dashboard](./assets/mantisbase-admin.png)
 
-After creating an admin account (see [Quick Start Guide](QuickStart.md)), access the dashboard at `http://localhost:7070/mb`. The dashboard provides a complete GUI alternative to the REST API, making it perfect for non-technical users and rapid development.
+After creating an admin account (see [Quick Start Guide](getting-started.md)), access the dashboard at `http://localhost:7070/mb`. The dashboard provides a complete GUI alternative to the REST API, making it perfect for non-technical users and rapid development.
 
-## 📚 Next Steps
-- Learn how to [Embed Mantis](05.embedding.md) into your C++ app.
-- Explore the [REST API generation](02.api.md) to build your app.
-- Access the [Admin Dashboard](QuickStart.md#2-access-the-admin-dashboard) to manage your data visually.
-
----
+## Next Steps
+- Learn how to [Embed Mantis](embedding.md) into your C++ app.
+- Explore the [REST API generation](api.md) to build your app.
+- Access the [Admin Dashboard](getting-started.md#2-access-the-admin-dashboard) to manage your data visually.

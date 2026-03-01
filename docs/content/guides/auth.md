@@ -1,10 +1,10 @@
-@page auth_api Authentication API
+# Authentication API
 
 MantisBase provides standalone authentication endpoints for user login, token refresh, and logout. These endpoints are separate from entity endpoints and handle JWT token management.
 
 ---
 
-## 🌐 Base URL
+## Base URL
 
 ```
 http://localhost:7070/api/v1/auth/
@@ -12,7 +12,7 @@ http://localhost:7070/api/v1/auth/
 
 ---
 
-## 📄 Authentication Endpoints
+## Authentication Endpoints
 
 | Method | Endpoint                      | Description                    |
 |--------|-------------------------------|--------------------------------|
@@ -23,7 +23,7 @@ http://localhost:7070/api/v1/auth/
 
 ---
 
-## 🔑 Login
+## Login
 
 Authenticate a user and receive a JWT token.
 
@@ -107,7 +107,7 @@ curl -X POST http://localhost:7070/api/v1/auth/login \
 
 ---
 
-## 🔄 Refresh Token
+## Refresh Token
 
 Refresh an existing JWT token to extend its validity.
 
@@ -137,7 +137,7 @@ curl -X POST http://localhost:7070/api/v1/auth/refresh \
 
 ---
 
-## 🚪 Logout
+## Logout
 
 Logout and invalidate the current token.
 
@@ -163,7 +163,7 @@ curl -X POST http://localhost:7070/api/v1/auth/logout \
 
 ---
 
-## 👤 Setup Admin
+## Setup Admin
 
 Create the initial admin account. This endpoint is typically used during first-time setup when no admin accounts exist. This is called by the system, do not use it.
 
@@ -200,7 +200,7 @@ curl -X POST http://localhost:7070/api/v1/auth/setup/admin \
 
 ---
 
-## 🔐 Using Tokens
+## Using Tokens
 
 After receiving a token from the login endpoint, include it in all subsequent API requests:
 
@@ -212,13 +212,8 @@ The token contains user information (id, entity) and is validated automatically 
 
 ---
 
-## ⏱️ Token Expiration
+## Token Expiration
 
 By default, tokens expire after 1 hour. Use the refresh endpoint to extend token validity without requiring the user to log in again.
 
 ---
-
-## 🏁 Summary
-
-The authentication API provides secure user authentication with JWT tokens. Tokens are automatically validated on all entity endpoints, ensuring only authenticated users can access protected resources.
-

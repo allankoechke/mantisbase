@@ -1,0 +1,7 @@
+title: MantisBase v0.3.4
+description: 
+files:
+  - "../include/mantisbase/**.h"
+#  - "../include/mantisbase/*.hpp"
+#  - "../include/mantisbase/**/*.hpp"
+#  - "../include/mantisbase/**/*.h"

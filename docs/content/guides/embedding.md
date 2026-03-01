@@ -1,4 +1,4 @@
-@page embedding Embedding MantisBase
+# Embedding MantisBase
 
 MantisBase is designed as a lightweight C++ library that can be embedded directly into your desktop, mobile, or embedded application. This guide explains how to integrate MantisBase into your project and configure it.
 
@@ -232,22 +232,6 @@ int main()
 
 ---
 
-## Project Structure
-
-A typical embedded project structure:
-
-```
-your-app/
-├── main.cpp
-├── CMakeLists.txt
-├── data/              # SQLite database and files (created automatically)
-├── public/            # Static assets (optional)
-├── scripts/           # JavaScript extensions (optional)
-└── mantisbase/        # MantisBase submodule
-```
-
----
-
 ## Using as a Submodule
 
 Add MantisBase as a git submodule:
@@ -319,9 +303,3 @@ int main()
     return app.run();
 }
 ```
-
----
-
-## Summary
-
-By embedding MantisBase, you gain powerful backend features including database storage, authentication, and REST APIs without requiring a separate server deployment. The library integrates seamlessly into your C++ application with minimal configuration.

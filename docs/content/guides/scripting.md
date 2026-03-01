@@ -1,4 +1,4 @@
-@page scripting Scripting in MantisBase
+# Scripting in MantisBase
 
 # Scripting
 On server run execution, MantisBase searches for a script file named `index.mantis.js` as an entry point into loading scripts into context. Once file is executed, ay actions are evaluated and methods stored for subsequent invokation by the C++ engine as needed. This is important for tasks like requests that reqires signature registration then when a new request comes in, we will route the request to the Javascript handler and/or middlewares.

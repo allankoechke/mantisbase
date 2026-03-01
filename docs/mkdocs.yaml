@@ -1,0 +1,60 @@
+site_name: MantisBase Documentation
+site_description:  User and developer docs for navigating the use and integration of MantisBase, an open source, single-binary, lightweight BaaS toolkit written in C++.
+docs_dir: content
+site_dir: site
+theme:
+  name: material
+  custom_dir: content/overrides
+  features:
+    - navigation.indexes
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: red
+      accent: red
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: red
+      accent: red
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - def_list
+  - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+plugins:
+  - search
+extra_css:
+  - stylesheets/doxide.css
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - https://cdn.jsdelivr.net/npm/tablesort@5.3.0/src/tablesort.min.js
+  - https://cdn.jsdelivr.net/npm/tablesort@5.3.0/src/sorts/tablesort.number.js
+  - javascripts/tablesort.js
+nav:
+  - index.md
+  - guides/installation.md
+  - guides/cmd.md
+  - guides/api.md
+  - guides/auth.md
+  - guides/embedding.md
+  - guides/docker.md
+  - guides/rules.md
+  - guides/files.md
+  - guides/healthcheck.md
+  - guides/scripting.md
+  - api/index.md

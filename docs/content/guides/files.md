@@ -1,4 +1,4 @@
-@page files Handling Files in MantisBase
+# Handling Files in MantisBase
 
 MantisBase supports file uploads and management for database records. Files can be associated with records through `file` or `files` field types and are stored on disk with references in the database.
 

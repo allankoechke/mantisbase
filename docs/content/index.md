@@ -1,7 +1,7 @@
 @mainpage Quick Start Guide
 
 <p align="center">
-  <img src="assets/mantisbase-banner.jpg" alt="MantisBase Cover" width="100%" />
+  <img src="./guides/assets/mantisbase-banner.png" alt="MantisBase Cover" width="100%" />
 </p>
 
 <p align="center">
@@ -55,7 +55,7 @@ cmake --build build
 ./build/mantisbase serve
 ```
 
-See [Installation Guide](00.installation.md) for more details.
+See [Installation Guide](guides/installation.md) for more details.
 
 ---
 
@@ -88,7 +88,7 @@ Log in with the admin credentials you just created.
 - **Search & Filtering** - Quickly find records with built-in search and filter capabilities
 - **File Management** - Upload and manage files associated with your entities
 
-![MantisBase Admin Dashboard](mantisbase-admin.png)
+![MantisBase Admin Dashboard](./guides/assets/mantisbase-admin.png)
 
 The dashboard is the **recommended way** to interact with MantisBase during development, as it provides a complete GUI alternative to the REST API and makes it easy to explore and manage your data.
 
@@ -195,7 +195,7 @@ curl -H "Authorization: Bearer <token>" \
   http://localhost:7070/api/v1/entities/posts
 ```
 
-See [Authentication API](02.auth.md) for all auth endpoints.
+See [Authentication API](guides/auth.md) for all auth endpoints.
 
 ---
 
@@ -222,7 +222,7 @@ Example rules:
 }
 ```
 
-See [Access Rules](03.rules.md) for detailed documentation.
+See [Access Rules](guides/rules.md) for detailed documentation.
 
 ---
 
@@ -243,7 +243,7 @@ Access files at:
 http://localhost:7070/api/files/posts/photo.jpg
 ```
 
-See [File Handling](11.files.md) for details.
+See [File Handling](guides/files.md) for details.
 
 ---
 
@@ -277,11 +277,11 @@ All entities automatically get these endpoints:
 ### System Endpoints
 
 - `GET /api/v1/health` - Health check
-- `GET /api/v1/sys/logs` - System logs (admin only, see [API Reference](02.api.md#-system-endpoints))
+- `GET /api/v1/sys/logs` - System logs (admin only, see [API Reference](api.md#-system-endpoints))
 - `GET /api/files/<entity>/<filename>` - Serve files
 - `GET /mb` - Admin dashboard
 
-See [API Reference](02.api.md) for complete documentation.
+See [API Reference](api.md) for complete documentation.
 
 ---
 
@@ -312,7 +312,7 @@ mantisbase --dataDir ./data --publicDir ./public --scriptsDir ./scripts serve
 export MB_JWT_SECRET=your-secret-key-here
 ```
 
-See [CLI Reference](01.cmd.md) for all options.
+See [CLI Reference](guides/cmd.md) for all options.
 
 ---
 
@@ -331,15 +331,15 @@ Now that you have MantisBase running:
 
 ## Documentation
 
-- [Installation Guide](00.installation.md) - Detailed installation instructions
-- [CLI Reference](01.cmd.md) - All command-line options
-- [API Reference](02.api.md) - Complete API documentation
-- [Authentication API](02.auth.md) - Auth endpoints and usage
-- [Access Rules](03.rules.md) - Permission system guide
-- [Embedding Guide](05.embedding.md) - Use as a C++ library
-- [File Handling](11.files.md) - File upload and serving
-- [Scripting Guide](13.scripting.md) - JavaScript extensions
-- [Docker Guide](06.docker.md) - Running in containers
+- [Installation Guide](guides/installation.md) - Detailed installation instructions
+- [CLI Reference](guides/cmd.md) - All command-line options
+- [API Reference](guides/api.md) - Complete API documentation
+- [Authentication API](guides/auth.md) - Auth endpoints and usage
+- [Access Rules](guides/rules.md) - Permission system guide
+- [Embedding Guide](guides/embedding.md) - Use as a C++ library
+- [File Handling](guides/files.md) - File upload and serving
+- [Scripting Guide](guides/scripting.md) - JavaScript extensions
+- [Docker Guide](guides/docker.md) - Running in containers
 
 ---
 
@@ -367,17 +367,4 @@ Deploy MantisBase as a standalone microservice for specific data management need
 
 - **Documentation**: Check the [docs directory](.) for detailed guides
 - **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/allankoechke/mantisbase/issues)
-- **Examples**: See the [examples directory](../examples) for code samples
-
----
-
-## Summary
-
-MantisBase provides everything you need for a backend in a single C++ library:
-- Create tables and get instant REST APIs
-- Built-in authentication and access control
-- Admin dashboard for easy management
-- File handling and JavaScript extensions
-- Embeddable in your applications
-
-Get started in minutes, scale as needed.
+- **Examples**: See the [examples directory](../../examples) for code samples

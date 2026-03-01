@@ -1,4 +1,4 @@
-@page cli Command Line Usage
+# Command Line Usage
 
 MantisBase has a comprehensive CLI tool built on top of `argparse`, particularly useful in:
 - Setting up Admin user accounts
@@ -6,7 +6,7 @@ MantisBase has a comprehensive CLI tool built on top of `argparse`, particularly
 - Initiating migrations (up or down)
 - etc.
 
-# 🧭 mantisbase CLI Reference
+# CLI Reference
 
 The `mantisbase` binary provides a modular command-line interface to manage and run the MantisBase backend.
 
@@ -18,7 +18,7 @@ You can run it in multiple modes:
 
 ---
 
-## ⚙️ Global Options
+## Global Options
 
 These options apply regardless of the command:
 
@@ -34,7 +34,7 @@ These options apply regardless of the command:
 
 ---
 
-## 🚀 serve Command
+## `serve` Command
 
 Start the HTTP server.
 
@@ -55,7 +55,7 @@ Start the HTTP server.
 
 ---
 
-## 👤 admins Command
+## `admins` Command
 
 Add or remove admin users.
 
@@ -79,7 +79,7 @@ If successful, you can use the credentials to log in on the admin dashboard or a
 
 ---
 
-## 🛠️ migrate Command *(WIP)*
+## `migrate` Command *(WIP)*
 
 Handles schema migrations.
 
@@ -98,11 +98,10 @@ Handles schema migrations.
 ---
 
 
-## 📚 See Also
+## See Also
 
-* [Quick Start](QuickStart.md)
-* [Embedding MantisBase](05.embedding.md)
-* [REST API Reference](02.api.md)
-* [Authentication API](02.auth.md)
+* [Quick Start](getting-started.md)
+* [Embedding MantisBase](embedding.md)
+* [REST API Reference](api.md)
+* [Authentication API](auth.md)
 
----
