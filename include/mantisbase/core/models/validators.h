@@ -1,6 +1,6 @@
 /**
  * @file validators.h
- * @brief Validation utilities for entity schemas and request bodies.
+ * Validation utilities for entity schemas and request bodies.
  *
  * Provides validation methods for checking field constraints, presets,
  * and request body validation against entity schemas.

@@ -1,6 +1,6 @@
 /**
  * @file types.h
- * @brief Type definitions and aliases for MantisBase.
+ * Type definitions and aliases for MantisBase.
  *
  * Defines common types used throughout the MantisBase library including
  * handler functions, middleware types, and route keys.

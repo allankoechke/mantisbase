@@ -1,6 +1,6 @@
 /**
  * @file kv_store.h
- * @brief Key-value store for application settings.
+ * Key-value store for application settings.
  *
  * Manages application-wide settings stored in the database with
  * REST API endpoints for configuration management.
@@ -17,7 +17,8 @@
 namespace mb
 {
     /**
-     * @brief Manages application settings
+     * Manages application settings
+     * @ingroup cpp_core
      */
     class KeyValStore
     {
@@ -27,18 +28,18 @@ namespace mb
         void close() {}
 
         /**
-         * @brief Initialize and set up routes for fetching settings data
+         * Initialize and set up routes for fetching settings data
          * @return `true` if setting up routes succeeded.
          */
         bool setupRoutes();
 
         /**
-         * @brief Initialize migration, create base data for setting fields
+         * Initialize migration, create base data for setting fields
          */
         void migrate();
 
         /**
-         * @brief Evaluate if request is authenticated and has permission to access this route.
+         * Evaluate if request is authenticated and has permission to access this route.
          *
          * This route is exclusive to admin login only!
          *
@@ -51,7 +52,7 @@ namespace mb
 
         // Getter sections
         /**
-         * @brief Get the current config data instance.
+         * Get the current config data instance.
          *
          * @return Config data as a JSON object
          */
@@ -59,14 +60,14 @@ namespace mb
 
     private:
         /**
-         * @brief Fetch config data from database, initializing it to defaults if not existing yet!
+         * Fetch config data from database, initializing it to defaults if not existing yet!
          *
          * @return json object having the config, or empty json object.
          */
         json initSettingsConfig();
 
         /**
-         * @brief Called by @see setupRoutes() to initialize routes specific to settings config only!
+         * Called by @see setupRoutes() to initialize routes specific to settings config only!
          */
         void setupConfigRoutes();
 

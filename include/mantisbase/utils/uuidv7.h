@@ -1,6 +1,6 @@
 /**
  * @file uuidv7.h
- * @brief UUID v7 generation utilities.
+ * UUID v7 generation utilities.
  *
  * Provides functions for generating UUID v7 identifiers that are
  * time-ordered and suitable for database primary keys.
@@ -19,6 +19,10 @@
 #include <cstdint>
 #include <mutex>
 
+/**
+ * Can we document namespaces here?
+ * @ingroup cpp_utils
+ */
 namespace mb {
     inline uint64_t now_unix_ms() {
         using namespace std::chrono;

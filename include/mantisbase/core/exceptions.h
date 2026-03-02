@@ -1,6 +1,6 @@
 /**
  * @file exceptions.h
- * @brief Custom exception class for MantisBase errors.
+ * Custom exception class for MantisBase errors.
  *
  * Provides a structured exception type with error code, message,
  * and optional description for error handling.
@@ -13,16 +13,46 @@
 #include <string>
 
 namespace mb {
+    /**
+     * Custom exception class for MantisBase errors.
+     *
+     * Provides a structured exception type with error code, message,
+     * and optional description for error handling.
+     * @ingroup cpp_core
+     */
     class MantisException final : public std::exception {
     public:
+        /**
+         * Construct a MantisException with an error code and message.
+         * @param _code Error code
+         * @param _msg Error message
+         */
         MantisException(int _code, std::string _msg);
 
+        /**
+         * Construct a MantisException with an error code, message, and description.
+         * @param _code Error code
+         * @param _msg Error message
+         * @param _desc Error description
+         */
         MantisException(int _code, std::string _msg, std::string _desc);
 
+        /**
+         * Get the error message.
+         * @return Error message
+         */
         [[nodiscard]] const char* what() const noexcept override;
 
+        /**
+         * Get the error description.
+         * @return Error description
+         */
         [[nodiscard]] const char* desc() const noexcept;
 
+        /**
+         * Get the error code.
+         * @return Error code
+         */
         [[nodiscard]] int code() const noexcept;
 
     private:

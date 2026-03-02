@@ -1,6 +1,6 @@
 /**
  * @file route_registry.h
- * @brief Route registry
+ * Route registry
  *
  * Created by allan on 12/05/2025.
  */
@@ -28,7 +28,7 @@ namespace mb
     struct RouteKeyHash
     {
         /**
-         * @brief Operator function called when hashing RouteKey is required.
+         * Operator function called when hashing RouteKey is required.
          * @param k RouteKey pair
          * @return Hash of RouteKey
          */
@@ -36,7 +36,7 @@ namespace mb
     };
 
     /**
-     * @brief Struct encompassing the list of middlewares and the handler function registered to a specific route.
+     * Struct encompassing the list of middlewares and the handler function registered to a specific route.
      */
     struct RouteHandler
     {
@@ -54,7 +54,7 @@ namespace mb
 
     public:
         /**
-         * @brief Add new route to the registry.
+         * Add new route to the registry.
          *
          * @param method Request method, i.e. GET, POST, PATCH, etc.
          * @param path Request path.
@@ -66,7 +66,7 @@ namespace mb
                  HandlerFn handler,
                  const Middlewares& middlewares);
         /**
-         * @brief Add new route to the registry.
+         * Add new route to the registry.
          *
          * @param method Request method, i.e. GET, POST, PATCH, etc.
          * @param path Request path.
@@ -78,7 +78,7 @@ namespace mb
                  HandlerWithContentReaderFn handler,
                  const Middlewares& middlewares);
         /**
-         * @brief Find a route in the registry matching given method and route.
+         * Find a route in the registry matching given method and route.
          *
          * @param method Request method.
          * @param path Request path.
@@ -87,7 +87,7 @@ namespace mb
         const RouteHandler* find(const std::string& method, const std::string& path) const;
 
         /**
-         * @brief Remove find and remove existing route + path pair from the registry
+         * Remove find and remove existing route + path pair from the registry
          *
          * @param method Request method
          * @param path Request path

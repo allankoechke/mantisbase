@@ -1,6 +1,6 @@
 /**
  * @file soci_custom_types.hpp
- * @brief Extend base soci types
+ * Extend base soci types
  *
  * This file adds `boolean` and `json` types to soci.
  */
@@ -14,7 +14,7 @@
 #include "../exceptions.h"
 
 /**
- * @brief Add SOCI support for `booleans` and `json` types
+ * Add SOCI support for `booleans` and `json` types
  *
  * SOCI docs say that for each data type we need to support, we have to implement a `struct` having two methods:
  * - `from_base(...)` to convert from base type to intended type
@@ -26,7 +26,7 @@ namespace soci {
     using json = nlohmann::json;
 
     /**
-     * @brief Boolean type conversion to base soci::type
+     * Boolean type conversion to base soci::type
      * This will allow us to cast to/from boolean types when dealing with soci.
      */
     template<>
@@ -48,7 +48,7 @@ namespace soci {
     };
 
     /**
-     * @brief JSON type conversion to base soci::type
+     * JSON type conversion to base soci::type
      * This will allow us to cast to/from json types when dealing with soci.
      */
     template<>

@@ -23,7 +23,7 @@ namespace mb
      *
      * For instance, the auth middleware will inject user `id` and subsequent middlewares can retrieve it as needed.
      *
-     * @code
+     * ```cpp
      * // Create the object
      * Context ctx;
      *
@@ -40,16 +40,17 @@ namespace mb
      * req.set("valid", true) // BOOLs
      *
      * req.getOr("nothing", "Default Value")
-     * @endcode
+     * ```
      *
      * The value returned from the `get()` is a std::optional, meaning a std::nullopt if the key was not found.
-     * @code
+     * ```cpp
      * std::optional key = ctx.get<std::string>("key");
      * if(key.has_value()) { .... }
-     * @endcode
+     * ```
      *
      * Additionally, we have a @see get_or() method that takes in a key and a default value if the key is missing. This
      * unlike @see get() method, returns a `T&` instead of `T*` depending on the usage needs.
+     * @ingroup cpp_core
      */
     class ContextStore
     {
@@ -59,7 +60,7 @@ namespace mb
     public:
         ContextStore() = default;
         /**
-         * @brief Convenience method for dumping context data for debugging.
+         * Convenience method for dumping context data for debugging.
          */
         void dump();
 
@@ -71,7 +72,7 @@ namespace mb
         bool hasKey(const std::string& key) const;
 
         /**
-         * @brief Store a key-value data in the context
+         * Store a key-value data in the context
          *
          * @tparam T Value data type
          * @param key Value key
@@ -84,7 +85,7 @@ namespace mb
         }
 
         /**
-         * @brief Get context value given the key.
+         * Get context value given the key.
          *
          * @tparam T Value data type
          * @param key Value key
@@ -101,7 +102,7 @@ namespace mb
         }
 
         /**
-         * @brief Get context value given the key.
+         * Get context value given the key.
          *
          * @tparam T Value data type
          * @param key Value key
@@ -131,7 +132,7 @@ namespace mb
         DukValue getOr_duk(const std::string& key, DukValue default_value);
 
         /**
-         * @brief Store a value in store with given `key` and `value`
+         * Store a value in store with given `key` and `value`
          *
          * @param key Key to store in context store
          * @param value Value to correspond to given `key`

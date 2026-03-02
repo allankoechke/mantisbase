@@ -1,6 +1,6 @@
 /**
  * @file database_mgr.h
- * @brief Database Unit file for managing base database functionality: connecton, pooling, logging, etc.
+ * Database Unit file for managing base database functionality: connecton, pooling, logging, etc.
  */
 
 #ifndef DATABASE_H
@@ -23,33 +23,34 @@ namespace mb {
     using json = nlohmann::json;
 
     /**
-     * @brief Database connection and session management.
+     * Database connection and session management.
      *
      * Handles database connections, connection pooling, and provides
      * session management for executing queries. Supports SQLite (default)
      * and PostgreSQL.
      *
-     * @code
+     * ```cpp
      * Database db;
      * db.connect("dbname=mantis user=postgres password=pass");
      * auto session = db.session();
      * *session << "SELECT * FROM users", soci::into(rows);
-     * @endcode
+     * ```
+     * @ingroup cpp_core
      */
     class Database {
     public:
         /**
-         * @brief Construct database instance.
+         * Construct database instance.
          */
         Database();
 
         /**
-         * @brief Destructor (disconnects from database).
+         * Destructor (disconnects from database).
          */
         ~Database();
 
         /**
-         * @brief Connect to database and initialize connection pool.
+         * Connect to database and initialize connection pool.
          * @param conn_str Connection string (format depends on database type)
          *   - SQLite: path to database file or empty for default
          *   - PostgreSQL: "dbname=name host=host port=5432 user=user password=pass"
@@ -60,18 +61,18 @@ namespace mb {
 
 
         /**
-         * @brief Close all database connections and destroy connection pool.
+         * Close all database connections and destroy connection pool.
          */
         void disconnect();
 
         /**
-         * @brief Create system tables (mb_tables, mb_admins, etc.).
+         * Create system tables (mb_tables, mb_admins, etc.).
          * @return true if migration successful, false otherwise
          */
         bool createSysTables() const;
 
         /**
-         * @brief Get a database session from the connection pool.
+         * Get a database session from the connection pool.
          * @return Shared pointer to soci::session
          * @code
          * auto sql = db.session();
@@ -81,13 +82,13 @@ namespace mb {
         [[nodiscard]] std::shared_ptr<soci::session> session() const;
 
         /**
-         * @brief Get access to the underlying connection pool.
+         * Get access to the underlying connection pool.
          * @return Reference to soci::connection_pool
          */
         [[nodiscard]] soci::connection_pool &connectionPool() const;
 
         /**
-         * @brief Check if database is connected.
+         * Check if database is connected.
          * @return true if connected, false otherwise
          */
         [[nodiscard]] bool isConnected() const;
@@ -98,7 +99,7 @@ namespace mb {
 
     private:
         /**
-         * @brief Execute an SQL script, bound to any given values and return a single or no
+         * Execute an SQL script, bound to any given values and return a single or no
          * Dukvalue object. In case of any error, we throw the error back to JS.
          *
          * @code
@@ -118,7 +119,7 @@ namespace mb {
 #endif
 
         /**
-         * @brief Write WAL data to db file and truncate the WAL file
+         * Write WAL data to db file and truncate the WAL file
          */
         void writeCheckpoint() const;
 
@@ -128,13 +129,13 @@ namespace mb {
     };
 
     /**
-     * @brief Logger implementation for soci, allowing us to override the default logging behaviour
+     * Logger implementation for soci, allowing us to override the default logging behaviour
      * with our own custom logger.
      */
     class MantisLoggerImpl : public soci::logger_impl {
     public:
         /**
-         * @brief Called before query is executed by soci, we can log the query here.
+         * Called before query is executed by soci, we can log the query here.
          * @param query SQL Query to be executed
          */
         void start_query(std::string const &query) override {
@@ -144,7 +145,7 @@ namespace mb {
 
     private:
         /**
-         * @brief Obtain a pointer to the logger implementation
+         * Obtain a pointer to the logger implementation
          * @return Logger implementation pointer
          */
         logger_impl *do_clone() const override {

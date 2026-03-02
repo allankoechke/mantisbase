@@ -1,6 +1,6 @@
 /**
  * @file realtime.h
- * @brief Realtime database change detection for SQLite and PostgreSQL.
+ * Realtime database change detection for SQLite and PostgreSQL.
  *
  * Provides live change notifications for entity tables so that SSE (Server-Sent Events)
  * and other consumers can broadcast insert, update, and delete events. Supported backends:

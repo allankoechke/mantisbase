@@ -1,6 +1,6 @@
 /**
  * @file expr_evaluator.h
- * @brief Expression Evaluator Unit for database access rules.
+ * Expression Evaluator Unit for database access rules.
  */
 
 #ifndef EXPR_EVALUATOR_H
@@ -29,12 +29,12 @@ namespace mb
     };
 
     /**
-     * @brief Struct instance for handling evaluation of database access rules.
+     * Struct instance for handling evaluation of database access rules.
      */
     struct Expr
     {
         /**
-         * @brief Evaluates a given expression in a context of the given TokenMap variables.
+         * Evaluates a given expression in a context of the given TokenMap variables.
          *
          * @param expr Access rule expression
          * @param vars Parameter tokens

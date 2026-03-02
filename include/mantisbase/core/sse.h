@@ -1,6 +1,6 @@
 /**
  * @file sse.h
- * @brief Server-Sent Events (SSE) manager for the realtime API.
+ * Server-Sent Events (SSE) manager for the realtime API.
  *
  * Exposes GET and POST /api/v1/realtime:
  * - **GET /api/v1/realtime?topics=...** — Opens an SSE connection with a comma-separated

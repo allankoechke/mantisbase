@@ -1,6 +1,6 @@
 /**
  * @file logging.h
- * @brief Wrapper around spdlog's functionality.
+ * Wrapper around spdlog's functionality.
  *
  * Created by allan on 12/05/2025.
  */
@@ -48,13 +48,13 @@ namespace mb {
         static void setLogLevel(const LogLevel &level = LogLevel::INFO);
 
         /**
-         * @brief Get the log database instance (for API access).
+         * Get the log database instance (for API access).
          * @return Pointer to LogDatabase instance, or nullptr if not initialized
          */
         [[nodiscard]] LogDatabase &logsDb() const;
 
         /**
-         * @brief Initialize database connection.
+         * Initialize database connection.
          */
         static void initDb(const std::string &data_dir = "");
 
@@ -160,7 +160,7 @@ namespace mb {
     }
 
     /**
-     * @brief Utility logger functions for each component/system.
+     * Utility logger functions for each component/system.
      * These functions automatically pass the origin parameter.
      */
     namespace LogOrigin {
@@ -321,7 +321,7 @@ namespace mb {
     }
 
     /**
-     * @brief A class for tracing function execution [entry, exit]
+     * A class for tracing function execution [entry, exit]
      * useful in following execution flow
      */
     class FuncLogger {

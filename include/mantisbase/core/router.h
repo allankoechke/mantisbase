@@ -1,6 +1,6 @@
 /**
- * @brief router.h
- * @brief Router file for higher level route registration and removal *
+ * router.h
+ * Router file for higher level route registration and removal *
  */
 
 #ifndef MB_ROUTER_H
@@ -20,7 +20,7 @@ namespace mb {
     class SSEMgr;
 
     /**
-     * @brief HTTP router for managing routes and request handling.
+     * HTTP router for managing routes and request handling.
      *
      * Router provides methods to register HTTP routes with handlers and middlewares,
      * manages entity schema cache, and handles request routing.
@@ -38,34 +38,34 @@ namespace mb {
     class Router {
     public:
         /**
-         * @brief Construct router instance.
+         * Construct router instance.
          */
         Router();
 
         /**
-         * @brief Destructor.
+         * Destructor.
          */
         ~Router();
 
         /**
-         * @brief Initialize router: create system tables and admin routes.
+         * Initialize router: create system tables and admin routes.
          * @return true if initialization successful
          */
         bool init();
 
         /**
-         * @brief Start HTTP server and begin listening for connections.
+         * Start HTTP server and begin listening for connections.
          * @return true if server started successfully
          */
         bool listen();
 
         /**
-         * @brief Close HTTP server and stop listening.
+         * Close HTTP server and stop listening.
          */
         void close();
 
         /**
-         * @brief Get underlying httplib::Server instance.
+         * Get underlying httplib::Server instance.
          * @return Reference to HTTP server
          */
         httplib::Server &server();
@@ -74,7 +74,7 @@ namespace mb {
 
         // ----------- HTTP METHODS ----------- //
         /**
-         * @brief Register GET route.
+         * Register GET route.
          * @param path Route path (supports path parameters like /:id)
          * @param handler Request handler function
          * @param middlewares Optional middleware functions
@@ -88,7 +88,7 @@ namespace mb {
         void Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
         /**
-         * @brief Register POST route with content reader (for file uploads).
+         * Register POST route with content reader (for file uploads).
          * @param path Route path
          * @param handler Handler with content reader for multipart/form-data
          * @param middlewares Optional middleware functions
@@ -97,7 +97,7 @@ namespace mb {
                   const Middlewares &middlewares = {});
 
         /**
-         * @brief Register POST route.
+         * Register POST route.
          * @param path Route path
          * @param handler Request handler function
          * @param middlewares Optional middleware functions
@@ -105,7 +105,7 @@ namespace mb {
         void Post(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
         /**
-         * @brief Register PATCH route with content reader (for file uploads).
+         * Register PATCH route with content reader (for file uploads).
          * @param path Route path
          * @param handler Handler with content reader
          * @param middlewares Optional middleware functions
@@ -114,7 +114,7 @@ namespace mb {
                    const Middlewares &middlewares = {});
 
         /**
-         * @brief Register PATCH route.
+         * Register PATCH route.
          * @param path Route path
          * @param handler Request handler function
          * @param middlewares Optional middleware functions
@@ -122,7 +122,7 @@ namespace mb {
         void Patch(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
         /**
-         * @brief Register DELETE route.
+         * Register DELETE route.
          * @param path Route path
          * @param handler Request handler function
          * @param middlewares Optional middleware functions
@@ -131,48 +131,48 @@ namespace mb {
 
         // ----------- SCHEMA CACHE METHODS ----------- //
         /**
-         * @brief Get cached schema JSON by table name.
+         * Get cached schema JSON by table name.
          * @param table_name Table name to lookup
          * @return Reference to cached schema JSON
          */
         const json &schemaCache(const std::string &table_name) const;
 
         /**
-         * @brief Check whether schema cache for given name exists.
+         * Check whether schema cache for given name exists.
          * @param table_name Table name to lookup
          * @return true if found, false otherwise.
          */
         bool hasSchemaCache(const std::string &table_name) const;
 
         /**
-         * @brief Get cached entity by table name.
+         * Get cached entity by table name.
          * @param table_name Table name to lookup
          * @return Entity instance from cache
          */
         Entity schemaCacheEntity(const std::string &table_name) const;
 
         /**
-         * @brief Add schema to cache.
+         * Add schema to cache.
          * @param entity_schema Schema JSON to cache
          */
         void addSchemaCache(const nlohmann::json &entity_schema);
 
         /**
-         * @brief Update cached schema.
+         * Update cached schema.
          * @param old_entity_name Old table name
          * @param new_schema Updated schema JSON
          */
         void updateSchemaCache(const std::string &old_entity_name, const json &new_schema);
 
         /**
-         * @brief Remove schema from cache.
+         * Remove schema from cache.
          * @param entity_name Table name to remove
          */
         void removeSchemaCache(const std::string &entity_name);
 
         // ----------- UTILS METHODS ----------- //
         /**
-         * @brief Decompress response body based on encoding.
+         * Decompress response body based on encoding.
          * @param body Compressed body data
          * @param encoding Encoding type (e.g., "gzip", "deflate")
          * @return Decompressed body string

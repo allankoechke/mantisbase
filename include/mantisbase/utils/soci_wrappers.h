@@ -1,6 +1,6 @@
 /**
  * @file soci_wrappers.h
- * @brief SOCI database wrapper utilities.
+ * SOCI database wrapper utilities.
  *
  * Provides conversion functions between JSON objects and SOCI database
  * value types for seamless data binding and retrieval.
@@ -22,7 +22,7 @@ namespace mb {
      * @param entity Reference entity object for schema validation.
      * @param fields JSON Array of fields to be converted to SOCI types.
      * @return An instance of soci::values object which matches the input fields.
-     * @ingroup cpp_utils_soci
+     * @ingroup cpp_utils
      */
     inline soci::values json2SociValue(const json &entity, const json &fields) {
         if (!fields.is_array()) throw std::invalid_argument("Fields must be an array");
@@ -120,7 +120,7 @@ namespace mb {
      * @param row Reference row record from the database query.
      * @param entity_fields Reference field schema for converting to/from soci types.
      * @return JSON Object representation of the soci::row data.
-     * @ingroup cpp_utils_soci
+     * @ingroup cpp_utils
      */
     inline json sociRow2Json(const soci::row &row, const std::vector<json> &entity_fields) {
         // Guard against empty reference schema fields

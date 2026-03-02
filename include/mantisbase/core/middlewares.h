@@ -1,6 +1,6 @@
 /**
  * @file middlewares.h
- * @brief Middleware functions for request processing.
+ * Middleware functions for request processing.
  *
  * Provides pre-built middleware functions for authentication, authorization,
  * and request context management.
@@ -16,70 +16,78 @@
 
 namespace mb {
     /**
-     * @brief Extract and validate JWT token from Authorization header.
+     * Extract and validate JWT token from Authorization header.
      *
      * Parses Bearer token from request headers and stores user info in context.
      * @return Middleware function
+     * @ingroup cpp_middlewares
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> getAuthToken();
     
     /**
-     * @brief Hydrate request context with additional data.
+     * Hydrate request context with additional data.
      *
      * Populates context store with request metadata and user information.
      * @return Middleware function
+     * @ingroup cpp_middlewares
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> hydrateContextData();
     
     /**
-     * @brief Check if request has access to entity based on access rules.
+     * Check if request has access to entity based on access rules.
      * @param entity_name Entity/table name to check access for
      * @return Middleware function that validates access rules
      * @code
      * router.Get("/api/v1/posts", handler, {hasAccess("posts")});
      * @endcode
+     * @ingroup cpp_middlewares
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> hasAccess(const std::string& entity_name);
     
     /**
-     * @brief Require expression evaluation to pass.
+     * Require expression evaluation to pass.
      * @param expr Expression string to evaluate
      * @return Middleware function that evaluates expression
+     * @ingroup cpp_middlewares
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> requireExprEval(const std::string& expr);
     
     /**
-     * @brief Require guest-only access (no authentication).
+     * Require guest-only access (no authentication).
      *
      * Blocks authenticated users, only allows unauthenticated requests.
      * @return Middleware function
+     * @ingroup cpp_middlewares
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> requireGuestOnly();
     
     /**
-     * @brief Require admin authentication.
+     * Require admin authentication.
      *
      * Only allows requests from users authenticated as admins.
      * @return Middleware function
+     * @ingroup cpp_middlewares
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> requireAdminAuth();
     
     /**
-     * @brief Require admin OR entity authentication.
+     * Require admin OR entity authentication.
      * @param entity_name Entity name for entity-based auth
      * @return Middleware function that allows admins or entity users
+     * @ingroup cpp_middlewares
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> requireAdminOrEntityAuth(const std::string& entity_name);
     
     /**
-     * @brief Require entity-specific authentication.
+     * Require entity-specific authentication.
      * @param entity_name Entity name to authenticate against
      * @return Middleware function that validates entity auth
+     * @ingroup cpp_middlewares
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> requireEntityAuth(const std::string& entity_name);
     
     /**
-     * @brief Rate limiting middleware to prevent abuse.
+     * Rate limiting middleware to prevent abuse.
      * 
      * Limits the number of requests per time window. Can rate limit by IP address
      * or by authenticated user ID. When the rate limit is exceeded, returns a
@@ -105,6 +113,7 @@ namespace mb {
      * // Login endpoint: 5 attempts per minute per IP (prevents brute force)
      * router.Post("/api/v1/auth/login", loginHandler, {rateLimit(5, 60, false)});
      * @endcode
+     * @ingroup cpp_middlewares
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> rateLimit(
         int max_requests, 

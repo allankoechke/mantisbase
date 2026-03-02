@@ -70,6 +70,5 @@ nav:
       - File Handling: guides/files.md
       - Healthcheck: guides/healthcheck.md
       - JavaScript Scripting: guides/scripting.md
-  - "C++ API Reference":
-      - api/index.md
+  - "C++ API Reference": api/index.md
   - Contributing: https://github.com/allankoechke/mantisbase/issues

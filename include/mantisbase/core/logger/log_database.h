@@ -1,6 +1,6 @@
 /**
  * @file log_database.h
- * @brief SQLite database manager for application logs.
+ * SQLite database manager for application logs.
  *
  * Manages a separate SQLite database for storing application logs with
  * automatic cleanup of old records.
@@ -25,7 +25,7 @@ namespace mb {
     using json = nlohmann::json;
 
     /**
-     * @brief Manages SQLite database for application logs.
+     * Manages SQLite database for application logs.
      *
      * Provides methods to store logs in a separate SQLite database,
      * with automatic cleanup of logs older than 5 days.
@@ -33,23 +33,23 @@ namespace mb {
     class LogDatabase {
     public:
         /**
-         * @brief Construct LogDatabase instance.
+         * Construct LogDatabase instance.
          */
         LogDatabase();
 
         /**
-         * @brief Destructor - stops cleanup thread and closes database.
+         * Destructor - stops cleanup thread and closes database.
          */
         ~LogDatabase();
 
         /**
-         * @brief Initialize database: create table and start cleanup thread.
+         * Initialize database: create table and start cleanup thread.
          * @return true if initialization successful, false otherwise
          */
         bool init(const std::string& data_dir = "");
 
         /**
-         * @brief Insert a log entry into the database.
+         * Insert a log entry into the database.
          * @param level Log level (trace, debug, info, warn, critical)
          * @param origin Component/system origin (System, Auth, Database, Entity, EntitySchema, etc.)
          * @param message Short message (e.g., "Auth Failed", "Database Connected")
@@ -61,7 +61,7 @@ namespace mb {
                        const std::string& details, const json& data = json::object());
 
         /**
-         * @brief Get logs with pagination, filtering, and sorting.
+         * Get logs with pagination, filtering, and sorting.
          * @param page Page number (1-based)
          * @param page_size Number of records per page
          * @param level_filter Optional level filter (empty = all levels)
@@ -81,22 +81,22 @@ namespace mb {
                      const std::string& sort_order = "desc");
     private:
         /**
-         * @brief Shutdown and clean up log database.
+         * Shutdown and clean up log database.
          */
         void shutdown();
 
         /**
-         * @brief Create the logs table if it doesn't exist.
+         * Create the logs table if it doesn't exist.
          */
         void createTable() const;
 
         /**
-         * @brief Background thread function to delete old logs.
+         * Background thread function to delete old logs.
          */
         void cleanupThread();
 
         /**
-         * @brief Delete logs older than specified days.
+         * Delete logs older than specified days.
          * @param days Number of days to keep (default: 5)
          */
         void deleteOldLogs(int days = 5);
