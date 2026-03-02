@@ -35,6 +35,12 @@ namespace mb {
         return ss.str();
     }
 
+    /**
+     * Generator for uuid v7 based on the spec.
+     *
+     * @return uuidv7 string representation
+     * @ingroup cpp_utils
+     */
     inline std::string generate_uuidv7() {
         thread_local std::mt19937_64 rng((std::random_device{})());
         thread_local uint64_t last_ts = 0;

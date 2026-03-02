@@ -1,7 +1,34 @@
-title: MantisBase v0.3.4
-description: 
+title: MantisBase Documentation
+description: User and developer docs for navigating the use and integration of MantisBase, an open source, single-binary, lightweight BaaS toolkit written in C++.
+output: docs/api
 files:
-  - "../include/mantisbase/**.h"
-#  - "../include/mantisbase/*.hpp"
-#  - "../include/mantisbase/**/*.hpp"
-#  - "../include/mantisbase/**/*.h"
+  - "include/mantisbase/**.h"
+  - "include/mantisbase/**.hpp"
+
+groups:
+  - name: general
+    title: General Documentation
+    description: Getting started with MantisBase quick documentation.
+
+  - name: cpp_api
+    title: C++ API Documentation
+    description: Overview of the C++ API in detail for developer integration and/or extensibility.
+
+    groups:
+      - name: cpp_main
+        title: MantisBase Entrypoint
+        description: Entry point to MantisBase C++ API and execution flow.
+
+      - name: cpp_core
+        title: MantisBase Core API
+        description: MantisBase building units
+
+      - name: cpp_utils
+        title: MantisBase Utils API
+        description: Utility functions exposed by and/or used internally by MantisBase for different operations.
+
+        groups:
+          - name: cpp_utils_soci
+            title: SOCI Utility Functions
+            description: Utility functions for converting to/from SOCI types.
+

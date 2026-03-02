@@ -1,10 +1,19 @@
 site_name: MantisBase Documentation
+site_url: https://mantisbase.com
 site_description:  User and developer docs for navigating the use and integration of MantisBase, an open source, single-binary, lightweight BaaS toolkit written in C++.
+site_author: MantisBase Team
+
 docs_dir: content
 site_dir: site
+
+repo_url: https://github.com/allankoech/mantisbase/
+edit_uri: blob/master/docs/
+
 theme:
   name: material
   custom_dir: content/overrides
+  logo: guides/assets/mantisbase.svg
+  favicon: guides/assets/favicon.png
   features:
     - navigation.tabs
     - navigation.tabs.sticky

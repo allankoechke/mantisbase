@@ -15,6 +15,15 @@
 #include "soci/values.h"
 
 namespace mb {
+    /**
+     * Convert fields data to a corresponding soci::values object with a ref
+     * to the entity schema the fields belong to.
+     *
+     * @param entity Reference entity object for schema validation.
+     * @param fields JSON Array of fields to be converted to SOCI types.
+     * @return An instance of soci::values object which matches the input fields.
+     * @ingroup cpp_utils_soci
+     */
     inline soci::values json2SociValue(const json &entity, const json &fields) {
         if (!fields.is_array()) throw std::invalid_argument("Fields must be an array");
 
@@ -105,6 +114,14 @@ namespace mb {
         throw std::runtime_error("No field type found matching column `" + column_name + "'");
     }
 
+    /**
+     * Convert database response of type soci::row to a corresponding JSON representation.
+     *
+     * @param row Reference row record from the database query.
+     * @param entity_fields Reference field schema for converting to/from soci types.
+     * @return JSON Object representation of the soci::row data.
+     * @ingroup cpp_utils_soci
+     */
     inline json sociRow2Json(const soci::row &row, const std::vector<json> &entity_fields) {
         // Guard against empty reference schema fields
         if (entity_fields.empty())

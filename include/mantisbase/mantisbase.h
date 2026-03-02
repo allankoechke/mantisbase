@@ -1,7 +1,7 @@
 /**
  * @file mantisbase.h
  *
- * @brief The main application for mantisbase.
+ * The main application for mantisbase.
  *
  * Controls all other units creation, commandline parsing as well as handling application state.
  *
@@ -25,7 +25,7 @@ namespace mb
 {
     class RealtimeDB;
     /**
-     * @brief MantisBase entry point.
+     * MantisBase entry point.
      *
      * This class handles the entrypoint to the `Mantis` world, where we can
      * set/get application flags and variables, as well as access other
@@ -35,26 +35,27 @@ namespace mb
      * - LogsMgr: For logging capabilities, @see LoggingMgr for more details.
      * - RouterMgr: High level routing wrapper on top of @see HttpMgr, @see RouterMgr for more details.
      * - ValidatorMgr: A validation store using regex, @see Validator for more details.
+     * @ingroup cpp_main
      */
     class MantisBase
     {
     public:
         ~MantisBase();
 
-        // Disable copying and moving
+        ///< Disable copying and moving
         MantisBase(const MantisBase&) = delete;
         MantisBase& operator=(const MantisBase&) = delete;
         MantisBase(MantisBase&&) = delete;
         MantisBase& operator=(MantisBase&&) = delete;
 
         /**
-         * @brief Retrieve existing application instance.
+         * Retrieve existing application instance.
          * @return A reference to the existing application instance.
          */
         static MantisBase& instance();
 
         /**
-         * @brief Create class instance given cmd args passed in.
+         * Create class instance given cmd args passed in.
          * @see parseArgs() for expected cmd args to be passed in.
          *
          * @param argc Number of cmd args
@@ -64,7 +65,7 @@ namespace mb
         static MantisBase& create(int argc, char** argv);
 
         /**
-         * @brief Convenience function to allow creating class instance given the
+         * Convenience function to allow creating class instance given the
          * values needed to set up the app without any need for passing in cmd args.
          *
          * The expected values are:
@@ -109,13 +110,13 @@ namespace mb
         static MantisBase& create(const json& config = json::object());
 
         /**
-         * @brief Start the http server and start listening for requests.
+         * Start the http server and start listening for requests.
          * @return `0` if execution was okay, else a non-zero value.
          */
         [[nodiscard]] int run();
 
         /**
-         * @brief Close the application and reset object
+         * Close the application and reset object
          * instances that are dependent on the class
          *
          * Internally, this stops running http server,
@@ -125,7 +126,7 @@ namespace mb
         void close();
 
         /**
-         * @brief Quit the running application immediately.
+         * Quit the running application immediately.
          * @param exitCode Exit code value
          * @param reason User-friendly reason for the exit.
          * @return `exitCode` value.
@@ -133,70 +134,70 @@ namespace mb
         static int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
 
         /**
-         * @brief Retrieve HTTP Listening port.
+         * Retrieve HTTP Listening port.
          * @return Http Listening Port.
          */
         [[nodiscard]] int port() const;
         /**
-         * @brief Set a new port value for HTTP server
+         * Set a new port value for HTTP server
          * @param port New HTTP port value.
          */
         void setPort(const int& port);
 
         /**
-         * @brief Retrieve the database pool size value.
+         * Retrieve the database pool size value.
          * @return SOCI's database pool size.
          */
         [[nodiscard]] int poolSize() const;
 
         /**
-         * @brief Retrieve HTTP Server host address. For instance, a host of `127.0.0.1`, `0.0.0.0`, etc.
+         * Retrieve HTTP Server host address. For instance, a host of `127.0.0.1`, `0.0.0.0`, etc.
          * @return HTTP Server Host address.
          */
         [[nodiscard]] std::string host() const;
         /**
-         * @brief Update HTTP Server host address.
+         * Update HTTP Server host address.
          * @param host New HTTP Server host address.
          */
         void setHost(const std::string& host);
 
         /**
-         * @brief Retrieve the public static file directory.
+         * Retrieve the public static file directory.
          * @return MantisApp public directory.
          */
         [[nodiscard]] std::string publicDir() const;
         /**
-         * @brief Update HTTP server static file directory.
+         * Update HTTP server static file directory.
          * @param dir New directory path.
          */
         void setPublicDir(const std::string& dir);
 
         /**
-         * @brief Retrieves the data directory where SQLite db and files are stored.
+         * Retrieves the data directory where SQLite db and files are stored.
          * @return MantisApp data directory.
          */
         [[nodiscard]] std::string dataDir() const;
         /**
-         * @brief Update the data directory for MantisApp.
+         * Update the data directory for MantisApp.
          * @param dir New data directory.
          */
         void setDataDir(const std::string& dir);
 
         /**
-         * @brief Retrieves the scripts directory where JavaScript files are stored
+         * Retrieves the scripts directory where JavaScript files are stored
          * used for extending functionality in Mantis.
          *
          * @return MantisApp scripts directory.
          */
         [[nodiscard]] std::string scriptsDir() const;
         /**
-         * @brief Update the scripts directory for MantisApp.
+         * Update the scripts directory for MantisApp.
          * @param dir New scripts directory.
          */
         void setScriptsDir(const std::string& dir);
 
         /**
-         * @brief Retrieves the active database type.
+         * Retrieves the active database type.
          * @return Selected DatabaseType enum value.
          */
         [[nodiscard]] std::string dbType() const;
@@ -207,7 +208,7 @@ namespace mb
          */
         void setDbType(const std::string& dbType);
         /**
-         * @brief Retrieve the JWT secret key.
+         * Retrieve the JWT secret key.
          * @return JWT Secret value.
          */
         static std::string jwtSecretKey();
@@ -237,7 +238,7 @@ namespace mb
         [[nodiscard]] RealtimeDB& rt() const;
 
         /**
-         * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
+         * Fetch a table schema encapsulated by an `Entity` object from given the table name.
          * If table does not exist yet, return an emty object.
          *
          * @param entity_name Name of the table of interest
@@ -246,7 +247,7 @@ namespace mb
         [[nodiscard]] Entity entity(const std::string& entity_name) const;
 
         /**
-         * @brief Check if table schema encapsulated by an `Entity` object from given the table name exists.
+         * Check if table schema encapsulated by an `Entity` object from given the table name exists.
          * If table does not exist yet, return false.
          *
          * @param entity_name Name of the table of interest
@@ -259,7 +260,7 @@ namespace mb
 
 
         /**
-         * @brief Launch browser with the admin dashboard page. If all goes well, the default
+         * Launch browser with the admin dashboard page. If all goes well, the default
          * OS browser should open (if not opened) with the admin dashboard URL.
          *
          * > Added in v0.1.6
@@ -267,7 +268,7 @@ namespace mb
         void openBrowserOnStart() const;
 
         /**
-         * @brief Get the server start time in std::chrono::
+         * Get the server start time in std::chrono::
          *
          * @return Server start time
          */
@@ -281,7 +282,7 @@ namespace mb
         MantisBase();
 
         /**
-         * @brief Run initialization actions for Mantis, ensuring all objects are initialized properly before use.
+         * Run initialization actions for Mantis, ensuring all objects are initialized properly before use.
          */
         void init(int argc = 0, char* argv[] = {});
 
@@ -293,7 +294,7 @@ namespace mb
         static MantisBase& getInstanceImpl();
 
         /**
-         * @brief Set the database pool size value.
+         * Set the database pool size value.
          * @param pool_size New pool size value.
          */
         void setPoolSize(const int& pool_size);
@@ -308,25 +309,25 @@ namespace mb
 
 #ifdef MB_SCRIPTING_ENABLED
         /**
-         * @brief Initialize JS engine and register Mantis functions to JS
+         * Initialize JS engine and register Mantis functions to JS
          */
         void initJSEngine();
 
         /**
-         * @brief Load startup `.js` file `index.mantis.js` from the mantis
+         * Load startup `.js` file `index.mantis.js` from the mantis
          * scripts directory.
          */
         void loadStartScript() const;
 
         /**
-         * @brief Load and execute a passed in file path for a `.js` file.
+         * Load and execute a passed in file path for a `.js` file.
          *
          * @param filePath File path to load and execute
          */
         void loadAndExecuteScript(const std::string& filePath) const;
 
         /**
-         * @brief Load a script file and execute it
+         * Load a script file and execute it
          *
          * @param relativePath Relative file path to be loaded.
          */
@@ -337,7 +338,7 @@ namespace mb
         void quit_JSWrapper(int code, const std::string& msg);
 
         /**
-         * @brief Wrapper method to return `DatabaseUnit*` instead of
+         * Wrapper method to return `DatabaseUnit*` instead of
          * `DatabaseUnit&` returned by @see db() method.
          *
          * @return DatabaseUnit instance pointer
