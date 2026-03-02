@@ -50,9 +50,8 @@ MantisBase includes a powerful web-based admin dashboard that provides a visual 
 
 ![MantisBase Admin Dashboard](./assets/mantisbase-admin.png)
 
-After creating an admin account (see [Quick Start Guide](getting-started.md)), access the dashboard at `http://localhost:7070/mb`. The dashboard provides a complete GUI alternative to the REST API, making it perfect for non-technical users and rapid development.
+After creating an admin account, access the dashboard at `http://localhost:7070/mb`. The dashboard provides a complete GUI alternative to the REST API, making it perfect for non-technical users and rapid development.
 
 ## Next Steps
 - Learn how to [Embed Mantis](embedding.md) into your C++ app.
 - Explore the [REST API generation](api.md) to build your app.
-- Access the [Admin Dashboard](getting-started.md#2-access-the-admin-dashboard) to manage your data visually.

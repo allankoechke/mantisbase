@@ -1,13 +1,15 @@
 site_name: MantisBase Documentation
-site_url: https://mantisbase.com
+site_url: https://docs.mantisbase.com
 site_description:  User and developer docs for navigating the use and integration of MantisBase, an open source, single-binary, lightweight BaaS toolkit written in C++.
 site_author: MantisBase Team
 
 docs_dir: content
 site_dir: site
 
-repo_url: https://github.com/allankoech/mantisbase/
-edit_uri: blob/master/docs/
+repo_url: https://github.com/allankoechke/mantisbase/
+repo_name: allankoechke/mantisbase
+
+use_directory_urls: false
 
 theme:
   name: material
@@ -19,10 +21,15 @@ theme:
     - navigation.tabs.sticky
     - navigation.indexes
     - navigation.footer
+  icon:
+    repo: material/github
+  repo:
+    url: https://github.com/allankoechke/mantisbase
+    edit: false
   palette:
     # Palette for dark mode
     - scheme: slate
-      primary: grey
+      primary: blue-grey
       accent: teal
       toggle:
         icon: material/brightness-4
@@ -52,16 +59,17 @@ extra_javascript:
 nav:
   - Home: index.md
   - "Getting Started":
-      - guides/installation.md
-      - guides/docker.md
+      - Setting Up: guides/installation.md
+      - Docker: guides/docker.md
+      - Embedding: guides/embedding.md
   - "Guides":
-      - guides/cmd.md
-      - guides/api.md
-      - guides/auth.md
-      - guides/embedding.md
-      - guides/rules.md
-      - guides/files.md
-      - guides/healthcheck.md
-      - guides/scripting.md
+      - CMD: guides/cmd.md
+      - API: guides/api.md
+      - Authentication: guides/auth.md
+      - Access Rules: guides/rules.md
+      - File Handling: guides/files.md
+      - Healthcheck: guides/healthcheck.md
+      - JavaScript Scripting: guides/scripting.md
   - "C++ API Reference":
       - api/index.md
+  - Contributing: https://github.com/allankoechke/mantisbase/issues

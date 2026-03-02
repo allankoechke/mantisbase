@@ -277,11 +277,11 @@ All entities automatically get these endpoints:
 ### System Endpoints
 
 - `GET /api/v1/health` - Health check
-- `GET /api/v1/sys/logs` - System logs (admin only, see [API Reference](api.md#-system-endpoints))
+- `GET /api/v1/sys/logs` - System logs (admin only, see [API Reference](guides/api.md#system-endpoints))
 - `GET /api/files/<entity>/<filename>` - Serve files
 - `GET /mb` - Admin dashboard
 
-See [API Reference](api.md) for complete documentation.
+See [API Reference](guides/api.md) for complete documentation.
 
 ---
 
@@ -343,28 +343,7 @@ Now that you have MantisBase running:
 
 ---
 
-## Common Use Cases
-
-### Desktop Application Backend
-
-Embed MantisBase in your Qt, Slint, or native C++ desktop app to provide local data storage and REST APIs.
-
-### Development Server
-
-Use MantisBase as a quick backend for frontend development, prototyping, or testing.
-
-### Embedded Device
-
-Run MantisBase on embedded devices to provide a local API server with data persistence.
-
-### Microservice
-
-Deploy MantisBase as a standalone microservice for specific data management needs.
-
----
-
 ## Getting Help
 
-- **Documentation**: Check the [docs directory](.) for detailed guides
 - **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/allankoechke/mantisbase/issues)
-- **Examples**: See the [examples directory](../../examples) for code samples
+- **Examples**: See the [examples directory](https://github.com/allankoechke/mantisbase/tree/master/examples) for code samples

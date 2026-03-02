@@ -100,7 +100,6 @@ Handles schema migrations.
 
 ## See Also
 
-* [Quick Start](getting-started.md)
 * [Embedding MantisBase](embedding.md)
 * [REST API Reference](api.md)
 * [Authentication API](auth.md)
