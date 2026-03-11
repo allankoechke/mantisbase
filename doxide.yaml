@@ -14,18 +14,18 @@ files:
   - "include/mantisbase/core/logger/**.hpp"
 
 groups:
-  - name: cpp_main
-    title: MantisBase Entrypoint
-    description: Entry point to MantisBase C++ API and execution flow.
-
-  - name: cpp_core
-    title: Core API
-    description: MantisBase building units
-
-  - name: cpp_middlewares
-    title: API Middlewares
-    description: MantisBase API Middleware methods
-
-  - name: cpp_utils
-    title: MantisBase Utils API
-    description: Utility functions exposed by and/or used internally by MantisBase for different operations.
+#  - name: cpp_main
+#    title: MantisBase Entrypoint
+#    description: Entry point to MantisBase C++ API and execution flow.
+#
+#  - name: cpp_core
+#    title: Core API
+#    description: MantisBase building units
+#
+#  - name: cpp_middlewares
+#    title: API Middlewares
+#    description: MantisBase API Middleware methods
+#
+#  - name: cpp_utils
+#    title: MantisBase Utils API
+#    description: Utility functions exposed by and/or used internally by MantisBase for different operations.
