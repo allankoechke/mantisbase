@@ -14,22 +14,27 @@ namespace mb {
             // If we have an auth header, extract it into the ctx, else
             // add a guest user type. The auth if present, should have
             // the user id, auth table, etc.
-            json auth;
-            auth["type"] = "guest"; // or 'user' or 'admin'
-            auth["token"] = nullptr; // User token from header ...
-            auth["id"] = nullptr; // Hold user `id` from auth user
-            auth["entity"] = nullptr; // Hold user table if valid
-            auth["user"] = nullptr; // Hold hydrated user if valid
+            try {
+                json auth;
+                auth["type"] = "guest"; // or 'user' or 'admin'
+                auth["token"] = nullptr; // User token from header ...
+                auth["id"] = nullptr; // Hold user `id` from auth user
+                auth["entity"] = nullptr; // Hold user table if valid
+                auth["user"] = nullptr; // Hold hydrated user if valid
 
-            if (req.hasHeader("Authorization")) {
-                const auto token = req.getBearerTokenAuth();
-                auth["token"] = trim(token);
+                if (req.hasHeader("Authorization")) {
+                    const auto token = req.getBearerTokenAuth();
+                    auth["token"] = trim(token);
+                }
+
+                // Update the context
+                req.set("auth", auth);
+                req.set("verification", json::object());
+                return HandlerResponse::Unhandled;
+            } catch (const std::exception& e) {
+                std::cout << "Failed to get access token: " << e.what() << std::endl;
+                throw MantisException(500, e.what());
             }
-
-            // Update the context
-            req.set("auth", auth);
-            req.set("verification", json::object());
-            return HandlerResponse::Unhandled;
         };
     }
 

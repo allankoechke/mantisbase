@@ -213,12 +213,17 @@ bool MantisRequest::hasKey(const std::string &key) const {
 }
 
 std::string MantisRequest::getBearerTokenAuth() const {
-  return get_bearer_token_auth(m_req);
+  if (hasHeader("Authorization")) {
+    const auto auth = getHeaderValue("Authorization", "", 0);
+    constexpr auto bearer_header_prefix_len = httplib::detail::str_len("Bearer ");
+    return auth.size() > bearer_header_prefix_len ? auth.substr(bearer_header_prefix_len) : "";
+  }
+  return "";
 }
 
 std::pair<nlohmann::json, std::string> MantisRequest::getBodyAsJson() const {
   try {
-    auto b = getBody();
+    const auto b = getBody();
     auto obj = b.empty() ? nlohmann::json::object() : nlohmann::json::parse(b);
     return {obj, ""};
   } catch (const std::exception &e) {

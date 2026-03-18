@@ -70,6 +70,7 @@ namespace mb {
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthLogin() {
         return [](const MantisRequest &req, const MantisResponse &res) {
+            // TRACE_FUNC("HandleAuthLogin()")
             try {
                 // Get JSON Body
                 const auto &[body, err] = req.getBodyAsJson();
