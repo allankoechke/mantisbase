@@ -12,9 +12,8 @@ namespace mb {
     MantisBase::MantisBase()
         : m_dbType("sqlite3"),
           m_startTime(std::chrono::steady_clock::now()),
-          m_logger(std::make_unique<Logger>())
-          , m_dukCtx(duk_create_heap_default()) {
-    }
+          m_logger(std::make_unique<Logger>()) {}
+          // , m_dukCtx(duk_create_heap_default()) {}
 
     MantisBase::~MantisBase() {
         if (!m_toStartServer) {
@@ -25,7 +24,7 @@ namespace mb {
         }
 
         // Destroy duk context
-        duk_destroy_heap(m_dukCtx);
+        // duk_destroy_heap(m_dukCtx);
     }
 
     void MantisBase::init(const int argc, char *argv[]) {
@@ -278,9 +277,9 @@ namespace mb {
         return m_router->hasSchemaCache(entity_name);
     }
 
-    duk_context *MantisBase::ctx() const {
-        return m_dukCtx;
-    }
+    // duk_context *MantisBase::ctx() const {
+    //     return m_dukCtx;
+    // }
 
     void MantisBase::openBrowserOnStart() const {
         // Skip spinning the default browser on first boot

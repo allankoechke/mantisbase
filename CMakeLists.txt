@@ -156,7 +156,8 @@ option(MB_BUILD_WITH_ASAN "Enable ASAN build for UNIX" ON)
 include(cmake/add-asan.cmake)
 
 # Include duktape for ECMASCRIPT scripting in Mantis
-include(cmake/add-duktape.cmake)
+# include(cmake/add-duktape.cmake)
+include (cmake/add-mbs.cmake)
 
 # Include directories
 target_include_directories(mantisbase

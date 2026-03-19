@@ -16,7 +16,7 @@
 #include <filesystem>
 #include <chrono>
 #include <argparse/argparse.hpp>
-#include <dukglue/dukglue.h>
+// #include <dukglue/dukglue.h>
 
 #include "core/types.h"
 #include "core/kv_store.h"
@@ -255,7 +255,7 @@ namespace mb
         [[nodiscard]] bool hasEntity(const std::string& entity_name) const;
 
         /// Get the duktape context
-        [[nodiscard]] duk_context* ctx() const;
+        // [[nodiscard]] duk_context* ctx() const;
 
 
         /**
@@ -374,7 +374,7 @@ namespace mb
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
-        duk_context* m_dukCtx; // For duktape context
+        // duk_context* m_dukCtx; // For duktape context
     };
 }
 
