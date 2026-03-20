@@ -340,7 +340,7 @@ namespace mb {
                    {hasAccess(entity_name)});
 
         // base & auth /post/:id /delete/:id
-        if (type() == "base" || type() == "auth") {
+        if (const auto& _type = type(); _type == "base" || _type == "auth") {
             // Create Entity
             router.Post(std::format("/api/v1/entities/{}", entity_name),
                         postRouteHandler(),
