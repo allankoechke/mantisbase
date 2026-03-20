@@ -14,17 +14,17 @@ TEST(IPValidation, ValidIPv4) {
 
 TEST(IPValidation, InvalidIPv4) {
     // Invalid IPv4 addresses
-    EXPECT_FALSE(mb::isValidIPv4(""));                    // Empty
-    EXPECT_FALSE(mb::isValidIPv4("256.1.1.1"));           // Out of range
-    EXPECT_FALSE(mb::isValidIPv4("192.168.1"));           // Missing octet
-    EXPECT_FALSE(mb::isValidIPv4("192.168.1.1.1"));       // Too many octets
-    EXPECT_FALSE(mb::isValidIPv4("192.168.1."));          // Trailing dot
-    EXPECT_FALSE(mb::isValidIPv4(".192.168.1.1"));        // Leading dot
-    EXPECT_FALSE(mb::isValidIPv4("192.168.1.1 "));        // Trailing space
-    EXPECT_FALSE(mb::isValidIPv4(" 192.168.1.1"));        // Leading space
-    EXPECT_FALSE(mb::isValidIPv4("192.168.1.-1"));        // Negative number
-    EXPECT_FALSE(mb::isValidIPv4("192.168.1.abc"));       // Non-numeric
-    EXPECT_FALSE(mb::isValidIPv4("192.168.1"));          // Incomplete
+    EXPECT_FALSE(mb::isValidIPv4(""));                      // Empty
+    EXPECT_FALSE(mb::isValidIPv4("256.1.1.1"));             // Out of range
+    EXPECT_FALSE(mb::isValidIPv4("192.168.1"));             // Missing octet
+    EXPECT_FALSE(mb::isValidIPv4("192.168.1.1.1"));         // Too many octets
+    EXPECT_FALSE(mb::isValidIPv4("192.168.1."));            // Trailing dot
+    EXPECT_FALSE(mb::isValidIPv4(".192.168.1.1"));          // Leading dot
+    EXPECT_FALSE(mb::isValidIPv4("192.168.1.1 "));          // Trailing space
+    EXPECT_FALSE(mb::isValidIPv4(" 192.168.1.1"));          // Leading space
+    EXPECT_FALSE(mb::isValidIPv4("192.168.1.-1"));          // Negative number
+    EXPECT_FALSE(mb::isValidIPv4("192.168.1.abc"));         // Non-numeric
+    EXPECT_FALSE(mb::isValidIPv4("192.168.1"));             // Incomplete
 }
 
 TEST(IPValidation, ValidIPv6) {

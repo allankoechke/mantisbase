@@ -7,27 +7,11 @@
 #define EXPR_EVALUATOR_H
 
 #include <string>
-#include <nlohmann/json.hpp>
-#include <dukglue/dukglue.h>
-
+#include <nlohmann/json_fwd.hpp>
 #include "../utils/utils.h"
 
 namespace mb
 {
-    using TokenMap = std::unordered_map<std::string, nlohmann::json>;
-
-    class DukCtx {
-    public:
-        DukCtx();
-
-        ~DukCtx();
-
-        [[nodiscard]] duk_context* get() const;
-
-    private:
-        duk_context* m_ctx;
-    };
-
     /**
      * @brief Struct instance for handling evaluation of database access rules.
      */
@@ -40,7 +24,7 @@ namespace mb
          * @param vars Parameter tokens
          * @return True or False
          */
-        static bool eval(const std::string& expr, const std::unordered_map<std::string, nlohmann::json>& vars = {});
+        static bool eval(const std::string& expr, const nlohmann::json& vars = {});
     };
 } // mb
 

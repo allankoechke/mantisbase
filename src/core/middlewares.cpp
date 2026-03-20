@@ -219,7 +219,7 @@ namespace mb {
                     const std::string expr = rule.expr();
 
                     // Token map variables for evaluation
-                    TokenMap vars;
+                    json vars = json::object();
 
                     // Add `auth` data to the TokenMap
                     vars["auth"] = auth;

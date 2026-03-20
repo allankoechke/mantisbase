@@ -9,6 +9,7 @@
 #define JWTUNIT_H
 
 #include <string>
+#include <wolfssl/wolfio.h>
 #include "../utils/utils.h"
 
 namespace mb
