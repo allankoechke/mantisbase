@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(MantisBase VERSION 0.3.5)
+project(MantisBase VERSION 0.3.6)
 set(CMAKE_CXX_STANDARD 20)
 
 # Set output directories to match SOCI's

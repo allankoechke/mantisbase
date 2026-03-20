@@ -307,8 +307,10 @@ namespace mb {
 
         std::cout << std::endl;
 
+        const auto &entity_name = name();
+
         // For admin entities ...
-        if (name() == "mb_admins") {
+        if (entity_name == "mb_admins") {
             router.Get("/api/v1/sys/admins",
                        getManyRouteHandler(),
                        {requireAdminAuth()});
@@ -324,33 +326,35 @@ namespace mb {
             router.Delete("/api/v1/sys/admins/:id",
                           deleteRouteHandler(),
                           {requireAdminAuth()});
-            // router.Post("/api/v1/sys/auth/login",
-            //             handle());
-
-            // return;
+            return;
         }
 
         // List Entities
-        router.Get("/api/v1/entities/" + name(), getManyRouteHandler(),
-                   {hasAccess(name())});
+        router.Get(std::format("/api/v1/entities/{}", entity_name),
+                   getManyRouteHandler(),
+                   {hasAccess(entity_name)});
 
         // Fetch Entity
-        router.Get("/api/v1/entities/" + name() + "/:id", getOneRouteHandler(),
-                   {hasAccess(name())});
+        router.Get(std::format("/api/v1/entities/{}/:id", entity_name),
+                   getOneRouteHandler(),
+                   {hasAccess(entity_name)});
 
         // base & auth /post/:id /delete/:id
         if (type() == "base" || type() == "auth") {
             // Create Entity
-            router.Post("/api/v1/entities/" + name(), postRouteHandler(),
-                        {hasAccess(name())});
+            router.Post(std::format("/api/v1/entities/{}", entity_name),
+                        postRouteHandler(),
+                        {hasAccess(entity_name)});
 
             // Update Entity
-            router.Patch("/api/v1/entities/" + name() + "/:id", patchRouteHandler(),
-                         {hasAccess(name())});
+            router.Patch(std::format("/api/v1/entities/{}/:id", entity_name),
+                         patchRouteHandler(),
+                         {hasAccess(entity_name)});
 
             // Delete Entity
-            router.Delete("/api/v1/entities/" + name() + "/:id", deleteRouteHandler(),
-                          {hasAccess(name())});
+            router.Delete(std::format("/api/v1/entities/{}/:id", entity_name),
+                          deleteRouteHandler(),
+                          {hasAccess(entity_name)});
         }
     };
 }

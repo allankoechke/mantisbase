@@ -401,11 +401,10 @@ namespace mb {
         // Logs endpoint - requires admin authentication
         router.Get("/api/v1/sys/logs", handleLogs(), {requireAdminAuth()});
 
-        router.Get("/api/v1/admins", handleLogs(), {requireAdminAuth()});
-        router.Get("/api/v1/admins/:id", handleLogs(), {requireAdminAuth()});
-        router.Post("/api/v1/admins", handleLogs(), {requireAdminAuth()});
-        router.Patch("/api/v1/admins/:id", handleLogs(), {requireAdminAuth()});
-        router.Delete("/api/v1/admins/:id", handleLogs(), {requireAdminAuth()});
+        // Admin user auth
+        router.Post("/api/v1/sys/admins/login", handleAdminLogin(), {rateLimit(5, 60, false)});
+        router.Post("/api/v1/sys/admins/refresh", handleAuthRefresh()); // TODO
+        router.Post("/api/v1/sys/admins/logout", handleAuthLogout()); // TODO
 
         // Add entity schema routes
         // GET|POST|PATCH|DELETE `/api/v1/schemas*`
@@ -460,72 +459,6 @@ namespace mb {
                                     fmt::format("Error processing /admin request: {}", e.what()));
             }
         };
-    }
-
-
-    std::function<void(const MantisRequest &, MantisResponse &)> handleListAdmins() {
-
-    }
-
-    HandlerFn handleGetAdmin() {
-        HandlerFn handler = [](const MantisRequest &req, MantisResponse &res) {
-            try {
-                // Get entity object for given name
-                const auto entity = MantisBase::instance().entity("mb_admins");
-
-                // Extract path `id` value [REQUIRED]
-                const auto entity_id = trim(req.getPathParamValue("id"));
-                if (entity_id.empty())
-                    throw MantisException(400, "Entity `id` is required!");
-
-                // Read for entity matching given `id` if it exists, return it, else error `404`
-                if (const auto record = entity.read(entity_id); record.has_value()) {
-                    res.sendJSON(200,
-                                 {
-                                     {"data", record},
-                                     {"error", ""},
-                                     {"status", 200}
-                                 }
-                    );
-                } else {
-                    res.sendJSON(404,
-                                 {
-                                     {"data", json::object()},
-                                     {"error", "Resource not found!"},
-                                     {"status", 404}
-                                 }
-                    );
-                }
-            } catch (const MantisException &e) {
-                res.sendJSON(e.code(), {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", e.code()}
-                             }
-                );
-            } catch (const std::exception &e) {
-                res.sendJSON(500, {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", 500}
-                             }
-                );
-            }
-        };
-
-        return handler;
-    }
-
-    std::function<void(const MantisRequest &, MantisResponse &)> handleCreateAdmin() {
-
-    }
-
-    std::function<void(const MantisRequest &, MantisResponse &)> handleUpdateAdmin() {
-
-    }
-
-    std::function<void(const MantisRequest &, MantisResponse &)> handleDeleteAdmin() {
-
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {

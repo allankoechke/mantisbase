@@ -191,13 +191,6 @@ namespace mb {
         // ----------- REQ/RES METHODS ----------- //
         static std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute() ;
 
-        // Admin routes
-        static std::function<void(const MantisRequest &, MantisResponse &)> handleListAdmins() ;
-        static std::function<void(const MantisRequest &, MantisResponse &)> handleGetAdmin() ;
-        static std::function<void(const MantisRequest &, MantisResponse &)> handleCreateAdmin() ;
-        static std::function<void(const MantisRequest &, MantisResponse &)> handleUpdateAdmin() ;
-        static std::function<void(const MantisRequest &, MantisResponse &)> handleDeleteAdmin() ;
-
         static std::function<void(const MantisRequest &, MantisResponse &)> fileServingHandler();
 
         static std::function<void(const MantisRequest &, MantisResponse &)> healthCheckHandler();
@@ -213,6 +206,8 @@ namespace mb {
         std::function<void(const httplib::Request &, httplib::Response &)> routingErrorHandler();
 
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogin();
+
+        std::function<void(MantisRequest &, MantisResponse &)> handleAdminLogin();
 
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh();
 
