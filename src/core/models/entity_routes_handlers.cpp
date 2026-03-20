@@ -307,6 +307,29 @@ namespace mb {
 
         std::cout << std::endl;
 
+        // For admin entities ...
+        if (name() == "mb_admins") {
+            router.Get("/api/v1/sys/admins",
+                       getManyRouteHandler(),
+                       {requireAdminAuth()});
+            router.Get("/api/v1/sys/admins/:id",
+                       getOneRouteHandler(),
+                       {requireAdminAuth()});
+            router.Post("/api/v1/sys/admins",
+                        postRouteHandler(),
+                        {requireAdminAuth()});
+            router.Patch("/api/v1/sys/admins/:id",
+                         patchRouteHandler(),
+                         {requireAdminAuth()});
+            router.Delete("/api/v1/sys/admins/:id",
+                          deleteRouteHandler(),
+                          {requireAdminAuth()});
+            // router.Post("/api/v1/sys/auth/login",
+            //             handle());
+
+            // return;
+        }
+
         // List Entities
         router.Get("/api/v1/entities/" + name(), getManyRouteHandler(),
                    {hasAccess(name())});
