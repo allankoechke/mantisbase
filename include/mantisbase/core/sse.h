@@ -44,7 +44,7 @@ namespace mb {
         std::chrono::steady_clock::time_point m_lastActivity;
 
     public:
-        SSESession(const std::string &sessionId,
+        SSESession(std::string client_id,
                    const std::set<std::string> &topics,
                    const json &auth = json::object(),
                    const json &verification = json::object());

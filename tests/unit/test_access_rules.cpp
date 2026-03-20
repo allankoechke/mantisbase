@@ -3,17 +3,17 @@
 #include <nlohmann/json.hpp>
 
 TEST(AccessRule, DefaultConstructor) {
-    mb::AccessRule rule;
+    const mb::AccessRule rule;
     
     EXPECT_EQ(rule.mode(), "");
     EXPECT_EQ(rule.expr(), "");
 }
 
 TEST(AccessRule, ConstructorWithParams) {
-    mb::AccessRule rule("custom", "auth.id != \"\"");
+    const mb::AccessRule rule("custom", "@auth.id != \"\"");
     
     EXPECT_EQ(rule.mode(), "custom");
-    EXPECT_EQ(rule.expr(), "auth.id != \"\"");
+    EXPECT_EQ(rule.expr(), "@auth.id != \"\"");
 }
 
 TEST(AccessRule, SetModeAndExpr) {
@@ -29,18 +29,17 @@ TEST(AccessRule, SetModeAndExpr) {
     EXPECT_EQ(rule.mode(), "auth");
     
     rule.setMode("custom");
-    rule.setExpr("auth.entity == \"mb_admins\"");
+    rule.setExpr("@auth.entity == \"mb_admins\"");
     EXPECT_EQ(rule.mode(), "custom");
-    EXPECT_EQ(rule.expr(), "auth.entity == \"mb_admins\"");
+    EXPECT_EQ(rule.expr(), "@auth.entity == \"mb_admins\"");
 }
 
 TEST(AccessRule, ToJSON) {
-    mb::AccessRule rule("custom", "auth.id == '123'");
-    
+    const mb::AccessRule rule("custom", "@auth.id == '123'");
     auto json = rule.toJSON();
     
     EXPECT_EQ(json["mode"], "custom");
-    EXPECT_EQ(json["expr"], "auth.id == '123'");
+    EXPECT_EQ(json["expr"], "@auth.id == '123'");
 }
 
 TEST(AccessRule, FromJSON) {
@@ -56,19 +55,19 @@ TEST(AccessRule, FromJSON) {
     
     j = {
         {"mode", "custom"},
-        {"expr", "auth.id != null"}
+        {"expr", "@auth.id != null"}
     };
     
     rule = mb::AccessRule::fromJSON(j);
     EXPECT_EQ(rule.mode(), "custom");
-    EXPECT_EQ(rule.expr(), "auth.id != null");
+    EXPECT_EQ(rule.expr(), "@auth.id != null");
 }
 
 TEST(AccessRule, RoundTripJSON) {
-    mb::AccessRule original("custom", "auth.entity == \"users\"");
-    
-    auto json = original.toJSON();
-    auto restored = mb::AccessRule::fromJSON(json);
+    mb::AccessRule original("custom", "@auth.entity == \"users\"");
+
+    const auto json = original.toJSON();
+    const auto restored = mb::AccessRule::fromJSON(json);
     
     EXPECT_EQ(restored.mode(), original.mode());
     EXPECT_EQ(restored.expr(), original.expr());
@@ -84,9 +83,9 @@ TEST(AccessRule, DifferentModes) {
     EXPECT_EQ(authRule.mode(), "auth");
     
     // Custom mode
-    mb::AccessRule customRule("custom", "auth.id == req.body.user_id");
+    mb::AccessRule customRule("custom", "@auth.id == @req.body.user_id");
     EXPECT_EQ(customRule.mode(), "custom");
-    EXPECT_EQ(customRule.expr(), "auth.id == req.body.user_id");
+    EXPECT_EQ(customRule.expr(), "@auth.id == @req.body.user_id");
     
     // Admin only (empty mode)
     mb::AccessRule adminRule("", "");

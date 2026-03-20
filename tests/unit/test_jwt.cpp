@@ -17,7 +17,7 @@ protected:
         app = &mb::MantisBase::instance();
     }
     
-    void TearDown() override {
+    void TearDown() {
         // Don't close the shared instance - let the test environment handle cleanup
         // The MantisBase instance is managed by MbTestEnv
     }

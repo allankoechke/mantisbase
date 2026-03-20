@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/utils/uuidv7.h"
@@ -12,11 +14,11 @@ namespace {
 }
 
 mb::SSESession::SSESession(
-    const std::string &client_id,
+    std::string client_id,
     const std::set<std::string> &topics,
     const json &auth,
     const json &verification)
-    : m_clientID(client_id),
+    : m_clientID(std::move(client_id)),
       m_topics(topics),
       m_isActive(true),
       m_lastActivity(std::chrono::steady_clock::now()) {
@@ -625,7 +627,7 @@ std::function<mb::HandlerResponse(mb::MantisRequest &, mb::MantisResponse &)> mb
                 // Token map variables for evaluation
                 json vars = json::object();
 
-                // Add `auth` data to the TokenMap
+                // Add `auth` data to the json var
                 vars["auth"] = auth;
 
                 // Request Token Map
@@ -638,7 +640,7 @@ std::function<mb::HandlerResponse(mb::MantisRequest &, mb::MantisResponse &)> mb
 
                 try {
                     if (req.getMethod() == "POST" && !req.getBody().empty()) {
-                        // Parse request body and add it to the request TokenMap
+                        // Parse request body and add it to the request json
                         req_obj["body"] = req.getBodyAsJson();
                     }
                 } catch (...) {
