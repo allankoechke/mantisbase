@@ -60,4 +60,6 @@ docker/www/
 *.pid
 *.seed
 
-docs/
+# Added by cargo
+
+/target
