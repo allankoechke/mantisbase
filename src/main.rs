@@ -168,7 +168,7 @@ fn main() {
             println!("Managing admin users");
 
         }
-        Some(Commands::Migrations(_)) => {
+        Some(Commands::Migrations(migration_args)) => {
             println!("Running database migrations");
         }
         None => {
