@@ -66,12 +66,27 @@ struct ServeArgs {
 
 #[derive(Args, Debug)]
 struct AdminArgs {
+    #[arg(long, short = 'a', num_args = 2, value_names = ["USERNAME", "PASSWORD"],
+    help = "Add an admin user")]
+    add: Option<(String, String)>, // (username, password)
 
+    #[arg(long, short = 'l', help = "List all admin users")]
+    ls: bool,
+
+    #[arg(long, short = 'r', help = "Remove an admin user by email or id")]
+    rm: Option<String>,
 }
 
 #[derive(Args, Debug)]
 struct MigrationArgs {
+    #[arg(long, short = 'u', help = "Run migrations up to a specific version")]
+    up: Option<u32>,
 
+    #[arg(long, short = 'd', help = "Run migrations down to a specific version")]
+    down: Option<u32>,
+
+    #[arg(long, short = 'r', help = "Reset migrations to initial state")]
+    reset: bool,
 }
 
 struct MantisBase {}
@@ -149,16 +164,16 @@ fn main() {
         Some(Commands::Serve(serve_args)) => {
             println!("Serving on port: {:?}", serve_args.port.unwrap());
         }
-        Some(Commands::Admins(_)) => {
+        Some(Commands::Admins(admin_args)) => {
             println!("Managing admin users");
+
         }
         Some(Commands::Migrations(_)) => {
             println!("Running database migrations");
         }
         None => {
-            println!("No subcommand provided, exiting");
-
-
+            println!("Nothing else to do, exiting!");
+            return;
         }
     }
 }
