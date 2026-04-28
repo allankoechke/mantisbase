@@ -1,4 +1,5 @@
 use crate::config::LogLevel;
+use crate::logger::{default_logger, LevelFilter, Level};
 
 #[derive(Debug)]
 pub enum MantisBaseDbType {
@@ -22,7 +23,7 @@ pub struct MantisBase {
     public_dir: String,
     db_url: String,
     db_type: MantisBaseDbType,
-    log_level: LogLevel, // default Info
+    log_level: Level, // default Info
     mode: MantisBaseMode,
 
     // Serve Options
@@ -32,13 +33,16 @@ pub struct MantisBase {
 
 impl MantisBase {
     pub fn new() -> Self {
+        default_logger()
+            .set_level_filter(LevelFilter::MoreSevereEqual(Level::Info));
+
         Self {
             data_dir: "./data".to_string(),
             scripts_dir: "./scripts".to_string(),
             public_dir: "./public".to_string(),
             db_url: "".to_string(),
             db_type: MantisBaseDbType::Sqlite,
-            log_level: LogLevel::Info,
+            log_level: Level::Info,
             mode: MantisBaseMode::None,
             port: 7070,
             host: "127.0.0.1".to_string(),
@@ -85,12 +89,14 @@ impl MantisBase {
         self.db_type = db_type;
     }
 
-    pub fn log_level(&self) -> &LogLevel {
+    pub fn log_level(&self) -> &Level {
         &self.log_level
     }
 
-    pub fn set_log_level(&mut self, log_level: LogLevel) {
+    pub fn set_log_level(&mut self, log_level: Level) {
         self.log_level = log_level;
+        default_logger()
+            .set_level_filter(LevelFilter::MoreSevereEqual(self.log_level));
     }
 
     pub fn mode(&self) -> &MantisBaseMode {

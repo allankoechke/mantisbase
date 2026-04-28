@@ -3,6 +3,7 @@ use clap::{Args, Parser, Subcommand, ValueEnum, ArgGroup};
 
 use mantisbase::cli::{Cli, Commands, DatabaseType};
 use mantisbase::core::MantisBase;
+use logger::{Level};
 
 fn main() {
     let cli = Cli::parse();
@@ -31,6 +32,20 @@ fn main() {
     // Set development mode
     if cli.dev {
         println!("Development mode enabled");
+
+    } else {
+        // Check if log level was set via env vars
+        if let Ok(log_level) = std::env::var("MB_LOG_LEVEL") {
+            match log_level.to_lowercase().as_str() {
+                "trace" => mantisbase.set_log_level(Level::Trace),
+                "debug" => mantisbase.set_log_level(Level::Debug),
+                "info" => mantisbase.set_log_level(Level::Info),
+                "warn" => mantisbase.set_log_level(Level::Warn),
+                "error" => mantisbase.set_log_level(Level::Error),
+                "critical" => mantisbase.set_log_level(Level::Critical),
+                _ => mantisbase.set_log_level(Level::Info), // Ignore invalid log levels
+            }
+        }
     }
 
     // SQLite is the default database to be used
