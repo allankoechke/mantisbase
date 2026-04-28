@@ -6,6 +6,7 @@ use crate::logger::{default_logger, LevelFilter, Level};
 ///
 #[derive(Debug)]
 pub enum MantisBaseDbType {
+    Turso,
     Sqlite,
     Postgres,
 }

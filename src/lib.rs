@@ -4,6 +4,7 @@ pub mod db;
 pub mod http;
 pub mod config;
 pub mod logger;
+pub mod models;
 
 pub use core::MantisBaseDbType;
 pub use core::MantisBaseMode;
