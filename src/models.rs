@@ -29,6 +29,27 @@ pub struct Field {
     constraints: Option<String>,
     default: Option<String>,
 }
+
+pub enum AccessRule {
+    Public,
+    Admin,
+    Authenticated,
+    Custom
+}
+
+pub struct EntitySchema {
+    entity_name: String,
+    entity_type: MantisBaseEntityType,
+    view_query: Option<String>,
+    is_system: bool,
+    has_api: bool,
+    fields: Vec<Field>,
+    list: AccessRule,
+    read: AccessRule,
+    create: AccessRule,
+    update: AccessRule,
+    delete: AccessRule,
+}
 pub struct BareModel {}
 
 pub struct BaseEntityModel {
@@ -38,6 +59,8 @@ pub struct BaseEntityModel {
     description: Option<String>,
     is_system: bool,
     fields: Vec<Field>,
+    foreign_keys: Vec<String>,
+    constraints: Option<String>
 }
 
 pub struct AuthModel {
