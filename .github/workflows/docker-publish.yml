@@ -22,12 +22,6 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Set version (strip leading v)
-        id: version
-        run: |
-          v="${{ inputs.version }}"
-          echo "version=${v#v}" >> "$GITHUB_OUTPUT"
-
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -44,11 +38,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./docker
+          context: .
           file: ./docker/Dockerfile
-          build-args: |
-            MB_VERSION=${{ steps.version.outputs.version }}
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.image_name }}:${{ steps.version.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.image_name }}:${{ inputs.version }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.image_name }}:latest

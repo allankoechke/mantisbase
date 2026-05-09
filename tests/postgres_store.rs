@@ -1,0 +1,30 @@
+//! Integration test for optional Postgres storage. CI sets `TEST_PG_URL`.
+
+#[cfg(feature = "postgres")]
+#[tokio::test]
+async fn postgres_migrate_and_admin_roundtrip() {
+    let Some(url) = std::env::var("TEST_PG_URL")
+        .ok()
+        .filter(|s| !s.trim().is_empty())
+    else {
+        return;
+    };
+
+    use mantisbase::storage::PostgresStore;
+
+    let store = PostgresStore::connect(&url)
+        .await
+        .expect("connect postgres");
+    let email = format!("pgtest_{}@example.com", uuid::Uuid::new_v4());
+    store
+        .add_admin(&email, "hunter2hunter2")
+        .await
+        .expect("add_admin");
+    let ok = store
+        .verify_admin_basic(&email, "hunter2hunter2")
+        .await
+        .expect("verify");
+    assert!(ok);
+    let list = store.list_admins().await.expect("list");
+    assert!(list.iter().any(|(_, e)| e == &email));
+}

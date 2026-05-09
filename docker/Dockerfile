@@ -1,23 +1,23 @@
-FROM debian:trixie-slim
-
-ARG MB_VERSION=0.3.4
-
+# Build from repository root: docker build -f docker/Dockerfile .
+FROM rust:1.85-bookworm AS builder
+WORKDIR /src
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    unzip \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+COPY Cargo.toml Cargo.lock ./
+COPY migrations ./migrations
+COPY src ./src
+COPY public ./public
+RUN cargo build --release
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
-    libpq5 \
-    libzstd1 \
-  && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /mb
-
-RUN wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/releases/download/v${MB_VERSION}/mantisbase_v${MB_VERSION}_linux-x86_64.zip \
-    && unzip /tmp/mantisbase.zip -d /mb \
-    && chmod +x /mb/mantisbase \
-    && rm /tmp/mantisbase.zip
-
-EXPOSE 80
-
-ENTRYPOINT ["/mb/mantisbase"]
-CMD ["--dev", "serve", "-p", "80"]
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /src/target/release/mantisbase /usr/local/bin/mantisbase
+COPY public /opt/mantisbase/public
+EXPOSE 7070
+ENTRYPOINT ["/usr/local/bin/mantisbase"]
+CMD ["serve", "--host", "0.0.0.0", "-p", "7070", "--public-dir", "/opt/mantisbase/public", "--data-dir", "/data"]

@@ -1,7 +1,9 @@
 use std::path::PathBuf;
-use clap::{Args, Parser, Subcommand, ValueEnum, ArgGroup};
+
+use clap::{ArgGroup, Args, Parser, Subcommand, ValueEnum};
 
 #[derive(Parser, Debug)]
+#[command(name = "mantisbase", version, about)]
 pub struct Cli {
     /// Data directory path
     #[arg(long)]
@@ -19,41 +21,47 @@ pub struct Cli {
     #[arg(long)]
     pub dev: bool,
 
-    /// Database type selection
+    /// Database backend (default: local libSQL file under data dir)
     #[arg(long)]
     pub db: Option<DatabaseType>,
 
-    /// Database connection URL
+    /// Database connection URL (Turso token URL or Postgres connection string)
     #[arg(long)]
     pub db_url: Option<String>,
 
-    /// Optional subcommands
     #[command(subcommand)]
     pub commands: Option<Commands>,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum DatabaseType {
-    SQLITE,
-    POSTGRESQL,
-    MYSQL,
+    /// Local libSQL database file (default).
+    Libsql,
+    /// Remote Turso / libSQL (`libsql://`…).
+    Turso,
+    /// PostgreSQL (`MB_DATABASE_URL` or `--db-url`).
+    #[cfg(feature = "postgres")]
+    Postgresql,
 }
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    /// Initialize http listening server
+    /// Run HTTP server
     Serve(ServeArgs),
     /// Manage admin users
     Admins(AdminArgs),
-    /// Database Migrations
+    /// Database migrations
     Migrations(MigrationArgs),
 }
 
 #[derive(Args, Debug)]
 pub struct ServeArgs {
-    #[arg(long, default_value = "7070",
-    value_parser = clap::value_parser!(u16).range(1..),
-    help = "Port number to listen on")]
+    #[arg(
+        long,
+        default_value = "7070",
+        value_parser = clap::value_parser!(u16).range(1..),
+        help = "Port number to listen on"
+    )]
     pub port: Option<u16>,
 
     #[arg(long, default_value = "127.0.0.1", help = "Host address to bind to")]
@@ -68,9 +76,14 @@ pub struct ServeArgs {
         .multiple(false)
 ))]
 pub struct AdminArgs {
-    #[arg(long, short = 'a', num_args = 2, value_names = ["EMAIL", "PASSWORD"],
-    help = "Add an admin user")]
-    pub add: Option<Vec<String>>, // [email, password]
+    #[arg(
+        long,
+        short = 'a',
+        num_args = 2,
+        value_names = ["EMAIL", "PASSWORD"],
+        help = "Add an admin user"
+    )]
+    pub add: Option<Vec<String>>,
 
     #[arg(long, short = 'l', help = "List all admin users")]
     pub ls: bool,
@@ -87,12 +100,12 @@ pub struct AdminArgs {
         .multiple(false)
 ))]
 pub struct MigrationArgs {
-    #[arg(long, short = 'u', help = "Run migrations up to a specific version")]
-    pub up: Option<u32>,
+    #[arg(long, short = 'u', help = "Apply all pending migrations")]
+    pub up: bool,
 
-    #[arg(long, short = 'd', help = "Run migrations down to a specific version")]
+    #[arg(long, short = 'd', help = "Reserved: downgrade migrations")]
     pub down: Option<u32>,
 
-    #[arg(long, short = 'r', help = "Reset migrations to initial state")]
+    #[arg(long, short = 'r', help = "Reset database schema (destructive)")]
     pub reset: bool,
 }

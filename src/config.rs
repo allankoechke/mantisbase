@@ -1,13 +1,8 @@
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum LogLevel {
     Debug,
+    #[default]
     Info,
     Warn,
     Error,
-}
-
-impl Default for LogLevel {
-    fn default() -> Self {
-        LogLevel::Info
-    }
 }

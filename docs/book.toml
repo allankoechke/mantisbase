@@ -1,0 +1,12 @@
+[book]
+authors = ["MantisBase contributors"]
+language = "en"
+multilingual = false
+src = "src"
+title = "MantisBase (Rust)"
+
+[build]
+build-dir = "book-build"
+
+[output.html]
+default-theme = "rust"
