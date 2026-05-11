@@ -60,4 +60,9 @@ docker/www/
 *.pid
 *.seed
 
-docs/
+# Added by cargo
+
+/target
+/docs/book-build/
+/public/mb-dist/
+/admin/node_modules/

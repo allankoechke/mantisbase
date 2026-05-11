@@ -1,0 +1,37 @@
+name: OpenAPI artifact
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --release
+      - name: Export OpenAPI from running server
+        run: |
+          set -e
+          mkdir -p data
+          ./target/release/mantisbase --data-dir ./data admins add ci@example.com 'Passw0rd!ci' || true
+          ./target/release/mantisbase --data-dir ./data serve &
+          PID=$!
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:7070/api/v1/health >/dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:7070/api/v1/openapi.json -o openapi.json
+          kill $PID
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openapi-${{ github.ref_name }}
+          path: openapi.json

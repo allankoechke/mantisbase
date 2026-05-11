@@ -3,28 +3,55 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
 
 jobs:
-  build:
-    uses: ./.github/workflows/build-matrix.yml
+  build-rust:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: mantisbase-${{ github.ref_name }}-linux.tar.gz
+          - os: windows-latest
+            artifact: mantisbase-${{ github.ref_name }}-windows.zip
+          - os: macos-latest
+            artifact: mantisbase-${{ github.ref_name }}-macos.tar.gz
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --release
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        run: tar czvf "${{ matrix.artifact }}" -C target/release mantisbase
+        shell: bash
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path target/release/mantisbase.exe -DestinationPath ${{ matrix.artifact }} -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
 
   release:
-    needs: build
+    needs: build-rust
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: mantisbase_${{ github.ref_name }}_*.zip
           path: ./artifacts
           merge-multiple: true
 
-      - name: Show artifact contents
-        run: ls -lh ./artifacts/
+      - name: List artifacts
+        run: find ./artifacts -type f -ls
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -32,7 +59,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           generate_release_notes: true
-          files: ./artifacts/*
+          files: ./artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -1,0 +1,6 @@
+/target
+.git
+**/node_modules
+/admin/node_modules
+/public/mb-dist
+/docs/book-build
