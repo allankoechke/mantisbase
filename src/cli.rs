@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::{ArgGroup, Args, Parser, Subcommand, ValueEnum};
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(name = "mantisbase", version, about)]
 pub struct Cli {
     /// Data directory path
@@ -33,9 +33,10 @@ pub struct Cli {
     pub commands: Option<Commands>,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Default)]
 pub enum DatabaseType {
     /// Local libSQL database file (default).
+    #[default]
     Libsql,
     /// Remote Turso / libSQL (`libsql://`…).
     Turso,
@@ -44,7 +45,7 @@ pub enum DatabaseType {
     Postgresql,
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Clone)]
 pub enum Commands {
     /// Run HTTP server
     Serve(ServeArgs),
@@ -54,7 +55,7 @@ pub enum Commands {
     Migrations(MigrationArgs),
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub struct ServeArgs {
     #[arg(
         long,
@@ -68,7 +69,7 @@ pub struct ServeArgs {
     pub host: Option<String>,
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 #[command(group(
     ArgGroup::new("admin_action")
         .args(["add", "ls", "rm"])
@@ -92,7 +93,7 @@ pub struct AdminArgs {
     pub rm: Option<String>,
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 #[command(group(
     ArgGroup::new("migration_action")
         .args(["up", "down", "reset"])

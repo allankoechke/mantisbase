@@ -5,8 +5,23 @@
 //! - **HTTP:** [`http::serve`] exposes `/api/v1/*` with **HTTP Basic** admin auth and OpenAPI at `/api/v1/openapi.json`.
 //! - **Files:** [`files::LocalFs`] stores blobs under `data_dir/files/…`.
 //!
-//! ## Example (CLI)
-//! Run `mantisbase serve` after creating an admin with `mantisbase admins add …`.
+//! ## Example (CLI binary)
+//! Run `mantisbase serve` after creating an admin with `mantisbase admins --add …`.
+//!
+//! ## Example (library, same behavior as the binary)
+//! ```no_run
+//! use clap::Parser;
+//! use mantisbase::cli::Cli;
+//! use mantisbase::core::MantisBase;
+//!
+//! # async fn demo() -> anyhow::Result<()> {
+//! let cli = Cli::parse_from(["mantisbase", "serve", "--port", "7070"]);
+//! let mut mantis = MantisBase::new();
+//! mantis.apply_cli(&cli)?; // or: mantis.parse_cli(&cli)?
+//! let _ = mantis.run().await?;
+//! # Ok(())
+//! # }
+//! ```
 
 pub mod auth;
 pub mod cli;
@@ -24,4 +39,4 @@ pub mod storage;
 pub mod util_time;
 pub mod webhooks;
 
-pub use core::{MantisBase, MantisBaseDbType, MantisBaseMode};
+pub use core::{MantisBase, MantisBaseDbType, MantisBaseMode, MantisBaseRunOutcome};
