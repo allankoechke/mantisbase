@@ -5,6 +5,7 @@ pub mod openapi;
 mod auth;
 mod entities;
 mod error;
+mod logging;
 mod login;
 mod meta;
 mod schemas;
@@ -13,16 +14,17 @@ mod webhooks;
 
 pub use error::ApiError;
 
+use std::net::SocketAddr;
 use std::sync::Arc;
 
+use axum::middleware;
 use axum::routing::{get, post};
 use axum::Router;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
-use tower_http::trace::TraceLayer;
 
 use crate::core::MantisBase;
-use crate::logger::{cli_stdout_line, prelude::*};
+use crate::logger::cli_stdout_line;
 use crate::storage::Store;
 
 /// Shared HTTP state (store + JWT secret for auth entities).
@@ -79,13 +81,19 @@ pub async fn serve(mantis: &MantisBase, store: Store) -> anyhow::Result<()> {
     let app = Router::new()
         .nest("/api/v1", api)
         .nest_service("/mb", ServeDir::new(mantis.public_dir()))
-        .layer(TraceLayer::new_for_http())
-        .layer(CorsLayer::permissive());
+        .layer(CorsLayer::permissive())
+        .layer(middleware::from_fn(logging::log_request));
 
     let addr = format!("{}:{}", mantis.host(), mantis.port());
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    cli_stdout_line(format!("\nStarting Servers: \n\t├── API Endpoints: http://{addr}/api/v1"));
+    cli_stdout_line(format!(
+        "\nStarting Servers: \n\t├── API Endpoints: http://{addr}/api/v1"
+    ));
     cli_stdout_line(format!("\t└── Admin Dashboard: http://{addr}/mb\n"));
-    axum::serve(listener, app).await?;
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await?;
     Ok(())
 }
