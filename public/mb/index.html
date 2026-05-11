@@ -12,9 +12,13 @@
   <body>
     <h1>MantisBase Admin</h1>
     <p>
-      Static placeholder served from <code>/mb</code>. For the Vite + TypeScript SPA scaffold, see
-      the <code>admin/</code> directory (build output can be copied to <code>public/mb/</code>).
+      Legacy placeholder only. The server serves the <strong>compiled</strong> admin app from
+      <code>public/mb-dist/</code> at <code>/mb/</code> — run <code>cd admin &amp;&amp; npm install &amp;&amp; npm run build</code>.
     </p>
-    <p>Use HTTP Basic auth against the <code>/api/v1/*</code> endpoints with an admin account.</p>
+    <p>
+      Use HTTP Basic auth with an admin account on <code>/api/v1/sys/*</code> (schemas, configs, logs),
+      <code>/api/v1/admins/*</code> (admin user list / create / delete), and similar protected routes.
+      Public and user-JWT routes stay under <code>/api/v1/entities/*</code>, <code>/api/v1/auth/*</code>, etc.
+    </p>
   </body>
 </html>

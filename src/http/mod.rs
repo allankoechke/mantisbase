@@ -1,7 +1,8 @@
-//! Axum HTTP server: `/api/v1/*`, admin Basic auth, OpenAPI, static `/mb`.
+//! Axum HTTP server: `/api/v1/*`, admin HTTP Basic on `/api/v1/sys/*` and `/api/v1/admins/*`, OpenAPI, compiled admin UI at `/mb`.
 
 pub mod openapi;
 
+mod admins;
 mod auth;
 mod entities;
 mod error;
@@ -11,6 +12,7 @@ mod login;
 mod meta;
 mod schemas;
 mod settings;
+mod sys;
 mod webhooks;
 
 pub use error::ApiError;
@@ -19,13 +21,16 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::middleware;
-use axum::routing::{get, post};
+use axum::routing::{delete, get, post};
 use axum::Router;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 
+use std::path::Path;
+
 use crate::core::MantisBase;
 use crate::logger::cli_stdout_line;
+use crate::logger::prelude::*;
 use crate::storage::Store;
 
 /// Shared HTTP state (store + JWT secret for [`login::auth_login`]).
@@ -41,13 +46,23 @@ fn api_router(state: Arc<AppState>) -> Router {
         .route("/health", get(meta::health))
         .route("/openapi.json", get(meta::openapi_json))
         .route(
-            "/schemas",
+            "/sys/schemas",
             get(schemas::list_schemas).post(schemas::create_schema),
         )
         .route(
-            "/schemas/{name}",
+            "/sys/schemas/{name}",
             get(schemas::get_schema).delete(schemas::delete_schema),
         )
+        .route(
+            "/sys/configs",
+            get(settings::list_config).patch(settings::patch_config),
+        )
+        .route("/sys/logs", get(sys::get_logs))
+        .route(
+            "/admins",
+            get(admins::list_admins).post(admins::create_admin),
+        )
+        .route("/admins/{id}", delete(admins::delete_admin))
         .route(
             "/entities/{entity}",
             get(entities::list_entities).post(entities::create_row),
@@ -57,10 +72,6 @@ fn api_router(state: Arc<AppState>) -> Router {
             get(entities::get_row)
                 .patch(entities::update_row)
                 .delete(entities::delete_row),
-        )
-        .route(
-            "/config",
-            get(settings::list_config).patch(settings::patch_config),
         )
         .route("/auth/login", post(login::auth_login))
         .route(
@@ -79,9 +90,16 @@ pub async fn serve(mantis: &MantisBase, store: Store) -> anyhow::Result<()> {
 
     let api = api_router(state.clone());
 
+    let admin_root = mantis.admin_ui_dir();
+    if !Path::new(admin_root).join("index.html").is_file() {
+        warn!(
+            "Admin UI not found at {admin_root}/index.html — run: cd admin && npm install && npm run build (writes public/mb-dist/)"
+        );
+    }
+
     let app = Router::new()
         .nest("/api/v1", api)
-        .nest_service("/mb", ServeDir::new(mantis.public_dir()))
+        .nest_service("/mb", ServeDir::new(admin_root))
         .layer(CorsLayer::permissive())
         .layer(middleware::from_fn(logging::log_request));
 

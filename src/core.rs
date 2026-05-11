@@ -39,7 +39,8 @@ pub enum MantisBaseRunOutcome {
 pub struct MantisBase {
     data_dir: String,
     scripts_dir: String,
-    public_dir: String,
+    /// Root of the Vite build output (default `./public/mb-dist`).
+    admin_ui_dir: String,
     db_url: String,
     db_type: MantisBaseDbType,
     log_level: Level,
@@ -61,7 +62,7 @@ impl MantisBase {
         Self {
             data_dir: "./data".to_string(),
             scripts_dir: "./scripts".to_string(),
-            public_dir: "./public".to_string(),
+            admin_ui_dir: "./public/mb-dist".to_string(),
             db_url: String::new(),
             db_type: MantisBaseDbType::Libsql,
             log_level: Level::Info,
@@ -99,6 +100,13 @@ impl MantisBase {
             );
         }
 
+        if let Ok(dir) = std::env::var("MB_ADMIN_UI_DIR") {
+            let t = dir.trim();
+            if !t.is_empty() {
+                self.admin_ui_dir = t.to_string();
+            }
+        }
+
         self
     }
 
@@ -118,12 +126,12 @@ impl MantisBase {
         &self.scripts_dir
     }
 
-    pub fn public_dir(&self) -> &str {
-        &self.public_dir
+    pub fn admin_ui_dir(&self) -> &str {
+        &self.admin_ui_dir
     }
 
-    pub fn set_public_dir(&mut self, public_dir: &str) {
-        self.public_dir = public_dir.to_string();
+    pub fn set_admin_ui_dir(&mut self, dir: &str) {
+        self.admin_ui_dir = dir.to_string();
     }
 
     pub fn db_url(&self) -> &str {
@@ -192,9 +200,9 @@ impl MantisBase {
             trace!("Scripts directory: {:?}", scripts_dir);
             self.set_scripts_dir(scripts_dir.to_str().unwrap_or("./scripts"));
         }
-        if let Some(public_dir) = &cli.public_dir {
-            trace!("Public directory: {:?}", public_dir);
-            self.set_public_dir(public_dir.to_str().unwrap_or("./public"));
+        if let Some(admin_ui) = &cli.admin_ui_dir {
+            trace!("Admin UI directory: {:?}", admin_ui);
+            self.set_admin_ui_dir(admin_ui.to_str().unwrap_or("./public/mb-dist"));
         }
         if cli.dev {
             self.set_log_level(Level::Trace);
@@ -357,7 +365,7 @@ fn print_no_subcommand_hint() {
         "No subcommand given.\n\n\
         Examples:\n\
           mantisbase serve                      HTTP API + static /mb\n\
-          mantisbase admins --add EMAIL PASS    create an admin (Basic auth for /api/v1)\n\
+          mantisbase admins --add EMAIL PASS    create an admin (or use POST /api/v1/admins)\n\
           mantisbase migrations --up            apply catalog migrations\n\n\
         For all options:  mantisbase --help\n\
         Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)"

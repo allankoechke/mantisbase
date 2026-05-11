@@ -13,9 +13,9 @@ pub struct Cli {
     #[arg(long)]
     pub scripts_dir: Option<PathBuf>,
 
-    /// Public directory path for static files
+    /// Directory containing the **built** admin SPA (`index.html` from `cd admin && npm run build`).
     #[arg(long)]
-    pub public_dir: Option<PathBuf>,
+    pub admin_ui_dir: Option<PathBuf>,
 
     /// Enable development mode (verbose logging)
     #[arg(long)]

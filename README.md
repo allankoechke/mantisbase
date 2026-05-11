@@ -35,6 +35,12 @@ cd mantisbase
 cargo build --release
 ```
 
+Build the admin SPA (Vite → `public/mb-dist/`, served at `/mb/`):
+
+```bash
+cd admin && npm install && npm run build && cd ..
+```
+
 Apply migrations, create an admin, set a JWT secret for app-user login, then serve:
 
 ```bash
@@ -47,9 +53,13 @@ export MB_JWT_SECRET='a-long-random-secret-for-user-jwt'
 Defaults:
 
 - API: `http://127.0.0.1:7070/api/v1/`
-- Admin static UI: `http://127.0.0.1:7070/mb` (use **HTTP Basic** with the admin email and password you created)
+- Admin UI: `http://127.0.0.1:7070/mb/` — **compiled** assets from `./public/mb-dist` (override with `--admin-ui-dir` or `MB_ADMIN_UI_DIR`). Use **HTTP Basic** in the browser where the UI calls the API.
 
 OpenAPI for the running shape of the API: `GET /api/v1/openapi.json`.
+
+### Admin accounts over HTTP (`/api/v1/admins`)
+
+With admin Basic auth: **`GET /api/v1/admins`** lists `{ "admins": [ { "id", "email" }, … ] }`; **`POST /api/v1/admins`** with `{"email":"…","password":"…"}` creates another admin; **`DELETE /api/v1/admins/{id-or-email}`** removes one (URL-encode the path segment). The CLI `mantisbase admins …` commands do the same against the database.
 
 ### Create a schema (admin Basic auth)
 
@@ -57,7 +67,7 @@ Admin routes expect `Authorization: Basic …` (email:password), not a bearer �
 
 ```bash
 curl -sS -u 'admin@example.com:your-admin-password' \
-  -X POST http://127.0.0.1:7070/api/v1/schemas \
+  -X POST http://127.0.0.1:7070/api/v1/sys/schemas \
   -H 'Content-Type: application/json' \
   -d '{
     "name": "posts",
@@ -97,11 +107,13 @@ Rough map for **this Rust codebase** (check `src/http/mod.rs` and OpenAPI for tr
 | Area | Status |
 |------|--------|
 | Health, OpenAPI, CORS, request logging | Implemented |
-| Schemas CRUD, entity row CRUD, access rules | Implemented |
-| Admin users CLI + Basic auth for admin API | Implemented |
+| `GET|POST /api/v1/sys/schemas`, `GET|DELETE …/sys/schemas/{name}` (admin) | Implemented |
+| `GET|PATCH /api/v1/sys/configs` (admin), `GET /api/v1/sys/logs` (admin, stub) | Implemented |
+| Entity row CRUD under `/api/v1/entities/...`, access rules | Implemented |
+| Admin users: CLI or `GET|POST /api/v1/admins`, `DELETE /api/v1/admins/{id}` (Basic) | Implemented |
 | `mb_user` + `POST /api/v1/auth/login` + JWT | Implemented |
-| Config patch, webhooks | Implemented |
-| Static `/mb` admin bundle | Served from `public/` |
+| `GET|POST /api/v1/webhooks` (admin) | Implemented |
+| Admin dashboard `/mb/` | Compiled Vite app (default `./public/mb-dist`) |
 | SSE realtime, file pipeline, refresh/logout auth routes, Duktape scripting, … | **Not** promised here; older `doc/*.md` may still describe the C++ server |
 
 When in doubt, prefer **`openapi.json`** and this README over historical prose.
@@ -116,7 +128,7 @@ When in doubt, prefer **`openapi.json`** and this README over historical prose.
 | `mantisbase admins …` | Add, list, or remove admin users |
 | `mantisbase migrations …` | Apply or reset SQL migrations |
 
-Global flags include `--data-dir`, `--public-dir`, `--dev`, `--db` (`libsql` \| `turso` \| `postgresql`), and `--db-url` (or `MB_DATABASE_URL`). Turso typically needs `MB_TURSO_AUTH_TOKEN`.
+Global flags include `--data-dir`, `--admin-ui-dir` (built SPA root), `--dev`, `--db` (`libsql` \| `turso` \| `postgresql`), and `--db-url` (or `MB_DATABASE_URL`). Turso typically needs `MB_TURSO_AUTH_TOKEN`.
 
 ---
 
@@ -125,6 +137,7 @@ Global flags include `--data-dir`, `--public-dir`, `--dev`, `--db` (`libsql` \| 
 | Variable | Role |
 |----------|------|
 | `MB_JWT_SECRET` | Required to issue JWTs from `/api/v1/auth/login` |
+| `MB_ADMIN_UI_DIR` | Directory with built admin `index.html` (default `./public/mb-dist`) |
 | `MB_DATABASE_URL` | DB URL when using Turso/Postgres (or pass `--db-url`) |
 | `MB_TURSO_AUTH_TOKEN` | Turso auth token when `--db turso` |
 | `MB_LOG_LEVEL` | `trace` … `critical` |
@@ -136,9 +149,10 @@ Global flags include `--data-dir`, `--public-dir`, `--dev`, `--db` (`libsql` \| 
 ```
 mantisbase/
 ├── src/              # Library + `mantisbase` binary (CLI, HTTP, storage)
+├── admin/            # Vite + TypeScript admin UI (`npm run build` → `public/mb-dist/`)
 ├── migrations/       # libSQL / Turso SQL migrations
 ├── migrations/postgres/
-├── public/           # Admin SPA assets for `/mb`
+├── public/mb-dist/   # Built admin bundle (served at `/mb/`; gitignored)
 ├── tests/
 └── doc/              # Legacy / long-form guides (may predate the Rust port)
 ```
