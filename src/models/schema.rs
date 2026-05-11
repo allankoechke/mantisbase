@@ -72,27 +72,6 @@ impl EntitySchema {
                     default: None,
                 });
             }
-            EntityType::Auth => {
-                for (id, name, ft) in [
-                    ("id", "id", FieldType::String),
-                    ("created_at", "created_at", FieldType::DateTime),
-                    ("updated_at", "updated_at", FieldType::DateTime),
-                    ("email", "email", FieldType::String),
-                    ("password", "password", FieldType::Password),
-                ] {
-                    self.fields.push(Field {
-                        field_id: id.to_string(),
-                        field_name: name.to_string(),
-                        field_description: None,
-                        field_type: ft,
-                        is_required: true,
-                        is_primary_key: id == "id",
-                        is_unique: id == "email" || id == "id",
-                        constraints: None,
-                        default: None,
-                    });
-                }
-            }
             EntityType::Bare | EntityType::View => {}
         }
         self
@@ -111,8 +90,8 @@ mod tests {
     }
 
     #[test]
-    fn auth_entity_has_auth_fields() {
-        let s = EntitySchema::new("users".to_string(), EntityType::Auth);
-        assert!(s.fields.iter().any(|f| f.field_name == "password"));
+    fn bare_entity_has_no_default_fields() {
+        let s = EntitySchema::new("x".to_string(), EntityType::Bare);
+        assert!(s.fields.is_empty());
     }
 }

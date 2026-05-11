@@ -147,16 +147,15 @@ impl Store {
         }
     }
 
-    pub async fn verify_auth_login(
+    pub async fn verify_user_login(
         &self,
-        entity: &str,
-        identity: &str,
+        email: &str,
         password: &str,
     ) -> Result<Option<Map<String, Value>>> {
         match self {
-            Store::Libsql(s) => s.verify_auth_login(entity, identity, password).await,
+            Store::Libsql(s) => s.verify_user_login(email, password).await,
             #[cfg(feature = "postgres")]
-            Store::Postgres(s) => s.verify_auth_login(entity, identity, password).await,
+            Store::Postgres(s) => s.verify_user_login(email, password).await,
         }
     }
 

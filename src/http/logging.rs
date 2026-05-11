@@ -9,7 +9,7 @@ use axum::middleware::Next;
 
 use crate::logger::prelude::*;
 
-fn http_version_str(v: Version) -> &'static str {
+fn http_version_label(v: Version) -> &'static str {
     match v {
         Version::HTTP_09 => "HTTP/0.9",
         Version::HTTP_10 => "HTTP/1.0",
@@ -20,7 +20,17 @@ fn http_version_str(v: Version) -> &'static str {
     }
 }
 
-/// Logs one line per request: method, URI, protocol, status, duration, peer, optional lengths.
+fn sanitize_ua(ua: &str) -> String {
+    const MAX_CHARS: usize = 160;
+    let u = ua.replace('"', "'");
+    if u.chars().count() > MAX_CHARS {
+        u.chars().take(MAX_CHARS).collect::<String>() + "…"
+    } else {
+        u
+    }
+}
+
+/// One structured `info!` line per completed request (API and static `/mb`).
 pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
     let method = req.method().clone();
     let uri = req.uri().clone();
@@ -30,6 +40,10 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
         .get::<ConnectInfo<std::net::SocketAddr>>()
         .map(|c| c.0.to_string())
         .unwrap_or_else(|| "-".to_string());
+    let resource = uri
+        .path_and_query()
+        .map(|pq| pq.as_str().to_string())
+        .unwrap_or_else(|| uri.path().to_string());
     let req_clen = req
         .headers()
         .get(header::CONTENT_LENGTH)
@@ -45,7 +59,7 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
 
     let start = Instant::now();
     let response = next.run(req).await;
-    let elapsed = start.elapsed();
+    let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0;
     let status = response.status();
     let resp_clen = response
         .headers()
@@ -55,16 +69,16 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
         .unwrap_or_else(|| "-".to_string());
 
     info!(
-        "{} \"{}\" {} -> {} {:.3}ms peer={} user_agent=\"{}\" req_content_length={} resp_content_length={}",
+        "HTTP access · {} {} · {} · status={} · {:.3} ms · client={} · request_bytes={} · response_bytes={} · user_agent=\"{}\"",
         method,
-        uri,
-        http_version_str(version),
+        resource,
+        http_version_label(version),
         status.as_u16(),
-        elapsed.as_secs_f64() * 1000.0,
+        elapsed_ms,
         peer,
-        user_agent.replace('"', "'"),
         req_clen,
-        resp_clen
+        resp_clen,
+        sanitize_ua(&user_agent),
     );
 
     response

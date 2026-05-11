@@ -270,7 +270,6 @@ impl PostgresStore {
         let type_str = match et {
             EntityType::Bare => "bare",
             EntityType::Base => "base",
-            EntityType::Auth => "auth",
             EntityType::View => "view",
         };
         sqlx::query(
@@ -491,21 +490,22 @@ impl PostgresStore {
         Ok(())
     }
 
-    pub async fn verify_auth_login(
+    pub async fn verify_user_login(
         &self,
-        entity: &str,
-        identity: &str,
+        email: &str,
         password: &str,
     ) -> Result<Option<Map<String, JsonValue>>> {
-        ensure_entity_name(entity)?;
-        let Some(mut user) = self.find_auth_user_by_email(entity, identity).await? else {
+        let row = sqlx::query(
+            r#"SELECT id, email, profile_json, created_at, updated_at, password_hash
+               FROM mb_user WHERE email = $1 LIMIT 1"#,
+        )
+        .bind(email)
+        .fetch_optional(&self.pool)
+        .await?;
+        let Some(row) = row else {
             return Ok(None);
         };
-        let hash = user
-            .get("password")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
+        let hash: String = row.try_get("password_hash")?;
         let parsed =
             PasswordHash::new(&hash).map_err(|e| StorageError::Validation(e.to_string()))?;
         if Argon2::default()
@@ -514,27 +514,22 @@ impl PostgresStore {
         {
             return Ok(None);
         }
-        user.remove("password");
-        Ok(Some(user))
-    }
-
-    async fn find_auth_user_by_email(
-        &self,
-        entity: &str,
-        email: &str,
-    ) -> Result<Option<Map<String, JsonValue>>> {
-        let q = format!(
-            r#"SELECT * FROM {} WHERE email = $1 LIMIT 1"#,
-            quote_ident(entity)?
-        );
-        let row = sqlx::query(&q)
-            .bind(email)
-            .fetch_optional(&self.pool)
-            .await?;
-        Ok(match row {
-            Some(r) => Some(pg_row_to_map(&r)?),
-            None => None,
-        })
+        let id: String = row.try_get("id")?;
+        let email_s: String = row.try_get("email")?;
+        let profile: Option<String> = row.try_get("profile_json")?;
+        let created_at: String = row.try_get("created_at")?;
+        let updated_at: String = row.try_get("updated_at")?;
+        let profile_val = match profile {
+            Some(s) if !s.trim().is_empty() => serde_json::from_str(&s).unwrap_or(json!(s)),
+            _ => JsonValue::Null,
+        };
+        let mut m = Map::new();
+        m.insert("id".into(), json!(id));
+        m.insert("email".into(), json!(email_s));
+        m.insert("profile".into(), profile_val);
+        m.insert("created_at".into(), json!(created_at));
+        m.insert("updated_at".into(), json!(updated_at));
+        Ok(Some(m))
     }
 
     pub async fn app_config_get(&self, key: &str) -> Result<Option<String>> {

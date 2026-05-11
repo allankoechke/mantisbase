@@ -46,7 +46,7 @@ pub struct MantisBase {
     mode: MantisBaseMode,
     port: u16,
     host: String,
-    /// Used to sign end-user JWTs (`auth` entities); optional in dev.
+    /// Used to sign application-user JWTs from `POST /api/v1/auth/login`; optional in dev.
     jwt_secret: Option<String>,
     /// Last CLI subcommand (set by [`Self::apply_cli`]).
     cli_command: Option<Commands>,

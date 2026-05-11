@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use argon2::password_hash::PasswordHasher;
 use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::Json;
@@ -58,22 +57,6 @@ pub async fn create_row(
     Json(body): Json<Map<String, Value>>,
 ) -> Result<(StatusCode, Json<Value>), ApiError> {
     check_entity_access(&state, &entity, "create", &headers).await?;
-    let et = state
-        .store
-        .entity_type(&entity)
-        .await?
-        .ok_or(ApiError(StatusCode::NOT_FOUND, "entity not found"))?;
-    let mut body = body;
-    if et == "auth" {
-        if let Some(p) = body.get("password").and_then(|v| v.as_str()) {
-            let salt = password_hash::SaltString::generate(&mut password_hash::rand_core::OsRng);
-            let hash = argon2::Argon2::default()
-                .hash_password(p.as_bytes(), &salt)
-                .map_err(|_| ApiError::bad_request("password hash failed"))?
-                .to_string();
-            body.insert("password".into(), json!(hash));
-        }
-    }
     let row = state.store.insert_entity_row(&entity, body).await?;
     Ok((
         StatusCode::CREATED,
@@ -88,22 +71,6 @@ pub async fn update_row(
     Json(patch): Json<Map<String, Value>>,
 ) -> Result<Json<Value>, ApiError> {
     check_entity_access(&state, &entity, "update", &headers).await?;
-    let et = state
-        .store
-        .entity_type(&entity)
-        .await?
-        .ok_or(ApiError(StatusCode::NOT_FOUND, "entity not found"))?;
-    let mut patch = patch;
-    if et == "auth" && patch.contains_key("password") {
-        if let Some(p) = patch.get("password").and_then(|v| v.as_str()) {
-            let salt = password_hash::SaltString::generate(&mut password_hash::rand_core::OsRng);
-            let hash = argon2::Argon2::default()
-                .hash_password(p.as_bytes(), &salt)
-                .map_err(|_| ApiError::bad_request("password hash failed"))?
-                .to_string();
-            patch.insert("password".into(), json!(hash));
-        }
-    }
     let row = state.store.update_entity_row(&entity, &id, patch).await?;
     Ok(Json(Value::Object(row.into_iter().collect())))
 }

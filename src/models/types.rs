@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 pub enum EntityType {
     Bare,
     Base,
-    Auth,
     View,
 }
 

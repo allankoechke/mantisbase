@@ -1,11 +1,12 @@
-//! Optional strongly-typed projections for auth rows (runtime rows are JSON maps).
+//! Strongly-typed projection for [`mb_user`](crate::storage) rows (no password hash).
 
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AuthUserRow {
+pub struct AppUserRow {
     pub id: String,
+    pub email: String,
+    pub profile_json: Option<String>,
     pub created_at: String,
     pub updated_at: String,
-    pub email: String,
 }

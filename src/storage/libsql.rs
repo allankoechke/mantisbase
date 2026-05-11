@@ -276,7 +276,6 @@ impl LibsqlStore {
         let type_str = match et {
             EntityType::Bare => "bare",
             EntityType::Base => "base",
-            EntityType::Auth => "auth",
             EntityType::View => "view",
         };
         conn.execute(
@@ -493,21 +492,23 @@ impl LibsqlStore {
         Ok(())
     }
 
-    pub async fn verify_auth_login(
+    /// Validates credentials against the central `mb_user` table (not catalog entities).
+    pub async fn verify_user_login(
         &self,
-        entity: &str,
-        identity: &str,
+        email: &str,
         password: &str,
     ) -> Result<Option<Map<String, JsonValue>>> {
-        ensure_entity_name(entity)?;
-        let Some(mut user) = self.find_auth_user_by_email(entity, identity).await? else {
+        let conn = self.conn()?;
+        let mut rows = conn
+            .query(
+                "SELECT id, email, profile_json, created_at, updated_at, password_hash FROM mb_user WHERE email = ? LIMIT 1",
+                params![email],
+            )
+            .await?;
+        let Some(row) = rows.next().await? else {
             return Ok(None);
         };
-        let hash = user
-            .get("password")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
+        let hash: String = row.get(5)?;
         let parsed =
             PasswordHash::new(&hash).map_err(|e| StorageError::Validation(e.to_string()))?;
         if Argon2::default()
@@ -516,31 +517,18 @@ impl LibsqlStore {
         {
             return Ok(None);
         }
-        user.remove("password");
-        Ok(Some(user))
-    }
-
-    async fn find_auth_user_by_email(
-        &self,
-        entity: &str,
-        email: &str,
-    ) -> Result<Option<Map<String, JsonValue>>> {
-        let conn = self.conn()?;
-        let q = format!(
-            "SELECT * FROM {} WHERE email = ? LIMIT 1",
-            quote_ident(entity)?
-        );
-        let mut rows = conn.query(&q, params![email]).await?;
-        let Some(row) = rows.next().await? else {
-            return Ok(None);
-        };
-        let n = row.column_count();
         let mut m = Map::new();
-        for i in 0..n {
-            let name = row.column_name(i).unwrap_or("");
-            let v = row.get_value(i)?;
-            m.insert(name.to_string(), libsql_value_to_json(v)?);
-        }
+        m.insert("id".into(), json!(row.get::<String>(0)?));
+        m.insert("email".into(), json!(row.get::<String>(1)?));
+        m.insert(
+            "profile".into(),
+            match row.get::<Option<String>>(2)? {
+                Some(s) if !s.trim().is_empty() => serde_json::from_str(&s).unwrap_or(json!(s)),
+                _ => JsonValue::Null,
+            },
+        );
+        m.insert("created_at".into(), json!(row.get::<String>(3)?));
+        m.insert("updated_at".into(), json!(row.get::<String>(4)?));
         Ok(Some(m))
     }
 

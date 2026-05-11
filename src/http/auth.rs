@@ -1,9 +1,12 @@
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use axum::http::{header, HeaderMap, StatusCode};
 
 use crate::models::types::{AccessMode, AccessRule};
 use crate::storage::Store;
 
 use super::error::ApiError;
+use super::jwt::AppUserClaims;
 use super::AppState;
 
 pub(in crate::http) async fn require_admin(
@@ -39,13 +42,6 @@ fn bearer_token(headers: &HeaderMap) -> Option<String> {
     raw.strip_prefix("Bearer ").map(|s| s.to_string())
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-struct JwtClaims {
-    sub: String,
-    entity: String,
-    exp: u64,
-}
-
 pub(in crate::http) async fn check_entity_access(
     state: &AppState,
     entity: &str,
@@ -75,14 +71,21 @@ pub(in crate::http) async fn check_entity_access(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "MB_JWT_SECRET not set",
             ))?;
-            let data = jsonwebtoken::decode::<JwtClaims>(
+            let data = jsonwebtoken::decode::<AppUserClaims>(
                 &token,
                 &jsonwebtoken::DecodingKey::from_secret(secret.as_bytes()),
                 &jsonwebtoken::Validation::default(),
             )
             .map_err(|_| ApiError(StatusCode::UNAUTHORIZED, "invalid token"))?;
-            if data.claims.entity != entity {
-                return Err(ApiError(StatusCode::FORBIDDEN, "token entity mismatch"));
+            let now = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .map_err(|_| ApiError(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
+                .as_secs();
+            if data.claims.exp <= now {
+                return Err(ApiError(StatusCode::UNAUTHORIZED, "token expired"));
+            }
+            if data.claims.sub.is_empty() {
+                return Err(ApiError(StatusCode::UNAUTHORIZED, "invalid token subject"));
             }
             Ok(())
         }

@@ -8,20 +8,13 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use super::error::ApiError;
+use super::jwt::AppUserClaims;
 use super::AppState;
 
 #[derive(Debug, Deserialize)]
 pub struct AuthLoginBody {
-    pub entity: String,
-    pub identity: String,
+    pub email: String,
     pub password: String,
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-struct JwtClaims {
-    sub: String,
-    entity: String,
-    exp: u64,
 }
 
 pub async fn auth_login(
@@ -30,7 +23,7 @@ pub async fn auth_login(
 ) -> Result<Json<Value>, ApiError> {
     let user = state
         .store
-        .verify_auth_login(&body.entity, &body.identity, &body.password)
+        .verify_user_login(&body.email, &body.password)
         .await?
         .ok_or(ApiError(StatusCode::UNAUTHORIZED, "invalid credentials"))?;
     let secret = state.jwt_secret.as_deref().ok_or(ApiError(
@@ -47,11 +40,7 @@ pub async fn auth_login(
         .unwrap()
         .as_secs()
         + 86400 * 7;
-    let claims = JwtClaims {
-        sub,
-        entity: body.entity.clone(),
-        exp,
-    };
+    let claims = AppUserClaims { sub, exp };
     let token = jsonwebtoken::encode(
         &jsonwebtoken::Header::default(),
         &claims,

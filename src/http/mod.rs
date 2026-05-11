@@ -5,6 +5,7 @@ pub mod openapi;
 mod auth;
 mod entities;
 mod error;
+mod jwt;
 mod logging;
 mod login;
 mod meta;
@@ -27,7 +28,7 @@ use crate::core::MantisBase;
 use crate::logger::cli_stdout_line;
 use crate::storage::Store;
 
-/// Shared HTTP state (store + JWT secret for auth entities).
+/// Shared HTTP state (store + JWT secret for [`login::auth_login`]).
 #[derive(Clone)]
 pub struct AppState {
     pub store: Store,
