@@ -3,6 +3,7 @@
 //! ## Overview
 //! - **Storage:** [`storage::Store`] ([`storage::LibsqlStore`] by default; optional PostgreSQL with the `postgres` feature).
 //! - **HTTP:** [`http::serve`] exposes `/api/v1/*` with **HTTP Basic** admin auth and OpenAPI at `/api/v1/openapi.json`.
+//! - **Logging:** [`logger`] (`info!`, `debug!`, …); do not use `tracing` or `println!` for diagnostics in crate code.
 //! - **Files:** [`files::LocalFs`] stores blobs under `data_dir/files/…`.
 //!
 //! ## Example (CLI binary)

@@ -18,6 +18,7 @@ use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
 
 use crate::core::MantisBase;
+use crate::logger::prelude::*;
 use crate::models::types::{validate_entity_name, AccessMode, AccessRule, EntityType};
 use crate::models::Field;
 use crate::storage::Store;
@@ -60,7 +61,7 @@ pub async fn serve(mantis: &MantisBase, store: Store) -> anyhow::Result<()> {
 
     let addr = format!("{}:{}", mantis.host(), mantis.port());
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    tracing::info!("listening on http://{addr}");
+    info!("listening on http://{addr}");
     axum::serve(listener, app).await?;
     Ok(())
 }

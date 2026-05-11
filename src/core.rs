@@ -1,8 +1,7 @@
 //! Core runtime configuration for directories, database selection, and HTTP listen options.
-use spdlog::{trace, warn};
 
 use crate::cli::{Cli, Commands, DatabaseType};
-use crate::logger::{default_logger, Level, LevelFilter};
+use crate::logger::prelude::*;
 #[cfg(feature = "postgres")]
 use crate::storage::PostgresStore;
 use crate::storage::{LibsqlStore, Store};
@@ -96,7 +95,7 @@ impl MantisBase {
             self.jwt_secret = Some(jwt_secret);
         } else {
             warn!(
-                "MB_JWT_SECRET not set — user JWT issuance disabled for production-grade setups."
+                "MB_JWT_SECRET not set — default user JWT issuance disabled for production-grade setups."
             );
         }
 
@@ -309,14 +308,14 @@ impl MantisBase {
                         anyhow::bail!("admins add requires EMAIL PASSWORD");
                     }
                     store.add_admin(&add_args[0], &add_args[1]).await?;
-                    println!("admin created");
+                    info!("admin created");
                 } else if admin_args.ls {
                     for (id, email) in store.list_admins().await? {
-                        println!("{id}\t{email}");
+                        crate::logger::cli_stdout_line(format!("{id}\t{email}"));
                     }
                 } else if let Some(target) = &admin_args.rm {
                     let n = store.remove_admin(target).await?;
-                    println!("removed {n} row(s)");
+                    info!("removed {n} admin row(s)");
                 }
                 Ok(MantisBaseRunOutcome::RanAction)
             }
@@ -335,13 +334,13 @@ impl MantisBase {
                 };
                 if migration_args.up {
                     store.migrate().await?;
-                    println!("migrations applied");
+                    info!("migrations applied");
                 } else if migration_args.reset {
                     anyhow::bail!(
                         "destructive reset not implemented; remove data/mantis.db manually"
                     );
                 } else {
-                    println!("use --up to apply migrations");
+                    info!("use --up to apply migrations");
                 }
                 Ok(MantisBaseRunOutcome::RanAction)
             }
@@ -354,15 +353,15 @@ impl MantisBase {
 }
 
 fn print_no_subcommand_hint() {
-    eprintln!("No subcommand given.");
-    eprintln!();
-    eprintln!("Examples:");
-    eprintln!("  mantisbase serve                    HTTP API + static /mb");
-    eprintln!("  mantisbase admins --add EMAIL PASS   create an admin (Basic auth for /api/v1)");
-    eprintln!("  mantisbase migrations --up         apply catalog migrations");
-    eprintln!();
-    eprintln!("For all options:  mantisbase --help");
-    eprintln!("Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)");
+    warn!(
+        "No subcommand given.\n\n\
+        Examples:\n\
+          mantisbase serve                      HTTP API + static /mb\n\
+          mantisbase admins --add EMAIL PASS    create an admin (Basic auth for /api/v1)\n\
+          mantisbase migrations --up            apply catalog migrations\n\n\
+        For all options:  mantisbase --help\n\
+        Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)"
+    );
 }
 
 impl Default for MantisBase {
