@@ -51,7 +51,9 @@ fn api_router(state: Arc<AppState>) -> Router {
         )
         .route(
             "/sys/schemas/{name}",
-            get(schemas::get_schema).delete(schemas::delete_schema),
+            get(schemas::get_schema)
+                .patch(schemas::patch_schema)
+                .delete(schemas::delete_schema),
         )
         .route(
             "/sys/configs",

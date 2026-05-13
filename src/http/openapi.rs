@@ -47,6 +47,11 @@ pub fn build_openapi_value(entities: &[Value]) -> Value {
                     "summary": "Get schema (admin)",
                     "responses": { "200": { "description": "OK" } }
                 },
+                "patch": {
+                    "security": [{ "basicAuth": [] }],
+                    "summary": "Patch schema (admin); reconciles physical table and writes generated SQL",
+                    "responses": { "200": { "description": "OK" } }
+                },
                 "delete": {
                     "security": [{ "basicAuth": [] }],
                     "summary": "Delete schema (admin)",

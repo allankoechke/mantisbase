@@ -44,6 +44,18 @@ impl Store {
         }
     }
 
+    pub async fn patch_entity_catalog(
+        &self,
+        name: &str,
+        patch: &crate::storage::EntityCatalogPatch,
+    ) -> Result<()> {
+        match self {
+            Store::Libsql(s) => s.patch_entity_catalog(name, patch).await,
+            #[cfg(feature = "postgres")]
+            Store::Postgres(s) => s.patch_entity_catalog(name, patch).await,
+        }
+    }
+
     pub async fn delete_entity_catalog(&self, name: &str) -> Result<()> {
         match self {
             Store::Libsql(s) => s.delete_entity_catalog(name).await,

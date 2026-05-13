@@ -10,33 +10,19 @@ use sqlx::postgres::PgRow;
 use sqlx::{Column, PgPool, QueryBuilder, Row};
 use uuid::Uuid;
 
-use crate::models::types::{validate_entity_name, AccessRule, EntityType, Field, FieldType};
+use crate::models::types::{AccessRule, EntityType, Field};
 use crate::models::EntitySchema;
 use crate::util_time::now_rfc3339;
 
+use super::catalog::{
+    access_rule_from_document, apply_entity_catalog_patch, build_schema_document,
+    entity_schema_from_document, fields_from_document, merge_rules_input_for_patch,
+    migrate_catalog_postgres, preserve_extra_on_document,
+};
+use super::ddl::{build_create_table_ddl, ensure_entity_name, quote_ident};
 use super::error::{Result, StorageError};
-use super::libsql::{field_type_to_catalog_str, parse_rule_from_json};
-
-fn field_type_sql(ft: &FieldType) -> &'static str {
-    match ft {
-        FieldType::String
-        | FieldType::Text
-        | FieldType::Password
-        | FieldType::Json
-        | FieldType::DateTime => "TEXT",
-        FieldType::Int | FieldType::Bool => "INTEGER",
-        FieldType::Float => "REAL",
-    }
-}
-
-fn ensure_entity_name(s: &str) -> Result<()> {
-    validate_entity_name(s).map_err(|m| StorageError::Validation(m.to_string()))
-}
-
-fn quote_ident(name: &str) -> Result<String> {
-    ensure_entity_name(name)?;
-    Ok(format!("\"{}\"", name.replace('"', "")))
-}
+use super::schema_alter::{plan_physical_ddl, SqlDialect};
+use super::schema_migration::{format_schema_json_comment, try_write_generated_migration};
 
 #[derive(Clone)]
 pub struct PostgresStore {
@@ -50,6 +36,7 @@ impl PostgresStore {
             .connect(database_url)
             .await?;
         sqlx::migrate!("migrations/postgres").run(&pool).await?;
+        migrate_catalog_postgres(&pool).await?;
         Ok(Self { pool })
     }
 
@@ -57,24 +44,21 @@ impl PostgresStore {
         sqlx::migrate!("migrations/postgres")
             .run(&self.pool)
             .await?;
-        Ok(())
+        migrate_catalog_postgres(&self.pool).await
     }
 
     async fn entity_field_types(&self, entity: &str) -> Result<HashMap<String, String>> {
         ensure_entity_name(entity)?;
-        let rows = sqlx::query(
-            r#"SELECT f.name, f.field_type FROM mb_field f
-               INNER JOIN mb_entity e ON f.entity_id = e.id
-               WHERE e.name = $1"#,
-        )
-        .bind(entity)
-        .fetch_all(&self.pool)
-        .await?;
-        let mut m = HashMap::new();
-        for row in rows {
-            m.insert(row.try_get(0)?, row.try_get(1)?);
-        }
-        Ok(m)
+        let row = sqlx::query("SELECT document FROM mb_entity_schema WHERE name = $1")
+            .bind(entity)
+            .fetch_optional(&self.pool)
+            .await?;
+        let Some(row) = row else {
+            return Ok(HashMap::new());
+        };
+        let doc_s: String = row.try_get(0)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        Ok(super::catalog::field_types_from_document(&doc))
     }
 
     pub async fn verify_admin_basic(&self, email: &str, password: &str) -> Result<bool> {
@@ -137,104 +121,79 @@ impl PostgresStore {
 
     pub async fn entity_type(&self, name: &str) -> Result<Option<String>> {
         ensure_entity_name(name)?;
-        let row = sqlx::query("SELECT type FROM mb_entity WHERE name = $1")
+        let row = sqlx::query("SELECT document FROM mb_entity_schema WHERE name = $1")
             .bind(name)
             .fetch_optional(&self.pool)
             .await?;
-        Ok(row.map(|r| r.try_get(0)).transpose()?)
+        let Some(row) = row else {
+            return Ok(None);
+        };
+        let doc_s: String = row.try_get(0)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        Ok(doc
+            .get("type")
+            .and_then(|x| x.as_str())
+            .map(std::string::ToString::to_string))
     }
 
     pub async fn list_entities_catalog(&self) -> Result<Vec<JsonValue>> {
         let rows = sqlx::query(
-            "SELECT id, name, type, view_sql, is_system, has_api FROM mb_entity ORDER BY name",
+            "SELECT id, name, document FROM mb_entity_schema ORDER BY name",
         )
         .fetch_all(&self.pool)
         .await?;
         let mut out = Vec::new();
         for row in rows {
-            out.push(json!({
-                "id": row.try_get::<String, _>(0)?,
-                "name": row.try_get::<String, _>(1)?,
-                "type": row.try_get::<String, _>(2)?,
-                "view_sql": row.try_get::<Option<String>, _>(3)?,
-                "is_system": row.try_get::<i32, _>(4)? != 0,
-                "has_api": row.try_get::<i32, _>(5)? != 0,
-            }));
+            let id: String = row.try_get(0)?;
+            let name: String = row.try_get(1)?;
+            let doc_s: String = row.try_get(2)?;
+            let doc: JsonValue = serde_json::from_str(&doc_s)?;
+            out.push(super::catalog::list_row_from_document(&id, &name, &doc));
         }
         Ok(out)
     }
 
     pub async fn get_entity_catalog(&self, name: &str) -> Result<Option<JsonValue>> {
         ensure_entity_name(name)?;
-        let row = sqlx::query(
-            "SELECT id, name, type, view_sql, is_system, has_api FROM mb_entity WHERE name = $1",
-        )
-        .bind(name)
-        .fetch_optional(&self.pool)
-        .await?;
+        let row = sqlx::query("SELECT document FROM mb_entity_schema WHERE name = $1")
+            .bind(name)
+            .fetch_optional(&self.pool)
+            .await?;
         let Some(row) = row else {
             return Ok(None);
         };
-        let entity_id: String = row.try_get(0)?;
-        let fields_rows = sqlx::query(
-            r#"SELECT name, field_type, description, is_required, is_primary_key, is_unique,
-                      constraints_json, default_expr FROM mb_field
-               WHERE entity_id = $1 ORDER BY name"#,
-        )
-        .bind(&entity_id)
-        .fetch_all(&self.pool)
-        .await?;
-        let mut fields = Vec::new();
-        for fr in fields_rows {
-            fields.push(json!({
-                "name": fr.try_get::<String, _>(0)?,
-                "type": fr.try_get::<String, _>(1)?,
-                "description": fr.try_get::<Option<String>, _>(2)?,
-                "required": fr.try_get::<i32, _>(3)? != 0,
-                "primary_key": fr.try_get::<i32, _>(4)? != 0,
-                "unique": fr.try_get::<i32, _>(5)? != 0,
-                "constraints": fr.try_get::<Option<String>, _>(6)?,
-                "default": fr.try_get::<Option<String>, _>(7)?,
-            }));
-        }
-        let rules_rows =
-            sqlx::query("SELECT op, mode, expr FROM mb_access_rule WHERE entity_id = $1")
-                .bind(&entity_id)
-                .fetch_all(&self.pool)
-                .await?;
-        let mut rules = serde_json::Map::new();
-        for rr in rules_rows {
-            let op: String = rr.try_get(0)?;
-            let mode: String = rr.try_get(1)?;
-            let expr: Option<String> = rr.try_get(2)?;
-            rules.insert(
-                op,
-                json!({ "mode": mode, "expr": expr.unwrap_or_default() }),
-            );
-        }
-        Ok(Some(json!({
-            "name": row.try_get::<String, _>(1)?,
-            "type": row.try_get::<String, _>(2)?,
-            "view_sql": row.try_get::<Option<String>, _>(3)?,
-            "is_system": row.try_get::<i32, _>(4)? != 0,
-            "has_api": row.try_get::<i32, _>(5)? != 0,
-            "fields": fields,
-            "rules": rules,
-        })))
+        let doc_s: String = row.try_get(0)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        Ok(Some(super::catalog::full_catalog_json(name, &doc)))
     }
 
     pub async fn delete_entity_catalog(&self, name: &str) -> Result<()> {
         ensure_entity_name(name)?;
-        let found = sqlx::query("SELECT id FROM mb_entity WHERE name = $1")
+        let row = sqlx::query("SELECT document FROM mb_entity_schema WHERE name = $1")
             .bind(name)
             .fetch_optional(&self.pool)
             .await?;
-        if found.is_none() {
+        let Some(row) = row else {
             return Err(StorageError::NotFound(name.to_string()));
+        };
+        let doc_s: String = row.try_get(0)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        let ty = doc.get("type").and_then(|x| x.as_str()).unwrap_or("bare");
+        let preamble = format_schema_json_comment(&doc);
+        if ty != "view" {
+            let ddl = format!("DROP TABLE IF EXISTS {}", quote_ident(name)?);
+            try_write_generated_migration(name, "drop", &preamble, &ddl);
+        } else {
+            try_write_generated_migration(
+                name,
+                "drop",
+                &preamble,
+                "-- view entity: no physical table to drop",
+            );
         }
         let q = format!("DROP TABLE IF EXISTS {}", quote_ident(name)?);
         sqlx::query(&q).execute(&self.pool).await?;
-        sqlx::query("DELETE FROM mb_entity WHERE name = $1")
+        sqlx::query("DELETE FROM mb_entity_schema WHERE name = $1")
             .bind(name)
             .execute(&self.pool)
             .await?;
@@ -267,88 +226,135 @@ impl PostgresStore {
         let mut tx = self.pool.begin().await?;
         let entity_id = Uuid::new_v4().to_string();
         let ts = now_rfc3339();
-        let type_str = match et {
-            EntityType::Bare => "bare",
-            EntityType::Base => "base",
-            EntityType::View => "view",
-        };
+        let doc = build_schema_document(&entity_id, &schema, view_sql, rules);
+        let doc_s = serde_json::to_string(&doc)?;
         sqlx::query(
-            r#"INSERT INTO mb_entity (id, name, type, view_sql, is_system, has_api, created_at, updated_at)
-               VALUES ($1, $2, $3, $4, 0, 1, $5, $6)"#,
+            r#"INSERT INTO mb_entity_schema (id, name, document, created_at, updated_at)
+               VALUES ($1, $2, $3, $4, $5)"#,
         )
         .bind(&entity_id)
         .bind(name)
-        .bind(type_str)
-        .bind(view_sql)
+        .bind(&doc_s)
         .bind(&ts)
         .bind(&ts)
         .execute(&mut *tx)
         .await?;
-        for f in &schema.fields {
-            let fid = Uuid::new_v4().to_string();
-            let ft = field_type_to_catalog_str(&f.field_type);
-            sqlx::query(
-                r#"INSERT INTO mb_field
-                (id, entity_id, name, field_type, description, is_required, is_primary_key,
-                 is_unique, constraints_json, default_expr)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"#,
-            )
-            .bind(&fid)
-            .bind(&entity_id)
-            .bind(&f.field_name)
-            .bind(ft)
-            .bind(&f.field_description)
-            .bind(f.is_required as i32)
-            .bind(f.is_primary_key as i32)
-            .bind(f.is_unique as i32)
-            .bind(&f.constraints)
-            .bind(&f.default)
-            .execute(&mut *tx)
-            .await?;
-        }
-        for (op, default_rule) in [
-            ("list", AccessRule::admin_only()),
-            ("read", AccessRule::admin_only()),
-            ("create", AccessRule::admin_only()),
-            ("update", AccessRule::admin_only()),
-            ("delete", AccessRule::admin_only()),
-        ] {
-            let r = parse_rule_from_json(rules, op).unwrap_or(default_rule);
-            sqlx::query(
-                r#"INSERT INTO mb_access_rule (entity_id, op, mode, expr, dsl_version)
-                   VALUES ($1, $2, $3, $4, 1)"#,
-            )
-            .bind(&entity_id)
-            .bind(op)
-            .bind(r.mode_str())
-            .bind(&r.expr)
-            .execute(&mut *tx)
-            .await?;
-        }
         if !matches!(et, EntityType::View) {
             let ddl = build_create_table_ddl(name, &schema.fields)?;
             sqlx::query(&ddl).execute(&mut *tx).await?;
+            let preamble = format_schema_json_comment(&doc);
+            try_write_generated_migration(name, "create", &preamble, &ddl);
+        } else {
+            let preamble = format_schema_json_comment(&doc);
+            try_write_generated_migration(
+                name,
+                "create",
+                &preamble,
+                "-- view entity: physical table not created",
+            );
         }
         tx.commit().await?;
         Ok(())
     }
 
+    pub async fn patch_entity_catalog(
+        &self,
+        name: &str,
+        patch: &super::EntityCatalogPatch,
+    ) -> Result<()> {
+        ensure_entity_name(name)?;
+        let row = sqlx::query("SELECT id, document FROM mb_entity_schema WHERE name = $1")
+            .bind(name)
+            .fetch_optional(&self.pool)
+            .await?;
+        let Some(row) = row else {
+            return Err(StorageError::NotFound(name.to_string()));
+        };
+        let entity_id: String = row.try_get(0)?;
+        let doc_s: String = row.try_get(1)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        let old_type = doc
+            .get("type")
+            .and_then(|x| x.as_str())
+            .unwrap_or("bare")
+            .to_string();
+        let old_fields = fields_from_document(&doc)?;
+        let mut schema = entity_schema_from_document(name, &doc)?;
+        apply_entity_catalog_patch(&mut schema, patch)?;
+        let rules_input = merge_rules_input_for_patch(&doc, patch.rules.as_ref());
+        let view_sql_ref = schema.view_query.as_deref();
+        let mut new_doc = build_schema_document(&entity_id, &schema, view_sql_ref, &rules_input);
+        preserve_extra_on_document(&mut new_doc, &doc, patch);
+        let new_type = new_doc
+            .get("type")
+            .and_then(|x| x.as_str())
+            .unwrap_or("bare")
+            .to_string();
+        let new_fields = fields_from_document(&new_doc)?;
+        let stmts = plan_physical_ddl(
+            name,
+            &old_type,
+            &old_fields,
+            &new_type,
+            &new_fields,
+            SqlDialect::Postgres,
+        )?;
+        let migration_body = if stmts.is_empty() {
+            "-- no physical DDL statements (catalog metadata only)\n".to_string()
+        } else {
+            stmts.join("\n")
+        };
+        let mut tx = self.pool.begin().await?;
+        let inner: Result<()> = async {
+            for st in &stmts {
+                let t = st.trim();
+                if t.is_empty() || t.starts_with("--") {
+                    continue;
+                }
+                sqlx::query(t).execute(&mut *tx).await?;
+            }
+            let ts = now_rfc3339();
+            let new_doc_s = serde_json::to_string(&new_doc)?;
+            sqlx::query(
+                "UPDATE mb_entity_schema SET document = $1, updated_at = $2 WHERE name = $3",
+            )
+            .bind(&new_doc_s)
+            .bind(&ts)
+            .bind(name)
+            .execute(&mut *tx)
+            .await?;
+            Ok(())
+        }
+        .await;
+        match &inner {
+            Ok(()) => {
+                tx.commit().await?;
+            }
+            Err(_) => {
+                tx.rollback().await?;
+            }
+        }
+        inner?;
+        let preamble = format!(
+            "{}\n{}",
+            format_schema_json_comment(&doc),
+            format_schema_json_comment(&new_doc)
+        );
+        try_write_generated_migration(name, "patch", &preamble, &migration_body);
+        Ok(())
+    }
+
     pub async fn get_access_rule(&self, entity_name: &str, op: &str) -> Result<Option<AccessRule>> {
-        let row = sqlx::query(
-            r#"SELECT r.mode, r.expr FROM mb_access_rule r
-               JOIN mb_entity e ON e.id = r.entity_id
-               WHERE e.name = $1 AND r.op = $2"#,
-        )
-        .bind(entity_name)
-        .bind(op)
-        .fetch_optional(&self.pool)
-        .await?;
+        let row = sqlx::query("SELECT document FROM mb_entity_schema WHERE name = $1")
+            .bind(entity_name)
+            .fetch_optional(&self.pool)
+            .await?;
         let Some(row) = row else {
             return Ok(None);
         };
-        let mode: String = row.try_get(0)?;
-        let expr: Option<String> = row.try_get(1)?;
-        Ok(Some(AccessRule::from_db(&mode, expr)))
+        let doc_s: String = row.try_get(0)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        Ok(access_rule_from_document(&doc, op))
     }
 
     pub async fn list_entity_rows(
@@ -700,30 +706,4 @@ fn pg_cell_to_json(row: &PgRow, i: usize) -> Result<JsonValue> {
         return Ok(JsonValue::String(s));
     }
     Ok(JsonValue::Null)
-}
-
-fn build_create_table_ddl(table: &str, fields: &[Field]) -> Result<String> {
-    let mut parts = Vec::new();
-    for f in fields {
-        ensure_entity_name(&f.field_name)?;
-        let nullsql = if f.is_required { "NOT NULL" } else { "NULL" };
-        let mut col = format!(
-            "{} {} {}",
-            quote_ident(&f.field_name)?,
-            field_type_sql(&f.field_type),
-            nullsql
-        );
-        if f.is_primary_key {
-            col.push_str(" PRIMARY KEY");
-        }
-        if f.is_unique && !f.is_primary_key {
-            col.push_str(" UNIQUE");
-        }
-        parts.push(col);
-    }
-    Ok(format!(
-        "CREATE TABLE IF NOT EXISTS {} ({})",
-        quote_ident(table)?,
-        parts.join(", ")
-    ))
 }

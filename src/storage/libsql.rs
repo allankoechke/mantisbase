@@ -12,35 +12,20 @@ use password_hash::rand_core::OsRng;
 use serde_json::{json, Map, Value as JsonValue};
 use uuid::Uuid;
 
-use crate::models::types::{
-    validate_entity_name, AccessMode, AccessRule, EntityType, Field, FieldType,
-};
+use crate::models::types::{AccessRule, EntityType, Field};
 use crate::models::EntitySchema;
 use crate::util_time::now_rfc3339;
 
+use super::catalog::{
+    access_rule_from_document, apply_entity_catalog_patch, build_schema_document,
+    entity_schema_from_document, fields_from_document, merge_rules_input_for_patch,
+    migrate_catalog_libsql, preserve_extra_on_document,
+};
+use super::ddl::{build_create_table_ddl, ensure_entity_name, quote_ident};
 use super::error::{Result, StorageError};
 use super::migrate::apply_embedded_migrations;
-
-fn field_type_sql(ft: &FieldType) -> &'static str {
-    match ft {
-        FieldType::String
-        | FieldType::Text
-        | FieldType::Password
-        | FieldType::Json
-        | FieldType::DateTime => "TEXT",
-        FieldType::Int | FieldType::Bool => "INTEGER",
-        FieldType::Float => "REAL",
-    }
-}
-
-fn ensure_entity_name(s: &str) -> Result<()> {
-    validate_entity_name(s).map_err(|m| StorageError::Validation(m.to_string()))
-}
-
-fn quote_ident(name: &str) -> Result<String> {
-    ensure_entity_name(name)?;
-    Ok(format!("\"{}\"", name.replace('"', "")))
-}
+use super::schema_alter::{plan_physical_ddl, SqlDialect};
+use super::schema_migration::{format_schema_json_comment, try_write_generated_migration};
 
 #[derive(Clone)]
 pub struct LibsqlStore {
@@ -58,6 +43,8 @@ impl LibsqlStore {
         let db = Builder::new_local(path).build().await?;
         let s = Self { db: Arc::new(db) };
         apply_embedded_migrations(&s.db).await?;
+        let c = s.conn()?;
+        migrate_catalog_libsql(&c).await?;
         Ok(s)
     }
 
@@ -67,6 +54,8 @@ impl LibsqlStore {
             .await?;
         let s = Self { db: Arc::new(db) };
         apply_embedded_migrations(&s.db).await?;
+        let c = s.conn()?;
+        migrate_catalog_libsql(&c).await?;
         Ok(s)
     }
 
@@ -75,7 +64,9 @@ impl LibsqlStore {
     }
 
     pub async fn migrate(&self) -> Result<()> {
-        apply_embedded_migrations(&self.db).await
+        apply_embedded_migrations(&self.db).await?;
+        let c = self.conn()?;
+        migrate_catalog_libsql(&c).await
     }
 
     pub async fn verify_admin_basic(&self, email: &str, password: &str) -> Result<bool> {
@@ -142,32 +133,37 @@ impl LibsqlStore {
         ensure_entity_name(name)?;
         let conn = self.conn()?;
         let mut rows = conn
-            .query("SELECT type FROM mb_entity WHERE name = ?", params![name])
+            .query(
+                "SELECT document FROM mb_entity_schema WHERE name = ?",
+                params![name],
+            )
             .await?;
-        Ok(match rows.next().await? {
-            Some(r) => Some(r.get::<String>(0)?),
-            None => None,
-        })
+        let Some(r) = rows.next().await? else {
+            return Ok(None);
+        };
+        let doc_s: String = r.get(0)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        Ok(doc
+            .get("type")
+            .and_then(|x| x.as_str())
+            .map(std::string::ToString::to_string))
     }
 
     pub async fn list_entities_catalog(&self) -> Result<Vec<JsonValue>> {
         let conn = self.conn()?;
         let mut rows = conn
             .query(
-                "SELECT id, name, type, view_sql, is_system, has_api FROM mb_entity ORDER BY name",
+                "SELECT id, name, document FROM mb_entity_schema ORDER BY name",
                 (),
             )
             .await?;
         let mut out = Vec::new();
         while let Some(row) = rows.next().await? {
-            out.push(json!({
-                "id": row.get::<String>(0)?,
-                "name": row.get::<String>(1)?,
-                "type": row.get::<String>(2)?,
-                "view_sql": row.get::<Option<String>>(3)?,
-                "is_system": row.get::<i64>(4)? != 0,
-                "has_api": row.get::<i64>(5)? != 0,
-            }));
+            let id: String = row.get(0)?;
+            let name: String = row.get(1)?;
+            let doc_s: String = row.get(2)?;
+            let doc: JsonValue = serde_json::from_str(&doc_s)?;
+            out.push(super::catalog::list_row_from_document(&id, &name, &doc));
         }
         Ok(out)
     }
@@ -177,73 +173,52 @@ impl LibsqlStore {
         let conn = self.conn()?;
         let mut rows = conn
             .query(
-                "SELECT id, name, type, view_sql, is_system, has_api FROM mb_entity WHERE name = ?",
+                "SELECT document FROM mb_entity_schema WHERE name = ?",
                 params![name],
             )
             .await?;
         let Some(row) = rows.next().await? else {
             return Ok(None);
         };
-        let entity_id: String = row.get(0)?;
-        let mut fields_rows = conn
-            .query(
-                "SELECT name, field_type, description, is_required, is_primary_key, is_unique, constraints_json, default_expr FROM mb_field WHERE entity_id = ? ORDER BY name",
-                params![entity_id.clone()],
-            )
-            .await?;
-        let mut fields = Vec::new();
-        while let Some(fr) = fields_rows.next().await? {
-            fields.push(json!({
-                "name": fr.get::<String>(0)?,
-                "type": fr.get::<String>(1)?,
-                "description": fr.get::<Option<String>>(2)?,
-                "required": fr.get::<i64>(3)? != 0,
-                "primary_key": fr.get::<i64>(4)? != 0,
-                "unique": fr.get::<i64>(5)? != 0,
-                "constraints": fr.get::<Option<String>>(6)?,
-                "default": fr.get::<Option<String>>(7)?,
-            }));
-        }
-        let mut rules_rows = conn
-            .query(
-                "SELECT op, mode, expr FROM mb_access_rule WHERE entity_id = ?",
-                params![entity_id],
-            )
-            .await?;
-        let mut rules = serde_json::Map::new();
-        while let Some(rr) = rules_rows.next().await? {
-            let op: String = rr.get(0)?;
-            let mode: String = rr.get(1)?;
-            let expr: Option<String> = rr.get(2)?;
-            rules.insert(
-                op,
-                json!({ "mode": mode, "expr": expr.unwrap_or_default() }),
-            );
-        }
-        Ok(Some(json!({
-            "name": row.get::<String>(1)?,
-            "type": row.get::<String>(2)?,
-            "view_sql": row.get::<Option<String>>(3)?,
-            "is_system": row.get::<i64>(4)? != 0,
-            "has_api": row.get::<i64>(5)? != 0,
-            "fields": fields,
-            "rules": rules,
-        })))
+        let doc_s: String = row.get(0)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        Ok(Some(super::catalog::full_catalog_json(name, &doc)))
     }
 
     pub async fn delete_entity_catalog(&self, name: &str) -> Result<()> {
         ensure_entity_name(name)?;
         let conn = self.conn()?;
         let mut rows = conn
-            .query("SELECT id FROM mb_entity WHERE name = ?", params![name])
+            .query(
+                "SELECT document FROM mb_entity_schema WHERE name = ?",
+                params![name],
+            )
             .await?;
-        let Some(_row) = rows.next().await? else {
+        let Some(row) = rows.next().await? else {
             return Err(StorageError::NotFound(name.to_string()));
         };
+        let doc_s: String = row.get(0)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        let ty = doc.get("type").and_then(|x| x.as_str()).unwrap_or("bare");
+        let preamble = format_schema_json_comment(&doc);
+        if ty != "view" {
+            let ddl = format!("DROP TABLE IF EXISTS {}", quote_ident(name)?);
+            try_write_generated_migration(name, "drop", &preamble, &ddl);
+        } else {
+            try_write_generated_migration(
+                name,
+                "drop",
+                &preamble,
+                "-- view entity: no physical table to drop",
+            );
+        }
         let q = format!("DROP TABLE IF EXISTS {}", quote_ident(name)?);
         conn.execute(&q, ()).await?;
-        conn.execute("DELETE FROM mb_entity WHERE name = ?", params![name])
-            .await?;
+        conn.execute(
+            "DELETE FROM mb_entity_schema WHERE name = ?",
+            params![name],
+        )
+        .await?;
         Ok(())
     }
 
@@ -273,61 +248,120 @@ impl LibsqlStore {
         let conn = self.conn()?;
         let entity_id = Uuid::new_v4().to_string();
         let ts = now_rfc3339();
-        let type_str = match et {
-            EntityType::Bare => "bare",
-            EntityType::Base => "base",
-            EntityType::View => "view",
-        };
+        let doc = build_schema_document(&entity_id, &schema, view_sql, rules);
+        let doc_s = serde_json::to_string(&doc)?;
         conn.execute(
-            "INSERT INTO mb_entity (id, name, type, view_sql, is_system, has_api, created_at, updated_at) VALUES (?, ?, ?, ?, 0, 1, ?, ?)",
+            "INSERT INTO mb_entity_schema (id, name, document, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
             params![
                 entity_id.clone(),
                 name,
-                type_str,
-                view_sql,
+                doc_s,
                 ts.clone(),
                 ts
             ],
         )
         .await?;
-        for f in &schema.fields {
-            let fid = Uuid::new_v4().to_string();
-            let ft = field_type_to_catalog_str(&f.field_type);
-            conn.execute(
-                "INSERT INTO mb_field (id, entity_id, name, field_type, description, is_required, is_primary_key, is_unique, constraints_json, default_expr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                params![
-                    fid,
-                    entity_id.clone(),
-                    f.field_name.clone(),
-                    ft,
-                    f.field_description.clone(),
-                    f.is_required as i64,
-                    f.is_primary_key as i64,
-                    f.is_unique as i64,
-                    f.constraints.clone(),
-                    f.default.clone(),
-                ],
-            )
-            .await?;
-        }
-        for (op, default_rule) in [
-            ("list", AccessRule::admin_only()),
-            ("read", AccessRule::admin_only()),
-            ("create", AccessRule::admin_only()),
-            ("update", AccessRule::admin_only()),
-            ("delete", AccessRule::admin_only()),
-        ] {
-            let r = parse_rule_from_json(rules, op).unwrap_or(default_rule);
-            conn.execute(
-                "INSERT INTO mb_access_rule (entity_id, op, mode, expr, dsl_version) VALUES (?, ?, ?, ?, 1)",
-                params![entity_id.clone(), op, r.mode_str(), r.expr],
-            )
-            .await?;
-        }
         if !matches!(et, EntityType::View) {
             let ddl = build_create_table_ddl(name, &schema.fields)?;
             conn.execute(&ddl, ()).await?;
+            let preamble = format_schema_json_comment(&doc);
+            try_write_generated_migration(name, "create", &preamble, &ddl);
+        } else {
+            let preamble = format_schema_json_comment(&doc);
+            try_write_generated_migration(
+                name,
+                "create",
+                &preamble,
+                "-- view entity: physical table not created",
+            );
         }
+        Ok(())
+    }
+
+    pub async fn patch_entity_catalog(
+        &self,
+        name: &str,
+        patch: &super::EntityCatalogPatch,
+    ) -> Result<()> {
+        ensure_entity_name(name)?;
+        let conn = self.conn()?;
+        let mut rows = conn
+            .query(
+                "SELECT id, document FROM mb_entity_schema WHERE name = ?",
+                params![name],
+            )
+            .await?;
+        let Some(row) = rows.next().await? else {
+            return Err(StorageError::NotFound(name.to_string()));
+        };
+        let entity_id: String = row.get(0)?;
+        let doc_s: String = row.get(1)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        let old_type = doc
+            .get("type")
+            .and_then(|x| x.as_str())
+            .unwrap_or("bare")
+            .to_string();
+        let old_fields = fields_from_document(&doc)?;
+        let mut schema = entity_schema_from_document(name, &doc)?;
+        apply_entity_catalog_patch(&mut schema, patch)?;
+        let rules_input = merge_rules_input_for_patch(&doc, patch.rules.as_ref());
+        let view_sql_ref = schema.view_query.as_deref();
+        let mut new_doc = build_schema_document(&entity_id, &schema, view_sql_ref, &rules_input);
+        preserve_extra_on_document(&mut new_doc, &doc, patch);
+        let new_type = new_doc
+            .get("type")
+            .and_then(|x| x.as_str())
+            .unwrap_or("bare")
+            .to_string();
+        let new_fields = fields_from_document(&new_doc)?;
+        let stmts = plan_physical_ddl(
+            name,
+            &old_type,
+            &old_fields,
+            &new_type,
+            &new_fields,
+            SqlDialect::Sqlite,
+        )?;
+        let migration_body = if stmts.is_empty() {
+            "-- no physical DDL statements (catalog metadata only)\n".to_string()
+        } else {
+            stmts.join("\n")
+        };
+        conn.execute("BEGIN", ()).await?;
+        let inner: Result<()> = async {
+            for st in &stmts {
+                let t = st.trim();
+                if t.is_empty() || t.starts_with("--") {
+                    continue;
+                }
+                conn.execute(t, ()).await?;
+            }
+            let ts = now_rfc3339();
+            let new_doc_s = serde_json::to_string(&new_doc)?;
+            conn.execute(
+                "UPDATE mb_entity_schema SET document = ?, updated_at = ? WHERE name = ?",
+                params![new_doc_s, ts, name],
+            )
+            .await?;
+            Ok(())
+        }
+        .await;
+        match &inner {
+            Ok(()) => {
+                conn.execute("COMMIT", ()).await?;
+            }
+            Err(_) => {
+                let _ = conn.execute("ROLLBACK", ()).await;
+            }
+        }
+        inner?;
+        let preamble = format!(
+            "{}\n{}",
+            format_schema_json_comment(&doc),
+            format_schema_json_comment(&new_doc)
+        );
+        try_write_generated_migration(name, "patch", &preamble, &migration_body);
         Ok(())
     }
 
@@ -335,16 +369,16 @@ impl LibsqlStore {
         let conn = self.conn()?;
         let mut rows = conn
             .query(
-                "SELECT r.mode, r.expr FROM mb_access_rule r JOIN mb_entity e ON e.id = r.entity_id WHERE e.name = ? AND r.op = ?",
-                params![entity_name, op],
+                "SELECT document FROM mb_entity_schema WHERE name = ?",
+                params![entity_name],
             )
             .await?;
         let Some(row) = rows.next().await? else {
             return Ok(None);
         };
-        let mode: String = row.get(0)?;
-        let expr: Option<String> = row.get(1)?;
-        Ok(Some(AccessRule::from_db(&mode, expr)))
+        let doc_s: String = row.get(0)?;
+        let doc: JsonValue = serde_json::from_str(&doc_s)?;
+        Ok(access_rule_from_document(&doc, op))
     }
 
     pub async fn list_entity_rows(
@@ -612,68 +646,6 @@ impl LibsqlStore {
         }
         Ok(out)
     }
-}
-
-pub(crate) fn field_type_to_catalog_str(ft: &FieldType) -> &'static str {
-    match ft {
-        FieldType::String => "string",
-        FieldType::Text => "text",
-        FieldType::Password => "password",
-        FieldType::Int => "int",
-        FieldType::Float => "float",
-        FieldType::Bool => "bool",
-        FieldType::DateTime => "datetime",
-        FieldType::Json => "json",
-    }
-}
-
-pub(crate) fn parse_rule_from_json(rules: &JsonValue, op: &str) -> Option<AccessRule> {
-    let obj = rules.as_object()?.get("rules")?.as_object()?;
-    let legacy = match op {
-        "read" => obj.get("get"),
-        _ => obj.get(op),
-    };
-    let v = legacy.or_else(|| obj.get(op))?;
-    let mode_raw = v.get("mode")?.as_str()?.to_string();
-    let expr = v
-        .get("expr")
-        .and_then(|x| x.as_str())
-        .unwrap_or("")
-        .to_string();
-    let mode = match mode_raw.as_str() {
-        "public" => AccessMode::Public,
-        "admin" => AccessMode::Admin,
-        "auth" | "authenticated" => AccessMode::Authenticated,
-        "custom" => AccessMode::Custom,
-        _ => AccessMode::Admin,
-    };
-    Some(AccessRule { mode, expr })
-}
-
-fn build_create_table_ddl(table: &str, fields: &[Field]) -> Result<String> {
-    let mut parts = Vec::new();
-    for f in fields {
-        ensure_entity_name(&f.field_name)?;
-        let nullsql = if f.is_required { "NOT NULL" } else { "NULL" };
-        let mut col = format!(
-            "{} {} {}",
-            quote_ident(&f.field_name)?,
-            field_type_sql(&f.field_type),
-            nullsql
-        );
-        if f.is_primary_key {
-            col.push_str(" PRIMARY KEY");
-        }
-        if f.is_unique && !f.is_primary_key {
-            col.push_str(" UNIQUE");
-        }
-        parts.push(col);
-    }
-    Ok(format!(
-        "CREATE TABLE IF NOT EXISTS {} ({})",
-        quote_ident(table)?,
-        parts.join(", ")
-    ))
 }
 
 fn libsql_value_to_json(v: libsql::Value) -> Result<JsonValue> {
