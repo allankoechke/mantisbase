@@ -53,7 +53,8 @@ docker/www/
 
 # Logs and databases
 *.log
-*.sql
+# Versioned migration sources live under migrations/; ignore only runtime-generated SQL there.
+migrations/generated/*.sql
 *.sqlite
 *.db
 *.db-journal
