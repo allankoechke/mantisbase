@@ -28,6 +28,20 @@ The rewrite targets the same product goals as the original C++ stack (speed, emb
 
 PostgreSQL is supported via the bundled **sqlx** client; no separate Cargo feature is required. You only need a running Postgres instance when using `--db postgresql`.
 
+### Build troubleshooting (`Disk quota exceeded` in `/tmp`)
+
+Native dependencies (**`ring`**, **`libsql-sqlite3-parser`**, etc.) invoke the C compiler, which often writes temporary `.s` files under **`/tmp`**. If that filesystem is full or over **quota**, you will see errors like `error writing to /tmp/cc….s: Disk quota exceeded`.
+
+Point the compiler at a directory on a volume with space:
+
+```bash
+mkdir -p /path/with/quota/headroom/tmp
+export TMPDIR=/path/with/quota/headroom/tmp
+cargo build
+```
+
+Optionally also set `CARGO_TARGET_DIR` to a path on the same volume if your default target dir is quota-limited.
+
 ### Build and run
 
 ```bash

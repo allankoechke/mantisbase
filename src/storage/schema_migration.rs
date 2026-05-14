@@ -119,7 +119,13 @@ fn write_one_generated_file(
 fn sanitize_filename(entity: &str) -> String {
     entity
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect()
 }
 

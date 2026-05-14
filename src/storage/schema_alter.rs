@@ -172,10 +172,7 @@ pub fn plan_physical_ddl(
 ) -> Result<Vec<String>> {
     let mut out = Vec::new();
     if old_type != "view" && new_type == "view" {
-        out.push(format!(
-            "DROP TABLE IF EXISTS {};",
-            quote_ident(table)?
-        ));
+        out.push(format!("DROP TABLE IF EXISTS {};", quote_ident(table)?));
         return Ok(out);
     }
     if new_type == "view" {
@@ -202,10 +199,7 @@ pub fn plan_physical_ddl(
     }
     for name in old_m.keys() {
         if !new_m.contains_key(name) {
-            out.push(format!(
-                "{};",
-                drop_column_stmt(table, name, dialect)?
-            ));
+            out.push(format!("{};", drop_column_stmt(table, name, dialect)?));
         }
     }
     for name in new_m.keys() {
@@ -269,7 +263,8 @@ mod tests {
             field_type: FieldType::Int,
             ..new[1].clone()
         };
-        let stmts = plan_physical_ddl("t", "bare", &old, "bare", &new, SqlDialect::Postgres).unwrap();
+        let stmts =
+            plan_physical_ddl("t", "bare", &old, "bare", &new, SqlDialect::Postgres).unwrap();
         assert!(stmts.iter().any(|s| s.contains("ALTER COLUMN")));
     }
 }

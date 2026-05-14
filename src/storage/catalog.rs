@@ -70,7 +70,7 @@ pub fn build_schema_document(
 ) -> JsonValue {
     let mut rules_out = Map::new();
     for op in ["list", "read", "create", "update", "delete"] {
-        let r = parse_rule_from_json(rules_input, op).unwrap_or_else(|| AccessRule::admin_only());
+        let r = parse_rule_from_json(rules_input, op).unwrap_or_else(AccessRule::admin_only);
         rules_out.insert(
             op.to_string(),
             json!({ "mode": r.mode_str(), "expr": r.expr }),
@@ -139,12 +139,18 @@ pub fn fields_from_document(doc: &JsonValue) -> Result<Vec<Field>> {
                 .and_then(|x| x.as_str())
                 .map(String::from),
             field_type: catalog_str_to_field_type(t),
-            is_required: item.get("required").and_then(|x| x.as_bool()).unwrap_or(false),
+            is_required: item
+                .get("required")
+                .and_then(|x| x.as_bool())
+                .unwrap_or(false),
             is_primary_key: item
                 .get("primary_key")
                 .and_then(|x| x.as_bool())
                 .unwrap_or(false),
-            is_unique: item.get("unique").and_then(|x| x.as_bool()).unwrap_or(false),
+            is_unique: item
+                .get("unique")
+                .and_then(|x| x.as_bool())
+                .unwrap_or(false),
             constraints: item
                 .get("constraints")
                 .and_then(|x| x.as_str())
@@ -243,14 +249,17 @@ pub fn entity_schema_from_document(entity_name: &str, doc: &JsonValue) -> Result
             .get("view_sql")
             .and_then(|v| v.as_str())
             .map(std::string::ToString::to_string),
-        is_system: doc.get("is_system").and_then(|x| x.as_bool()).unwrap_or(false),
+        is_system: doc
+            .get("is_system")
+            .and_then(|x| x.as_bool())
+            .unwrap_or(false),
         has_api: doc.get("has_api").and_then(|x| x.as_bool()).unwrap_or(true),
         fields: fields_from_document(doc)?,
-        list: access_rule_from_document(doc, "list").unwrap_or_else(|| AccessRule::admin_only()),
-        read: access_rule_from_document(doc, "read").unwrap_or_else(|| AccessRule::admin_only()),
-        create: access_rule_from_document(doc, "create").unwrap_or_else(|| AccessRule::admin_only()),
-        update: access_rule_from_document(doc, "update").unwrap_or_else(|| AccessRule::admin_only()),
-        delete: access_rule_from_document(doc, "delete").unwrap_or_else(|| AccessRule::admin_only()),
+        list: access_rule_from_document(doc, "list").unwrap_or_else(AccessRule::admin_only),
+        read: access_rule_from_document(doc, "read").unwrap_or_else(AccessRule::admin_only),
+        create: access_rule_from_document(doc, "create").unwrap_or_else(AccessRule::admin_only),
+        update: access_rule_from_document(doc, "update").unwrap_or_else(AccessRule::admin_only),
+        delete: access_rule_from_document(doc, "delete").unwrap_or_else(AccessRule::admin_only),
     })
 }
 
@@ -293,11 +302,7 @@ pub fn apply_entity_catalog_patch(
         match v {
             JsonValue::Null => schema.view_query = None,
             JsonValue::String(s) => {
-                schema.view_query = if s.is_empty() {
-                    None
-                } else {
-                    Some(s.clone())
-                };
+                schema.view_query = if s.is_empty() { None } else { Some(s.clone()) };
             }
             _ => {
                 return Err(StorageError::Validation(
@@ -359,10 +364,7 @@ pub async fn reconcile_physical_tables_libsql(conn: &Connection) -> Result<()> {
         let name: String = row.get(0)?;
         let doc_s: String = row.get(1)?;
         let doc: JsonValue = serde_json::from_str(&doc_s)?;
-        let ty = doc
-            .get("type")
-            .and_then(|x| x.as_str())
-            .unwrap_or("bare");
+        let ty = doc.get("type").and_then(|x| x.as_str()).unwrap_or("bare");
         if ty == "view" {
             continue;
         }
@@ -390,10 +392,7 @@ pub async fn reconcile_physical_tables_postgres(pool: &sqlx::PgPool) -> Result<(
         let name: String = row.try_get(0)?;
         let doc_s: String = row.try_get(1)?;
         let doc: JsonValue = serde_json::from_str(&doc_s)?;
-        let ty = doc
-            .get("type")
-            .and_then(|x| x.as_str())
-            .unwrap_or("bare");
+        let ty = doc.get("type").and_then(|x| x.as_str()).unwrap_or("bare");
         if ty == "view" {
             continue;
         }
@@ -421,4 +420,3 @@ pub async fn migrate_catalog_postgres(pool: &sqlx::PgPool) -> Result<()> {
     }
     reconcile_physical_tables_postgres(pool).await
 }
-

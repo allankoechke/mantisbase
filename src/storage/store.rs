@@ -6,8 +6,8 @@ use crate::models::types::{AccessRule, EntityType};
 use crate::models::Field;
 
 use super::error::Result;
-use super::LibsqlStore;
 use super::postgres::PostgresStore;
+use super::LibsqlStore;
 
 /// Active persistence backend for the HTTP server and CLI.
 #[derive(Clone)]

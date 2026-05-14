@@ -36,10 +36,7 @@ pub struct PostgresStore {
 }
 
 impl PostgresStore {
-    pub async fn connect(
-        database_url: &str,
-        migrations_dir: impl AsRef<Path>,
-    ) -> Result<Self> {
+    pub async fn connect(database_url: &str, migrations_dir: impl AsRef<Path>) -> Result<Self> {
         let migrations_dir = migrations_dir.as_ref().to_path_buf();
         let pool = sqlx::postgres::PgPoolOptions::new()
             .max_connections(10)
@@ -152,11 +149,9 @@ impl PostgresStore {
     }
 
     pub async fn list_entities_catalog(&self) -> Result<Vec<JsonValue>> {
-        let rows = sqlx::query(
-            "SELECT id, name, document FROM mb_entity_schema ORDER BY name",
-        )
-        .fetch_all(&self.pool)
-        .await?;
+        let rows = sqlx::query("SELECT id, name, document FROM mb_entity_schema ORDER BY name")
+            .fetch_all(&self.pool)
+            .await?;
         let mut out = Vec::new();
         for row in rows {
             let id: String = row.try_get(0)?;
