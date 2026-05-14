@@ -10,8 +10,6 @@ use super::error::{Result, StorageError};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SqlDialect {
     Sqlite,
-    /// Used by the PostgreSQL store and unit tests; unused in default lib builds without `postgres`.
-    #[allow(dead_code)]
     Postgres,
 }
 

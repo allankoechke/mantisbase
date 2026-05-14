@@ -25,7 +25,9 @@ use super::ddl::{build_create_table_ddl, ensure_entity_name, quote_ident};
 use super::dir_migrate::apply_directory_sql_migrations_postgres;
 use super::error::{Result, StorageError};
 use super::schema_alter::{plan_physical_ddl, SqlDialect};
-use super::schema_migration::{format_schema_json_comment, try_write_generated_migration};
+use super::schema_migration::{
+    format_schema_json_comment, join_physical_ddl_statements, try_write_generated_schema_migrations,
+};
 
 #[derive(Clone)]
 pub struct PostgresStore {
@@ -195,14 +197,23 @@ impl PostgresStore {
         let preamble = format_schema_json_comment(&doc);
         if ty != "view" {
             let ddl = format!("DROP TABLE IF EXISTS {}", quote_ident(name)?);
-            try_write_generated_migration(self.migrations_dir.as_path(), name, "drop", &preamble, &ddl);
-        } else {
-            try_write_generated_migration(
+            try_write_generated_schema_migrations(
                 self.migrations_dir.as_path(),
                 name,
                 "drop",
                 &preamble,
-                "-- view entity: no physical table to drop",
+                &ddl,
+                &ddl,
+            );
+        } else {
+            let view_note = "-- view entity: no physical table to drop";
+            try_write_generated_schema_migrations(
+                self.migrations_dir.as_path(),
+                name,
+                "drop",
+                &preamble,
+                view_note,
+                view_note,
             );
         }
         let q = format!("DROP TABLE IF EXISTS {}", quote_ident(name)?);
@@ -257,15 +268,24 @@ impl PostgresStore {
             let ddl = build_create_table_ddl(name, &schema.fields)?;
             sqlx::query(&ddl).execute(&mut *tx).await?;
             let preamble = format_schema_json_comment(&doc);
-            try_write_generated_migration(self.migrations_dir.as_path(), name, "create", &preamble, &ddl);
-        } else {
-            let preamble = format_schema_json_comment(&doc);
-            try_write_generated_migration(
+            try_write_generated_schema_migrations(
                 self.migrations_dir.as_path(),
                 name,
                 "create",
                 &preamble,
-                "-- view entity: physical table not created",
+                &ddl,
+                &ddl,
+            );
+        } else {
+            let preamble = format_schema_json_comment(&doc);
+            let view_note = "-- view entity: physical table not created";
+            try_write_generated_schema_migrations(
+                self.migrations_dir.as_path(),
+                name,
+                "create",
+                &preamble,
+                view_note,
+                view_note,
             );
         }
         tx.commit().await?;
@@ -306,7 +326,15 @@ impl PostgresStore {
             .unwrap_or("bare")
             .to_string();
         let new_fields = fields_from_document(&new_doc)?;
-        let stmts = plan_physical_ddl(
+        let stmts_sqlite = plan_physical_ddl(
+            name,
+            &old_type,
+            &old_fields,
+            &new_type,
+            &new_fields,
+            SqlDialect::Sqlite,
+        )?;
+        let stmts_postgres = plan_physical_ddl(
             name,
             &old_type,
             &old_fields,
@@ -314,14 +342,11 @@ impl PostgresStore {
             &new_fields,
             SqlDialect::Postgres,
         )?;
-        let migration_body = if stmts.is_empty() {
-            "-- no physical DDL statements (catalog metadata only)\n".to_string()
-        } else {
-            stmts.join("\n")
-        };
+        let migration_body_sqlite = join_physical_ddl_statements(&stmts_sqlite);
+        let migration_body_postgres = join_physical_ddl_statements(&stmts_postgres);
         let mut tx = self.pool.begin().await?;
         let inner: Result<()> = async {
-            for st in &stmts {
+            for st in &stmts_postgres {
                 let t = st.trim();
                 if t.is_empty() || t.starts_with("--") {
                     continue;
@@ -355,12 +380,13 @@ impl PostgresStore {
             format_schema_json_comment(&doc),
             format_schema_json_comment(&new_doc)
         );
-        try_write_generated_migration(
+        try_write_generated_schema_migrations(
             self.migrations_dir.as_path(),
             name,
             "patch",
             &preamble,
-            &migration_body,
+            &migration_body_sqlite,
+            &migration_body_postgres,
         );
         Ok(())
     }
