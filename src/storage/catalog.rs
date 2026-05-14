@@ -70,7 +70,7 @@ pub fn build_schema_document(
 ) -> JsonValue {
     let mut rules_out = Map::new();
     for op in ["list", "read", "create", "update", "delete"] {
-        let r = parse_rule_from_json(rules_input, op).unwrap_or_else(|| AccessRule::admin_only());
+        let r = parse_rule_from_json(rules_input, op).unwrap_or_else(AccessRule::admin_only);
         rules_out.insert(
             op.to_string(),
             json!({ "mode": r.mode_str(), "expr": r.expr }),
@@ -255,14 +255,11 @@ pub fn entity_schema_from_document(entity_name: &str, doc: &JsonValue) -> Result
             .unwrap_or(false),
         has_api: doc.get("has_api").and_then(|x| x.as_bool()).unwrap_or(true),
         fields: fields_from_document(doc)?,
-        list: access_rule_from_document(doc, "list").unwrap_or_else(|| AccessRule::admin_only()),
-        read: access_rule_from_document(doc, "read").unwrap_or_else(|| AccessRule::admin_only()),
-        create: access_rule_from_document(doc, "create")
-            .unwrap_or_else(|| AccessRule::admin_only()),
-        update: access_rule_from_document(doc, "update")
-            .unwrap_or_else(|| AccessRule::admin_only()),
-        delete: access_rule_from_document(doc, "delete")
-            .unwrap_or_else(|| AccessRule::admin_only()),
+        list: access_rule_from_document(doc, "list").unwrap_or_else(AccessRule::admin_only),
+        read: access_rule_from_document(doc, "read").unwrap_or_else(AccessRule::admin_only),
+        create: access_rule_from_document(doc, "create").unwrap_or_else(AccessRule::admin_only),
+        update: access_rule_from_document(doc, "update").unwrap_or_else(AccessRule::admin_only),
+        delete: access_rule_from_document(doc, "delete").unwrap_or_else(AccessRule::admin_only),
     })
 }
 
