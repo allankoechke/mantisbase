@@ -1,6 +1,5 @@
-//! Integration test for optional Postgres storage. CI sets `TEST_PG_URL`.
+//! Integration test for PostgreSQL storage. CI sets `TEST_PG_URL`.
 
-#[cfg(feature = "postgres")]
 #[tokio::test]
 async fn postgres_migrate_and_admin_roundtrip() {
     let Some(url) = std::env::var("TEST_PG_URL")

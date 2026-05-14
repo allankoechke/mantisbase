@@ -1,4 +1,4 @@
-//! PostgreSQL persistence (optional `postgres` feature). Mirrors [`super::LibsqlStore`] API.
+//! PostgreSQL persistence. Mirrors [`super::LibsqlStore`] API.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};

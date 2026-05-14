@@ -32,7 +32,6 @@ impl From<crate::storage::StorageError> for ApiError {
             crate::storage::StorageError::Validation(_) => {
                 ApiError(StatusCode::BAD_REQUEST, "validation failed")
             }
-            #[cfg(feature = "postgres")]
             crate::storage::StorageError::SqlxMigrate(_) => {
                 ApiError(StatusCode::INTERNAL_SERVER_ERROR, "migration error")
             }

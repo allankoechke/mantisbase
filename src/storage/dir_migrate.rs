@@ -125,7 +125,6 @@ pub async fn apply_directory_sql_migrations_libsql(db: &Database, root: &Path) -
     Ok(())
 }
 
-#[cfg(feature = "postgres")]
 pub async fn apply_directory_sql_migrations_postgres(
     pool: &sqlx::PgPool,
     root: &Path,

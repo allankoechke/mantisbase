@@ -7,7 +7,7 @@
 
 <p align="center">
   <strong>A lightweight Backend-as-a-Service (BaaS) in Rust — single binary, schemas, REST, and an admin UI</strong><br />
-  Local <strong>libSQL</strong> by default; optional <strong>Turso</strong> and <strong>PostgreSQL</strong> (<code>postgres</code> feature).
+  Local <strong>libSQL</strong> by default; <strong>Turso</strong> and <strong>PostgreSQL</strong> are included in the binary and chosen at runtime (<code>--db</code>).
 </p>
 
 ---
@@ -25,7 +25,8 @@ The rewrite targets the same product goals as the original C++ stack (speed, emb
 ### Prerequisites
 
 - [Rust](https://rustup.rs/) (see `rust-version` in `Cargo.toml`)
-- Optional: PostgreSQL client libs if you build with `--features postgres`
+
+PostgreSQL is supported via the bundled **sqlx** client; no separate Cargo feature is required. You only need a running Postgres instance when using `--db postgresql`.
 
 ### Build and run
 
@@ -161,11 +162,10 @@ mantisbase/
 
 ## Optional Cargo features
 
-- **`postgres`** — PostgreSQL backend via sqlx migrations under `migrations/postgres/`
 - **`smtp`** — email (lettre)
 - **`embed-js`** — experimental QuickJS embedding
 
-Example: `cargo build --release --features postgres`
+Example: `cargo build --release --features smtp`
 
 ---
 

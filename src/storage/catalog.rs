@@ -9,8 +9,6 @@ use crate::models::EntitySchema;
 
 use super::ddl::{build_create_table_ddl, ensure_entity_name};
 use super::error::{Result, StorageError};
-
-#[cfg(feature = "postgres")]
 use sqlx::Row;
 
 pub fn field_type_to_catalog_str(ft: &FieldType) -> &'static str {
@@ -179,7 +177,6 @@ pub fn access_rule_from_document(doc: &JsonValue, op: &str) -> Option<AccessRule
     Some(AccessRule { mode, expr })
 }
 
-#[cfg(feature = "postgres")]
 pub fn field_types_from_document(doc: &JsonValue) -> std::collections::HashMap<String, String> {
     let mut m = std::collections::HashMap::new();
     if let Some(arr) = doc.get("fields").and_then(|x| x.as_array()) {
@@ -385,7 +382,6 @@ pub async fn migrate_catalog_libsql(conn: &Connection) -> Result<()> {
     reconcile_physical_tables_libsql(conn).await
 }
 
-#[cfg(feature = "postgres")]
 pub async fn reconcile_physical_tables_postgres(pool: &sqlx::PgPool) -> Result<()> {
     let rows = sqlx::query("SELECT name, document FROM mb_entity_schema ORDER BY name")
         .fetch_all(pool)
@@ -409,7 +405,6 @@ pub async fn reconcile_physical_tables_postgres(pool: &sqlx::PgPool) -> Result<(
     Ok(())
 }
 
-#[cfg(feature = "postgres")]
 async fn pg_table_exists(pool: &sqlx::PgPool, table: &str) -> Result<bool> {
     let r = sqlx::query_scalar::<_, bool>(
         "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = $1)",
@@ -420,7 +415,6 @@ async fn pg_table_exists(pool: &sqlx::PgPool, table: &str) -> Result<bool> {
     Ok(r)
 }
 
-#[cfg(feature = "postgres")]
 pub async fn migrate_catalog_postgres(pool: &sqlx::PgPool) -> Result<()> {
     if !pg_table_exists(pool, "mb_entity_schema").await? {
         return Ok(());

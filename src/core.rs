@@ -9,10 +9,8 @@ use std::path::{Path, PathBuf};
 
 use crate::cli::{Cli, Commands, DatabaseType};
 use crate::logger::prelude::*;
+use crate::storage::{LibsqlStore, PostgresStore, Store};
 use crate::util_paths::resolve_relative_to_binary;
-#[cfg(feature = "postgres")]
-use crate::storage::PostgresStore;
-use crate::storage::{LibsqlStore, Store};
 
 /// Database backend selected at runtime.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -21,8 +19,7 @@ pub enum MantisBaseDbType {
     Libsql,
     /// Turso / remote libSQL (`libsql://` URL).
     Turso,
-    /// PostgreSQL (`postgres` Cargo feature; `--db postgresql`).
-    #[cfg(feature = "postgres")]
+    /// PostgreSQL (`--db postgresql` and `MB_DATABASE_URL` / `--db-url`).
     Postgres,
 }
 
@@ -235,7 +232,6 @@ impl MantisBase {
         let db_type = match db_backend {
             DatabaseType::Libsql => MantisBaseDbType::Libsql,
             DatabaseType::Turso => MantisBaseDbType::Turso,
-            #[cfg(feature = "postgres")]
             DatabaseType::Postgresql => MantisBaseDbType::Postgres,
         };
         self.set_db_type(db_type);
@@ -351,7 +347,6 @@ impl MantisBase {
                             .await?,
                         )
                     }
-                    #[cfg(feature = "postgres")]
                     DatabaseType::Postgresql => {
                         Store::Postgres(
                             PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
@@ -374,7 +369,6 @@ impl MantisBase {
                         )
                         .await?,
                     ),
-                    #[cfg(feature = "postgres")]
                     DatabaseType::Postgresql => {
                         Store::Postgres(
                             PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
@@ -410,7 +404,6 @@ impl MantisBase {
                         )
                         .await?,
                     ),
-                    #[cfg(feature = "postgres")]
                     DatabaseType::Postgresql => {
                         Store::Postgres(
                             PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,

@@ -50,8 +50,7 @@ pub enum DatabaseType {
     Libsql,
     /// Remote Turso / libSQL (`libsql://`…).
     Turso,
-    /// PostgreSQL (`MB_DATABASE_URL` or `--db-url`).
-    #[cfg(feature = "postgres")]
+    /// PostgreSQL (`--db postgresql`; requires `--db-url` or `MB_DATABASE_URL` env var set).
     Postgresql,
 }
 
