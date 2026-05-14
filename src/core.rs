@@ -1,10 +1,16 @@
 //! Core runtime configuration for directories, database selection, and HTTP listen options.
+//!
+//! Relative `data`, `migrations`, `scripts`, and admin UI paths are resolved against the directory
+//! that contains the running `mantisbase` executable (not the current working directory), then
+//! created if missing (except when resolution fails).
+
+use std::fs;
+use std::path::{Path, PathBuf};
 
 use crate::cli::{Cli, Commands, DatabaseType};
 use crate::logger::prelude::*;
-#[cfg(feature = "postgres")]
-use crate::storage::PostgresStore;
-use crate::storage::{LibsqlStore, Store};
+use crate::storage::{LibsqlStore, PostgresStore, Store};
+use crate::util_paths::resolve_relative_to_binary;
 
 /// Database backend selected at runtime.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -13,8 +19,7 @@ pub enum MantisBaseDbType {
     Libsql,
     /// Turso / remote libSQL (`libsql://` URL).
     Turso,
-    /// PostgreSQL (`postgres` Cargo feature; `--db postgresql`).
-    #[cfg(feature = "postgres")]
+    /// PostgreSQL (`--db postgresql` and `MB_DATABASE_URL` / `--db-url`).
     Postgres,
 }
 
@@ -39,14 +44,16 @@ pub enum MantisBaseRunOutcome {
 pub struct MantisBase {
     data_dir: String,
     scripts_dir: String,
-    public_dir: String,
+    migrations_dir: PathBuf,
+    /// Root of the Vite build output (default `./public/mb-dist`; resolved next to the binary after CLI parse).
+    admin_ui_dir: String,
     db_url: String,
     db_type: MantisBaseDbType,
     log_level: Level,
     mode: MantisBaseMode,
     port: u16,
     host: String,
-    /// Used to sign end-user JWTs (`auth` entities); optional in dev.
+    /// Used to sign application-user JWTs from `POST /api/v1/auth/login`; optional in dev.
     jwt_secret: Option<String>,
     /// Last CLI subcommand (set by [`Self::apply_cli`]).
     cli_command: Option<Commands>,
@@ -61,7 +68,8 @@ impl MantisBase {
         Self {
             data_dir: "./data".to_string(),
             scripts_dir: "./scripts".to_string(),
-            public_dir: "./public".to_string(),
+            migrations_dir: PathBuf::from("./migrations"),
+            admin_ui_dir: "./public/mb-dist".to_string(),
             db_url: String::new(),
             db_type: MantisBaseDbType::Libsql,
             log_level: Level::Info,
@@ -99,6 +107,13 @@ impl MantisBase {
             );
         }
 
+        if let Ok(dir) = std::env::var("MB_ADMIN_UI_DIR") {
+            let t = dir.trim();
+            if !t.is_empty() {
+                self.admin_ui_dir = t.to_string();
+            }
+        }
+
         self
     }
 
@@ -114,16 +129,24 @@ impl MantisBase {
         self.scripts_dir = scripts_dir.to_string();
     }
 
+    pub fn set_migrations_dir(&mut self, dir: impl AsRef<Path>) {
+        self.migrations_dir = dir.as_ref().to_path_buf();
+    }
+
     pub fn scripts_dir(&self) -> &str {
         &self.scripts_dir
     }
 
-    pub fn public_dir(&self) -> &str {
-        &self.public_dir
+    pub fn migrations_dir(&self) -> &Path {
+        self.migrations_dir.as_path()
     }
 
-    pub fn set_public_dir(&mut self, public_dir: &str) {
-        self.public_dir = public_dir.to_string();
+    pub fn admin_ui_dir(&self) -> &str {
+        &self.admin_ui_dir
+    }
+
+    pub fn set_admin_ui_dir(&mut self, dir: &str) {
+        self.admin_ui_dir = dir.to_string();
     }
 
     pub fn db_url(&self) -> &str {
@@ -192,9 +215,11 @@ impl MantisBase {
             trace!("Scripts directory: {:?}", scripts_dir);
             self.set_scripts_dir(scripts_dir.to_str().unwrap_or("./scripts"));
         }
-        if let Some(public_dir) = &cli.public_dir {
-            trace!("Public directory: {:?}", public_dir);
-            self.set_public_dir(public_dir.to_str().unwrap_or("./public"));
+        self.set_migrations_dir(&cli.migrations_dir);
+        trace!("Migrations directory: {:?}", self.migrations_dir());
+        if let Some(admin_ui) = &cli.admin_ui_dir {
+            trace!("Admin UI directory: {:?}", admin_ui);
+            self.set_admin_ui_dir(admin_ui.to_str().unwrap_or("./public/mb-dist"));
         }
         if cli.dev {
             self.set_log_level(Level::Trace);
@@ -207,7 +232,6 @@ impl MantisBase {
         let db_type = match db_backend {
             DatabaseType::Libsql => MantisBaseDbType::Libsql,
             DatabaseType::Turso => MantisBaseDbType::Turso,
-            #[cfg(feature = "postgres")]
             DatabaseType::Postgresql => MantisBaseDbType::Postgres,
         };
         self.set_db_type(db_type);
@@ -226,6 +250,8 @@ impl MantisBase {
 
         self.set_db_url(&db_url);
 
+        self.normalize_runtime_paths()?;
+
         if let Some(Commands::Serve(serve_args)) = &cli.commands {
             if let Some(p) = serve_args.port {
                 self.set_port(p);
@@ -243,6 +269,33 @@ impl MantisBase {
             Some(Commands::Migrations(_)) => MantisBaseMode::Migrations,
         });
 
+        Ok(())
+    }
+
+    /// Resolves relative directory paths against the running binary and ensures they exist.
+    fn normalize_runtime_paths(&mut self) -> anyhow::Result<()> {
+        self.data_dir = path_to_utf8(&resolve_relative_to_binary(Path::new(&self.data_dir)))?;
+        self.scripts_dir = path_to_utf8(&resolve_relative_to_binary(Path::new(&self.scripts_dir)))?;
+        self.migrations_dir = resolve_relative_to_binary(self.migrations_dir.as_path());
+        self.admin_ui_dir = path_to_utf8(&resolve_relative_to_binary(Path::new(&self.admin_ui_dir)))?;
+
+        let db = self.db_url.trim();
+        if !db.is_empty() && !db.contains("://") {
+            let p = Path::new(db);
+            if p.is_relative() {
+                let abs = resolve_relative_to_binary(p);
+                self.db_url = path_to_utf8(&abs)?;
+            }
+        }
+
+        fs::create_dir_all(&self.data_dir)
+            .map_err(|e| anyhow::anyhow!("create data dir {:?}: {e}", self.data_dir))?;
+        fs::create_dir_all(&self.scripts_dir)
+            .map_err(|e| anyhow::anyhow!("create scripts dir {:?}: {e}", self.scripts_dir))?;
+        fs::create_dir_all(&self.migrations_dir)
+            .map_err(|e| anyhow::anyhow!("create migrations dir {:?}: {e}", self.migrations_dir))?;
+        fs::create_dir_all(&self.admin_ui_dir)
+            .map_err(|e| anyhow::anyhow!("create admin UI dir {:?}: {e}", self.admin_ui_dir))?;
         Ok(())
     }
 
@@ -274,17 +327,30 @@ impl MantisBase {
             MantisBaseMode::Serve => {
                 let store = match self.db_backend {
                     DatabaseType::Libsql => Store::Libsql(
-                        LibsqlStore::open_local(self.data_dir(), self.db_url()).await?,
+                        LibsqlStore::open_local(
+                            self.data_dir(),
+                            self.db_url(),
+                            self.migrations_dir(),
+                        )
+                        .await?,
                     ),
                     DatabaseType::Turso => {
                         let token = std::env::var("MB_TURSO_AUTH_TOKEN").map_err(|_| {
                             anyhow::anyhow!("MB_TURSO_AUTH_TOKEN required for Turso")
                         })?;
-                        Store::Libsql(LibsqlStore::open_remote(self.db_url(), &token).await?)
+                        Store::Libsql(
+                            LibsqlStore::open_remote(
+                                self.db_url(),
+                                &token,
+                                self.migrations_dir(),
+                            )
+                            .await?,
+                        )
                     }
-                    #[cfg(feature = "postgres")]
                     DatabaseType::Postgresql => {
-                        Store::Postgres(PostgresStore::connect(self.db_url()).await?)
+                        Store::Postgres(
+                            PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
+                        )
                     }
                 };
                 crate::http::serve(self, store).await?;
@@ -296,11 +362,17 @@ impl MantisBase {
                 };
                 let store = match self.db_backend {
                     DatabaseType::Libsql | DatabaseType::Turso => Store::Libsql(
-                        LibsqlStore::open_local(self.data_dir(), self.db_url()).await?,
+                        LibsqlStore::open_local(
+                            self.data_dir(),
+                            self.db_url(),
+                            self.migrations_dir(),
+                        )
+                        .await?,
                     ),
-                    #[cfg(feature = "postgres")]
                     DatabaseType::Postgresql => {
-                        Store::Postgres(PostgresStore::connect(self.db_url()).await?)
+                        Store::Postgres(
+                            PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
+                        )
                     }
                 };
                 if let Some(add_args) = &admin_args.add {
@@ -325,11 +397,17 @@ impl MantisBase {
                 };
                 let store = match self.db_backend {
                     DatabaseType::Libsql | DatabaseType::Turso => Store::Libsql(
-                        LibsqlStore::open_local(self.data_dir(), self.db_url()).await?,
+                        LibsqlStore::open_local(
+                            self.data_dir(),
+                            self.db_url(),
+                            self.migrations_dir(),
+                        )
+                        .await?,
                     ),
-                    #[cfg(feature = "postgres")]
                     DatabaseType::Postgresql => {
-                        Store::Postgres(PostgresStore::connect(self.db_url()).await?)
+                        Store::Postgres(
+                            PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
+                        )
                     }
                 };
                 if migration_args.up {
@@ -352,15 +430,22 @@ impl MantisBase {
     }
 }
 
+fn path_to_utf8(path: &Path) -> anyhow::Result<String> {
+    path.to_str()
+        .map(String::from)
+        .ok_or_else(|| anyhow::anyhow!("path is not valid UTF-8: {path:?}"))
+}
+
 fn print_no_subcommand_hint() {
     warn!(
         "No subcommand given.\n\n\
         Examples:\n\
           mantisbase serve                      HTTP API + static /mb\n\
-          mantisbase admins --add EMAIL PASS    create an admin (Basic auth for /api/v1)\n\
+          mantisbase admins --add EMAIL PASS    create an admin (or use POST /api/v1/admins)\n\
           mantisbase migrations --up            apply catalog migrations\n\n\
         For all options:  mantisbase --help\n\
-        Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)"
+        Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)\n\
+        Migrations dir:   --migrations-dir …           (default ./migrations next to the binary; optional *.sql after system DDL)"
     );
 }
 

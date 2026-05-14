@@ -16,7 +16,6 @@ path = "src/main.rs"
 
 [features]
 default = []
-postgres = ["dep:sqlx"]
 smtp = ["dep:lettre"]
 embed-js = ["dep:rquickjs"]
 
@@ -42,7 +41,7 @@ jsonwebtoken = "9"
 sha2 = "0.10"
 hex = "0.4"
 
-sqlx = { version = "0.8", optional = true, default-features = false, features = [
+sqlx = { version = "0.8", default-features = false, features = [
     "runtime-tokio",
     "postgres",
     "macros",

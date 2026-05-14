@@ -61,4 +61,4 @@ jobs:
       - name: Integration tests (Postgres)
         env:
           TEST_PG_URL: postgres://mb:mb@localhost:5432/mantisbase_test
-        run: cargo test --all-features postgres_migrate_and_admin_roundtrip
+        run: cargo test postgres_migrate_and_admin_roundtrip

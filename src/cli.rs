@@ -5,17 +5,27 @@ use clap::{ArgGroup, Args, Parser, Subcommand, ValueEnum};
 #[derive(Parser, Debug, Clone)]
 #[command(name = "mantisbase", version, about)]
 pub struct Cli {
-    /// Data directory path
+    /// Directory for optional top-level `*.sql` (after built-in catalog) and `generated/` output.
+    #[arg(
+        long = "migrations-dir",
+        value_name = "DIR",
+        default_value = "./migrations",
+        help = "Run *.sql here after embedded system DDL (ledger: mb_sql_dir_migration); generated schema SQL goes under generated/. Relative paths are resolved next to the mantisbase binary."
+    )]
+    pub migrations_dir: PathBuf,
+
+    /// Data directory path (relative paths are resolved next to the mantisbase binary).
     #[arg(long)]
     pub data_dir: Option<PathBuf>,
 
-    /// Scripts directory path
+    /// Scripts directory path (relative paths are resolved next to the mantisbase binary).
     #[arg(long)]
     pub scripts_dir: Option<PathBuf>,
 
-    /// Public directory path for static files
+    /// Directory containing the **built** admin SPA (`index.html` from `cd admin && npm run build`).
+    /// Relative paths are resolved next to the mantisbase binary.
     #[arg(long)]
-    pub public_dir: Option<PathBuf>,
+    pub admin_ui_dir: Option<PathBuf>,
 
     /// Enable development mode (verbose logging)
     #[arg(long)]
@@ -40,8 +50,7 @@ pub enum DatabaseType {
     Libsql,
     /// Remote Turso / libSQL (`libsql://`…).
     Turso,
-    /// PostgreSQL (`MB_DATABASE_URL` or `--db-url`).
-    #[cfg(feature = "postgres")]
+    /// PostgreSQL (`--db postgresql`; requires `--db-url` or `MB_DATABASE_URL` env var set).
     Postgresql,
 }
 

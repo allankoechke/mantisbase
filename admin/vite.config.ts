@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // Production bundle is served under `/mb` by the Rust binary; dev keeps `/` for simpler Vite URLs.
+  base: command === "build" ? "/mb/" : "/",
   root: ".",
   build: {
     outDir: "../public/mb-dist",
@@ -11,4 +13,4 @@ export default defineConfig({
       "/api": "http://127.0.0.1:7070",
     },
   },
-});
+}));

@@ -4,8 +4,10 @@ use mantisbase::storage::{LibsqlStore, Store};
 #[tokio::test]
 async fn libsql_migrations_and_openapi_smoke() {
     let dir = tempfile::tempdir().unwrap();
+    let mig = dir.path().join("migrations");
+    std::fs::create_dir_all(&mig).unwrap();
     let store = Store::Libsql(
-        LibsqlStore::open_local(dir.path().to_str().unwrap(), "")
+        LibsqlStore::open_local(dir.path().to_str().unwrap(), "", &mig)
             .await
             .unwrap(),
     );

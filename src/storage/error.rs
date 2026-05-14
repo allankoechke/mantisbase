@@ -14,12 +14,8 @@ pub enum StorageError {
     Conflict(String),
     #[error("validation: {0}")]
     Validation(String),
-    #[error("postgres backend not compiled in")]
-    PostgresDisabled,
-    #[cfg(feature = "postgres")]
     #[error("sqlx: {0}")]
     Sqlx(#[from] sqlx::Error),
-    #[cfg(feature = "postgres")]
     #[error("sqlx migrate: {0}")]
     SqlxMigrate(#[from] sqlx::migrate::MigrateError),
 }

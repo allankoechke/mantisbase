@@ -1,4 +1,4 @@
-//! Unified store handle (libSQL default, optional PostgreSQL).
+//! Unified store handle (libSQL / Turso or PostgreSQL, selected at runtime).
 
 use serde_json::{Map, Value};
 
@@ -7,15 +7,12 @@ use crate::models::Field;
 
 use super::error::Result;
 use super::LibsqlStore;
-
-#[cfg(feature = "postgres")]
 use super::postgres::PostgresStore;
 
 /// Active persistence backend for the HTTP server and CLI.
 #[derive(Clone)]
 pub enum Store {
     Libsql(LibsqlStore),
-    #[cfg(feature = "postgres")]
     Postgres(PostgresStore),
 }
 
@@ -23,7 +20,6 @@ impl Store {
     pub async fn verify_admin_basic(&self, email: &str, password: &str) -> Result<bool> {
         match self {
             Store::Libsql(s) => s.verify_admin_basic(email, password).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.verify_admin_basic(email, password).await,
         }
     }
@@ -31,7 +27,6 @@ impl Store {
     pub async fn entity_type(&self, name: &str) -> Result<Option<String>> {
         match self {
             Store::Libsql(s) => s.entity_type(name).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.entity_type(name).await,
         }
     }
@@ -39,15 +34,24 @@ impl Store {
     pub async fn list_entities_catalog(&self) -> Result<Vec<Value>> {
         match self {
             Store::Libsql(s) => s.list_entities_catalog().await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.list_entities_catalog().await,
+        }
+    }
+
+    pub async fn patch_entity_catalog(
+        &self,
+        name: &str,
+        patch: &crate::storage::EntityCatalogPatch,
+    ) -> Result<()> {
+        match self {
+            Store::Libsql(s) => s.patch_entity_catalog(name, patch).await,
+            Store::Postgres(s) => s.patch_entity_catalog(name, patch).await,
         }
     }
 
     pub async fn delete_entity_catalog(&self, name: &str) -> Result<()> {
         match self {
             Store::Libsql(s) => s.delete_entity_catalog(name).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.delete_entity_catalog(name).await,
         }
     }
@@ -65,7 +69,6 @@ impl Store {
                 s.create_entity_from_schema(name, et, view_sql, fields_override, rules)
                     .await
             }
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => {
                 s.create_entity_from_schema(name, et, view_sql, fields_override, rules)
                     .await
@@ -76,7 +79,6 @@ impl Store {
     pub async fn get_entity_catalog(&self, name: &str) -> Result<Option<Value>> {
         match self {
             Store::Libsql(s) => s.get_entity_catalog(name).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.get_entity_catalog(name).await,
         }
     }
@@ -84,7 +86,6 @@ impl Store {
     pub async fn get_access_rule(&self, entity_name: &str, op: &str) -> Result<Option<AccessRule>> {
         match self {
             Store::Libsql(s) => s.get_access_rule(entity_name, op).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.get_access_rule(entity_name, op).await,
         }
     }
@@ -97,7 +98,6 @@ impl Store {
     ) -> Result<Vec<Map<String, Value>>> {
         match self {
             Store::Libsql(s) => s.list_entity_rows(entity, limit, offset).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.list_entity_rows(entity, limit, offset).await,
         }
     }
@@ -109,7 +109,6 @@ impl Store {
     ) -> Result<Option<Map<String, Value>>> {
         match self {
             Store::Libsql(s) => s.get_entity_row(entity, id).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.get_entity_row(entity, id).await,
         }
     }
@@ -121,7 +120,6 @@ impl Store {
     ) -> Result<Map<String, Value>> {
         match self {
             Store::Libsql(s) => s.insert_entity_row(entity, body).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.insert_entity_row(entity, body).await,
         }
     }
@@ -134,7 +132,6 @@ impl Store {
     ) -> Result<Map<String, Value>> {
         match self {
             Store::Libsql(s) => s.update_entity_row(entity, id, patch).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.update_entity_row(entity, id, patch).await,
         }
     }
@@ -142,28 +139,24 @@ impl Store {
     pub async fn delete_entity_row(&self, entity: &str, id: &str) -> Result<()> {
         match self {
             Store::Libsql(s) => s.delete_entity_row(entity, id).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.delete_entity_row(entity, id).await,
         }
     }
 
-    pub async fn verify_auth_login(
+    pub async fn verify_user_login(
         &self,
-        entity: &str,
-        identity: &str,
+        email: &str,
         password: &str,
     ) -> Result<Option<Map<String, Value>>> {
         match self {
-            Store::Libsql(s) => s.verify_auth_login(entity, identity, password).await,
-            #[cfg(feature = "postgres")]
-            Store::Postgres(s) => s.verify_auth_login(entity, identity, password).await,
+            Store::Libsql(s) => s.verify_user_login(email, password).await,
+            Store::Postgres(s) => s.verify_user_login(email, password).await,
         }
     }
 
     pub async fn app_config_list(&self) -> Result<Vec<(String, String)>> {
         match self {
             Store::Libsql(s) => s.app_config_list().await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.app_config_list().await,
         }
     }
@@ -171,7 +164,6 @@ impl Store {
     pub async fn list_admins(&self) -> Result<Vec<(String, String)>> {
         match self {
             Store::Libsql(s) => s.list_admins().await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.list_admins().await,
         }
     }
@@ -184,7 +176,6 @@ impl Store {
     ) -> Result<()> {
         match self {
             Store::Libsql(s) => s.app_config_set(key, value, updated_by).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.app_config_set(key, value, updated_by).await,
         }
     }
@@ -192,7 +183,6 @@ impl Store {
     pub async fn list_webhooks(&self) -> Result<Vec<Value>> {
         match self {
             Store::Libsql(s) => s.list_webhooks().await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.list_webhooks().await,
         }
     }
@@ -205,7 +195,6 @@ impl Store {
     ) -> Result<String> {
         match self {
             Store::Libsql(s) => s.register_webhook(url, events, secret).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.register_webhook(url, events, secret).await,
         }
     }
@@ -213,7 +202,6 @@ impl Store {
     pub async fn migrate(&self) -> Result<()> {
         match self {
             Store::Libsql(s) => s.migrate().await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.migrate().await,
         }
     }
@@ -221,7 +209,6 @@ impl Store {
     pub async fn add_admin(&self, email: &str, password: &str) -> Result<()> {
         match self {
             Store::Libsql(s) => s.add_admin(email, password).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.add_admin(email, password).await,
         }
     }
@@ -229,7 +216,6 @@ impl Store {
     pub async fn remove_admin(&self, id_or_email: &str) -> Result<u64> {
         match self {
             Store::Libsql(s) => s.remove_admin(id_or_email).await,
-            #[cfg(feature = "postgres")]
             Store::Postgres(s) => s.remove_admin(id_or_email).await,
         }
     }
