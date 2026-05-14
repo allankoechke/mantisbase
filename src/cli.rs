@@ -10,19 +10,20 @@ pub struct Cli {
         long = "migrations-dir",
         value_name = "DIR",
         default_value = "./migrations",
-        help = "Run *.sql here after embedded system DDL (ledger: mb_sql_dir_migration); generated schema SQL goes under generated/"
+        help = "Run *.sql here after embedded system DDL (ledger: mb_sql_dir_migration); generated schema SQL goes under generated/. Relative paths are resolved next to the mantisbase binary."
     )]
     pub migrations_dir: PathBuf,
 
-    /// Data directory path
+    /// Data directory path (relative paths are resolved next to the mantisbase binary).
     #[arg(long)]
     pub data_dir: Option<PathBuf>,
 
-    /// Scripts directory path
+    /// Scripts directory path (relative paths are resolved next to the mantisbase binary).
     #[arg(long)]
     pub scripts_dir: Option<PathBuf>,
 
     /// Directory containing the **built** admin SPA (`index.html` from `cd admin && npm run build`).
+    /// Relative paths are resolved next to the mantisbase binary.
     #[arg(long)]
     pub admin_ui_dir: Option<PathBuf>,
 

@@ -5,6 +5,7 @@
 //! - **HTTP:** [`http::serve`] exposes `/api/v1/*` (admin **HTTP Basic** on `/api/v1/sys/*` and `/api/v1/admins/*`), OpenAPI at `/api/v1/openapi.json`, and the built admin SPA at `/mb/`.
 //! - **Logging:** [`logger`] (`info!`, `debug!`, …); do not use `tracing` or `println!` for diagnostics in crate code.
 //! - **Files:** [`files::LocalFs`] stores blobs under `data_dir/files/…`.
+//! - **Paths:** After [`core::MantisBase::apply_cli`], default-style relative `data`, `migrations`, `scripts`, and admin UI paths are resolved next to the `mantisbase` executable and those directories are created if missing.
 //!
 //! ## Example (CLI binary)
 //! Run `mantisbase serve` after creating an admin with `mantisbase admins --add …`.
@@ -38,6 +39,7 @@ pub mod realtime;
 pub mod scripts;
 pub mod storage;
 pub mod util_time;
+pub(crate) mod util_paths;
 pub mod webhooks;
 
 pub use core::{MantisBase, MantisBaseDbType, MantisBaseMode, MantisBaseRunOutcome};

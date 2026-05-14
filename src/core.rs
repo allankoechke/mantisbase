@@ -1,9 +1,15 @@
 //! Core runtime configuration for directories, database selection, and HTTP listen options.
+//!
+//! Relative `data`, `migrations`, `scripts`, and admin UI paths are resolved against the directory
+//! that contains the running `mantisbase` executable (not the current working directory), then
+//! created if missing (except when resolution fails).
 
+use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::cli::{Cli, Commands, DatabaseType};
 use crate::logger::prelude::*;
+use crate::util_paths::resolve_relative_to_binary;
 #[cfg(feature = "postgres")]
 use crate::storage::PostgresStore;
 use crate::storage::{LibsqlStore, Store};
@@ -42,7 +48,7 @@ pub struct MantisBase {
     data_dir: String,
     scripts_dir: String,
     migrations_dir: PathBuf,
-    /// Root of the Vite build output (default `./public/mb-dist`).
+    /// Root of the Vite build output (default `./public/mb-dist`; resolved next to the binary after CLI parse).
     admin_ui_dir: String,
     db_url: String,
     db_type: MantisBaseDbType,
@@ -248,6 +254,8 @@ impl MantisBase {
 
         self.set_db_url(&db_url);
 
+        self.normalize_runtime_paths()?;
+
         if let Some(Commands::Serve(serve_args)) = &cli.commands {
             if let Some(p) = serve_args.port {
                 self.set_port(p);
@@ -265,6 +273,33 @@ impl MantisBase {
             Some(Commands::Migrations(_)) => MantisBaseMode::Migrations,
         });
 
+        Ok(())
+    }
+
+    /// Resolves relative directory paths against the running binary and ensures they exist.
+    fn normalize_runtime_paths(&mut self) -> anyhow::Result<()> {
+        self.data_dir = path_to_utf8(&resolve_relative_to_binary(Path::new(&self.data_dir)))?;
+        self.scripts_dir = path_to_utf8(&resolve_relative_to_binary(Path::new(&self.scripts_dir)))?;
+        self.migrations_dir = resolve_relative_to_binary(self.migrations_dir.as_path());
+        self.admin_ui_dir = path_to_utf8(&resolve_relative_to_binary(Path::new(&self.admin_ui_dir)))?;
+
+        let db = self.db_url.trim();
+        if !db.is_empty() && !db.contains("://") {
+            let p = Path::new(db);
+            if p.is_relative() {
+                let abs = resolve_relative_to_binary(p);
+                self.db_url = path_to_utf8(&abs)?;
+            }
+        }
+
+        fs::create_dir_all(&self.data_dir)
+            .map_err(|e| anyhow::anyhow!("create data dir {:?}: {e}", self.data_dir))?;
+        fs::create_dir_all(&self.scripts_dir)
+            .map_err(|e| anyhow::anyhow!("create scripts dir {:?}: {e}", self.scripts_dir))?;
+        fs::create_dir_all(&self.migrations_dir)
+            .map_err(|e| anyhow::anyhow!("create migrations dir {:?}: {e}", self.migrations_dir))?;
+        fs::create_dir_all(&self.admin_ui_dir)
+            .map_err(|e| anyhow::anyhow!("create admin UI dir {:?}: {e}", self.admin_ui_dir))?;
         Ok(())
     }
 
@@ -402,6 +437,12 @@ impl MantisBase {
     }
 }
 
+fn path_to_utf8(path: &Path) -> anyhow::Result<String> {
+    path.to_str()
+        .map(String::from)
+        .ok_or_else(|| anyhow::anyhow!("path is not valid UTF-8: {path:?}"))
+}
+
 fn print_no_subcommand_hint() {
     warn!(
         "No subcommand given.\n\n\
@@ -411,7 +452,7 @@ fn print_no_subcommand_hint() {
           mantisbase migrations --up            apply catalog migrations\n\n\
         For all options:  mantisbase --help\n\
         Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)\n\
-        Migrations dir:   --migrations-dir …           (default ./migrations; optional *.sql after system DDL)"
+        Migrations dir:   --migrations-dir …           (default ./migrations next to the binary; optional *.sql after system DDL)"
     );
 }
 
