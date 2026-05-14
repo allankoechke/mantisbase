@@ -1,6 +1,8 @@
 //! PostgreSQL persistence (optional `postgres` feature). Mirrors [`super::LibsqlStore`] API.
 
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use argon2::Argon2;
@@ -20,6 +22,7 @@ use super::catalog::{
     migrate_catalog_postgres, preserve_extra_on_document,
 };
 use super::ddl::{build_create_table_ddl, ensure_entity_name, quote_ident};
+use super::dir_migrate::apply_directory_sql_migrations_postgres;
 use super::error::{Result, StorageError};
 use super::schema_alter::{plan_physical_ddl, SqlDialect};
 use super::schema_migration::{format_schema_json_comment, try_write_generated_migration};
@@ -27,24 +30,34 @@ use super::schema_migration::{format_schema_json_comment, try_write_generated_mi
 #[derive(Clone)]
 pub struct PostgresStore {
     pool: PgPool,
+    migrations_dir: Arc<PathBuf>,
 }
 
 impl PostgresStore {
-    pub async fn connect(database_url: &str) -> Result<Self> {
+    pub async fn connect(
+        database_url: &str,
+        migrations_dir: impl AsRef<Path>,
+    ) -> Result<Self> {
+        let migrations_dir = migrations_dir.as_ref().to_path_buf();
         let pool = sqlx::postgres::PgPoolOptions::new()
             .max_connections(10)
             .connect(database_url)
             .await?;
         sqlx::migrate!("migrations/postgres").run(&pool).await?;
         migrate_catalog_postgres(&pool).await?;
-        Ok(Self { pool })
+        apply_directory_sql_migrations_postgres(&pool, migrations_dir.as_path()).await?;
+        Ok(Self {
+            pool,
+            migrations_dir: Arc::new(migrations_dir),
+        })
     }
 
     pub async fn migrate(&self) -> Result<()> {
         sqlx::migrate!("migrations/postgres")
             .run(&self.pool)
             .await?;
-        migrate_catalog_postgres(&self.pool).await
+        migrate_catalog_postgres(&self.pool).await?;
+        apply_directory_sql_migrations_postgres(&self.pool, self.migrations_dir.as_path()).await
     }
 
     async fn entity_field_types(&self, entity: &str) -> Result<HashMap<String, String>> {
@@ -182,9 +195,10 @@ impl PostgresStore {
         let preamble = format_schema_json_comment(&doc);
         if ty != "view" {
             let ddl = format!("DROP TABLE IF EXISTS {}", quote_ident(name)?);
-            try_write_generated_migration(name, "drop", &preamble, &ddl);
+            try_write_generated_migration(self.migrations_dir.as_path(), name, "drop", &preamble, &ddl);
         } else {
             try_write_generated_migration(
+                self.migrations_dir.as_path(),
                 name,
                 "drop",
                 &preamble,
@@ -243,10 +257,11 @@ impl PostgresStore {
             let ddl = build_create_table_ddl(name, &schema.fields)?;
             sqlx::query(&ddl).execute(&mut *tx).await?;
             let preamble = format_schema_json_comment(&doc);
-            try_write_generated_migration(name, "create", &preamble, &ddl);
+            try_write_generated_migration(self.migrations_dir.as_path(), name, "create", &preamble, &ddl);
         } else {
             let preamble = format_schema_json_comment(&doc);
             try_write_generated_migration(
+                self.migrations_dir.as_path(),
                 name,
                 "create",
                 &preamble,
@@ -340,7 +355,13 @@ impl PostgresStore {
             format_schema_json_comment(&doc),
             format_schema_json_comment(&new_doc)
         );
-        try_write_generated_migration(name, "patch", &preamble, &migration_body);
+        try_write_generated_migration(
+            self.migrations_dir.as_path(),
+            name,
+            "patch",
+            &preamble,
+            &migration_body,
+        );
         Ok(())
     }
 

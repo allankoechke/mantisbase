@@ -1,6 +1,6 @@
 //! libSQL / Turso persistence (default backend).
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
@@ -23,6 +23,7 @@ use super::catalog::{
 };
 use super::ddl::{build_create_table_ddl, ensure_entity_name, quote_ident};
 use super::error::{Result, StorageError};
+use super::dir_migrate::apply_directory_sql_migrations_libsql;
 use super::migrate::apply_embedded_migrations;
 use super::schema_alter::{plan_physical_ddl, SqlDialect};
 use super::schema_migration::{format_schema_json_comment, try_write_generated_migration};
@@ -30,32 +31,51 @@ use super::schema_migration::{format_schema_json_comment, try_write_generated_mi
 #[derive(Clone)]
 pub struct LibsqlStore {
     db: Arc<Database>,
+    migrations_dir: Arc<PathBuf>,
 }
 
 impl LibsqlStore {
-    pub async fn open_local(data_dir: &str, db_url_override: &str) -> Result<Self> {
+    pub async fn open_local(
+        data_dir: &str,
+        db_url_override: &str,
+        migrations_dir: impl AsRef<Path>,
+    ) -> Result<Self> {
         std::fs::create_dir_all(data_dir)?;
         let path = if db_url_override.trim().is_empty() {
             Path::new(data_dir).join("mantis.db")
         } else {
             Path::new(db_url_override).to_path_buf()
         };
+        let migrations_dir = migrations_dir.as_ref().to_path_buf();
         let db = Builder::new_local(path).build().await?;
-        let s = Self { db: Arc::new(db) };
+        let s = Self {
+            db: Arc::new(db),
+            migrations_dir: Arc::new(migrations_dir),
+        };
         apply_embedded_migrations(&s.db).await?;
         let c = s.conn()?;
         migrate_catalog_libsql(&c).await?;
+        apply_directory_sql_migrations_libsql(&s.db, s.migrations_dir.as_path()).await?;
         Ok(s)
     }
 
-    pub async fn open_remote(url: &str, auth_token: &str) -> Result<Self> {
+    pub async fn open_remote(
+        url: &str,
+        auth_token: &str,
+        migrations_dir: impl AsRef<Path>,
+    ) -> Result<Self> {
+        let migrations_dir = migrations_dir.as_ref().to_path_buf();
         let db = Builder::new_remote(url.to_string(), auth_token.to_string())
             .build()
             .await?;
-        let s = Self { db: Arc::new(db) };
+        let s = Self {
+            db: Arc::new(db),
+            migrations_dir: Arc::new(migrations_dir),
+        };
         apply_embedded_migrations(&s.db).await?;
         let c = s.conn()?;
         migrate_catalog_libsql(&c).await?;
+        apply_directory_sql_migrations_libsql(&s.db, s.migrations_dir.as_path()).await?;
         Ok(s)
     }
 
@@ -66,7 +86,8 @@ impl LibsqlStore {
     pub async fn migrate(&self) -> Result<()> {
         apply_embedded_migrations(&self.db).await?;
         let c = self.conn()?;
-        migrate_catalog_libsql(&c).await
+        migrate_catalog_libsql(&c).await?;
+        apply_directory_sql_migrations_libsql(&self.db, self.migrations_dir.as_path()).await
     }
 
     pub async fn verify_admin_basic(&self, email: &str, password: &str) -> Result<bool> {
@@ -203,9 +224,10 @@ impl LibsqlStore {
         let preamble = format_schema_json_comment(&doc);
         if ty != "view" {
             let ddl = format!("DROP TABLE IF EXISTS {}", quote_ident(name)?);
-            try_write_generated_migration(name, "drop", &preamble, &ddl);
+            try_write_generated_migration(self.migrations_dir.as_path(), name, "drop", &preamble, &ddl);
         } else {
             try_write_generated_migration(
+                self.migrations_dir.as_path(),
                 name,
                 "drop",
                 &preamble,
@@ -265,10 +287,11 @@ impl LibsqlStore {
             let ddl = build_create_table_ddl(name, &schema.fields)?;
             conn.execute(&ddl, ()).await?;
             let preamble = format_schema_json_comment(&doc);
-            try_write_generated_migration(name, "create", &preamble, &ddl);
+            try_write_generated_migration(self.migrations_dir.as_path(), name, "create", &preamble, &ddl);
         } else {
             let preamble = format_schema_json_comment(&doc);
             try_write_generated_migration(
+                self.migrations_dir.as_path(),
                 name,
                 "create",
                 &preamble,
@@ -361,7 +384,13 @@ impl LibsqlStore {
             format_schema_json_comment(&doc),
             format_schema_json_comment(&new_doc)
         );
-        try_write_generated_migration(name, "patch", &preamble, &migration_body);
+        try_write_generated_migration(
+            self.migrations_dir.as_path(),
+            name,
+            "patch",
+            &preamble,
+            &migration_body,
+        );
         Ok(())
     }
 

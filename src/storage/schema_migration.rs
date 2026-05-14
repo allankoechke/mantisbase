@@ -1,8 +1,8 @@
-//! Append-only SQL snippets for catalog / physical DDL changes under `migrations/generated/`.
+//! Append-only SQL snippets for catalog / physical DDL under `{migrations_dir}/generated/`.
 
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use time::format_description::well_known::Rfc3339;
 use time::OffsetDateTime;
@@ -11,11 +11,19 @@ use crate::logger::prelude::*;
 
 use super::error::Result;
 
-pub const GENERATED_SUBDIR: &str = "migrations/generated";
+pub fn generated_dir(migrations_root: impl AsRef<Path>) -> PathBuf {
+    migrations_root.as_ref().join("generated")
+}
 
 /// Writes a timestamped `.sql` file (best-effort). Failures are logged and do not abort storage ops.
-pub fn try_write_generated_migration(entity: &str, action: &str, preamble: &str, sql_body: &str) {
-    if let Err(e) = write_generated_migration(entity, action, preamble, sql_body) {
+pub fn try_write_generated_migration(
+    migrations_root: &Path,
+    entity: &str,
+    action: &str,
+    preamble: &str,
+    sql_body: &str,
+) {
+    if let Err(e) = write_generated_migration(migrations_root, entity, action, preamble, sql_body) {
         warn!(
             "could not write generated schema migration for {} ({}): {}",
             entity, action, e
@@ -23,7 +31,13 @@ pub fn try_write_generated_migration(entity: &str, action: &str, preamble: &str,
     }
 }
 
-fn write_generated_migration(entity: &str, action: &str, preamble: &str, sql_body: &str) -> Result<()> {
+fn write_generated_migration(
+    migrations_root: &Path,
+    entity: &str,
+    action: &str,
+    preamble: &str,
+    sql_body: &str,
+) -> Result<()> {
     let ts = OffsetDateTime::now_utc()
         .format(&Rfc3339)
         .unwrap_or_else(|_| "unknown-time".into());
@@ -31,7 +45,7 @@ fn write_generated_migration(entity: &str, action: &str, preamble: &str, sql_bod
         .chars()
         .map(|c| if c.is_ascii_alphanumeric() { c } else { '_' })
         .collect();
-    let dir = PathBuf::from(GENERATED_SUBDIR);
+    let dir = generated_dir(migrations_root);
     fs::create_dir_all(&dir)?;
     let fname = format!("{}_{}_{}.sql", safe_ts, sanitize_filename(entity), action);
     let path = dir.join(fname);

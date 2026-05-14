@@ -1,5 +1,6 @@
 mod catalog;
 mod ddl;
+mod dir_migrate;
 mod error;
 mod libsql;
 mod migrate;

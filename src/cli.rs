@@ -5,6 +5,15 @@ use clap::{ArgGroup, Args, Parser, Subcommand, ValueEnum};
 #[derive(Parser, Debug, Clone)]
 #[command(name = "mantisbase", version, about)]
 pub struct Cli {
+    /// Directory for optional top-level `*.sql` (after built-in catalog) and `generated/` output.
+    #[arg(
+        long = "migrations-dir",
+        value_name = "DIR",
+        default_value = "./migrations",
+        help = "Run *.sql here after embedded system DDL (ledger: mb_sql_dir_migration); generated schema SQL goes under generated/"
+    )]
+    pub migrations_dir: PathBuf,
+
     /// Data directory path
     #[arg(long)]
     pub data_dir: Option<PathBuf>,

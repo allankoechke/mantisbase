@@ -1,5 +1,7 @@
 //! Core runtime configuration for directories, database selection, and HTTP listen options.
 
+use std::path::{Path, PathBuf};
+
 use crate::cli::{Cli, Commands, DatabaseType};
 use crate::logger::prelude::*;
 #[cfg(feature = "postgres")]
@@ -39,6 +41,7 @@ pub enum MantisBaseRunOutcome {
 pub struct MantisBase {
     data_dir: String,
     scripts_dir: String,
+    migrations_dir: PathBuf,
     /// Root of the Vite build output (default `./public/mb-dist`).
     admin_ui_dir: String,
     db_url: String,
@@ -62,6 +65,7 @@ impl MantisBase {
         Self {
             data_dir: "./data".to_string(),
             scripts_dir: "./scripts".to_string(),
+            migrations_dir: PathBuf::from("./migrations"),
             admin_ui_dir: "./public/mb-dist".to_string(),
             db_url: String::new(),
             db_type: MantisBaseDbType::Libsql,
@@ -122,8 +126,16 @@ impl MantisBase {
         self.scripts_dir = scripts_dir.to_string();
     }
 
+    pub fn set_migrations_dir(&mut self, dir: impl AsRef<Path>) {
+        self.migrations_dir = dir.as_ref().to_path_buf();
+    }
+
     pub fn scripts_dir(&self) -> &str {
         &self.scripts_dir
+    }
+
+    pub fn migrations_dir(&self) -> &Path {
+        self.migrations_dir.as_path()
     }
 
     pub fn admin_ui_dir(&self) -> &str {
@@ -200,6 +212,8 @@ impl MantisBase {
             trace!("Scripts directory: {:?}", scripts_dir);
             self.set_scripts_dir(scripts_dir.to_str().unwrap_or("./scripts"));
         }
+        self.set_migrations_dir(&cli.migrations_dir);
+        trace!("Migrations directory: {:?}", self.migrations_dir());
         if let Some(admin_ui) = &cli.admin_ui_dir {
             trace!("Admin UI directory: {:?}", admin_ui);
             self.set_admin_ui_dir(admin_ui.to_str().unwrap_or("./public/mb-dist"));
@@ -282,17 +296,31 @@ impl MantisBase {
             MantisBaseMode::Serve => {
                 let store = match self.db_backend {
                     DatabaseType::Libsql => Store::Libsql(
-                        LibsqlStore::open_local(self.data_dir(), self.db_url()).await?,
+                        LibsqlStore::open_local(
+                            self.data_dir(),
+                            self.db_url(),
+                            self.migrations_dir(),
+                        )
+                        .await?,
                     ),
                     DatabaseType::Turso => {
                         let token = std::env::var("MB_TURSO_AUTH_TOKEN").map_err(|_| {
                             anyhow::anyhow!("MB_TURSO_AUTH_TOKEN required for Turso")
                         })?;
-                        Store::Libsql(LibsqlStore::open_remote(self.db_url(), &token).await?)
+                        Store::Libsql(
+                            LibsqlStore::open_remote(
+                                self.db_url(),
+                                &token,
+                                self.migrations_dir(),
+                            )
+                            .await?,
+                        )
                     }
                     #[cfg(feature = "postgres")]
                     DatabaseType::Postgresql => {
-                        Store::Postgres(PostgresStore::connect(self.db_url()).await?)
+                        Store::Postgres(
+                            PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
+                        )
                     }
                 };
                 crate::http::serve(self, store).await?;
@@ -304,11 +332,18 @@ impl MantisBase {
                 };
                 let store = match self.db_backend {
                     DatabaseType::Libsql | DatabaseType::Turso => Store::Libsql(
-                        LibsqlStore::open_local(self.data_dir(), self.db_url()).await?,
+                        LibsqlStore::open_local(
+                            self.data_dir(),
+                            self.db_url(),
+                            self.migrations_dir(),
+                        )
+                        .await?,
                     ),
                     #[cfg(feature = "postgres")]
                     DatabaseType::Postgresql => {
-                        Store::Postgres(PostgresStore::connect(self.db_url()).await?)
+                        Store::Postgres(
+                            PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
+                        )
                     }
                 };
                 if let Some(add_args) = &admin_args.add {
@@ -333,11 +368,18 @@ impl MantisBase {
                 };
                 let store = match self.db_backend {
                     DatabaseType::Libsql | DatabaseType::Turso => Store::Libsql(
-                        LibsqlStore::open_local(self.data_dir(), self.db_url()).await?,
+                        LibsqlStore::open_local(
+                            self.data_dir(),
+                            self.db_url(),
+                            self.migrations_dir(),
+                        )
+                        .await?,
                     ),
                     #[cfg(feature = "postgres")]
                     DatabaseType::Postgresql => {
-                        Store::Postgres(PostgresStore::connect(self.db_url()).await?)
+                        Store::Postgres(
+                            PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
+                        )
                     }
                 };
                 if migration_args.up {
@@ -368,7 +410,8 @@ fn print_no_subcommand_hint() {
           mantisbase admins --add EMAIL PASS    create an admin (or use POST /api/v1/admins)\n\
           mantisbase migrations --up            apply catalog migrations\n\n\
         For all options:  mantisbase --help\n\
-        Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)"
+        Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)\n\
+        Migrations dir:   --migrations-dir …           (default ./migrations; optional *.sql after system DDL)"
     );
 }
 

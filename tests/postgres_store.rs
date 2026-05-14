@@ -12,7 +12,8 @@ async fn postgres_migrate_and_admin_roundtrip() {
 
     use mantisbase::storage::PostgresStore;
 
-    let store = PostgresStore::connect(&url)
+    let mig = tempfile::tempdir().expect("migrations tempdir");
+    let store = PostgresStore::connect(&url, mig.path())
         .await
         .expect("connect postgres");
     let email = format!("pgtest_{}@example.com", uuid::Uuid::new_v4());
