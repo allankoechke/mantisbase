@@ -22,8 +22,8 @@ use super::catalog::{
     migrate_catalog_libsql, preserve_extra_on_document,
 };
 use super::ddl::{build_create_table_ddl, ensure_entity_name, quote_ident};
-use super::error::{Result, StorageError};
 use super::dir_migrate::apply_directory_sql_migrations_libsql;
+use super::error::{Result, StorageError};
 use super::migrate::apply_embedded_migrations;
 use super::schema_alter::{plan_physical_ddl, SqlDialect};
 use super::schema_migration::{
@@ -247,11 +247,8 @@ impl LibsqlStore {
         }
         let q = format!("DROP TABLE IF EXISTS {}", quote_ident(name)?);
         conn.execute(&q, ()).await?;
-        conn.execute(
-            "DELETE FROM mb_entity_schema WHERE name = ?",
-            params![name],
-        )
-        .await?;
+        conn.execute("DELETE FROM mb_entity_schema WHERE name = ?", params![name])
+            .await?;
         Ok(())
     }
 

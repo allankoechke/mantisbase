@@ -38,8 +38,8 @@ pub mod models;
 pub mod realtime;
 pub mod scripts;
 pub mod storage;
-pub mod util_time;
 pub(crate) mod util_paths;
+pub mod util_time;
 pub mod webhooks;
 
 pub use core::{MantisBase, MantisBaseDbType, MantisBaseMode, MantisBaseRunOutcome};

@@ -277,7 +277,8 @@ impl MantisBase {
         self.data_dir = path_to_utf8(&resolve_relative_to_binary(Path::new(&self.data_dir)))?;
         self.scripts_dir = path_to_utf8(&resolve_relative_to_binary(Path::new(&self.scripts_dir)))?;
         self.migrations_dir = resolve_relative_to_binary(self.migrations_dir.as_path());
-        self.admin_ui_dir = path_to_utf8(&resolve_relative_to_binary(Path::new(&self.admin_ui_dir)))?;
+        self.admin_ui_dir =
+            path_to_utf8(&resolve_relative_to_binary(Path::new(&self.admin_ui_dir)))?;
 
         let db = self.db_url.trim();
         if !db.is_empty() && !db.contains("://") {
@@ -339,19 +340,13 @@ impl MantisBase {
                             anyhow::anyhow!("MB_TURSO_AUTH_TOKEN required for Turso")
                         })?;
                         Store::Libsql(
-                            LibsqlStore::open_remote(
-                                self.db_url(),
-                                &token,
-                                self.migrations_dir(),
-                            )
-                            .await?,
+                            LibsqlStore::open_remote(self.db_url(), &token, self.migrations_dir())
+                                .await?,
                         )
                     }
-                    DatabaseType::Postgresql => {
-                        Store::Postgres(
-                            PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
-                        )
-                    }
+                    DatabaseType::Postgresql => Store::Postgres(
+                        PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
+                    ),
                 };
                 crate::http::serve(self, store).await?;
                 Ok(MantisBaseRunOutcome::RanAction)
@@ -369,11 +364,9 @@ impl MantisBase {
                         )
                         .await?,
                     ),
-                    DatabaseType::Postgresql => {
-                        Store::Postgres(
-                            PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
-                        )
-                    }
+                    DatabaseType::Postgresql => Store::Postgres(
+                        PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
+                    ),
                 };
                 if let Some(add_args) = &admin_args.add {
                     if add_args.len() != 2 {
@@ -404,11 +397,9 @@ impl MantisBase {
                         )
                         .await?,
                     ),
-                    DatabaseType::Postgresql => {
-                        Store::Postgres(
-                            PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
-                        )
-                    }
+                    DatabaseType::Postgresql => Store::Postgres(
+                        PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
+                    ),
                 };
                 if migration_args.up {
                     store.migrate().await?;
