@@ -375,12 +375,9 @@ impl MantisBase {
                     store.add_admin(&add_args[0], &add_args[1]).await?;
                     info!("admin created");
                 } else if admin_args.ls {
-                    for a in store.list_admins().await? {
-                        crate::logger::cli_stdout_line(format!(
-                            "{}\t{}\t{}\t{}",
-                            a.id, a.email, a.active, a.password_reset_required
-                        ));
-                    }
+                    let admins = store.list_admins().await?;
+                    print_admins_cli_table(&admins);
+                    info!("found {} admin row(s)", admins.len());
                 } else if let Some(target) = &admin_args.rm {
                     let n = store.remove_admin(target).await?;
                     info!("removed {n} admin row(s)");
@@ -430,13 +427,71 @@ fn path_to_utf8(path: &Path) -> anyhow::Result<String> {
         .ok_or_else(|| anyhow::anyhow!("path is not valid UTF-8: {path:?}"))
 }
 
+/// Truncate with `…` then pad to `width` (bytes; safe for ASCII admin id/email).
+fn clip_pad_ascii_field(s: &str, width: usize) -> String {
+    let clipped = if s.len() <= width {
+        s.to_string()
+    } else {
+        let take = width.saturating_sub(3);
+        let mut end = take.min(s.len());
+        while end > 0 && !s.is_char_boundary(end) {
+            end -= 1;
+        }
+        if end == 0 {
+            "…".to_string()
+        } else {
+            format!("{}…", &s[..end])
+        }
+    };
+    let mut out = clipped;
+    while out.len() < width {
+        out.push(' ');
+    }
+    out
+}
+
+/// Columnar stdout for `admins --ls` (machine-friendly fixed widths).
+fn print_admins_cli_table(rows: &[crate::models::AdminRow]) {
+    const W_ID: usize = 38;
+    const W_EMAIL: usize = 42;
+    const W_ACTIVE: usize = 7;
+    const W_PWD_RESET: usize = 10;
+
+    crate::logger::cli_stdout_line("");
+    crate::logger::cli_stdout_line(format!(
+        "{:<w_id$}{:<w_email$}{:>w_act$}{:>w_pwd$}",
+        "id",
+        "email",
+        "active",
+        "pwd_reset",
+        w_id = W_ID,
+        w_email = W_EMAIL,
+        w_act = W_ACTIVE,
+        w_pwd = W_PWD_RESET,
+    ));
+    for a in rows {
+        crate::logger::cli_stdout_line(format!(
+            "{:<w_id$}{:<w_email$}{:>w_act$}{:>w_pwd$}",
+            clip_pad_ascii_field(&a.id, W_ID),
+            clip_pad_ascii_field(&a.email, W_EMAIL),
+            if a.active { "1" } else { "0" },
+            if a.password_reset_required { "1" } else { "0" },
+            w_id = W_ID,
+            w_email = W_EMAIL,
+            w_act = W_ACTIVE,
+            w_pwd = W_PWD_RESET,
+        ));
+    }
+    crate::logger::cli_stdout_line("");
+}
+
 fn print_no_subcommand_hint() {
     warn!(
         "No subcommand given.\n\n\
         Examples:\n\
           mantisbase serve                      HTTP API + static /mb\n\
           mantisbase admins --add EMAIL PASS    create an admin (or use POST /api/v1/admins)\n\
-          mantisbase admins --ls                tab-separated: id, email, active, password_reset_required\n\
+          mantisbase admins --ls                fixed-width table: id, email, active, pwd_reset\n\
           mantisbase migrations --up            apply catalog migrations\n\n\
         For all options:  mantisbase --help\n\
         Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)\n\
