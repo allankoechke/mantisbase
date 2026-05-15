@@ -13,7 +13,7 @@ use serde_json::{json, Map, Value as JsonValue};
 use uuid::Uuid;
 
 use crate::models::types::{AccessRule, EntityType, Field};
-use crate::models::EntitySchema;
+use crate::models::{AdminRow, EntitySchema};
 use crate::util_time::now_rfc3339;
 
 use super::catalog::{
@@ -96,7 +96,7 @@ impl LibsqlStore {
         let conn = self.conn()?;
         let mut rows = conn
             .query(
-                "SELECT password_hash FROM mb_admin WHERE email = ?",
+                "SELECT password_hash, active FROM mb_admin WHERE email = ?",
                 params![email],
             )
             .await?;
@@ -105,6 +105,10 @@ impl LibsqlStore {
             None => return Ok(false),
         };
         let hash: String = row.get(0)?;
+        let active: i64 = row.get(1)?;
+        if active == 0 {
+            return Ok(false);
+        }
         let parsed =
             PasswordHash::new(&hash).map_err(|e| StorageError::Validation(e.to_string()))?;
         Ok(Argon2::default()
@@ -112,14 +116,22 @@ impl LibsqlStore {
             .is_ok())
     }
 
-    pub async fn list_admins(&self) -> Result<Vec<(String, String)>> {
+    pub async fn list_admins(&self) -> Result<Vec<AdminRow>> {
         let conn = self.conn()?;
         let mut rows = conn
-            .query("SELECT id, email FROM mb_admin ORDER BY email", ())
+            .query(
+                "SELECT id, email, active, password_reset_required FROM mb_admin ORDER BY email",
+                (),
+            )
             .await?;
         let mut out = Vec::new();
         while let Some(row) = rows.next().await? {
-            out.push((row.get(0)?, row.get(1)?));
+            out.push(AdminRow {
+                id: row.get(0)?,
+                email: row.get(1)?,
+                active: row.get::<i64>(2)? != 0,
+                password_reset_required: row.get::<i64>(3)? != 0,
+            });
         }
         Ok(out)
     }
@@ -134,7 +146,7 @@ impl LibsqlStore {
             .to_string();
         let ts = now_rfc3339();
         conn.execute(
-            "INSERT INTO mb_admin (id, email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO mb_admin (id, email, password_hash, created_at, updated_at, active, password_reset_required) VALUES (?, ?, ?, ?, ?, 1, 0)",
             params![id, email, hash, ts.clone(), ts],
         )
         .await?;

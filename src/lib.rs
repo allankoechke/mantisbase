@@ -43,3 +43,4 @@ pub mod util_time;
 pub mod webhooks;
 
 pub use core::{MantisBase, MantisBaseDbType, MantisBaseMode, MantisBaseRunOutcome};
+pub use models::AdminRow;

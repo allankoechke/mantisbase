@@ -83,7 +83,7 @@ pub fn build_openapi_value(entities: &[Value]) -> Value {
             "/api/v1/admins": {
                 "get": {
                     "security": [{ "basicAuth": [] }],
-                    "summary": "List admin accounts (admin)",
+                    "summary": "List admin accounts (id, email, active, password_reset_required) (admin)",
                     "responses": { "200": { "description": "OK" } }
                 },
                 "post": {

@@ -20,7 +20,14 @@ pub async fn list_admins(
     let rows = state.store.list_admins().await?;
     let list: Vec<Value> = rows
         .into_iter()
-        .map(|(id, email)| json!({ "id": id, "email": email }))
+        .map(|a| {
+            json!({
+                "id": a.id,
+                "email": a.email,
+                "active": a.active,
+                "password_reset_required": a.password_reset_required,
+            })
+        })
         .collect();
     Ok(Json(json!({ "admins": list })))
 }

@@ -375,8 +375,11 @@ impl MantisBase {
                     store.add_admin(&add_args[0], &add_args[1]).await?;
                     info!("admin created");
                 } else if admin_args.ls {
-                    for (id, email) in store.list_admins().await? {
-                        crate::logger::cli_stdout_line(format!("{id}\t{email}"));
+                    for a in store.list_admins().await? {
+                        crate::logger::cli_stdout_line(format!(
+                            "{}\t{}\t{}\t{}",
+                            a.id, a.email, a.active, a.password_reset_required
+                        ));
                     }
                 } else if let Some(target) = &admin_args.rm {
                     let n = store.remove_admin(target).await?;
@@ -433,6 +436,7 @@ fn print_no_subcommand_hint() {
         Examples:\n\
           mantisbase serve                      HTTP API + static /mb\n\
           mantisbase admins --add EMAIL PASS    create an admin (or use POST /api/v1/admins)\n\
+          mantisbase admins --ls                tab-separated: id, email, active, password_reset_required\n\
           mantisbase migrations --up            apply catalog migrations\n\n\
         For all options:  mantisbase --help\n\
         Database:         --db libsql|turso|postgresql   --db-url …   (or MB_DATABASE_URL)\n\

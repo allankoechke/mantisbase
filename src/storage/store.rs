@@ -161,7 +161,7 @@ impl Store {
         }
     }
 
-    pub async fn list_admins(&self) -> Result<Vec<(String, String)>> {
+    pub async fn list_admins(&self) -> Result<Vec<crate::models::AdminRow>> {
         match self {
             Store::Libsql(s) => s.list_admins().await,
             Store::Postgres(s) => s.list_admins().await,

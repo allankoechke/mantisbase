@@ -25,7 +25,11 @@ pub fn field_type_sql(ft: &FieldType) -> &'static str {
     }
 }
 
-pub fn build_create_table_ddl(table: &str, fields: &[Field]) -> Result<String> {
+fn build_create_table_ddl_impl(
+    table: &str,
+    fields: &[Field],
+    if_not_exists: bool,
+) -> Result<String> {
     let mut parts = Vec::new();
     for f in fields {
         ensure_entity_name(&f.field_name)?;
@@ -44,9 +48,25 @@ pub fn build_create_table_ddl(table: &str, fields: &[Field]) -> Result<String> {
         }
         parts.push(col);
     }
+    let header = if if_not_exists {
+        "CREATE TABLE IF NOT EXISTS"
+    } else {
+        "CREATE TABLE"
+    };
     Ok(format!(
-        "CREATE TABLE IF NOT EXISTS {} ({})",
+        "{} {} ({})",
+        header,
         quote_ident(table)?,
         parts.join(", ")
     ))
+}
+
+/// `CREATE TABLE IF NOT EXISTS` for new entities and catalog-driven physical tables.
+pub fn build_create_table_ddl(table: &str, fields: &[Field]) -> Result<String> {
+    build_create_table_ddl_impl(table, fields, true)
+}
+
+/// Plain `CREATE TABLE` (no `IF NOT EXISTS`) for staging tables used in SQLite rebuilds.
+pub fn build_create_table_ddl_plain(table: &str, fields: &[Field]) -> Result<String> {
+    build_create_table_ddl_impl(table, fields, false)
 }

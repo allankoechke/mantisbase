@@ -67,3 +67,5 @@ migrations/generated/*.sql
 /docs/book-build/
 /public/mb-dist/
 /admin/node_modules/
+/.cargo-target/
+.cargo-target/

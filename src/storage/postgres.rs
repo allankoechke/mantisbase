@@ -13,7 +13,7 @@ use sqlx::{Column, PgPool, QueryBuilder, Row};
 use uuid::Uuid;
 
 use crate::models::types::{AccessRule, EntityType, Field};
-use crate::models::EntitySchema;
+use crate::models::{AdminRow, EntitySchema};
 use crate::util_time::now_rfc3339;
 
 use super::catalog::{
@@ -74,7 +74,7 @@ impl PostgresStore {
     }
 
     pub async fn verify_admin_basic(&self, email: &str, password: &str) -> Result<bool> {
-        let row = sqlx::query("SELECT password_hash FROM mb_admin WHERE email = $1")
+        let row = sqlx::query("SELECT password_hash, active FROM mb_admin WHERE email = $1")
             .bind(email)
             .fetch_optional(&self.pool)
             .await?;
@@ -82,6 +82,10 @@ impl PostgresStore {
             return Ok(false);
         };
         let hash: String = row.try_get(0)?;
+        let active: bool = row.try_get(1)?;
+        if !active {
+            return Ok(false);
+        }
         let parsed =
             PasswordHash::new(&hash).map_err(|e| StorageError::Validation(e.to_string()))?;
         Ok(Argon2::default()
@@ -89,13 +93,20 @@ impl PostgresStore {
             .is_ok())
     }
 
-    pub async fn list_admins(&self) -> Result<Vec<(String, String)>> {
-        let rows = sqlx::query("SELECT id, email FROM mb_admin ORDER BY email")
-            .fetch_all(&self.pool)
-            .await?;
+    pub async fn list_admins(&self) -> Result<Vec<AdminRow>> {
+        let rows = sqlx::query(
+            "SELECT id, email, active, password_reset_required FROM mb_admin ORDER BY email",
+        )
+        .fetch_all(&self.pool)
+        .await?;
         let mut out = Vec::new();
         for row in rows {
-            out.push((row.try_get(0)?, row.try_get(1)?));
+            out.push(AdminRow {
+                id: row.try_get(0)?,
+                email: row.try_get(1)?,
+                active: row.try_get(2)?,
+                password_reset_required: row.try_get(3)?,
+            });
         }
         Ok(out)
     }
@@ -109,8 +120,8 @@ impl PostgresStore {
             .to_string();
         let ts = now_rfc3339();
         sqlx::query(
-            r#"INSERT INTO mb_admin (id, email, password_hash, created_at, updated_at)
-               VALUES ($1, $2, $3, $4, $5)"#,
+            r#"INSERT INTO mb_admin (id, email, password_hash, created_at, updated_at, active, password_reset_required)
+               VALUES ($1, $2, $3, $4, $5, TRUE, FALSE)"#,
         )
         .bind(&id)
         .bind(email)
