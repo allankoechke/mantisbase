@@ -44,13 +44,7 @@ pub async fn create_admin(
     Json(body): Json<CreateAdminBody>,
 ) -> Result<(StatusCode, Json<Value>), ApiError> {
     let _ = require_admin(&headers, &state.store).await?;
-    if body.email.trim().is_empty() || body.password.is_empty() {
-        return Err(ApiError::bad_request("email and password required"));
-    }
-    state
-        .store
-        .add_admin(body.email.trim(), &body.password)
-        .await?;
+    state.store.add_admin(&body.email, &body.password).await?;
     Ok((StatusCode::CREATED, Json(json!({ "ok": true }))))
 }
 
