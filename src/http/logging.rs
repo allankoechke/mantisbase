@@ -87,7 +87,7 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
             status.as_u16(),
             resource,
             elapsed_ms,
-            err_body
+            if err_body.is_empty() { "N/A" } else { &err_body }
         );
     }
 
