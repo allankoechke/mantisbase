@@ -70,22 +70,22 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
 
     if status.is_success() {
         info!(
-            "{}   {:<8}  {:<7}  {}  -  Status: {}  -  Time: {:.3} ms",
+            "{}  {:<8}  {:<7}  {}  {}  {:.3} ms",
             peer,
             http_version_label(version),
             method,
-            resource,
             status.as_u16(),
+            resource,
             elapsed_ms
         );
     } else {
         warn!(
-            "{}   {:<8}  {:<7}  {}  -  Status: {}  -  Time: {:.3} ms  \n\t└──  {}",
+            "{}  {:<8}  {:<7}  {}  {}  {:.3} ms  \n\t└──  {}",
             peer,
             http_version_label(version),
             method,
-            resource,
             status.as_u16(),
+            resource,
             elapsed_ms,
             err_body
         );
