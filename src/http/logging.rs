@@ -68,18 +68,31 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
         .map(String::from)
         .unwrap_or_else(|| "-".to_string());
 
-    info!(
-        "HTTP access · {} {} · {} · status={} · {:.3} ms · client={} · request_bytes={} · response_bytes={} · user_agent=\"{}\"",
-        method,
-        resource,
-        http_version_label(version),
-        status.as_u16(),
-        elapsed_ms,
-        peer,
-        req_clen,
-        resp_clen,
-        sanitize_ua(&user_agent),
-    );
+    // LogOrigin::info("HTTP Request", fmt::format("{} {:<7} {}  - Status: {}  - Time: {}ms\n\t└──Body: {}",
+    // req.version, req.method, req.path, res.status, duration_ms, body));
+
+    if status.is_success() {
+        info!(
+            "{}   {:<8}  {:<7}  {}  -  Status: {}  -  Time: {:.3} ms",
+            peer,
+            http_version_label(version),
+            method,
+            resource,
+            status.as_u16(),
+            elapsed_ms
+        );
+    } else {
+        warn!(
+            "{}   {:<8}  {:<7}  {}  -  Status: {}  -  Time: {:.3} ms\n\t└──Body: {:?}",
+            peer,
+            http_version_label(version),
+            method,
+            resource,
+            status.as_u16(),
+            elapsed_ms,
+            response.body()
+        );
+    }
 
     response
 }

@@ -18,7 +18,8 @@ pub fn build_openapi_value(entities: &[Value]) -> Value {
                 "bearerAuth": {
                     "type": "http",
                     "scheme": "bearer",
-                    "bearerFormat": "JWT"
+                    "bearerFormat": "JWT",
+                    "description": "Application user JWT from /api/v1/auth/login, or admin JWT from /api/v1/admins/auth/login (aud=mantisbase_admin)"
                 }
             }
         },
@@ -31,48 +32,48 @@ pub fn build_openapi_value(entities: &[Value]) -> Value {
             },
             "/api/v1/sys/schemas": {
                 "get": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "List entity schemas (admin)",
                     "responses": { "200": { "description": "OK" } }
                 },
                 "post": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "Create schema (admin)",
                     "responses": { "201": { "description": "Created" } }
                 }
             },
             "/api/v1/sys/schemas/{name}": {
                 "get": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "Get schema (admin)",
                     "responses": { "200": { "description": "OK" } }
                 },
                 "patch": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "Patch schema (admin); reconciles physical table and writes generated SQL",
                     "responses": { "200": { "description": "OK" } }
                 },
                 "delete": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "Delete schema (admin)",
                     "responses": { "204": { "description": "No Content" } }
                 }
             },
             "/api/v1/sys/configs": {
                 "get": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "List application config (admin)",
                     "responses": { "200": { "description": "OK" } }
                 },
                 "patch": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "Patch config key (admin)",
                     "responses": { "200": { "description": "OK" } }
                 }
             },
             "/api/v1/sys/logs": {
                 "get": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "System logs (admin)",
                     "parameters": [
                         { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "maximum": 500 } }
@@ -80,21 +81,46 @@ pub fn build_openapi_value(entities: &[Value]) -> Value {
                     "responses": { "200": { "description": "OK" } }
                 }
             },
+            "/api/v1/admins/auth/login": {
+                "post": {
+                    "summary": "Admin login (email + password); returns JWT and admin profile (no prior auth)",
+                    "requestBody": {
+                        "required": true,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": ["email", "password"],
+                                    "properties": {
+                                        "email": { "type": "string" },
+                                        "password": { "type": "string" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": { "description": "OK; body includes token (Bearer) and admin object" },
+                        "400": { "description": "Bad request" },
+                        "401": { "description": "Invalid credentials" }
+                    }
+                }
+            },
             "/api/v1/admins": {
                 "get": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "List admin accounts (id, email, active, password_reset_required) (admin)",
                     "responses": { "200": { "description": "OK" } }
                 },
                 "post": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "Create admin account (admin)",
                     "responses": { "201": { "description": "Created" } }
                 }
             },
             "/api/v1/admins/{id}": {
                 "delete": {
-                    "security": [{ "basicAuth": [] }],
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "Delete admin by id or email (admin)",
                     "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
                     "responses": { "204": { "description": "No Content" }, "404": { "description": "Not found" } }

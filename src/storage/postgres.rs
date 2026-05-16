@@ -93,6 +93,24 @@ impl PostgresStore {
             .is_ok())
     }
 
+    pub async fn get_admin_by_email(&self, email: &str) -> Result<Option<AdminRow>> {
+        let row = sqlx::query(
+            "SELECT id, email, active, password_reset_required FROM mb_admin WHERE email = $1 LIMIT 1",
+        )
+        .bind(email)
+        .fetch_optional(&self.pool)
+        .await?;
+        let Some(row) = row else {
+            return Ok(None);
+        };
+        Ok(Some(AdminRow {
+            id: row.try_get(0)?,
+            email: row.try_get(1)?,
+            active: row.try_get(2)?,
+            password_reset_required: row.try_get(3)?,
+        }))
+    }
+
     pub async fn list_admins(&self) -> Result<Vec<AdminRow>> {
         let rows = sqlx::query(
             "SELECT id, email, active, password_reset_required FROM mb_admin ORDER BY email",

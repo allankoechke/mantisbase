@@ -99,6 +99,8 @@ impl MantisBase {
             }
         }
 
+        println!("secret: {:?}", std::env::var("MB_JWT_SECRET"));
+
         if let Ok(jwt_secret) = std::env::var("MB_JWT_SECRET") {
             self.jwt_secret = Some(jwt_secret);
         } else {

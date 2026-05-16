@@ -116,6 +116,25 @@ impl LibsqlStore {
             .is_ok())
     }
 
+    pub async fn get_admin_by_email(&self, email: &str) -> Result<Option<AdminRow>> {
+        let conn = self.conn()?;
+        let mut rows = conn
+            .query(
+                "SELECT id, email, active, password_reset_required FROM mb_admin WHERE email = ? LIMIT 1",
+                params![email],
+            )
+            .await?;
+        let Some(row) = rows.next().await? else {
+            return Ok(None);
+        };
+        Ok(Some(AdminRow {
+            id: row.get(0)?,
+            email: row.get(1)?,
+            active: row.get::<i64>(2)? != 0,
+            password_reset_required: row.get::<i64>(3)? != 0,
+        }))
+    }
+
     pub async fn list_admins(&self) -> Result<Vec<AdminRow>> {
         let conn = self.conn()?;
         let mut rows = conn

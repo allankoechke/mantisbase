@@ -20,7 +20,7 @@ pub async fn list_config(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,
 ) -> Result<Json<Value>, ApiError> {
-    let _ = require_admin(&headers, &state.store).await?;
+    let _ = require_admin(&headers, &state).await?;
     let rows = state.store.app_config_list().await?;
     let mut m = Map::new();
     for (k, v) in rows {
@@ -35,7 +35,7 @@ pub async fn patch_config(
     headers: HeaderMap,
     Json(body): Json<PatchConfigBody>,
 ) -> Result<Json<Value>, ApiError> {
-    let email = require_admin(&headers, &state.store).await?;
+    let email = require_admin(&headers, &state).await?;
     let admins = state.store.list_admins().await?;
     let admin_id = admins
         .iter()

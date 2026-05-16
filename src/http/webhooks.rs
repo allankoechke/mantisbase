@@ -22,7 +22,7 @@ pub async fn list_hooks(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,
 ) -> Result<Json<Value>, ApiError> {
-    let _ = require_admin(&headers, &state.store).await?;
+    let _ = require_admin(&headers, &state).await?;
     let v = state.store.list_webhooks().await?;
     Ok(Json(json!(v)))
 }
@@ -32,7 +32,7 @@ pub async fn register_hook(
     headers: HeaderMap,
     Json(body): Json<RegisterHookBody>,
 ) -> Result<Json<Value>, ApiError> {
-    let _ = require_admin(&headers, &state.store).await?;
+    let _ = require_admin(&headers, &state).await?;
     let id = state
         .store
         .register_webhook(&body.url, &body.events, body.secret.as_deref())

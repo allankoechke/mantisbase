@@ -2,7 +2,7 @@
 //!
 //! ## Overview
 //! - **Storage:** [`storage::Store`] ([`storage::LibsqlStore`] or [`storage::PostgresStore`]; backend chosen with `--db` at runtime).
-//! - **HTTP:** [`http::serve`] exposes `/api/v1/*` (admin **HTTP Basic** on `/api/v1/sys/*` and `/api/v1/admins/*`), OpenAPI at `/api/v1/openapi.json`, and the built admin SPA at `/mb/`.
+//! - **HTTP:** [`http::serve`] exposes `/api/v1/*` (admin **HTTP Basic** or **Bearer admin JWT** on `/api/v1/sys/*` and `/api/v1/admins/*`; `POST /api/v1/admins/auth/login` issues the admin JWT), OpenAPI at `/api/v1/openapi.json`, and the built admin SPA at `/mb/`.
 //! - **Logging:** [`logger`] (`info!`, `debug!`, …); do not use `tracing` or `println!` for diagnostics in crate code.
 //! - **Files:** [`files::LocalFs`] stores blobs under `data_dir/files/…`.
 //! - **Paths:** After [`core::MantisBase::apply_cli`], default-style relative `data`, `migrations`, `scripts`, and admin UI paths are resolved next to the `mantisbase` executable and those directories are created if missing.

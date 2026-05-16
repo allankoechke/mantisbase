@@ -27,6 +27,24 @@ impl Store {
         }
     }
 
+    pub async fn get_admin_by_email(&self, email: &str) -> Result<Option<crate::models::AdminRow>> {
+        match self {
+            Store::Libsql(s) => s.get_admin_by_email(email).await,
+            Store::Postgres(s) => s.get_admin_by_email(email).await,
+        }
+    }
+
+    pub async fn authenticate_admin(
+        &self,
+        email: &str,
+        password: &str,
+    ) -> Result<Option<crate::models::AdminRow>> {
+        if !self.verify_admin_basic(email, password).await? {
+            return Ok(None);
+        }
+        self.get_admin_by_email(email).await
+    }
+
     pub async fn entity_type(&self, name: &str) -> Result<Option<String>> {
         match self {
             Store::Libsql(s) => s.entity_type(name).await,
