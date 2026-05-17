@@ -117,11 +117,15 @@ impl LibsqlStore {
     }
 
     pub async fn get_admin_by_email(&self, email: &str) -> Result<Option<AdminRow>> {
+        self.get_admin(email).await
+    }
+
+    pub async fn get_admin(&self, id_or_email: &str) -> Result<Option<AdminRow>> {
         let conn = self.conn()?;
         let mut rows = conn
             .query(
-                "SELECT id, email, active, password_reset_required FROM mb_admin WHERE email = ? LIMIT 1",
-                params![email],
+                "SELECT id, email, active, password_reset_required FROM mb_admin WHERE id = ? OR email = ? LIMIT 1",
+                params![id_or_email, id_or_email],
             )
             .await?;
         let Some(row) = rows.next().await? else {

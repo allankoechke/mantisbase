@@ -30,8 +30,13 @@ pub async fn auth_login(
         StatusCode::INTERNAL_SERVER_ERROR,
         "MB_JWT_SECRET not set",
     ))?;
-    let sub = user
+    let id = user
         .get("id")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let email = user
+        .get("email")
         .and_then(|v| v.as_str())
         .unwrap_or("")
         .to_string();
@@ -40,7 +45,12 @@ pub async fn auth_login(
         .unwrap()
         .as_secs()
         + 86400 * 7;
-    let claims = AppUserClaims { sub, exp };
+    let claims = AppUserClaims {
+        sub: id.clone(),
+        id,
+        email,
+        exp,
+    };
     let token = jsonwebtoken::encode(
         &jsonwebtoken::Header::default(),
         &claims,

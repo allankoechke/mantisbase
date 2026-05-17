@@ -8,13 +8,18 @@ pub const MB_ADMIN_JWT_AUD: &str = "mantisbase_admin";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppUserClaims {
+    /// User row id (same as [`Self::id`]).
     pub sub: String,
+    pub id: String,
+    pub email: String,
     pub exp: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AdminJwtClaims {
+    /// Admin row id (same as [`Self::id`]).
     pub sub: String,
+    pub id: String,
     pub email: String,
     pub exp: u64,
     pub aud: String,

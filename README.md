@@ -76,7 +76,7 @@ OpenAPI for the running shape of the API: `GET /api/v1/openapi.json`.
 
 Use **`POST /api/v1/admins/auth/login`** with `{"email":"…","password":"…"}` (no prior auth) to obtain `{ "token", "admin" }` — send the token as `Authorization: Bearer …` on admin routes. Alternatively use **HTTP Basic** (`email:password`) on the same routes.
 
-With admin auth: **`GET /api/v1/admins`** lists `{ "admins": [ { "id", "email", "active", "password_reset_required" }, … ] }`; **`POST /api/v1/admins`** with `{"email":"…","password":"…"}` creates another admin; **`DELETE /api/v1/admins/{id-or-email}`** removes one (URL-encode the path segment). The CLI `mantisbase admins …` commands do the same against the database.
+With admin auth: **`GET /api/v1/admins`** lists admins; **`GET /api/v1/admins/{id-or-email}`** returns one admin; **`POST /api/v1/admins`** creates another; **`DELETE /api/v1/admins/{id-or-email}`** removes one (URL-encode the path segment). Admin JWTs include **`id`**, **`email`**, and **`sub`** (id). The CLI `mantisbase admins …` commands do the same against the database.
 
 ### Create a schema (admin auth)
 

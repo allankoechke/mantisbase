@@ -119,6 +119,12 @@ pub fn build_openapi_value(entities: &[Value]) -> Value {
                 }
             },
             "/api/v1/admins/{id}": {
+                "get": {
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
+                    "summary": "Get admin by id or email (admin)",
+                    "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+                    "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } }
+                },
                 "delete": {
                     "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "Delete admin by id or email (admin)",

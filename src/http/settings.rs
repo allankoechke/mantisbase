@@ -35,14 +35,12 @@ pub async fn patch_config(
     headers: HeaderMap,
     Json(body): Json<PatchConfigBody>,
 ) -> Result<Json<Value>, ApiError> {
-    let email = require_admin(&headers, &state).await?;
-    let admins = state.store.list_admins().await?;
-    let admin_id = admins
-        .iter()
-        .find(|a| a.email == email)
-        .map(|a| a.id.as_str());
+    let admin = require_admin(&headers, &state).await?;
     let v =
         serde_json::to_string(&body.value).map_err(|_| ApiError::bad_request("invalid JSON"))?;
-    state.store.app_config_set(&body.key, &v, admin_id).await?;
+    state
+        .store
+        .app_config_set(&body.key, &v, Some(&admin.id))
+        .await?;
     Ok(Json(json!({ "ok": true })))
 }

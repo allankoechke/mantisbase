@@ -48,6 +48,7 @@ pub async fn admin_auth_login(
         + 86400 * 7;
     let claims = AdminJwtClaims {
         sub: admin.id.clone(),
+        id: admin.id.clone(),
         email: admin.email.clone(),
         exp,
         aud: MB_ADMIN_JWT_AUD.to_string(),
@@ -71,6 +72,21 @@ fn admin_json(a: &AdminRow) -> Value {
         "active": a.active,
         "password_reset_required": a.password_reset_required,
     })
+}
+
+/// `id` is admin row id or email (URL-encoded), same as delete.
+pub async fn get_admin(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+) -> Result<Json<Value>, ApiError> {
+    let _ = require_admin(&headers, &state).await?;
+    let admin = state
+        .store
+        .get_admin(&id)
+        .await?
+        .ok_or(ApiError(StatusCode::NOT_FOUND, "admin not found"))?;
+    Ok(Json(admin_json(&admin)))
 }
 
 pub async fn list_admins(

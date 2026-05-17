@@ -21,7 +21,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::middleware;
-use axum::routing::{delete, get, post};
+use axum::routing::{get, post};
 use axum::Router;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
@@ -65,7 +65,10 @@ fn api_router(state: Arc<AppState>) -> Router {
             "/admins",
             get(admins::list_admins).post(admins::create_admin),
         )
-        .route("/admins/{id}", delete(admins::delete_admin))
+        .route(
+            "/admins/{id}",
+            get(admins::get_admin).delete(admins::delete_admin),
+        )
         .route(
             "/entities/{entity}",
             get(entities::list_entities).post(entities::create_row),
