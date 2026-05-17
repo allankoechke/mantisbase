@@ -26,5 +26,13 @@ async fn postgres_migrate_and_admin_roundtrip() {
         .expect("verify");
     assert!(ok);
     let list = store.list_admins().await.expect("list");
-    assert!(list.iter().any(|(_, e)| e == &email));
+    assert!(list.iter().any(|a| a.email == email));
+    assert!(list.iter().find(|a| a.email == email).unwrap().active);
+    assert!(
+        !list
+            .iter()
+            .find(|a| a.email == email)
+            .unwrap()
+            .password_reset_required
+    );
 }

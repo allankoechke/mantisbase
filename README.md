@@ -68,17 +68,19 @@ export MB_JWT_SECRET='a-long-random-secret-for-user-jwt'
 Defaults:
 
 - API: `http://127.0.0.1:7070/api/v1/`
-- Admin UI: `http://127.0.0.1:7070/mb/` — **compiled** assets from `./public/mb-dist` (override with `--admin-ui-dir` or `MB_ADMIN_UI_DIR`). Use **HTTP Basic** in the browser where the UI calls the API.
+- Admin UI: `http://127.0.0.1:7070/mb/` — **compiled** assets from `./public/mb-dist` (override with `--admin-ui-dir` or `MB_ADMIN_UI_DIR`). Use **HTTP Basic** or a **Bearer** token from `POST /api/v1/admins/auth/login` where the UI calls the API.
 
 OpenAPI for the running shape of the API: `GET /api/v1/openapi.json`.
 
 ### Admin accounts over HTTP (`/api/v1/admins`)
 
-With admin Basic auth: **`GET /api/v1/admins`** lists `{ "admins": [ { "id", "email" }, … ] }`; **`POST /api/v1/admins`** with `{"email":"…","password":"…"}` creates another admin; **`DELETE /api/v1/admins/{id-or-email}`** removes one (URL-encode the path segment). The CLI `mantisbase admins …` commands do the same against the database.
+Use **`POST /api/v1/admins/auth/login`** with `{"email":"…","password":"…"}` (no prior auth) to obtain `{ "token", "admin" }` — send the token as `Authorization: Bearer …` on admin routes. Alternatively use **HTTP Basic** (`email:password`) on the same routes.
 
-### Create a schema (admin Basic auth)
+With admin auth: **`GET /api/v1/admins`** lists `{ "admins": [ { "id", "email", "active", "password_reset_required" }, … ] }`; **`POST /api/v1/admins`** with `{"email":"…","password":"…"}` creates another admin; **`DELETE /api/v1/admins/{id-or-email}`** removes one (URL-encode the path segment). The CLI `mantisbase admins …` commands do the same against the database.
 
-Admin routes expect `Authorization: Basic …` (email:password), not a bearer “admin token”.
+### Create a schema (admin auth)
+
+Admin routes accept `Authorization: Basic …` or `Authorization: Bearer …` with a JWT from **`POST /api/v1/admins/auth/login`** (same `MB_JWT_SECRET` as application user tokens; admin JWTs include `aud: mantisbase_admin`).
 
 ```bash
 curl -sS -u 'admin@example.com:your-admin-password' \

@@ -1,4 +1,4 @@
-//! Axum HTTP server: `/api/v1/*`, admin HTTP Basic on `/api/v1/sys/*` and `/api/v1/admins/*`, OpenAPI, compiled admin UI at `/mb`.
+//! Axum HTTP server: `/api/v1/*`, admin **Basic** or **admin JWT** on `/api/v1/sys/*` and `/api/v1/admins/*`, OpenAPI, compiled admin UI at `/mb`.
 
 pub mod openapi;
 
@@ -33,7 +33,7 @@ use crate::logger::cli_stdout_line;
 use crate::logger::prelude::*;
 use crate::storage::Store;
 
-/// Shared HTTP state (store + JWT secret for [`login::auth_login`]).
+/// Shared HTTP state (store + JWT secret for [`login::auth_login`] and [`admins::admin_auth_login`]).
 #[derive(Clone)]
 pub struct AppState {
     pub store: Store,
@@ -60,6 +60,7 @@ fn api_router(state: Arc<AppState>) -> Router {
             get(settings::list_config).patch(settings::patch_config),
         )
         .route("/sys/logs", get(sys::get_logs))
+        .route("/admins/auth/login", post(admins::admin_auth_login))
         .route(
             "/admins",
             get(admins::list_admins).post(admins::create_admin),

@@ -25,7 +25,7 @@ pub async fn get_logs(
     headers: HeaderMap,
     Query(q): Query<LogsQuery>,
 ) -> Result<Json<Value>, ApiError> {
-    let _ = require_admin(&headers, &state.store).await?;
+    let _ = require_admin(&headers, &state).await?;
     let limit = q.limit.unwrap_or(100).min(500);
     Ok(Json(json!({
         "entries": [],

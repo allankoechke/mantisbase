@@ -2,12 +2,15 @@
 
 use std::time::Instant;
 
-use axum::body::Body;
+use axum::body::{to_bytes, Body};
 use axum::extract::ConnectInfo;
 use axum::http::{header, Request, Response, Version};
 use axum::middleware::Next;
 
 use crate::logger::prelude::*;
+
+const ERR_BODY_LOG_MAX: usize = 512;
+const ERR_BODY_READ_MAX: usize = 4096;
 
 fn http_version_label(v: Version) -> &'static str {
     match v {
@@ -20,66 +23,77 @@ fn http_version_label(v: Version) -> &'static str {
     }
 }
 
-fn sanitize_ua(ua: &str) -> String {
-    const MAX_CHARS: usize = 160;
-    let u = ua.replace('"', "'");
-    if u.chars().count() > MAX_CHARS {
-        u.chars().take(MAX_CHARS).collect::<String>() + "…"
-    } else {
-        u
+fn clip_body_for_log(bytes: &[u8]) -> String {
+    let mut s = String::from_utf8_lossy(bytes).replace(['\n', '\r'], " ");
+    if s.len() > ERR_BODY_LOG_MAX {
+        s.truncate(ERR_BODY_LOG_MAX);
+        s.push('…');
     }
+    s
 }
 
-/// One structured `info!` line per completed request (API and static `/mb`).
+/// One structured line per completed request (API and static `/mb`).
 pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
     let method = req.method().clone();
-    let uri = req.uri().clone();
+    let resource = req
+        .uri()
+        .path_and_query()
+        .map(|pq| pq.as_str().to_string())
+        .unwrap_or_else(|| req.uri().path().to_string());
     let version = req.version();
     let peer = req
         .extensions()
         .get::<ConnectInfo<std::net::SocketAddr>>()
         .map(|c| c.0.to_string())
         .unwrap_or_else(|| "-".to_string());
-    let resource = uri
-        .path_and_query()
-        .map(|pq| pq.as_str().to_string())
-        .unwrap_or_else(|| uri.path().to_string());
-    let req_clen = req
-        .headers()
-        .get(header::CONTENT_LENGTH)
-        .and_then(|v| v.to_str().ok())
-        .map(String::from)
-        .unwrap_or_else(|| "-".to_string());
-    let user_agent = req
-        .headers()
-        .get(header::USER_AGENT)
-        .and_then(|v| v.to_str().ok())
-        .map(String::from)
-        .unwrap_or_else(|| "-".to_string());
 
     let start = Instant::now();
-    let response = next.run(req).await;
+    let mut response = next.run(req).await;
     let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0;
     let status = response.status();
-    let resp_clen = response
-        .headers()
-        .get(header::CONTENT_LENGTH)
-        .and_then(|v| v.to_str().ok())
-        .map(String::from)
-        .unwrap_or_else(|| "-".to_string());
 
-    info!(
-        "HTTP access · {} {} · {} · status={} · {:.3} ms · client={} · request_bytes={} · response_bytes={} · user_agent=\"{}\"",
-        method,
-        resource,
-        http_version_label(version),
-        status.as_u16(),
-        elapsed_ms,
-        peer,
-        req_clen,
-        resp_clen,
-        sanitize_ua(&user_agent),
-    );
+    let err_body = if status.is_success() {
+        String::new()
+    } else {
+        let (mut parts, body) = response.into_parts();
+        let (body, logged) = match to_bytes(body, ERR_BODY_READ_MAX).await {
+            Ok(b) => {
+                let logged = clip_body_for_log(&b);
+                parts.headers.remove(header::CONTENT_LENGTH);
+                (Body::from(b), logged)
+            }
+            Err(_) => (Body::empty(), "(response body unreadable)".into()),
+        };
+        response = Response::from_parts(parts, body);
+        logged
+    };
+
+    if status.is_success() {
+        info!(
+            "{:<18}  {:<8}  {:<7}  {:<4}  {}  {:.3} ms",
+            peer,
+            http_version_label(version),
+            method,
+            status.as_u16(),
+            resource,
+            elapsed_ms
+        );
+    } else {
+        warn!(
+            "{:<18}  {:<8}  {:<7}  {:<4}  {}  {:.3} ms  \n\t└──  {}",
+            peer,
+            http_version_label(version),
+            method,
+            status.as_u16(),
+            resource,
+            elapsed_ms,
+            if err_body.is_empty() {
+                "N/A"
+            } else {
+                &err_body
+            }
+        );
+    }
 
     response
 }

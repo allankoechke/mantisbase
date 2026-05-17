@@ -11,7 +11,9 @@ CREATE TABLE IF NOT EXISTS mb_admin (
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    password_reset_required INTEGER NOT NULL DEFAULT 0
 );
 
 -- Application users (single catalog; passwords managed here, not per-entity tables)

@@ -8,8 +8,8 @@
 //! configures the default logger level; override with `MB_LOG_LEVEL`.
 //!
 //! ## Stdout for scripts
-//! Tab-separated lines for `admins --ls` are written with [`cli_stdout_line`] so they stay
-//! clean for piping; that is **program output**, not a log line.
+//! Fixed-width table lines for `admins --ls` are written with [`cli_stdout_line`] so they stay
+//! readable for humans and scripts; that is **program output**, not a log line (counts go through `info!`).
 
 pub use spdlog::prelude::*;
 pub use spdlog::{default_logger, Level, LevelFilter};
@@ -20,7 +20,7 @@ pub mod prelude {
     pub use spdlog::{default_logger, Level, LevelFilter};
 }
 
-/// One line of machine-oriented CLI output to **stdout** (e.g. `admins --ls`), without log formatting.
+/// One line of machine-oriented CLI output to **stdout** (e.g. `admins --ls` table rows), without log formatting.
 #[inline]
 pub fn cli_stdout_line(line: impl AsRef<str>) {
     use std::io::Write;

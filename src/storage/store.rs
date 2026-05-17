@@ -3,7 +3,10 @@
 use serde_json::{Map, Value};
 
 use crate::models::types::{AccessRule, EntityType};
-use crate::models::Field;
+use crate::models::{
+    normalize_and_validate_admin_email, normalize_and_validate_admin_password,
+    normalize_and_validate_admin_remove_target, Field,
+};
 
 use super::error::Result;
 use super::postgres::PostgresStore;
@@ -22,6 +25,24 @@ impl Store {
             Store::Libsql(s) => s.verify_admin_basic(email, password).await,
             Store::Postgres(s) => s.verify_admin_basic(email, password).await,
         }
+    }
+
+    pub async fn get_admin_by_email(&self, email: &str) -> Result<Option<crate::models::AdminRow>> {
+        match self {
+            Store::Libsql(s) => s.get_admin_by_email(email).await,
+            Store::Postgres(s) => s.get_admin_by_email(email).await,
+        }
+    }
+
+    pub async fn authenticate_admin(
+        &self,
+        email: &str,
+        password: &str,
+    ) -> Result<Option<crate::models::AdminRow>> {
+        if !self.verify_admin_basic(email, password).await? {
+            return Ok(None);
+        }
+        self.get_admin_by_email(email).await
     }
 
     pub async fn entity_type(&self, name: &str) -> Result<Option<String>> {
@@ -161,7 +182,7 @@ impl Store {
         }
     }
 
-    pub async fn list_admins(&self) -> Result<Vec<(String, String)>> {
+    pub async fn list_admins(&self) -> Result<Vec<crate::models::AdminRow>> {
         match self {
             Store::Libsql(s) => s.list_admins().await,
             Store::Postgres(s) => s.list_admins().await,
@@ -207,16 +228,22 @@ impl Store {
     }
 
     pub async fn add_admin(&self, email: &str, password: &str) -> Result<()> {
+        let email = normalize_and_validate_admin_email(email)
+            .map_err(|m| super::error::StorageError::Validation(m.to_string()))?;
+        let password = normalize_and_validate_admin_password(password)
+            .map_err(|m| super::error::StorageError::Validation(m.to_string()))?;
         match self {
-            Store::Libsql(s) => s.add_admin(email, password).await,
-            Store::Postgres(s) => s.add_admin(email, password).await,
+            Store::Libsql(s) => s.add_admin(&email, &password).await,
+            Store::Postgres(s) => s.add_admin(&email, &password).await,
         }
     }
 
     pub async fn remove_admin(&self, id_or_email: &str) -> Result<u64> {
+        let target = normalize_and_validate_admin_remove_target(id_or_email)
+            .map_err(|m| super::error::StorageError::Validation(m.to_string()))?;
         match self {
-            Store::Libsql(s) => s.remove_admin(id_or_email).await,
-            Store::Postgres(s) => s.remove_admin(id_or_email).await,
+            Store::Libsql(s) => s.remove_admin(&target).await,
+            Store::Postgres(s) => s.remove_admin(&target).await,
         }
     }
 }

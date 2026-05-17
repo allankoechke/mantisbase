@@ -74,7 +74,7 @@ pub async fn list_schemas(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,
 ) -> Result<Json<Value>, ApiError> {
-    let _ = require_admin(&headers, &state.store).await?;
+    let _ = require_admin(&headers, &state).await?;
     let v = state.store.list_entities_catalog().await?;
     Ok(Json(json!(v)))
 }
@@ -84,7 +84,7 @@ pub async fn create_schema(
     headers: HeaderMap,
     Json(body): Json<CreateSchemaBody>,
 ) -> Result<(StatusCode, Json<Value>), ApiError> {
-    let _ = require_admin(&headers, &state.store).await?;
+    let _ = require_admin(&headers, &state).await?;
     validate_entity_name(&body.name).map_err(ApiError::bad_request)?;
     state
         .store
@@ -107,7 +107,7 @@ pub async fn get_schema(
     headers: HeaderMap,
     Path(name): Path<String>,
 ) -> Result<Json<Value>, ApiError> {
-    let _ = require_admin(&headers, &state.store).await?;
+    let _ = require_admin(&headers, &state).await?;
     let v = state
         .store
         .get_entity_catalog(&name)
@@ -122,7 +122,7 @@ pub async fn patch_schema(
     Path(name): Path<String>,
     Json(body): Json<PatchSchemaBody>,
 ) -> Result<Json<Value>, ApiError> {
-    let _ = require_admin(&headers, &state.store).await?;
+    let _ = require_admin(&headers, &state).await?;
     validate_entity_name(&name).map_err(ApiError::bad_request)?;
     if body.is_noop() {
         return Err(ApiError::bad_request("empty patch body"));
@@ -145,7 +145,7 @@ pub async fn delete_schema(
     headers: HeaderMap,
     Path(name): Path<String>,
 ) -> Result<Json<Value>, ApiError> {
-    let _ = require_admin(&headers, &state.store).await?;
+    let _ = require_admin(&headers, &state).await?;
     state.store.delete_entity_catalog(&name).await?;
     Ok(Json(json!({ "ok": true })))
 }
