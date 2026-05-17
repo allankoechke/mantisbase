@@ -96,7 +96,7 @@ pub async fn create_admin(
 ) -> Result<(StatusCode, Json<Value>), ApiError> {
     let _ = require_admin(&headers, &state).await?;
     state.store.add_admin(&body.email, &body.password).await?;
-    Ok((StatusCode::CREATED, Json(json!({ "ok": true }))))
+    Ok((StatusCode::CREATED, Json(json!({}))))
 }
 
 /// `id` is an admin row `id` or `email` (URL-encoded), same as CLI `admins --rm`.

@@ -70,7 +70,7 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
 
     if status.is_success() {
         info!(
-            "{}  {:<8}  {:<7}  {}  {}  {:.3} ms",
+            "{:<18}  {:<8}  {:<7}  {:<4}  {}  {:.3} ms",
             peer,
             http_version_label(version),
             method,
@@ -80,14 +80,18 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
         );
     } else {
         warn!(
-            "{}  {:<8}  {:<7}  {}  {}  {:.3} ms  \n\t└──  {}",
+            "{:<18}  {:<8}  {:<7}  {:<4}  {}  {:.3} ms  \n\t└──  {}",
             peer,
             http_version_label(version),
             method,
             status.as_u16(),
             resource,
             elapsed_ms,
-            if err_body.is_empty() { "N/A" } else { &err_body }
+            if err_body.is_empty() {
+                "N/A"
+            } else {
+                &err_body
+            }
         );
     }
 
