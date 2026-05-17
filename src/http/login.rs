@@ -25,8 +25,8 @@ pub async fn auth_login(
         .store
         .verify_user_login(&body.email, &body.password)
         .await?
-        .ok_or(ApiError(StatusCode::UNAUTHORIZED, "invalid credentials"))?;
-    let secret = state.jwt_secret.as_deref().ok_or(ApiError(
+        .ok_or(ApiError::new(StatusCode::UNAUTHORIZED, "invalid credentials"))?;
+    let secret = state.jwt_secret.as_deref().ok_or(ApiError::new(
         StatusCode::INTERNAL_SERVER_ERROR,
         "MB_JWT_SECRET not set",
     ))?;

@@ -25,33 +25,37 @@ pub(in crate::http) async fn require_admin(
     let raw = headers
         .get(header::AUTHORIZATION)
         .and_then(|v| v.to_str().ok())
-        .ok_or(ApiError(StatusCode::UNAUTHORIZED, "missing Authorization"))?;
+        .ok_or(ApiError::new(StatusCode::UNAUTHORIZED, "missing Authorization"))?;
     if let Some(b64) = raw.strip_prefix("Basic ") {
         let decoded = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
-            .map_err(|_| ApiError(StatusCode::UNAUTHORIZED, "invalid Basic encoding"))?;
+            .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic encoding"))?;
         let s = String::from_utf8(decoded)
-            .map_err(|_| ApiError(StatusCode::UNAUTHORIZED, "invalid Basic utf8"))?;
+            .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic utf8"))?;
         let (user, pass) = s
             .split_once(':')
-            .ok_or(ApiError(StatusCode::UNAUTHORIZED, "invalid Basic format"))?;
+            .ok_or(ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic format"))?;
         let ok = state.store.verify_admin_basic(user, pass).await?;
         if !ok {
-            return Err(ApiError(
+            return Err(ApiError::new(
                 StatusCode::UNAUTHORIZED,
                 "invalid admin credentials",
             ));
         }
-        let admin = state.store.get_admin_by_email(user).await?.ok_or(ApiError(
-            StatusCode::UNAUTHORIZED,
-            "invalid admin credentials",
-        ))?;
+        let admin = state
+            .store
+            .get_admin_by_email(user)
+            .await?
+            .ok_or(ApiError::new(
+                StatusCode::UNAUTHORIZED,
+                "invalid admin credentials",
+            ))?;
         return Ok(AdminPrincipal {
             id: admin.id,
             email: admin.email,
         });
     }
     if let Some(token) = raw.strip_prefix("Bearer ") {
-        let secret = state.jwt_secret.as_deref().ok_or(ApiError(
+        let secret = state.jwt_secret.as_deref().ok_or(ApiError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "MB_JWT_SECRET not set",
         ))?;
@@ -63,17 +67,17 @@ pub(in crate::http) async fn require_admin(
             &validation,
         )
         .map_err(|_| {
-            ApiError(
+            ApiError::new(
                 StatusCode::UNAUTHORIZED,
                 "invalid or non-admin bearer token",
             )
         })?;
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .map_err(|_| ApiError(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
+            .map_err(|_| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
             .as_secs();
         if data.claims.exp <= now {
-            return Err(ApiError(StatusCode::UNAUTHORIZED, "token expired"));
+            return Err(ApiError::new(StatusCode::UNAUTHORIZED, "token expired"));
         }
         let id = if data.claims.id.is_empty() {
             data.claims.sub
@@ -81,7 +85,7 @@ pub(in crate::http) async fn require_admin(
             data.claims.id
         };
         if id.is_empty() || data.claims.email.is_empty() {
-            return Err(ApiError(
+            return Err(ApiError::new(
                 StatusCode::UNAUTHORIZED,
                 "invalid admin token claims",
             ));
@@ -91,7 +95,7 @@ pub(in crate::http) async fn require_admin(
             email: data.claims.email,
         });
     }
-    Err(ApiError(
+    Err(ApiError::new(
         StatusCode::UNAUTHORIZED,
         "expected Basic or Bearer admin authorization",
     ))
@@ -123,11 +127,11 @@ pub(in crate::http) async fn check_entity_access(
             if require_admin(headers, state).await.is_ok() {
                 return Ok(());
             }
-            let token = bearer_token(headers).ok_or(ApiError(
+            let token = bearer_token(headers).ok_or(ApiError::new(
                 StatusCode::UNAUTHORIZED,
                 "Bearer token or admin Basic required",
             ))?;
-            let secret = state.jwt_secret.as_deref().ok_or(ApiError(
+            let secret = state.jwt_secret.as_deref().ok_or(ApiError::new(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "MB_JWT_SECRET not set",
             ))?;
@@ -136,13 +140,13 @@ pub(in crate::http) async fn check_entity_access(
                 &jsonwebtoken::DecodingKey::from_secret(secret.as_bytes()),
                 &jsonwebtoken::Validation::default(),
             )
-            .map_err(|_| ApiError(StatusCode::UNAUTHORIZED, "invalid token"))?;
+            .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid token"))?;
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
-                .map_err(|_| ApiError(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
+                .map_err(|_| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
                 .as_secs();
             if data.claims.exp <= now {
-                return Err(ApiError(StatusCode::UNAUTHORIZED, "token expired"));
+                return Err(ApiError::new(StatusCode::UNAUTHORIZED, "token expired"));
             }
             let id = if data.claims.id.is_empty() {
                 data.claims.sub.clone()
@@ -150,11 +154,11 @@ pub(in crate::http) async fn check_entity_access(
                 data.claims.id.clone()
             };
             if id.is_empty() {
-                return Err(ApiError(StatusCode::UNAUTHORIZED, "invalid token subject"));
+                return Err(ApiError::new(StatusCode::UNAUTHORIZED, "invalid token subject"));
             }
             Ok(())
         }
-        AccessMode::Custom => Err(ApiError(
+        AccessMode::Custom => Err(ApiError::new(
             StatusCode::FORBIDDEN,
             "custom access rules not implemented",
         )),

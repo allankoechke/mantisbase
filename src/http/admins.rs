@@ -26,18 +26,14 @@ pub async fn admin_auth_login(
     State(state): State<Arc<AppState>>,
     Json(body): Json<AdminAuthLoginBody>,
 ) -> Result<Json<Value>, ApiError> {
-    let email = normalize_and_validate_admin_email(&body.email)
-        .map_err(|_| ApiError(StatusCode::BAD_REQUEST, "invalid or missing email"))?;
-    let password = normalize_and_validate_admin_password(&body.password).map_err(|_| {
-        ApiError(
-            StatusCode::BAD_REQUEST,
-            "password must be at least 8 characters",
-        )
-    })?;
+    let email =
+        normalize_and_validate_admin_email(&body.email).map_err(ApiError::bad_request)?;
+    let password =
+        normalize_and_validate_admin_password(&body.password).map_err(ApiError::bad_request)?;
     let Some(admin) = state.store.authenticate_admin(&email, &password).await? else {
-        return Err(ApiError(StatusCode::UNAUTHORIZED, "invalid credentials"));
+        return Err(ApiError::new(StatusCode::UNAUTHORIZED, "invalid credentials"));
     };
-    let secret = state.jwt_secret.as_deref().ok_or(ApiError(
+    let secret = state.jwt_secret.as_deref().ok_or(ApiError::new(
         StatusCode::INTERNAL_SERVER_ERROR,
         "MB_JWT_SECRET not set",
     ))?;
@@ -85,7 +81,7 @@ pub async fn get_admin(
         .store
         .get_admin(&id)
         .await?
-        .ok_or(ApiError(StatusCode::NOT_FOUND, "admin not found"))?;
+        .ok_or(ApiError::new(StatusCode::NOT_FOUND, "admin not found"))?;
     Ok(Json(admin_json(&admin)))
 }
 
@@ -124,7 +120,7 @@ pub async fn delete_admin(
     let _ = require_admin(&headers, &state).await?;
     let n = state.store.remove_admin(&id).await?;
     if n == 0 {
-        return Err(ApiError(StatusCode::NOT_FOUND, "admin not found"));
+        return Err(ApiError::new(StatusCode::NOT_FOUND, "admin not found"));
     }
     Ok(StatusCode::NO_CONTENT)
 }
