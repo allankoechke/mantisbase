@@ -79,7 +79,7 @@ pub async fn list_admins(
 ) -> Result<Json<Value>, ApiError> {
     let _ = require_admin(&headers, &state).await?;
     let rows = state.store.list_admins().await?;
-    let list: Vec<Value> = rows.iter().map(|a| admin_json(a)).collect();
+    let list: Vec<Value> = rows.iter().map(admin_json).collect();
     Ok(Json(json!({ "admins": list })))
 }
 
