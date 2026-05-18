@@ -74,6 +74,7 @@ For CI and automated runs, skip setup and the browser prompt:
 
 ```bash
 ./target/release/mantisbase serve --skip-setup
+# or: export MB_SKIP_ADMIN_SETUP=1 && ./target/release/mantisbase serve
 ```
 
 Defaults:
@@ -173,6 +174,7 @@ Global flags include `--data-dir`, `--admin-ui-dir` (built SPA root), `--dev`, `
 | `MB_DATABASE_URL` | DB URL when using Turso/Postgres (or pass `--db-url`) |
 | `MB_TURSO_AUTH_TOKEN` | Turso auth token when `--db turso` |
 | `MB_LOG_LEVEL` | `trace` … `critical` |
+| `MB_SKIP_ADMIN_SETUP` | If truthy (`1`, `true`, `yes`, `on`), skip first-admin setup URL and browser (same as `--skip-setup`) |
 
 ---
 

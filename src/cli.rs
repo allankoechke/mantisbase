@@ -77,8 +77,8 @@ pub struct ServeArgs {
     #[arg(long, default_value = "127.0.0.1", help = "Host address to bind to")]
     pub host: Option<String>,
 
-    /// Skip first-admin setup (no setup token, no browser); useful for CI and automated tests.
-    #[arg(long, help = "Do not issue first-admin setup URL or open a browser")]
+    /// Skip first-admin setup (no setup token, no browser); also enabled when `MB_SKIP_ADMIN_SETUP` is truthy.
+    #[arg(long, help = "Do not issue first-admin setup URL or open a browser (or set MB_SKIP_ADMIN_SETUP=1)")]
     pub skip_setup: bool,
 }
 

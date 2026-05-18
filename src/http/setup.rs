@@ -246,7 +246,7 @@ pub async fn bootstrap_first_admin_setup(
     state: &Arc<AppState>,
 ) -> anyhow::Result<()> {
     if state.skip_setup {
-        info!("first-admin setup skipped (--skip-setup)");
+        info!("first-admin setup skipped (--skip-setup or MB_SKIP_ADMIN_SETUP)");
         return Ok(());
     }
     if state.store.has_any_admin().await? {

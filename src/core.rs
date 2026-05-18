@@ -348,11 +348,11 @@ impl MantisBase {
                         PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
                     ),
                 };
-                let skip_setup = match &self.cli_command {
+                let cli_skip = match &self.cli_command {
                     Some(Commands::Serve(args)) => args.skip_setup,
                     _ => false,
                 };
-                crate::http::serve(self, store, skip_setup).await?;
+                crate::http::serve(self, store, skip_first_admin_setup(cli_skip)).await?;
                 Ok(MantisBaseRunOutcome::RanAction)
             }
             MantisBaseMode::Admin => {
@@ -429,6 +429,17 @@ fn path_to_utf8(path: &Path) -> anyhow::Result<String> {
     path.to_str()
         .map(String::from)
         .ok_or_else(|| anyhow::anyhow!("path is not valid UTF-8: {path:?}"))
+}
+
+/// True when `name` is set to a common truthy value (`1`, `true`, `yes`, `on`, case-insensitive).
+fn env_truthy(name: &str) -> bool {
+    std::env::var(name)
+        .ok()
+        .is_some_and(|v| matches!(v.trim().to_lowercase().as_str(), "1" | "true" | "yes" | "on"))
+}
+
+fn skip_first_admin_setup(cli_flag: bool) -> bool {
+    cli_flag || env_truthy("MB_SKIP_ADMIN_SETUP")
 }
 
 /// Truncate with `…` then pad to `width` (bytes; safe for ASCII admin id/email).
