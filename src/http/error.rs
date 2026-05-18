@@ -35,13 +35,9 @@ impl From<crate::storage::StorageError> for ApiError {
     fn from(e: crate::storage::StorageError) -> Self {
         match e {
             crate::storage::StorageError::NotFound(msg) => ApiError::not_found(msg),
-            crate::storage::StorageError::Conflict(msg) => {
-                ApiError::new(StatusCode::CONFLICT, msg)
-            }
+            crate::storage::StorageError::Conflict(msg) => ApiError::new(StatusCode::CONFLICT, msg),
             crate::storage::StorageError::Validation(msg) => ApiError::bad_request(msg),
-            crate::storage::StorageError::SqlxMigrate(_) => {
-                ApiError::internal("migration error")
-            }
+            crate::storage::StorageError::SqlxMigrate(_) => ApiError::internal("migration error"),
             _ => ApiError::internal("storage error"),
         }
     }

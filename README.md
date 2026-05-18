@@ -56,13 +56,24 @@ Build the admin SPA (Vite → `public/mb-dist/`, served at `/mb/`):
 cd admin && npm install && npm run build && cd ..
 ```
 
-Apply migrations, create an admin, set a JWT secret for app-user login, then serve:
+Apply migrations, then serve (first admin via setup wizard or CLI):
 
 ```bash
 ./target/release/mantisbase migrations up
-./target/release/mantisbase admins add admin@example.com 'your-admin-password'
-export MB_JWT_SECRET='a-long-random-secret-for-user-jwt'
+export MB_JWT_SECRET='a-long-random-secret-for-user-jwt'   # optional but recommended
 ./target/release/mantisbase serve
+```
+
+If **no admin account** exists, `serve` prints a **one-time setup URL** (valid 20 minutes, single use) such as `http://127.0.0.1:7070/mb/setup?token=…` and tries to open it in your browser. Complete the form to create the first admin. Alternatively:
+
+```bash
+./target/release/mantisbase admins add admin@example.com 'your-admin-password'
+```
+
+For CI and automated runs, skip setup and the browser prompt:
+
+```bash
+./target/release/mantisbase serve --skip-setup
 ```
 
 Defaults:
@@ -71,6 +82,10 @@ Defaults:
 - Admin UI: `http://127.0.0.1:7070/mb/` — **compiled** assets from `./public/mb-dist` (override with `--admin-ui-dir` or `MB_ADMIN_UI_DIR`). Use **HTTP Basic** or a **Bearer** token from `POST /api/v1/admins/auth/login` where the UI calls the API.
 
 OpenAPI for the running shape of the API: `GET /api/v1/openapi.json`.
+
+### First-admin setup (`/mb/setup`, `/api/v1/setup/*`)
+
+When the database has no admins: **`GET /api/v1/setup/status?token=…`**, **`POST /api/v1/setup/first-admin`** with `Authorization: Bearer <setup-token>` and `{ "email", "password" }`. The setup token is invalidated after use or once any admin exists.
 
 ### Admin accounts over HTTP (`/api/v1/admins`)
 

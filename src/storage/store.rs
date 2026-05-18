@@ -198,6 +198,10 @@ impl Store {
         }
     }
 
+    pub async fn has_any_admin(&self) -> Result<bool> {
+        Ok(!self.list_admins().await?.is_empty())
+    }
+
     pub async fn app_config_set(
         &self,
         key: &str,

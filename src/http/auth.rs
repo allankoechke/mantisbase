@@ -25,15 +25,19 @@ pub(in crate::http) async fn require_admin(
     let raw = headers
         .get(header::AUTHORIZATION)
         .and_then(|v| v.to_str().ok())
-        .ok_or(ApiError::new(StatusCode::UNAUTHORIZED, "missing Authorization"))?;
+        .ok_or(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "missing Authorization",
+        ))?;
     if let Some(b64) = raw.strip_prefix("Basic ") {
         let decoded = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
             .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic encoding"))?;
         let s = String::from_utf8(decoded)
             .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic utf8"))?;
-        let (user, pass) = s
-            .split_once(':')
-            .ok_or(ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic format"))?;
+        let (user, pass) = s.split_once(':').ok_or(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid Basic format",
+        ))?;
         let ok = state.store.verify_admin_basic(user, pass).await?;
         if !ok {
             return Err(ApiError::new(
@@ -55,15 +59,11 @@ pub(in crate::http) async fn require_admin(
         });
     }
     if let Some(token) = raw.strip_prefix("Bearer ") {
-        let secret = state.jwt_secret.as_deref().ok_or(ApiError::new(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "MB_JWT_SECRET not set",
-        ))?;
         let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
         validation.set_audience(&[MB_ADMIN_JWT_AUD]);
         let data = jsonwebtoken::decode::<AdminJwtClaims>(
             token.trim(),
-            &DecodingKey::from_secret(secret.as_bytes()),
+            &DecodingKey::from_secret(state.signing_key.as_bytes()),
             &validation,
         )
         .map_err(|_| {
@@ -131,13 +131,9 @@ pub(in crate::http) async fn check_entity_access(
                 StatusCode::UNAUTHORIZED,
                 "Bearer token or admin Basic required",
             ))?;
-            let secret = state.jwt_secret.as_deref().ok_or(ApiError::new(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "MB_JWT_SECRET not set",
-            ))?;
             let data = jsonwebtoken::decode::<AppUserClaims>(
                 &token,
-                &jsonwebtoken::DecodingKey::from_secret(secret.as_bytes()),
+                &jsonwebtoken::DecodingKey::from_secret(state.signing_key.as_bytes()),
                 &jsonwebtoken::Validation::default(),
             )
             .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid token"))?;
@@ -154,7 +150,10 @@ pub(in crate::http) async fn check_entity_access(
                 data.claims.id.clone()
             };
             if id.is_empty() {
-                return Err(ApiError::new(StatusCode::UNAUTHORIZED, "invalid token subject"));
+                return Err(ApiError::new(
+                    StatusCode::UNAUTHORIZED,
+                    "invalid token subject",
+                ));
             }
             Ok(())
         }

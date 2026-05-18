@@ -99,8 +99,6 @@ impl MantisBase {
             }
         }
 
-        println!("secret: {:?}", std::env::var("MB_JWT_SECRET"));
-
         if let Ok(jwt_secret) = std::env::var("MB_JWT_SECRET") {
             self.jwt_secret = Some(jwt_secret);
         } else {
@@ -350,7 +348,11 @@ impl MantisBase {
                         PostgresStore::connect(self.db_url(), self.migrations_dir()).await?,
                     ),
                 };
-                crate::http::serve(self, store).await?;
+                let skip_setup = match &self.cli_command {
+                    Some(Commands::Serve(args)) => args.skip_setup,
+                    _ => false,
+                };
+                crate::http::serve(self, store, skip_setup).await?;
                 Ok(MantisBaseRunOutcome::RanAction)
             }
             MantisBaseMode::Admin => {

@@ -26,17 +26,15 @@ pub async fn admin_auth_login(
     State(state): State<Arc<AppState>>,
     Json(body): Json<AdminAuthLoginBody>,
 ) -> Result<Json<Value>, ApiError> {
-    let email =
-        normalize_and_validate_admin_email(&body.email).map_err(ApiError::bad_request)?;
+    let email = normalize_and_validate_admin_email(&body.email).map_err(ApiError::bad_request)?;
     let password =
         normalize_and_validate_admin_password(&body.password).map_err(ApiError::bad_request)?;
     let Some(admin) = state.store.authenticate_admin(&email, &password).await? else {
-        return Err(ApiError::new(StatusCode::UNAUTHORIZED, "invalid credentials"));
+        return Err(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid credentials",
+        ));
     };
-    let secret = state.jwt_secret.as_deref().ok_or(ApiError::new(
-        StatusCode::INTERNAL_SERVER_ERROR,
-        "MB_JWT_SECRET not set",
-    ))?;
     let exp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
@@ -52,7 +50,7 @@ pub async fn admin_auth_login(
     let token = jsonwebtoken::encode(
         &jsonwebtoken::Header::default(),
         &claims,
-        &jsonwebtoken::EncodingKey::from_secret(secret.as_bytes()),
+        &jsonwebtoken::EncodingKey::from_secret(state.signing_key.as_bytes()),
     )
     .map_err(|_| ApiError::internal("jwt encode failed"))?;
     Ok(Json(json!({
@@ -61,7 +59,7 @@ pub async fn admin_auth_login(
     })))
 }
 
-fn admin_json(a: &AdminRow) -> Value {
+pub(in crate::http) fn admin_json(a: &AdminRow) -> Value {
     json!({
         "id": a.id,
         "email": a.email,
