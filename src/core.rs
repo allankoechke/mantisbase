@@ -433,9 +433,12 @@ fn path_to_utf8(path: &Path) -> anyhow::Result<String> {
 
 /// True when `name` is set to a common truthy value (`1`, `true`, `yes`, `on`, case-insensitive).
 fn env_truthy(name: &str) -> bool {
-    std::env::var(name)
-        .ok()
-        .is_some_and(|v| matches!(v.trim().to_lowercase().as_str(), "1" | "true" | "yes" | "on"))
+    std::env::var(name).ok().is_some_and(|v| {
+        matches!(
+            v.trim().to_lowercase().as_str(),
+            "1" | "true" | "yes" | "on"
+        )
+    })
 }
 
 fn skip_first_admin_setup(cli_flag: bool) -> bool {

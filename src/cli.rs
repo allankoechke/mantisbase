@@ -78,7 +78,10 @@ pub struct ServeArgs {
     pub host: Option<String>,
 
     /// Skip first-admin setup (no setup token, no browser); also enabled when `MB_SKIP_ADMIN_SETUP` is truthy.
-    #[arg(long, help = "Do not issue first-admin setup URL or open a browser (or set MB_SKIP_ADMIN_SETUP=1)")]
+    #[arg(
+        long,
+        help = "Do not issue first-admin setup URL or open a browser (or set MB_SKIP_ADMIN_SETUP=1)"
+    )]
     pub skip_setup: bool,
 }
 
