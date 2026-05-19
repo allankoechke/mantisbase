@@ -9,4 +9,6 @@ pub use admin::{
 };
 pub use entity::AppUserRow;
 pub use schema::EntitySchema;
-pub use types::{validate_entity_name, AccessMode, AccessRule, EntityType, Field, FieldType};
+pub use types::{
+    normalize_fields, validate_entity_name, AccessMode, AccessRule, EntityType, Field, FieldType,
+};

@@ -19,8 +19,14 @@ pub enum SqlDialect {
 }
 
 fn field_physical_eq(a: &Field, b: &Field) -> bool {
-    a.field_name == b.field_name
-        && a.field_type == b.field_type
+    a.field_id == b.field_id
+        && a.field_name == b.field_name
+        && field_specs_eq(a, b)
+}
+
+/// Column definition equality ignoring stable id and SQL name (used after renames).
+fn field_specs_eq(a: &Field, b: &Field) -> bool {
+    a.field_type == b.field_type
         && a.is_required == b.is_required
         && a.is_primary_key == b.is_primary_key
         && a.is_unique == b.is_unique
@@ -28,10 +34,10 @@ fn field_physical_eq(a: &Field, b: &Field) -> bool {
         && a.constraints == b.constraints
 }
 
-fn field_maps(fields: &[Field]) -> HashMap<String, Field> {
+fn field_maps_by_id(fields: &[Field]) -> HashMap<String, Field> {
     fields
         .iter()
-        .map(|f| (f.field_name.clone(), f.clone()))
+        .map(|f| (f.field_id.clone(), f.clone()))
         .collect()
 }
 
@@ -98,6 +104,17 @@ fn add_column_stmt(table: &str, f: &Field, dialect: SqlDialect) -> Result<String
     })
 }
 
+fn rename_column_stmt(table: &str, from: &str, to: &str, dialect: SqlDialect) -> Result<String> {
+    let qtable = quote_ident(table)?;
+    let qfrom = quote_ident(from)?;
+    let qto = quote_ident(to)?;
+    Ok(match dialect {
+        SqlDialect::Sqlite | SqlDialect::Postgres => {
+            format!("ALTER TABLE {qtable} RENAME COLUMN {qfrom} TO {qto}")
+        }
+    })
+}
+
 fn drop_column_stmt(table: &str, col: &str, dialect: SqlDialect) -> Result<String> {
     let qtable = quote_ident(table)?;
     let qcol = quote_ident(col)?;
@@ -158,13 +175,13 @@ fn pg_alter_column_chunks(table: &str, old: &Field, new: &Field) -> Result<Vec<S
 }
 
 fn schemas_physically_equal(old_fields: &[Field], new_fields: &[Field]) -> bool {
-    let om = field_maps(old_fields);
-    let nm = field_maps(new_fields);
+    let om = field_maps_by_id(old_fields);
+    let nm = field_maps_by_id(new_fields);
     if om.len() != nm.len() {
         return false;
     }
-    for (k, nf) in &nm {
-        match om.get(k) {
+    for (id, nf) in &nm {
+        match om.get(id) {
             Some(of) if field_physical_eq(of, nf) => {}
             _ => return false,
         }
@@ -198,12 +215,15 @@ fn sqlite_rebuild_table_stmts(
         "{};",
         build_create_table_ddl_plain(&staging, new_fields)?
     ));
+    let old_by_id = field_maps_by_id(old_fields);
     let old_names: HashSet<String> = old_fields.iter().map(|f| f.field_name.clone()).collect();
     let mut col_list = Vec::with_capacity(new_fields.len());
     let mut select_parts = Vec::with_capacity(new_fields.len());
     for f in new_fields {
         col_list.push(quote_ident(&f.field_name)?);
-        let part = if old_names.contains(&f.field_name) {
+        let part = if let Some(prev) = old_by_id.get(&f.field_id) {
+            quote_ident(&prev.field_name)?
+        } else if old_names.contains(&f.field_name) {
             quote_ident(&f.field_name)?
         } else if f.is_required {
             insert_default_expr(f)
@@ -254,37 +274,57 @@ pub fn plan_physical_ddl(
         }
         return sqlite_rebuild_table_stmts(table, old_fields, new_fields);
     }
-    let old_m = field_maps(old_fields);
-    let new_m = field_maps(new_fields);
-    for name in new_m.keys() {
-        if !old_m.contains_key(name) {
-            if new_m[name].is_primary_key {
+    let old_m = field_maps_by_id(old_fields);
+    let new_m = field_maps_by_id(new_fields);
+
+    for id in old_m.keys() {
+        if !new_m.contains_key(id) {
+            let col = &old_m[id].field_name;
+            out.push(format!("{};", drop_column_stmt(table, col, dialect)?));
+        }
+    }
+
+    for id in new_m.keys() {
+        if let Some(o) = old_m.get(id) {
+            let n = &new_m[id];
+            if o.field_name != n.field_name {
+                out.push(format!(
+                    "{};",
+                    rename_column_stmt(table, &o.field_name, &n.field_name, dialect)?
+                ));
+            }
+        }
+    }
+
+    for id in new_m.keys() {
+        if !old_m.contains_key(id) {
+            let col = &new_m[id].field_name;
+            if new_m[id].is_primary_key {
                 return Err(StorageError::Validation(format!(
-                    "new column `{name}` cannot declare PRIMARY KEY on an existing table"
+                    "new column `{col}` cannot declare PRIMARY KEY on an existing table"
                 )));
             }
             out.push(format!(
                 "{};",
-                add_column_stmt(table, &new_m[name], dialect)?
+                add_column_stmt(table, &new_m[id], dialect)?
             ));
         }
     }
-    for name in old_m.keys() {
-        if !new_m.contains_key(name) {
-            out.push(format!("{};", drop_column_stmt(table, name, dialect)?));
-        }
-    }
-    for name in new_m.keys() {
-        if let (Some(o), Some(n)) = (old_m.get(name), new_m.get(name)) {
-            if field_physical_eq(o, n) {
+
+    for id in new_m.keys() {
+        if let (Some(o), Some(n)) = (old_m.get(id), new_m.get(id)) {
+            if field_specs_eq(o, n) {
                 continue;
             }
             if o.is_primary_key != n.is_primary_key {
                 return Err(StorageError::Validation(format!(
-                    "cannot change PRIMARY KEY on column `{name}`"
+                    "cannot change PRIMARY KEY on column `{}`",
+                    n.field_name
                 )));
             }
-            for chunk in pg_alter_column_chunks(table, o, n)? {
+            let mut o_at = o.clone();
+            o_at.field_name = n.field_name.clone();
+            for chunk in pg_alter_column_chunks(table, &o_at, n)? {
                 out.push(format!("{chunk};"));
             }
         }
@@ -357,5 +397,33 @@ mod tests {
         let stmts =
             plan_physical_ddl("t", "bare", &old, "bare", &new, SqlDialect::Postgres).unwrap();
         assert!(stmts.iter().any(|s| s.contains("ALTER COLUMN")));
+    }
+
+    #[test]
+    fn postgres_plan_renames_by_field_id() {
+        let old = vec![col("id", FieldType::String), col("title", FieldType::String)];
+        let mut new = old.clone();
+        new[1].field_name = "headline".into();
+        let stmts =
+            plan_physical_ddl("t", "bare", &old, "bare", &new, SqlDialect::Postgres).unwrap();
+        let joined = stmts.join("\n");
+        assert!(joined.contains("RENAME COLUMN"));
+        assert!(joined.contains("\"title\""));
+        assert!(joined.contains("\"headline\""));
+        assert!(!joined.contains("DROP COLUMN"));
+        assert!(!joined.contains("ADD COLUMN"));
+    }
+
+    #[test]
+    fn sqlite_rebuild_maps_renamed_column_by_field_id() {
+        let old = vec![col("id", FieldType::String), col("title", FieldType::String)];
+        let mut new = old.clone();
+        new[1].field_name = "headline".into();
+        let stmts =
+            plan_physical_ddl("t", "bare", &old, "bare", &new, SqlDialect::Sqlite).unwrap();
+        let joined = stmts.join("\n");
+        assert!(joined.contains("INSERT INTO"));
+        assert!(joined.contains("\"title\""));
+        assert!(joined.contains("\"headline\""));
     }
 }

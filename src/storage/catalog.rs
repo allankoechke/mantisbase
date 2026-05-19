@@ -4,7 +4,7 @@
 use libsql::{params, Connection};
 use serde_json::{json, Map, Value as JsonValue};
 
-use crate::models::types::{AccessMode, AccessRule, EntityType, Field, FieldType};
+use crate::models::types::{normalize_fields, AccessMode, AccessRule, EntityType, Field, FieldType};
 use crate::models::EntitySchema;
 
 use super::ddl::{build_create_table_ddl, ensure_entity_name};
@@ -161,6 +161,7 @@ pub fn fields_from_document(doc: &JsonValue) -> Result<Vec<Field>> {
                 .map(String::from),
         });
     }
+    normalize_fields(&mut out).map_err(StorageError::Validation)?;
     Ok(out)
 }
 
@@ -296,7 +297,9 @@ pub fn apply_entity_catalog_patch(
         schema.entity_type = et;
     }
     if let Some(fields) = &patch.fields {
-        schema.fields = fields.clone();
+        let mut normalized = fields.clone();
+        normalize_fields(&mut normalized).map_err(StorageError::Validation)?;
+        schema.fields = normalized;
     }
     if let Some(v) = &patch.view_sql {
         match v {
