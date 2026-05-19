@@ -85,7 +85,7 @@ pub async fn create_schema(
     Json(body): Json<CreateSchemaBody>,
 ) -> Result<(StatusCode, Json<Value>), ApiError> {
     let _ = require_admin(&headers, &state).await?;
-    validate_entity_name(&body.name).map_err(|m| ApiError::bad_request(m))?;
+    validate_entity_name(&body.name).map_err(ApiError::bad_request)?;
     state
         .store
         .create_entity_from_schema(
@@ -123,7 +123,7 @@ pub async fn patch_schema(
     Json(body): Json<PatchSchemaBody>,
 ) -> Result<Json<Value>, ApiError> {
     let _ = require_admin(&headers, &state).await?;
-    validate_entity_name(&name).map_err(|m| ApiError::bad_request(m))?;
+    validate_entity_name(&name).map_err(ApiError::bad_request)?;
     if body.is_noop() {
         return Err(ApiError::bad_request("empty patch body"));
     }

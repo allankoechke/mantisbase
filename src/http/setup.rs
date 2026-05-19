@@ -5,7 +5,6 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use axum::extract::{Query, State};
 use axum::http::{header, HeaderMap, StatusCode};
-use axum::response::Html;
 use axum::Json;
 use jsonwebtoken::{DecodingKey, EncodingKey, Validation};
 use rand::RngCore;
