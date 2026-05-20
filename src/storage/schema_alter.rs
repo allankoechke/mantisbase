@@ -19,9 +19,7 @@ pub enum SqlDialect {
 }
 
 fn field_physical_eq(a: &Field, b: &Field) -> bool {
-    a.field_id == b.field_id
-        && a.field_name == b.field_name
-        && field_specs_eq(a, b)
+    a.field_id == b.field_id && a.field_name == b.field_name && field_specs_eq(a, b)
 }
 
 /// Column definition equality ignoring stable id and SQL name (used after renames).
@@ -304,10 +302,7 @@ pub fn plan_physical_ddl(
                     "new column `{col}` cannot declare PRIMARY KEY on an existing table"
                 )));
             }
-            out.push(format!(
-                "{};",
-                add_column_stmt(table, &new_m[id], dialect)?
-            ));
+            out.push(format!("{};", add_column_stmt(table, &new_m[id], dialect)?));
         }
     }
 
@@ -401,7 +396,10 @@ mod tests {
 
     #[test]
     fn postgres_plan_renames_by_field_id() {
-        let old = vec![col("id", FieldType::String), col("title", FieldType::String)];
+        let old = vec![
+            col("id", FieldType::String),
+            col("title", FieldType::String),
+        ];
         let mut new = old.clone();
         new[1].field_name = "headline".into();
         let stmts =
@@ -416,11 +414,13 @@ mod tests {
 
     #[test]
     fn sqlite_rebuild_maps_renamed_column_by_field_id() {
-        let old = vec![col("id", FieldType::String), col("title", FieldType::String)];
+        let old = vec![
+            col("id", FieldType::String),
+            col("title", FieldType::String),
+        ];
         let mut new = old.clone();
         new[1].field_name = "headline".into();
-        let stmts =
-            plan_physical_ddl("t", "bare", &old, "bare", &new, SqlDialect::Sqlite).unwrap();
+        let stmts = plan_physical_ddl("t", "bare", &old, "bare", &new, SqlDialect::Sqlite).unwrap();
         let joined = stmts.join("\n");
         assert!(joined.contains("INSERT INTO"));
         assert!(joined.contains("\"title\""));

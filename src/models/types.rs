@@ -65,10 +65,8 @@ pub fn normalize_fields(fields: &mut [Field]) -> Result<(), String> {
             }
             f.field_id = f.field_name.clone();
         }
-        validate_entity_name(&f.field_name)
-            .map_err(|m| format!("invalid field name: {m}"))?;
-        validate_entity_name(&f.field_id)
-            .map_err(|m| format!("invalid field id: {m}"))?;
+        validate_entity_name(&f.field_name).map_err(|m| format!("invalid field name: {m}"))?;
+        validate_entity_name(&f.field_id).map_err(|m| format!("invalid field id: {m}"))?;
     }
     let mut ids = HashSet::new();
     let mut names = HashSet::new();
@@ -184,8 +182,8 @@ mod tests {
 
     #[test]
     fn field_deserializes_name_as_id_default() {
-        let f: Field = serde_json::from_str(r#"{"name":"title","type":"string","required":true}"#)
-            .unwrap();
+        let f: Field =
+            serde_json::from_str(r#"{"name":"title","type":"string","required":true}"#).unwrap();
         assert_eq!(f.field_name, "title");
         assert_eq!(f.field_id, "");
         let mut fields = vec![f];

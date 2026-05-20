@@ -4,7 +4,9 @@
 use libsql::{params, Connection};
 use serde_json::{json, Map, Value as JsonValue};
 
-use crate::models::types::{normalize_fields, AccessMode, AccessRule, EntityType, Field, FieldType};
+use crate::models::types::{
+    normalize_fields, AccessMode, AccessRule, EntityType, Field, FieldType,
+};
 use crate::models::EntitySchema;
 
 use super::ddl::{build_create_table_ddl, ensure_entity_name};

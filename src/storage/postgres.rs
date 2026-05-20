@@ -270,8 +270,7 @@ impl PostgresStore {
         } else {
             EntitySchema::new(name.to_string(), et)
         };
-        crate::models::normalize_fields(&mut schema.fields)
-            .map_err(StorageError::Validation)?;
+        crate::models::normalize_fields(&mut schema.fields).map_err(StorageError::Validation)?;
         if matches!(et, EntityType::View) {
             let vs = view_sql
                 .ok_or_else(|| StorageError::Validation("view entity requires view_sql".into()))?;
