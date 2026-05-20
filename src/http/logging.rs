@@ -80,7 +80,7 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
         );
     } else {
         warn!(
-            "{:<18}  {:<8}  {:<7}  {:<4}  {}  {:.3} ms  \n\t└──  {}",
+            "{:<18}  {:<8}  {:<7}  {:<4}  {}  {:.3} ms{}",
             peer,
             http_version_label(version),
             method,
@@ -88,9 +88,9 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
             resource,
             elapsed_ms,
             if err_body.is_empty() {
-                "N/A"
+                ""
             } else {
-                &err_body
+                "\n\t└──  ".to_string() + &err_body
             }
         );
     }
