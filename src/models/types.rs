@@ -3,6 +3,7 @@
 use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 /// Logical entity kind (matches REST `type` field).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -29,8 +30,8 @@ pub enum FieldType {
 
 /// One field on an entity schema (API + DDL projection).
 ///
-/// Stable identity is [`field_id`] (JSON `id`); [`field_name`] (JSON `name`) is the SQL column.
-/// If `id` / `field_id` is omitted, it defaults to `name` / `field_name`.
+/// Stable identity is [`field_id`] (JSON `id`), assigned as `mbf_<sha256-prefix>` from [`field_name`]
+/// via [`stable_field_id`]. [`field_name`] (JSON `name`) is the SQL column.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Field {
     #[serde(default, alias = "id")]
@@ -53,19 +54,35 @@ pub struct Field {
     pub default: Option<String>,
 }
 
-/// Fills missing `field_id` from `field_name` (and vice versa), validates identifiers, and checks uniqueness.
+/// SHA-256 hex digest (first 128 bits) for reproducible catalog ids across installs.
+pub fn stable_id_hex(input: &str) -> String {
+    let digest = Sha256::digest(input.as_bytes());
+    hex::encode(&digest[..16])
+}
+
+/// Catalog row id for an entity table: `mbt_<hash(name)>`.
+pub fn stable_entity_id(entity_name: &str) -> String {
+    format!("mbt_{}", stable_id_hex(entity_name))
+}
+
+/// Stable field id from SQL column name: `mbf_<hash(field_name)>`.
+pub fn stable_field_id(field_name: &str) -> String {
+    format!("mbf_{}", stable_id_hex(field_name))
+}
+
+/// Resolves `field_name`, assigns deterministic [`stable_field_id`], validates, and checks uniqueness.
 pub fn normalize_fields(fields: &mut [Field]) -> Result<(), String> {
     for f in fields.iter_mut() {
         if f.field_name.is_empty() && !f.field_id.is_empty() {
             f.field_name = f.field_id.clone();
         }
-        if f.field_id.is_empty() {
-            if f.field_name.is_empty() {
-                return Err("each field must have name or id".into());
-            }
-            f.field_id = f.field_name.clone();
+        if f.field_name.is_empty() {
+            return Err("each field must have a name".into());
         }
         validate_entity_name(&f.field_name).map_err(|m| format!("invalid field name: {m}"))?;
+        if f.field_id.is_empty() {
+            f.field_id = stable_field_id(&f.field_name);
+        }
         validate_entity_name(&f.field_id).map_err(|m| format!("invalid field id: {m}"))?;
     }
     let mut ids = HashSet::new();
@@ -185,20 +202,30 @@ mod tests {
         let f: Field =
             serde_json::from_str(r#"{"name":"title","type":"string","required":true}"#).unwrap();
         assert_eq!(f.field_name, "title");
-        assert_eq!(f.field_id, "");
         let mut fields = vec![f];
         normalize_fields(&mut fields).unwrap();
-        assert_eq!(fields[0].field_id, "title");
+        assert_eq!(fields[0].field_id, stable_field_id("title"));
         assert!(fields[0].is_required);
     }
 
     #[test]
-    fn field_keeps_distinct_id_when_renaming_column() {
-        let f: Field = serde_json::from_str(
-            r#"{"id":"title","name":"headline","type":"string","required":false}"#,
-        )
+    fn stable_ids_are_deterministic() {
+        assert_eq!(stable_entity_id("posts"), stable_entity_id("posts"));
+        assert_eq!(stable_field_id("title"), stable_field_id("title"));
+        assert!(stable_entity_id("posts").starts_with("mbt_"));
+        assert!(stable_field_id("title").starts_with("mbf_"));
+    }
+
+    #[test]
+    fn field_id_preserved_for_rename_patch() {
+        let title_id = stable_field_id("title");
+        let f: Field = serde_json::from_str(&format!(
+            r#"{{"id":"{title_id}","name":"headline","type":"string","required":false}}"#
+        ))
         .unwrap();
-        assert_eq!(f.field_id, "title");
-        assert_eq!(f.field_name, "headline");
+        let mut fields = vec![f];
+        normalize_fields(&mut fields).unwrap();
+        assert_eq!(fields[0].field_name, "headline");
+        assert_eq!(fields[0].field_id, title_id);
     }
 }

@@ -1,4 +1,4 @@
-use crate::models::types::{AccessRule, EntityType, Field, FieldType};
+use crate::models::types::{stable_field_id, AccessRule, EntityType, Field, FieldType};
 
 /// In-memory / API representation of an entity schema before or after persistence.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,7 +39,7 @@ impl EntitySchema {
         match self.entity_type {
             EntityType::Base => {
                 self.fields.push(Field {
-                    field_id: "id".to_string(),
+                    field_id: stable_field_id("id"),
                     field_name: "id".to_string(),
                     field_description: None,
                     field_type: FieldType::String,
@@ -50,7 +50,7 @@ impl EntitySchema {
                     default: None,
                 });
                 self.fields.push(Field {
-                    field_id: "created_at".to_string(),
+                    field_id: stable_field_id("created_at"),
                     field_name: "created_at".to_string(),
                     field_description: None,
                     field_type: FieldType::DateTime,
@@ -61,7 +61,7 @@ impl EntitySchema {
                     default: None,
                 });
                 self.fields.push(Field {
-                    field_id: "updated_at".to_string(),
+                    field_id: stable_field_id("updated_at"),
                     field_name: "updated_at".to_string(),
                     field_description: None,
                     field_type: FieldType::DateTime,

@@ -10,5 +10,6 @@ pub use admin::{
 pub use entity::AppUserRow;
 pub use schema::EntitySchema;
 pub use types::{
-    normalize_fields, validate_entity_name, AccessMode, AccessRule, EntityType, Field, FieldType,
+    normalize_fields, stable_entity_id, stable_field_id, stable_id_hex, validate_entity_name,
+    AccessMode, AccessRule, EntityType, Field, FieldType,
 };

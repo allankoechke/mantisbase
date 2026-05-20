@@ -96,10 +96,15 @@ pub async fn create_schema(
             &body.rules,
         )
         .await?;
-    Ok((
-        StatusCode::CREATED,
-        Json(json!({ "ok": true, "name": body.name })),
-    ))
+    let schema = state
+        .store
+        .get_entity_catalog(&body.name)
+        .await?
+        .ok_or(ApiError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "schema missing after create",
+        ))?;
+    Ok((StatusCode::CREATED, Json(schema)))
 }
 
 pub async fn get_schema(

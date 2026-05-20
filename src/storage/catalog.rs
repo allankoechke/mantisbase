@@ -5,7 +5,8 @@ use libsql::{params, Connection};
 use serde_json::{json, Map, Value as JsonValue};
 
 use crate::models::types::{
-    normalize_fields, AccessMode, AccessRule, EntityType, Field, FieldType,
+    normalize_fields, stable_entity_id, stable_field_id, AccessMode, AccessRule, EntityType, Field,
+    FieldType,
 };
 use crate::models::EntitySchema;
 
@@ -41,12 +42,14 @@ fn catalog_str_to_field_type(s: &str) -> FieldType {
 }
 
 pub fn parse_rule_from_json(rules: &JsonValue, op: &str) -> Option<AccessRule> {
-    let obj = rules.as_object()?.get("rules")?.as_object()?;
+    let obj = rules.as_object()?;
+    // Accept `{ "rules": { "list": … } }` (API) or `{ "list": … }` (README-style flat map).
+    let rule_map = obj.get("rules").and_then(|x| x.as_object()).unwrap_or(obj);
     let legacy = match op {
-        "read" => obj.get("get"),
-        _ => obj.get(op),
+        "read" => rule_map.get("get"),
+        _ => None,
     };
-    let v = legacy.or_else(|| obj.get(op))?;
+    let v = legacy.or_else(|| rule_map.get(op))?;
     let mode_raw = v.get("mode")?.as_str()?.to_string();
     let expr = v
         .get("expr")
@@ -127,8 +130,8 @@ pub fn fields_from_document(doc: &JsonValue) -> Result<Vec<Field>> {
         let field_id = item
             .get("field_id")
             .and_then(|x| x.as_str())
-            .unwrap_or(name)
-            .to_string();
+            .map(String::from)
+            .unwrap_or_else(|| stable_field_id(name));
         let t = item
             .get("type")
             .and_then(|x| x.as_str())
@@ -214,7 +217,13 @@ pub fn list_row_from_document(id: &str, name: &str, doc: &JsonValue) -> JsonValu
 
 pub fn full_catalog_json(name: &str, doc: &JsonValue) -> JsonValue {
     let rules = doc.get("rules").cloned().unwrap_or(json!({}));
+    let id = doc
+        .get("entity_id")
+        .and_then(|x| x.as_str())
+        .map(String::from)
+        .unwrap_or_else(|| stable_entity_id(name));
     json!({
+        "id": id,
         "name": name,
         "type": doc.get("type").cloned().unwrap_or(json!("bare")),
         "view_sql": doc.get("view_sql").cloned(),

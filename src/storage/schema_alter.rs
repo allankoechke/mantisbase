@@ -330,11 +330,11 @@ pub fn plan_physical_ddl(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::types::FieldType;
+    use crate::models::types::{stable_field_id, FieldType};
 
     fn col(name: &str, ft: FieldType) -> Field {
         Field {
-            field_id: name.to_string(),
+            field_id: stable_field_id(name),
             field_name: name.to_string(),
             field_description: None,
             field_type: ft,
@@ -402,6 +402,7 @@ mod tests {
         ];
         let mut new = old.clone();
         new[1].field_name = "headline".into();
+        // field_id stays mbf_<hash("title")> while column becomes "headline"
         let stmts =
             plan_physical_ddl("t", "bare", &old, "bare", &new, SqlDialect::Postgres).unwrap();
         let joined = stmts.join("\n");

@@ -1,6 +1,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use axum::http::{header, HeaderMap, StatusCode};
+use base64::Engine;
 use jsonwebtoken::{DecodingKey, Validation};
 
 use crate::models::types::{AccessMode, AccessRule};
@@ -17,93 +18,179 @@ pub(in crate::http) struct AdminPrincipal {
     pub email: String,
 }
 
-/// Admin routes accept **HTTP Basic** (email:password) or **Bearer** JWT from [`super::admins::admin_auth_login`].
-pub(in crate::http) async fn require_admin(
-    headers: &HeaderMap,
-    state: &AppState,
-) -> Result<AdminPrincipal, ApiError> {
+#[derive(Debug, Clone)]
+enum AuthorizationCredential {
+    Basic { user: String, pass: String },
+    Bearer(String),
+}
+
+fn scheme_prefix<'a>(raw: &'a str, scheme: &str) -> Option<&'a str> {
+    let raw = raw.trim();
+    if raw.len() < scheme.len() {
+        return None;
+    }
+    if !raw[..scheme.len()].eq_ignore_ascii_case(scheme) {
+        return None;
+    }
+    let rest = &raw[scheme.len()..];
+    Some(rest.trim_start())
+}
+
+fn parse_authorization_header(raw: &str) -> Option<AuthorizationCredential> {
+    let raw = raw.trim();
+    if let Some(b64) = scheme_prefix(raw, "Basic") {
+        let decoded = base64::engine::general_purpose::STANDARD.decode(b64).ok()?;
+        let s = String::from_utf8(decoded).ok()?;
+        let (user, pass) = s.split_once(':')?;
+        return Some(AuthorizationCredential::Basic {
+            user: user.to_string(),
+            pass: pass.to_string(),
+        });
+    }
+    if let Some(token) = scheme_prefix(raw, "Bearer") {
+        if token.is_empty() {
+            return None;
+        }
+        return Some(AuthorizationCredential::Bearer(token.to_string()));
+    }
+    // Some clients send the JWT alone without a "Bearer " prefix.
+    if raw.starts_with("eyJ") && raw.contains('.') {
+        return Some(AuthorizationCredential::Bearer(raw.to_string()));
+    }
+    None
+}
+
+fn parse_authorization(headers: &HeaderMap) -> Result<AuthorizationCredential, ApiError> {
     let raw = headers
         .get(header::AUTHORIZATION)
         .and_then(|v| v.to_str().ok())
         .ok_or(ApiError::new(
             StatusCode::UNAUTHORIZED,
-            "missing Authorization",
+            "missing Authorization header",
         ))?;
-    if let Some(b64) = raw.strip_prefix("Basic ") {
-        let decoded = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
-            .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic encoding"))?;
-        let s = String::from_utf8(decoded)
-            .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic utf8"))?;
-        let (user, pass) = s.split_once(':').ok_or(ApiError::new(
+    parse_authorization_header(raw).ok_or_else(|| {
+        ApiError::new(
             StatusCode::UNAUTHORIZED,
-            "invalid Basic format",
-        ))?;
-        let ok = state.store.verify_admin_basic(user, pass).await?;
-        if !ok {
-            return Err(ApiError::new(
-                StatusCode::UNAUTHORIZED,
-                "invalid admin credentials",
-            ));
-        }
-        let admin = state
-            .store
-            .get_admin_by_email(user)
-            .await?
-            .ok_or(ApiError::new(
-                StatusCode::UNAUTHORIZED,
-                "invalid admin credentials",
-            ))?;
-        return Ok(AdminPrincipal {
-            id: admin.id,
-            email: admin.email,
-        });
-    }
-    if let Some(token) = raw.strip_prefix("Bearer ") {
-        let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
-        validation.set_audience(&[MB_ADMIN_JWT_AUD]);
-        let data = jsonwebtoken::decode::<AdminJwtClaims>(
-            token.trim(),
-            &DecodingKey::from_secret(state.signing_key.as_bytes()),
-            &validation,
+            "Authorization must be Basic credentials or Bearer <token>",
         )
-        .map_err(|_| {
-            ApiError::new(
-                StatusCode::UNAUTHORIZED,
-                "invalid or non-admin bearer token",
-            )
-        })?;
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|_| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
-            .as_secs();
-        if data.claims.exp <= now {
-            return Err(ApiError::new(StatusCode::UNAUTHORIZED, "token expired"));
-        }
-        let id = if data.claims.id.is_empty() {
-            data.claims.sub
-        } else {
-            data.claims.id
-        };
-        if id.is_empty() || data.claims.email.is_empty() {
-            return Err(ApiError::new(
-                StatusCode::UNAUTHORIZED,
-                "invalid admin token claims",
-            ));
-        }
-        return Ok(AdminPrincipal {
-            id,
-            email: data.claims.email,
-        });
-    }
-    Err(ApiError::new(
-        StatusCode::UNAUTHORIZED,
-        "expected Basic or Bearer admin authorization",
-    ))
+    })
 }
 
-fn bearer_token(headers: &HeaderMap) -> Option<String> {
-    let raw = headers.get(header::AUTHORIZATION)?.to_str().ok()?;
-    raw.strip_prefix("Bearer ").map(|s| s.to_string())
+async fn verify_admin_basic(
+    state: &AppState,
+    user: &str,
+    pass: &str,
+) -> Result<AdminPrincipal, ApiError> {
+    let ok = state.store.verify_admin_basic(user, pass).await?;
+    if !ok {
+        return Err(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid admin credentials",
+        ));
+    }
+    let admin = state
+        .store
+        .get_admin_by_email(user)
+        .await?
+        .ok_or(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid admin credentials",
+        ))?;
+    Ok(AdminPrincipal {
+        id: admin.id,
+        email: admin.email,
+    })
+}
+
+fn verify_admin_bearer(state: &AppState, token: &str) -> Result<AdminPrincipal, ApiError> {
+    let token = token.trim();
+    let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
+    validation.set_audience(&[MB_ADMIN_JWT_AUD]);
+    let data = jsonwebtoken::decode::<AdminJwtClaims>(
+        token,
+        &DecodingKey::from_secret(state.signing_key.as_bytes()),
+        &validation,
+    )
+    .map_err(|_| {
+        ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid or non-admin bearer token",
+        )
+    })?;
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|_| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
+        .as_secs();
+    if data.claims.exp <= now {
+        return Err(ApiError::new(StatusCode::UNAUTHORIZED, "token expired"));
+    }
+    let id = if data.claims.id.is_empty() {
+        data.claims.sub
+    } else {
+        data.claims.id
+    };
+    if id.is_empty() || data.claims.email.is_empty() {
+        return Err(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid admin token claims",
+        ));
+    }
+    Ok(AdminPrincipal {
+        id,
+        email: data.claims.email,
+    })
+}
+
+async fn verify_admin_credential(
+    state: &AppState,
+    cred: &AuthorizationCredential,
+) -> Result<AdminPrincipal, ApiError> {
+    match cred {
+        AuthorizationCredential::Basic { user, pass } => {
+            verify_admin_basic(state, user, pass).await
+        }
+        AuthorizationCredential::Bearer(token) => verify_admin_bearer(state, token),
+    }
+}
+
+fn verify_app_user_bearer(state: &AppState, token: &str) -> Result<(), ApiError> {
+    let token = token.trim();
+    let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
+    validation.validate_aud = false;
+    let data = jsonwebtoken::decode::<AppUserClaims>(
+        token,
+        &DecodingKey::from_secret(state.signing_key.as_bytes()),
+        &validation,
+    )
+    .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid bearer token"))?;
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|_| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
+        .as_secs();
+    if data.claims.exp <= now {
+        return Err(ApiError::new(StatusCode::UNAUTHORIZED, "token expired"));
+    }
+    let id = if data.claims.id.is_empty() {
+        data.claims.sub.clone()
+    } else {
+        data.claims.id.clone()
+    };
+    if id.is_empty() {
+        return Err(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid token subject",
+        ));
+    }
+    Ok(())
+}
+
+/// Admin routes accept **HTTP Basic** (email:password) or **Bearer** JWT from [`super::admins::admin_auth_login`].
+pub(in crate::http) async fn require_admin(
+    headers: &HeaderMap,
+    state: &AppState,
+) -> Result<AdminPrincipal, ApiError> {
+    let cred = parse_authorization(headers)?;
+    verify_admin_credential(state, &cred).await
 }
 
 pub(in crate::http) async fn check_entity_access(
@@ -124,42 +211,60 @@ pub(in crate::http) async fn check_entity_access(
             Ok(())
         }
         AccessMode::Authenticated => {
-            if require_admin(headers, state).await.is_ok() {
+            let cred = match parse_authorization(headers) {
+                Ok(c) => c,
+                Err(e) => return Err(e),
+            };
+            if verify_admin_credential(state, &cred).await.is_ok() {
                 return Ok(());
             }
-            let token = bearer_token(headers).ok_or(ApiError::new(
-                StatusCode::UNAUTHORIZED,
-                "Bearer token or admin Basic required",
-            ))?;
-            let data = jsonwebtoken::decode::<AppUserClaims>(
-                &token,
-                &jsonwebtoken::DecodingKey::from_secret(state.signing_key.as_bytes()),
-                &jsonwebtoken::Validation::default(),
-            )
-            .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid token"))?;
-            let now = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .map_err(|_| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
-                .as_secs();
-            if data.claims.exp <= now {
-                return Err(ApiError::new(StatusCode::UNAUTHORIZED, "token expired"));
-            }
-            let id = if data.claims.id.is_empty() {
-                data.claims.sub.clone()
-            } else {
-                data.claims.id.clone()
-            };
-            if id.is_empty() {
-                return Err(ApiError::new(
+            match cred {
+                AuthorizationCredential::Bearer(token) => {
+                    if verify_app_user_bearer(state, &token).is_ok() {
+                        return Ok(());
+                    }
+                    // Admin JWTs also decode as app-user-shaped claims (extra `aud` is ignored).
+                    if verify_admin_bearer(state, &token).is_ok() {
+                        return Ok(());
+                    }
+                    Err(ApiError::new(
+                        StatusCode::UNAUTHORIZED,
+                        "invalid or expired bearer token",
+                    ))
+                }
+                AuthorizationCredential::Basic { .. } => Err(ApiError::new(
                     StatusCode::UNAUTHORIZED,
-                    "invalid token subject",
-                ));
+                    "invalid admin credentials",
+                )),
             }
-            Ok(())
         }
         AccessMode::Custom => Err(ApiError::new(
             StatusCode::FORBIDDEN,
             "custom access rules not implemented",
         )),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_bearer_case_insensitive() {
+        let c = parse_authorization_header("bearer mytoken").unwrap();
+        match c {
+            AuthorizationCredential::Bearer(t) => assert_eq!(t, "mytoken"),
+            _ => panic!("expected bearer"),
+        }
+    }
+
+    #[test]
+    fn parse_raw_jwt_without_scheme() {
+        let jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.sig";
+        let c = parse_authorization_header(jwt).unwrap();
+        match c {
+            AuthorizationCredential::Bearer(t) => assert_eq!(t, jwt),
+            _ => panic!("expected bearer"),
+        }
     }
 }

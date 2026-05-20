@@ -312,7 +312,7 @@ impl LibsqlStore {
             }
         }
         let conn = self.conn()?;
-        let entity_id = Uuid::new_v4().to_string();
+        let entity_id = crate::models::stable_entity_id(name);
         let ts = now_rfc3339();
         let doc = build_schema_document(&entity_id, &schema, view_sql, rules);
         let doc_s = serde_json::to_string(&doc)?;
