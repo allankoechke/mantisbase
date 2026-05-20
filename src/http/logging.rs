@@ -88,7 +88,7 @@ pub async fn log_request(req: Request<Body>, next: Next) -> Response<Body> {
             resource,
             elapsed_ms,
             if err_body.is_empty() {
-                ""
+                "".to_string()
             } else {
                 "\n\t└──  ".to_string() + &err_body
             }
