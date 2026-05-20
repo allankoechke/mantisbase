@@ -9,66 +9,93 @@ use super::error::ApiError;
 use super::jwt::{AdminJwtClaims, AppUserClaims, MB_ADMIN_JWT_AUD};
 use super::AppState;
 
+/// Authenticated admin identity (id + email).
+#[derive(Debug, Clone)]
+pub(in crate::http) struct AdminPrincipal {
+    pub id: String,
+    #[allow(dead_code)]
+    pub email: String,
+}
+
 /// Admin routes accept **HTTP Basic** (email:password) or **Bearer** JWT from [`super::admins::admin_auth_login`].
 pub(in crate::http) async fn require_admin(
     headers: &HeaderMap,
     state: &AppState,
-) -> Result<String, ApiError> {
+) -> Result<AdminPrincipal, ApiError> {
     let raw = headers
         .get(header::AUTHORIZATION)
         .and_then(|v| v.to_str().ok())
-        .ok_or(ApiError(StatusCode::UNAUTHORIZED, "missing Authorization"))?;
+        .ok_or(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "missing Authorization",
+        ))?;
     if let Some(b64) = raw.strip_prefix("Basic ") {
         let decoded = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
-            .map_err(|_| ApiError(StatusCode::UNAUTHORIZED, "invalid Basic encoding"))?;
+            .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic encoding"))?;
         let s = String::from_utf8(decoded)
-            .map_err(|_| ApiError(StatusCode::UNAUTHORIZED, "invalid Basic utf8"))?;
-        let (user, pass) = s
-            .split_once(':')
-            .ok_or(ApiError(StatusCode::UNAUTHORIZED, "invalid Basic format"))?;
+            .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid Basic utf8"))?;
+        let (user, pass) = s.split_once(':').ok_or(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid Basic format",
+        ))?;
         let ok = state.store.verify_admin_basic(user, pass).await?;
         if !ok {
-            return Err(ApiError(
+            return Err(ApiError::new(
                 StatusCode::UNAUTHORIZED,
                 "invalid admin credentials",
             ));
         }
-        return Ok(user.to_string());
+        let admin = state
+            .store
+            .get_admin_by_email(user)
+            .await?
+            .ok_or(ApiError::new(
+                StatusCode::UNAUTHORIZED,
+                "invalid admin credentials",
+            ))?;
+        return Ok(AdminPrincipal {
+            id: admin.id,
+            email: admin.email,
+        });
     }
     if let Some(token) = raw.strip_prefix("Bearer ") {
-        let secret = state.jwt_secret.as_deref().ok_or(ApiError(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "MB_JWT_SECRET not set",
-        ))?;
         let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
         validation.set_audience(&[MB_ADMIN_JWT_AUD]);
         let data = jsonwebtoken::decode::<AdminJwtClaims>(
             token.trim(),
-            &DecodingKey::from_secret(secret.as_bytes()),
+            &DecodingKey::from_secret(state.signing_key.as_bytes()),
             &validation,
         )
         .map_err(|_| {
-            ApiError(
+            ApiError::new(
                 StatusCode::UNAUTHORIZED,
                 "invalid or non-admin bearer token",
             )
         })?;
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .map_err(|_| ApiError(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
+            .map_err(|_| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
             .as_secs();
         if data.claims.exp <= now {
-            return Err(ApiError(StatusCode::UNAUTHORIZED, "token expired"));
+            return Err(ApiError::new(StatusCode::UNAUTHORIZED, "token expired"));
         }
-        if data.claims.sub.is_empty() || data.claims.email.is_empty() {
-            return Err(ApiError(
+        let id = if data.claims.id.is_empty() {
+            data.claims.sub
+        } else {
+            data.claims.id
+        };
+        if id.is_empty() || data.claims.email.is_empty() {
+            return Err(ApiError::new(
                 StatusCode::UNAUTHORIZED,
                 "invalid admin token claims",
             ));
         }
-        return Ok(data.claims.email);
+        return Ok(AdminPrincipal {
+            id,
+            email: data.claims.email,
+        });
     }
-    Err(ApiError(
+    Err(ApiError::new(
         StatusCode::UNAUTHORIZED,
         "expected Basic or Bearer admin authorization",
     ))
@@ -100,33 +127,37 @@ pub(in crate::http) async fn check_entity_access(
             if require_admin(headers, state).await.is_ok() {
                 return Ok(());
             }
-            let token = bearer_token(headers).ok_or(ApiError(
+            let token = bearer_token(headers).ok_or(ApiError::new(
                 StatusCode::UNAUTHORIZED,
                 "Bearer token or admin Basic required",
             ))?;
-            let secret = state.jwt_secret.as_deref().ok_or(ApiError(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "MB_JWT_SECRET not set",
-            ))?;
             let data = jsonwebtoken::decode::<AppUserClaims>(
                 &token,
-                &jsonwebtoken::DecodingKey::from_secret(secret.as_bytes()),
+                &jsonwebtoken::DecodingKey::from_secret(state.signing_key.as_bytes()),
                 &jsonwebtoken::Validation::default(),
             )
-            .map_err(|_| ApiError(StatusCode::UNAUTHORIZED, "invalid token"))?;
+            .map_err(|_| ApiError::new(StatusCode::UNAUTHORIZED, "invalid token"))?;
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
-                .map_err(|_| ApiError(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
+                .map_err(|_| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "clock error"))?
                 .as_secs();
             if data.claims.exp <= now {
-                return Err(ApiError(StatusCode::UNAUTHORIZED, "token expired"));
+                return Err(ApiError::new(StatusCode::UNAUTHORIZED, "token expired"));
             }
-            if data.claims.sub.is_empty() {
-                return Err(ApiError(StatusCode::UNAUTHORIZED, "invalid token subject"));
+            let id = if data.claims.id.is_empty() {
+                data.claims.sub.clone()
+            } else {
+                data.claims.id.clone()
+            };
+            if id.is_empty() {
+                return Err(ApiError::new(
+                    StatusCode::UNAUTHORIZED,
+                    "invalid token subject",
+                ));
             }
             Ok(())
         }
-        AccessMode::Custom => Err(ApiError(
+        AccessMode::Custom => Err(ApiError::new(
             StatusCode::FORBIDDEN,
             "custom access rules not implemented",
         )),

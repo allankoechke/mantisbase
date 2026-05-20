@@ -81,6 +81,21 @@ pub fn build_openapi_value(entities: &[Value]) -> Value {
                     "responses": { "200": { "description": "OK" } }
                 }
             },
+            "/api/v1/setup/status": {
+                "get": {
+                    "summary": "First-admin setup status (public when no admins exist)",
+                    "parameters": [
+                        { "name": "token", "in": "query", "required": false, "schema": { "type": "string" } }
+                    ],
+                    "responses": { "200": { "description": "OK" } }
+                }
+            },
+            "/api/v1/setup/first-admin": {
+                "post": {
+                    "summary": "Create first admin using setup token (Bearer or body.token)",
+                    "responses": { "201": { "description": "Created" }, "401": { "description": "Invalid token" }, "403": { "description": "Setup not available" } }
+                }
+            },
             "/api/v1/admins/auth/login": {
                 "post": {
                     "summary": "Admin login (email + password); returns JWT and admin profile (no prior auth)",
@@ -119,6 +134,12 @@ pub fn build_openapi_value(entities: &[Value]) -> Value {
                 }
             },
             "/api/v1/admins/{id}": {
+                "get": {
+                    "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
+                    "summary": "Get admin by id or email (admin)",
+                    "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+                    "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } }
+                },
                 "delete": {
                     "security": [{ "basicAuth": [] }, { "bearerAuth": [] }],
                     "summary": "Delete admin by id or email (admin)",

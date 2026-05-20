@@ -45,6 +45,15 @@ impl Store {
         self.get_admin_by_email(email).await
     }
 
+    pub async fn get_admin(&self, id_or_email: &str) -> Result<Option<crate::models::AdminRow>> {
+        let key = normalize_and_validate_admin_remove_target(id_or_email)
+            .map_err(|m| super::error::StorageError::Validation(m.to_string()))?;
+        match self {
+            Store::Libsql(s) => s.get_admin(&key).await,
+            Store::Postgres(s) => s.get_admin(&key).await,
+        }
+    }
+
     pub async fn entity_type(&self, name: &str) -> Result<Option<String>> {
         match self {
             Store::Libsql(s) => s.entity_type(name).await,
@@ -187,6 +196,10 @@ impl Store {
             Store::Libsql(s) => s.list_admins().await,
             Store::Postgres(s) => s.list_admins().await,
         }
+    }
+
+    pub async fn has_any_admin(&self) -> Result<bool> {
+        Ok(!self.list_admins().await?.is_empty())
     }
 
     pub async fn app_config_set(

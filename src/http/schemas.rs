@@ -112,7 +112,7 @@ pub async fn get_schema(
         .store
         .get_entity_catalog(&name)
         .await?
-        .ok_or(ApiError(StatusCode::NOT_FOUND, "schema not found"))?;
+        .ok_or(ApiError::new(StatusCode::NOT_FOUND, "schema not found"))?;
     Ok(Json(v))
 }
 
@@ -133,7 +133,7 @@ pub async fn patch_schema(
         .store
         .get_entity_catalog(&name)
         .await?
-        .ok_or(ApiError(
+        .ok_or(ApiError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "schema missing after patch",
         ))?;

@@ -25,13 +25,17 @@ pub async fn auth_login(
         .store
         .verify_user_login(&body.email, &body.password)
         .await?
-        .ok_or(ApiError(StatusCode::UNAUTHORIZED, "invalid credentials"))?;
-    let secret = state.jwt_secret.as_deref().ok_or(ApiError(
-        StatusCode::INTERNAL_SERVER_ERROR,
-        "MB_JWT_SECRET not set",
-    ))?;
-    let sub = user
+        .ok_or(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid credentials",
+        ))?;
+    let id = user
         .get("id")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let email = user
+        .get("email")
         .and_then(|v| v.as_str())
         .unwrap_or("")
         .to_string();
@@ -40,11 +44,16 @@ pub async fn auth_login(
         .unwrap()
         .as_secs()
         + 86400 * 7;
-    let claims = AppUserClaims { sub, exp };
+    let claims = AppUserClaims {
+        sub: id.clone(),
+        id,
+        email,
+        exp,
+    };
     let token = jsonwebtoken::encode(
         &jsonwebtoken::Header::default(),
         &claims,
-        &jsonwebtoken::EncodingKey::from_secret(secret.as_bytes()),
+        &jsonwebtoken::EncodingKey::from_secret(state.signing_key.as_bytes()),
     )
     .map_err(|_| ApiError::internal("jwt encode failed"))?;
     Ok(Json(json!({ "token": token, "user": user })))

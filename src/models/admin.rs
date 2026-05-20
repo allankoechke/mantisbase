@@ -64,7 +64,7 @@ pub fn normalize_and_validate_admin_remove_target(raw: &str) -> Result<String, &
     if s.contains('@') {
         return normalize_and_validate_admin_email(s);
     }
-    Uuid::parse_str(s).map_err(|_| "invalid admin id")?;
+    Uuid::parse_str(s).map_err(|_| "admin id must be a valid UUID")?;
     Ok(s.to_string())
 }
 

@@ -94,10 +94,15 @@ impl PostgresStore {
     }
 
     pub async fn get_admin_by_email(&self, email: &str) -> Result<Option<AdminRow>> {
+        self.get_admin(email).await
+    }
+
+    pub async fn get_admin(&self, id_or_email: &str) -> Result<Option<AdminRow>> {
         let row = sqlx::query(
-            "SELECT id, email, active, password_reset_required FROM mb_admin WHERE email = $1 LIMIT 1",
+            "SELECT id, email, active, password_reset_required FROM mb_admin WHERE id = $1 OR email = $2 LIMIT 1",
         )
-        .bind(email)
+        .bind(id_or_email)
+        .bind(id_or_email)
         .fetch_optional(&self.pool)
         .await?;
         let Some(row) = row else {
@@ -258,13 +263,14 @@ impl PostgresStore {
         rules: &JsonValue,
     ) -> Result<()> {
         ensure_entity_name(name)?;
-        let schema = if let Some(f) = fields_override {
+        let mut schema = if let Some(f) = fields_override {
             let mut s = EntitySchema::new(name.to_string(), et);
             s.fields = f;
             s
         } else {
             EntitySchema::new(name.to_string(), et)
         };
+        crate::models::normalize_fields(&mut schema.fields).map_err(StorageError::Validation)?;
         if matches!(et, EntityType::View) {
             let vs = view_sql
                 .ok_or_else(|| StorageError::Validation("view entity requires view_sql".into()))?;

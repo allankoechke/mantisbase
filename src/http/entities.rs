@@ -46,7 +46,7 @@ pub async fn get_row(
         .store
         .get_entity_row(&entity, &id)
         .await?
-        .ok_or(ApiError(StatusCode::NOT_FOUND, "row not found"))?;
+        .ok_or(ApiError::new(StatusCode::NOT_FOUND, "row not found"))?;
     Ok(Json(Value::Object(row.into_iter().collect())))
 }
 

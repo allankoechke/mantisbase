@@ -12,16 +12,18 @@ mod login;
 mod meta;
 mod schemas;
 mod settings;
+mod setup;
 mod sys;
 mod webhooks;
 
 pub use error::ApiError;
 
 use std::net::SocketAddr;
+
 use std::sync::Arc;
 
 use axum::middleware;
-use axum::routing::{delete, get, post};
+use axum::routing::{get, post};
 use axum::Router;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
@@ -38,6 +40,10 @@ use crate::storage::Store;
 pub struct AppState {
     pub store: Store,
     pub jwt_secret: Option<String>,
+    /// HMAC secret for JWTs this process (from `MB_JWT_SECRET` or ephemeral).
+    pub signing_key: String,
+    pub setup: Arc<setup::SetupState>,
+    pub skip_setup: bool,
 }
 
 /// Builds the `/api/v1` router with all JSON routes.
@@ -65,7 +71,10 @@ fn api_router(state: Arc<AppState>) -> Router {
             "/admins",
             get(admins::list_admins).post(admins::create_admin),
         )
-        .route("/admins/{id}", delete(admins::delete_admin))
+        .route(
+            "/admins/{id}",
+            get(admins::get_admin).delete(admins::delete_admin),
+        )
         .route(
             "/entities/{entity}",
             get(entities::list_entities).post(entities::create_row),
@@ -77,6 +86,8 @@ fn api_router(state: Arc<AppState>) -> Router {
                 .delete(entities::delete_row),
         )
         .route("/auth/login", post(login::auth_login))
+        .route("/setup/status", get(setup::setup_status))
+        .route("/setup/first-admin", post(setup::create_first_admin))
         .route(
             "/webhooks",
             get(webhooks::list_hooks).post(webhooks::register_hook),
@@ -85,11 +96,17 @@ fn api_router(state: Arc<AppState>) -> Router {
 }
 
 /// Binds the listener and serves HTTP until shutdown.
-pub async fn serve(mantis: &MantisBase, store: Store) -> anyhow::Result<()> {
+pub async fn serve(mantis: &MantisBase, store: Store, skip_setup: bool) -> anyhow::Result<()> {
+    let signing_key = setup::signing_key_for_process(mantis.jwt_secret());
     let state = Arc::new(AppState {
-        store,
         jwt_secret: mantis.jwt_secret().map(|s| s.to_string()),
+        store,
+        signing_key,
+        setup: Arc::new(setup::SetupState::default()),
+        skip_setup,
     });
+
+    setup::bootstrap_first_admin_setup(mantis.host(), mantis.port(), &state).await?;
 
     let api = api_router(state.clone());
 
@@ -102,6 +119,7 @@ pub async fn serve(mantis: &MantisBase, store: Store) -> anyhow::Result<()> {
 
     let app = Router::new()
         .nest("/api/v1", api)
+        // .route("/mb/setup", get(setup::setup_page))
         .nest_service("/mb", ServeDir::new(admin_root))
         .layer(CorsLayer::permissive())
         .layer(middleware::from_fn(logging::log_request));

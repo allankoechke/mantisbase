@@ -26,21 +26,15 @@ pub async fn admin_auth_login(
     State(state): State<Arc<AppState>>,
     Json(body): Json<AdminAuthLoginBody>,
 ) -> Result<Json<Value>, ApiError> {
-    let email = normalize_and_validate_admin_email(&body.email)
-        .map_err(|_| ApiError(StatusCode::BAD_REQUEST, "invalid or missing email"))?;
-    let password = normalize_and_validate_admin_password(&body.password).map_err(|_| {
-        ApiError(
-            StatusCode::BAD_REQUEST,
-            "password must be at least 8 characters",
-        )
-    })?;
+    let email = normalize_and_validate_admin_email(&body.email).map_err(ApiError::bad_request)?;
+    let password =
+        normalize_and_validate_admin_password(&body.password).map_err(ApiError::bad_request)?;
     let Some(admin) = state.store.authenticate_admin(&email, &password).await? else {
-        return Err(ApiError(StatusCode::UNAUTHORIZED, "invalid credentials"));
+        return Err(ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            "invalid credentials",
+        ));
     };
-    let secret = state.jwt_secret.as_deref().ok_or(ApiError(
-        StatusCode::INTERNAL_SERVER_ERROR,
-        "MB_JWT_SECRET not set",
-    ))?;
     let exp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
@@ -48,6 +42,7 @@ pub async fn admin_auth_login(
         + 86400 * 7;
     let claims = AdminJwtClaims {
         sub: admin.id.clone(),
+        id: admin.id.clone(),
         email: admin.email.clone(),
         exp,
         aud: MB_ADMIN_JWT_AUD.to_string(),
@@ -55,7 +50,7 @@ pub async fn admin_auth_login(
     let token = jsonwebtoken::encode(
         &jsonwebtoken::Header::default(),
         &claims,
-        &jsonwebtoken::EncodingKey::from_secret(secret.as_bytes()),
+        &jsonwebtoken::EncodingKey::from_secret(state.signing_key.as_bytes()),
     )
     .map_err(|_| ApiError::internal("jwt encode failed"))?;
     Ok(Json(json!({
@@ -64,13 +59,28 @@ pub async fn admin_auth_login(
     })))
 }
 
-fn admin_json(a: &AdminRow) -> Value {
+pub(in crate::http) fn admin_json(a: &AdminRow) -> Value {
     json!({
         "id": a.id,
         "email": a.email,
         "active": a.active,
         "password_reset_required": a.password_reset_required,
     })
+}
+
+/// `id` is admin row id or email (URL-encoded), same as delete.
+pub async fn get_admin(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+) -> Result<Json<Value>, ApiError> {
+    let _ = require_admin(&headers, &state).await?;
+    let admin = state
+        .store
+        .get_admin(&id)
+        .await?
+        .ok_or(ApiError::new(StatusCode::NOT_FOUND, "admin not found"))?;
+    Ok(Json(admin_json(&admin)))
 }
 
 pub async fn list_admins(
@@ -108,7 +118,7 @@ pub async fn delete_admin(
     let _ = require_admin(&headers, &state).await?;
     let n = state.store.remove_admin(&id).await?;
     if n == 0 {
-        return Err(ApiError(StatusCode::NOT_FOUND, "admin not found"));
+        return Err(ApiError::new(StatusCode::NOT_FOUND, "admin not found"));
     }
     Ok(StatusCode::NO_CONTENT)
 }

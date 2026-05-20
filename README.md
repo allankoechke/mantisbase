@@ -56,13 +56,25 @@ Build the admin SPA (Vite → `public/mb-dist/`, served at `/mb/`):
 cd admin && npm install && npm run build && cd ..
 ```
 
-Apply migrations, create an admin, set a JWT secret for app-user login, then serve:
+Apply migrations, then serve (first admin via setup wizard or CLI):
 
 ```bash
 ./target/release/mantisbase migrations up
-./target/release/mantisbase admins add admin@example.com 'your-admin-password'
-export MB_JWT_SECRET='a-long-random-secret-for-user-jwt'
+export MB_JWT_SECRET='a-long-random-secret-for-user-jwt'   # optional but recommended
 ./target/release/mantisbase serve
+```
+
+If **no admin account** exists, `serve` prints a **one-time setup URL** (valid 20 minutes, single use) such as `http://127.0.0.1:7070/mb/setup?token=…` and tries to open it in your browser. Complete the form to create the first admin. Alternatively:
+
+```bash
+./target/release/mantisbase admins add admin@example.com 'your-admin-password'
+```
+
+For CI and automated runs, skip setup and the browser prompt:
+
+```bash
+./target/release/mantisbase serve --skip-setup
+# or: export MB_SKIP_ADMIN_SETUP=1 && ./target/release/mantisbase serve
 ```
 
 Defaults:
@@ -72,11 +84,15 @@ Defaults:
 
 OpenAPI for the running shape of the API: `GET /api/v1/openapi.json`.
 
+### First-admin setup (`/mb/setup`, `/api/v1/setup/*`)
+
+When the database has no admins: **`GET /api/v1/setup/status?token=…`**, **`POST /api/v1/setup/first-admin`** with `Authorization: Bearer <setup-token>` and `{ "email", "password" }`. The setup token is invalidated after use or once any admin exists.
+
 ### Admin accounts over HTTP (`/api/v1/admins`)
 
 Use **`POST /api/v1/admins/auth/login`** with `{"email":"…","password":"…"}` (no prior auth) to obtain `{ "token", "admin" }` — send the token as `Authorization: Bearer …` on admin routes. Alternatively use **HTTP Basic** (`email:password`) on the same routes.
 
-With admin auth: **`GET /api/v1/admins`** lists `{ "admins": [ { "id", "email", "active", "password_reset_required" }, … ] }`; **`POST /api/v1/admins`** with `{"email":"…","password":"…"}` creates another admin; **`DELETE /api/v1/admins/{id-or-email}`** removes one (URL-encode the path segment). The CLI `mantisbase admins …` commands do the same against the database.
+With admin auth: **`GET /api/v1/admins`** lists admins; **`GET /api/v1/admins/{id-or-email}`** returns one admin; **`POST /api/v1/admins`** creates another; **`DELETE /api/v1/admins/{id-or-email}`** removes one (URL-encode the path segment). Admin JWTs include **`id`**, **`email`**, and **`sub`** (id). The CLI `mantisbase admins …` commands do the same against the database.
 
 ### Create a schema (admin auth)
 
@@ -158,6 +174,7 @@ Global flags include `--data-dir`, `--admin-ui-dir` (built SPA root), `--dev`, `
 | `MB_DATABASE_URL` | DB URL when using Turso/Postgres (or pass `--db-url`) |
 | `MB_TURSO_AUTH_TOKEN` | Turso auth token when `--db turso` |
 | `MB_LOG_LEVEL` | `trace` … `critical` |
+| `MB_SKIP_ADMIN_SETUP` | If truthy (`1`, `true`, `yes`, `on`), skip first-admin setup URL and browser (same as `--skip-setup`) |
 
 ---
 
