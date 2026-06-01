@@ -61,3 +61,8 @@ docker/www/
 *.seed
 
 docs/
+
+
+# Rust files
+target/
+.cargo-target/
