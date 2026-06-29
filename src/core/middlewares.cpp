@@ -252,6 +252,46 @@ namespace mb {
         };
     }
 
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveSchema() {
+        std::string msg = MB_FUNC();
+        return [msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
+            const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
+            if (schema_id_or_name.empty()) {
+                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                return HandlerResponse::Handled;
+            }
+
+            try {
+                const auto schema_id = schema_id_or_name.starts_with("mbt_")
+                                           ? schema_id_or_name
+                                           : (EntitySchema::isValidEntityName(schema_id_or_name)
+                                                  ? EntitySchema::genEntityId(schema_id_or_name)
+                                                  : throw MantisException(400, "Invalid entity name/id"));
+
+                if (!schema_id_or_name.starts_with("mbt_") &&
+                    MantisBase::instance().hasEntity(schema_id_or_name)) {
+                    return HandlerResponse::Unhandled;
+                }
+
+                EntitySchema::getTable(schema_id);
+                return HandlerResponse::Unhandled;
+            } catch (const MantisException &e) {
+                if (e.code() == 404 || e.code() == 400) {
+                    res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                    return HandlerResponse::Handled;
+                }
+
+                res.sendJSON(e.code(), {
+                    {"status", e.code()},
+                    {"data", json::object()},
+                    {"error", e.what()}
+                });
+                return HandlerResponse::Handled;
+            }
+        };
+    }
+
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveEntity() {
         std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, MantisResponse &res) {

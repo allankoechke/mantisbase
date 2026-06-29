@@ -18,6 +18,7 @@
 #include "../include/mantisbase/core/middlewares.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
 #include "../include/mantisbase/core/models/entity_routes.h"
+#include "../include/mantisbase/core/models/entity_schema_routes.h"
 #include "../include/mantisbase/core/logger/log_database.h"
 #include "../include/mantisbase/core/realtime.h"
 #include "../include/mantisbase/core/sse.h"
@@ -28,7 +29,6 @@ CMRC_DECLARE(mantis);
 namespace mb {
     Router::Router()
         : mApp(MantisBase::instance()),
-          m_entitySchema(std::make_unique<EntitySchema>()),
           m_sseMgr(std::make_unique<SSEMgr>()) {
         // Let's fix timing initialization, set the start time to current time
         svr.set_pre_routing_handler(preRoutingHandler());
@@ -360,6 +360,17 @@ namespace mb {
         }
     }
 
+    void Router::registerSchemaRoutes() {
+        const Middlewares adminAuth = {requireAdminAuth()};
+        const Middlewares schemaItemMiddleware = {requireAdminAuth(), resolveSchema()};
+
+        Get("/api/v1/schemas", schemaGetManyHandler(), adminAuth);
+        Post("/api/v1/schemas", schemaPostHandler(), adminAuth);
+        Get("/api/v1/schemas/:schema_name_or_id", schemaGetOneHandler(), schemaItemMiddleware);
+        Patch("/api/v1/schemas/:schema_name_or_id", schemaPatchHandler(), schemaItemMiddleware);
+        Delete("/api/v1/schemas/:schema_name_or_id", schemaDeleteHandler(), schemaItemMiddleware);
+    }
+
     void Router::registerEntityRoutes() {
         const Middlewares readMiddleware = {resolveEntity(), hasEntityAccess()};
         const Middlewares mutateMiddleware = {resolveEntity(), rejectViewMutations(), hasEntityAccess()};
@@ -396,10 +407,7 @@ namespace mb {
         router.Post("/api/v1/sys/admins/refresh", handleAuthRefresh()); // TODO
         router.Post("/api/v1/sys/admins/logout", handleAuthLogout()); // TODO
 
-        // Add entity schema routes
-        // GET|POST|PATCH|DELETE `/api/v1/schemas*`
-        m_entitySchema->createEntityRoutes();
-
+        registerSchemaRoutes();
         registerEntityRoutes();
         registerAdminEntityRoutes();
 

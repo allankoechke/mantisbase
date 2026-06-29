@@ -32,6 +32,14 @@ namespace mb {
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> hydrateContextData();
     
     /**
+     * @brief Resolve schema from `:schema_name_or_id` path param and validate it exists.
+     *
+     * Returns 404 when the schema id/name is invalid or not found.
+     * @return Middleware function
+     */
+    std::function<HandlerResponse(MantisRequest&, MantisResponse&)> resolveSchema();
+
+    /**
      * @brief Resolve entity from `:entity_name` path param and validate it is API-accessible.
      *
      * Returns 404 when the entity does not exist, is a system entity, or has API disabled.

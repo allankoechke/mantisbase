@@ -188,6 +188,8 @@ namespace mb {
 
         void registerEntityRoutes();
 
+        void registerSchemaRoutes();
+
         static std::string getMimeType(const std::string &path);
 
         // ----------- REQ/RES METHODS ----------- //
@@ -225,10 +227,8 @@ namespace mb {
         httplib::Server svr;
         RouteRegistry m_routeRegistry;
         std::unique_ptr<SSEMgr> m_sseMgr;
-        // std::vector<nlohmann::json> m_schemas;
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
         std::vector<HandlerFn> m_postRoutingMiddlewares;
-        std::unique_ptr<EntitySchema> m_entitySchema;
         std::unordered_map<std::string, Entity> m_entityMap;
     };
 } // mb
