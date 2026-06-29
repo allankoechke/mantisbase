@@ -1,85 +1,63 @@
+#include "../../include/mantisbase/core/models/entity_routes.h"
 #include "../../include/mantisbase/core/models/entity.h"
-// #include "spdlog/fmt/bundled/std.h"
 #include "../../include/mantisbase/core/auth.h"
-#include <fstream>
+#include "../../include/mantisbase/core/middlewares.h"
+#include "../../include/mantisbase/mantisbase.h"
 
 namespace mb {
-    HandlerFn Entity::getOneRouteHandler() const {
-        // Capture entity name, currently we get an error if we capture `this` directly.
-        const std::string entity_name = name();
-
-        HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
+    namespace {
+        void handleGetOne(const MantisRequest &req, const MantisResponse &res, const std::string &entity_name) {
             try {
-                // Get entity object for given name
                 const auto entity = MantisBase::instance().entity(entity_name);
 
-                // Extract path `id` value [REQUIRED]
                 const auto entity_id = trim(req.getPathParamValue("id"));
                 if (entity_id.empty())
                     throw MantisException(400, "Entity `id` is required!");
 
-                // Read for entity matching given `id` if it exists, return it, else error `404`
                 if (const auto record = entity.read(entity_id); record.has_value()) {
-                    res.sendJSON(200,
-                                 {
-                                     {"data", record},
-                                     {"error", ""},
-                                     {"status", 200}
-                                 }
-                    );
+                    res.sendJSON(200, {
+                        {"data", record},
+                        {"error", ""},
+                        {"status", 200}
+                    });
                 } else {
-                    res.sendJSON(404,
-                                 {
-                                     {"data", json::object()},
-                                     {"error", "Resource not found!"},
-                                     {"status", 404}
-                                 }
-                    );
+                    res.sendJSON(404, {
+                        {"data", json::object()},
+                        {"error", "Resource not found!"},
+                        {"status", 404}
+                    });
                 }
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", e.code()}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", e.code()}
+                });
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", 500}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", 500}
+                });
             }
-        };
+        }
 
-        return handler;
-    }
-
-    HandlerFn Entity::getManyRouteHandler() const {
-        // Capture entity name, currently we get an error if we capture `this` directly.
-        const std::string entity_name = name();
-
-        HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
+        void handleGetMany(const MantisRequest &req, const MantisResponse &res, const std::string &entity_name) {
             try {
-                // Get entity object for given `name`
                 const auto entity = MantisBase::instance().entity(entity_name);
 
-                // Page number to query
                 auto page = req.hasQueryParam("page")
                                 ? safe_stoi(req.getQueryParamValue("page"), 1)
                                 : 1;
 
-                // Records per request
                 auto page_size = req.hasQueryParam("page_size")
                                      ? safe_stoi(req.getQueryParamValue("page_size"), 100)
                                      : 100;
 
-                // Skip counting total items
                 bool skip_total_count = req.hasQueryParam("skip_total_count")
                                             ? strToBool(req.getQueryParamValue("skip_total_count"))
                                             : false;
-                // Filter parameters
+
                 std::string filter = req.hasQueryParam("filter")
                                          ? req.getQueryParamValue("filter")
                                          : "";
@@ -90,190 +68,137 @@ namespace mb {
                     {"page_size", page_size},
                     {"skip_total_count", skip_total_count}
                 };
-                opts["filter"] = filter; // TODO
+                opts["filter"] = filter;
 
-                // Get total count
                 int items_count = skip_total_count ? -1 : entity.countRecords();
-
                 const auto records = entity.list(opts);
+
                 res.sendJSON(200, {
-                                 {
-                                     "data", {
-                                         {"page", page},
-                                         {"items_count", records.size()},
-                                         {"page_size", page_size},
-                                         {"total_count", items_count},
-                                         {"items", records}
-                                     }
-                                 },
-                                 {"error", ""},
-                                 {"status", 200}
-                             }
-                );
+                    {
+                        "data", {
+                            {"page", page},
+                            {"items_count", records.size()},
+                            {"page_size", page_size},
+                            {"total_count", items_count},
+                            {"items", records}
+                        }
+                    },
+                    {"error", ""},
+                    {"status", 200}
+                });
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", e.code()}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", e.code()}
+                });
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", 500}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", 500}
+                });
             }
-        };
+        }
 
-        return handler;
-    }
-
-    HandlerWithContentReaderFn Entity::postRouteHandler() const {
-        // Capture entity name, currently we get an error if we capture `this` directly.
-        const std::string entity_name = name();
-
-        HandlerWithContentReaderFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res,
-                                                           MantisContentReader &reader) {
+        void handlePost(const MantisRequest &req, const MantisResponse &res, MantisContentReader &reader,
+                        const std::string &entity_name) {
             try {
-                // Get entity object for given name
                 const auto entity = MantisBase::instance().entity(entity_name);
 
-                // Parse form data to JSON body and files metadata
-                // Ignored for non multipart-form data
                 reader.parseFormDataToEntity(entity);
 
                 if (const auto &val_err = Validators::validateRequestBody(entity, reader.jsonBody());
                     val_err.has_value()) {
                     res.sendJSON(400, {
-                                     {"data", json::object()},
-                                     {"error", val_err.value()},
-                                     {"status", 400}
-                                 });
+                        {"data", json::object()},
+                        {"error", val_err.value()},
+                        {"status", 400}
+                    });
                     return;
                 }
 
-                // Write files to disk ...
-                // Ignored for non multipart-form data
                 reader.writeFiles(entity_name);
-
-                // Create the record
                 auto record = entity.create(reader.jsonBody());
 
-                // For auth types, remove the password field from the response
                 if (entity.type() == "auth" && record.contains("password")) {
                     record.erase("password");
                 }
 
-                // Send record back to user
                 res.sendJSON(201, {
-                                 {"data", record},
-                                 {"error", ""},
-                                 {"status", 201}
-                             }
-                );
+                    {"data", record},
+                    {"error", ""},
+                    {"status", 201}
+                });
             } catch (const MantisException &e) {
-                // Ignored for non multipart-form data
                 reader.undoWrittenFiles(entity_name);
-
                 res.sendJSON(e.code(), {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", e.code()}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", e.code()}
+                });
             } catch (const std::exception &e) {
-                // Ignored for non multipart-form data
                 reader.undoWrittenFiles(entity_name);
-
                 res.sendJSON(500, {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", 500}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", 500}
+                });
             }
-        };
+        }
 
-        return handler;
-    }
-
-    HandlerWithContentReaderFn Entity::patchRouteHandler() const {
-        // Capture entity name, currently we get an error if we capture `this` directly.
-        const std::string entity_name = name();
-
-        HandlerWithContentReaderFn handler = [entity_name](MantisRequest &req, MantisResponse &res,
-                                                           MantisContentReader &reader) {
+        void handlePatch(MantisRequest &req, MantisResponse &res, MantisContentReader &reader,
+                         const std::string &entity_name) {
             try {
-                // Get entity object for given name
                 const auto entity = MantisBase::instance().entity(entity_name);
 
                 const auto entity_id = trim(req.getPathParamValue("id"));
                 if (entity_id.empty())
                     throw MantisException(400, "Entity `id` is required!");
 
-                // Parse form data to JSON body and files metadata
                 reader.parseFormDataToEntity(entity);
 
-                // Validate request body
                 if (const auto &val_err = Validators::validateUpdateRequestBody(entity, reader.jsonBody());
                     val_err.has_value()) {
                     res.sendJSON(400, {
-                                     {"data", json::object()},
-                                     {"error", val_err.value()},
-                                     {"status", 400}
-                                 });
+                        {"data", json::object()},
+                        {"error", val_err.value()},
+                        {"status", 400}
+                    });
                     return;
                 }
 
-                // Write files to disk first
                 reader.writeFiles(entity_name);
-
-                // Update records ...
                 auto record = entity.update(entity_id, reader.jsonBody());
 
-                // For auth types, remove the password field from the response
                 if (entity.type() == "auth" && record.contains("password")) {
                     record.erase("password");
                 }
 
-                // Send record back to user
                 res.sendJSON(200, {
-                                 {"data", record},
-                                 {"error", ""},
-                                 {"status", 200}
-                             }
-                );
+                    {"data", record},
+                    {"error", ""},
+                    {"status", 200}
+                });
             } catch (const MantisException &e) {
                 reader.undoWrittenFiles(entity_name);
                 res.sendJSON(e.code(), {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", e.code()}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", e.code()}
+                });
             } catch (const std::exception &e) {
                 reader.undoWrittenFiles(entity_name);
                 res.sendJSON(500, {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", 500}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", 500}
+                });
             }
-        };
+        }
 
-        return handler;
-    }
-
-    HandlerFn Entity::deleteRouteHandler() const {
-        // Capture entity name, currently we get an error if we capture `this` directly.
-        const std::string entity_name = name();
-
-        HandlerFn handler = [entity_name](const MantisRequest &req, const MantisResponse &res) {
+        void handleDelete(const MantisRequest &req, const MantisResponse &res, const std::string &entity_name) {
             try {
-                // Get entity object for given name
                 const auto entity = MantisBase::instance().entity(entity_name);
 
                 const auto entity_id = trim(req.getPathParamValue("id"));
@@ -284,77 +209,78 @@ namespace mb {
                 res.sendEmpty();
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", e.code()}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", e.code()}
+                });
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
-                                 {"data", json::object()},
-                                 {"error", e.what()},
-                                 {"status", 500}
-                             }
-                );
+                    {"data", json::object()},
+                    {"error", e.what()},
+                    {"status", 500}
+                });
             }
-        };
-
-        return handler;
+        }
     }
 
-    void Entity::createEntityRoutes() const {
+    HandlerFn entityGetOneHandler() {
+        return [](const MantisRequest &req, const MantisResponse &res) {
+            handleGetOne(req, res, trim(req.getPathParamValue("entity_name")));
+        };
+    }
+
+    HandlerFn entityGetManyHandler() {
+        return [](const MantisRequest &req, const MantisResponse &res) {
+            handleGetMany(req, res, trim(req.getPathParamValue("entity_name")));
+        };
+    }
+
+    HandlerWithContentReaderFn entityPostHandler() {
+        return [](const MantisRequest &req, const MantisResponse &res, MantisContentReader &reader) {
+            handlePost(req, res, reader, trim(req.getPathParamValue("entity_name")));
+        };
+    }
+
+    HandlerWithContentReaderFn entityPatchHandler() {
+        return [](MantisRequest &req, MantisResponse &res, MantisContentReader &reader) {
+            handlePatch(req, res, reader, trim(req.getPathParamValue("entity_name")));
+        };
+    }
+
+    HandlerFn entityDeleteHandler() {
+        return [](const MantisRequest &req, const MantisResponse &res) {
+            handleDelete(req, res, trim(req.getPathParamValue("entity_name")));
+        };
+    }
+
+    void registerAdminEntityRoutes() {
         auto &router = MantisBase::instance().router();
+        const std::string admin_entity = "mb_admins";
 
-        std::cout << std::endl;
-
-        const auto &entity_name = name();
-
-        // For admin entities ...
-        if (entity_name == "mb_admins") {
-            router.Get("/api/v1/sys/admins",
-                       getManyRouteHandler(),
-                       {requireAdminAuth()});
-            router.Get("/api/v1/sys/admins/:id",
-                       getOneRouteHandler(),
-                       {requireAdminAuth()});
-            router.Post("/api/v1/sys/admins",
-                        postRouteHandler(),
-                        {requireAdminAuth()});
-            router.Patch("/api/v1/sys/admins/:id",
-                         patchRouteHandler(),
-                         {requireAdminAuth()});
-            router.Delete("/api/v1/sys/admins/:id",
-                          deleteRouteHandler(),
-                          {requireAdminAuth()});
-            return;
-        }
-
-        // List Entities
-        router.Get(std::format("/api/v1/entities/{}", entity_name),
-                   getManyRouteHandler(),
-                   {hasAccess(entity_name)});
-
-        // Fetch Entity
-        router.Get(std::format("/api/v1/entities/{}/:id", entity_name),
-                   getOneRouteHandler(),
-                   {hasAccess(entity_name)});
-
-        // base & auth /post/:id /delete/:id
-        if (const auto& _type = type(); _type == "base" || _type == "auth") {
-            // Create Entity
-            router.Post(std::format("/api/v1/entities/{}", entity_name),
-                        postRouteHandler(),
-                        {hasAccess(entity_name)});
-
-            // Update Entity
-            router.Patch(std::format("/api/v1/entities/{}/:id", entity_name),
-                         patchRouteHandler(),
-                         {hasAccess(entity_name)});
-
-            // Delete Entity
-            router.Delete(std::format("/api/v1/entities/{}/:id", entity_name),
-                          deleteRouteHandler(),
-                          {hasAccess(entity_name)});
-        }
-    };
+        router.Get("/api/v1/sys/admins",
+                   [admin_entity](const MantisRequest &req, const MantisResponse &res) {
+                       handleGetMany(req, res, admin_entity);
+                   },
+                   {requireAdminAuth()});
+        router.Get("/api/v1/sys/admins/:id",
+                   [admin_entity](const MantisRequest &req, const MantisResponse &res) {
+                       handleGetOne(req, res, admin_entity);
+                   },
+                   {requireAdminAuth()});
+        router.Post("/api/v1/sys/admins",
+                    [admin_entity](const MantisRequest &req, const MantisResponse &res, MantisContentReader &reader) {
+                        handlePost(req, res, reader, admin_entity);
+                    },
+                    {requireAdminAuth()});
+        router.Patch("/api/v1/sys/admins/:id",
+                     [admin_entity](MantisRequest &req, MantisResponse &res, MantisContentReader &reader) {
+                         handlePatch(req, res, reader, admin_entity);
+                     },
+                     {requireAdminAuth()});
+        router.Delete("/api/v1/sys/admins/:id",
+                      [admin_entity](const MantisRequest &req, const MantisResponse &res) {
+                          handleDelete(req, res, admin_entity);
+                      },
+                      {requireAdminAuth()});
+    }
 }

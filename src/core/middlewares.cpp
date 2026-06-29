@@ -1,12 +1,177 @@
 #include "../include/mantisbase/core/middlewares.h"
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/core/models/entity.h"
+#include "../include/mantisbase/core/models/entity_schema.h"
 #include <unordered_map>
 #include <deque>
 #include <chrono>
 #include <mutex>
 
 namespace mb {
+    namespace {
+        json entityRouteNotFoundResponse(const std::string &method, const std::string &path) {
+            return {
+                {"status", 404},
+                {"error", std::format("{} {} Route Not Found", method, path)},
+                {"data", json::object()}
+            };
+        }
+
+        HandlerResponse checkEntityAccess(MantisRequest &req, MantisResponse &res, const std::string &entity_name,
+                                          const std::string &trace_msg) {
+            TRACE_FUNC(trace_msg);
+            try {
+                const auto entity = MantisBase::instance().entity(entity_name);
+                auto auth = req.getOr<json>("auth", json::object());
+                auto method = req.getMethod();
+
+                if (!(method == "GET"
+                      || method == "POST"
+                      || method == "PATCH"
+                      || method == "DELETE")) {
+                    res.sendJSON(400, {
+                        {"status", 400},
+                        {"data", json::object()},
+                        {"error", "Unsupported method `" + method + "`"}
+                    });
+                    return HandlerResponse::Handled;
+                }
+
+                AccessRule rule = method == "GET"
+                                      ? (req.hasPathParam("id")
+                                             ? entity.getRule()
+                                             : entity.listRule())
+                                      : method == "POST"
+                                            ? entity.addRule()
+                                            : method == "PATCH"
+                                                  ? entity.updateRule()
+                                                  : entity.deleteRule();
+
+                if (rule.mode() == "public") {
+                    LogOrigin::authTrace("Public Access", "Public access, no auth required!");
+                    return HandlerResponse::Unhandled;
+                }
+
+                if (rule.mode().empty()) {
+                    LogOrigin::authTrace("Admin Access Required", "Restricted access, admin auth required!");
+                    auto verification = req.getOr<json>("verification", json::object());
+                    if (verification.empty()) {
+                        res.sendJSON(403, {
+                            {"data", json::object()},
+                            {"status", 403},
+                            {"error", "Admin auth required to access this resource!"}
+                        });
+                        return HandlerResponse::Handled;
+                    }
+
+                    if (verification.contains("verified") &&
+                        verification["verified"].is_boolean() &&
+                        verification["verified"].get<bool>()) {
+                        if (auth["user"].is_null() || !auth["user"].is_object()) {
+                            res.sendJSON(403, {
+                                {"data", json::object()},
+                                {"status", 403},
+                                {"error", "Auth user not found!"}
+                            });
+                            return HandlerResponse::Handled;
+                        }
+
+                        return HandlerResponse::Unhandled;
+                    }
+
+                    res.sendJSON(403, {
+                        {"data", json::object()},
+                        {"status", 403},
+                        {"error", verification["error"]}
+                    });
+                    return HandlerResponse::Handled;
+                }
+
+                if (rule.mode() == "auth" || (auth["entity"].is_string() && auth["entity"].get<std::string>() == "mb_admins")) {
+                    LogOrigin::authTrace("User/Admin Access Required", "Restricted access, admin/user auth required!");
+                    auto verification = req.getOr<json>("verification", json::object());
+                    if (verification.empty()) {
+                        res.sendJSON(403, {
+                            {"data", json::object()},
+                            {"status", 403},
+                            {"error", "Auth required to access this resource!"}
+                        });
+                        return HandlerResponse::Handled;
+                    }
+
+                    if (verification.contains("verified") &&
+                        verification["verified"].is_boolean() &&
+                        verification["verified"].get<bool>()) {
+                        if (auth["user"].is_null() || !auth["user"].is_object()) {
+                            res.sendJSON(403, {
+                                {"data", json::object()},
+                                {"status", 403},
+                                {"error", "Auth user not found!"}
+                            });
+                            return HandlerResponse::Handled;
+                        }
+
+                        return HandlerResponse::Unhandled;
+                    }
+
+                    res.sendJSON(403, {
+                        {"data", json::object()},
+                        {"status", 403},
+                        {"error", verification["error"]}
+                    });
+                    return HandlerResponse::Handled;
+                }
+
+                if (rule.mode() == "custom") {
+                    LogOrigin::authTrace("Custom Expression Access", fmt::format("Restricted access, custom expression `{}` to be evaluated", rule.expr()));
+                    const std::string expr = rule.expr();
+                    json vars = json::object();
+                    vars["auth"] = auth;
+
+                    json req_obj;
+                    req_obj["remoteAddr"] = req.getRemoteAddr();
+                    req_obj["remotePort"] = req.getRemotePort();
+                    req_obj["localAddr"] = req.getLocalAddr();
+                    req_obj["localPort"] = req.getLocalPort();
+                    req_obj["body"] = json::object();
+
+                    try {
+                        if (req.getMethod() == "POST" && !req.getBody().empty()) {
+                            req_obj["body"] = req.getBodyAsJson();
+                        }
+                    } catch (...) {
+                    }
+
+                    vars["req"] = req_obj;
+
+                    if (Expr::eval(expr, vars))
+                        return HandlerResponse::Unhandled;
+
+                    res.sendJSON(403, {
+                        {"status", 403},
+                        {"data", json::object()},
+                        {"error", "Access denied!"}
+                    });
+                    return HandlerResponse::Handled;
+                }
+
+                res.sendJSON(403, {
+                    {"status", 403},
+                    {"data", json::object()},
+                    {"error", "Access denied, entity access rule unknown."}
+                });
+                return HandlerResponse::Handled;
+            } catch (std::exception &e) {
+                res.sendJSON(500, {
+                    {"status", 500},
+                    {"data", json::object()},
+                    {"error", e.what()}
+                });
+                return HandlerResponse::Handled;
+            }
+        }
+    }
+
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> getAuthToken() {
         std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, MantisResponse &_) {
@@ -87,192 +252,62 @@ namespace mb {
         };
     }
 
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveEntity() {
+        std::string msg = MB_FUNC();
+        return [msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
+            const auto entity_name = trim(req.getPathParamValue("entity_name"));
+            if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
+                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                return HandlerResponse::Handled;
+            }
+
+            if (!MantisBase::instance().hasEntity(entity_name)) {
+                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                return HandlerResponse::Handled;
+            }
+
+            const auto entity = MantisBase::instance().entity(entity_name);
+            if (entity.isSystem() || !entity.hasApi()) {
+                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                return HandlerResponse::Handled;
+            }
+
+            return HandlerResponse::Unhandled;
+        };
+    }
+
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rejectViewMutations() {
+        std::string msg = MB_FUNC();
+        return [msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
+            const auto entity_name = trim(req.getPathParamValue("entity_name"));
+            const auto entity = MantisBase::instance().entity(entity_name);
+            if (entity.type() == "view") {
+                res.sendJSON(405, {
+                    {"status", 405},
+                    {"data", json::object()},
+                    {"error", std::format("Method `{}` is not allowed for view entity `{}`", req.getMethod(), entity_name)}
+                });
+                return HandlerResponse::Handled;
+            }
+
+            return HandlerResponse::Unhandled;
+        };
+    }
+
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasEntityAccess() {
+        std::string msg = MB_FUNC();
+        return [msg](MantisRequest &req, MantisResponse &res) {
+            const auto entity_name = trim(req.getPathParamValue("entity_name"));
+            return checkEntityAccess(req, res, entity_name, msg);
+        };
+    }
+
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const std::string &entity_name) {
         std::string msg = MB_FUNC();
         return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
-            try {
-                const auto entity = MantisBase::instance().entity(entity_name);
-
-                // Get the auth var from the context, resort to empty object if it's not set.
-                auto auth = req.getOr<json>("auth", json::object());
-
-                auto method = req.getMethod();
-                if (!(method == "GET"
-                      || method == "POST"
-                      || method == "PATCH"
-                      || method == "DELETE")) {
-                    json response;
-                    response["status"] = 400;
-                    response["data"] = json::object();
-                    response["error"] = "Unsupported method `" + method + "`";
-
-                    res.sendJSON(400, response);
-                    return HandlerResponse::Handled;
-                }
-
-                // Store rule, depending on the request type
-                AccessRule rule = method == "GET"
-                                      ? (req.hasPathParams()
-                                             ? entity.getRule()
-                                             : entity.listRule())
-                                      : method == "POST"
-                                            ? entity.addRule()
-                                            : method == "PATCH"
-                                                  ? entity.updateRule()
-                                                  : entity.deleteRule();
-
-                if (rule.mode() == "public") {
-                    LogOrigin::authTrace("Public Access", "Public access, no auth required!");
-                    // Open to all
-                    return HandlerResponse::Unhandled;
-                }
-
-                // For empty mode (admin only)
-                if (rule.mode().empty()) {
-                    LogOrigin::authTrace("Admin Access Required", "Restricted access, admin auth required!");
-
-                    // Require at least one valid auth on any table
-                    auto verification = req.getOr<json>("verification", json::object());
-                    if (verification.empty()) {
-                        // Send auth error
-                        res.sendJSON(403, {
-                                         {"data", json::object()},
-                                         {"status", 403},
-                                         {"error", "Admin auth required to access this resource!"}
-                                     });
-                        return HandlerResponse::Handled;
-                    }
-
-                    if (verification.contains("verified") &&
-                        verification["verified"].is_boolean() &&
-                        verification["verified"].get<bool>()) {
-
-                        // Check if verified user object is valid, if not throw auth error
-                        if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(403, {
-                                     {"data", json::object()},
-                                     {"status", 403},
-                                     {"error", "Auth user not found!"}
-                                 });
-
-                            return HandlerResponse::Handled;
-                        }
-
-                        return HandlerResponse::Unhandled;
-                    }
-
-                    // Send auth error
-                    res.sendJSON(403, {
-                                     {"data", json::object()},
-                                     {"status", 403},
-                                     {"error", verification["error"]}
-                                 });
-                    return HandlerResponse::Handled;
-                }
-
-                if (rule.mode() == "auth" || (auth["entity"].is_string() && auth["entity"].get<std::string>() == "mb_admins")) {
-                    LogOrigin::authTrace("User/Admin Access Required", "Restricted access, admin/user auth required!");
-
-                    // Require at least one valid auth on any table
-                    auto verification = req.getOr<json>("verification", json::object());
-                    if (verification.empty()) {
-                        // Send auth error
-                        res.sendJSON(403, {
-                                         {"data", json::object()},
-                                         {"status", 403},
-                                         {"error", "Auth required to access this resource!"}
-                                     });
-                        return HandlerResponse::Handled;
-                    }
-
-                    if (verification.contains("verified") &&
-                        verification["verified"].is_boolean() &&
-                        verification["verified"].get<bool>()) {
-
-                        // Check if verified user object is valid, if not throw auth error
-                        if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(403, {
-                                     {"data", json::object()},
-                                     {"status", 403},
-                                     {"error", "Auth user not found!"}
-                                 });
-                            return HandlerResponse::Handled;
-                        }
-
-                        return HandlerResponse::Unhandled;
-                    }
-
-                    // Send auth error
-                    res.sendJSON(403, {
-                                     {"data", json::object()},
-                                     {"status", 403},
-                                     {"error", verification["error"]}
-                                 });
-                    return HandlerResponse::Handled;
-                }
-
-                if (rule.mode() == "custom") {
-                    LogOrigin::authTrace("Custom Expression Access", fmt::format("Restricted access, custom expression `{}` to be evaluated", rule.expr()));
-
-                    // Evaluate expression
-                    const std::string expr = rule.expr();
-
-                    // Token map variables for evaluation
-                    json vars = json::object();
-
-                    // Add `auth` data to the TokenMap
-                    vars["auth"] = auth;
-
-                    // Request Token Map
-                    json req_obj;
-                    req_obj["remoteAddr"] = req.getRemoteAddr();
-                    req_obj["remotePort"] = req.getRemotePort();
-                    req_obj["localAddr"] = req.getLocalAddr();
-                    req_obj["localPort"] = req.getLocalPort();
-                    req_obj["body"] = json::object();
-
-                    try {
-                        // TODO handle form data
-                        if (req.getMethod() == "POST" && !req.getBody().empty()) {
-                            // Parse request body and add it to the request TokenMap
-                            req_obj["body"] = req.getBodyAsJson();
-                        }
-                    } catch (...) {
-                    }
-
-                    // Add the request map to the vars
-                    vars["req"] = req_obj;
-
-                    // If expression evaluation returns true, lets return allowing execution
-                    // continuation. Else, we'll craft an error response.
-                    if (Expr::eval(expr, vars))
-                        return HandlerResponse::Unhandled; // Proceed to next middleware
-
-                    // Evaluation yielded false, return generic access denied error
-                    json response;
-                    response["status"] = 403;
-                    response["data"] = json::object();
-                    response["error"] = "Access denied!";
-
-                    res.sendJSON(403, response);
-                    return HandlerResponse::Handled;
-                }
-
-                res.sendJSON(403, {
-                                 {"status", 403},
-                                 {"data", json::object()},
-                                 {"error", "Access denied, entity access rule unknown."}
-                             });
-                return HandlerResponse::Handled;
-            } catch (std::exception &e) {
-                res.sendJSON(500, {
-                                 {"status", 500},
-                                 {"data", json::object()},
-                                 {"error", e.what()}
-                             });
-                return HandlerResponse::Handled;
-            }
+            return checkEntityAccess(req, res, entity_name, msg);
         };
     }
 

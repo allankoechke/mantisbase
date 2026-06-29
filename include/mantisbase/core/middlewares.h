@@ -32,6 +32,26 @@ namespace mb {
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> hydrateContextData();
     
     /**
+     * @brief Resolve entity from `:entity_name` path param and validate it is API-accessible.
+     *
+     * Returns 404 when the entity does not exist, is a system entity, or has API disabled.
+     * @return Middleware function
+     */
+    std::function<HandlerResponse(MantisRequest&, MantisResponse&)> resolveEntity();
+
+    /**
+     * @brief Reject POST, PATCH, and DELETE requests against view-type entities.
+     * @return Middleware function
+     */
+    std::function<HandlerResponse(MantisRequest&, MantisResponse&)> rejectViewMutations();
+
+    /**
+     * @brief Check access rules for the entity named in the `:entity_name` path param.
+     * @return Middleware function that validates access rules
+     */
+    std::function<HandlerResponse(MantisRequest&, MantisResponse&)> hasEntityAccess();
+
+    /**
      * @brief Check if request has access to entity based on access rules.
      * @param entity_name Entity/table name to check access for
      * @return Middleware function that validates access rules

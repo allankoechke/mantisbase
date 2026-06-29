@@ -17,6 +17,7 @@
 #include "../include/mantisbase/core/exceptions.h"
 #include "../include/mantisbase/core/middlewares.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
+#include "../include/mantisbase/core/models/entity_routes.h"
 #include "../include/mantisbase/core/logger/log_database.h"
 #include "../include/mantisbase/core/realtime.h"
 #include "../include/mantisbase/core/sse.h"
@@ -64,9 +65,6 @@ namespace mb {
                 // Create entity based on the schema
                 Entity entity{schema};
 
-                // Create routes based on the entity type
-                if (entity.hasApi()) entity.createEntityRoutes();
-
                 // Store this object to keep alive function pointers
                 // if not, possible access violation error
                 m_entityMap.emplace(entity.name(), std::move(entity));
@@ -78,7 +76,6 @@ namespace mb {
         admin_schema.removeField("name");
         admin_schema.setSystem(true);
         auto admin_entity = admin_schema.toEntity();
-        admin_entity.createEntityRoutes();
         m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
 
         // Service Schema [No routes]
@@ -236,9 +233,8 @@ namespace mb {
             throw MantisException(500, "An entity exists with given entity_name");
         }
 
-        // Create entity and its routes
+        // Create entity and cache it. Unified entity routes resolve entities dynamically.
         auto entity = Entity(entity_schema);
-        entity.createEntityRoutes();
         m_entityMap.insert_or_assign(entity_name, std::move(entity));
         std::cout << std::endl;
     }
@@ -259,28 +255,11 @@ namespace mb {
     }
 
     void Router::removeSchemaCache(const std::string &entity_name) {
-        // Let's find and remove existing object
         if (!m_entityMap.contains(entity_name)) {
             throw MantisException(404, "Could not find EntitySchema for " + entity_name);
         }
 
-        // Get cached entity
-        const Entity &entity = m_entityMap.at(entity_name);
-
-        // Also, check if we have defined some routes for this one ...
-        const auto basePath = "/api/v1/entities/" + entity_name;
-        m_routeRegistry.remove("GET", basePath);
-        m_routeRegistry.remove("GET", basePath + "/:id");
-
-        if (entity.type() != "view") {
-            m_routeRegistry.remove("POST", basePath);
-            m_routeRegistry.remove("PATCH", basePath + "/:id");
-            m_routeRegistry.remove("DELETE", basePath + "/:id");
-        }
-
-        // Remove Entity instance for the cache
         m_entityMap.erase(entity_name);
-
         std::cout << std::endl;
     }
 
@@ -381,6 +360,17 @@ namespace mb {
         }
     }
 
+    void Router::registerEntityRoutes() {
+        const Middlewares readMiddleware = {resolveEntity(), hasEntityAccess()};
+        const Middlewares mutateMiddleware = {resolveEntity(), rejectViewMutations(), hasEntityAccess()};
+
+        Get("/api/v1/entities/:entity_name", entityGetManyHandler(), readMiddleware);
+        Get("/api/v1/entities/:entity_name/:id", entityGetOneHandler(), readMiddleware);
+        Post("/api/v1/entities/:entity_name", entityPostHandler(), mutateMiddleware);
+        Patch("/api/v1/entities/:entity_name/:id", entityPatchHandler(), mutateMiddleware);
+        Delete("/api/v1/entities/:entity_name/:id", entityDeleteHandler(), mutateMiddleware);
+    }
+
     void Router::generateMiscEndpoints() {
         auto &router = mApp.router();
         router.Get("/api/v1/health", healthCheckHandler());
@@ -409,6 +399,9 @@ namespace mb {
         // Add entity schema routes
         // GET|POST|PATCH|DELETE `/api/v1/schemas*`
         m_entitySchema->createEntityRoutes();
+
+        registerEntityRoutes();
+        registerAdminEntityRoutes();
 
         // Add /public static file serving directory
         if (const auto mount_ok = svr.set_mount_point("/", mApp.publicDir()); !mount_ok) {

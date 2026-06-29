@@ -231,42 +231,6 @@ namespace mb {
         [[nodiscard]] std::optional<json> queryFromCols(const std::string &value,
                                                         const std::vector<std::string> &columns) const;
 
-        // --------------- SCHEMA ROUTING ------------------ //
-        /**
-         * @brief Get route handler for GET /api/v1/entities/{table}/:id.
-         * @return Handler function for single record retrieval
-         */
-        [[nodiscard]] HandlerFn getOneRouteHandler() const;
-
-        /**
-         * @brief Get route handler for GET /api/v1/entities/{table}.
-         * @return Handler function for listing records
-         */
-        [[nodiscard]] HandlerFn getManyRouteHandler() const;
-
-        /**
-         * @brief Get route handler for POST /api/v1/entities/{table}.
-         * @return Handler function with content reader for record creation
-         */
-        [[nodiscard]] HandlerWithContentReaderFn postRouteHandler() const;
-
-        /**
-         * @brief Get route handler for PATCH /api/v1/entities/{table}/:id.
-         * @return Handler function with content reader for record updates
-         */
-        [[nodiscard]] HandlerWithContentReaderFn patchRouteHandler() const;
-
-        /**
-         * @brief Get route handler for DELETE /api/v1/entities/{table}/:id.
-         * @return Handler function for record deletion
-         */
-        [[nodiscard]] HandlerFn deleteRouteHandler() const;
-
-        /**
-         * @brief Register all CRUD routes for this entity with the router.
-         */
-        void createEntityRoutes() const;
-
     private:
         nlohmann::json m_schema;
     };

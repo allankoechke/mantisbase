@@ -186,6 +186,8 @@ namespace mb {
 
         void generateMiscEndpoints();
 
+        void registerEntityRoutes();
+
         static std::string getMimeType(const std::string &path);
 
         // ----------- REQ/RES METHODS ----------- //
