@@ -240,7 +240,7 @@ curl -X POST http://localhost:7070/api/v1/entities/posts \
 Access files at:
 
 ```
-http://localhost:7070/api/files/posts/photo.jpg
+http://localhost:7070/api/v1/files/posts/photo.jpg
 ```
 
 See [File Handling](11.files.md) for details.
@@ -264,7 +264,15 @@ All entities automatically get these endpoints:
 - `POST /api/v1/auth/login` - User login
 - `POST /api/v1/auth/refresh` - Refresh token
 - `POST /api/v1/auth/logout` - Logout
-- `POST /api/v1/auth/setup/admin` - Create initial admin
+
+### Admin Endpoints (`/api/v1/sys/admins/`)
+
+- `POST /api/v1/sys/admins/login` - Admin login
+- `POST /api/v1/sys/admins/refresh` - Refresh admin token
+- `POST /api/v1/sys/admins/logout` - Admin logout
+- `POST /api/v1/sys/admins/setup` - Create initial admin
+- `GET|POST /api/v1/sys/admins` - List or create admin accounts
+- `GET|PATCH|DELETE /api/v1/sys/admins/:id` - Manage admin account
 
 ### Schema Management (Admin Only)
 
@@ -276,9 +284,11 @@ All entities automatically get these endpoints:
 
 ### System Endpoints
 
-- `GET /api/v1/health` - Health check
+- `GET /api/v1/sys/health` - Health check
 - `GET /api/v1/sys/logs` - System logs (admin only, see [API Reference](02.api.md#-system-endpoints))
-- `GET /api/files/<entity>/<filename>` - Serve files
+- `GET /api/v1/sys/settings/config` - Application settings
+- `PATCH /api/v1/sys/settings/config` - Update application settings
+- `GET /api/v1/files/<entity>/<filename>` - Serve files
 - `GET /mb` - Admin dashboard
 
 See [API Reference](02.api.md) for complete documentation.

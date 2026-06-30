@@ -16,7 +16,7 @@ namespace TestHelpers {
     inline bool waitForServer(httplib::Client& client, int max_retries = 20, int initial_delay_ms = 50) {
         int delay_ms = initial_delay_ms;
         for (int i = 0; i < max_retries; ++i) {
-            if (auto res = client.Get("/api/v1/health"); res && res->status == 200) {
+            if (auto res = client.Get("/api/v1/sys/health"); res && res->status == 200) {
                 return true;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
@@ -89,7 +89,7 @@ namespace TestHelpers {
                     {"password", TestConfig::getTestPassword()}
                 };
                 
-                client.Post("/api/v1/auth/setup/admin", headers,
+                client.Post("/api/v1/sys/admins/setup", headers,
                     setupAdmin.dump(), "application/json");
                 
                 // Login to get token

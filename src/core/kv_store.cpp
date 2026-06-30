@@ -200,7 +200,7 @@ namespace mb
 
         // Set up settings get & update endpoints
         MantisBase::instance().router().Get(
-            "/api/v1/settings/config",
+            "/api/v1/sys/settings/config",
             [this](MantisRequest& req, MantisResponse& res)
             {
                 // If we have a cached config object ...
@@ -260,7 +260,7 @@ namespace mb
 
         // Update settings config
         MantisBase::instance().router().Patch(
-            "/api/v1/settings/config",
+            "/api/v1/sys/settings/config",
             [this](MantisRequest& req, MantisResponse& res)
             {
                 // Parse request body

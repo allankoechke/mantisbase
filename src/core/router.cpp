@@ -384,28 +384,25 @@ namespace mb {
 
     void Router::generateMiscEndpoints() {
         auto &router = mApp.router();
-        router.Get("/api/v1/health", healthCheckHandler());
-        router.Get("/api/files/:entity/:file", fileServingHandler());
         router.Get(R"(/mb(/.*)?)", handleAdminDashboardRoute());
 
-        // Systemwide auth endpoints
-        // Rate limit login endpoint: 5 attempts per minute per IP to prevent brute force attacks
+        // /api/v1/sys/*
+        router.Get("/api/v1/sys/health", healthCheckHandler());
+        router.Get("/api/v1/sys/logs", handleLogs(), {requireAdminAuth()});
+        router.Post("/api/v1/sys/admins/login", handleAdminLogin(), {rateLimit(5, 60, false)});
+        router.Post("/api/v1/sys/admins/refresh", handleAuthRefresh());
+        router.Post("/api/v1/sys/admins/logout", handleAuthLogout());
+        router.Post("/api/v1/sys/admins/setup", handleSetupAdmin(), {rateLimit(3, 3600, false)});
+
+        // /api/v1/auth/*
         router.Post("/api/v1/auth/login", handleAuthLogin(), {rateLimit(5, 60, false)});
         router.Post("/api/v1/auth/refresh", handleAuthRefresh());
         router.Post("/api/v1/auth/logout", handleAuthLogout());
 
+        // /api/v1/files/*
+        router.Get("/api/v1/files/:entity/:file", fileServingHandler());
+
         SSEMgr::createRoutes();
-
-        // Rate limit admin setup: 3 attempts per hour per IP (very strict for security)
-        router.Post("/api/v1/auth/setup/admin", handleSetupAdmin(), {rateLimit(3, 3600, false)});
-
-        // Logs endpoint - requires admin authentication
-        router.Get("/api/v1/sys/logs", handleLogs(), {requireAdminAuth()});
-
-        // Admin user auth
-        router.Post("/api/v1/sys/admins/login", handleAdminLogin(), {rateLimit(5, 60, false)});
-        router.Post("/api/v1/sys/admins/refresh", handleAuthRefresh()); // TODO
-        router.Post("/api/v1/sys/admins/logout", handleAuthLogout()); // TODO
 
         registerSchemaRoutes();
         registerEntityRoutes();
@@ -463,7 +460,7 @@ namespace mb {
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
-        LogOrigin::trace("Endpoint Registration", "Registering /api/files/:entity/:file GET endpoint ...");
+        LogOrigin::trace("Endpoint Registration", "Registering /api/v1/files/:entity/:file GET endpoint ...");
         return [](const MantisRequest &req, MantisResponse &res) {
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");
