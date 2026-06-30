@@ -248,15 +248,6 @@ namespace mb
 
                 res.sendJSON(404, response);
             }, { });
-                // [](MantisRequest& req, MantisResponse& res)-> bool
-                // {
-                //     return TableUnit::getAuthToken(req, res);
-                // },
-                // [this](MantisRequest& req, MantisResponse& res)-> bool
-                // {
-                //     return hasAccess(req, res);
-                // }
-            // });
 
         // Update settings config
         MantisBase::instance().router().Patch(
