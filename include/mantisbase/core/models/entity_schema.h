@@ -349,20 +349,6 @@ namespace mb {
          */
         static bool isValidEntityType(const std::string& type);
 
-        // --------------- SCHEMA ROUTING ------------------ //
-        [[nodiscard]] HandlerFn getOneRouteHandler() const;
-
-        [[nodiscard]] HandlerFn getManyRouteHandler() const;
-
-        [[nodiscard]] HandlerFn postRouteHandler() const;
-
-        [[nodiscard]] HandlerFn patchRouteHandler() const;
-
-        [[nodiscard]] HandlerFn deleteRouteHandler() const;
-
-        void createEntityRoutes() const;
-
-
         static const std::vector<EntitySchemaField> &defaultBaseFieldsSchema();
         static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
 

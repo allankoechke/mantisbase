@@ -175,10 +175,9 @@ MantisBase provides standalone authentication endpoints:
 
 ```bash
 # Login (identity can be email or user ID)
-curl -X POST http://localhost:7070/api/v1/auth/login \
+curl -X POST http://localhost:7070/api/v1/auth/users/login \
   -H "Content-Type: application/json" \
   -d '{
-    "entity": "users",
     "identity": "user@example.com",
     "password": "password"
   }'
@@ -240,7 +239,7 @@ curl -X POST http://localhost:7070/api/v1/entities/posts \
 Access files at:
 
 ```
-http://localhost:7070/api/files/posts/photo.jpg
+http://localhost:7070/api/v1/files/posts/photo.jpg
 ```
 
 See [File Handling](11.files.md) for details.
@@ -261,10 +260,20 @@ All entities automatically get these endpoints:
 
 ### Authentication Endpoints
 
-- `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/refresh` - Refresh token
-- `POST /api/v1/auth/logout` - Logout
-- `POST /api/v1/auth/setup/admin` - Create initial admin
+Auth-type entities expose login under `/api/v1/auth/<entity>/`:
+
+- `POST /api/v1/auth/<entity>/login` - User login
+- `POST /api/v1/auth/<entity>/refresh` - Refresh token
+- `POST /api/v1/auth/<entity>/logout` - Logout
+
+### Admin Endpoints (`/api/v1/sys/admins/`)
+
+- `POST /api/v1/sys/admins/login` - Admin login
+- `POST /api/v1/sys/admins/refresh` - Refresh admin token
+- `POST /api/v1/sys/admins/logout` - Admin logout
+- `POST /api/v1/sys/admins/setup` - Create initial admin
+- `GET|POST /api/v1/sys/admins` - List or create admin accounts
+- `GET|PATCH|DELETE /api/v1/sys/admins/:id` - Manage admin account
 
 ### Schema Management (Admin Only)
 
@@ -278,7 +287,9 @@ All entities automatically get these endpoints:
 
 - `GET /api/v1/health` - Health check
 - `GET /api/v1/sys/logs` - System logs (admin only, see [API Reference](02.api.md#-system-endpoints))
-- `GET /api/files/<entity>/<filename>` - Serve files
+- `GET /api/v1/sys/settings/config` - Application settings
+- `PATCH /api/v1/sys/settings/config` - Update application settings
+- `GET /api/v1/files/<entity>/<filename>` - Serve files
 - `GET /mb` - Admin dashboard
 
 See [API Reference](02.api.md) for complete documentation.

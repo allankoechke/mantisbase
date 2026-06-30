@@ -17,6 +17,8 @@
 #include "../include/mantisbase/core/exceptions.h"
 #include "../include/mantisbase/core/middlewares.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
+#include "../include/mantisbase/core/models/entity_routes.h"
+#include "../include/mantisbase/core/models/entity_schema_routes.h"
 #include "../include/mantisbase/core/logger/log_database.h"
 #include "../include/mantisbase/core/realtime.h"
 #include "../include/mantisbase/core/sse.h"
@@ -27,7 +29,6 @@ CMRC_DECLARE(mantis);
 namespace mb {
     Router::Router()
         : mApp(MantisBase::instance()),
-          m_entitySchema(std::make_unique<EntitySchema>()),
           m_sseMgr(std::make_unique<SSEMgr>()) {
         // Let's fix timing initialization, set the start time to current time
         svr.set_pre_routing_handler(preRoutingHandler());
@@ -64,9 +65,6 @@ namespace mb {
                 // Create entity based on the schema
                 Entity entity{schema};
 
-                // Create routes based on the entity type
-                if (entity.hasApi()) entity.createEntityRoutes();
-
                 // Store this object to keep alive function pointers
                 // if not, possible access violation error
                 m_entityMap.emplace(entity.name(), std::move(entity));
@@ -78,7 +76,6 @@ namespace mb {
         admin_schema.removeField("name");
         admin_schema.setSystem(true);
         auto admin_entity = admin_schema.toEntity();
-        admin_entity.createEntityRoutes();
         m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
 
         // Service Schema [No routes]
@@ -236,9 +233,8 @@ namespace mb {
             throw MantisException(500, "An entity exists with given entity_name");
         }
 
-        // Create entity and its routes
+        // Create entity and cache it. Unified entity routes resolve entities dynamically.
         auto entity = Entity(entity_schema);
-        entity.createEntityRoutes();
         m_entityMap.insert_or_assign(entity_name, std::move(entity));
         std::cout << std::endl;
     }
@@ -259,28 +255,11 @@ namespace mb {
     }
 
     void Router::removeSchemaCache(const std::string &entity_name) {
-        // Let's find and remove existing object
         if (!m_entityMap.contains(entity_name)) {
             throw MantisException(404, "Could not find EntitySchema for " + entity_name);
         }
 
-        // Get cached entity
-        const Entity &entity = m_entityMap.at(entity_name);
-
-        // Also, check if we have defined some routes for this one ...
-        const auto basePath = "/api/v1/entities/" + entity_name;
-        m_routeRegistry.remove("GET", basePath);
-        m_routeRegistry.remove("GET", basePath + "/:id");
-
-        if (entity.type() != "view") {
-            m_routeRegistry.remove("POST", basePath);
-            m_routeRegistry.remove("PATCH", basePath + "/:id");
-            m_routeRegistry.remove("DELETE", basePath + "/:id");
-        }
-
-        // Remove Entity instance for the cache
         m_entityMap.erase(entity_name);
-
         std::cout << std::endl;
     }
 
@@ -381,34 +360,61 @@ namespace mb {
         }
     }
 
+    void Router::registerAuthRoutes() {
+        const Middlewares authEntityMiddleware = {resolveAuthEntity()};
+        const Middlewares authLoginMiddleware = {resolveAuthEntity(), rateLimit(5, 60, false)};
+
+        Post("/api/v1/auth/:entity_name/login", handleAuthLogin(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/refresh", handleAuthRefresh(), authEntityMiddleware);
+        Post("/api/v1/auth/:entity_name/logout", handleAuthLogout(), authEntityMiddleware);
+    }
+
+    void Router::registerSchemaRoutes() {
+        const Middlewares adminAuth = {requireAdminAuth()};
+        const Middlewares schemaItemMiddleware = {requireAdminAuth(), resolveSchema()};
+
+        Get("/api/v1/schemas", schemaGetManyHandler(), adminAuth);
+        Post("/api/v1/schemas", schemaPostHandler(), adminAuth);
+        Get("/api/v1/schemas/:schema_name_or_id", schemaGetOneHandler(), schemaItemMiddleware);
+        Patch("/api/v1/schemas/:schema_name_or_id", schemaPatchHandler(), schemaItemMiddleware);
+        Delete("/api/v1/schemas/:schema_name_or_id", schemaDeleteHandler(), schemaItemMiddleware);
+    }
+
+    void Router::registerEntityRoutes() {
+        const Middlewares readMiddleware = {resolveEntity(), hasEntityAccess()};
+        const Middlewares mutateMiddleware = {resolveEntity(), rejectViewMutations(), hasEntityAccess()};
+
+        Get("/api/v1/entities/:entity_name", entityGetManyHandler(), readMiddleware);
+        Get("/api/v1/entities/:entity_name/:id", entityGetOneHandler(), readMiddleware);
+        Post("/api/v1/entities/:entity_name", entityPostHandler(), mutateMiddleware);
+        Patch("/api/v1/entities/:entity_name/:id", entityPatchHandler(), mutateMiddleware);
+        Delete("/api/v1/entities/:entity_name/:id", entityDeleteHandler(), mutateMiddleware);
+    }
+
     void Router::generateMiscEndpoints() {
         auto &router = mApp.router();
-        router.Get("/api/v1/health", healthCheckHandler());
-        router.Get("/api/files/:entity/:file", fileServingHandler());
         router.Get(R"(/mb(/.*)?)", handleAdminDashboardRoute());
 
-        // Systemwide auth endpoints
-        // Rate limit login endpoint: 5 attempts per minute per IP to prevent brute force attacks
-        router.Post("/api/v1/auth/login", handleAuthLogin(), {rateLimit(5, 60, false)});
-        router.Post("/api/v1/auth/refresh", handleAuthRefresh());
-        router.Post("/api/v1/auth/logout", handleAuthLogout());
+        router.Get("/api/v1/health", healthCheckHandler());
+
+        // /api/v1/sys/*
+        router.Get("/api/v1/sys/logs", handleLogs(), {requireAdminAuth()});
+        router.Post("/api/v1/sys/admins/login", handleAdminLogin(), {rateLimit(5, 60, false)});
+        router.Post("/api/v1/sys/admins/refresh", handleAuthRefresh());
+        router.Post("/api/v1/sys/admins/logout", handleAuthLogout());
+        router.Post("/api/v1/sys/admins/setup", handleSetupAdmin(), {rateLimit(3, 3600, false)});
+
+        // /api/v1/auth/<entity>/*
+        registerAuthRoutes();
+
+        // /api/v1/files/*
+        router.Get("/api/v1/files/:entity/:file", fileServingHandler());
 
         SSEMgr::createRoutes();
 
-        // Rate limit admin setup: 3 attempts per hour per IP (very strict for security)
-        router.Post("/api/v1/auth/setup/admin", handleSetupAdmin(), {rateLimit(3, 3600, false)});
-
-        // Logs endpoint - requires admin authentication
-        router.Get("/api/v1/sys/logs", handleLogs(), {requireAdminAuth()});
-
-        // Admin user auth
-        router.Post("/api/v1/sys/admins/login", handleAdminLogin(), {rateLimit(5, 60, false)});
-        router.Post("/api/v1/sys/admins/refresh", handleAuthRefresh()); // TODO
-        router.Post("/api/v1/sys/admins/logout", handleAuthLogout()); // TODO
-
-        // Add entity schema routes
-        // GET|POST|PATCH|DELETE `/api/v1/schemas*`
-        m_entitySchema->createEntityRoutes();
+        registerSchemaRoutes();
+        registerEntityRoutes();
+        registerAdminEntityRoutes();
 
         // Add /public static file serving directory
         if (const auto mount_ok = svr.set_mount_point("/", mApp.publicDir()); !mount_ok) {
@@ -462,7 +468,7 @@ namespace mb {
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
-        LogOrigin::trace("Endpoint Registration", "Registering /api/files/:entity/:file GET endpoint ...");
+        LogOrigin::trace("Endpoint Registration", "Registering /api/v1/files/:entity/:file GET endpoint ...");
         return [](const MantisRequest &req, MantisResponse &res) {
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");

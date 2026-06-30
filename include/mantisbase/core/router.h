@@ -186,7 +186,13 @@ namespace mb {
 
         void generateMiscEndpoints();
 
-        static std::string getMimeType(const std::string &path);
+        void registerEntityRoutes();
+
+    void registerSchemaRoutes();
+
+    void registerAuthRoutes();
+
+    static std::string getMimeType(const std::string &path);
 
         // ----------- REQ/RES METHODS ----------- //
         static std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute() ;
@@ -223,10 +229,8 @@ namespace mb {
         httplib::Server svr;
         RouteRegistry m_routeRegistry;
         std::unique_ptr<SSEMgr> m_sseMgr;
-        // std::vector<nlohmann::json> m_schemas;
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
         std::vector<HandlerFn> m_postRoutingMiddlewares;
-        std::unique_ptr<EntitySchema> m_entitySchema;
         std::unordered_map<std::string, Entity> m_entityMap;
     };
 } // mb

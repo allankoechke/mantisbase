@@ -77,12 +77,11 @@ protected:
 
 TEST_F(IntegrationAuthTest, LoginWithValidCredentials) {
     nlohmann::json login = {
-        {"entity", "test_users"},
         {"identity", "testuser@example.com"},
         {"password", TestConfig::getTestPassword()}
     };
 
-    auto res = client->Post("/api/v1/auth/login",
+    auto res = client->Post("/api/v1/auth/test_users/login",
                             login.dump(), "application/json");
 
     ASSERT_TRUE(res != nullptr);
@@ -98,12 +97,11 @@ TEST_F(IntegrationAuthTest, LoginWithValidCredentials) {
 
 TEST_F(IntegrationAuthTest, LoginWithInvalidPassword) {
     nlohmann::json login = {
-        {"entity", "test_users"},
         {"identity", "testuser@example.com"},
         {"password", "wrongpassword"}
     };
 
-    auto res = client->Post("/api/v1/auth/login",
+    auto res = client->Post("/api/v1/auth/test_users/login",
                             login.dump(), "application/json");
 
     ASSERT_TRUE(res != nullptr);
@@ -115,12 +113,11 @@ TEST_F(IntegrationAuthTest, LoginWithInvalidPassword) {
 
 TEST_F(IntegrationAuthTest, LoginWithInvalidEntity) {
     nlohmann::json login = {
-        {"entity", "nonexistent"},
         {"identity", "testuser@example.com"},
         {"password", TestConfig::getTestPassword()}
     };
 
-    auto res = client->Post("/api/v1/auth/login",
+    auto res = client->Post("/api/v1/auth/nonexistent/login",
                             login.dump(), "application/json");
 
     ASSERT_TRUE(res != nullptr);
@@ -148,16 +145,15 @@ TEST_F(IntegrationAuthTest, LoginWithNonAuthEntity) {
     client->Post("/api/v1/schemas", headers, schema.dump(), "application/json");
 
     nlohmann::json login = {
-        {"entity", "test_products"},
         {"identity", "test"},
         {"password", "test"}
     };
 
-    auto res = client->Post("/api/v1/auth/login",
+    auto res = client->Post("/api/v1/auth/test_products/login",
                             login.dump(), "application/json");
 
     ASSERT_TRUE(res != nullptr);
-    EXPECT_EQ(res->status, 400);
+    EXPECT_EQ(res->status, 404);
 
     // Cleanup
     client->Delete("/api/v1/schemas/test_products", headers);
@@ -166,12 +162,11 @@ TEST_F(IntegrationAuthTest, LoginWithNonAuthEntity) {
 TEST_F(IntegrationAuthTest, RefreshToken) {
     // First login
     nlohmann::json login = {
-        {"entity", "test_users"},
         {"identity", "testuser@example.com"},
         {"password", TestConfig::getTestPassword()}
     };
 
-    auto loginRes = client->Post("/api/v1/auth/login",
+    auto loginRes = client->Post("/api/v1/auth/test_users/login",
                                  login.dump(), "application/json");
 
     ASSERT_TRUE(loginRes != nullptr);
@@ -185,7 +180,7 @@ TEST_F(IntegrationAuthTest, RefreshToken) {
     //
     // // Refresh token
     // httplib::Headers headers = {{"Authorization", "Bearer " + token}};
-    // auto refreshRes = client->Post("/api/v1/auth/refresh", headers);
+    // auto refreshRes = client->Post("/api/v1/auth/test_users/refresh", headers);
     //
     // ASSERT_TRUE(refreshRes != nullptr);
     // EXPECT_EQ(refreshRes->status, 200);
@@ -197,7 +192,7 @@ TEST_F(IntegrationAuthTest, RefreshToken) {
 
 TEST_F(IntegrationAuthTest, RefreshTokenInvalid) {
     httplib::Headers headers = {{"Authorization", "Bearer invalid_token"}};
-    auto res = client->Post("/api/v1/auth/refresh", headers);
+    auto res = client->Post("/api/v1/auth/test_users/refresh", headers);
 
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 200); // TODO add proper refresh ...
@@ -206,12 +201,11 @@ TEST_F(IntegrationAuthTest, RefreshTokenInvalid) {
 TEST_F(IntegrationAuthTest, Logout) {
     // First login
     nlohmann::json login = {
-        {"entity", "test_users"},
         {"identity", "testuser@example.com"},
         {"password", TestConfig::getTestPassword()}
     };
 
-    auto loginRes = client->Post("/api/v1/auth/login",
+    auto loginRes = client->Post("/api/v1/auth/test_users/login",
                                  login.dump(), "application/json");
 
     ASSERT_TRUE(loginRes != nullptr);
@@ -224,7 +218,7 @@ TEST_F(IntegrationAuthTest, Logout) {
 
     // Logout
     httplib::Headers headers = {{"Authorization", "Bearer " + token}};
-    auto logoutRes = client->Post("/api/v1/auth/logout", headers);
+    auto logoutRes = client->Post("/api/v1/auth/test_users/logout", headers);
 
     ASSERT_TRUE(logoutRes != nullptr);
     EXPECT_EQ(logoutRes->status, 200);
@@ -233,12 +227,11 @@ TEST_F(IntegrationAuthTest, Logout) {
 TEST_F(IntegrationAuthTest, UseTokenForAuthenticatedRequest) {
     // Login
     nlohmann::json login = {
-        {"entity", "test_users"},
         {"identity", "testuser@example.com"},
         {"password", TestConfig::getTestPassword()}
     };
 
-    auto loginRes = client->Post("/api/v1/auth/login",
+    auto loginRes = client->Post("/api/v1/auth/test_users/login",
                                  login.dump(), "application/json");
 
     ASSERT_TRUE(loginRes != nullptr);

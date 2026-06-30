@@ -207,12 +207,16 @@ Every entity (table) you create automatically gets REST endpoints:
 
 ### Authentication
 
-Standalone authentication endpoints:
+Entity user authentication (auth-type entities):
 
-- `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/refresh` - Refresh token
-- `POST /api/v1/auth/logout` - Logout
-- `POST /api/v1/auth/setup/admin` - Create initial admin
+- `POST /api/v1/auth/<entity>/login` - User login
+- `POST /api/v1/auth/<entity>/refresh` - Refresh token
+- `POST /api/v1/auth/<entity>/logout` - Logout
+
+Admin authentication and accounts (`/api/v1/sys/admins/`):
+
+- `POST /api/v1/sys/admins/login` - Admin login
+- `POST /api/v1/sys/admins/setup` - Create initial admin
 
 See [Authentication API](doc/02.auth.md) for details.
 
@@ -229,6 +233,8 @@ Works with both SQLite and PostgreSQL. See [API Reference – Realtime](doc/02.a
 
 - `GET /api/v1/health` - Health check
 - `GET /api/v1/sys/logs` - System logs with filtering and pagination (admin only)
+- `GET|PATCH /api/v1/sys/settings/config` - Application settings
+- `GET /api/v1/files/<entity>/<filename>` - Serve uploaded files
 
 ### Access Control
 
@@ -260,7 +266,7 @@ curl -X POST http://localhost:7070/api/v1/entities/posts \
   -F "image=@photo.jpg"
 
 # Access file
-curl http://localhost:7070/api/files/posts/photo.jpg
+curl http://localhost:7070/api/v1/files/posts/photo.jpg
 ```
 
 See [File Handling](doc/11.files.md) for details.
@@ -397,9 +403,9 @@ curl http://localhost:7070/api/v1/entities/users
 
 ```bash
 # 1. Login (identity can be email or user ID)
-curl -X POST http://localhost:7070/api/v1/auth/login \
+curl -X POST http://localhost:7070/api/v1/auth/users/login \
   -H "Content-Type: application/json" \
-  -d '{"entity": "users", "identity": "user@example.com", "password": "password"}'
+  -d '{"identity": "user@example.com", "password": "password"}'
 
 # Response: {"token": "...", "user": {...}}
 
