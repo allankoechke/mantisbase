@@ -308,12 +308,12 @@ mantisbase serve --port 8080 --host 0.0.0.0
 mantisbase --dev serve
 
 # PostgreSQL database
-mantisbase --database PSQL \
-  --connection "dbname=mantis host=localhost user=postgres password=pass" \
+mantisbase --db postgresql \
+  --db_url "dbname=mantis host=localhost user=postgres password=pass" \
   serve
 
 # Custom directories
-mantisbase --dataDir ./data --publicDir ./public --scriptsDir ./scripts serve
+mantisbase --data-dir ./data --public-dir ./public --scripts-dir ./scripts serve
 ```
 
 ### Environment Variables

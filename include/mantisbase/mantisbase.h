@@ -69,21 +69,26 @@ namespace mb
          *
          * The expected values are:
          * {
-         *     "database": "<db type>",
-         *     "connection": "<connection string>",
-         *     "dataDir": "<path to dir>",
-         *     "publicDir": "<path to dir>",
-         *     "scriptsDir": "<path to dir>",
+         *     "db": "<db type>",
+         *     "db_url": "<connection string>",
+         *     "data-dir": "<path to dir>",
+         *     "public-dir": "<path to dir>",
+         *     "scripts-dir": "<path to dir>",
+         *     "migrations-dir": "<path to dir>",
          *     "dev": true,
          *     "serve": {
          *         "port": <int>,
          *         "host": "<host IP/addr>",
-         *         "poolSize": <int>,
+         *         "pool-size": <int>,
+         *         "skip-admin-setup": <bool>
          *     },
          *     "admins": {
-         *         "add": "<email to add>",
-         *         "rm": "<email to remove>"
-         *     }
+         *         "add": ["<email>", "<password>"],
+         *         "ls": true,
+         *         "rm": "<email or id>"
+         *     },
+         *     "migrations": { "up": true, "down": false },
+         *     "schema": { "ls": true, "rm": "<entity>", "add": "<json>", "update": { "entity": "<name>", "body": "<json>" } }
          * }
          *
          * @note All primary options above are optional, you can omit to use default values.
@@ -194,6 +199,23 @@ namespace mb
          * @param dir New scripts directory.
          */
         void setScriptsDir(const std::string& dir);
+
+        /**
+         * @brief Retrieves the migrations directory path.
+         * @return Migrations directory.
+         */
+        [[nodiscard]] std::string migrationsDir() const;
+        /**
+         * @brief Update the migrations directory path.
+         * @param dir New migrations directory.
+         */
+        void setMigrationsDir(const std::string& dir);
+
+        /**
+         * @brief Whether first-boot admin setup (browser) should be skipped on serve.
+         */
+        [[nodiscard]] bool skipAdminSetup() const;
+        void setSkipAdminSetup(bool skip);
 
         /**
          * @brief Retrieves the active database type.
@@ -355,6 +377,7 @@ namespace mb
         std::string m_publicDir;
         std::string m_dataDir;
         std::string m_scriptsDir;
+        std::string m_migrationsDir;
         std::string m_dbType;
 
         // System uptime checkpoint
@@ -367,6 +390,7 @@ namespace mb
         bool m_toStartServer = false;
         bool m_launchAdminPanel = false;
         bool m_isDevMode = false;
+        bool m_skipAdminSetup = false;
 
         std::unique_ptr<Logger> m_logger;
         std::unique_ptr<Database> m_database;

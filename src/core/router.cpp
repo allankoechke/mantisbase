@@ -107,7 +107,7 @@ namespace mb {
             const auto admin_entity = mApp.entity("mb_admins");
 
             // If we don't have admin accounts, spin up admin dashboard
-            bool launch_admin_setup = admin_entity.isEmpty();
+            bool launch_admin_setup = !mApp.skipAdminSetup() && admin_entity.isEmpty();
 
             m_sseMgr->start();
 
