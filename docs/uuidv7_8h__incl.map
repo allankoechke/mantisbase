@@ -1,0 +1,21 @@
+<map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/utils/uuidv7.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/utils/uuidv7.h">
+<area shape="rect" id="Node000001" title="UUID v7 generation utilities." alt="" coords="298,5,531,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,61,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="298,60,75,110,74,105,297,55"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="85,108,152,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="325,63,166,109,164,103,324,58"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="176,108,251,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="354,63,254,105,252,100,352,58"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="275,108,355,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="386,62,341,101,337,97,382,58"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="379,108,451,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="417,60,417,94,412,94,412,60"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="475,108,549,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="446,58,490,97,487,101,443,62"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="573,108,632,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="473,58,566,100,564,105,471,62"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="656,108,723,133"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="499,58,644,102,642,107,498,63"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="747,108,811,133"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="531,57,734,105,733,110,530,63"/>
+</map>
