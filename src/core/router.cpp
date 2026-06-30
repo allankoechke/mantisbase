@@ -386,8 +386,9 @@ namespace mb {
         auto &router = mApp.router();
         router.Get(R"(/mb(/.*)?)", handleAdminDashboardRoute());
 
+        router.Get("/api/v1/health", healthCheckHandler());
+
         // /api/v1/sys/*
-        router.Get("/api/v1/sys/health", healthCheckHandler());
         router.Get("/api/v1/sys/logs", handleLogs(), {requireAdminAuth()});
         router.Post("/api/v1/sys/admins/login", handleAdminLogin(), {rateLimit(5, 60, false)});
         router.Post("/api/v1/sys/admins/refresh", handleAuthRefresh());

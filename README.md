@@ -231,7 +231,7 @@ Works with both SQLite and PostgreSQL. See [API Reference – Realtime](doc/02.a
 
 ### System Endpoints
 
-- `GET /api/v1/sys/health` - Health check
+- `GET /api/v1/health` - Health check
 - `GET /api/v1/sys/logs` - System logs with filtering and pagination (admin only)
 - `GET|PATCH /api/v1/sys/settings/config` - Application settings
 - `GET /api/v1/files/<entity>/<filename>` - Serve uploaded files

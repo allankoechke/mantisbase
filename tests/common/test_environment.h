@@ -187,7 +187,7 @@ inline bool MbTestEnv::waitForServer(const int max_retries, const int initial_de
             cli.set_read_timeout(1, 0);
 
             // Try health endpoint
-            if (auto res = cli.Get("/api/v1/sys/health")) {
+            if (auto res = cli.Get("/api/v1/health")) {
                 if (res->status == 200) {
                     server_ready.store(true);
                     std::cout << "[MbTestEnv] Health check passed (attempt " << (i + 1) << ")\n";

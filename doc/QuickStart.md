@@ -284,7 +284,7 @@ All entities automatically get these endpoints:
 
 ### System Endpoints
 
-- `GET /api/v1/sys/health` - Health check
+- `GET /api/v1/health` - Health check
 - `GET /api/v1/sys/logs` - System logs (admin only, see [API Reference](02.api.md#-system-endpoints))
 - `GET /api/v1/sys/settings/config` - Application settings
 - `PATCH /api/v1/sys/settings/config` - Update application settings
