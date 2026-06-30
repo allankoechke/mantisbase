@@ -188,9 +188,11 @@ namespace mb {
 
         void registerEntityRoutes();
 
-        void registerSchemaRoutes();
+    void registerSchemaRoutes();
 
-        static std::string getMimeType(const std::string &path);
+    void registerAuthRoutes();
+
+    static std::string getMimeType(const std::string &path);
 
         // ----------- REQ/RES METHODS ----------- //
         static std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute() ;

@@ -360,6 +360,15 @@ namespace mb {
         }
     }
 
+    void Router::registerAuthRoutes() {
+        const Middlewares authEntityMiddleware = {resolveAuthEntity()};
+        const Middlewares authLoginMiddleware = {resolveAuthEntity(), rateLimit(5, 60, false)};
+
+        Post("/api/v1/auth/:entity_name/login", handleAuthLogin(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/refresh", handleAuthRefresh(), authEntityMiddleware);
+        Post("/api/v1/auth/:entity_name/logout", handleAuthLogout(), authEntityMiddleware);
+    }
+
     void Router::registerSchemaRoutes() {
         const Middlewares adminAuth = {requireAdminAuth()};
         const Middlewares schemaItemMiddleware = {requireAdminAuth(), resolveSchema()};
@@ -395,10 +404,8 @@ namespace mb {
         router.Post("/api/v1/sys/admins/logout", handleAuthLogout());
         router.Post("/api/v1/sys/admins/setup", handleSetupAdmin(), {rateLimit(3, 3600, false)});
 
-        // /api/v1/auth/*
-        router.Post("/api/v1/auth/login", handleAuthLogin(), {rateLimit(5, 60, false)});
-        router.Post("/api/v1/auth/refresh", handleAuthRefresh());
-        router.Post("/api/v1/auth/logout", handleAuthLogout());
+        // /api/v1/auth/<entity>/*
+        registerAuthRoutes();
 
         // /api/v1/files/*
         router.Get("/api/v1/files/:entity/:file", fileServingHandler());

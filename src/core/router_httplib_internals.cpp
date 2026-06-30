@@ -83,8 +83,8 @@ namespace mb {
                     return;
                 }
 
-                // The body should contain `identity`, `password` and `entity` keys
-                for (const auto &key: std::vector<std::string>{"identity", "password", "entity"}) {
+                // The body should contain `identity` and `password` keys
+                for (const auto &key: std::vector<std::string>{"identity", "password"}) {
                     if (!body.contains(key) || !body[key].is_string() || body[key].empty()) {
                         res.sendJSON(400, {
                                          {"status", 400},
@@ -95,21 +95,8 @@ namespace mb {
                     }
                 }
 
-                // Check that entity exists in database, throws an error if missing!
-                const auto entity = MantisBase::instance().entity(body["entity"].get<std::string>());
-
-                // Auth only supported on `auth` tables only
-                if (entity.type() != "auth") {
-                    res.sendJSON(400, {
-                                     {"status", 400},
-                                     {"data", json::object()},
-                                     {
-                                         "error",
-                                         "Entity provided does not support authentication."
-                                     }
-                                 });
-                    return;
-                }
+                const auto entity_name = trim(req.getPathParamValue("entity_name"));
+                const auto entity = MantisBase::instance().entity(entity_name);
 
                 // Get user for given identity
                 auto opt_user = entity.queryFromCols(body["identity"].get<std::string>(), {"id", "email"});

@@ -292,6 +292,31 @@ namespace mb {
         };
     }
 
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveAuthEntity() {
+        std::string msg = MB_FUNC();
+        return [msg](MantisRequest &req, MantisResponse &res) {
+            TRACE_FUNC(msg);
+            const auto entity_name = trim(req.getPathParamValue("entity_name"));
+            if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
+                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                return HandlerResponse::Handled;
+            }
+
+            if (!MantisBase::instance().hasEntity(entity_name)) {
+                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                return HandlerResponse::Handled;
+            }
+
+            const auto entity = MantisBase::instance().entity(entity_name);
+            if (entity.isSystem() || !entity.hasApi() || entity.type() != "auth") {
+                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                return HandlerResponse::Handled;
+            }
+
+            return HandlerResponse::Unhandled;
+        };
+    }
+
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveEntity() {
         std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, MantisResponse &res) {

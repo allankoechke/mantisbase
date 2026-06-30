@@ -207,11 +207,11 @@ Every entity (table) you create automatically gets REST endpoints:
 
 ### Authentication
 
-Entity user authentication:
+Entity user authentication (auth-type entities):
 
-- `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/refresh` - Refresh token
-- `POST /api/v1/auth/logout` - Logout
+- `POST /api/v1/auth/<entity>/login` - User login
+- `POST /api/v1/auth/<entity>/refresh` - Refresh token
+- `POST /api/v1/auth/<entity>/logout` - Logout
 
 Admin authentication and accounts (`/api/v1/sys/admins/`):
 
@@ -403,9 +403,9 @@ curl http://localhost:7070/api/v1/entities/users
 
 ```bash
 # 1. Login (identity can be email or user ID)
-curl -X POST http://localhost:7070/api/v1/auth/login \
+curl -X POST http://localhost:7070/api/v1/auth/users/login \
   -H "Content-Type: application/json" \
-  -d '{"entity": "users", "identity": "user@example.com", "password": "password"}'
+  -d '{"identity": "user@example.com", "password": "password"}'
 
 # Response: {"token": "...", "user": {...}}
 

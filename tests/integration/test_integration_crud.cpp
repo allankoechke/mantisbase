@@ -91,12 +91,11 @@ protected:
 
         // Login
         nlohmann::json login = {
-            {"entity", "test_users"},
             {"identity", "user@test.com"},
             {"password", TestConfig::getTestPassword()}
         };
 
-        auto loginRes = client->Post("/api/v1/auth/login",
+        auto loginRes = client->Post("/api/v1/auth/test_users/login",
                                      login.dump(), "application/json");
 
         if (loginRes && loginRes->status == 200) {

@@ -40,6 +40,15 @@ namespace mb {
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> resolveSchema();
 
     /**
+     * @brief Resolve auth entity from `:entity_name` path param.
+     *
+     * Returns 404 when the entity is missing, not auth type, is a system/admin entity,
+     * or has API disabled.
+     * @return Middleware function
+     */
+    std::function<HandlerResponse(MantisRequest&, MantisResponse&)> resolveAuthEntity();
+
+    /**
      * @brief Resolve entity from `:entity_name` path param and validate it is API-accessible.
      *
      * Returns 404 when the entity does not exist, is a system entity, or has API disabled.
@@ -131,7 +140,7 @@ namespace mb {
      * router.Post("/api/v1/upload", handler, {rateLimit(10, 1, true)});
      * 
      * // Login endpoint: 5 attempts per minute per IP (prevents brute force)
-     * router.Post("/api/v1/auth/login", loginHandler, {rateLimit(5, 60, false)});
+     * router.Post("/api/v1/auth/users/login", loginHandler, {rateLimit(5, 60, false), resolveAuthEntity()});
      * @endcode
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> rateLimit(

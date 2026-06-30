@@ -175,10 +175,9 @@ MantisBase provides standalone authentication endpoints:
 
 ```bash
 # Login (identity can be email or user ID)
-curl -X POST http://localhost:7070/api/v1/auth/login \
+curl -X POST http://localhost:7070/api/v1/auth/users/login \
   -H "Content-Type: application/json" \
   -d '{
-    "entity": "users",
     "identity": "user@example.com",
     "password": "password"
   }'
@@ -261,9 +260,11 @@ All entities automatically get these endpoints:
 
 ### Authentication Endpoints
 
-- `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/refresh` - Refresh token
-- `POST /api/v1/auth/logout` - Logout
+Auth-type entities expose login under `/api/v1/auth/<entity>/`:
+
+- `POST /api/v1/auth/<entity>/login` - User login
+- `POST /api/v1/auth/<entity>/refresh` - Refresh token
+- `POST /api/v1/auth/<entity>/logout` - Logout
 
 ### Admin Endpoints (`/api/v1/sys/admins/`)
 

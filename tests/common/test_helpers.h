@@ -53,12 +53,11 @@ namespace TestHelpers {
             
             // Login to get token
             nlohmann::json login = {
-                {"entity", "mb_admins"},
                 {"identity", TestConfig::getAdminEmail()},
                 {"password", TestConfig::getTestPassword()}
             };
             
-            auto loginRes = client.Post("/api/v1/auth/login",
+            auto loginRes = client.Post("/api/v1/sys/admins/login",
                 login.dump(), "application/json");
             
             if (loginRes && loginRes->status == 200) {
@@ -94,12 +93,11 @@ namespace TestHelpers {
                 
                 // Login to get token
                 nlohmann::json login = {
-                    {"entity", "mb_admins"},
                     {"identity", TestConfig::getAdminEmail()},
                     {"password", TestConfig::getTestPassword()}
                 };
                 
-                auto loginRes = client.Post("/api/v1/auth/login",
+                auto loginRes = client.Post("/api/v1/sys/admins/login",
                     login.dump(), "application/json");
                 
                 if (loginRes && loginRes->status == 200) {
