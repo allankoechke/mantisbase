@@ -12,6 +12,7 @@
 #include <iostream>
 #include <iomanip>
 
+#include "mantisbase/core/realtime.h"
 #include "mantisbase/core/models/entity_schema.h"
 #include "mantisbase/core/models/validators.h"
 
@@ -40,7 +41,7 @@ namespace mb {
             if (normalized == "psql" || normalized == "postgresql" || normalized == "postgres")
                 return "postgresql";
 
-            quit(-1, std::format("Backend Database `{}` is unsupported!", db));
+            MantisBase::quit(-1, std::format("Backend Database `{}` is unsupported!", db));
             return "sqlite3";
         }
 
@@ -61,7 +62,7 @@ namespace mb {
                 const auto email = getEnvOrDefault("MB_DEFAULT_ADMIN_EMAIL", "");
                 const auto password = getEnvOrDefault("MB_DEFAULT_ADMIN_PASSWORD", "");
                 if (email.empty() || password.empty()) {
-                    quit(400, "admins --add requires email/password arguments or "
+                    MantisBase::quit(400, "admins --add requires email/password arguments or "
                               "MB_DEFAULT_ADMIN_EMAIL/MB_DEFAULT_ADMIN_PASSWORD env vars.");
                 }
 
@@ -185,7 +186,7 @@ namespace mb {
                 .nargs(1)
                 .metavar("TYPE")
                 .help("Database type: sqlite3, postgresql, mysql (overridden by MB_DATABASE_TYPE)");
-        program.add_argument("--db_url")
+        program.add_argument("--db-url")
                 .nargs(1)
                 .metavar("URL")
                 .help("Database connection URL (overridden by MB_DATABASE_URL)");
@@ -210,7 +211,7 @@ namespace mb {
         admins_command.add_description("Manage admin accounts");
         admins_command.add_argument("--add")
                 .nargs(2)
-                .metavar("EMAIL", "PASSWORD")
+                // .metavar("EMAIL", "PASSWORD")
                 .help("Add admin account (or use MB_DEFAULT_ADMIN_EMAIL/PASSWORD with `--add` alone via env expansion)");
         admins_command.add_argument("--ls")
                 .flag()
@@ -244,7 +245,7 @@ namespace mb {
                 .help("Create schema from JSON string or file path");
         schema_command.add_argument("--update")
                 .nargs(2)
-                .metavar("ENTITY", "JSON_OR_FILE")
+                // .metavar("ENTITY", "JSON_OR_FILE")
                 .help("Update schema from JSON string or file path");
 
         program.add_subparser(serve_command);
@@ -266,7 +267,7 @@ namespace mb {
         }
 
         const auto db_type = resolveDbType(program.present<std::string>("--db"));
-        const auto conn_string = resolveDbUrl(program.present<std::string>("--db_url"));
+        const auto conn_string = resolveDbUrl(program.present<std::string>("--db-url"));
         const auto _dataDir = program.present<std::string>("--data-dir").value_or("data");
         const auto _pubDir = program.present<std::string>("--public-dir").value_or("public");
         const auto _scriptsDir = program.present<std::string>("--scripts-dir").value_or("scripts");
@@ -492,5 +493,9 @@ namespace mb {
         std::cout << "Unknown command. Available subcommands: serve, admins, migrations, schema\n\n"
                   << program;
         quit(400, "No subcommand specified.");
+    }
+
+    bool MantisBase::isCreated() const {
+        return m_isCreated.load();
     }
 }

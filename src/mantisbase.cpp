@@ -49,7 +49,7 @@ namespace mb {
 
     MantisBase &MantisBase::instance() {
         auto &app_instance = getInstanceImpl();
-        if (!app_instance.m_isCreated.load())
+        if (!app_instance.isCreated())
             throw std::runtime_error("MantisBase not created yet");
 
         return app_instance;
@@ -57,7 +57,7 @@ namespace mb {
 
     MantisBase &MantisBase::create(const int argc, char **argv) {
         auto &app = getInstanceImpl();
-        if (app.m_isCreated.load())
+        if (app.isCreated())
             throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
 
         // Initialize the app with passed in args
@@ -69,7 +69,7 @@ namespace mb {
 
     MantisBase &MantisBase::create(const json &config) {
         auto &app = getInstanceImpl();
-        if (app.m_isCreated.load())
+        if (app.isCreated())
             throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
 
         // logEntry::trace("MantisBase Config: {}", config.dump());
@@ -239,15 +239,15 @@ namespace mb {
 
     void MantisBase::close() {
         // Already closed, nothing to do
-        if (!m_isCreated.load()) {
+        if (!isCreated()) {
             return;
         }
 
-        LogOrigin::trace("Shutdown Started", "[MB] Starting closing all units ...");
+        LogOrigin::trace("MantisBase", "Closing units");
         try {
             if (m_router && m_router->server().is_running()) {
                 m_router->close();
-                LogOrigin::trace("Router Reset", "[MB] Resetting router instance [OK] ...");
+                LogOrigin::trace("Router", "Router stopped");
             }
 
             if (m_kvStore) {
@@ -257,14 +257,18 @@ namespace mb {
 
             if (m_database && m_database->isConnected()) {
                 m_database->disconnect();
-                LogOrigin::trace("Database Shutdown", "[MB] Finished DB Store closing ...");
+                LogOrigin::trace("Db Shutdown", "Completed Successfully!");
             }
         } catch (const std::exception &e) {
-            std::cerr << "[MB]  Error during reset: " << e.what() << std::endl;
+            std::cerr << "Error during reset: " << e.what() << std::endl;
         }
 
+        // Reset created flag
         m_isCreated.store(false);
-        LogOrigin::debug("Shutdown Complete", "[MB] Finished closing all units");
+
+        // Mark logger instance as destroyed
+        Logger::isDbInitialized.store(false);
+        LogOrigin::debug("MantisBase", "Shutdown Complete");
     }
 
     int MantisBase::run() {

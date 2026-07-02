@@ -93,6 +93,7 @@ set( MB_SOURCES
         src/core/exceptions.cpp
         src/core/realtime.cpp
         src/core/sse.cpp
+        include/mantisbase/utils/snowflake.hpp
 )
 
 # Add library
