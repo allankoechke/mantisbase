@@ -67,7 +67,7 @@ namespace mb {
 
         void updateTopics(std::set<std::string> &topics);
 
-        auto getLastActivity() const;
+        std::chrono::steady_clock::time_point getLastActivity() const;
 
         /** Mark session inactive and wake any waiters (disconnect). */
         void close();

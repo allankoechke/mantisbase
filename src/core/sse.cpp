@@ -112,7 +112,7 @@ void mb::SSESession::updateTopics(std::set<std::string> &topics) {
     m_topics = topics;
 }
 
-auto mb::SSESession::getLastActivity() const { return m_lastActivity; }
+std::chrono::steady_clock::time_point mb::SSESession::getLastActivity() const { return m_lastActivity; }
 
 void mb::SSESession::close() {
     m_isActive = false;
