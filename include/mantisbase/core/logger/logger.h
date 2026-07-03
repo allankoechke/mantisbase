@@ -8,6 +8,7 @@
 #ifndef MB_LOGGER_H
 #define MB_LOGGER_H
 
+#include <iostream>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -42,6 +43,7 @@ namespace mb {
 
     public:
         Logger();
+        ~Logger() { std::cout << "Logger Des()" << std::endl; }
 
         inline static std::atomic<bool> isDbInitialized = false;
 

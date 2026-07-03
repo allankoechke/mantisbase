@@ -388,6 +388,11 @@ namespace mb
         int m_port = 7070;
         std::string m_host = "127.0.0.1";
 
+        // For snowflake ID generation
+        uint8_t m_zoneId = 0;
+        uint8_t m_shardNo = 0;
+
+        //
         int m_poolSize = 2;
         bool m_toStartServer = false;
         bool m_launchAdminPanel = false;

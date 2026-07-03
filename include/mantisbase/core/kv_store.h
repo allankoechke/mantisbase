@@ -23,6 +23,7 @@ namespace mb
     {
     public:
         KeyValStore() = default;
+        ~KeyValStore() { std::cout << "KeyValStore Des()" << std::endl; }
 
         void close() {}
 

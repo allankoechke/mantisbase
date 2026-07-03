@@ -19,6 +19,7 @@ namespace mb {
 
     Database::~Database() {
         disconnect();
+        std::cout << "Database Des()" << std::endl;
     }
 
     bool Database::connect(const std::string &conn_str) {

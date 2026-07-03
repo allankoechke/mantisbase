@@ -70,6 +70,7 @@ set( MB_SOURCES
         src/core/http_response.cpp
 
         src/core/models/entity.cpp
+        src/core/models/entity_crud.cpp
         src/parse_cmd.cpp
 
         src/core/models/validators.cpp
@@ -93,6 +94,9 @@ set( MB_SOURCES
         src/core/exceptions.cpp
         src/core/realtime.cpp
         src/core/sse.cpp
+        src/core/sse_mgr.cpp
+        src/core/http.cpp
+
         include/mantisbase/utils/snowflake.hpp
 )
 

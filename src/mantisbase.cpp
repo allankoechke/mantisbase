@@ -16,15 +16,17 @@ namespace mb {
           // , m_dukCtx(duk_create_heap_default()) {}
 
     MantisBase::~MantisBase() {
-        if (!m_toStartServer) {
-            std::cout << std::endl;
-            LogOrigin::info(
-                "Exiting Application",
-                "Nothing else to do. Did you intend to run the server? Try `mantisbase serve` instead.");
-        }
+        // if (!m_toStartServer) {
+        //     std::cout << std::endl;
+        //     LogOrigin::info(
+        //         "Exiting Application",
+        //         "Nothing else to do. Did you intend to run the server? Try `mantisbase serve` instead.");
+        // }
 
         // Destroy duk context
         // duk_destroy_heap(m_dukCtx);
+
+        std::cout << "Exiting ~MantisBase()" << std::endl;
     }
 
     void MantisBase::init(const int argc, char *argv[]) {
