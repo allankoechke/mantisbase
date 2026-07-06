@@ -59,8 +59,11 @@ namespace mb {
                 placeholders += placeholders.empty() ? (":" + field_name) : (", :" + field_name);
             }
 
-            // Create the SQL Query
-            std::string sql_query = std::format("INSERT INTO {} ({}) VALUES ({})", name(), columns, placeholders);
+            // Create the SQL Query. RETURNING * lets us read the freshly stored
+            // row back in the same round-trip instead of issuing a separate
+            // SELECT (supported by SQLite >= 3.35 and PostgreSQL).
+            std::string sql_query = std::format("INSERT INTO {} ({}) VALUES ({}) RETURNING *",
+                                                name(), columns, placeholders);
 
             // Bind soci::values to entity values
             auto vals = json2SociValue(new_record, fields());
@@ -68,13 +71,11 @@ namespace mb {
             vals.set("created", created_tm, soci::i_ok);
             vals.set("updated", created_tm, soci::i_ok);
 
-            // Execute sql query
-            *sql << sql_query, soci::use(vals);
+            // Execute the insert and fetch the newly-created row in one go
+            soci::row r;
+            *sql << sql_query, soci::use(vals), soci::into(r);
             tr.commit();
 
-            // Query back the created record and send it back to the client
-            soci::row r;
-            *sql << std::format("SELECT * FROM {} WHERE id = :id", name()), soci::use(id), soci::into(r);
             auto added_row = sociRow2Json(r, fields());
 
             // Remove user password from the response
@@ -261,24 +262,25 @@ namespace mb {
                 }
             }
 
-            // Create the SQL Query
-            std::string sql_query = std::format("UPDATE {} SET {} WHERE id = :old_id", name(), columns);
+            // Create the SQL Query. RETURNING * reads the updated row back in
+            // the same round-trip instead of a separate SELECT (supported by
+            // SQLite >= 3.35 and PostgreSQL).
+            std::string sql_query = std::format("UPDATE {} SET {} WHERE id = :old_id RETURNING *",
+                                                name(), columns);
 
             // Bind soci::values to entity values, throws an error if it fails
             auto vals = json2SociValue(data, fields());
             vals.set("old_id", id);
             vals.set("updated", created_tm);
 
-            // Bind values, then execute
-            *sql << sql_query, soci::use(vals);
+            // Bind values, execute, and fetch the updated row in one go
+            soci::row r;
+            *sql << sql_query, soci::use(vals), soci::into(r);
             tr.commit();
 
             // Delete files, if any were removed ...
             Files::removeFiles(name(), files_to_delete);
 
-            // Query back the created record and send it back to the client
-            soci::row r;
-            *sql << std::format("SELECT * FROM {} WHERE id = :id", name()), soci::use(id), soci::into(r);
             Record new_record = sociRow2Json(r, fields());
 
             // Redact passwords
