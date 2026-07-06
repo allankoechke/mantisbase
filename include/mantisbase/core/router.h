@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <vector>
+#include <shared_mutex>
 #include <nlohmann/json.hpp>
 #include <httplib.h>
 
@@ -180,6 +181,18 @@ namespace mb {
         std::string decompressResponseBody(const std::string &body, const std::string &encoding);
 
     private:
+        /**
+         * @brief Insert an entity into the cache. Caller MUST hold an exclusive
+         *        lock on m_entityMapMutex.
+         */
+        void addSchemaCacheLocked(const nlohmann::json &entity_schema);
+
+        /**
+         * @brief Erase an entity from the cache. Caller MUST hold an exclusive
+         *        lock on m_entityMapMutex.
+         */
+        void removeSchemaCacheLocked(const std::string &entity_name);
+
         void globalRouteHandler(const std::string &method, const std::string &path);
 
         void globalRouteHandlerWithReader(const std::string &method, const std::string &path);
@@ -231,7 +244,12 @@ namespace mb {
         std::unique_ptr<SSEMgr> m_sseMgr;
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
         std::vector<HandlerFn> m_postRoutingMiddlewares;
+
+        /// Entity schema cache. Read on every request by the httplib worker
+        /// threads and mutated at runtime by the schema CRUD endpoints, so all
+        /// access must be synchronized via m_entityMapMutex.
         std::unordered_map<std::string, Entity> m_entityMap;
+        mutable std::shared_mutex m_entityMapMutex;
     };
 } // mb
 

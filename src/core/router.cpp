@@ -9,6 +9,8 @@
 #include <cmrc/cmrc.hpp>
 #include <chrono>
 #include <thread>
+#include <mutex>
+#include <shared_mutex>
 
 // For thread logger
 #include <spdlog/sinks/stdout_color_sinks-inl.h>
@@ -58,6 +60,11 @@ namespace mb {
 
     bool Router::init() {
         {
+            // Runs before the server starts listening (single-threaded), but we
+            // take the exclusive lock anyway to keep all m_entityMap access
+            // uniformly synchronized and future-proof.
+            std::unique_lock lock(m_entityMapMutex);
+
             const auto sql = mApp.db().session();
             const soci::rowset rows = (sql->prepare << "SELECT schema FROM mb_tables");
 
@@ -71,21 +78,21 @@ namespace mb {
                 // if not, possible access violation error
                 m_entityMap.emplace(entity.name(), std::move(entity));
             }
+
+            // Add admin routes
+            EntitySchema admin_schema{"mb_admins", "auth"};
+            admin_schema.removeField("name");
+            admin_schema.setSystem(true);
+            auto admin_entity = admin_schema.toEntity();
+            m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
+
+            // Service Schema [No routes]
+            EntitySchema service_schema{"mb_service_acc", "base"};
+            service_schema.setHasApi(false);
+            service_schema.setSystem(true);
+            auto service_entity = service_schema.toEntity();
+            m_entityMap.emplace(service_entity.name(), std::move(service_entity));
         }
-
-        // Add admin routes
-        EntitySchema admin_schema{"mb_admins", "auth"};
-        admin_schema.removeField("name");
-        admin_schema.setSystem(true);
-        auto admin_entity = admin_schema.toEntity();
-        m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
-
-        // Service Schema [No routes]
-        EntitySchema service_schema{"mb_service_acc", "base"};
-        service_schema.setHasApi(false);
-        service_schema.setSystem(true);
-        auto service_entity = service_schema.toEntity();
-        m_entityMap.emplace(service_entity.name(), std::move(service_entity));
 
         // Misc Endpoints [admin, auth, etc]
         generateMiscEndpoints();
@@ -159,7 +166,10 @@ namespace mb {
         // Stop router and clear out objects
         if (svr.is_running()) {
             svr.stop();
-            m_entityMap.clear();
+            {
+                std::unique_lock lock(m_entityMapMutex);
+                m_entityMap.clear();
+            }
             LogOrigin::info("Server Stopped", "HTTP Server Stopped.");
         }
     }
@@ -173,6 +183,10 @@ namespace mb {
     }
 
     const json &Router::schemaCache(const std::string &table_name) const {
+        // NOTE: returns a reference into the cache; the caller must not rely on
+        // it remaining valid across a concurrent schema mutation. Currently
+        // unused, kept for API completeness.
+        std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
             throw MantisException(404, "Entity schema for " + table_name + " was not found!");
         }
@@ -181,18 +195,43 @@ namespace mb {
     }
 
     bool Router::hasSchemaCache(const std::string &table_name) const {
+        std::shared_lock lock(m_entityMapMutex);
         return m_entityMap.contains(table_name);
     }
 
     Entity Router::schemaCacheEntity(const std::string &table_name) const {
+        std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
             throw MantisException(404, "Entity schema for `" + table_name + "` was not found!");
         }
 
+        // Returns a copy, so it stays valid after the lock is released.
         return m_entityMap.at(table_name);
     }
 
     void Router::addSchemaCache(const nlohmann::json &entity_schema) {
+        std::unique_lock lock(m_entityMapMutex);
+        addSchemaCacheLocked(entity_schema);
+    }
+
+    void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) {
+        std::unique_lock lock(m_entityMapMutex);
+
+        if (!m_entityMap.contains(old_entity_name))
+            throw MantisException(404, "Cannot update, schema not found for entity " + old_entity_name);
+
+        // Clean up old entity, then insert the new one, all under a single
+        // exclusive lock so readers never observe the intermediate state.
+        removeSchemaCacheLocked(old_entity_name);
+        addSchemaCacheLocked(new_schema);
+    }
+
+    void Router::removeSchemaCache(const std::string &entity_name) {
+        std::unique_lock lock(m_entityMapMutex);
+        removeSchemaCacheLocked(entity_name);
+    }
+
+    void Router::addSchemaCacheLocked(const nlohmann::json &entity_schema) {
         const auto entity_name = entity_schema.at("name").get<std::string>();
         if (m_entityMap.contains(entity_name)) {
             throw MantisException(500, "An entity exists with given entity_name");
@@ -201,31 +240,14 @@ namespace mb {
         // Create entity and cache it. Unified entity routes resolve entities dynamically.
         auto entity = Entity(entity_schema);
         m_entityMap.insert_or_assign(entity_name, std::move(entity));
-        std::cout << std::endl;
     }
 
-    void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) {
-        if (!m_entityMap.contains(old_entity_name))
-            throw MantisException(404, "Cannot update, schema not found for entity " + old_entity_name);
-
-        // Clean up old entity route
-        removeSchemaCache(old_entity_name);
-
-        assert(!m_entityMap.contains(new_schema)); // Ensure we don't have any old schema data anymore
-
-        // Add new route
-        addSchemaCache(new_schema);
-
-        assert(m_entityMap.contains(new_schema)); // Ensure new entity has been added
-    }
-
-    void Router::removeSchemaCache(const std::string &entity_name) {
+    void Router::removeSchemaCacheLocked(const std::string &entity_name) {
         if (!m_entityMap.contains(entity_name)) {
             throw MantisException(404, "Could not find EntitySchema for " + entity_name);
         }
 
         m_entityMap.erase(entity_name);
-        std::cout << std::endl;
     }
 
     void Router::registerAuthRoutes() {
