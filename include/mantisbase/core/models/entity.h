@@ -10,6 +10,7 @@
 #define MANTISBASE_ENTITY_H
 
 #include <string>
+#include <memory>
 #include "mantisbase/mantis.h"
 #include "mantisbase/core/exceptions.h"
 #include "mantisbase/utils/soci_wrappers.h"
@@ -232,7 +233,12 @@ namespace mb {
                                                         const std::vector<std::string> &columns) const;
 
     private:
-        nlohmann::json m_schema;
+        /// Immutable schema shared across copies. An Entity is never mutated
+        /// after construction, so copies (returned from the cache on every
+        /// request) only bump a refcount instead of deep-copying the JSON, and
+        /// the pointed-to schema is safe to read concurrently from multiple
+        /// threads.
+        std::shared_ptr<const nlohmann::json> m_schema;
     };
 } // mb
 
