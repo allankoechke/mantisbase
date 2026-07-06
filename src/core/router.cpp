@@ -278,6 +278,19 @@ namespace mb {
         // /api/v1/files/*
         router.Get("/api/v1/files/:entity/:file", fileServingHandler());
 
+        router.Get("/api/v1/sys/settings/config", [](const MantisRequest&, const MantisResponse& res) {
+            res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
+        });
+
+        router.Post("/api/v1/sys/settings/config", [](const MantisRequest&, const MantisResponse& res) {
+            res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
+        });
+
+        router.Patch("/api/v1/sys/settings/config", [](const MantisRequest&, const MantisResponse& res) {
+            res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
+        });
+
+
         SSEMgr::createRoutes();
 
         registerSchemaRoutes();
