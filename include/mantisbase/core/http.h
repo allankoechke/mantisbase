@@ -14,6 +14,8 @@
 #include "../utils/utils.h"
 #include "types.h"
 #include <fstream>
+#include <optional>
+#include <utility>
 
 namespace mb {
 #ifdef MB_SCRIPTING_ENABLED
@@ -39,6 +41,11 @@ namespace mb {
     class MantisRequest {
         const httplib::Request &m_req;
         ContextStore m_store;
+
+        /// Lazily-parsed, cached request body. getBodyAsJson() is called
+        /// several times per request (access-rule evaluation, then the
+        /// handler), so the body is parsed once and reused.
+        mutable std::optional<std::pair<nlohmann::json, std::string>> m_bodyJsonCache;
 
         const std::string __class_name__ = "mb::MantisRequest";
 
@@ -243,12 +250,17 @@ namespace mb {
         std::string getBearerTokenAuth() const;
 
         /**
-         * @brief Parse request body as JSON.
-         * @return Pair of (JSON object, error message)
+         * @brief Parse request body as JSON (parsed once and cached).
+         * @return Reference to a pair of (JSON object, error message)
          *   - If parsing succeeds: (json object, "")
          *   - If parsing fails: (empty json, error message)
+         *
+         * The result is cached on first call and reused for the lifetime of the
+         * request, so repeated calls across middlewares and the handler do not
+         * re-parse the body. The returned reference is valid for as long as the
+         * request object lives.
          */
-        std::pair<nlohmann::json, std::string> getBodyAsJson() const;
+        const std::pair<nlohmann::json, std::string> &getBodyAsJson() const;
 
         /**
          * @brief Store value in request context (for middleware communication).

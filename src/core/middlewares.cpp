@@ -22,7 +22,7 @@ namespace mb {
             TRACE_FUNC(trace_msg);
             try {
                 const auto entity = MantisBase::instance().entity(entity_name);
-                auto auth = req.getOr<json>("auth", json::object());
+                const auto &auth = req.getOr<json>("auth", json::object());
                 auto method = req.getMethod();
 
                 if (!(method == "GET"
@@ -54,7 +54,7 @@ namespace mb {
 
                 if (rule.mode().empty()) {
                     LogOrigin::authTrace("Admin Access Required", "Restricted access, admin auth required!");
-                    auto verification = req.getOr<json>("verification", json::object());
+                    const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
                         res.sendJSON(403, {
                             {"data", json::object()},
@@ -89,7 +89,7 @@ namespace mb {
 
                 if (rule.mode() == "auth" || (auth["entity"].is_string() && auth["entity"].get<std::string>() == "mb_admins")) {
                     LogOrigin::authTrace("User/Admin Access Required", "Restricted access, admin/user auth required!");
-                    auto verification = req.getOr<json>("verification", json::object());
+                    const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
                         res.sendJSON(403, {
                             {"data", json::object()},
@@ -388,7 +388,7 @@ namespace mb {
         std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
-            const auto auth = req.getOr<json>("auth", json::object());
+            const auto &auth = req.getOr<json>("auth", json::object());
             if (auth["type"] == "guest")
                 return HandlerResponse::Unhandled;
 
@@ -407,7 +407,7 @@ namespace mb {
             TRACE_FUNC(msg);
             try {
                 // Require admin authentication
-                auto verification = req.getOr<json>("verification", json::object());
+                const auto &verification = req.getOr<json>("verification", json::object());
                 // logEntry::trace("Verification: {}", verification.dump());
 
                 if (verification.empty()) {
@@ -424,7 +424,7 @@ namespace mb {
                                 verification["verified"].is_boolean() &&
                                 verification["verified"].get<bool>();
                 if (ok) {
-                    auto auth = req.getOr<json>("auth", json::object());
+                    const auto &auth = req.getOr<json>("auth", json::object());
                     // logEntry::trace("Ver User Auth: {}", auth.dump());
 
                     // Check if verified user object is valid, if not throw auth error
@@ -528,7 +528,7 @@ namespace mb {
                 
                 if (use_user_id) {
                     // Try to get user ID from auth context
-                    auto auth = req.getOr<json>("auth", json::object());
+                    const auto &auth = req.getOr<json>("auth", json::object());
                     if (auth.contains("id") && !auth["id"].is_null()) {
                         identifier = auth["id"].get<std::string>();
                     } else {

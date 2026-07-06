@@ -221,14 +221,18 @@ std::string MantisRequest::getBearerTokenAuth() const {
   return "";
 }
 
-std::pair<nlohmann::json, std::string> MantisRequest::getBodyAsJson() const {
-  try {
-    const auto b = getBody();
-    auto obj = b.empty() ? nlohmann::json::object() : nlohmann::json::parse(b);
-    return {obj, ""};
-  } catch (const std::exception &e) {
-    return {nlohmann::json::object(), e.what()};
+const std::pair<nlohmann::json, std::string> &MantisRequest::getBodyAsJson() const {
+  // Parse the body only once per request; subsequent callers reuse the cache.
+  if (!m_bodyJsonCache.has_value()) {
+    try {
+      const auto &b = m_req.body;
+      auto obj = b.empty() ? nlohmann::json::object() : nlohmann::json::parse(b);
+      m_bodyJsonCache.emplace(std::move(obj), std::string{});
+    } catch (const std::exception &e) {
+      m_bodyJsonCache.emplace(nlohmann::json::object(), std::string{e.what()});
+    }
   }
+  return *m_bodyJsonCache;
 }
 
 #ifdef MB_SCRIPTING_ENABLED
