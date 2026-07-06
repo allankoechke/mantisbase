@@ -26,7 +26,7 @@ namespace mb {
         // Destroy duk context
         // duk_destroy_heap(m_dukCtx);
 
-        std::cout << "Exiting ~MantisBase()" << std::endl;
+        // std::cout << "Exiting ~MantisBase()" << std::endl;
     }
 
     void MantisBase::init(const int argc, char *argv[]) {

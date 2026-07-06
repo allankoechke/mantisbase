@@ -53,7 +53,7 @@ namespace mb {
         if (svr.is_running())
             svr.stop();
 
-        std::cout << "Router Des()" << std::endl;
+        // std::cout << "Router Des()" << std::endl;
     }
 
     bool Router::init() {
