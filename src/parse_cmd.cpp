@@ -7,106 +7,258 @@
 #include "../include/mantisbase/mantis.h"
 
 #include <argparse/argparse.hpp>
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 
 #include "mantisbase/core/realtime.h"
+#include "mantisbase/core/models/entity_schema.h"
 #include "mantisbase/core/models/validators.h"
 
 namespace mb {
-    void MantisBase::parseArgs() {
-        // Main program parser with global arguments
-        argparse::ArgumentParser program("mantisbase", appVersion());
-        program.add_argument("--database", "-d")
-                .nargs(1)
-                .help("<type> Database type ['SQLITE', 'PSQL', 'MYSQL'] (default: SQLITE)");
-        program.add_argument("--connection", "-c")
-                .nargs(1)
-                .help("<conn> Database connection string.");
-        program.add_argument("--dataDir")
-                .nargs(1)
-                .help("<dir> Data directory (default: ./data)");
-        program.add_argument("--publicDir")
-                .nargs(1)
-                .help("<dir> Static files directory (default: ./public).");
-        program.add_argument("--scriptsDir")
-                .nargs(1)
-                .help("<dir> JS script files directory (default: ./scripts).");
-        program.add_argument("--poolSize")
-                .nargs(1)
-                .scan<'i', int>()
-                .help("<pool size> Size of database connection pools >= 1");
-        program.add_argument("--dev").flag();
+    namespace {
+        LogLevel logLevelFromString(std::string level) {
+            toLowerCase(level);
+            if (level == "trace") return LogLevel::TRACE;
+            if (level == "debug") return LogLevel::DEBUG;
+            if (level == "info") return LogLevel::INFO;
+            if (level == "warn" || level == "warning") return LogLevel::WARN;
+            if (level == "critical" || level == "error") return LogLevel::CRITICAL;
+            throw MantisException(400, std::format("Unsupported log level `{}`", level));
+        }
 
-        // Serve subcommand
-        argparse::ArgumentParser serve_command("serve");
-        serve_command.add_argument("--port", "-p")
-                .default_value(7070)
-                .scan<'i', int>()
-                .help("<port> Server Port (default: 7070)");
-        serve_command.add_argument("--host", "-h")
-                .nargs(1)
-                .default_value("0.0.0.0")
-                .help("<host> Server Host (default: 0.0.0.0)");
+        std::string resolveDbType(const std::optional<std::string> &cli_db) {
+            const auto env_db = getEnvOrDefault("MB_DATABASE_TYPE", "");
+            const auto db = !env_db.empty() ? env_db : cli_db.value_or("sqlite3");
+            std::string normalized = db;
+            toLowerCase(normalized);
 
-        // Admins subcommand with nested subcommands
-        // admins add user@doe.com 123456789
-        // admins rm user@doe.com  # by email
-        // admins rm 7r6r656-896-8y97587-897AB7587 # by ID
-        argparse::ArgumentParser admins_command("admins");
-        admins_command.add_description("Admin accounts management commands");
+            if (normalized == "sqlite" || normalized == "sqlite3")
+                return "sqlite3";
+            if (normalized == "mysql")
+                return "mysql";
+            if (normalized == "psql" || normalized == "postgresql" || normalized == "postgres")
+                return "postgresql";
 
-        // Create the 'add' subcommand
-        argparse::ArgumentParser add_command("add");
-        add_command.add_description("Add a new admin");
-        add_command.add_argument("email")
-                .help("Admin email address");
-        add_command.add_argument("password")
-                .help("Admin password");
+            MantisBase::quit(-1, std::format("Backend Database `{}` is unsupported!", db));
+            return "sqlite3";
+        }
 
-        // Create the 'rm' subcommand
-        argparse::ArgumentParser rm_command("rm");
-        rm_command.add_description("Remove an admin");
-        rm_command.add_argument("identifier")
-                .help("Admin email or GUID");
+        std::string resolveDbUrl(const std::optional<std::string> &cli_url) {
+            const auto env_url = getEnvOrDefault("MB_DATABASE_URL", "");
+            return !env_url.empty() ? env_url : cli_url.value_or("");
+        }
 
-        // Add subcommands to admins
-        admins_command.add_subparser(add_command);
-        admins_command.add_subparser(rm_command);
+        void expandAdminAddFromEnv(std::vector<std::string> &args) {
+            for (size_t i = 0; i + 1 < args.size(); ++i) {
+                if (args[i] != "admins" || args[i + 1] != "--add")
+                    continue;
 
-        // Migrations subcommand with nested subcommands
-        argparse::ArgumentParser migrate_command("migrate");
-        migrate_command.add_description("Migration management commands");
+                const bool has_email = i + 2 < args.size() && !args[i + 2].starts_with("-");
+                if (has_email)
+                    break;
 
-        // Create the 'load' subcommand
-        argparse::ArgumentParser load_command("load");
-        load_command.add_description("Load admin data from file");
-        load_command.add_argument("file")
-                .help("File to load (json or zip format)");
+                const auto email = getEnvOrDefault("MB_DEFAULT_ADMIN_EMAIL", "");
+                const auto password = getEnvOrDefault("MB_DEFAULT_ADMIN_PASSWORD", "");
+                if (email.empty() || password.empty()) {
+                    MantisBase::quit(400, "admins --add requires email/password arguments or "
+                              "MB_DEFAULT_ADMIN_EMAIL/MB_DEFAULT_ADMIN_PASSWORD env vars.");
+                }
 
-        // Create the 'create' subcommand
-        argparse::ArgumentParser create_command("create");
-        create_command.add_description("Create new admin");
-        create_command.add_argument("filename")
-                .help("Optional filename for output")
-                .nargs(argparse::nargs_pattern::optional);
+                args.insert(args.begin() + static_cast<std::ptrdiff_t>(i + 2), {email, password});
+                break;
+            }
+        }
 
-        // Add subcommands to admins
-        migrate_command.add_subparser(load_command);
-        migrate_command.add_subparser(create_command);
+        json loadJsonInput(const std::string &value) {
+            const fs::path path = value;
+            if (fs::exists(path) && fs::is_regular_file(path)) {
+                std::ifstream file(path);
+                if (!file.is_open())
+                    throw MantisException(400, std::format("Could not open JSON file `{}`", value));
 
-        // Add main subparsers
-        program.add_subparser(serve_command);
-        program.add_subparser(admins_command);
-        program.add_subparser(migrate_command);
-
-        try {
-            // Create a vector of `const char*` pointing to the owned `std::string`s
-            std::vector<const char *> argv;
-            argv.reserve(m_cmdArgs.size());
-            for (const auto &arg: m_cmdArgs) {
-                argv.push_back(arg.c_str());
+                json body;
+                file >> body;
+                return body;
             }
 
-            // Parse safely — strings are now owned by `m_cmdArgs`
+            return json::parse(value);
+        }
+
+        std::string schemaIdFromNameOrId(const std::string &entity_name_or_id) {
+            if (entity_name_or_id.starts_with("mbt_"))
+                return entity_name_or_id;
+
+            if (!EntitySchema::isValidEntityName(entity_name_or_id))
+                throw MantisException(400, std::format("Invalid entity name `{}`", entity_name_or_id));
+
+            return EntitySchema::genEntityId(entity_name_or_id);
+        }
+
+        void printSchemaList() {
+            const auto tables = EntitySchema::listTables();
+            std::cout << std::left
+                      << std::setw(24) << "NAME"
+                      << std::setw(10) << "TYPE"
+                      << std::setw(8) << "SYSTEM"
+                      << std::setw(8) << "HAS_API"
+                      << "ID"
+                      << std::endl;
+
+            for (const auto &row: tables) {
+                const auto &schema = row.at("schema");
+                std::cout << std::left
+                          << std::setw(24) << schema.value("name", "")
+                          << std::setw(10) << schema.value("type", "")
+                          << std::setw(8) << (schema.value("system", false) ? "true" : "false")
+                          << std::setw(8) << (schema.value("has_api", true) ? "true" : "false")
+                          << row.at("id").get<std::string>()
+                          << std::endl;
+            }
+        }
+
+        void runMigrationsUp(MantisBase &app) {
+            const auto dir = fs::path(app.migrationsDir());
+            if (!fs::exists(dir)) {
+                LogOrigin::info("Migrations", fmt::format("No migrations directory at `{}`, nothing to apply.", dir.string()));
+                return;
+            }
+
+            std::vector<fs::path> files;
+            for (const auto &entry: fs::directory_iterator(dir)) {
+                if (entry.is_regular_file() && entry.path().extension() == ".json")
+                    files.push_back(entry.path());
+            }
+
+            std::ranges::sort(files);
+            if (files.empty()) {
+                LogOrigin::info("Migrations", "No migration JSON files found.");
+                return;
+            }
+
+            for (const auto &file: files) {
+                LogOrigin::info("Migrations", fmt::format("Applying migration `{}`", file.filename().string()));
+                const auto body = loadJsonInput(file.string());
+                const auto eSchema = EntitySchema::fromSchema(body);
+                if (const auto err = eSchema.validate(); err.has_value())
+                    throw MantisException(400, err.value());
+
+                EntitySchema::createTable(eSchema);
+            }
+        }
+
+        void runMigrationsDown(MantisBase &) {
+            LogOrigin::warn("Migrations", "Migration rollback (`--down`) is not implemented yet.");
+        }
+
+        int countExclusiveFlags(const std::initializer_list<bool> flags) {
+            return static_cast<int>(std::ranges::count(flags, true));
+        }
+    }
+
+    void MantisBase::parseArgs() {
+        expandAdminAddFromEnv(m_cmdArgs);
+
+        argparse::ArgumentParser program("mantisbase", appVersion());
+        program.add_description("MantisBase backend CLI");
+
+        program.add_argument("--migrations-dir", "--migrationsDir")
+                .nargs(1)
+                .metavar("PATH")
+                .help("Migrations directory (default: ./migrations)");
+        program.add_argument("--data-dir", "--dataDir")
+                .nargs(1)
+                .metavar("PATH")
+                .help("Data directory (default: ./data)");
+        program.add_argument("--public-dir", "--publicDir")
+                .nargs(1)
+                .metavar("PATH")
+                .help("Static files directory (default: ./public)");
+        program.add_argument("--scripts-dir", "--scriptsDir")
+                .nargs(1)
+                .metavar("PATH")
+                .help("JavaScript scripts directory (default: ./scripts)");
+        program.add_argument("--dev")
+                .flag()
+                .help("Enable verbose development logging (overridden by MB_LOG_LEVEL)");
+        program.add_argument("--db")
+                .nargs(1)
+                .metavar("TYPE")
+                .help("Database type: sqlite3, postgresql, mysql (overridden by MB_DATABASE_TYPE)");
+        program.add_argument("--db-url")
+                .nargs(1)
+                .metavar("URL")
+                .help("Database connection URL (overridden by MB_DATABASE_URL)");
+
+        argparse::ArgumentParser serve_command("serve");
+        serve_command.add_description("Start the HTTP server");
+        serve_command.add_argument("--host")
+                .default_value(std::string("0.0.0.0"))
+                .help("Server host address (default: 0.0.0.0)");
+        serve_command.add_argument("--port")
+                .default_value(7070)
+                .scan<'i', int>()
+                .help("Server port (default: 7070)");
+        serve_command.add_argument("--skip-admin-setup")
+                .flag()
+                .help("Skip first-boot admin browser setup (also MB_SKIP_ADMIN_SETUP=1)");
+        serve_command.add_argument("--pool-size", "--poolSize")
+                .scan<'i', int>()
+                .help("Database connection pool size (default: 4 for sqlite3, 10 for postgresql)");
+
+        argparse::ArgumentParser admins_command("admins");
+        admins_command.add_description("Manage admin accounts");
+        admins_command.add_argument("--add")
+                .nargs(2)
+                // .metavar("EMAIL", "PASSWORD")
+                .help("Add admin account (or use MB_DEFAULT_ADMIN_EMAIL/PASSWORD with `--add` alone via env expansion)");
+        admins_command.add_argument("--ls")
+                .flag()
+                .help("List admin accounts");
+        admins_command.add_argument("--rm")
+                .nargs(1)
+                .metavar("IDENTIFIER")
+                .help("Remove admin by email or id");
+
+        argparse::ArgumentParser migrations_command("migrations");
+        migrations_command.add_description("Apply or rollback schema migrations");
+        migrations_command.add_argument("--up")
+                .flag()
+                .help("Apply migrations from the migrations directory");
+        migrations_command.add_argument("--down")
+                .flag()
+                .help("Rollback migrations (not yet implemented)");
+
+        argparse::ArgumentParser schema_command("schema");
+        schema_command.add_description("Manage entity schemas");
+        schema_command.add_argument("--ls")
+                .flag()
+                .help("List entity schemas");
+        schema_command.add_argument("--rm")
+                .nargs(1)
+                .metavar("ENTITY")
+                .help("Remove an entity schema");
+        schema_command.add_argument("--add")
+                .nargs(1)
+                .metavar("JSON_OR_FILE")
+                .help("Create schema from JSON string or file path");
+        schema_command.add_argument("--update")
+                .nargs(2)
+                // .metavar("ENTITY", "JSON_OR_FILE")
+                .help("Update schema from JSON string or file path");
+
+        program.add_subparser(serve_command);
+        program.add_subparser(admins_command);
+        program.add_subparser(migrations_command);
+        program.add_subparser(schema_command);
+
+        try {
+            std::vector<const char *> argv;
+            argv.reserve(m_cmdArgs.size());
+            for (const auto &arg: m_cmdArgs)
+                argv.push_back(arg.c_str());
+
             program.parse_args(static_cast<int>(argv.size()), argv.data());
         } catch (const std::exception &err) {
             std::cerr << std::endl << err.what() << std::endl;
@@ -114,135 +266,140 @@ namespace mb {
             quit(500, err.what());
         }
 
-        // Get main program args
-        auto db = program.present<std::string>("--database").value_or("sqlite");
-        const auto connString = program.present<std::string>("--connection").value_or("");
-        const auto _dataDir = program.present<std::string>("--dataDir").value_or("data");
-        const auto _pubDir = program.present<std::string>("--publicDir").value_or("public");
-        const auto _scriptsDir = program.present<std::string>("--scriptsDir").value_or("scripts");
-        const auto pools = program.present<int>("--poolSize").value_or(-1);
+        const auto db_type = resolveDbType(program.present<std::string>("--db"));
+        const auto conn_string = resolveDbUrl(program.present<std::string>("--db-url"));
+        const auto _dataDir = program.present<std::string>("--data-dir").value_or("data");
+        const auto _pubDir = program.present<std::string>("--public-dir").value_or("public");
+        const auto _scriptsDir = program.present<std::string>("--scripts-dir").value_or("scripts");
+        const auto _migrationsDir = program.present<std::string>("--migrations-dir").value_or("migrations");
+        const auto dev_flag = program.get<bool>("--dev");
 
-        // Set trace mode if flag is set
-        if (program.get<bool>("--dev")) {
-            // Print developer messages - set it to trace for now
+        const auto env_level = getEnvOrDefault("MB_LOG_LEVEL", "");
+        if (!env_level.empty()) {
+            Logger::setLogLevel(logLevelFromString(env_level));
+            const auto level = logLevelFromString(env_level);
+            if (level == LogLevel::TRACE || level == LogLevel::DEBUG)
+                m_isDevMode = true;
+        } else if (dev_flag) {
             Logger::setLogLevel(LogLevel::TRACE);
             m_isDevMode = true;
         }
 
-        // If directory paths are not valid, we default back to the
-        // default directory for the respective items (`public`, `data` and `scripts`)
-        // relative to the application binary.
         const auto pub_dir = dirFromPath(_pubDir);
         setPublicDir(pub_dir.empty() ? dirFromPath("public") : pub_dir);
 
         const auto data_dir = dirFromPath(_dataDir);
         setDataDir(data_dir.empty() ? dirFromPath("data") : data_dir);
 
-        // Initialize log database now that data directory is set
-        Logger::initDb(dataDir());
-        LogOrigin::info("Initialization", fmt::format("Initializing mantisbase v{}", appVersion()));
-
         const auto scripts_dir = dirFromPath(_scriptsDir);
         setScriptsDir(scripts_dir.empty() ? dirFromPath("scripts") : scripts_dir);
 
-        // Ensure objects are first created, taking into account the cmd args passed in
-        // esp. the directory paths
+        const auto migrations_dir = dirFromPath(_migrationsDir);
+        setMigrationsDir(migrations_dir.empty() ? dirFromPath("migrations") : migrations_dir);
+
+        Logger::initDb(dataDir());
+        LogOrigin::info("Initialization", fmt::format("Initializing mantisbase v{}", appVersion()));
+
         init_units();
 
-        // Convert db type to lowercase and set the db type
-        toLowerCase(db);
-        if (db == "sqlite" || db == "sqlite3") {
-            setDbType("sqlite3");
-        } else if (db == "mysql") {
-            setDbType(db);
-        } else if (db == "psql" || db == "postgresql" || db == "postgres") {
-            setDbType("postgresql");
-        } else {
-            quit(-1, std::format("Backend Database `{}` is unsupported!", db));
+        setDbType(db_type);
+
+        int pool_size = m_dbType == "sqlite3" ? 4 : 10;
+        if (program.is_subcommand_used("serve") && serve_command.is_used("--pool-size")) {
+            pool_size = serve_command.get<int>("--pool-size");
         }
+        setPoolSize(pool_size);
 
-        // Set pool size before initiating connections
-        setPoolSize(pools > 0 ? pools : m_dbType == "sqlite3" ? 4 : 10);
-
-        // Initialize database connection & Migration
-        if (!m_database->connect(connString)) {
-            // Connection to database failed
+        if (!m_database->connect(conn_string)) {
             quit(500, "Database connection failed, exiting!");
         }
         if (!m_database->createSysTables()) {
             quit(500, "Database migration failed, exiting!");
         }
-
         if (!m_database->isConnected()) {
             LogOrigin::dbCritical("Database Not Opened", "Database was not opened!");
             quit(500, "Database opening failed!");
         }
-
         if (!m_realtime->init()) {
             LogOrigin::dbCritical("Database Not Opened", "Realtime Db Mgr failed to instantiate.");
             quit(500, "Realtime Db Mgr failed to instantiate.");
         }
-
-        // Initialize router here to ensure schemas are loaded
-        if (!m_router->init())
+        if (!m_router->init()) {
             quit(500, "Failed to initialize router!");
+        }
 
-        // Check which commands were used
         if (program.is_subcommand_used("serve")) {
-            const auto host = serve_command.get<std::string>("--host");
-            const auto port = serve_command.get<int>("--port");
-
-            setHost(host);
-            setPort(port);
-
-            // Set the serve flag to true, will be checked later before
-            // running the listen on port & host above.
+            setHost(serve_command.get<std::string>("--host"));
+            setPort(serve_command.get<int>("--port"));
+            if (serve_command.get<bool>("--skip-admin-setup"))
+                setSkipAdminSetup(true);
             m_toStartServer = true;
-        } else if (program.is_subcommand_used("admins")) {
-            // Check which subcommand was used
-            if (admins_command.is_subcommand_used("add")) {
-                std::string email = add_command.get("email");
-                std::string password = add_command.get("password");
+            return;
+        }
 
-                if (const auto val_err = Validators::validatePreset("email", email);
-                    val_err.has_value()) {
-                    LogOrigin::authCritical("Email Validation Failed", fmt::format("Error validating admin email: {}", val_err.value()));
+        if (program.is_subcommand_used("admins")) {
+            const bool do_add = admins_command.is_used("--add");
+            const bool do_ls = admins_command.get<bool>("--ls");
+            const bool do_rm = admins_command.is_used("--rm");
+
+            if (countExclusiveFlags({do_add, do_ls, do_rm}) != 1) {
+                quit(400, "admins requires exactly one of --add, --ls, or --rm.");
+            }
+
+            auto admin_entity = entity("mb_admins");
+
+            if (do_add) {
+                const auto creds = admins_command.get<std::vector<std::string>>("--add");
+                std::string email = creds.at(0);
+                std::string password = creds.at(1);
+
+                if (const auto val_err = Validators::validatePreset("email", email); val_err.has_value()) {
+                    LogOrigin::authCritical("Email Validation Failed",
+                                            fmt::format("Error validating admin email: {}", val_err.value()));
                     quit(-1, "Email validation failed!");
                 }
-
                 if (const auto val_pswd_err = Validators::validatePreset("password", password);
                     val_pswd_err.has_value()) {
-                    LogOrigin::authCritical("Password Validation Failed", fmt::format("Error validating password: {}", val_pswd_err.value()));
-                    quit(-1, "Email validation failed!");
+                    LogOrigin::authCritical("Password Validation Failed",
+                                            fmt::format("Error validating password: {}", val_pswd_err.value()));
+                    quit(-1, "Password validation failed!");
                 }
 
                 try {
-                    auto admin_entity = entity("mb_admins");
-
-                    // Create new admin user
                     const auto admin_user = admin_entity.create({{"email", email}, {"password", password}});
-
-                    // Admin User was created!
-                    LogOrigin::authInfo("Admin Created", fmt::format("Admin account created, use '{}' to access the `/mb` dashboard.",
-                                 admin_user.at("email").get<std::string>()));
+                    LogOrigin::authInfo("Admin Created", fmt::format(
+                                            "Admin account created, use '{}' to access the `/mb` dashboard.",
+                                            admin_user.at("email").get<std::string>()));
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    LogOrigin::authCritical("Admin Creation Failed", fmt::format("Failed to created Admin user: {}", e.what()));
+                    LogOrigin::authCritical("Admin Creation Failed",
+                                            fmt::format("Failed to created Admin user: {}", e.what()));
                     quit(500, e.what());
                 }
-            } else if (admins_command.is_subcommand_used("rm")) {
-                std::string identifier = rm_command.get("identifier");
-                // Process rm command - identifier could be email or GUID
+            }
+
+            if (do_ls) {
+                const auto admins = admin_entity.list();
+                std::cout << std::left << std::setw(40) << "ID" << "EMAIL" << std::endl;
+                for (const auto &admin: admins) {
+                    std::cout << std::left << std::setw(40) << admin.value("id", "")
+                              << admin.value("email", "")
+                              << std::endl;
+                }
+                quit(0, "");
+            }
+
+            if (do_rm) {
+                const std::string identifier = admins_command.get<std::string>("--rm");
                 if (identifier.empty()) {
                     LogOrigin::authCritical("Invalid Admin Identifier", "Invalid admin `email` or `id` provided!");
                     quit(400, "");
                 }
 
-                auto admin_entity = entity("mb_admins");
                 auto resp = admin_entity.queryFromCols(identifier, {"id", "email"});
                 if (!resp.has_value()) {
-                    LogOrigin::authCritical("Admin Not Found", fmt::format("Admin not found matching id/email on '{}'",
-                                     identifier));
+                    LogOrigin::authCritical("Admin Not Found",
+                                            fmt::format("Admin not found matching id/email on '{}'", identifier));
                     quit(404, "");
                 }
 
@@ -251,32 +408,94 @@ namespace mb {
                     LogOrigin::authInfo("Admin Removed", "Admin removed successfully.");
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    LogOrigin::authCritical("Admin Removal Failed", fmt::format("Failed to remove admin account: {}", e.what()));
+                    LogOrigin::authCritical("Admin Removal Failed",
+                                            fmt::format("Failed to remove admin account: {}", e.what()));
                     quit(500, e.what());
                 }
-            } else {
-                std::cout << std::endl << "Unknown arguments to `admins` subcommand.\n\n" << admins_command <<
-                        std::endl;
             }
-        } else if (program.is_subcommand_used("migrate")) {
-            // Do migration stuff here
-            LogOrigin::info("Migration Not Implemented", "Migration CMD support has not been implemented yet! ");
-
-            if (admins_command.is_subcommand_used("load")) {
-                std::string file = load_command.get("file");
-                // Process load command
-            } else if (admins_command.is_subcommand_used("create")) {
-                bool use_json = create_command.get<bool>("--json");
-                bool use_zip = create_command.get<bool>("--zip");
-
-                if (create_command.is_used("filename")) {
-                    std::string filename = create_command.get("filename");
-                    // Process with filename
-                }
-                // Process create command
-            }
-        } else {
-            std::cout << "Unknown command, try one of the following:\n" << program;
         }
+
+        if (program.is_subcommand_used("migrations")) {
+            const bool up = migrations_command.get<bool>("--up");
+            const bool down = migrations_command.get<bool>("--down");
+
+            if (countExclusiveFlags({up, down}) != 1) {
+                quit(400, "migrations requires exactly one of --up or --down.");
+            }
+
+            try {
+                if (up)
+                    runMigrationsUp(*this);
+                else
+                    runMigrationsDown(*this);
+                quit(0, "");
+            } catch (const MantisException &e) {
+                quit(e.code(), e.what());
+            } catch (const std::exception &e) {
+                quit(500, e.what());
+            }
+        }
+
+        if (program.is_subcommand_used("schema")) {
+            const bool do_ls = schema_command.get<bool>("--ls");
+            const bool do_rm = schema_command.is_used("--rm");
+            const bool do_add = schema_command.is_used("--add");
+            const bool do_update = schema_command.is_used("--update");
+
+            if (countExclusiveFlags({do_ls, do_rm, do_add, do_update}) != 1) {
+                quit(400, "schema requires exactly one of --ls, --rm, --add, or --update.");
+            }
+
+            try {
+                if (do_ls) {
+                    printSchemaList();
+                    quit(0, "");
+                }
+
+                if (do_rm) {
+                    const auto entity_name = schema_command.get<std::string>("--rm");
+                    const auto schema_id = schemaIdFromNameOrId(entity_name);
+                    EntitySchema::dropTable(schema_id);
+                    LogOrigin::entitySchemaInfo("Schema Removed",
+                                                fmt::format("Removed schema `{}`", entity_name));
+                    quit(0, "");
+                }
+
+                if (do_add) {
+                    const auto body = loadJsonInput(schema_command.get<std::string>("--add"));
+                    const auto eSchema = EntitySchema::fromSchema(body);
+                    if (const auto err = eSchema.validate(); err.has_value())
+                        throw MantisException(400, err.value());
+
+                    const auto created = EntitySchema::createTable(eSchema);
+                    std::cout << created.dump(2) << std::endl;
+                    quit(0, "");
+                }
+
+                if (do_update) {
+                    const auto parts = schema_command.get<std::vector<std::string>>("--update");
+                    const auto entity_name = parts.at(0);
+                    const auto body = loadJsonInput(parts.at(1));
+                    const auto schema_id = schemaIdFromNameOrId(entity_name);
+                    const auto updated = EntitySchema::updateTable(schema_id, body);
+                    std::cout << updated.dump(2) << std::endl;
+                    quit(0, "");
+                }
+            } catch (const MantisException &e) {
+                quit(e.code(), e.what());
+            } catch (const json::parse_error &e) {
+                quit(400, std::string("Invalid JSON: ") + e.what());
+            } catch (const std::exception &e) {
+                quit(500, e.what());
+            }
+        }
+
+        std::cout << "Unknown command. Available subcommands: serve, admins, migrations, schema\n\n"
+                  << program;
+        quit(400, "No subcommand specified.");
+    }
+
+    bool MantisBase::isCreated() const {
+        return m_isCreated.load();
     }
 }

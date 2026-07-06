@@ -43,7 +43,7 @@ The server starts on `http://localhost:7070` with:
 Before using the admin dashboard, create an admin user:
 
 ```bash
-./mantisbase admins add admin@example.com very_string_password_123!@h
+./mantisbase admins --add admin@example.com very_string_password_123!@h
 ```
 
 Once admin user has been created, log in at `http://localhost:7070/mb`.
@@ -297,15 +297,15 @@ See [Scripting Guide](doc/13.scripting.md) for details.
 mantisbase serve --port 8080 --host 0.0.0.0
 
 # Use PostgreSQL
-mantisbase --database PSQL \
-  --connection "dbname=mantis host=localhost user=postgres password=pass" \
+mantisbase --db postgresql \
+  --db_url "dbname=mantis host=localhost user=postgres password=pass" \
   serve
 
 # Development mode (verbose logging)
 mantisbase --dev serve
 
 # Custom directories
-mantisbase --dataDir ./my-data --publicDir ./my-public serve
+mantisbase --data-dir ./my-data --public-dir ./my-public serve
 ```
 
 See [CLI Reference](doc/01.cmd.md) for all options.

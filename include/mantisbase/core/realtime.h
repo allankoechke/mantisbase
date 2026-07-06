@@ -53,6 +53,8 @@ namespace mb {
     public:
         RealtimeDB();
 
+        ~RealtimeDB() { std::cout << "RealtimeDB Des()" << std::endl; }
+
         /** Initialize realtime for the current database backend. Must be called after DB is ready. */
         [[nodiscard]] bool init() const;
 

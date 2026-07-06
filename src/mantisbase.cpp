@@ -16,25 +16,30 @@ namespace mb {
           // , m_dukCtx(duk_create_heap_default()) {}
 
     MantisBase::~MantisBase() {
-        if (!m_toStartServer) {
-            std::cout << std::endl;
-            LogOrigin::info(
-                "Exiting Application",
-                "Nothing else to do. Did you intend to run the server? Try `mantisbase serve` instead.");
-        }
+        // if (!m_toStartServer) {
+        //     std::cout << std::endl;
+        //     LogOrigin::info(
+        //         "Exiting Application",
+        //         "Nothing else to do. Did you intend to run the server? Try `mantisbase serve` instead.");
+        // }
 
         // Destroy duk context
         // duk_destroy_heap(m_dukCtx);
+
+        // std::cout << "Exiting ~MantisBase()" << std::endl;
     }
 
     void MantisBase::init(const int argc, char *argv[]) {
         // Set that the object was created successfully, now initializing
         m_isCreated.store(true);
 
-        // Store cmd args into our member vector
-        m_cmdArgs.reserve(argc);
-        for (int i = 0; i < argc; ++i) {
-            m_cmdArgs.emplace_back(argv[i]); // copy each string over
+        // Store cmd args into our member vector (skip when pre-built by create(json))
+        if (argc > 0) {
+            m_cmdArgs.clear();
+            m_cmdArgs.reserve(argc);
+            for (int i = 0; i < argc; ++i) {
+                m_cmdArgs.emplace_back(argv[i]); // copy each string over
+            }
         }
 
         parseArgs(); // Parse args & start units
@@ -46,7 +51,7 @@ namespace mb {
 
     MantisBase &MantisBase::instance() {
         auto &app_instance = getInstanceImpl();
-        if (!app_instance.m_isCreated.load())
+        if (!app_instance.isCreated())
             throw std::runtime_error("MantisBase not created yet");
 
         return app_instance;
@@ -54,7 +59,7 @@ namespace mb {
 
     MantisBase &MantisBase::create(const int argc, char **argv) {
         auto &app = getInstanceImpl();
-        if (app.m_isCreated.load())
+        if (app.isCreated())
             throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
 
         // Initialize the app with passed in args
@@ -66,93 +71,136 @@ namespace mb {
 
     MantisBase &MantisBase::create(const json &config) {
         auto &app = getInstanceImpl();
-        if (app.m_isCreated.load())
+        if (app.isCreated())
             throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
 
         // logEntry::trace("MantisBase Config: {}", config.dump());
 
-        app.m_cmdArgs.emplace_back("mantisbase"); // Arg[0] should be the app name
+        app.m_cmdArgs.emplace_back("mantisbase");
 
-        // dataDir publicDir scriptsDir serve [port host] admins [add remove]
-        // --database psql
-        if (config.contains("database")) {
-            app.m_cmdArgs.emplace_back("--database");
-            app.m_cmdArgs.push_back(config.at("database").get<std::string>());
+        if (config.contains("database") || config.contains("db")) {
+            app.m_cmdArgs.emplace_back("--db");
+            app.m_cmdArgs.push_back(config.contains("db")
+                                         ? config.at("db").get<std::string>()
+                                         : config.at("database").get<std::string>());
         }
 
-        // --connection "dbname=mantis host=127.0.0.1 username=user password=1235"
-        if (config.contains("connection")) {
-            app.m_cmdArgs.emplace_back("--connection");
-            app.m_cmdArgs.push_back(config.at("connection").get<std::string>());
+        if (config.contains("connection") || config.contains("db_url")) {
+            app.m_cmdArgs.emplace_back("--db_url");
+            app.m_cmdArgs.push_back(config.contains("db_url")
+                                        ? config.at("db_url").get<std::string>()
+                                        : config.at("connection").get<std::string>());
         }
 
-        // --dataDir /some/path/to/dir
-        if (config.contains("dataDir")) {
-            app.m_cmdArgs.emplace_back("--dataDir");
-            app.m_cmdArgs.push_back(config.at("dataDir").get<std::string>());
+        if (config.contains("dataDir") || config.contains("data-dir")) {
+            app.m_cmdArgs.emplace_back("--data-dir");
+            app.m_cmdArgs.push_back(config.contains("data-dir")
+                                        ? config.at("data-dir").get<std::string>()
+                                        : config.at("dataDir").get<std::string>());
         }
 
-        // --publicDir /some/path/to/dir
-        if (config.contains("publicDir")) {
-            app.m_cmdArgs.emplace_back("--publicDir");
-            app.m_cmdArgs.push_back(config.at("publicDir").get<std::string>());
+        if (config.contains("publicDir") || config.contains("public-dir")) {
+            app.m_cmdArgs.emplace_back("--public-dir");
+            app.m_cmdArgs.push_back(config.contains("public-dir")
+                                        ? config.at("public-dir").get<std::string>()
+                                        : config.at("publicDir").get<std::string>());
         }
 
-        // --scriptsDir /some/path/to/dir
-        if (config.contains("scriptsDir")) {
-            app.m_cmdArgs.emplace_back("--scriptsDir");
-            app.m_cmdArgs.push_back(config.at("scriptsDir").get<std::string>());
+        if (config.contains("scriptsDir") || config.contains("scripts-dir")) {
+            app.m_cmdArgs.emplace_back("--scripts-dir");
+            app.m_cmdArgs.push_back(config.contains("scripts-dir")
+                                        ? config.at("scripts-dir").get<std::string>()
+                                        : config.at("scriptsDir").get<std::string>());
         }
 
-        // --dev
+        if (config.contains("migrationsDir") || config.contains("migrations-dir")) {
+            app.m_cmdArgs.emplace_back("--migrations-dir");
+            app.m_cmdArgs.push_back(config.contains("migrations-dir")
+                                        ? config.at("migrations-dir").get<std::string>()
+                                        : config.at("migrationsDir").get<std::string>());
+        }
+
         if (config.contains("dev")) {
-            app.m_cmdArgs.emplace_back("--dev"); // We don't care much about the value
+            app.m_cmdArgs.emplace_back("--dev");
         }
 
-        // serve [--host x.y.z.t --port 1234 --poolSize 8]
         if (config.contains("serve")) {
             app.m_cmdArgs.emplace_back("serve");
             const auto &serve = config["serve"];
 
-            // If we have a valid JSON Object
             if (serve.is_object()) {
-                // serve --host 127.0.0.1
                 if (serve.contains("host")) {
                     app.m_cmdArgs.emplace_back("--host");
                     app.m_cmdArgs.push_back(serve.at("host").get<std::string>());
                 }
 
-                // serve --port 7071
                 if (serve.contains("port")) {
                     app.m_cmdArgs.emplace_back("--port");
                     app.m_cmdArgs.push_back(std::to_string(serve.at("port").get<int>()));
                 }
 
-                // serve --poolSize 10
-                if (serve.contains("poolSize")) {
-                    app.m_cmdArgs.emplace_back("--poolSize");
-                    app.m_cmdArgs.push_back(std::to_string(serve.at("poolSize").get<int>()));
+                if (serve.contains("skip-admin-setup") && serve.at("skip-admin-setup").get<bool>()) {
+                    app.m_cmdArgs.emplace_back("--skip-admin-setup");
+                }
+
+                if (serve.contains("pool-size") || serve.contains("poolSize")) {
+                    app.m_cmdArgs.emplace_back("--pool-size");
+                    app.m_cmdArgs.push_back(std::to_string(serve.contains("pool-size")
+                                                                 ? serve.at("pool-size").get<int>()
+                                                                 : serve.at("poolSize").get<int>()));
                 }
             }
         }
 
-        // admins --add x@y.z
-        // admins --rm x@y.z
         if (config.contains("admins")) {
             app.m_cmdArgs.emplace_back("admins");
             const auto &admins = config["admins"];
 
             if (admins.contains("add")) {
-                app.m_cmdArgs.emplace_back("--host");
-                app.m_cmdArgs.push_back(admins.at("host").get<std::string>());
-            }
-
-            if (admins.contains("rm")) {
+                app.m_cmdArgs.emplace_back("--add");
+                if (admins["add"].is_array()) {
+                    app.m_cmdArgs.push_back(admins["add"].at(0).get<std::string>());
+                    app.m_cmdArgs.push_back(admins["add"].at(1).get<std::string>());
+                } else if (admins["add"].is_string()) {
+                    app.m_cmdArgs.push_back(admins["add"].get<std::string>());
+                    if (admins.contains("password"))
+                        app.m_cmdArgs.push_back(admins.at("password").get<std::string>());
+                }
+            } else if (admins.contains("ls") && admins["ls"].get<bool>()) {
+                app.m_cmdArgs.emplace_back("--ls");
+            } else if (admins.contains("rm")) {
                 app.m_cmdArgs.emplace_back("--rm");
                 app.m_cmdArgs.push_back(admins.at("rm").get<std::string>());
             } else {
                 throw std::runtime_error(
-                    "MantisBase `admins` command expects `--add <email>` or `--rm <user>` subcommand.");
+                    "MantisBase `admins` command expects `add`, `ls`, or `rm`.");
+            }
+        }
+
+        if (config.contains("migrations")) {
+            app.m_cmdArgs.emplace_back("migrations");
+            const auto &migrations = config["migrations"];
+            if (migrations.contains("up") && migrations["up"].get<bool>())
+                app.m_cmdArgs.emplace_back("--up");
+            else if (migrations.contains("down") && migrations["down"].get<bool>())
+                app.m_cmdArgs.emplace_back("--down");
+        }
+
+        if (config.contains("schema")) {
+            app.m_cmdArgs.emplace_back("schema");
+            const auto &schema = config["schema"];
+            if (schema.contains("ls") && schema["ls"].get<bool>()) {
+                app.m_cmdArgs.emplace_back("--ls");
+            } else if (schema.contains("rm")) {
+                app.m_cmdArgs.emplace_back("--rm");
+                app.m_cmdArgs.push_back(schema.at("rm").get<std::string>());
+            } else if (schema.contains("add")) {
+                app.m_cmdArgs.emplace_back("--add");
+                app.m_cmdArgs.push_back(schema.at("add").get<std::string>());
+            } else if (schema.contains("update")) {
+                app.m_cmdArgs.emplace_back("--update");
+                app.m_cmdArgs.push_back(schema.at("update").at("entity").get<std::string>());
+                app.m_cmdArgs.push_back(schema.at("update").at("body").get<std::string>());
             }
         }
 
@@ -193,15 +241,15 @@ namespace mb {
 
     void MantisBase::close() {
         // Already closed, nothing to do
-        if (!m_isCreated.load()) {
+        if (!isCreated()) {
             return;
         }
 
-        LogOrigin::trace("Shutdown Started", "[MB] Starting closing all units ...");
+        LogOrigin::trace("MantisBase", "Closing units");
         try {
             if (m_router && m_router->server().is_running()) {
                 m_router->close();
-                LogOrigin::trace("Router Reset", "[MB] Resetting router instance [OK] ...");
+                LogOrigin::trace("Router", "Router stopped");
             }
 
             if (m_kvStore) {
@@ -211,14 +259,18 @@ namespace mb {
 
             if (m_database && m_database->isConnected()) {
                 m_database->disconnect();
-                LogOrigin::trace("Database Shutdown", "[MB] Finished DB Store closing ...");
+                LogOrigin::trace("Db Shutdown", "Completed Successfully!");
             }
         } catch (const std::exception &e) {
-            std::cerr << "[MB]  Error during reset: " << e.what() << std::endl;
+            std::cerr << "Error during reset: " << e.what() << std::endl;
         }
 
+        // Reset created flag
         m_isCreated.store(false);
-        LogOrigin::debug("Shutdown Complete", "[MB] Finished closing all units");
+
+        // Mark logger instance as destroyed
+        Logger::isDbInitialized.store(false);
+        LogOrigin::debug("MantisBase", "Shutdown Complete");
     }
 
     int MantisBase::run() {
@@ -303,7 +355,7 @@ namespace mb {
 
             const std::string url = std::format("http://localhost:{}/mb/setup?token={}", m_port, token);
             LogOrigin::info("Admin Setup", fmt::format(
-                                "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins add <email> <password>\n",
+                                "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins --add <email> <password>\n",
                                 url));
 
 #ifdef _WIN32
@@ -440,6 +492,28 @@ namespace mb {
         m_scriptsDir = dir;
     }
 
+    std::string MantisBase::migrationsDir() const {
+        return m_migrationsDir;
+    }
+
+    void MantisBase::setMigrationsDir(const std::string &dir) {
+        if (dir.empty())
+            return;
+
+        m_migrationsDir = dir;
+    }
+
+    bool MantisBase::skipAdminSetup() const {
+        if (m_skipAdminSetup)
+            return true;
+
+        return getEnvOrDefault("MB_SKIP_ADMIN_SETUP", "0") == "1";
+    }
+
+    void MantisBase::setSkipAdminSetup(const bool skip) {
+        m_skipAdminSetup = skip;
+    }
+
     inline bool MantisBase::ensureDirsAreCreated() const {
         // Data Directory
         if (!createDirs(resolvePath(m_dataDir)))
@@ -449,6 +523,9 @@ namespace mb {
             return false;
 
         if (!createDirs(resolvePath(m_scriptsDir)))
+            return false;
+
+        if (!createDirs(resolvePath(m_migrationsDir)))
             return false;
 
         return true;
