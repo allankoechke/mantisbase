@@ -296,6 +296,20 @@ namespace mb {
     }
 
     /**
+     * @brief Thread-safe conversion of an epoch time to a local-time std::tm.
+     *
+     * std::localtime returns a pointer to a shared static std::tm, so calling
+     * it from multiple threads concurrently is a data race. This wrapper
+     * serializes the call and returns a copy, making it safe to use from the
+     * request-handling worker threads. Portable across MinGW/MSVC/Linux
+     * without depending on the non-standard localtime_r/localtime_s.
+     *
+     * @param t Epoch time value.
+     * @return std::tm in the server's local timezone.
+     */
+    std::tm toLocalTime(std::time_t t);
+
+    /**
      * @brief Convert c++ std::tm date/time value to ISO formatted string.
      * @param t std::tm value
      * @return ISO formatted datetime value

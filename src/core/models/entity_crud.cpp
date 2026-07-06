@@ -1,6 +1,7 @@
 #include "../../../include/mantisbase/core/models/entity.h"
 #include "../../../include/mantisbase/core/models/entity_schema.h"
 #include "../../../include/mantisbase/core/models/entity_schema_field.h"
+#include "../../../include/mantisbase/utils/utils.h"
 #include "../../../include/mantisbase/utils/uuidv7.h"
 #include "mantisbase/utils/soci_wrappers.h"
 
@@ -30,7 +31,7 @@ namespace mb {
 
             // Create default time values
             std::time_t current_t = time(nullptr);
-            std::tm created_tm = *std::localtime(&current_t);
+            std::tm created_tm = toLocalTime(current_t);
             std::string columns, placeholders;
 
             // Clone record for editing ...
@@ -155,7 +156,7 @@ namespace mb {
         try {
             // Create default time values
             std::time_t current_t = time(nullptr);
-            std::tm created_tm = *std::localtime(&current_t);
+            std::tm created_tm = toLocalTime(current_t);
             std::string columns, placeholders;
 
             // Store files to delete by filename

@@ -78,7 +78,7 @@ namespace mb {
 
             // Create default time values
             const std::time_t t = time(nullptr);
-            std::tm created_tm = *std::localtime(&t);
+            std::tm created_tm = toLocalTime(t);
 
             // Execute DDL & Save to DB
             *sql << "INSERT INTO mb_tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",
@@ -690,7 +690,7 @@ namespace mb {
 
             // Get updated timestamp
             std::time_t t = time(nullptr);
-            std::tm updated_tm = *std::localtime(&t);
+            std::tm updated_tm = toLocalTime(t);
 
             // Update table record, if all went well.
             std::string query = "UPDATE mb_tables SET id = :id, schema = :schema,";

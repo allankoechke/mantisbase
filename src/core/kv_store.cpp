@@ -48,7 +48,7 @@ namespace mb
         {
             // Create default time values
             const std::time_t current_t = time(nullptr);
-            std::tm* created_tm = std::localtime(&current_t);
+            std::tm created_tm = toLocalTime(current_t);
 
             // Create data since it's missing
             settings.clear();
@@ -66,7 +66,7 @@ namespace mb
                 "INSERT INTO __settings (id, value, created, updated) VALUES (:id, :value, :created, :updated)"
                 ,
                 soci::use(id), soci::use(settings),
-                soci::use(*created_tm), soci::use(*created_tm);
+                soci::use(created_tm), soci::use(created_tm);
         }
     }
 
@@ -317,14 +317,14 @@ namespace mb
 
                 // Create default time values
                 const std::time_t updated_t = time(nullptr);
-                std::tm* updated_tm = std::localtime(&updated_t);
+                std::tm updated_tm = toLocalTime(updated_t);
 
                 // Create config admin
                 auto id = std::to_string(std::hash<std::string>{}("configs"));
 
                 // Update config values
                 *sql << "UPDATE __settings SET value = :value, updated = :updated WHERE id = :id",
-                    soci::use(m_configs), soci::use(*updated_tm);
+                    soci::use(m_configs), soci::use(updated_tm);
 
                 json response;
                 response["status"] = 200;
