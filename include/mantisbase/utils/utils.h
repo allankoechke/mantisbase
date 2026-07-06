@@ -286,14 +286,19 @@ namespace mb {
     // AUTH UTILS
     // ----------------------------------------------------------------- //
 
-    inline std::string getCurrentTimestampUTC() {
-        const std::time_t now = std::time(nullptr);
-        const std::tm* utc = std::gmtime(&now);  // Use UTC time
-
-        char buffer[20];
-        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", utc);
-        return std::string{ buffer };
-    }
+    /**
+     * @brief Thread-safe conversion of an epoch time to a UTC std::tm.
+     *
+     * std::gmtime returns a pointer to a shared static std::tm, so calling it
+     * from multiple threads concurrently is a data race. This wrapper
+     * serializes the call and returns a copy. UTC is the canonical timezone
+     * for all persisted timestamps so values are stable regardless of the
+     * server's local timezone or DST.
+     *
+     * @param t Epoch time value.
+     * @return std::tm in UTC.
+     */
+    std::tm toUtcTime(std::time_t t);
 
     /**
      * @brief Thread-safe conversion of an epoch time to a local-time std::tm.
@@ -304,10 +309,22 @@ namespace mb {
      * request-handling worker threads. Portable across MinGW/MSVC/Linux
      * without depending on the non-standard localtime_r/localtime_s.
      *
+     * Prefer toUtcTime() for anything persisted to the database; this is only
+     * for values intended to be rendered in the server's local timezone.
+     *
      * @param t Epoch time value.
      * @return std::tm in the server's local timezone.
      */
     std::tm toLocalTime(std::time_t t);
+
+    inline std::string getCurrentTimestampUTC() {
+        const std::time_t now = std::time(nullptr);
+        const std::tm utc = toUtcTime(now);
+
+        char buffer[20];
+        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &utc);
+        return std::string{ buffer };
+    }
 
     /**
      * @brief Convert c++ std::tm date/time value to ISO formatted string.

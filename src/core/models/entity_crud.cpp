@@ -31,7 +31,7 @@ namespace mb {
 
             // Create default time values
             std::time_t current_t = time(nullptr);
-            std::tm created_tm = toLocalTime(current_t);
+            std::tm created_tm = toUtcTime(current_t);
             std::string columns, placeholders;
 
             // Clone record for editing ...
@@ -156,7 +156,7 @@ namespace mb {
         try {
             // Create default time values
             std::time_t current_t = time(nullptr);
-            std::tm created_tm = toLocalTime(current_t);
+            std::tm created_tm = toUtcTime(current_t);
             std::string columns, placeholders;
 
             // Store files to delete by filename

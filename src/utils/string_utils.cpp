@@ -61,7 +61,7 @@ namespace mb {
         const auto tt = system_clock::to_time_t(now);
         const auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;
 
-        const std::tm tm = toLocalTime(tt);
+        const std::tm tm = toUtcTime(tt);
         std::ostringstream oss;
         oss << std::put_time(&tm, "%Y%m%dT%H%M%S");
         oss << std::setw(3) << std::setfill('0') << ms.count();

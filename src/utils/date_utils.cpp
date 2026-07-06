@@ -8,6 +8,16 @@
 
 namespace mb
 {
+    std::tm toUtcTime(const std::time_t t)
+    {
+        // std::gmtime writes into a shared static buffer, so concurrent calls
+        // from request threads race on it. Serialize the call and copy the
+        // result out while holding the lock.
+        static std::mutex mtx;
+        std::lock_guard lock(mtx);
+        return *std::gmtime(&t);
+    }
+
     std::tm toLocalTime(const std::time_t t)
     {
         // std::localtime writes into a shared static buffer, so concurrent

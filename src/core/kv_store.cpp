@@ -48,7 +48,7 @@ namespace mb
         {
             // Create default time values
             const std::time_t current_t = time(nullptr);
-            std::tm created_tm = toLocalTime(current_t);
+            std::tm created_tm = toUtcTime(current_t);
 
             // Create data since it's missing
             settings.clear();
@@ -317,7 +317,7 @@ namespace mb
 
                 // Create default time values
                 const std::time_t updated_t = time(nullptr);
-                std::tm updated_tm = toLocalTime(updated_t);
+                std::tm updated_tm = toUtcTime(updated_t);
 
                 // Create config admin
                 auto id = std::to_string(std::hash<std::string>{}("configs"));

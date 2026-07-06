@@ -104,9 +104,10 @@ namespace mb {
             const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                                 now.time_since_epoch()) % 1000;
 
-            // Format timestamp as ISO 8601
+            // Format timestamp as ISO 8601 (UTC)
+            const std::tm utc = toUtcTime(time_t);
             std::stringstream ss;
-            ss << std::put_time(std::gmtime(&time_t), "%Y-%m-%dT%H:%M:%S");
+            ss << std::put_time(&utc, "%Y-%m-%dT%H:%M:%S");
             ss << "." << std::setfill('0') << std::setw(3) << ms.count() << "Z";
             std::string timestamp = ss.str();
 
