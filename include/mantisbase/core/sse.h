@@ -65,7 +65,7 @@ namespace mb {
 
         void updateActivity();
 
-        void updateTopics(std::set<std::string> &topics);
+        void updateTopics(const std::set<std::string> &topics);
 
         std::chrono::steady_clock::time_point getLastActivity() const;
 

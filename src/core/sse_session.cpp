@@ -108,7 +108,7 @@ void mb::SSESession::updateActivity() {
     m_lastActivity = std::chrono::steady_clock::now();
 }
 
-void mb::SSESession::updateTopics(std::set<std::string> &topics) {
+void mb::SSESession::updateTopics(const std::set<std::string> &topics) {
     m_topics = topics;
 }
 
