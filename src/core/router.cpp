@@ -32,6 +32,44 @@ namespace mb {
     Router::Router()
         : mApp(MantisBase::instance()),
           m_sseMgr(std::make_unique<SSEMgr>()) {
+        // Size the worker thread pool for long-lived SSE connections.
+        //
+        // Each realtime (SSE) connection occupies a worker thread for its whole
+        // lifetime — httplib's chunked content provider is a blocking loop — and
+        // those threads never go idle. With the default pool (base = cores-1,
+        // ceiling = 4x base) a few dozen subscribers could consume every worker
+        // and starve ordinary REST requests. Give the pool a much higher dynamic
+        // ceiling so SSE and REST don't compete for the same handful of threads.
+        // Threads above the base count are spawned on demand and reaped after an
+        // idle timeout, so the idle footprint stays at the base count.
+        //
+        // The ceiling is effectively the budget for (concurrent SSE connections
+        // + in-flight REST requests); override it with MB_MAX_WORKER_THREADS.
+        {
+            const auto base_threads = static_cast<size_t>(CPPHTTPLIB_THREAD_POOL_COUNT);
+            size_t max_threads = 512;
+
+            if (const auto env = getEnvOrDefault("MB_MAX_WORKER_THREADS", std::string{}); !env.empty()) {
+                try {
+                    if (const auto v = static_cast<size_t>(std::stoul(env)); v >= base_threads) {
+                        max_threads = v;
+                    } else {
+                        LogOrigin::warn("Server Configuration",
+                                        fmt::format("MB_MAX_WORKER_THREADS ({}) is below the base thread "
+                                                    "count ({}); using {}.", v, base_threads, max_threads));
+                    }
+                } catch (const std::exception &) {
+                    LogOrigin::warn("Server Configuration",
+                                    fmt::format("Invalid MB_MAX_WORKER_THREADS value `{}`; using {}.",
+                                                env, max_threads));
+                }
+            }
+
+            svr.new_task_queue = [base_threads, max_threads] {
+                return new httplib::ThreadPool(base_threads, max_threads, /*max_queued_requests=*/0);
+            };
+        }
+
         // Let's fix timing initialization, set the start time to current time
         svr.set_pre_routing_handler(preRoutingHandler());
 

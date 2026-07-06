@@ -320,6 +320,7 @@ All runtime configuration uses the `MB_*` prefix:
 | `MB_DISABLE_FILE_UPLOADS` | Set to `1` to disable file uploads | `0` |
 | `MB_DISABLE_ADMIN_ON_FIRST_BOOT` | Set to `1` to skip creating admin on first boot | `0` |
 | `MB_DISABLE_RATE_LIMIT` | Set to `1` to disable rate limiting | (enabled) |
+| `MB_MAX_WORKER_THREADS` | Max HTTP worker threads. Doubles as the budget for concurrent SSE/realtime connections + in-flight requests (each SSE connection holds one thread). | `512` |
 
 ```bash
 # Set JWT secret (important for production)
