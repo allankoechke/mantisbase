@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🧩_20installation_20options_0',['🧩 Installation Options',['../setup.html#autotoc_md0',1,'']]]
+  ['🛡️_20middlewares_0',['🛡️ Middlewares',['../rest_api.html#autotoc_md33',1,'']]]
 ];

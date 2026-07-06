@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
    </div>
   </td>
  </tr>
@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('auth_api.html',''); initResizable(); }
 <div class="textblock"><p>MantisBase provides authentication endpoints scoped to auth-type entities. Each auth entity exposes login, refresh, and logout under <code>/api/v1/auth/&lt;entity&gt;/</code>.</p>
 <p>Admin authentication uses <code>/api/v1/sys/admins/</code> instead.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md94"></a>
+<h2><a class="anchor" id="autotoc_md96"></a>
 🌐 Base URL</h2>
 <div class="fragment"><div class="line">http://localhost:7070/api/v1/auth/&lt;entity&gt;/</div>
 </div><!-- fragment --><p><code>&lt;entity&gt;</code> must be a registered entity that is:</p>
@@ -108,7 +108,7 @@ $(document).ready(function(){initNavTree('auth_api.html',''); initResizable(); }
 </ul>
 <p>If the entity is missing or does not meet these requirements, the route returns <b>404 Route Not Found</b>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md96"></a>
+<h2><a class="anchor" id="autotoc_md98"></a>
 📄 Authentication Endpoints</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -122,7 +122,7 @@ $(document).ready(function(){initNavTree('auth_api.html',''); initResizable(); }
 </table>
 <p>For admin authentication and initial setup, see <a href="02.api.md#admin-accounts">System Endpoints – Admin Accounts</a> (<code>/api/v1/sys/admins/</code>).</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md98"></a>
+<h2><a class="anchor" id="autotoc_md100"></a>
 🔑 Login</h2>
 <p>Authenticate a user and receive a JWT token.</p>
 <blockquote class="doxtable">
@@ -180,7 +180,7 @@ $(document).ready(function(){initNavTree('auth_api.html',''); initResizable(); }
 <div class="line">    &quot;password&quot;: &quot;userpassword&quot;</div>
 <div class="line">  }&#39;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md100"></a>
+<h2><a class="anchor" id="autotoc_md102"></a>
 🔄 Refresh Token</h2>
 <p>Refresh an existing JWT token to extend its validity.</p>
 <p><b>Endpoint:</b> <code>POST /api/v1/auth/&lt;entity&gt;/refresh</code></p>
@@ -195,7 +195,7 @@ $(document).ready(function(){initNavTree('auth_api.html',''); initResizable(); }
 </div><!-- fragment --><p><b>Example:</b> </p><div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/refresh \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;existing_token&gt;&quot;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md102"></a>
+<h2><a class="anchor" id="autotoc_md104"></a>
 🚪 Logout</h2>
 <p>Logout and invalidate the current token.</p>
 <p><b>Endpoint:</b> <code>POST /api/v1/auth/&lt;entity&gt;/logout</code></p>
@@ -206,23 +206,23 @@ $(document).ready(function(){initNavTree('auth_api.html',''); initResizable(); }
 </div><!-- fragment --><p><b>Example:</b> </p><div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/logout \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md104"></a>
+<h2><a class="anchor" id="autotoc_md106"></a>
 👤 Admin Setup and Authentication</h2>
 <p>Admin account setup and admin-only authentication use the <code>/api/v1/sys/admins/</code> namespace. See <a href="02.api.md#admin-accounts">System Endpoints – Admin Accounts</a> in the API reference.</p>
 <p><b>Initial setup:</b> <code>POST /api/v1/sys/admins/setup</code> (only when no admin accounts exist)</p>
 <p><b>Admin login:</b> <code>POST /api/v1/sys/admins/login</code></p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md106"></a>
+<h2><a class="anchor" id="autotoc_md108"></a>
 🔐 Using Tokens</h2>
 <p>After receiving a token from the login endpoint, include it in all subsequent API requests:</p>
 <div class="fragment"><div class="line">Authorization: Bearer &lt;token&gt;</div>
 </div><!-- fragment --><p>The token contains user information (id, entity) and is validated automatically by the <code>getAuthToken()</code> middleware on all endpoints.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md108"></a>
+<h2><a class="anchor" id="autotoc_md110"></a>
 ⏱️ Token Expiration</h2>
 <p>By default, tokens expire after 1 hour. Use the refresh endpoint to extend token validity without requiring the user to log in again.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md110"></a>
+<h2><a class="anchor" id="autotoc_md112"></a>
 🏁 Summary</h2>
 <p>The authentication API provides secure user authentication with JWT tokens scoped to auth-type entities. Tokens are automatically validated on all entity endpoints, ensuring only authenticated users can access protected resources. </p>
 </div></div><!-- contents -->

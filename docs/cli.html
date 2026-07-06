@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
    </div>
   </td>
  </tr>
@@ -94,91 +94,120 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
   <div class="headertitle"><div class="title">Command Line Usage</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>MantisBase has a comprehensive CLI tool built on top of <code>argparse</code>, particularly useful in:</p><ul>
-<li>Setting up Admin user accounts</li>
-<li>Starting server</li>
-<li>Initiating migrations (up or down)</li>
-<li>etc.</li>
-</ul>
+<div class="textblock"><p>MantisBase has a comprehensive CLI built on <code>argparse</code> for server management, admin accounts, migrations, and schema operations.</p>
 <h1><a class="anchor" id="autotoc_md9"></a>
 🧭 mantisbase CLI Reference</h1>
-<p>The <code>mantisbase</code> binary provides a modular command-line interface to manage and run the MantisBase backend.</p>
-<p>You can run it in multiple modes:</p>
-<div class="fragment"><div class="line">./mantisbase [options] &lt;command&gt; [command-options]</div>
-</div><!-- fragment --><hr  />
+<div class="fragment"><div class="line">mantisbase [global options] &lt;subcommand&gt; [subcommand options]</div>
+</div><!-- fragment --><p>Only <b>one subcommand</b> may be used per invocation: <code>serve</code>, <code>admins</code>, <code>migrations</code>, or <code>schema</code>.</p>
+<hr  />
 <h2><a class="anchor" id="autotoc_md11"></a>
 ⚙️ Global Options</h2>
-<p>These options apply regardless of the command:</p>
+<p>These options can appear before the subcommand:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Alias   </th><th class="markdownTableHeadNone">Description   </th><th class="markdownTableHeadNone">Default    </th></tr>
+<th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Alias   </th><th class="markdownTableHeadNone">Description   </th><th class="markdownTableHeadNone">Default   </th><th class="markdownTableHeadNone">Env override    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--database &lt;type&gt;</code>   </td><td class="markdownTableBodyNone"><code>-d</code>   </td><td class="markdownTableBodyNone">Backend database to use: <code>SQLITE</code>, <code>PSQL</code>, or <code>MYSQL</code>.   </td><td class="markdownTableBodyNone"><code>SQLITE</code>    </td></tr>
+<td class="markdownTableBodyNone"><code>--migrations-dir &lt;path&gt;</code>   </td><td class="markdownTableBodyNone"><code>--migrationsDir</code>   </td><td class="markdownTableBodyNone">Migrations directory   </td><td class="markdownTableBodyNone"><code>./migrations</code>   </td><td class="markdownTableBodyNone">—    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>--connection &lt;str&gt;</code>   </td><td class="markdownTableBodyNone"><code>-c</code>   </td><td class="markdownTableBodyNone">Database connection string   </td><td class="markdownTableBodyNone">*(empty)*    </td></tr>
+<td class="markdownTableBodyNone"><code>--data-dir &lt;path&gt;</code>   </td><td class="markdownTableBodyNone"><code>--dataDir</code>   </td><td class="markdownTableBodyNone">Data storage directory   </td><td class="markdownTableBodyNone"><code>./data</code>   </td><td class="markdownTableBodyNone">—    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--dataDir &lt;dir&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Path to data storage directory   </td><td class="markdownTableBodyNone"><code>./data</code>    </td></tr>
+<td class="markdownTableBodyNone"><code>--public-dir &lt;path&gt;</code>   </td><td class="markdownTableBodyNone"><code>--publicDir</code>   </td><td class="markdownTableBodyNone">Static file directory   </td><td class="markdownTableBodyNone"><code>./public</code>   </td><td class="markdownTableBodyNone">—    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>--publicDir &lt;dir&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Path to static file serving directory   </td><td class="markdownTableBodyNone"><code>./public</code>    </td></tr>
+<td class="markdownTableBodyNone"><code>--scripts-dir &lt;path&gt;</code>   </td><td class="markdownTableBodyNone"><code>--scriptsDir</code>   </td><td class="markdownTableBodyNone">JavaScript extensions directory   </td><td class="markdownTableBodyNone"><code>./scripts</code>   </td><td class="markdownTableBodyNone">—    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--scriptsDir &lt;dir&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Path to JavaScript files for extending Mantis functionality   </td><td class="markdownTableBodyNone"><code>./scripts</code>    </td></tr>
+<td class="markdownTableBodyNone"><code>--dev</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Enable verbose development logging   </td><td class="markdownTableBodyNone">off   </td><td class="markdownTableBodyNone"><code>MB_LOG_LEVEL</code>    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>--dev</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Enable development mode with verbose logging   </td><td class="markdownTableBodyNone">*(disabled)*    </td></tr>
+<td class="markdownTableBodyNone"><code>--db &lt;type&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Database type (<code>sqlite3</code>, <code>postgresql</code>, <code>mysql</code>)   </td><td class="markdownTableBodyNone"><code>sqlite3</code>   </td><td class="markdownTableBodyNone"><code>MB_DATABASE_TYPE</code>    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--poolSize &lt;size&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Number of database pools to create   </td><td class="markdownTableBodyNone">(depends on db)   </td></tr>
+<td class="markdownTableBodyNone"><code>--db_url &lt;url&gt;</code>   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone">Database connection string   </td><td class="markdownTableBodyNone">*(empty)*   </td><td class="markdownTableBodyNone"><code>MB_DATABASE_URL</code>   </td></tr>
 </table>
+<p>When an environment variable is set, it overrides the matching CLI option. For logging, <code>MB_LOG_LEVEL</code> (<code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>critical</code>) overrides <code>--dev</code>.</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md13"></a>
-🚀 serve Command</h2>
+🚀 serve</h2>
 <p>Start the HTTP server.</p>
-<div class="fragment"><div class="line">./mantisapp serve [options]</div>
+<div class="fragment"><div class="line">mantisbase serve [--host=&lt;host&gt;] [--port=&lt;port&gt;] [--pool-size=&lt;int&gt;] [--skip-admin-setup]</div>
 </div><!-- fragment --><table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Alias   </th><th class="markdownTableHeadNone">Description   </th><th class="markdownTableHeadNone">Default    </th></tr>
+<th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Description   </th><th class="markdownTableHeadNone">Default    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--port &lt;port&gt;</code>   </td><td class="markdownTableBodyNone"><code>-p</code>   </td><td class="markdownTableBodyNone">Port to bind the server to   </td><td class="markdownTableBodyNone"><code>7070</code>    </td></tr>
+<td class="markdownTableBodyNone"><code>--host</code>   </td><td class="markdownTableBodyNone">Bind address   </td><td class="markdownTableBodyNone"><code>0.0.0.0</code>    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>--host &lt;host&gt;</code>   </td><td class="markdownTableBodyNone"><code>-h</code>   </td><td class="markdownTableBodyNone">Host address to bind the server   </td><td class="markdownTableBodyNone"><code>0.0.0.0</code>   </td></tr>
+<td class="markdownTableBodyNone"><code>--port</code>   </td><td class="markdownTableBodyNone">Listen port   </td><td class="markdownTableBodyNone"><code>7070</code>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>--pool-size</code>   </td><td class="markdownTableBodyNone">Database connection pool size (<code>--poolSize</code>)   </td><td class="markdownTableBodyNone"><code>4</code> (sqlite3), <code>10</code> (postgresql)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>--skip-admin-setup</code>   </td><td class="markdownTableBodyNone">Skip first-boot admin browser setup   </td><td class="markdownTableBodyNone">off   </td></tr>
 </table>
+<p><code>MB_SKIP_ADMIN_SETUP=1</code> also skips admin setup (even without the flag).</p>
 <p><b>Example:</b></p>
-<div class="fragment"><div class="line">./mantisbase serve -p 7070 -h 127.0.0.1</div>
+<div class="fragment"><div class="line">mantisbase serve --host=127.0.0.1 --port=7070</div>
+<div class="line">mantisbase --dev serve --port=8000</div>
 </div><!-- fragment --><hr  />
 <h2><a class="anchor" id="autotoc_md15"></a>
-👤 admins Command</h2>
-<p>Add or remove admin users.</p>
-<div class="fragment"><div class="line">./mantisbase admins add &lt;email&gt; &lt;password&gt;</div>
-<div class="line">./mantisbase admins rm &lt;email or id&gt;</div>
+👤 admins</h2>
+<p>Manage admin accounts. Exactly <b>one</b> of <code>--add</code>, <code>--ls</code>, or <code>--rm</code> is required.</p>
+<div class="fragment"><div class="line">mantisbase admins --add &lt;email&gt; &lt;password&gt;</div>
+<div class="line">mantisbase admins --add                    # uses MB_DEFAULT_ADMIN_EMAIL/PASSWORD</div>
+<div class="line">mantisbase admins --ls</div>
+<div class="line">mantisbase admins --rm &lt;email-or-id&gt;</div>
 </div><!-- fragment --><table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>add &lt;email&gt; &lt;password&gt;</code>   </td><td class="markdownTableBodyNone">Create a new admin user.    </td></tr>
+<td class="markdownTableBodyNone"><code>--add &lt;email&gt; &lt;password&gt;</code>   </td><td class="markdownTableBodyNone">Create a new admin user    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>rm &lt;id/email&gt;</code>   </td><td class="markdownTableBodyNone">Remove an existing admin by ID or email.   </td></tr>
+<td class="markdownTableBodyNone"><code>--ls</code>   </td><td class="markdownTableBodyNone">List admin accounts    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>--rm &lt;identifier&gt;</code>   </td><td class="markdownTableBodyNone">Remove admin by email or id   </td></tr>
+</table>
+<p><b>Examples:</b></p>
+<div class="fragment"><div class="line">mantisbase admins --add admin@example.com &#39;secure-password&#39;</div>
+<div class="line">mantisbase admins --ls</div>
+<div class="line">mantisbase admins --rm admin@example.com</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md17"></a>
+🛠️ migrations</h2>
+<p>Apply or rollback migrations from the migrations directory. Exactly <b>one</b> of <code>--up</code> or <code>--down</code> is required.</p>
+<div class="fragment"><div class="line">mantisbase migrations --up</div>
+<div class="line">mantisbase migrations --down</div>
+</div><!-- fragment --><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>--up</code>   </td><td class="markdownTableBodyNone">Apply sorted <code>*.json</code> migration files from <code>--migrations-dir</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>--down</code>   </td><td class="markdownTableBodyNone">Rollback migrations *(not yet implemented)*   </td></tr>
 </table>
 <p><b>Example:</b></p>
-<div class="fragment"><div class="line">./mantisbase admins add admin@example.com 123456789</div>
-</div><!-- fragment --><p> If successful, you can use the credentials to log in on the admin dashboard or authenticate requests.</p>
-<hr  />
-<h2><a class="anchor" id="autotoc_md17"></a>
-🛠️ migrate Command *(WIP)*</h2>
-<p>Handles schema migrations.</p>
-<div class="fragment"><div class="line">./mantisbase migrate --up &lt;file&gt;</div>
-<div class="line">./mantisbase migrate --down &lt;file&gt;</div>
+<div class="fragment"><div class="line">mantisbase --migrations-dir=./db/migrations migrations --up</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md19"></a>
+📋 schema</h2>
+<p>Manage entity schemas locally (without the HTTP API). Exactly <b>one</b> of <code>--ls</code>, <code>--rm</code>, <code>--add</code>, or <code>--update</code> is required.</p>
+<div class="fragment"><div class="line">mantisbase schema --ls</div>
+<div class="line">mantisbase schema --rm &lt;entity&gt;</div>
+<div class="line">mantisbase schema --add &lt;json-file-or-string&gt;</div>
+<div class="line">mantisbase schema --update &lt;entity&gt; &lt;json-file-or-string&gt;</div>
 </div><!-- fragment --><table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--up &lt;file&gt;</code>   </td><td class="markdownTableBodyNone">Apply migrations from a JSON file.    </td></tr>
+<td class="markdownTableBodyNone"><code>--ls</code>   </td><td class="markdownTableBodyNone">List schemas in a table view    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>--down &lt;file&gt;</code>   </td><td class="markdownTableBodyNone">Rollback using the specified file.   </td></tr>
+<td class="markdownTableBodyNone"><code>--rm &lt;entity&gt;</code>   </td><td class="markdownTableBodyNone">Drop entity schema and table    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>--add &lt;json&gt;</code>   </td><td class="markdownTableBodyNone">Create schema from JSON file or inline JSON    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>--update &lt;entity&gt; &lt;json&gt;</code>   </td><td class="markdownTableBodyNone">Update schema from JSON file or inline JSON   </td></tr>
 </table>
-<blockquote class="doxtable">
-<p>&zwj;Migration functionality is in early development. </p>
-</blockquote>
-<h2><a class="anchor" id="autotoc_md18"></a>
-&lt;/blockquote&gt;</h2>
-<h2><a class="anchor" id="autotoc_md19"></a>
+<p><b>Examples:</b></p>
+<div class="fragment"><div class="line">mantisbase schema --ls</div>
+<div class="line">mantisbase schema --add ./schemas/posts.json</div>
+<div class="line">mantisbase schema --update posts ./schemas/posts-v2.json</div>
+<div class="line">mantisbase schema --rm posts</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md21"></a>
 📚 See Also</h2>
 <ul>
 <li><a class="el" href="QuickStart_8md.html">Quick Start</a></li>

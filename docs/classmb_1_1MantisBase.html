@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
    </div>
   </td>
  </tr>
@@ -155,6 +155,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa8b6e850493fb1a0cb7bce9712974327" id="r_aa8b6e850493fb1a0cb7bce9712974327"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#aa8b6e850493fb1a0cb7bce9712974327">setScriptsDir</a> (const std::string &amp;dir)</td></tr>
 <tr class="memdesc:aa8b6e850493fb1a0cb7bce9712974327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the scripts directory for MantisApp.  <br /></td></tr>
 <tr class="separator:aa8b6e850493fb1a0cb7bce9712974327"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a298e5dc7929388e131b19eab611b4043" id="r_a298e5dc7929388e131b19eab611b4043"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a298e5dc7929388e131b19eab611b4043">migrationsDir</a> () const</td></tr>
+<tr class="memdesc:a298e5dc7929388e131b19eab611b4043"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the migrations directory path.  <br /></td></tr>
+<tr class="separator:a298e5dc7929388e131b19eab611b4043"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab138c47d6e57ff579f399b346f71d39c" id="r_ab138c47d6e57ff579f399b346f71d39c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#ab138c47d6e57ff579f399b346f71d39c">setMigrationsDir</a> (const std::string &amp;dir)</td></tr>
+<tr class="memdesc:ab138c47d6e57ff579f399b346f71d39c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the migrations directory path.  <br /></td></tr>
+<tr class="separator:ab138c47d6e57ff579f399b346f71d39c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af646dc94f6fba2c0fec58f8167948c89" id="r_af646dc94f6fba2c0fec58f8167948c89"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#af646dc94f6fba2c0fec58f8167948c89">skipAdminSetup</a> () const</td></tr>
+<tr class="memdesc:af646dc94f6fba2c0fec58f8167948c89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether first-boot admin setup (browser) should be skipped on serve.  <br /></td></tr>
+<tr class="separator:af646dc94f6fba2c0fec58f8167948c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac31962f5bd176276bf67850fd7159552" id="r_ac31962f5bd176276bf67850fd7159552"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#ac31962f5bd176276bf67850fd7159552">setSkipAdminSetup</a> (bool skip)</td></tr>
+<tr class="separator:ac31962f5bd176276bf67850fd7159552"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a9a711b0c3c33ecdd2a0e2e4cd5e570" id="r_a2a9a711b0c3c33ecdd2a0e2e4cd5e570"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a2a9a711b0c3c33ecdd2a0e2e4cd5e570">dbType</a> () const</td></tr>
 <tr class="memdesc:a2a9a711b0c3c33ecdd2a0e2e4cd5e570"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the active database type.  <br /></td></tr>
 <tr class="separator:a2a9a711b0c3c33ecdd2a0e2e4cd5e570"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -482,7 +493,7 @@ RouterMgr for more details.</dd></dl>
 </div><div class="memdoc">
 
 <p>Convenience function to allow creating class instance given the values needed to set up the app without any need for passing in cmd args. </p>
-<p>The expected values are: { "database": "&lt;db type&gt;", "connection": "&lt;connection string&gt;", "dataDir": "&lt;path to dir&gt;", "publicDir": "&lt;path to dir&gt;", "scriptsDir": "&lt;path to dir&gt;", "dev": true, "serve": { "port": &lt;int&gt;, "host": "&lt;host IP/addr&gt;", "poolSize": &lt;int&gt;, }, "admins": { "add": "&lt;email to add&gt;", "rm": "&lt;email to remove&gt;" } }</p>
+<p>The expected values are: { "db": "&lt;db type&gt;", "db_url": "&lt;connection string&gt;", "data-dir": "&lt;path to dir&gt;", "public-dir": "&lt;path to dir&gt;", "scripts-dir": "&lt;path to dir&gt;", "migrations-dir": "&lt;path to dir&gt;", "dev": true, "serve": { "port": &lt;int&gt;, "host": "&lt;host IP/addr&gt;", "pool-size": &lt;int&gt;, "skip-admin-setup": &lt;bool&gt; }, "admins": { "add": ["&lt;email&gt;", "&lt;password&gt;"], "ls": true, "rm": "&lt;email or id&gt;" }, "migrations": { "up": true, "down": false }, "schema": { "ls": true, "rm": "&lt;entity&gt;", "add": "&lt;json&gt;", "update": { "entity": "&lt;name&gt;", "body": "&lt;json&gt;" } } }</p>
 <dl class="section note"><dt>Note</dt><dd>All primary options above are optional, you can omit to use default values. </dd>
 <dd>
 <code>admins</code> subcommand expects a subcommand with either the <code>add</code> or <code>rm</code>. </dd>
@@ -777,6 +788,26 @@ RouterMgr for more details.</dd></dl>
 </div><div class="memdoc">
 
 <p>Get the logs unit object. </p>
+
+</div>
+</div>
+<a id="a298e5dc7929388e131b19eab611b4043" name="a298e5dc7929388e131b19eab611b4043"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a298e5dc7929388e131b19eab611b4043">&#9670;&#160;</a></span>migrationsDir()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::MantisBase::migrationsDir </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the migrations directory path. </p>
+<dl class="section return"><dt>Returns</dt><dd>Migrations directory. </dd></dl>
 
 </div>
 </div>
@@ -1115,6 +1146,32 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
+<a id="ab138c47d6e57ff579f399b346f71d39c" name="ab138c47d6e57ff579f399b346f71d39c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab138c47d6e57ff579f399b346f71d39c">&#9670;&#160;</a></span>setMigrationsDir()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::MantisBase::setMigrationsDir </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>dir</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Update the migrations directory path. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dir</td><td>New migrations directory. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a797bcb2d6d6d3593f6b7315559162a1f" name="a797bcb2d6d6d3593f6b7315559162a1f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a797bcb2d6d6d3593f6b7315559162a1f">&#9670;&#160;</a></span>setPort()</h2>
 
@@ -1193,6 +1250,24 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
+<a id="ac31962f5bd176276bf67850fd7159552" name="ac31962f5bd176276bf67850fd7159552"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac31962f5bd176276bf67850fd7159552">&#9670;&#160;</a></span>setSkipAdminSetup()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::MantisBase::setSkipAdminSetup </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>skip</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a4ccd43ffc1a92afadb6b01f23a5681dc" name="a4ccd43ffc1a92afadb6b01f23a5681dc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4ccd43ffc1a92afadb6b01f23a5681dc">&#9670;&#160;</a></span>settings()</h2>
 
@@ -1209,6 +1284,25 @@ RouterMgr for more details.</dd></dl>
 </div><div class="memdoc">
 
 <p>Get the KeyValue unit object. </p>
+
+</div>
+</div>
+<a id="af646dc94f6fba2c0fec58f8167948c89" name="af646dc94f6fba2c0fec58f8167948c89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af646dc94f6fba2c0fec58f8167948c89">&#9670;&#160;</a></span>skipAdminSetup()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::MantisBase::skipAdminSetup </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Whether first-boot admin setup (browser) should be skipped on serve. </p>
 
 </div>
 </div>

@@ -1,6 +1,7 @@
 var classmb_1_1RealtimeDB =
 [
     [ "RealtimeDB", "classmb_1_1RealtimeDB.html#a7372b3e53724e577a5627d246b448105", null ],
+    [ "~RealtimeDB", "classmb_1_1RealtimeDB.html#a67cb3b61854e25db7255628f1f36c4d2", null ],
     [ "addDbHooks", "classmb_1_1RealtimeDB.html#aa07509b35ba3cb4aeef4d36c16c81e18", null ],
     [ "addDbHooks", "classmb_1_1RealtimeDB.html#a0564616d7e21c1b1ee6e3bae84051b4d", null ],
     [ "dropDbHooks", "classmb_1_1RealtimeDB.html#a7d96157d40756287e83ca0d2b547a27d", null ],

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['📡_20realtime_20api_0',['📡 Realtime API',['../rest_api.html#autotoc_md74',1,'']]]
+  ['📚_20next_20steps_0',['📚 Next Steps',['../setup.html#autotoc_md7',1,'']]],
+  ['📚_20see_20also_1',['📚 See Also',['../cli.html#autotoc_md21',1,'']]]
 ];

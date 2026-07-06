@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['fetchsession_0',['fetchSession',['../classmb_1_1SSEMgr.html#a51a84a53fcee54c41c5e9cbf8219cb3f',1,'mb::SSEMgr']]],
+  ['fetchsession_0',['fetchSession',['../classmb_1_1SSEMgr.html#a1798d028c9e6452955f3567b49ffe876',1,'mb::SSEMgr']]],
   ['field_1',['field',['../classmb_1_1Entity.html#a68fc1d809fd9ecb011ffae8db4bd71fb',1,'mb::Entity::field()'],['../classmb_1_1EntitySchema.html#a6f3b3df7444255ecc5badb14cda61b59',1,'mb::EntitySchema::field(const std::string &amp;field_name)']]],
   ['fieldbyid_2',['fieldById',['../classmb_1_1EntitySchema.html#ac5ad1ea9b9638e5631a8bcf63e49779d',1,'mb::EntitySchema']]],
   ['fields_3',['fields',['../classmb_1_1Entity.html#a06b6989436a0acdbab7856c029de221f',1,'mb::Entity::fields()'],['../classmb_1_1EntitySchema.html#aff7d5893936eca2b12c851a924781c99',1,'mb::EntitySchema::fields()']]],

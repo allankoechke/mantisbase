@@ -9,6 +9,7 @@ var searchData=
   ['matches_6',['matches',['../classmb_1_1MantisRequest.html#af519b13deaaff60034061dadb1f86943',1,'mb::MantisRequest']]],
   ['maximumconstraintcheck_7',['maximumConstraintCheck',['../classmb_1_1Validators.html#a3c6c560823b2cf439cbda2f8f2c28c83',1,'mb::Validators']]],
   ['migrate_8',['migrate',['../classmb_1_1KeyValStore.html#aebaf937e9b5190be0661868008c66c62',1,'mb::KeyValStore']]],
-  ['minimumconstraintcheck_9',['minimumConstraintCheck',['../classmb_1_1Validators.html#acddbbf2eeeb3a9441e45307c525f781b',1,'mb::Validators']]],
-  ['mode_10',['mode',['../classmb_1_1AccessRule.html#afc7e9897e7ccbab40946c60768ac080e',1,'mb::AccessRule']]]
+  ['migrationsdir_9',['migrationsDir',['../classmb_1_1MantisBase.html#a298e5dc7929388e131b19eab611b4043',1,'mb::MantisBase']]],
+  ['minimumconstraintcheck_10',['minimumConstraintCheck',['../classmb_1_1Validators.html#acddbbf2eeeb3a9441e45307c525f781b',1,'mb::Validators']]],
+  ['mode_11',['mode',['../classmb_1_1AccessRule.html#afc7e9897e7ccbab40946c60768ac080e',1,'mb::AccessRule']]]
 ];

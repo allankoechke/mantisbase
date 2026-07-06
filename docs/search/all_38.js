@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🧭_20mantisbase_20cli_20reference_0',['🧭 mantisbase CLI Reference',['../cli.html#autotoc_md9',1,'']]]
+  ['🧩_20installation_20options_0',['🧩 Installation Options',['../setup.html#autotoc_md0',1,'']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🛠️_20migrate_20command_20wip_0',['🛠️ migrate Command *(WIP)*',['../cli.html#autotoc_md17',1,'']]]
+  ['🚪_20logout_0',['🚪 Logout',['../auth_api.html#autotoc_md104',1,'']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🗃️_20schema_20management_20api_0',['🗃️ Schema Management API',['../rest_api.html#autotoc_md37',1,'']]]
+  ['🗂️_20api_20namespaces_0',['🗂️ API Namespaces',['../rest_api.html#autotoc_md26',1,'']]]
 ];

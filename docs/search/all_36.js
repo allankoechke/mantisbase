@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🛡️_20middlewares_0',['🛡️ Middlewares',['../rest_api.html#autotoc_md31',1,'']]]
+  ['🛠️_20migrations_0',['🛠️ migrations',['../cli.html#autotoc_md17',1,'']]]
 ];

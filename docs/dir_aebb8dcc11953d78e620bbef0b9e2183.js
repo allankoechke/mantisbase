@@ -9,6 +9,7 @@ var dir_aebb8dcc11953d78e620bbef0b9e2183 =
     [ "exceptions.cpp", "exceptions_8cpp.html", null ],
     [ "expr_evaluator.cpp", "expr__evaluator_8cpp.html", null ],
     [ "files.cpp", "files_8cpp.html", null ],
+    [ "http.cpp", "http_8cpp.html", null ],
     [ "http_content_reader.cpp", "http__content__reader_8cpp.html", null ],
     [ "http_request.cpp", "http__request_8cpp.html", "http__request_8cpp" ],
     [ "http_response.cpp", "http__response_8cpp.html", "http__response_8cpp" ],
@@ -18,5 +19,6 @@ var dir_aebb8dcc11953d78e620bbef0b9e2183 =
     [ "route_registry.cpp", "route__registry_8cpp.html", "route__registry_8cpp" ],
     [ "router.cpp", "router_8cpp.html", "router_8cpp" ],
     [ "router_httplib_internals.cpp", "router__httplib__internals_8cpp.html", null ],
-    [ "sse.cpp", "sse_8cpp.html", null ]
+    [ "sse_mgr.cpp", "sse__mgr_8cpp.html", null ],
+    [ "sse_session.cpp", "sse__session_8cpp.html", null ]
 ];
