@@ -285,6 +285,26 @@ namespace mb {
         // If server command is explicitly passed in, start listening,
         // else, exit!
         if (m_toStartServer) {
+            // Fail closed: never serve traffic in production with an unset/blank
+            // JWT secret. Otherwise token signing would fall back to a shipped
+            // default and anyone could forge admin/user tokens. Development mode
+            // is allowed to run with an insecure, clearly-marked default.
+            if (const auto secret = getEnvOrDefault("MB_JWT_SECRET", std::string{}); secret.empty()) {
+                if (!m_isDevMode) {
+                    LogOrigin::critical(
+                        "Insecure Configuration",
+                        "MB_JWT_SECRET is not set. Refusing to start the server without a "
+                        "signing key in production. Set MB_JWT_SECRET to a strong, secret "
+                        "value, or pass --dev for local development.");
+                    return quit(1, "MB_JWT_SECRET not set");
+                }
+
+                LogOrigin::warn(
+                    "Insecure Configuration",
+                    "MB_JWT_SECRET is not set; using an insecure development-only default. "
+                    "Do NOT use this in production — set MB_JWT_SECRET.");
+            }
+
             if (!m_router->listen())
                 return 500;
         }
@@ -397,11 +417,19 @@ namespace mb {
     }
 
     std::string MantisBase::jwtSecretKey() {
-        // This is the default secret key, override it through environment variable
-        // MB_JWT_SECRET, recommended to override this key
-        // TODO add commandline input for overriding the key
-        // or explictly require that key to be set before we boot.
-        return getEnvOrDefault("MB_JWT_SECRET", "<our-very-secret-JWT-key>");
+        // Prefer an explicitly configured secret. In production the server
+        // refuses to start when this is unset (see MantisBase::run()), so we
+        // never sign tokens with a shipped default.
+        if (auto secret = getEnvOrDefault("MB_JWT_SECRET", std::string{}); !secret.empty())
+            return secret;
+
+        // Development-only fallback. Reaching this in production would mean the
+        // startup guard was bypassed, so fail loudly rather than emit a token
+        // signed with a well-known key.
+        if (instance().isDevMode())
+            return "mb-insecure-dev-secret-do-not-use-in-production";
+
+        throw MantisException(500, "MB_JWT_SECRET is not configured");
     }
 
     std::string MantisBase::appVersion() {
