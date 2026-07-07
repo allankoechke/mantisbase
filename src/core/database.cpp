@@ -43,7 +43,12 @@ namespace mb {
                 // For SQLite, lets explicitly define location and name of the database
                 // we intend to use within the `dataDir`
                 auto sqlite_db_path = joinPaths(mbApp.dataDir(), "mantis.db").string();
-                m_connStr = std::format("db={} timeout=30 shared_cache=true synchronous=normal foreign_keys=on",
+                // Private cache (the default) + WAL gives concurrent readers with
+                // a single writer via the connection pool. shared_cache is a
+                // legacy mode discouraged with WAL (adds table-level lock
+                // contention), so it is intentionally not enabled. timeout=30
+                // sets a 30s busy timeout.
+                m_connStr = std::format("db={} timeout=30 synchronous=normal foreign_keys=on",
                                            sqlite_db_path);
             }
 

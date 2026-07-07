@@ -551,8 +551,11 @@ bool mb::RtDbWorker::initSQLite() {
     auto audit_db_path = joinPaths(MantisBase::instance().dataDir(), "mantis.db").string();
 
     try {
+        // Read-only poller connection. Private cache + WAL lets it read the
+        // latest committed snapshot alongside the writable pool; shared_cache is
+        // intentionally not enabled (legacy, discouraged with WAL).
         auto sqlite_conn_str = std::format(
-            "db={} timeout=30 mode=ro shared_cache=true synchronous=normal", audit_db_path);
+            "db={} timeout=30 mode=ro synchronous=normal", audit_db_path);
 
         sql_ro = std::make_unique<soci::session>(soci::sqlite3, sqlite_conn_str);
 
