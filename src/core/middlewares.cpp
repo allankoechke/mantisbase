@@ -495,7 +495,6 @@ namespace mb {
     namespace {
         struct RateLimitEntry {
             std::deque<std::chrono::steady_clock::time_point> requests;
-            std::chrono::steady_clock::time_point last_cleanup;
         };
 
         // In-memory storage for rate limit tracking
@@ -504,6 +503,18 @@ namespace mb {
         std::unordered_map<std::string, RateLimitEntry> rate_limit_store;
         std::mutex rate_limit_mutex;
         constexpr auto CLEANUP_INTERVAL = std::chrono::minutes(5);
+
+        // Timestamp of the last full sweep of rate_limit_store (guarded by
+        // rate_limit_mutex). The sweep evicts entries for identifiers that were
+        // seen once and never returned, which the per-identifier cleanup can
+        // never reach.
+        std::chrono::steady_clock::time_point last_global_sweep{};
+
+        // An entry whose most recent request is older than this is stale: all of
+        // its timestamps are outside every rate-limit window, so it can be
+        // evicted. MUST be >= the largest window passed to rateLimit() (the
+        // largest currently in use is 1 hour for admin setup).
+        constexpr auto STALE_ENTRY_TTL = std::chrono::hours(1);
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rateLimit(
@@ -553,25 +564,32 @@ namespace mb {
                 
                 // Lock for thread-safe access
                 std::lock_guard<std::mutex> lock(rate_limit_mutex);
-                
+
+                // Periodically sweep the whole store so entries for identifiers
+                // that were seen once and never came back (e.g. IP scans,
+                // spoofed source IPs) don't accumulate without bound. Throttled
+                // to once per CLEANUP_INTERVAL and piggybacked on request
+                // traffic, so it costs nothing when idle.
+                if (now - last_global_sweep > CLEANUP_INTERVAL) {
+                    last_global_sweep = now;
+                    for (auto it = rate_limit_store.begin(); it != rate_limit_store.end();) {
+                        const auto& reqs = it->second.requests;
+                        if (reqs.empty() || now - reqs.back() > STALE_ENTRY_TTL) {
+                            it = rate_limit_store.erase(it);
+                        } else {
+                            ++it;
+                        }
+                    }
+                }
+
                 // Get or create entry for this identifier
                 auto& entry = rate_limit_store[identifier];
-                
+
                 // Cleanup old requests outside the window
                 while (!entry.requests.empty() && entry.requests.front() < cutoff_time) {
                     entry.requests.pop_front();
                 }
-                
-                // Periodic cleanup of stale entries (every 5 minutes per identifier)
-                if (now - entry.last_cleanup > CLEANUP_INTERVAL) {
-                    entry.last_cleanup = now;
-                    // If no requests in window, remove the entry to save memory
-                    if (entry.requests.empty()) {
-                        rate_limit_store.erase(identifier);
-                        return HandlerResponse::Unhandled;
-                    }
-                }
-                
+
                 // Check if rate limit exceeded
                 if (entry.requests.size() >= static_cast<size_t>(max_requests)) {
                     // Calculate retry-after seconds (time until oldest request expires)
