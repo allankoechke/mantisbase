@@ -285,11 +285,6 @@ namespace mb {
         return std::nullopt;
     }
 
-    std::optional<std::string> Validators::validateRequestBody(const json &schema, const json &body) {
-        const auto entity_obj = Entity{schema};
-        return validateRequestBody(entity_obj, body);
-    }
-
     std::optional<std::string> Validators::validateRequestBody(const Entity &entity, const json &body) {
         TRACE_MB_FUNC();
         // If the table type is of view type, check that the SQL is passed in ...
@@ -365,10 +360,5 @@ namespace mb {
 
         // Return null option for no error cases
         return std::nullopt;
-    }
-
-    std::optional<std::string> Validators::validateUpdateRequestBody(const json &schema, const json &body) {
-        const auto entity_obj = Entity{schema};
-        return validateUpdateRequestBody(entity_obj, body);
     }
 }

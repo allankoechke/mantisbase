@@ -5,7 +5,7 @@
 #include "mantisbase/utils/soci_wrappers.h"
 
 namespace mb {
-    Entity::Entity(const nlohmann::json &schema) {
+    Entity::Entity(const MantisBase &app, const nlohmann::json &schema) : m_app(&app) {
         LogOrigin::entityTrace("Entity Creation", "Creating Entity from JSON Schema", schema);
 
         if (!schema.contains("name") || !schema["name"].is_string() || schema["name"].empty())
@@ -61,8 +61,8 @@ namespace mb {
         m_schema = std::make_shared<const json>(std::move(s));
     }
 
-    Entity::Entity(const std::string &name, const std::string &type)
-        : Entity({{"name", name}, {"type", type}}) {
+    Entity::Entity(const MantisBase &app, const std::string &name, const std::string &type)
+        : Entity(app, {{"name", name}, {"type", type}}) {
         // Ensure name is valid
         if (!EntitySchema::isValidEntityName(name)) {
             throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", name);
@@ -73,15 +73,7 @@ namespace mb {
         }
     }
 
-    Entity &Entity::setApp(const MantisBase &app) {
-        m_app = &app;
-        return *this;
-    }
-
     const MantisBase &Entity::app() const {
-        if (!m_app)
-            throw MantisException(500, "Entity is not bound to an application; "
-                                       "obtain entities via MantisBase::entity().");
         return *m_app;
     }
 

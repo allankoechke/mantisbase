@@ -17,8 +17,6 @@
 #include "soci/soci-backend.h"
 
 namespace mb {
-    class MantisBase; // forward declaration; fields hold a non-owning pointer to it
-
     /**
      * @brief Represents a single field in a database table schema.
      *
@@ -269,23 +267,10 @@ namespace mb {
          */
         static const nlohmann::json &defaultConstraints();
 
-        /**
-         * @brief Bind this field to the owning application (for FK validation).
-         *        Returns *this for chaining.
-         */
-        EntitySchemaField &setApp(const MantisBase &app);
-
     private:
-        /**
-         * @brief Owning application. Falls back to MantisBase::instance() while
-         *        unbound during the DI migration (fallback removed in phase 4).
-         */
-        [[nodiscard]] const MantisBase &app() const;
-
         std::string m_id, m_name, m_type;
         bool m_required = false, m_primaryKey = false, m_isSystem = false, m_isUnique = false;
         nlohmann::json m_constraints{}, m_foreignKey{};
-        const MantisBase *m_app = nullptr; ///< Non-owning; set via setApp()
     };
 } // mb
 

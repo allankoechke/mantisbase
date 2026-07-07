@@ -84,8 +84,7 @@ namespace mb {
                     return;
                 }
 
-                auto eSchema = EntitySchema::fromSchema(body);
-                eSchema.setApp(req.app()); // bind so validate()/createTable resolve this app
+                auto eSchema = EntitySchema::fromSchema(req.app(), body);
                 auto _ = eSchema.dump();
 
                 if (const auto val_err = eSchema.validate(); val_err.has_value())

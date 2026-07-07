@@ -382,7 +382,7 @@ namespace mb {
                 }
 
                 // Validate request body
-                if (const auto v_err = Validators::validateRequestBody(admin_entity.schema(), body);
+                if (const auto v_err = Validators::validateRequestBody(admin_entity, body);
                     v_err.has_value()) {
                     LogOrigin::critical("Request Validation Error", fmt::format("Error validating request body\n\t— {}", v_err.value()));
 

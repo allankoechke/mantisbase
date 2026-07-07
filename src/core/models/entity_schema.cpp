@@ -3,7 +3,10 @@
 #include "mantisbase/core/exceptions.h"
 
 namespace mb {
-    EntitySchema::EntitySchema(const std::string &entity_name, const std::string &entity_type) {
+    EntitySchema::EntitySchema(const MantisBase &app) : m_app(&app) {}
+
+    EntitySchema::EntitySchema(const MantisBase &app, const std::string &entity_name, const std::string &entity_type)
+        : m_app(&app) {
         // Ensure name is valid
         if (!EntitySchema::isValidEntityName(entity_name)) {
             throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", entity_name);
@@ -32,6 +35,7 @@ namespace mb {
             m_addRule = other.m_addRule;
             m_updateRule = other.m_updateRule;
             m_deleteRule = other.m_deleteRule;
+            m_app = other.m_app;
         }
         return *this;
     }
@@ -42,8 +46,8 @@ namespace mb {
         return toJSON() == other.toJSON();
     }
 
-    EntitySchema EntitySchema::fromSchema(const json &entity_schema) {
-        EntitySchema eSchema;
+    EntitySchema EntitySchema::fromSchema(const MantisBase &app, const json &entity_schema) {
+        EntitySchema eSchema(app);
 
         LogOrigin::entitySchemaTrace("Schema Creation", fmt::format("Creating Entity Schema from JSON"), entity_schema);
 
@@ -118,8 +122,8 @@ namespace mb {
         return eSchema;
     }
 
-    EntitySchema EntitySchema::fromEntity(const Entity &entity) {
-        EntitySchema eSchema;
+    EntitySchema EntitySchema::fromEntity(const MantisBase &app, const Entity &entity) {
+        EntitySchema eSchema(app);
 
         // Default schema fields
         eSchema.setName(entity.name());
@@ -154,7 +158,7 @@ namespace mb {
     }
 
     Entity EntitySchema::toEntity() const {
-        return Entity{toJSON()};
+        return Entity{app(), toJSON()};
     }
 
     std::string EntitySchema::id() const {
@@ -442,17 +446,8 @@ namespace mb {
         return j;
     }
 
-    EntitySchema &EntitySchema::setApp(const MantisBase &app) {
-        m_app = &app;
-        // Propagate to owned fields so their FK validation resolves the same app.
-        for (auto &field: m_fields) field.setApp(app);
-        return *this;
-    }
-
     const MantisBase &EntitySchema::app() const {
-        // TODO(di): drop the singleton fallback once every construction site
-        // stamps the app (phase 4).
-        return m_app ? *m_app : MantisBase::instance();
+        return *m_app;
     }
 
     std::string EntitySchema::toDDL() const {
@@ -619,16 +614,16 @@ namespace mb {
                     const std::string refField = field.foreignKeyColumn();
 
                     // Check if referenced entity exists
-                    // TODO 
-                    if (tableExists(refEntity)) {
+                    // TODO
+                    if (tableExists(table_schema.app(), refEntity)) {
                         // Check if referenced field exists in the referenced entity
                         try {
-                            const auto refEntityData = getTable(EntitySchema::genEntityId(refEntity));
+                            const auto refEntityData = getTable(table_schema.app(), EntitySchema::genEntityId(refEntity));
                             if (!refEntityData.contains("schema")) {
                                 return "Invalid schema data for referenced entity: `" + refEntity + "`";
                             }
 
-                            EntitySchema refEntitySchema = EntitySchema::fromSchema(refEntityData["schema"]);
+                            EntitySchema refEntitySchema = EntitySchema::fromSchema(table_schema.app(), refEntityData["schema"]);
 
                             if (!refEntitySchema.hasField(refField)) {
                                 return "Foreign key references non-existent field `" + refField +

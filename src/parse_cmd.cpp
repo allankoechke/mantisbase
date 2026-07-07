@@ -140,8 +140,7 @@ namespace mb {
             for (const auto &file: files) {
                 LogOrigin::info("Migrations", fmt::format("Applying migration `{}`", file.filename().string()));
                 const auto body = loadJsonInput(file.string());
-                auto eSchema = EntitySchema::fromSchema(body);
-                eSchema.setApp(app);
+                auto eSchema = EntitySchema::fromSchema(app, body);
                 if (const auto err = eSchema.validate(); err.has_value())
                     throw MantisException(400, err.value());
 
@@ -464,8 +463,7 @@ namespace mb {
 
                 if (do_add) {
                     const auto body = loadJsonInput(schema_command.get<std::string>("--add"));
-                    auto eSchema = EntitySchema::fromSchema(body);
-                    eSchema.setApp(*this);
+                    auto eSchema = EntitySchema::fromSchema(*this, body);
                     if (const auto err = eSchema.validate(); err.has_value())
                         throw MantisException(400, err.value());
 

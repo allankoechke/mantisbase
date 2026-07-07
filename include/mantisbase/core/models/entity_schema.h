@@ -38,16 +38,23 @@ namespace mb {
     class EntitySchema {
     public:
         /**
-         * @brief Default constructor (creates empty schema).
+         * @brief Construct an empty schema bound to its application.
+         *
+         * Used by the fromSchema()/fromEntity() builders before fields are added.
+         * The app is injected at construction so DDL/validation can always reach
+         * the database without a separate bind step to forget.
+         *
+         * @param app Owning application. Stored non-owning; must outlive the schema.
          */
-        EntitySchema() = default;
-        
+        explicit EntitySchema(const MantisBase &app);
+
         /**
-         * @brief Construct schema with name and type.
+         * @brief Construct schema with name and type, bound to its application.
+         * @param app Owning application (see the app-only constructor).
          * @param entity_name Table name
          * @param entity_type Entity type ("base", "auth", or "view"), defaults to "base"
          */
-        explicit EntitySchema(const std::string &entity_name, const std::string &entity_type = "base");
+        EntitySchema(const MantisBase &app, const std::string &entity_name, const std::string &entity_type = "base");
 
         // Allow copy constructors & assignment ops for easy cloning
         EntitySchema(const EntitySchema &);
@@ -67,18 +74,20 @@ namespace mb {
         bool operator==(const EntitySchema &other) const;
 
         /**
-         * @brief Create schema from JSON object.
+         * @brief Create schema from JSON object, bound to an application.
+         * @param app Owning application (db access for DDL/validation).
          * @param entity_schema JSON schema object
          * @return EntitySchema instance
          */
-        static EntitySchema fromSchema(const json &entity_schema);
-        
+        static EntitySchema fromSchema(const MantisBase &app, const json &entity_schema);
+
         /**
-         * @brief Create schema from existing Entity.
+         * @brief Create schema from existing Entity, bound to an application.
+         * @param app Owning application (db access for DDL/validation).
          * @param entity Entity to convert from
          * @return EntitySchema instance
          */
-        static EntitySchema fromEntity(const Entity &entity);
+        static EntitySchema fromEntity(const MantisBase &app, const Entity &entity);
         
         /**
          * @brief Convert schema to Entity for database operations.
@@ -353,23 +362,15 @@ namespace mb {
         static const std::vector<EntitySchemaField> &defaultBaseFieldsSchema();
         static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
 
-        /**
-         * @brief Bind this schema (and its fields) to the owning application.
-         *
-         * Used so schema DDL/validation can reach db/entity services without the
-         * global singleton. Returns *this for chaining.
-         */
-        EntitySchema &setApp(const MantisBase &app);
-
     private:
         static std::string getFieldType(const std::string &type, std::shared_ptr<soci::session> sql);
 
         void addFieldsIfNotExist(const std::string &type);
 
         /**
-         * @brief Owning application. During the DI migration this falls back to
-         *        MantisBase::instance() when unbound; the fallback is removed
-         *        once all construction sites stamp the app (phase 4).
+         * @brief Owning application (db access for DDL/validation).
+         *
+         * Always valid: injected through the constructor.
          */
         [[nodiscard]] const MantisBase &app() const;
 
@@ -380,7 +381,7 @@ namespace mb {
         bool m_hasApi = true;
         std::vector<EntitySchemaField> m_fields;
         AccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
-        const MantisBase *m_app = nullptr; ///< Non-owning; set via setApp()
+        const MantisBase *m_app; ///< Non-owning; set from the constructor reference
     };
 } // mb
 

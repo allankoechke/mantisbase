@@ -163,7 +163,7 @@ namespace mb {
 
         try {
             // Create admin table, for managing and auth for admin accounts
-            EntitySchema admin_schema{"mb_admins", "auth"};
+            EntitySchema admin_schema{mbApp, "mb_admins", "auth"};
             admin_schema.removeField("name");
             admin_schema.setSystem(true);
             *sql << admin_schema.toDDL();
@@ -171,13 +171,13 @@ namespace mb {
             // Internal use for service accounts
             // Use `base` type to avoid login via /api/auth/*
             // Used for `id` to track given tokens for single use only
-            EntitySchema service_schema{"mb_service_acc", "base"};
+            EntitySchema service_schema{mbApp, "mb_service_acc", "base"};
             service_schema.setSystem(true);
             service_schema.setHasApi(false);
             *sql << service_schema.toDDL();
 
             // Create and manage other db tables, keeping track of access rules, schema, etc.!
-            EntitySchema tables_schema{"mb_tables", "base"};
+            EntitySchema tables_schema{mbApp, "mb_tables", "base"};
             tables_schema.setSystem(true);
             tables_schema.addField(EntitySchemaField({
                 {"name", "schema"}, {"type", "json"}, {"required", true}, {"system", true}
@@ -185,7 +185,7 @@ namespace mb {
             *sql << tables_schema.toDDL();
 
             // A Key - Value settings store, where the key is hashed as the table id
-            EntitySchema store_schema{"mb_store", "base"};
+            EntitySchema store_schema{mbApp, "mb_store", "base"};
             store_schema.setSystem(true);
             store_schema.addField(EntitySchemaField({
                 {"name", "value"}, {"type", "json"}, {"required", true}, {"system", true}

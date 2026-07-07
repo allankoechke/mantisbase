@@ -111,8 +111,7 @@ namespace mb {
 
                 // Create entity based on the schema, bound to this application
                 // so its CRUD ops can reach db/realtime without the singleton.
-                Entity entity{schema};
-                entity.setApp(mApp);
+                Entity entity{mApp, schema};
 
                 // Store this object to keep alive function pointers
                 // if not, possible access violation error
@@ -120,19 +119,17 @@ namespace mb {
             }
 
             // Add admin routes
-            EntitySchema admin_schema{"mb_admins", "auth"};
+            EntitySchema admin_schema{mApp, "mb_admins", "auth"};
             admin_schema.removeField("name");
             admin_schema.setSystem(true);
             auto admin_entity = admin_schema.toEntity();
-            admin_entity.setApp(mApp);
             m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
 
             // Service Schema [No routes]
-            EntitySchema service_schema{"mb_service_acc", "base"};
+            EntitySchema service_schema{mApp, "mb_service_acc", "base"};
             service_schema.setHasApi(false);
             service_schema.setSystem(true);
             auto service_entity = service_schema.toEntity();
-            service_entity.setApp(mApp);
             m_entityMap.emplace(service_entity.name(), std::move(service_entity));
         }
 
@@ -283,8 +280,7 @@ namespace mb {
 
         // Create entity and cache it, bound to this application. Unified entity
         // routes resolve entities dynamically.
-        auto entity = Entity(entity_schema);
-        entity.setApp(mApp);
+        auto entity = Entity(mApp, entity_schema);
         m_entityMap.insert_or_assign(entity_name, std::move(entity));
     }
 

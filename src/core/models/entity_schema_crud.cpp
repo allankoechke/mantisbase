@@ -88,7 +88,7 @@ namespace mb {
             *sql << new_table.toDDL();
 
             // Add hooks for this table
-            mb::RealtimeDB::addDbHooks(Entity{schema}, sql);
+            mb::RealtimeDB::addDbHooks(Entity{new_table.app(), schema}, sql);
 
             // Commit changes
             tr.commit();
@@ -140,10 +140,8 @@ namespace mb {
                 throw MantisException(404, "Entity resource for given name/id was not found!");
             }
 
-            EntitySchema old_entity = EntitySchema::fromSchema(old_schema); // Old table data
-            old_entity.setApp(app);
-            EntitySchema new_entity{old_entity}; // New table data
-            new_entity.setApp(app);
+            EntitySchema old_entity = EntitySchema::fromSchema(app, old_schema); // Old table data
+            EntitySchema new_entity{old_entity}; // New table data (copy carries the app)
             assert(old_entity == new_entity); // These two objects should be same
             new_entity.updateWith(new_schema);
 

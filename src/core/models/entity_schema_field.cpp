@@ -2,20 +2,8 @@
 #include "../../../include/mantisbase/utils/utils.h"
 #include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/soci_wrappers.h"
-#include "../../../include/mantisbase/mantisbase.h"
 
 namespace mb {
-    EntitySchemaField &EntitySchemaField::setApp(const MantisBase &app) {
-        m_app = &app;
-        return *this;
-    }
-
-    const MantisBase &EntitySchemaField::app() const {
-        // TODO(di): drop the singleton fallback once every construction site
-        // stamps the app (phase 4).
-        return m_app ? *m_app : MantisBase::instance();
-    }
-
     EntitySchemaField::EntitySchemaField(std::string field_name, std::string field_type)
         : m_name(std::move(field_name)),
           m_type(std::move(field_type)),
@@ -229,14 +217,9 @@ namespace mb {
             throw MantisException(400, "Foreign key reference table cannot be empty!");
         }
 
-        // Validate entity exists which is being referenced
-        if (!app().hasEntity(table)) {
-            throw MantisException(400, std::format("Entity `{}` being referenced was not found!", table));
-        }
-
-        if (const auto entity = app().entity(table); !entity.hasField(column.empty() ? "id" : column)) {
-            throw MantisException(400, std::format("Invalid entity column name `{}` in the entity.", column));
-        }
+        // Note: existence of the referenced entity/column is validated at the
+        // schema level (EntitySchema::validate), which has the owning app. A
+        // field is a pure value type and does not reach into app state here.
 
         // Validate update/delete policies
         const std::vector<std::string> validPolicies = {
