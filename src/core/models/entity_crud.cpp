@@ -14,7 +14,7 @@ namespace mb {
 
     Record Entity::create(const json &record, const json &opts) const {
         // Database session & transaction instance
-        auto sql = MantisBase::instance().db().session();
+        auto sql = app().db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -79,7 +79,7 @@ namespace mb {
             tr.commit();
 
             // Wake the realtime worker to deliver the change immediately.
-            MantisBase::instance().rt().notifyChange();
+            app().rt().notifyChange();
 
             auto added_row = sociRow2Json(r, fields());
 
@@ -94,7 +94,7 @@ namespace mb {
     }
 
     Records Entity::list(const json &opts) const {
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app().db().session();
         int page = 1;
         int per_page = 100;
 
@@ -142,7 +142,7 @@ namespace mb {
 
     std::optional<Record> Entity::read(const std::string &id, const json &opts) const {
         // Get a soci::session from the pool
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app().db().session();
 
         soci::row r; // To hold read data
         *sql << std::format("SELECT * FROM {} WHERE id = :id", sqlIdentifier(name())), soci::use(id), soci::into(r);
@@ -167,7 +167,7 @@ namespace mb {
 
     Record Entity::update(const std::string &id, const json &data, const json &opts) const {
         // Database session & transaction instance
-        auto sql = MantisBase::instance().db().session();
+        auto sql = app().db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -297,7 +297,7 @@ namespace mb {
             tr.commit();
 
             // Wake the realtime worker to deliver the change immediately.
-            MantisBase::instance().rt().notifyChange();
+            app().rt().notifyChange();
 
             // Delete files, if any were removed ...
             Files::removeFiles(name(), files_to_delete);
@@ -319,7 +319,7 @@ namespace mb {
         if (type() == "view")
             throw std::invalid_argument("Remove is not implemented for Entity of `view` type!");
 
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app().db().session();
         soci::transaction tr(*sql);
 
         // Check if item exists of given id
@@ -336,7 +336,7 @@ namespace mb {
         tr.commit();
 
         // Wake the realtime worker to deliver the change immediately.
-        MantisBase::instance().rt().notifyChange();
+        app().rt().notifyChange();
 
         // Parse row to JSON
         const auto record = sociRow2Json(row, fields());
@@ -370,7 +370,7 @@ namespace mb {
     int Entity::countRecords() const {
         // TODO add record filtering ...
         try {
-            const auto sql = MantisBase::instance().db().session();
+            const auto sql = app().db().session();
             int count = 0;
             *sql << std::format("SELECT COUNT(id) FROM {}", sqlIdentifier(name())), soci::into(count);
             return count;
@@ -381,7 +381,7 @@ namespace mb {
 
     bool Entity::isEmpty() const {
         try {
-            const auto &sql = MantisBase::instance().db().session();
+            const auto &sql = app().db().session();
             int dummy = 0;
             soci::indicator ind = soci::i_null;
             *sql << std::format("SELECT 1 FROM {} LIMIT 1", sqlIdentifier(name())),
@@ -394,7 +394,7 @@ namespace mb {
 
     std::optional<json> Entity::queryFromCols(const std::string &value, const std::vector<std::string> &columns) const {
         // Get a session object
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app().db().session();
 
         // Validate all column names against entity schema
         std::vector<std::string> valid_columns;
@@ -437,7 +437,7 @@ namespace mb {
     bool Entity::recordExists(const std::string &id) const {
         try {
             std::string _nid;
-            const auto sql = MantisBase::instance().db().session();
+            const auto sql = app().db().session();
             *sql << std::format("SELECT id FROM {} WHERE id = :id LIMIT 1", sqlIdentifier(name())),
                     soci::use(id), soci::into(_nid);
             return sql->got_data();

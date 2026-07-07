@@ -96,7 +96,7 @@ namespace mb {
                 }
 
                 const auto entity_name = trim(req.getPathParamValue("entity_name"));
-                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto entity = req.app().entity(entity_name);
 
                 // Get user for given identity
                 auto opt_user = entity.queryFromCols(body["identity"].get<std::string>(), {"id", "email"});
@@ -194,7 +194,7 @@ namespace mb {
                 }
 
                 // Check that entity exists in database, throws an error if missing!
-                const auto entity = MantisBase::instance().entity("mb_admins");
+                const auto entity = req.app().entity("mb_admins");
 
                 // Get user for given identity
                 auto opt_user = entity.queryFromCols(
@@ -367,8 +367,8 @@ namespace mb {
                 }
 
                 // Check token table and user ...
-                const auto entity = MantisBase::instance().entity("mb_service_acc");
-                const auto admin_entity = MantisBase::instance().entity("mb_admins");
+                const auto entity = req.app().entity("mb_service_acc");
+                const auto admin_entity = req.app().entity("mb_admins");
 
                 const auto &[body, err] = req.getBodyAsJson();
 

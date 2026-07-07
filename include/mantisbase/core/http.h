@@ -18,6 +18,8 @@
 #include <utility>
 
 namespace mb {
+    class MantisBase; // forward declaration; MantisRequest holds a reference to it
+
 #ifdef MB_SCRIPTING_ENABLED
     class DuktapeImpl {
     public:
@@ -47,6 +49,11 @@ namespace mb {
         /// handler), so the body is parsed once and reused.
         mutable std::optional<std::pair<nlohmann::json, std::string>> m_bodyJsonCache;
 
+        /// Owning application, injected by the Router when the request is
+        /// wrapped. Request-path code reaches shared services (db, router,
+        /// realtime, config) via app() instead of the global singleton.
+        MantisBase &m_app;
+
         const std::string __class_name__ = "mb::MantisRequest";
 
     public:
@@ -59,8 +66,16 @@ namespace mb {
         /**
          * @brief Construct request wrapper.
          * @param _req Reference to httplib::Request object
+         * @param app Owning application (source of shared services). Injected by
+         *        the Router when wrapping the request.
          */
-        explicit MantisRequest(const httplib::Request &_req);
+        MantisRequest(const httplib::Request &_req, MantisBase &app);
+
+        /**
+         * @brief Access the owning application (db, router, realtime, config).
+         * @return Reference to the MantisBase instance handling this request.
+         */
+        [[nodiscard]] MantisBase &app() const { return m_app; }
 
         /**
          * @brief Get HTTP request method (GET, POST, etc.).

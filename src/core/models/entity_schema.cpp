@@ -442,8 +442,21 @@ namespace mb {
         return j;
     }
 
+    EntitySchema &EntitySchema::setApp(const MantisBase &app) {
+        m_app = &app;
+        // Propagate to owned fields so their FK validation resolves the same app.
+        for (auto &field: m_fields) field.setApp(app);
+        return *this;
+    }
+
+    const MantisBase &EntitySchema::app() const {
+        // TODO(di): drop the singleton fallback once every construction site
+        // stamps the app (phase 4).
+        return m_app ? *m_app : MantisBase::instance();
+    }
+
     std::string EntitySchema::toDDL() const {
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app().db().session();
         const auto db_type = sql->get_backend()->get_backend_name();
 
         std::ostringstream ddl;

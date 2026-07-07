@@ -13,6 +13,8 @@
 
 namespace mb
 {
+    KeyValStore::KeyValStore(MantisBase &app) : mApp(app) {}
+
     bool KeyValStore::setupRoutes()
     {
         try
@@ -31,7 +33,7 @@ namespace mb
 
     void KeyValStore::migrate()
     {
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = mApp.db().session();
 
         // Check if we have settings data already, if not so, add base settings
         json settings;
@@ -136,7 +138,7 @@ namespace mb
         // the session context, queried by:
         //  ` ctx.get<json>("auth").value("id", ""); // returns the user ID
         //  ` ctx.get<json>("auth").value("name", ""); // returns the user's name
-        auto sql = MantisBase::instance().db().session();
+        auto sql = mApp.db().session();
         soci::row r;
         std::string query = "SELECT * FROM mb_admins WHERE id = :id LIMIT 1";
         *sql << query, soci::use(_id), soci::into(r);
@@ -179,7 +181,7 @@ namespace mb
     json KeyValStore::initSettingsConfig()
     {
         // Get app session
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = mApp.db().session();
 
         // Fetch settings
         json settings;
@@ -199,7 +201,7 @@ namespace mb
         // TRACE_CLASS_METHOD()
 
         // Set up settings get & update endpoints
-        MantisBase::instance().router().Get(
+        mApp.router().Get(
             "/api/v1/sys/settings/config",
             [this](MantisRequest& req, MantisResponse& res)
             {
@@ -218,7 +220,7 @@ namespace mb
                 }
 
                 // Get app session
-                const auto sql = MantisBase::instance().db().session();
+                const auto sql = mApp.db().session();
                 json response; // Response object
 
                 // Fetch settings
@@ -250,7 +252,7 @@ namespace mb
             }, { });
 
         // Update settings config
-        MantisBase::instance().router().Patch(
+        mApp.router().Patch(
             "/api/v1/sys/settings/config",
             [this](MantisRequest& req, MantisResponse& res)
             {
@@ -272,7 +274,7 @@ namespace mb
                 }
 
                 // Get app session
-                const auto sql = MantisBase::instance().db().session();
+                const auto sql = mApp.db().session();
 
                 // Create base data before we update.
                 if (m_configs.empty()) migrate();

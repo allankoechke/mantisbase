@@ -4,8 +4,8 @@
 #define __file__ "duktape_response_wrapper.cpp"
 
 namespace mb {
-MantisRequest::MantisRequest(const httplib::Request &_req)
-    : m_req(_req), m_store(ContextStore{}) {}
+MantisRequest::MantisRequest(const httplib::Request &_req, MantisBase &app)
+    : m_req(_req), m_store(ContextStore{}), m_app(app) {}
 
 std::string MantisRequest::getMethod() const { return m_req.method; }
 

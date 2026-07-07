@@ -76,6 +76,10 @@ namespace mb {
 
         // logEntry::trace("MantisBase Config: {}", config.dump());
 
+        // Start from a clean slate: on a create() -> close() -> create() cycle
+        // (e.g. across test runs in one process) the arg vector would otherwise
+        // accumulate the previous run's arguments.
+        app.m_cmdArgs.clear();
         app.m_cmdArgs.emplace_back("mantisbase");
 
         if (config.contains("database") || config.contains("db")) {
@@ -221,10 +225,10 @@ namespace mb {
             quit(-1, "Failed to create database directories!");
 
         // Create instance objects
-        m_database = std::make_unique<Database>(); // depends on log()
-        m_realtime = std::make_unique<RealtimeDB>(); // depends on db()
-        m_router = std::make_unique<Router>(); // depends on db() & http()
-        m_kvStore = std::make_unique<KeyValStore>(); // depends on db(), router() & http()
+        m_database = std::make_unique<Database>(*this); // depends on log()
+        m_realtime = std::make_unique<RealtimeDB>(*this); // depends on db()
+        m_router = std::make_unique<Router>(*this); // depends on db() & http()
+        m_kvStore = std::make_unique<KeyValStore>(*this); // depends on db(), router() & http()
         m_opts = std::make_unique<argparse::ArgumentParser>();
     }
 

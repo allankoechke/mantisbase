@@ -51,9 +51,8 @@ namespace mb {
      */
     class RealtimeDB {
     public:
-        RealtimeDB();
-
-        ~RealtimeDB() { std::cout << "RealtimeDB Des()" << std::endl; }
+        /** @param app Owning application (used for db access/config). Stored by reference. */
+        explicit RealtimeDB(const MantisBase &app);
 
         /** Initialize realtime for the current database backend. Must be called after DB is ready. */
         [[nodiscard]] bool init() const;
@@ -101,7 +100,8 @@ namespace mb {
     /** Internal worker that polls (SQLite) or listens (PostgreSQL) for DB changes. */
     class RtDbWorker {
     public:
-        RtDbWorker();
+        /** @param app Owning application (used for db access/config). Stored by reference. */
+        explicit RtDbWorker(const MantisBase &app);
 
         ~RtDbWorker();
 
@@ -131,6 +131,7 @@ namespace mb {
 
         void pruneChangeLog(int up_to_id); // Delete consumed rows from mb_change_log (SQLite)
 
+        const MantisBase &mApp; // Owning application (injected)
         int last_id = -1; // Last db ID to be queried, only query newer than this
         int m_lastPrunedId = 0; // Highest mb_change_log id already pruned
         std::string last_ts = getCurrentTimestampUTC(); // When last is not set, use timestamp value in UTC

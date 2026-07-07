@@ -6,8 +6,8 @@
 #include <soci/soci.h>
 #include "soci/sqlite3/soci-sqlite3.h"
 
-mb::RealtimeDB::RealtimeDB()
-    : mApp(mb::MantisBase::instance()) {
+mb::RealtimeDB::RealtimeDB(const MantisBase &app)
+    : mApp(app) {
 }
 
 bool mb::RealtimeDB::init() const {
@@ -192,7 +192,7 @@ void mb::RealtimeDB::dropDbHooks(const std::string &entity_name, const std::shar
 
 void mb::RealtimeDB::runWorker(const RtCallback &callback) {
     if (!m_rtDbWorker) {
-        m_rtDbWorker = std::make_unique<RtDbWorker>();
+        m_rtDbWorker = std::make_unique<RtDbWorker>(mApp);
         m_rtDbWorker->addCallback(callback);
     }
 }
@@ -277,9 +277,9 @@ std::string mb::RealtimeDB::buildTriggerObject(const Entity &entity, const std::
     return ss.str();
 }
 
-mb::RtDbWorker::RtDbWorker()
-    : m_running(true) {
-    m_db_type = MantisBase::instance().dbType();
+mb::RtDbWorker::RtDbWorker(const MantisBase &app)
+    : mApp(app), m_running(true) {
+    m_db_type = mApp.dbType();
     if (m_db_type == "sqlite3") {
         if (!initSQLite())
             throw MantisException(500, "Worker: SQLite db instantiation failed!");
@@ -464,7 +464,7 @@ void mb::RtDbWorker::pruneChangeLog(const int up_to_id) {
     // session from the main pool for the delete. The pk index on `id` makes
     // this a cheap range delete, and WAL lets it run alongside the poller.
     try {
-        const auto write_sql = MantisBase::instance().db().session();
+        const auto write_sql = mApp.db().session();
         *write_sql << "DELETE FROM mb_change_log WHERE id <= :id", soci::use(up_to_id);
         m_lastPrunedId = up_to_id;
     } catch (const std::exception &e) {
@@ -556,7 +556,7 @@ void mb::RtDbWorker::runPostgreSQL() {
 
 bool mb::RtDbWorker::initSQLite() {
     // Connect to main db
-    auto audit_db_path = joinPaths(MantisBase::instance().dataDir(), "mantis.db").string();
+    auto audit_db_path = joinPaths(mApp.dataDir(), "mantis.db").string();
 
     try {
         // Read-only poller connection. Private cache + WAL lets it read the
@@ -584,7 +584,7 @@ bool mb::RtDbWorker::initSQLite() {
 
 #if MB_HAS_POSTGRESQL
 bool mb::RtDbWorker::initPSQL() {
-    const auto &conn_str = MantisBase::instance().db().connectionStr();
+    const auto &conn_str = mApp.db().connectionStr();
     // Create PSQL object ...
     psql = std::unique_ptr<PGconn, decltype(&PQfinish)>(PQconnectdb(conn_str.c_str()), &PQfinish);
 

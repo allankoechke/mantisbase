@@ -267,14 +267,15 @@ namespace mb {
          * @param opts Optional parameters (pagination, etc.)
          * @return JSON array of table schemas
          */
-        static nlohmann::json listTables(const nlohmann::json &opts = nlohmann::json::object());
+        static nlohmann::json listTables(const MantisBase &app, const nlohmann::json &opts = nlohmann::json::object());
 
         /**
          * @brief Get table schema by ID from database.
+         * @param app Owning application (db access).
          * @param table_id Table identifier
          * @return JSON schema object
          */
-        static nlohmann::json getTable(const std::string &table_id);
+        static nlohmann::json getTable(const MantisBase &app, const std::string &table_id);
 
         /**
          * @brief Create table in database from schema.
@@ -289,7 +290,7 @@ namespace mb {
          * @param new_schema Updated schema JSON
          * @return JSON object with updated table data
          */
-        static nlohmann::json updateTable(const std::string &table_id, const nlohmann::json &new_schema);
+        static nlohmann::json updateTable(const MantisBase &app, const std::string &table_id, const nlohmann::json &new_schema);
 
         /**
          * @brief Drop table from database.
@@ -301,14 +302,14 @@ namespace mb {
          * @brief Drop table by ID from database.
          * @param table_id Table identifier to drop
          */
-        static void dropTable(const std::string &table_id);
+        static void dropTable(const MantisBase &app, const std::string &table_id);
 
         /**
          * @brief Check if table exists by name.
          * @param table_name Table name to check
          * @return true if table exists
          */
-        static bool tableExists(const std::string &table_name);
+        static bool tableExists(const MantisBase &app, const std::string &table_name);
 
         /**
          * @brief Check if table exists (by schema name).
@@ -352,10 +353,25 @@ namespace mb {
         static const std::vector<EntitySchemaField> &defaultBaseFieldsSchema();
         static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
 
+        /**
+         * @brief Bind this schema (and its fields) to the owning application.
+         *
+         * Used so schema DDL/validation can reach db/entity services without the
+         * global singleton. Returns *this for chaining.
+         */
+        EntitySchema &setApp(const MantisBase &app);
+
     private:
         static std::string getFieldType(const std::string &type, std::shared_ptr<soci::session> sql);
 
         void addFieldsIfNotExist(const std::string &type);
+
+        /**
+         * @brief Owning application. During the DI migration this falls back to
+         *        MantisBase::instance() when unbound; the fallback is removed
+         *        once all construction sites stamp the app (phase 4).
+         */
+        [[nodiscard]] const MantisBase &app() const;
 
         std::string m_name;
         std::string m_type;
@@ -364,6 +380,7 @@ namespace mb {
         bool m_hasApi = true;
         std::vector<EntitySchemaField> m_fields;
         AccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
+        const MantisBase *m_app = nullptr; ///< Non-owning; set via setApp()
     };
 } // mb
 

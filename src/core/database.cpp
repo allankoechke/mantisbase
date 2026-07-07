@@ -14,7 +14,7 @@
 #endif
 
 namespace mb {
-    Database::Database() : m_connPool(nullptr), mbApp(MantisBase::instance()) {
+    Database::Database(const MantisBase &app) : m_connPool(nullptr), mbApp(app) {
     }
 
     Database::~Database() {
@@ -84,7 +84,7 @@ namespace mb {
                     sql.set_logger(new MantisLoggerImpl()); // Set custom query logger
 
                     // Log SQL insert values in DevMode only!
-                    if (MantisBase::instance().isDevMode())
+                    if (mbApp.isDevMode())
                         sql.set_query_context_logging_mode(soci::log_context::always);
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
@@ -110,7 +110,7 @@ namespace mb {
             return false;
         }
 
-        if (MantisBase::instance().dbType() == "sqlite3") writeCheckpoint();
+        if (mbApp.dbType() == "sqlite3") writeCheckpoint();
 
         return true;
     }

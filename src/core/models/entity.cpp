@@ -73,6 +73,18 @@ namespace mb {
         }
     }
 
+    Entity &Entity::setApp(const MantisBase &app) {
+        m_app = &app;
+        return *this;
+    }
+
+    const MantisBase &Entity::app() const {
+        if (!m_app)
+            throw MantisException(500, "Entity is not bound to an application; "
+                                       "obtain entities via MantisBase::entity().");
+        return *m_app;
+    }
+
     std::string Entity::id() const {
         return m_schema->at("id").get<std::string>();
     }

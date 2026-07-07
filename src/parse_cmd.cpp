@@ -96,8 +96,8 @@ namespace mb {
             return EntitySchema::genEntityId(entity_name_or_id);
         }
 
-        void printSchemaList() {
-            const auto tables = EntitySchema::listTables();
+        void printSchemaList(MantisBase &app) {
+            const auto tables = EntitySchema::listTables(app);
             std::cout << std::left
                       << std::setw(24) << "NAME"
                       << std::setw(10) << "TYPE"
@@ -140,7 +140,8 @@ namespace mb {
             for (const auto &file: files) {
                 LogOrigin::info("Migrations", fmt::format("Applying migration `{}`", file.filename().string()));
                 const auto body = loadJsonInput(file.string());
-                const auto eSchema = EntitySchema::fromSchema(body);
+                auto eSchema = EntitySchema::fromSchema(body);
+                eSchema.setApp(app);
                 if (const auto err = eSchema.validate(); err.has_value())
                     throw MantisException(400, err.value());
 
@@ -448,14 +449,14 @@ namespace mb {
 
             try {
                 if (do_ls) {
-                    printSchemaList();
+                    printSchemaList(*this);
                     quit(0, "");
                 }
 
                 if (do_rm) {
                     const auto entity_name = schema_command.get<std::string>("--rm");
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
-                    EntitySchema::dropTable(schema_id);
+                    EntitySchema::dropTable(*this, schema_id);
                     LogOrigin::entitySchemaInfo("Schema Removed",
                                                 fmt::format("Removed schema `{}`", entity_name));
                     quit(0, "");
@@ -463,7 +464,8 @@ namespace mb {
 
                 if (do_add) {
                     const auto body = loadJsonInput(schema_command.get<std::string>("--add"));
-                    const auto eSchema = EntitySchema::fromSchema(body);
+                    auto eSchema = EntitySchema::fromSchema(body);
+                    eSchema.setApp(*this);
                     if (const auto err = eSchema.validate(); err.has_value())
                         throw MantisException(400, err.value());
 
@@ -477,7 +479,7 @@ namespace mb {
                     const auto entity_name = parts.at(0);
                     const auto body = loadJsonInput(parts.at(1));
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
-                    const auto updated = EntitySchema::updateTable(schema_id, body);
+                    const auto updated = EntitySchema::updateTable(*this, schema_id, body);
                     std::cout << updated.dump(2) << std::endl;
                     quit(0, "");
                 }

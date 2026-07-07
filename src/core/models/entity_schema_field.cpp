@@ -2,8 +2,20 @@
 #include "../../../include/mantisbase/utils/utils.h"
 #include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/soci_wrappers.h"
+#include "../../../include/mantisbase/mantisbase.h"
 
 namespace mb {
+    EntitySchemaField &EntitySchemaField::setApp(const MantisBase &app) {
+        m_app = &app;
+        return *this;
+    }
+
+    const MantisBase &EntitySchemaField::app() const {
+        // TODO(di): drop the singleton fallback once every construction site
+        // stamps the app (phase 4).
+        return m_app ? *m_app : MantisBase::instance();
+    }
+
     EntitySchemaField::EntitySchemaField(std::string field_name, std::string field_type)
         : m_name(std::move(field_name)),
           m_type(std::move(field_type)),
@@ -218,11 +230,11 @@ namespace mb {
         }
 
         // Validate entity exists which is being referenced
-        if (!MantisBase::instance().hasEntity(table)) {
+        if (!app().hasEntity(table)) {
             throw MantisException(400, std::format("Entity `{}` being referenced was not found!", table));
         }
 
-        if (const auto entity = MantisBase::instance().entity(table); !entity.hasField(column.empty() ? "id" : column)) {
+        if (const auto entity = app().entity(table); !entity.hasField(column.empty() ? "id" : column)) {
             throw MantisException(400, std::format("Invalid entity column name `{}` in the entity.", column));
         }
 

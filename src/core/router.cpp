@@ -29,8 +29,8 @@
 CMRC_DECLARE(mantis);
 
 namespace mb {
-    Router::Router()
-        : mApp(MantisBase::instance()),
+    Router::Router(MantisBase &app)
+        : mApp(app),
           m_sseMgr(std::make_unique<SSEMgr>()) {
         // Size the worker thread pool for long-lived SSE connections.
         //
@@ -109,8 +109,10 @@ namespace mb {
             for (const auto &row: rows) {
                 const auto schema = row.get<nlohmann::json>("schema");
 
-                // Create entity based on the schema
+                // Create entity based on the schema, bound to this application
+                // so its CRUD ops can reach db/realtime without the singleton.
                 Entity entity{schema};
+                entity.setApp(mApp);
 
                 // Store this object to keep alive function pointers
                 // if not, possible access violation error
@@ -122,6 +124,7 @@ namespace mb {
             admin_schema.removeField("name");
             admin_schema.setSystem(true);
             auto admin_entity = admin_schema.toEntity();
+            admin_entity.setApp(mApp);
             m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
 
             // Service Schema [No routes]
@@ -129,6 +132,7 @@ namespace mb {
             service_schema.setHasApi(false);
             service_schema.setSystem(true);
             auto service_entity = service_schema.toEntity();
+            service_entity.setApp(mApp);
             m_entityMap.emplace(service_entity.name(), std::move(service_entity));
         }
 
@@ -158,8 +162,10 @@ namespace mb {
 
             m_sseMgr->start();
 
-            // Launch logging/browser in separate thread after listen starts
-            std::thread notifier([host, port, launch_admin_setup]() -> void {
+            // Launch logging/browser in separate thread after listen starts.
+            // Capture the owning app (this->mApp) so we drive the right instance;
+            // the notifier is joined before listen() returns, so mApp outlives it.
+            std::thread notifier([this, host, port, launch_admin_setup]() -> void {
                 // Wait a little for the server to be fully ready
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 auto endpoint = std::format("{}:{}", host, port);
@@ -176,7 +182,7 @@ namespace mb {
                     endpoint, endpoint);
 
                 if (launch_admin_setup)
-                    MantisBase::instance().openBrowserOnStart();
+                    mApp.openBrowserOnStart();
             });
 
             if (!svr.listen(host, port)) {
@@ -275,8 +281,10 @@ namespace mb {
             throw MantisException(500, "An entity exists with given entity_name");
         }
 
-        // Create entity and cache it. Unified entity routes resolve entities dynamically.
+        // Create entity and cache it, bound to this application. Unified entity
+        // routes resolve entities dynamically.
         auto entity = Entity(entity_schema);
+        entity.setApp(mApp);
         m_entityMap.insert_or_assign(entity_name, std::move(entity));
     }
 
@@ -474,7 +482,7 @@ namespace mb {
             try {
                 TRACE_FUNC(f);
                 // Get log database instance
-                auto &logsDb = MantisBase::instance().logs().logsDb();
+                auto &logsDb = req.app().logs().logsDb();
                 if (!Logger::isDbInitialized) {
                     json response;
                     response["error"] = "Log database not initialized";

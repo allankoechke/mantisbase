@@ -63,7 +63,7 @@ namespace mb {
 
     void Router::globalRouteHandler(const std::string &method, const std::string &path) {
         const std::function handlerFunc = [this, method, path](const httplib::Request &req, httplib::Response &res) {
-            MantisRequest ma_req{req};
+            MantisRequest ma_req{req, mApp};
             MantisResponse ma_res{res};
 
             const auto route = m_routeRegistry.find(method, path);
@@ -114,7 +114,7 @@ namespace mb {
     void Router::globalRouteHandlerWithReader(const std::string &method, const std::string &path) {
         const std::function handlerFuncWithContentReader = [this, method, path](
             const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &cr) {
-            MantisRequest ma_req{req};
+            MantisRequest ma_req{req, mApp};
             MantisResponse ma_res{res};
             MantisContentReader ma_cr{cr, ma_req};
 

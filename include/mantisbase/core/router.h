@@ -39,9 +39,11 @@ namespace mb {
     class Router {
     public:
         /**
-         * @brief Construct router instance.
+         * @brief Construct router instance bound to an application.
+         * @param app Owning application; stored by reference and injected into
+         *        each wrapped MantisRequest. Must outlive this Router.
          */
-        Router();
+        explicit Router(MantisBase &app);
 
         /**
          * @brief Destructor.

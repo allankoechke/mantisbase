@@ -18,6 +18,8 @@
 #include "access_rules.h"
 
 namespace mb {
+    class MantisBase; // forward declaration; Entity holds a non-owning pointer to it
+
     using Record = nlohmann::json;  ///< Single database record as JSON object
     using Records = std::vector<Record>;  ///< Collection of database records
 
@@ -56,6 +58,18 @@ namespace mb {
          * @param type Entity type ("base", "auth", or "view")
          */
         explicit Entity(const std::string &name, const std::string& type);
+
+        /**
+         * @brief Bind this entity to its owning application.
+         *
+         * The Router stamps the app onto entities it caches so that CRUD
+         * operations can reach the database/realtime services without the
+         * global singleton. Copies carry the binding. Returns *this for
+         * chaining.
+         *
+         * @param app Owning application (non-owning; must outlive the entity).
+         */
+        Entity &setApp(const MantisBase &app);
 
         // --------------- DB TABLE OPS ------------------ //
         /**
@@ -238,12 +252,23 @@ namespace mb {
                                                         const std::vector<std::string> &columns) const;
 
     private:
+        /**
+         * @brief Owning application for DB/realtime access, throwing if unbound.
+         * @throws MantisException(500) if the entity was not stamped with an app
+         *         (only cached entities obtained via MantisBase::entity() are).
+         */
+        [[nodiscard]] const MantisBase &app() const;
+
         /// Immutable schema shared across copies. An Entity is never mutated
         /// after construction, so copies (returned from the cache on every
         /// request) only bump a refcount instead of deep-copying the JSON, and
         /// the pointed-to schema is safe to read concurrently from multiple
         /// threads.
         std::shared_ptr<const nlohmann::json> m_schema;
+
+        /// Non-owning pointer to the owning application, set via setApp() by the
+        /// Router for cached entities. Null for entities built only for DDL.
+        const MantisBase *m_app = nullptr;
     };
 } // mb
 
