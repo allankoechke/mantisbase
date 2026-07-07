@@ -87,7 +87,8 @@ void mb::RealtimeDB::addDbHooks(const Entity &entity) const {
 void mb::RealtimeDB::addDbHooks(const Entity &entity, const std::shared_ptr<soci::session> &sess) {
     logEntry::debug("Realtime Mgr", std::format("Creating Db Hooks on `{}`", entity.name()));
 
-    const auto entity_name = entity.name();
+    // Validate up front: the entity name is interpolated into trigger DDL below.
+    const auto entity_name = sqlIdentifier(entity.name());
 
     // First drop any existing hooks
     dropDbHooks(entity_name, sess);
@@ -253,7 +254,8 @@ std::string mb::RealtimeDB::buildTriggerObject(const Entity &entity, const std::
     ss << "json_object(";
     int i = 0;
     for (const auto &field: entity.fields()) {
-        auto name = field["name"].get<std::string>();
+        // Field name is interpolated into trigger DDL, so validate it.
+        auto name = sqlIdentifier(field["name"].get<std::string>());
         ss << "'" << name << "', " << action << "." << name;
         if (i < entity.fields().size() - 1) {
             ss << ", ";

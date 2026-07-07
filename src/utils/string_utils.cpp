@@ -1,9 +1,21 @@
 #include "../../include/mantisbase/utils/utils.h"
+#include "../../include/mantisbase/core/exceptions.h"
 
 #include <algorithm>
+#include <cctype>
 #include <httplib.h>
 
 namespace mb {
+    std::string sqlIdentifier(const std::string &ident) {
+        const bool ok = !ident.empty() && ident.length() <= 64 &&
+                        std::ranges::all_of(ident, [](const unsigned char c) {
+                            return std::isalnum(c) || c == '_';
+                        });
+        if (!ok)
+            throw MantisException(400, std::format("Invalid SQL identifier `{}`", ident));
+        return ident;
+    }
+
     std::optional<json> tryParseJsonStr(const std::string &json_str, std::optional<json> default_value) {
         try {
             if (trim(json_str).empty())

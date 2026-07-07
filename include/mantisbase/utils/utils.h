@@ -120,6 +120,23 @@ namespace mb {
     std::string trim(const std::string &s);
 
     /**
+     * @brief Validate a string as a safe SQL identifier and return it unchanged.
+     *
+     * This is the single choke point that every query builder must route
+     * interpolated identifiers (table and column names) through, since those
+     * cannot be passed as bound parameters. Only 1..64 characters of
+     * [A-Za-z0-9_] are accepted, which makes identifier-based SQL injection
+     * impossible (no quotes, whitespace or semicolons can appear). Column and
+     * row *values* must still be bound via soci::use — this is only for
+     * identifiers.
+     *
+     * @param ident Candidate identifier.
+     * @return The identifier unchanged if valid.
+     * @throws MantisException(400) if the identifier is not a valid SQL identifier.
+     */
+    std::string sqlIdentifier(const std::string &ident);
+
+    /**
      * @brief Attempt to parse a JSON string.
      * @param json_str JSON string to parse
      * @param default_value Optional default value if conversion fails
