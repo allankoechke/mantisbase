@@ -35,6 +35,8 @@ namespace mb {
     class SSESession {
         std::string m_clientID;
         std::set<std::string> m_topics;
+        mutable std::mutex m_topicsMutex; // guards m_topics (read by the broadcast
+                                          // thread, written by request threads)
 
         std::mutex m_queueMutex;
         std::condition_variable m_queueCV;
@@ -76,7 +78,7 @@ namespace mb {
 
         const std::string &getClientID() const;
 
-        const std::set<std::string> &getTopics() const;
+        std::set<std::string> getTopics() const;
 
         void setTopics(const std::set<std::string> &topics);
     };

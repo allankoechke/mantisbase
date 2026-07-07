@@ -1,4 +1,7 @@
 #include <utility>
+#include <vector>
+#include <memory>
+#include <ranges>
 
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/mantisbase.h"
@@ -83,9 +86,22 @@ namespace mb {
     // Broadcast change event to interested sessions
     void SSEMgr::broadcastChange(const json &change_event) {
         try {
-            std::lock_guard lock(m_sessions_mutex);
+            // Snapshot the live sessions under the lock, then do the fan-out
+            // (isInterestedIn / formatEvent / queueEvent) outside it. Holding
+            // m_sessions_mutex across the whole loop serialized broadcasts
+            // against createSession/removeSession/cleanup and every per-session
+            // format+queue. Sessions are shared_ptr, so a snapshotted session
+            // stays alive even if removed concurrently, and each session
+            // synchronizes its own topics and event queue internally.
+            std::vector<std::shared_ptr<SSESession>> sessions;
+            {
+                std::lock_guard lock(m_sessions_mutex);
+                sessions.reserve(m_sessions.size());
+                for (const auto &session: m_sessions | std::views::values)
+                    sessions.push_back(session);
+            }
 
-            for (const auto &session: m_sessions | std::views::values) {
+            for (const auto &session: sessions) {
                 if (session->isInterestedIn(change_event)) {
                     json formatted = session->formatEvent(change_event);
                     session->queueEvent("change", formatted);

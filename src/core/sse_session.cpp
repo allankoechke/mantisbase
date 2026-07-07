@@ -56,6 +56,8 @@ bool mb::SSESession::isInterestedIn(const json &change_event) const {
     const std::string event_table = change_event["entity"].get<std::string>();
     const std::string event_row_id = change_event["row_id"].get<std::string>();
 
+    std::lock_guard<std::mutex> lock(m_topicsMutex);
+
     // Check table subscription
     if (m_topics.contains(event_table)) {
         return true;
@@ -87,8 +89,11 @@ mb::json mb::SSESession::formatEvent(const json &change_event) const {
     std::string matched_topic = table;
     std::string specific_topic = table + ":" + row_id;
 
-    if (m_topics.contains(specific_topic)) {
-        matched_topic = specific_topic;
+    {
+        std::lock_guard<std::mutex> lock(m_topicsMutex);
+        if (m_topics.contains(specific_topic)) {
+            matched_topic = specific_topic;
+        }
     }
 
     // Send new data only (minify response)
@@ -109,6 +114,7 @@ void mb::SSESession::updateActivity() {
 }
 
 void mb::SSESession::updateTopics(const std::set<std::string> &topics) {
+    std::lock_guard<std::mutex> lock(m_topicsMutex);
     m_topics = topics;
 }
 
@@ -123,8 +129,12 @@ bool mb::SSESession::isActive() const { return m_isActive; }
 
 const std::string &mb::SSESession::getClientID() const { return m_clientID; }
 
-const std::set<std::string> &mb::SSESession::getTopics() const { return m_topics; }
+std::set<std::string> mb::SSESession::getTopics() const {
+    std::lock_guard<std::mutex> lock(m_topicsMutex);
+    return m_topics;
+}
 
 void mb::SSESession::setTopics(const std::set<std::string> &topics) {
+    std::lock_guard<std::mutex> lock(m_topicsMutex);
     m_topics = topics;
 }
