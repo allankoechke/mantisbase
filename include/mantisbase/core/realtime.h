@@ -119,7 +119,10 @@ namespace mb {
         bool initPSQL();
 #endif
 
+        void pruneChangeLog(int up_to_id); // Delete consumed rows from mb_change_log (SQLite)
+
         int last_id = -1; // Last db ID to be queried, only query newer than this
+        int m_lastPrunedId = 0; // Highest mb_change_log id already pruned
         std::string last_ts = getCurrentTimestampUTC(); // When last is not set, use timestamp value in UTC
 
         std::string m_db_type;

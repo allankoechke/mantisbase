@@ -432,9 +432,35 @@ void mb::RtDbWorker::runSQlite() {
             // Call only when we have data
             if (m_callback && !res.empty())
                 m_callback(res);
+
+            // Prune consumed rows to keep mb_change_log bounded. This worker is
+            // the sole consumer and does not replay history to new subscribers,
+            // so rows with id <= last_id have already been broadcast and are
+            // safe to delete. Batch the deletes to avoid an extra write on
+            // every poll.
+            constexpr int kPruneThreshold = 500;
+            if (!res.empty() && last_id - m_lastPrunedId >= kPruneThreshold)
+                pruneChangeLog(last_id);
         } catch (std::exception &e) {
             logEntry::critical("RTDb Worker", "Realtime Db Worker Error", e.what());
         }
+    }
+
+    // Best-effort final prune of everything consumed before the worker exits.
+    if (last_id > m_lastPrunedId)
+        pruneChangeLog(last_id);
+}
+
+void mb::RtDbWorker::pruneChangeLog(const int up_to_id) {
+    // The poller connection (sql_ro) is read-only, so acquire a writable
+    // session from the main pool for the delete. The pk index on `id` makes
+    // this a cheap range delete, and WAL lets it run alongside the poller.
+    try {
+        const auto write_sql = MantisBase::instance().db().session();
+        *write_sql << "DELETE FROM mb_change_log WHERE id <= :id", soci::use(up_to_id);
+        m_lastPrunedId = up_to_id;
+    } catch (const std::exception &e) {
+        logEntry::warn("RTDb Worker", "Change log prune failed", e.what());
     }
 }
 
