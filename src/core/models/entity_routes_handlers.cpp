@@ -54,6 +54,13 @@ namespace mb {
                                      ? safe_stoi(req.getQueryParamValue("page_size"), 100)
                                      : 100;
 
+                // Clamp pagination so a single request cannot request an
+                // unbounded page. Keep the echoed metadata consistent with the
+                // values actually used by the query.
+                if (page < 1) page = 1;
+                if (page_size < 1) page_size = 1;
+                if (page_size > MAX_LIST_PAGE_SIZE) page_size = MAX_LIST_PAGE_SIZE;
+
                 bool skip_total_count = req.hasQueryParam("skip_total_count")
                                             ? strToBool(req.getQueryParamValue("skip_total_count"))
                                             : false;

@@ -94,19 +94,30 @@ namespace mb {
         int per_page = 100;
 
         if (opts.contains("pagination") && opts["pagination"].is_object()) {
-            auto &pagination = opts["pagination"];
+            const auto &pagination = opts["pagination"];
 
-            // Extract the page number and page size
-            if (pagination.contains("page_index") && pagination["page_index"].is_number())
-                page = pagination["page_index"].get<int>();
-            if (pagination.contains("per_page") && pagination["per_page"].is_number())
-                per_page = pagination["per_page"].get<int>();
+            // Extract the page number and page size. Keys match the handler and
+            // the HTTP query params (`page` / `page_size`).
+            if (pagination.contains("page") && pagination["page"].is_number())
+                page = pagination["page"].get<int>();
+            if (pagination.contains("page_size") && pagination["page_size"].is_number())
+                per_page = pagination["page_size"].get<int>();
         }
 
-        if (per_page <= 0) throw std::invalid_argument("Page size, `per_page` value must be greater than 0");
+        if (per_page <= 0) throw std::invalid_argument("Page size, `page_size` value must be greater than 0");
         if (page <= 0) throw std::invalid_argument("Page number, `page` value must be greater than 0");
 
-        const auto offset = (page - 1) * per_page;
+        // Bound the page size so a single request cannot force an unbounded
+        // query/allocation (defense in depth; the handler clamps too).
+        if (per_page > MAX_LIST_PAGE_SIZE) {
+            LogOrigin::entityWarn("Page Size Clamped",
+                                  fmt::format("Requested page_size {} exceeds maximum {}; clamping.",
+                                              per_page, MAX_LIST_PAGE_SIZE));
+            per_page = MAX_LIST_PAGE_SIZE;
+        }
+
+        // Compute the offset in 64-bit to avoid int overflow for large page numbers.
+        const long long offset = static_cast<long long>(page - 1) * per_page;
 
         const auto query = "SELECT * FROM " + name() + " ORDER BY created DESC LIMIT :limit OFFSET :offset";
         const soci::rowset rs = (sql->prepare << query, soci::use(per_page), soci::use(offset));

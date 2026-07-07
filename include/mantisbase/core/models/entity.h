@@ -21,6 +21,11 @@ namespace mb {
     using Record = nlohmann::json;  ///< Single database record as JSON object
     using Records = std::vector<Record>;  ///< Collection of database records
 
+    /// Upper bound on the number of records returned by a single list() page.
+    /// Requests larger than this are clamped so one request cannot force an
+    /// unbounded query or response allocation.
+    inline constexpr int MAX_LIST_PAGE_SIZE = 500;
+
     /**
      * @brief Represents a database table/entity with schema and CRUD operations.
      *
