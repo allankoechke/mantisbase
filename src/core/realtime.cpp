@@ -203,6 +203,15 @@ void mb::RealtimeDB::stopWorker() const {
     }
 }
 
+void mb::RealtimeDB::notifyChange() const {
+    // No-op until the worker is started (e.g. during bootstrap or when the
+    // server isn't serving). The worker signals itself; this is the push from
+    // the write path.
+    if (m_rtDbWorker) {
+        m_rtDbWorker->notify();
+    }
+}
+
 #if MB_HAS_POSTGRESQL
 void mb::RealtimeDB::createNotifyFunction(soci::session &sql) {
     sql << R"(
@@ -355,94 +364,83 @@ void mb::RtDbWorker::run() {
 }
 
 void mb::RtDbWorker::runSQlite() {
-    int emptyPollCount = 0;
-    auto sleep_for = std::chrono::milliseconds(500);
+    // Push-based delivery: sleep until the write path signals a change (see
+    // notify()), with a periodic fallback tick as a safety net for writes made
+    // outside the CRUD layer (e.g. scripting or migrations). This replaces the
+    // old adaptive busy-poll (100ms..5s), so idle load is a single query every
+    // few seconds and app-layer writes are delivered with near-zero latency.
+    constexpr auto kFallbackInterval = std::chrono::seconds(2);
+    constexpr int kBatchSize = 100;
+    constexpr int kPruneThreshold = 500;
 
     while (m_running.load()) {
         {
             std::unique_lock lock(mtx);
-            cv.wait_for(lock, sleep_for);
+            cv.wait_for(lock, kFallbackInterval, [this] {
+                return !m_running.load() || m_notified;
+            });
+            m_notified = false;
         }
 
+        if (!m_running.load()) break;
+
+        // Drain all pending change rows before sleeping again, so a burst of
+        // writes is delivered promptly rather than one batch per wake-up.
         try {
-            soci::rowset row_set
-                    = last_id < 0
-                          ? (
-                              sql_ro->prepare <<
-                              "SELECT id, timestamp, type, entity, row_id, old_data, new_data from mb_change_log "
-                              "WHERE timestamp > :ts ORDER BY id ASC LIMIT 100"
-                              , soci::use(last_ts)
-                          )
-                          : (
-                              sql_ro->prepare <<
-                              "SELECT id, timestamp, type, entity, row_id, old_data, new_data from mb_change_log "
-                              "WHERE id > :last_id ORDER BY id ASC LIMIT 100"
-                              , soci::use(last_id)
-                          );
+            while (m_running.load()) {
+                soci::rowset row_set
+                        = last_id < 0
+                              ? (
+                                  sql_ro->prepare <<
+                                  "SELECT id, timestamp, type, entity, row_id, old_data, new_data from mb_change_log "
+                                  "WHERE timestamp > :ts ORDER BY id ASC LIMIT 100"
+                                  , soci::use(last_ts)
+                              )
+                              : (
+                                  sql_ro->prepare <<
+                                  "SELECT id, timestamp, type, entity, row_id, old_data, new_data from mb_change_log "
+                                  "WHERE id > :last_id ORDER BY id ASC LIMIT 100"
+                                  , soci::use(last_id)
+                              );
 
-            json res = json::array();
+                json res = json::array();
 
-            for (const auto &row: row_set) {
-                auto old_data = row.get_indicator(5) == soci::i_null ? "" : row.get<std::string>(5);
-                auto new_data = row.get_indicator(6) == soci::i_null ? "" : row.get<std::string>(6);
+                for (const auto &row: row_set) {
+                    auto old_data = row.get_indicator(5) == soci::i_null ? "" : row.get<std::string>(5);
+                    auto new_data = row.get_indicator(6) == soci::i_null ? "" : row.get<std::string>(6);
 
-                auto od = tryParseJsonStr(old_data, json::object()).value();
-                auto nd = tryParseJsonStr(new_data, json::object()).value();
+                    auto od = tryParseJsonStr(old_data, json::object()).value();
+                    auto nd = tryParseJsonStr(new_data, json::object()).value();
 
-                res.push_back({
-                    {"id", row.get<int>(0)},
-                    {"timestamp", tmToStr(row.get<std::tm>(1))},
-                    {"type", row.get<std::string>(2)},
-                    {"entity", row.get<std::string>(3)},
-                    {"row_id", row.get<std::string>(4)},
-                    {"old_data", od.empty() ? nullptr : od},
-                    {"new_data", nd.empty() ? nullptr : nd},
-                });
-            }
+                    res.push_back({
+                        {"id", row.get<int>(0)},
+                        {"timestamp", tmToStr(row.get<std::tm>(1))},
+                        {"type", row.get<std::string>(2)},
+                        {"entity", row.get<std::string>(3)},
+                        {"row_id", row.get<std::string>(4)},
+                        {"old_data", od.empty() ? nullptr : od},
+                        {"new_data", nd.empty() ? nullptr : nd},
+                    });
+                }
 
-            if (!res.empty()) {
+                if (res.empty()) break; // fully drained
+
                 // Get last element's `id`
                 last_id = res.at(res.size() - 1)["id"].get<int>();
 
-                emptyPollCount = 0;
-                sleep_for = std::chrono::milliseconds(100);
-            } else {
-                emptyPollCount++;
+                if (m_callback)
+                    m_callback(res);
 
-                // Adaptive backoff: slow down when idle
-                if (emptyPollCount > 5) {
-                    sleep_for = std::chrono::milliseconds(100);
-                }
+                // Prune consumed rows to keep mb_change_log bounded. This worker
+                // is the sole consumer and does not replay history to new
+                // subscribers, so rows with id <= last_id have been broadcast
+                // and are safe to delete. Batch the deletes.
+                if (last_id - m_lastPrunedId >= kPruneThreshold)
+                    pruneChangeLog(last_id);
 
-                if (emptyPollCount > 20) {
-                    sleep_for = std::chrono::milliseconds(500);
-                }
-
-                if (emptyPollCount > 50) {
-                    sleep_for = std::chrono::milliseconds(1000);
-                }
-
-                if (emptyPollCount > 100) {
-                    sleep_for = std::chrono::milliseconds(3000);
-                }
-
-                if (emptyPollCount > 300) {
-                    sleep_for = std::chrono::milliseconds(5000);
-                }
+                if (res.size() < static_cast<size_t>(kBatchSize))
+                    break; // partial batch => nothing more to read for now
             }
-
-            // Call only when we have data
-            if (m_callback && !res.empty())
-                m_callback(res);
-
-            // Prune consumed rows to keep mb_change_log bounded. This worker is
-            // the sole consumer and does not replay history to new subscribers,
-            // so rows with id <= last_id have already been broadcast and are
-            // safe to delete. Batch the deletes to avoid an extra write on
-            // every poll.
-            constexpr int kPruneThreshold = 500;
-            if (!res.empty() && last_id - m_lastPrunedId >= kPruneThreshold)
-                pruneChangeLog(last_id);
         } catch (std::exception &e) {
             logEntry::critical("RTDb Worker", "Realtime Db Worker Error", e.what());
         }
@@ -451,6 +449,14 @@ void mb::RtDbWorker::runSQlite() {
     // Best-effort final prune of everything consumed before the worker exits.
     if (last_id > m_lastPrunedId)
         pruneChangeLog(last_id);
+}
+
+void mb::RtDbWorker::notify() {
+    {
+        std::lock_guard lock(mtx);
+        m_notified = true;
+    }
+    cv.notify_one();
 }
 
 void mb::RtDbWorker::pruneChangeLog(const int up_to_id) {

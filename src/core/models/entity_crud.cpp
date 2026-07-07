@@ -4,6 +4,7 @@
 #include "../../../include/mantisbase/utils/utils.h"
 #include "../../../include/mantisbase/utils/uuidv7.h"
 #include "mantisbase/utils/soci_wrappers.h"
+#include "mantisbase/core/realtime.h"
 
 
 namespace mb {
@@ -76,6 +77,9 @@ namespace mb {
             soci::row r;
             *sql << sql_query, soci::use(vals), soci::into(r);
             tr.commit();
+
+            // Wake the realtime worker to deliver the change immediately.
+            MantisBase::instance().rt().notifyChange();
 
             auto added_row = sociRow2Json(r, fields());
 
@@ -292,6 +296,9 @@ namespace mb {
             *sql << sql_query, soci::use(vals), soci::into(r);
             tr.commit();
 
+            // Wake the realtime worker to deliver the change immediately.
+            MantisBase::instance().rt().notifyChange();
+
             // Delete files, if any were removed ...
             Files::removeFiles(name(), files_to_delete);
 
@@ -327,6 +334,9 @@ namespace mb {
         // Remove from DB
         *sql << std::format("DELETE FROM {} WHERE id = :id", sqlIdentifier(name())), soci::use(id);
         tr.commit();
+
+        // Wake the realtime worker to deliver the change immediately.
+        MantisBase::instance().rt().notifyChange();
 
         // Parse row to JSON
         const auto record = sociRow2Json(row, fields());

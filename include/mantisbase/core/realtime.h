@@ -79,6 +79,13 @@ namespace mb {
         /** Stop the realtime worker. */
         void stopWorker() const;
 
+        /**
+         * Wake the worker to drain change events immediately (push, not poll).
+         * Called by the write path after a mutation commits. No-op if the worker
+         * is not running. Thread-safe.
+         */
+        void notifyChange() const;
+
     private:
 #if MB_HAS_POSTGRESQL
         // Create the notification trigger function
@@ -104,6 +111,9 @@ namespace mb {
 
         void stopWorker();
 
+        /** Signal the worker (SQLite) to wake and drain the change log now. */
+        void notify();
+
     private:
         void run();
 
@@ -128,6 +138,7 @@ namespace mb {
         std::string m_db_type;
         RtCallback m_callback;
         std::atomic<bool> m_running;
+        bool m_notified = false; // set by notify(); guarded by mtx
         std::thread th;
         std::mutex mtx;
         std::condition_variable cv;
