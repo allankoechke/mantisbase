@@ -43,7 +43,6 @@ set( MB_SOURCES
         src/mantisbase.cpp
         src/core/database.cpp
         src/core/router.cpp
-        src/core/route_registry.cpp
         src/core/auth.cpp
 
         # Logging
@@ -66,8 +65,12 @@ set( MB_SOURCES
         src/core/files.cpp
         src/core/context_store.cpp
 
-        src/core/http_request.cpp
-        src/core/http_response.cpp
+        src/core/realtime_ws.cpp
+        src/core/oauth.cpp
+        src/core/api_keys.cpp
+        src/core/router_oauth.cpp
+        src/core/router_api_keys.cpp
+        src/utils/crypto_utils.cpp
 
         src/core/models/entity.cpp
         src/core/models/entity_crud.cpp
@@ -88,7 +91,6 @@ set( MB_SOURCES
         src/core/models/access_rules.cpp
 
         src/utils/dukglue_utils_bindings.cpp
-        src/core/http_content_reader.cpp
         # src/core/private-impl/duktape_wrapper.cpp
 
         src/core/exceptions.cpp
@@ -126,8 +128,8 @@ if(MB_SCRIPTING_ENABLED)
     target_compile_definitions(mantisbase PRIVATE MB_SCRIPTING_ENABLED=1)
 endif (MB_SCRIPTING_ENABLED)
 
-# Add httplib
-include(cmake/add-httplib.cmake)
+# Add Drogon HTTP framework
+include(cmake/add-drogon.cmake)
 
 # Add spdlog
 if(MB_SHARED_DEPS)
@@ -169,7 +171,6 @@ include (cmake/add-mbs.cmake)
 target_include_directories(mantisbase
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/httplib-cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/argparse/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/spdlog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/jwt-cpp/include
@@ -202,6 +203,5 @@ configure_file(
 # Link to libs
 target_link_libraries(mantisbase
         PUBLIC
-        httplib::httplib
         spdlog::spdlog
 )
