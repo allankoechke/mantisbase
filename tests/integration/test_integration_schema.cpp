@@ -1,36 +1,33 @@
 #include <gtest/gtest.h>
-#include <httplib.h>
 #include <nlohmann/json.hpp>
 #include "../common/test_environment.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
+#include "../common/test_http_client.h"
 
 class IntegrationSchemaTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Server is already started in main.cpp, just get client
         auto& fixture = MbTestEnv::instance();
-        client = std::make_unique<httplib::Client>(fixture.client());
+        client = std::make_unique<TestHttp::Client>(fixture.client());
 
-        // Create admin token
         adminToken = TestHelpers::createTestAdminToken(*client);
         ASSERT_FALSE(adminToken.empty());
     }
 
     void TearDown() override {
-        // Clean up test schemas
         TestHelpers::cleanupTestEntity(*client, "test_schema", adminToken);
         TestHelpers::cleanupTestEntity(*client, "test_schema_update", adminToken);
         TestHelpers::cleanupTestEntity(*client, "test_schema_delete", adminToken);
         TestHelpers::cleanupTestEntity(*client, "test_schema_rules", adminToken);
     }
 
-    std::unique_ptr<httplib::Client> client;
+    std::unique_ptr<TestHttp::Client> client;
     std::string adminToken;
 };
 
 TEST_F(IntegrationSchemaTest, CreateSchema) {
-    const httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
 
     const nlohmann::json schema = {
         {"name", "test_schema"},
@@ -73,18 +70,16 @@ TEST_F(IntegrationSchemaTest, CreateSchemaRequiresAdmin) {
         {"fields", nlohmann::json::array()}
     };
 
-    // Try without auth
     auto res = client->Post("/api/v1/schemas",
                             schema.dump(), "application/json");
 
     ASSERT_TRUE(res != nullptr);
-    EXPECT_EQ(res->status, 403); // Unauthorized
+    EXPECT_EQ(res->status, 403);
 }
 
 TEST_F(IntegrationSchemaTest, GetSchema) {
-    httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
 
-    // Create schema first
     nlohmann::json schema = {
         {"name", "test_schema"},
         {"type", "base"},
@@ -98,7 +93,6 @@ TEST_F(IntegrationSchemaTest, GetSchema) {
     client->Post("/api/v1/schemas", headers,
                  schema.dump(), "application/json");
 
-    // Get schema
     auto res = client->Get("/api/v1/schemas/test_schema", headers);
 
     ASSERT_TRUE(res != nullptr);
@@ -111,7 +105,7 @@ TEST_F(IntegrationSchemaTest, GetSchema) {
 }
 
 TEST_F(IntegrationSchemaTest, ListSchemas) {
-    httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
 
     auto res = client->Get("/api/v1/schemas", headers);
 
@@ -125,9 +119,8 @@ TEST_F(IntegrationSchemaTest, ListSchemas) {
 }
 
 TEST_F(IntegrationSchemaTest, UpdateSchema) {
-    const httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
 
-    // Create schema first
     const nlohmann::json schema = {
         {"name", "test_schema_update"},
         {"type", "base"},
@@ -144,8 +137,6 @@ TEST_F(IntegrationSchemaTest, UpdateSchema) {
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 201);
 
-
-    // Update schema
     const nlohmann::json updates = {
         {
             "fields", nlohmann::json::array({
@@ -165,9 +156,8 @@ TEST_F(IntegrationSchemaTest, UpdateSchema) {
 }
 
 TEST_F(IntegrationSchemaTest, DeleteSchema) {
-    const httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
 
-    // Create schema first
     const nlohmann::json schema = {
         {"name", "test_schema_delete"},
         {"type", "base"},
@@ -177,19 +167,17 @@ TEST_F(IntegrationSchemaTest, DeleteSchema) {
     client->Post("/api/v1/schemas", headers,
                  schema.dump(), "application/json");
 
-    // Delete schema
     auto res = client->Delete("/api/v1/schemas/test_schema_delete", headers);
 
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 204);
 
-    // Verify it's deleted
     auto getRes = client->Get("/api/v1/schemas/test_schema_delete", headers);
     EXPECT_EQ(getRes->status, 404);
 }
 
 TEST_F(IntegrationSchemaTest, SchemaWithAccessRules) {
-    const httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
 
     const nlohmann::json schema = {
         {"name", "test_schema_rules"},
@@ -199,7 +187,7 @@ TEST_F(IntegrationSchemaTest, SchemaWithAccessRules) {
                 {"list", {{"mode", "public"}}},
                 {"get", {{"mode", "auth"}}},
                 {"add", {{"mode", "custom"}, {"expr", "auth.id != null"}}},
-                {"update", {{"mode", ""}}}, // Admin only
+                {"update", {{"mode", ""}}},
                 {"delete", {{"mode", "custom"}, {"expr", "auth.entity == 'mb_admins'"}}},
             },
         },
@@ -221,6 +209,5 @@ TEST_F(IntegrationSchemaTest, SchemaWithAccessRules) {
     EXPECT_EQ(response["data"]["schema"]["rules"]["add"]["mode"], "custom");
     EXPECT_EQ(response["data"]["schema"]["rules"]["add"]["expr"], "auth.id != null");
 
-    // Cleanup
     client->Delete("/api/v1/schemas/test_schema_rules", headers);
 }

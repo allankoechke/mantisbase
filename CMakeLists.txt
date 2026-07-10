@@ -88,6 +88,9 @@ set( MB_SOURCES
 
         src/core/exceptions.cpp
         src/core/router_httplib_internals.cpp
+        src/core/http_request.cpp
+        src/core/http_response.cpp
+        src/core/http_content_reader.cpp
         src/core/models/access_rules.cpp
 
         src/utils/dukglue_utils_bindings.cpp
