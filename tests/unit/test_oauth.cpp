@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
+#include <soci/soci.h>
 #include "mantisbase/utils/crypto_utils.h"
+#include "mantisbase/core/oauth.h"
 #include "mantisbase/mantisbase.h"
 #include "../common/test_environment.h"
 #include "../common/test_config.h"
@@ -112,6 +114,30 @@ TEST_F(OAuthTestFixture, AES256GCMShortKeyFails) {
     std::string plaintext = "test";
 
     EXPECT_THROW(mb::aes256GcmEncrypt(plaintext, short_key), std::runtime_error);
+}
+
+TEST_F(OAuthTestFixture, HandleCallbackRejectsInvalidState) {
+    EXPECT_THROW(
+        mb::OAuthManager::handleCallback("test_entity", "google", "fake_code", "invalid_state_value"),
+        std::runtime_error
+    );
+}
+
+TEST_F(OAuthTestFixture, HandleCallbackRejectsExpiredState) {
+    auto sql = app->db().session();
+    auto state_id = mb::generateTimeBasedId();
+    std::string state = mb::generateSecureRandom(32);
+    std::string verifier = mb::generatePKCEVerifier();
+
+    // Insert an already-expired state
+    *sql << "INSERT INTO mb_oauth_states (id, state, pkce_verifier, entity_name, provider_id, redirect_uri, expires_at) "
+            "VALUES (:id, :state, :verifier, 'test_entity', 'fake_provider', 'http://localhost/cb', datetime('now', '-1 hour'))",
+        soci::use(state_id), soci::use(state), soci::use(verifier);
+
+    EXPECT_THROW(
+        mb::OAuthManager::handleCallback("test_entity", "google", "fake_code", state),
+        std::runtime_error
+    );
 }
 
 TEST_F(OAuthTestFixture, AES256GCMDifferentCiphertexts) {

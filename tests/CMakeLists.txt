@@ -40,6 +40,7 @@ file(GLOB TEST_FILES
         integration/test_integration_auth.cpp
         integration/test_integration_sse.cpp
         integration/test_integration_ws.cpp
+        integration/test_integration_multi_instance.cpp
 )
 
 add_executable(mantisbase_tests ${TEST_FILES})
@@ -71,3 +72,9 @@ target_link_libraries(mantisbase_tests PRIVATE
 
 include(GoogleTest)
 add_test(NAME all_mantisbase_tests COMMAND mantisbase_tests)
+
+# Benchmarks (optional, off by default)
+option(MB_BUILD_BENCHMARKS "Build MantisBase Benchmarks" OFF)
+if (MB_BUILD_BENCHMARKS)
+    add_subdirectory(bench)
+endif ()
