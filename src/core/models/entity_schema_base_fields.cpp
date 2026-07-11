@@ -214,8 +214,7 @@ namespace mb {
 
     const std::vector<std::string> &EntitySchemaField::defaultEntityFieldTypes() {
         static const std::vector<std::string> _fieldTypes = {
-            "xml", "string", "double", "date", "int8", "uint8",
-            "int16", "uint16", "int32", "uint32", "int64", "uint64",
+            "xml", "string", "double", "date", "int",
             "blob", "json", "bool", "file", "files"
         };
         return _fieldTypes;

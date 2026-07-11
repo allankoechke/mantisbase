@@ -49,6 +49,13 @@ namespace mb {
             setType(field_schema["type"].get<std::string>());
         }
 
+        if (field_schema.contains("precision")) {
+            if (!field_schema["precision"].is_number_integer())
+                throw MantisException(400, "Expected an integer for field property `precision`.");
+
+            setPrecision(field_schema["precision"].get<int>());
+        }
+
         if (field_schema.contains("required")) {
             if (!field_schema["required"].is_boolean())
                 throw MantisException(400, "Expected a bool for field property `required`.");
@@ -147,6 +154,18 @@ namespace mb {
             throw MantisException(400, "Unsupported field type `" + type + "`");
 
         m_type = type;
+        return *this;
+    }
+
+    int EntitySchemaField::precision() const {
+        return m_precision;
+    }
+
+    EntitySchemaField &EntitySchemaField::setPrecision(int precision) {
+        static const std::vector<int> validPrecisions = {8, 16, 32, 64};
+        if (std::ranges::find(validPrecisions, precision) == validPrecisions.end())
+            throw MantisException(400, "Invalid precision `" + std::to_string(precision) + "`. Must be 8, 16, 32, or 64.");
+        m_precision = precision;
         return *this;
     }
 
@@ -311,7 +330,10 @@ namespace mb {
             {"constraints", m_constraints}
         };
 
-        // Add foreign key information if present
+        if (m_type == "int") {
+            json_obj["precision"] = m_precision;
+        }
+
         if (isForeignKey()) {
             json_obj["foreign_key"] = m_foreignKey;
         }
@@ -320,10 +342,14 @@ namespace mb {
     }
 
     soci::db_type EntitySchemaField::toSociType() const {
-        return EntitySchemaField::toSociType(m_type);
+        return EntitySchemaField::toSociType(m_type, m_precision);
     }
 
     soci::db_type EntitySchemaField::toSociType(const std::string &type) {
+        return toSociType(type, 32);
+    }
+
+    soci::db_type EntitySchemaField::toSociType(const std::string &type, int precision) {
         if (trim(type).empty())
             throw MantisException(400, "Field type is required, none provided!");
 
@@ -333,22 +359,14 @@ namespace mb {
             return soci::db_double;
         if (type == "date")
             return soci::db_date;
-        if (type == "int8")
-            return soci::db_int8;
-        if (type == "uint8")
-            return soci::db_uint8;
-        if (type == "int16")
-            return soci::db_int16;
-        if (type == "uint16")
-            return soci::db_uint16;
-        if (type == "int32")
-            return soci::db_int32;
-        if (type == "uint32")
-            return soci::db_uint32;
-        if (type == "int64")
-            return soci::db_int64;
-        if (type == "uint64")
-            return soci::db_uint64;
+        if (type == "int") {
+            switch (precision) {
+                case 8: return soci::db_int8;
+                case 16: return soci::db_int16;
+                case 64: return soci::db_int64;
+                default: return soci::db_int32;
+            }
+        }
         if (type == "blob")
             return soci::db_blob;
         if (type == "bool")

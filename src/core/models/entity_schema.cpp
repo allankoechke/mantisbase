@@ -25,8 +25,8 @@ namespace mb {
             m_viewSqlQuery = other.m_viewSqlQuery;
             m_isSystem = other.m_isSystem;
             m_hasApi = other.m_hasApi;
-            m_viewSqlQuery = other.m_viewSqlQuery;
             m_fields = other.m_fields;
+            m_indexes = other.m_indexes;
             m_listRule = other.m_listRule;
             m_getRule = other.m_getRule;
             m_addRule = other.m_addRule;
@@ -115,6 +115,12 @@ namespace mb {
             eSchema.setViewQuery(entity_schema.at("view_query").get<std::string>());
         }
 
+        if (entity_schema.contains("indexes") && entity_schema["indexes"].is_array()) {
+            for (const auto &idx : entity_schema["indexes"]) {
+                eSchema.addIndex(IndexDefinition::fromJSON(idx));
+            }
+        }
+
         return eSchema;
     }
 
@@ -146,8 +152,20 @@ namespace mb {
         }
 
         // For 'view' types, check for 'view_query'
-        if (entity.type() == "view" && !entity.viewQuery().empty()) {
-            eSchema.setViewQuery(entity.viewQuery());
+        if (entity.type() == "view") {
+            const auto &schema_json = entity.toJSON();
+            if (schema_json.contains("view_query") && schema_json["view_query"].is_string()
+                && !schema_json["view_query"].get<std::string>().empty()) {
+                eSchema.setViewQuery(schema_json["view_query"].get<std::string>());
+            }
+        }
+
+        // Copy indexes
+        const auto &schema_json = entity.toJSON();
+        if (schema_json.contains("indexes") && schema_json["indexes"].is_array()) {
+            for (const auto &idx : schema_json["indexes"]) {
+                eSchema.addIndex(IndexDefinition::fromJSON(idx));
+            }
         }
 
         return eSchema;
@@ -194,9 +212,30 @@ namespace mb {
 
     EntitySchema &EntitySchema::setViewQuery(const std::string &viewQuery) {
         if (viewQuery.empty()) throw std::invalid_argument("Empty view query statement.");
-        // TODO check if its a valid SQL query?
         m_viewSqlQuery = viewQuery;
         return *this;
+    }
+
+    const std::vector<IndexDefinition> &EntitySchema::indexes() const {
+        return m_indexes;
+    }
+
+    EntitySchema &EntitySchema::addIndex(const IndexDefinition &index) {
+        if (index.name.empty())
+            throw MantisException(400, "Index name is required.");
+        if (index.columns.empty())
+            throw MantisException(400, "Index must have at least one column.");
+        m_indexes.push_back(index);
+        return *this;
+    }
+
+    bool EntitySchema::removeIndex(const std::string &index_name) {
+        auto it = std::ranges::find_if(m_indexes, [&](const IndexDefinition &idx) {
+            return idx.name == index_name;
+        });
+        if (it == m_indexes.end()) return false;
+        m_indexes.erase(it);
+        return true;
     }
 
     void EntitySchema::updateWith(const nlohmann::json &new_data) {
@@ -311,6 +350,13 @@ namespace mb {
         if (m_type == "view" && new_data.contains("view_query") && new_data["view_query"].is_string()
             && !new_data.at("view_query").get<std::string>().empty()) {
             setViewQuery(new_data.at("view_query").get<std::string>());
+        }
+
+        if (new_data.contains("indexes") && new_data["indexes"].is_array()) {
+            m_indexes.clear();
+            for (const auto &idx : new_data["indexes"]) {
+                addIndex(IndexDefinition::fromJSON(idx));
+            }
         }
     }
 
@@ -439,6 +485,14 @@ namespace mb {
                 j["fields"].emplace_back(field.toJSON());
             }
         }
+
+        if (!m_indexes.empty()) {
+            j["indexes"] = json::array();
+            for (const auto &idx : m_indexes) {
+                j["indexes"].emplace_back(idx.toJSON());
+            }
+        }
+
         return j;
     }
 
@@ -447,55 +501,49 @@ namespace mb {
         const auto db_type = sql->get_backend()->get_backend_name();
 
         std::ostringstream ddl;
+
+        if (m_type == "view") {
+            ddl << "CREATE VIEW IF NOT EXISTS " << m_name << " AS " << m_viewSqlQuery;
+            return ddl.str();
+        }
+
         ddl << "CREATE TABLE IF NOT EXISTS " << m_name << " (";
 
-        // First, add all column definitions
         for (size_t i = 0; i < m_fields.size(); ++i) {
             if (i > 0) ddl << ", ";
-            const auto field = m_fields[i];
+            const auto &field = m_fields[i];
 
             ddl << field.name()
                     << " "
-                    << getFieldType(field.type(), sql);
+                    << getFieldType(field.type(), sql, field.precision());
 
-            // Note: PRIMARY KEY and UNIQUE constraints are added as table-level constraints
-            // below to ensure they have explicit names for later updates/deletes
             if (field.required()) ddl << " NOT NULL";
             if (field.constraints().contains("default_value") && !field.constraints()["default_value"].is_null())
                 ddl << " DEFAULT " << toDefaultSqlValue(field.type(), field.constraints()["default_value"]);
         }
 
-        // Handle all constraints at once to ensure they have explicit names for later updates/deletes
         for (const auto &field: m_fields) {
-            // Add PRIMARY KEY constraints with explicit names
             if (field.isPrimaryKey()) {
-                // Generate constraint name: pk_<table>_<column>
                 std::string constraintName = std::format("pk_{}_{}", m_name, field.name());
                 ddl << ", CONSTRAINT " << constraintName << " PRIMARY KEY (" << field.name() << ")";
             }
 
-            // Add UNIQUE constraints with explicit names
             if (field.isUnique()) {
-                // Generate constraint name: uniq_<table>_<column>
                 std::string constraintName = std::format("uniq_{}_{}", m_name, field.name());
                 ddl << ", CONSTRAINT " << constraintName << " UNIQUE (" << field.name() << ")";
             }
 
-            // Add foreign key constraints with explicit constraint names
             if (field.isForeignKey()) {
-                // Generate constraint name: fk_<table>_<column>
                 std::string constraintName = std::format("fk_{}_{}", m_name, field.name());
 
                 ddl << ", CONSTRAINT " << constraintName << " FOREIGN KEY (" << field.name() << ") "
                         << "REFERENCES " << field.foreignKeyTable()
                         << "(" << field.foreignKeyColumn() << ")";
 
-                // Add ON UPDATE clause
                 if (field.foreignKeyOnUpdate() != "NO ACTION" && !field.foreignKeyOnUpdate().empty()) {
                     ddl << " ON UPDATE " << field.foreignKeyOnUpdate();
                 }
 
-                // Add ON DELETE clause
                 if (field.foreignKeyOnDelete() != "NO ACTION" && !field.foreignKeyOnDelete().empty()) {
                     ddl << " ON DELETE " << field.foreignKeyOnDelete();
                 }
@@ -505,6 +553,23 @@ namespace mb {
         ddl << ");";
 
         return ddl.str();
+    }
+
+    std::vector<std::string> EntitySchema::indexDDL() const {
+        std::vector<std::string> stmts;
+        for (const auto &idx : m_indexes) {
+            std::ostringstream ddl;
+            ddl << "CREATE ";
+            if (idx.unique) ddl << "UNIQUE ";
+            ddl << "INDEX IF NOT EXISTS " << idx.name << " ON " << m_name << "(";
+            for (size_t i = 0; i < idx.columns.size(); ++i) {
+                if (i > 0) ddl << ", ";
+                ddl << idx.columns[i];
+            }
+            ddl << ")";
+            stmts.push_back(ddl.str());
+        }
+        return stmts;
     }
 
     bool EntitySchema::hasField(const std::string &field_name) const {
@@ -534,11 +599,9 @@ namespace mb {
             return "'" + v.dump() + "'";
         }
 
-        if (type == "double" || type == "int8" || type == "uint8"
-            || type == "int16" || type == "uint16" || type == "int32"
-            || type == "uint32" || type == "int64" || type == "uint64"
+        if (type == "double" || type == "int"
             || type == "date" || type == "json" || type == "blob"
-            || type == "date" || type == "file" || type == "files") {
+            || type == "file" || type == "files") {
             return v.dump();
         }
 
@@ -573,7 +636,12 @@ namespace mb {
             }
         }
 
-        // logEntry::trace("Entity Schema {}", str);
+        if (!m_indexes.empty()) {
+            str += "\n\tIndexes:";
+            for (const auto &idx : m_indexes) {
+                str += std::format("\n\t  - Name: `{}`\n\t\tSchema: {}", idx.name, idx.toJSON().dump());
+            }
+        }
 
         return str;
     }
@@ -692,27 +760,22 @@ namespace mb {
         });
     }
 
-    std::string EntitySchema::getFieldType(const std::string &type, std::shared_ptr<soci::session> sql) {
+    std::string EntitySchema::getFieldType(const std::string &type, std::shared_ptr<soci::session> sql, int precision) {
         const auto db_type = sql->get_backend()->get_backend_name();
-        // For date types, enforce `text` type SQLite ONLY
+
         if (db_type == "sqlite3" && type == "date") {
             return "text";
         }
 
-        // PostgreSQL has no support for `db_uint` and `db_uint8` so lets store them in `db_uint16`/`db_int16 types`
-        if (db_type == "postgresql" && (type == "uint8" || type == "int8")) {
-            return type == "uint8"
-                       ? sql->get_backend()->create_column_type(soci::db_uint16, 0, 0)
-                       : sql->get_backend()->create_column_type(soci::db_int16, 0, 0);
+        if (db_type == "postgresql" && type == "int" && precision == 8) {
+            return sql->get_backend()->create_column_type(soci::db_int16, 0, 0);
         }
 
-        // Convert bool types to `db_uint16`
         if (db_type == "postgresql" && type == "bool") {
             return sql->get_backend()->create_column_type(soci::db_uint16, 0, 0);
         }
 
-        // General catch for all other types
-        return sql->get_backend()->create_column_type(EntitySchemaField::toSociType(type), 0, 0);
+        return sql->get_backend()->create_column_type(EntitySchemaField::toSociType(type, precision), 0, 0);
     }
 
     void EntitySchema::addFieldsIfNotExist(const std::string &type) {

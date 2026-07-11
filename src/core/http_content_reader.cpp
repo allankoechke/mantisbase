@@ -200,9 +200,7 @@ namespace mb {
             obj["value"] = nullptr;
         } else if (type == "xml" || type == "string" || type == "date" || type == "file") {
             obj["value"] = content;
-        } else if (type == "double" || type == "int8" || type == "uint8" || type == "int16" ||
-                   type == "uint16" || type == "int32" ||
-                   type == "uint32" || type == "int64" || type == "uint64") {
+        } else if (type == "double" || type == "int") {
             obj["value"] = json::parse(content);
         } else if (type == "json" || type == "bool") {
             obj["value"] = json::parse(content);

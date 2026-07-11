@@ -46,7 +46,7 @@ TEST_F(IntegrationSchemaTest, CreateSchema) {
             "fields", nlohmann::json::array({
                 {{"name", "title"}, {"type", "string"}, {"required", true}},
                 {{"name", "content"}, {"type", "string"}},
-                {{"name", "views"}, {"type", "int32"}}
+                {{"name", "views"}, {"type", "int"}}
             })
         }
     };

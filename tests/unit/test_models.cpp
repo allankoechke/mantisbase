@@ -125,18 +125,122 @@ TEST(EntitySchema, EntitySchemaJSONConversion) {
     mb::EntitySchema schema{"test", "base"};
     schema.addField(mb::EntitySchemaField("name", "string").setRequired(true));
     schema.setListRule(mb::AccessRule("public", ""));
-    
+
     // Convert to JSON
     auto json = schema.toJSON();
     EXPECT_EQ(json["name"], "test");
     EXPECT_EQ(json["type"], "base");
     EXPECT_EQ(json["rules"]["list"]["mode"], "public");
     EXPECT_TRUE(json.contains("fields"));
-    
+
     // Create from JSON
     auto newSchema = mb::EntitySchema::fromSchema(json);
     EXPECT_EQ(newSchema.name(), "test");
     EXPECT_EQ(newSchema.type(), "base");
     EXPECT_EQ(newSchema.listRule().mode(), "public");
     EXPECT_TRUE(newSchema.hasField("name"));
+}
+
+TEST(EntitySchema, IntTypeWithPrecision) {
+    mb::EntitySchemaField field("count", "int");
+    EXPECT_EQ(field.type(), "int");
+    EXPECT_EQ(field.precision(), 32);
+
+    field.setPrecision(64);
+    EXPECT_EQ(field.precision(), 64);
+
+    auto j = field.toJSON();
+    EXPECT_EQ(j["type"], "int");
+    EXPECT_EQ(j["precision"], 64);
+
+    mb::EntitySchemaField field2(j);
+    EXPECT_EQ(field2.type(), "int");
+    EXPECT_EQ(field2.precision(), 64);
+
+    EXPECT_THROW(field.setPrecision(128), mb::MantisException);
+    EXPECT_THROW(field.setPrecision(0), mb::MantisException);
+}
+
+TEST(EntitySchema, IntPrecisionSociTypes) {
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", 8), soci::db_int8);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", 16), soci::db_int16);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", 32), soci::db_int32);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", 64), soci::db_int64);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int"), soci::db_int32);
+}
+
+TEST(EntitySchema, IntTypeInFieldTypes) {
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int"));
+    EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("int32"));
+    EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("uint32"));
+    EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("int64"));
+}
+
+TEST(EntitySchema, IndexDefinition) {
+    mb::IndexDefinition idx;
+    idx.name = "idx_users_email";
+    idx.unique = true;
+    idx.columns = {"email"};
+
+    auto j = idx.toJSON();
+    EXPECT_EQ(j["name"], "idx_users_email");
+    EXPECT_TRUE(j["unique"].get<bool>());
+    EXPECT_EQ(j["columns"].size(), 1);
+    EXPECT_EQ(j["columns"][0], "email");
+
+    auto idx2 = mb::IndexDefinition::fromJSON(j);
+    EXPECT_EQ(idx2.name, "idx_users_email");
+    EXPECT_TRUE(idx2.unique);
+    EXPECT_EQ(idx2.columns.size(), 1);
+    EXPECT_EQ(idx2.columns[0], "email");
+}
+
+TEST(EntitySchema, SchemaWithIndexes) {
+    mb::EntitySchema schema{"test", "base"};
+    EXPECT_TRUE(schema.indexes().empty());
+
+    mb::IndexDefinition idx;
+    idx.name = "idx_test_name";
+    idx.unique = false;
+    idx.columns = {"name"};
+    schema.addIndex(idx);
+
+    EXPECT_EQ(schema.indexes().size(), 1);
+    EXPECT_EQ(schema.indexes()[0].name, "idx_test_name");
+
+    auto j = schema.toJSON();
+    EXPECT_TRUE(j.contains("indexes"));
+    EXPECT_EQ(j["indexes"].size(), 1);
+    EXPECT_EQ(j["indexes"][0]["name"], "idx_test_name");
+
+    auto schema2 = mb::EntitySchema::fromSchema(j);
+    EXPECT_EQ(schema2.indexes().size(), 1);
+    EXPECT_EQ(schema2.indexes()[0].name, "idx_test_name");
+
+    schema.removeIndex("idx_test_name");
+    EXPECT_TRUE(schema.indexes().empty());
+}
+
+TEST(EntitySchema, ViewEntityType) {
+    nlohmann::json viewSchema = {
+        {"name", "active_users"},
+        {"type", "view"},
+        {"view_query", "SELECT id, name FROM users WHERE active = 1"}
+    };
+
+    auto schema = mb::EntitySchema::fromSchema(viewSchema);
+    EXPECT_EQ(schema.type(), "view");
+    EXPECT_EQ(schema.name(), "active_users");
+    EXPECT_EQ(schema.viewQuery(), "SELECT id, name FROM users WHERE active = 1");
+    EXPECT_TRUE(schema.fields().empty());
+
+    auto j = schema.toJSON();
+    EXPECT_EQ(j["view_query"], "SELECT id, name FROM users WHERE active = 1");
+    EXPECT_FALSE(j.contains("fields"));
+}
+
+TEST(EntitySchema, ViewEntityRejectsFields) {
+    const mb::EntitySchema view{"test_view", "view"};
+    EXPECT_TRUE(view.fields().empty());
+    EXPECT_FALSE(view.hasField("anything"));
 }
