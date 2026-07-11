@@ -39,13 +39,17 @@ jobs:
       - name: Install dependencies on Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libzstd-dev libpq-dev libjsoncpp-dev zlib1g-dev libuuid-dev
+          for i in 1 2 3; do
+            sudo apt-get update && break
+            echo "apt-get update failed (attempt $i), retrying..."
+            sleep 5
+          done
+          sudo apt-get install -y libzstd-dev libpq-dev zlib1g-dev uuid-dev
 
       - name: Install dependencies on macOS
         if: matrix.os == 'macos-latest'
         run: |
-          brew install jsoncpp zlib zstd postgresql@16 openssl
+          brew install zlib zstd postgresql@16 openssl
 
       - name: Install dependencies on Windows
         if: matrix.os == 'windows-latest'
