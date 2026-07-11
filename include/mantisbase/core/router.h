@@ -56,6 +56,8 @@ namespace mb {
         void registerEntityRoutes();
         void registerSchemaRoutes();
         void registerAuthRoutes();
+        void registerApiKeyRoutes();
+        void registerOAuthRoutes();
 
         static std::string getMimeType(const std::string &path);
 

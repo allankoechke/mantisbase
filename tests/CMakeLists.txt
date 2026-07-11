@@ -33,6 +33,8 @@ file(GLOB TEST_FILES
         unit/test_entity_schema_field.cpp
         unit/test_files_security.cpp
         unit/test_ip_validation.cpp
+        unit/test_oauth.cpp
+        unit/test_api_keys.cpp
         integration/test_integration_crud.cpp
         integration/test_integration_schema.cpp
         integration/test_integration_auth.cpp

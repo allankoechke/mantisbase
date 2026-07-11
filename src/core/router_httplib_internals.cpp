@@ -44,6 +44,16 @@ namespace mb {
 
                 auto &user = opt_user.value();
 
+                // OAuth-only users have no password
+                if (user["password"].is_null()) {
+                    res.sendJSON(400, {
+                        {"status", 400},
+                        {"data", json::object()},
+                        {"error", "This account uses OAuth login. Please sign in with your linked provider."}
+                    });
+                    return;
+                }
+
                 if (!verifyPassword(body["password"].get<std::string>(), user["password"].get<std::string>())) {
                     res.sendJSON(404, {
                         {"status", 404},
@@ -159,9 +169,47 @@ namespace mb {
     }
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthRefresh() {
-        return [](MantisRequest &, const MantisResponse &res) {
+        return [](MantisRequest &req, const MantisResponse &res) {
             try {
-                // TODO - Add auth refresh tokens
+                auto auth = req.getOr<json>("auth", json::object());
+                auto verification = req.getOr<json>("verification", json::object());
+
+                if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
+                    res.sendJSON(403, {
+                        {"status", 403},
+                        {"data", json::object()},
+                        {"error", "Valid token required to refresh"}
+                    });
+                    return;
+                }
+
+                auto claims = verification["claims"];
+                auto session_id = claims.value("session_id", "");
+                auto entity_name = claims["entity"].get<std::string>();
+                auto user_id = claims["id"].get<std::string>();
+
+                if (session_id.empty()) {
+                    res.sendJSON(400, {
+                        {"status", 400},
+                        {"data", json::object()},
+                        {"error", "Token does not contain a session"}
+                    });
+                    return;
+                }
+
+                auto result = Auth::refreshSession(session_id, entity_name, user_id);
+
+                // Get user record
+                const auto entity = MantisBase::instance().entity(entity_name);
+                auto user_opt = entity.read(user_id);
+                json user = user_opt.has_value() ? user_opt.value() : json::object();
+                user.erase("password");
+
+                res.sendJSON(200, {
+                    {"status", 200},
+                    {"data", {{"token", result["token"]}, {"user", user}}},
+                    {"error", ""}
+                });
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                     {"status", e.code()},
@@ -179,9 +227,31 @@ namespace mb {
     }
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthLogout() {
-        return [](MantisRequest &, const MantisResponse &res) {
+        return [](MantisRequest &req, const MantisResponse &res) {
             try {
-                // TODO - Add auth logout
+                auto verification = req.getOr<json>("verification", json::object());
+
+                if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
+                    res.sendJSON(403, {
+                        {"status", 403},
+                        {"data", json::object()},
+                        {"error", "Valid token required to logout"}
+                    });
+                    return;
+                }
+
+                auto claims = verification["claims"];
+                auto session_id = claims.value("session_id", "");
+
+                if (!session_id.empty()) {
+                    Auth::deleteSession(session_id);
+                }
+
+                res.sendJSON(200, {
+                    {"status", 200},
+                    {"data", {{"logged_out", true}}},
+                    {"error", ""}
+                });
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                     {"status", e.code()},

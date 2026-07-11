@@ -2,6 +2,8 @@
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/core/models/entity.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
+#include "../include/mantisbase/core/api_keys.h"
+#include "../include/mantisbase/utils/crypto_utils.h"
 #include <unordered_map>
 #include <deque>
 #include <chrono>
@@ -176,23 +178,56 @@ namespace mb {
         std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, MantisResponse &_) {
             TRACE_FUNC(msg);
-            // If we have an auth header, extract it into the ctx, else
-            // add a guest user type. The auth if present, should have
-            // the user id, auth table, etc.
             try {
                 json auth;
-                auth["type"] = "guest"; // or 'user' or 'admin'
-                auth["token"] = nullptr; // User token from header ...
-                auth["id"] = nullptr; // Hold user `id` from auth user
-                auth["entity"] = nullptr; // Hold user table if valid
-                auth["user"] = nullptr; // Hold hydrated user if valid
+                auth["type"] = "guest";
+                auth["token"] = nullptr;
+                auth["id"] = nullptr;
+                auth["entity"] = nullptr;
+                auth["user"] = nullptr;
 
                 if (req.hasHeader("Authorization")) {
-                    const auto token = req.getBearerTokenAuth();
-                    auth["token"] = trim(token);
+                    const auto token = trim(req.getBearerTokenAuth());
+
+                    if (token.starts_with("mb_sk_")) {
+                        // API key authentication
+                        auto key_hash = ApiKeyManager::hashApiKey(token);
+                        auto key_info = ApiKeyManager::lookupByHash(key_hash);
+
+                        if (key_info.has_value()) {
+                            auto &info = key_info.value();
+                            auth["type"] = "user";
+                            auth["id"] = info["user_id"];
+                            auth["entity"] = info["entity_name"];
+                            auth["auth_method"] = "api_key";
+
+                            // Hydrate user record
+                            try {
+                                auto entity_name = info["entity_name"].get<std::string>();
+                                auto user_id = info["user_id"].get<std::string>();
+                                const auto user_entity = MantisBase::instance().entity(entity_name);
+                                if (auto user = user_entity.read(user_id); user.has_value()) {
+                                    auto u = user.value();
+                                    u.erase("password");
+                                    auth["user"] = u;
+                                }
+                            } catch (...) {}
+
+                            req.set("auth", auth);
+                            // Fake a verified verification object for downstream middleware
+                            json verification;
+                            verification["verified"] = true;
+                            verification["claims"] = {{"id", auth["id"]}, {"entity", auth["entity"]}};
+                            verification["error"] = "";
+                            req.set("verification", verification);
+                            return HandlerResponse::Unhandled;
+                        }
+                    }
+
+                    // JWT token (starts with eyJ or any other non-api-key format)
+                    auth["token"] = token;
                 }
 
-                // Update the context
                 req.set("auth", auth);
                 req.set("verification", json::object());
                 return HandlerResponse::Unhandled;

@@ -29,12 +29,14 @@ namespace mb {
             // Skip fields that are not in the JSON object
             if (!entity.contains(field_name)) continue;
 
-            // For password types, let's hash them before binding to DB
+            // For password types, hash before binding (null password = OAuth-only user)
             if (field_name == "password") {
-                // Extract password value and hash it
+                if (entity[field_name].is_null() || (entity[field_name].is_string() && entity[field_name].get<std::string>().empty())) {
+                    std::optional<int> val;
+                    vals.set(field_name, val, soci::i_null);
+                    continue;
+                }
                 auto hashed_password = hashPassword(entity.at(field_name).get<std::string>());
-
-                // Add the hashed password to the soci::vals
                 vals.set(field_name, hashed_password);
                 continue;
             }

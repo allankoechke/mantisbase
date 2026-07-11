@@ -24,6 +24,8 @@
 #include "../include/mantisbase/core/realtime.h"
 #include "../include/mantisbase/core/sse.h"
 #include "../include/mantisbase/core/ws.h"
+#include "../include/mantisbase/core/oauth.h"
+#include "../include/mantisbase/core/api_keys.h"
 
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
@@ -330,6 +332,8 @@ namespace mb {
         registerSchemaRoutes();
         registerEntityRoutes();
         registerAdminEntityRoutes();
+        registerApiKeyRoutes();
+        registerOAuthRoutes();
 
         // Static file serving: register a catch-all for the public directory
         const auto publicDir = mApp.publicDir();
