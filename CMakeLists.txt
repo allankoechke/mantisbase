@@ -32,10 +32,12 @@ else()
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
             message("-- Building MantisBase static libs (Windows MinGW fully static)")
         endif ()
-    else()
-        # Linux/Unix: static link only runtime libraries
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        # Linux GCC: static link only runtime libraries
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
         message("-- Building MantisBase static libs")
+    else()
+        message("-- Building MantisBase static libs (no runtime static flags for ${CMAKE_CXX_COMPILER_ID})")
     endif()
 endif()
 

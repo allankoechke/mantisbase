@@ -45,6 +45,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(drogon)
 
+# Drogon's install(EXPORT "DrogonTargets") requires all linked targets to be
+# in an export set. Add jsoncpp_static so cmake generate doesn't fail.
+install(TARGETS jsoncpp_static EXPORT DrogonTargets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+)
+
 target_link_libraries(mantisbase PUBLIC Drogon::Drogon)
 
 if(WIN32)
