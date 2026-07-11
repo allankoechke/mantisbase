@@ -13,7 +13,6 @@ namespace mb {
         : m_dbType("sqlite3"),
           m_startTime(std::chrono::steady_clock::now()),
           m_logger(std::make_unique<Logger>()) {}
-          // , m_dukCtx(duk_create_heap_default()) {}
 
     MantisBase::~MantisBase() {
         // if (!m_toStartServer) {
@@ -23,8 +22,12 @@ namespace mb {
         //         "Nothing else to do. Did you intend to run the server? Try `mantisbase serve` instead.");
         // }
 
-        // Destroy duk context
-        // duk_destroy_heap(m_dukCtx);
+#ifdef MB_SCRIPTING_ENABLED
+        if (m_dukCtx) {
+            duk_destroy_heap(m_dukCtx);
+            m_dukCtx = nullptr;
+        }
+#endif
 
         // std::cout << "Exiting ~MantisBase()" << std::endl;
     }
@@ -329,9 +332,11 @@ namespace mb {
         return m_router->hasSchemaCache(entity_name);
     }
 
-    // duk_context *MantisBase::ctx() const {
-    //     return m_dukCtx;
-    // }
+#ifdef MB_SCRIPTING_ENABLED
+    duk_context *MantisBase::ctx() const {
+        return m_dukCtx;
+    }
+#endif
 
     void MantisBase::openBrowserOnStart() const {
         // Skip spinning the default browser on first boot
@@ -532,34 +537,34 @@ namespace mb {
     }
 
 #ifdef MB_SCRIPTING_ENABLED
-    void MantisApp::initJSEngine() {
-        // TRACE_CLASS_METHOD();
+    void MantisBase::initJSEngine() {
+        m_dukCtx = duk_create_heap_default();
+        if (!m_dukCtx) {
+            LogOrigin::critical("Scripting", "Failed to create Duktape heap");
+            return;
+        }
 
-        // ---------------------------------------------- //
-        // Register `app` object
-        // ---------------------------------------------- //
-        // Register the singleton instance as a global
         dukglue_register_global(m_dukCtx, this, "app");
 
         // Properties
-        dukglue_register_property(m_dukCtx, &MantisApp::host, &MantisApp::setHost, "host");
-        dukglue_register_property(m_dukCtx, &MantisApp::port, &MantisApp::setPort, "port");
-        dukglue_register_property(m_dukCtx, &MantisApp::poolSize, &MantisApp::setPoolSize, "poolSize");
-        dukglue_register_property(m_dukCtx, &MantisApp::publicDir, &MantisApp::setPublicDir, "publicDir");
-        dukglue_register_property(m_dukCtx, &MantisApp::dataDir, &MantisApp::setDataDir, "dataDir");
-        dukglue_register_property(m_dukCtx, &MantisApp::isDevMode, nullptr, "devMode");
-        dukglue_register_property(m_dukCtx, &MantisApp::dbTypeByName, nullptr, "dbType");
-        dukglue_register_property(m_dukCtx, &MantisApp::jwtSecretKey_JSWrapper, nullptr, "secretKey");
-        dukglue_register_property(m_dukCtx, &MantisApp::version_JSWrapper, nullptr, "version");
+        dukglue_register_property(m_dukCtx, &MantisBase::host, &MantisBase::setHost, "host");
+        dukglue_register_property(m_dukCtx, &MantisBase::port, &MantisBase::setPort, "port");
+        dukglue_register_property(m_dukCtx, &MantisBase::poolSize, &MantisBase::setPoolSize, "poolSize");
+        dukglue_register_property(m_dukCtx, &MantisBase::publicDir, &MantisBase::setPublicDir, "publicDir");
+        dukglue_register_property(m_dukCtx, &MantisBase::dataDir, &MantisBase::setDataDir, "dataDir");
+        dukglue_register_property(m_dukCtx, &MantisBase::isDevMode, nullptr, "devMode");
+        dukglue_register_property(m_dukCtx, &MantisBase::dbType, nullptr, "dbType");
+        dukglue_register_property(m_dukCtx, &MantisBase::jwtSecretKey_JSWrapper, nullptr, "secretKey");
+        dukglue_register_property(m_dukCtx, &MantisBase::version_JSWrapper, nullptr, "version");
 
         // `app.close()`
-        dukglue_register_method(m_dukCtx, &MantisApp::close, "close");
+        dukglue_register_method(m_dukCtx, &MantisBase::close, "close");
         // `app.quit(1, "Just crashed?")`
-        dukglue_register_method(m_dukCtx, &MantisApp::quit_JSWrapper, "quit");
+        dukglue_register_method(m_dukCtx, &MantisBase::quit_JSWrapper, "quit");
         // `app.db()`
-        dukglue_register_method(m_dukCtx, &MantisApp::duk_db, "db");
+        dukglue_register_method(m_dukCtx, &MantisBase::duk_db, "db");
         // `app.router()`
-        dukglue_register_method(m_dukCtx, &MantisApp::duk_router, "router");
+        dukglue_register_method(m_dukCtx, &MantisBase::duk_router, "router");
 
         MantisRequest::registerDuktapeMethods();
         MantisResponse::registerDuktapeMethods();
@@ -585,19 +590,18 @@ namespace mb {
         registerUtilsToDuktapeEngine();
 
         // DATABASE methods
-        DatabaseUnit::registerDuktapeMethods();
+        Database::registerDuktapeMethods();
 
-        // Router methods for dukttape
-        RouterUnit::registerDuktapeMethods();
+        // TODO: Router::registerDuktapeMethods() — not yet ported to Drogon
     }
 
-    void MantisApp::loadStartScript() const {
+    void MantisBase::loadStartScript() const {
         // Look for index.js as the entry point
         const auto entryPoint = (fs::path(m_scriptsDir) / "index.mantis.js").string();
         loadAndExecuteScript(entryPoint);
     }
 
-    void MantisApp::loadAndExecuteScript(const std::string &filePath) const {
+    void MantisBase::loadAndExecuteScript(const std::string &filePath) const {
         if (!fs::exists(fs::path(filePath))) {
             LogOrigin::trace("File Execution",
                              fmt::format("Executing a file that does not exist, path `{}`", filePath));
@@ -618,21 +622,21 @@ namespace mb {
         }
     }
 
-    void MantisApp::loadScript(const std::string &relativePath) const {
+    void MantisBase::loadScript(const std::string &relativePath) const {
         // Construct full path relative to scripts directory
         const auto fullPath = fs::path(m_scriptsDir) / relativePath;
         loadAndExecuteScript(fullPath.string());
     }
 
-    void MantisApp::quit_JSWrapper(const int code, const std::string &msg) {
+    void MantisBase::quit_JSWrapper(const int code, const std::string &msg) {
         quit(code, msg);
     }
 
-    DatabaseUnit *MantisApp::duk_db() const {
+    Database *MantisBase::duk_db() const {
         return m_database.get();
     }
 
-    RouterUnit *MantisApp::duk_router() const {
+    Router *MantisBase::duk_router() const {
         return m_router.get();
     }
 #endif

@@ -24,6 +24,13 @@ namespace mb {
         static duk_ret_t nativeConsoleTrace(duk_context *ctx);
         static duk_ret_t nativeConsoleTable(duk_context *ctx);
     };
+
+    class ScriptingHooks {
+    public:
+        static void fireOnServerStart(duk_context *ctx);
+        static void fireOnRecordCreated(duk_context *ctx, const std::string &entity, const std::string &recordId);
+        static void fireOnRecordUpdated(duk_context *ctx, const std::string &entity, const std::string &recordId);
+    };
 #endif
 
     class MantisRequest {

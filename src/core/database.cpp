@@ -360,13 +360,13 @@ namespace mb {
     }
 
 #ifdef MB_SCRIPTING_ENABLED
-    void DatabaseUnit::registerDuktapeMethods() {
-        const auto ctx = MantisApp::instance().ctx();
+    void Database::registerDuktapeMethods() {
+        const auto ctx = MantisBase::instance().ctx();
 
-        // DatabaseUnit methods
-        dukglue_register_property(ctx, &DatabaseUnit::isConnected, nullptr, "connected");
-        dukglue_register_method(ctx, &DatabaseUnit::session, "session");
-        dukglue_register_method_varargs(ctx, &DatabaseUnit::query, "query");
+        // Database methods
+        dukglue_register_property(ctx, &Database::isConnected, nullptr, "connected");
+        dukglue_register_method(ctx, &Database::session, "session");
+        dukglue_register_method_varargs(ctx, &Database::query, "query");
 
         // soci::session methods
         dukglue_register_method(ctx, &soci::session::close, "close");
@@ -387,7 +387,7 @@ namespace mb {
 
 
 #ifdef MB_SCRIPTING_ENABLED
-    duk_ret_t DatabaseUnit::query(duk_context *ctx) {
+    duk_ret_t Database::query(duk_context *ctx) {
         // TRACE_CLASS_METHOD();
 
         // Get number of arguments
