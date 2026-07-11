@@ -15,11 +15,8 @@
 #include <string>
 #include <filesystem>
 #include <chrono>
-#include "export.h"
 #include <argparse/argparse.hpp>
-#ifdef MB_SCRIPTING_ENABLED
-#include <dukglue/dukglue.h>
-#endif
+// #include <dukglue/dukglue.h>
 
 #include "core/types.h"
 #include "core/kv_store.h"
@@ -39,7 +36,7 @@ namespace mb
      * - RouterMgr: High level routing wrapper on top of @see HttpMgr, @see RouterMgr for more details.
      * - ValidatorMgr: A validation store using regex, @see Validator for more details.
      */
-    class MANTISBASE_API MantisBase
+    class MantisBase
     {
     public:
         ~MantisBase();
@@ -280,9 +277,7 @@ namespace mb
         [[nodiscard]] bool hasEntity(const std::string& entity_name) const;
 
         /// Get the duktape context
-#ifdef MB_SCRIPTING_ENABLED
-        [[nodiscard]] duk_context* ctx() const;
-#endif
+        // [[nodiscard]] duk_context* ctx() const;
 
 
         /**
@@ -410,9 +405,7 @@ namespace mb
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
-#ifdef MB_SCRIPTING_ENABLED
-        duk_context* m_dukCtx = nullptr;
-#endif
+        // duk_context* m_dukCtx; // For duktape context
     };
 }
 

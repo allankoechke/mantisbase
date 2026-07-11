@@ -164,7 +164,7 @@ namespace mb {
                 {
                     {"name", "password"},
                     {"type", "string"},
-                    {"required", false},
+                    {"required", true},
                     {"primary_key", false},
                     {"system", true},
                     {"unique", false},
@@ -173,24 +173,6 @@ namespace mb {
                             {"min-value", 6},
                             {"max_value", nullptr},
                             {"validator", "@password"},
-                            {"default_value", nullptr},
-                        }
-                    },
-                }
-            },
-            EntitySchemaField{
-                {
-                    {"name", "avatar_url"},
-                    {"type", "string"},
-                    {"required", false},
-                    {"primary_key", false},
-                    {"system", true},
-                    {"unique", false},
-                    {
-                        "constraints", {
-                            {"min-value", nullptr},
-                            {"max_value", nullptr},
-                            {"validator", nullptr},
                             {"default_value", nullptr},
                         }
                     },
@@ -207,14 +189,15 @@ namespace mb {
 
     const std::vector<std::string> &EntitySchemaField::defaultAuthFields() {
         static const std::vector<std::string> _auth_fields = {
-            "id", "created", "updated", "name", "email", "password", "avatar_url"
+            "id", "created", "updated", "name", "email", "password"
         };
         return _auth_fields;
     }
 
     const std::vector<std::string> &EntitySchemaField::defaultEntityFieldTypes() {
         static const std::vector<std::string> _fieldTypes = {
-            "xml", "string", "double", "date", "int",
+            "xml", "string", "double", "date", "int8", "uint8",
+            "int16", "uint16", "int32", "uint32", "int64", "uint64",
             "blob", "json", "bool", "file", "files"
         };
         return _fieldTypes;

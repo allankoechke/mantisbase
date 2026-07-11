@@ -17,26 +17,29 @@
 #include "soci/soci-backend.h"
 
 namespace mb {
-    struct IndexDefinition {
-        std::string name;
-        bool unique = false;
-        std::vector<std::string> columns;
-
-        [[nodiscard]] nlohmann::json toJSON() const {
-            return {{"name", name}, {"unique", unique}, {"columns", columns}};
-        }
-
-        static IndexDefinition fromJSON(const nlohmann::json &j) {
-            IndexDefinition idx;
-            idx.name = j.at("name").get<std::string>();
-            idx.unique = j.value("unique", false);
-            idx.columns = j.at("columns").get<std::vector<std::string>>();
-            return idx;
-        }
-    };
-
+    /**
+     * @brief Represents a single field in a database table schema.
+     *
+     * Defines field properties including name, type, constraints, and validation rules.
+     * Supports fluent interface for building field definitions.
+     *
+     * @code
+     * // Create a required string field
+     * EntitySchemaField nameField("name", "string");
+     * nameField.setRequired(true);
+     *
+     * // Create a unique email field
+     * EntitySchemaField emailField("email", "string");
+     * emailField.setIsUnique(true).setRequired(true);
+     * @endcode
+     */
     class EntitySchemaField {
     public:
+        /**
+         * @brief Construct field with name and type.
+         * @param field_name Field name
+         * @param field_type Field type (e.g., "string", "int32", "bool", "date")
+         */
         EntitySchemaField(std::string field_name, std::string field_type);
 
         /**
@@ -83,11 +86,12 @@ namespace mb {
          */
         [[nodiscard]] std::string type() const;
 
+        /**
+         * @brief Set field type (fluent interface).
+         * @param type Field type (e.g., "string", "int32", "bool")
+         * @return Reference to self for chaining
+         */
         EntitySchemaField &setType(const std::string &type);
-
-        [[nodiscard]] int precision() const;
-
-        EntitySchemaField &setPrecision(int precision);
 
         /**
          * @brief Check if field is required.
@@ -230,9 +234,12 @@ namespace mb {
          */
         [[nodiscard]] soci::db_type toSociType() const;
 
+        /**
+         * @brief Convert type string to SOCI database type (static).
+         * @param type Field type string
+         * @return SOCI db_type enum value
+         */
         [[nodiscard]] static soci::db_type toSociType(const std::string &type);
-
-        [[nodiscard]] static soci::db_type toSociType(const std::string &type, int precision);
 
         /**
          * @brief Validate field definition.
@@ -262,7 +269,6 @@ namespace mb {
 
     private:
         std::string m_id, m_name, m_type;
-        int m_precision = 32;
         bool m_required = false, m_primaryKey = false, m_isSystem = false, m_isUnique = false;
         nlohmann::json m_constraints{}, m_foreignKey{};
     };

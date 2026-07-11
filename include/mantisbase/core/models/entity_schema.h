@@ -215,15 +215,18 @@ namespace mb {
          */
         [[nodiscard]] bool hasFieldById(const std::string &field_id) const;
 
+        /**
+         * @brief Get SQL query for view type entities.
+         * @return View SQL query string
+         */
         [[nodiscard]] std::string viewQuery() const;
 
+        /**
+         * @brief Set SQL query for view type (fluent interface).
+         * @param viewQuery SQL SELECT query string
+         * @return Reference to self for chaining
+         */
         EntitySchema &setViewQuery(const std::string &viewQuery);
-
-        [[nodiscard]] const std::vector<IndexDefinition> &indexes() const;
-
-        EntitySchema &addIndex(const IndexDefinition &index);
-
-        bool removeIndex(const std::string &index_name);
 
         /**
          * @brief Update schema with new JSON data (merges fields).
@@ -243,8 +246,6 @@ namespace mb {
          * @return SQL DDL string
          */
         [[nodiscard]] std::string toDDL() const;
-
-        [[nodiscard]] std::vector<std::string> indexDDL() const;
 
         /**
          * @brief Get default SQL value for a field type.
@@ -352,7 +353,7 @@ namespace mb {
         static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
 
     private:
-        static std::string getFieldType(const std::string &type, std::shared_ptr<soci::session> sql, int precision = 32);
+        static std::string getFieldType(const std::string &type, std::shared_ptr<soci::session> sql);
 
         void addFieldsIfNotExist(const std::string &type);
 
@@ -362,7 +363,6 @@ namespace mb {
         bool m_isSystem = false;
         bool m_hasApi = true;
         std::vector<EntitySchemaField> m_fields;
-        std::vector<IndexDefinition> m_indexes;
         AccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
     };
 } // mb
