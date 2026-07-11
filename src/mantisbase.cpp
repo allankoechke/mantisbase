@@ -250,7 +250,7 @@ namespace mb {
 
         LogOrigin::trace("MantisBase", "Closing units");
         try {
-            if (m_router && m_router->server().is_running()) {
+            if (m_router && m_router->isRunning()) {
                 m_router->close();
                 LogOrigin::trace("Router", "Router stopped");
             }

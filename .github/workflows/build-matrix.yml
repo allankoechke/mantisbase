@@ -134,8 +134,19 @@ jobs:
             @pgArgs `
             -S ${{ github.workspace }}
 
-      - name: Configure CMake (Linux/macOS)
-        if: matrix.os != 'windows-latest'
+      - name: Configure CMake (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -G Ninja \
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DMB_BUILD_TESTS=true \
+            -S ${{ github.workspace }}
+
+      - name: Configure CMake (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
