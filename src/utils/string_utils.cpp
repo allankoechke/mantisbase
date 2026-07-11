@@ -2,8 +2,6 @@
 #include "../../include/mantisbase/core/exceptions.h"
 
 #include <algorithm>
-#include <cctype>
-#include <httplib.h>
 
 namespace mb {
     std::string sqlIdentifier(const std::string &ident) {

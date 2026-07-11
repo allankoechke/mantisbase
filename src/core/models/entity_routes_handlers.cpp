@@ -46,24 +46,17 @@ namespace mb {
             try {
                 const auto entity = req.app().entity(entity_name);
 
-                auto page = req.hasQueryParam("page")
-                                ? safe_stoi(req.getQueryParamValue("page"), 1)
-                                : 1;
+                int limit = req.hasQueryParam("limit")
+                                ? safe_stoi(req.getQueryParamValue("limit"), 50)
+                                : 50;
 
-                auto page_size = req.hasQueryParam("page_size")
-                                     ? safe_stoi(req.getQueryParamValue("page_size"), 100)
-                                     : 100;
+                std::string after = req.hasQueryParam("after")
+                                        ? req.getQueryParamValue("after")
+                                        : "";
 
-                // Clamp pagination so a single request cannot request an
-                // unbounded page. Keep the echoed metadata consistent with the
-                // values actually used by the query.
-                if (page < 1) page = 1;
-                if (page_size < 1) page_size = 1;
-                if (page_size > MAX_LIST_PAGE_SIZE) page_size = MAX_LIST_PAGE_SIZE;
-
-                bool skip_total_count = req.hasQueryParam("skip_total_count")
-                                            ? strToBool(req.getQueryParamValue("skip_total_count"))
-                                            : false;
+                std::string sort = req.hasQueryParam("sort")
+                                       ? req.getQueryParamValue("sort")
+                                       : "";
 
                 std::string filter = req.hasQueryParam("filter")
                                          ? req.getQueryParamValue("filter")
@@ -71,22 +64,27 @@ namespace mb {
 
                 nlohmann::json opts;
                 opts["pagination"] = {
-                    {"page", page},
-                    {"page_size", page_size},
-                    {"skip_total_count", skip_total_count}
+                    {"limit", limit},
+                    {"after", after},
+                    {"sort", sort}
                 };
                 opts["filter"] = filter;
 
-                int items_count = skip_total_count ? -1 : entity.countRecords();
                 const auto records = entity.list(opts);
+
+                std::string cursor;
+                if (!records.empty()) {
+                    const auto &last = records.back();
+                    if (last.contains("id") && last["id"].is_string())
+                        cursor = last["id"].get<std::string>();
+                }
 
                 res.sendJSON(200, {
                     {
                         "data", {
-                            {"page", page},
                             {"items_count", records.size()},
-                            {"page_size", page_size},
-                            {"total_count", items_count},
+                            {"limit", limit},
+                            {"cursor", cursor},
                             {"items", records}
                         }
                     },
