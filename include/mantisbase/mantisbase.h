@@ -38,6 +38,16 @@ namespace mb
      * - LogsMgr: For logging capabilities, @see LoggingMgr for more details.
      * - RouterMgr: High level routing wrapper on top of @see HttpMgr, @see RouterMgr for more details.
      * - ValidatorMgr: A validation store using regex, @see Validator for more details.
+     *
+     * @note MantisBase is a single-instance-per-process type (a managed
+     * singleton): the whole codebase reaches the active instance through
+     * instance(). Call create() exactly once during startup, then use
+     * instance() everywhere else to obtain that same instance. Multiple
+     * concurrent instances in one process are not supported — create() throws
+     * if an instance already exists, and instance() throws if one has not been
+     * created yet. "Embeddable" means you link and drive MantisBase from your
+     * own C++ process, not that you can run several independent instances side
+     * by side.
      */
     class MANTISBASE_API MantisBase
     {
@@ -51,8 +61,9 @@ namespace mb
         MantisBase& operator=(MantisBase&&) = delete;
 
         /**
-         * @brief Retrieve existing application instance.
-         * @return A reference to the existing application instance.
+         * @brief Retrieve the existing application instance.
+         * @return A reference to the single, already-created application instance.
+         * @throws std::runtime_error if create() has not been called yet.
          */
         static MantisBase& instance();
 
@@ -60,9 +71,13 @@ namespace mb
          * @brief Create class instance given cmd args passed in.
          * @see parseArgs() for expected cmd args to be passed in.
          *
+         * @note Only one instance may exist per process. Call this once at
+         *       startup and use instance() thereafter.
+         *
          * @param argc Number of cmd args
          * @param argv Char array list
          * @return Reference to the created class instance
+         * @throws std::runtime_error if an instance has already been created.
          */
         static MantisBase& create(int argc, char** argv);
 
@@ -98,21 +113,27 @@ namespace mb
          * @note `admins` subcommand expects a subcommand with either the `add` or `rm`.
          * @note `serve` command can have an empty json object and the app will configure with defaults.
          *
+         * @note Only one instance may exist per process; call this once during
+         *       startup and use instance() thereafter.
+         *
          * @code
-         * json arg1 = json::object();
-         * auto& app1 = MantisApp::create(arg2);
+         * // Defaults only:
+         * auto& app = MantisBase::create(json::object());
          *
-         * json arg2;
-         * arg2["database"] = "PSQL";
-         * arg2["database"] = "dbname=mantis username=postgres password=12342532";
-         * arg2["dev"] = true;
-         * arg2["serve"] = json::object{};
-         * auto& app2 = MantisApp::create(arg2);
-         *
+         * // With configuration:
+         * json cfg;
+         * cfg["db"] = "postgresql";
+         * cfg["db_url"] = "dbname=mantis user=postgres password=12342532";
+         * cfg["dev"] = true;
+         * cfg["serve"] = json::object();
+         * auto& app = MantisBase::create(cfg);
+         * // ...elsewhere in the process, retrieve the same instance:
+         * auto& same = MantisBase::instance();
          * @endcode
          *
          * @param config JSON Object bearing the cmd args values to be used
          * @return A reference to the created class instance
+         * @throws std::runtime_error if an instance has already been created.
          */
         static MantisBase& create(const json& config = json::object());
 

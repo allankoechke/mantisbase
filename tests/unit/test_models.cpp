@@ -7,7 +7,7 @@
 
 TEST(EntitySchema, EntitySchemaBaseType) {
     // Base field type
-    mb::EntitySchema base{"test", "base"};
+    mb::EntitySchema base{mb::MantisBase::instance(), "test", "base"};
 
     EXPECT_EQ(base.type(), "base");
     EXPECT_EQ(base.name(), "test");
@@ -34,7 +34,7 @@ TEST(EntitySchema, EntitySchemaBaseType) {
 
 TEST(EntitySchema, EntitySchemaAuthType) {
     // Auth Type
-    mb::EntitySchema auth{"test", "auth"};
+    mb::EntitySchema auth{mb::MantisBase::instance(), "test", "auth"};
 
     EXPECT_EQ(auth.type(), "auth");
     EXPECT_EQ(auth.name(), "test");
@@ -63,7 +63,7 @@ TEST(EntitySchema, EntitySchemaAuthType) {
 
 TEST(EntitySchema, EntitySchemaViewType) {
     // View Type
-    const mb::EntitySchema view{"test", "view"};
+    const mb::EntitySchema view{mb::MantisBase::instance(), "test", "view"};
 
     EXPECT_EQ(view.type(), "view");
     EXPECT_EQ(view.name(), "test");
@@ -73,7 +73,7 @@ TEST(EntitySchema, EntitySchemaViewType) {
 }
 
 TEST(EntitySchema, EntitySchemaAccessRules) {
-    mb::EntitySchema schema{"test", "base"};
+    mb::EntitySchema schema{mb::MantisBase::instance(), "test", "base"};
     
     // Set access rules with different modes
     schema.setListRule(mb::AccessRule("public", ""));
@@ -99,7 +99,7 @@ TEST(EntitySchema, EntitySchemaAccessRules) {
 }
 
 TEST(EntitySchema, EntitySchemaFieldOperations) {
-    mb::EntitySchema schema{"test", "base"};
+    mb::EntitySchema schema{mb::MantisBase::instance(), "test", "base"};
     
     // Add custom fields
     mb::EntitySchemaField nameField("name", "string");
@@ -122,7 +122,7 @@ TEST(EntitySchema, EntitySchemaFieldOperations) {
 }
 
 TEST(EntitySchema, EntitySchemaJSONConversion) {
-    mb::EntitySchema schema{"test", "base"};
+    mb::EntitySchema schema{mb::MantisBase::instance(), "test", "base"};
     schema.addField(mb::EntitySchemaField("name", "string").setRequired(true));
     schema.setListRule(mb::AccessRule("public", ""));
 
@@ -134,7 +134,7 @@ TEST(EntitySchema, EntitySchemaJSONConversion) {
     EXPECT_TRUE(json.contains("fields"));
 
     // Create from JSON
-    auto newSchema = mb::EntitySchema::fromSchema(json);
+    auto newSchema = mb::EntitySchema::fromSchema(mb::MantisBase::instance(), json);
     EXPECT_EQ(newSchema.name(), "test");
     EXPECT_EQ(newSchema.type(), "base");
     EXPECT_EQ(newSchema.listRule().mode(), "public");

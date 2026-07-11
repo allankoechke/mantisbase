@@ -78,6 +78,10 @@ namespace mb {
         std::unique_ptr<SSEMgr> m_sseMgr;
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
         std::vector<HandlerFn> m_postRoutingMiddlewares;
+
+        /// Entity schema cache. Read on every request by the httplib worker
+        /// threads and mutated at runtime by the schema CRUD endpoints, so all
+        /// access must be synchronized via m_entityMapMutex.
         std::unordered_map<std::string, Entity> m_entityMap;
         std::atomic<bool> m_running{false};
     };

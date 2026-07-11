@@ -20,7 +20,7 @@ TEST(DatabaseTest, CheckSystemSchemaMigrated) {
     EXPECT_TRUE(admin_entity.isSystem());
 
     // Create schema, check fields
-    mb::EntitySchema admin_schema = mb::EntitySchema::fromEntity(admin_entity);
+    mb::EntitySchema admin_schema = mb::EntitySchema::fromEntity(mApp, admin_entity);
 
     EXPECT_TRUE(admin_schema.hasField("id"));
     EXPECT_EQ(admin_schema.field("id").type(), "string");

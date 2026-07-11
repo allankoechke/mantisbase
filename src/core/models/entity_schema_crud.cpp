@@ -11,8 +11,8 @@
 #include "mantisbase/core/realtime.h"
 
 namespace mb {
-    nlohmann::json EntitySchema::listTables(const json &) {
-        const auto sql = MantisBase::instance().db().session();
+    nlohmann::json EntitySchema::listTables(const MantisBase &app, const json &) {
+        const auto sql = app.db().session();
         const soci::rowset rs = (sql->prepare <<
                                  "SELECT id, schema, created, updated FROM mb_tables");
 
@@ -34,11 +34,11 @@ namespace mb {
         return response;
     }
 
-    nlohmann::json EntitySchema::getTable(const std::string &table_id) {
+    nlohmann::json EntitySchema::getTable(const MantisBase &app, const std::string &table_id) {
         if (table_id.empty())
             throw MantisException(400, "Required table id/name is empty!");
 
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app.db().session();
 
         soci::row row;
         *sql << "SELECT id, schema, created, updated FROM mb_tables WHERE id = :id", soci::use(table_id),
@@ -61,7 +61,7 @@ namespace mb {
 
     nlohmann::json EntitySchema::createTable(const EntitySchema &new_table) {
         // Database session & transaction instance
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = new_table.app().db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -72,13 +72,13 @@ namespace mb {
             const auto schema = new_table.toJSON();
 
             // Check if item exits already in db
-            if (tableExists(schema.at("name").get<std::string>())) {
+            if (tableExists(new_table.app(), schema.at("name").get<std::string>())) {
                 throw MantisException(500, "Table with similar name exists.");
             }
 
             // Create default time values
             const std::time_t t = time(nullptr);
-            std::tm created_tm = *std::localtime(&t);
+            std::tm created_tm = toUtcTime(t);
 
             // Execute DDL & Save to DB
             *sql << "INSERT INTO mb_tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",
@@ -115,7 +115,7 @@ namespace mb {
                 }
 
                 // Add created table to the routes
-                MantisBase::instance().router().addSchemaCache(schema);
+                new_table.app().router().addSchemaCache(schema);
             } catch (const std::exception &e) {
                 LogOrigin::entitySchemaCritical("Parse Error",
                                                 fmt::format("Could not parse entity after creation\n\t- {}", e.what()));
@@ -131,11 +131,11 @@ namespace mb {
         }
     }
 
-    nlohmann::json EntitySchema::updateTable(const std::string &table_id, const nlohmann::json &new_schema) {
+    nlohmann::json EntitySchema::updateTable(const MantisBase &app, const std::string &table_id, const nlohmann::json &new_schema) {
         if (new_schema.empty())
             throw MantisException(400, "Schema body is empty!");
 
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app.db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -149,8 +149,8 @@ namespace mb {
                 throw MantisException(404, "Entity resource for given name/id was not found!");
             }
 
-            EntitySchema old_entity = EntitySchema::fromSchema(old_schema); // Old table data
-            EntitySchema new_entity{old_entity}; // New table data
+            EntitySchema old_entity = EntitySchema::fromSchema(app, old_schema); // Old table data
+            EntitySchema new_entity{old_entity}; // New table data (copy carries the app)
             assert(old_entity == new_entity); // These two objects should be same
             new_entity.updateWith(new_schema);
 
@@ -189,7 +189,7 @@ namespace mb {
             }
 
             // Get db type
-            const auto db_type = MantisBase::instance().dbType();
+            const auto db_type = app.dbType();
             const auto new_schema_fields = new_schema.contains("fields") && new_schema["fields"].is_array()
                                                ? new_schema["fields"]
                                                : json::array();
@@ -695,7 +695,7 @@ namespace mb {
 
             // Get updated timestamp
             std::time_t t = time(nullptr);
-            std::tm updated_tm = *std::localtime(&t);
+            std::tm updated_tm = toUtcTime(t);
 
             // Update table record, if all went well.
             std::string query = "UPDATE mb_tables SET id = :id, schema = :schema,";
@@ -720,15 +720,15 @@ namespace mb {
             // Wrap in new try catch block to suppress any errors here to avoid rollbacks
             try {
                 // Update cache & subsequently the routes ...
-                MantisBase::instance().router().updateSchemaCache(old_entity.name(), updated_schema);
+                app.router().updateSchemaCache(old_entity.name(), updated_schema);
 
                 // Add hooks for this table
-                MantisBase::instance().rt().addDbHooks(new_entity.toEntity(), sql);
+                app.rt().addDbHooks(new_entity.toEntity(), sql);
 
                 // Only trigger routes to be reloaded if table name changes.
                 if (old_entity.name() != new_entity.name()) {
                     // Add hooks for this table
-                    MantisBase::instance().rt().dropDbHooks(old_entity.name(), sql);
+                    app.rt().dropDbHooks(old_entity.name(), sql);
 
                     // Update file table folder name
                     Files::renameDir(old_entity.name(), new_entity.name());
@@ -753,12 +753,12 @@ namespace mb {
     }
 
     void EntitySchema::dropTable(const EntitySchema &original_table) {
-        return dropTable(original_table.id());
+        return dropTable(original_table.app(), original_table.id());
     }
 
-    void EntitySchema::dropTable(const std::string &table_id) {
+    void EntitySchema::dropTable(const MantisBase &app, const std::string &table_id) {
         TRACE_METHOD();
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app.db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -791,7 +791,7 @@ namespace mb {
             }
 
             // Remove route for this Entity
-            MantisBase::instance().router().removeSchemaCache(entity_name);
+            app.router().removeSchemaCache(entity_name);
 
             tr.commit();
         } catch (const MantisException &e) {
@@ -805,10 +805,10 @@ namespace mb {
         }
     }
 
-    bool EntitySchema::tableExists(const std::string &table_name) {
+    bool EntitySchema::tableExists(const MantisBase &app, const std::string &table_name) {
         try {
-            const auto db_type = MantisBase::instance().dbType();
-            const auto sql = MantisBase::instance().db().session();
+            const auto db_type = app.dbType();
+            const auto sql = app.db().session();
 
             if (!(db_type == "sqlite3" || db_type == "postgresql" || db_type == "mysql")) {
                 throw std::runtime_error("The database `" + db_type + "` is not supported yet!");
@@ -831,6 +831,6 @@ namespace mb {
     }
 
     bool EntitySchema::tableExists(const EntitySchema &table) {
-        return tableExists(table.name());
+        return tableExists(table.app(), table.name());
     }
 } // mantis

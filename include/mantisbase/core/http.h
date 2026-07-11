@@ -17,6 +17,8 @@
 #include <drogon/HttpResponse.h>
 
 namespace mb {
+    class MantisBase; // forward declaration; MantisRequest holds a reference to it
+
 #ifdef MB_SCRIPTING_ENABLED
     class DuktapeImpl {
     public:
@@ -37,6 +39,16 @@ namespace mb {
         drogon::HttpRequestPtr m_req;
         ContextStore m_store;
         std::unordered_map<std::string, std::string> m_pathParams;
+
+        /// Lazily-parsed, cached request body. getBodyAsJson() is called
+        /// several times per request (access-rule evaluation, then the
+        /// handler), so the body is parsed once and reused.
+        mutable std::optional<std::pair<nlohmann::json, std::string>> m_bodyJsonCache;
+
+        /// Owning application, injected by the Router when the request is
+        /// wrapped. Request-path code reaches shared services (db, router,
+        /// realtime, config) via app() instead of the global singleton.
+        MantisBase &m_app;
 
         const std::string __class_name__ = "mb::MantisRequest";
 

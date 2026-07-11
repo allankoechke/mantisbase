@@ -18,7 +18,7 @@
 #endif
 
 namespace mb {
-    Database::Database() : m_connPool(nullptr), mbApp(MantisBase::instance()) {
+    Database::Database(const MantisBase &app) : m_connPool(nullptr), mbApp(app) {
     }
 
     Database::~Database() {
@@ -47,7 +47,12 @@ namespace mb {
                 // For SQLite, lets explicitly define location and name of the database
                 // we intend to use within the `dataDir`
                 auto sqlite_db_path = joinPaths(mbApp.dataDir(), "mantis.db").string();
-                m_connStr = std::format("db={} timeout=30 shared_cache=true synchronous=normal foreign_keys=on",
+                // Private cache (the default) + WAL gives concurrent readers with
+                // a single writer via the connection pool. shared_cache is a
+                // legacy mode discouraged with WAL (adds table-level lock
+                // contention), so it is intentionally not enabled. timeout=30
+                // sets a 30s busy timeout.
+                m_connStr = std::format("db={} timeout=30 synchronous=normal foreign_keys=on",
                                            sqlite_db_path);
             }
 
@@ -83,7 +88,7 @@ namespace mb {
                     sql.set_logger(new MantisLoggerImpl()); // Set custom query logger
 
                     // Log SQL insert values in DevMode only!
-                    if (MantisBase::instance().isDevMode())
+                    if (mbApp.isDevMode())
                         sql.set_query_context_logging_mode(soci::log_context::always);
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
@@ -121,7 +126,7 @@ namespace mb {
             return false;
         }
 
-        if (MantisBase::instance().dbType() == "sqlite3") writeCheckpoint();
+        if (mbApp.dbType() == "sqlite3") writeCheckpoint();
 
         return true;
     }
@@ -174,7 +179,7 @@ namespace mb {
 
         try {
             // Create admin table, for managing and auth for admin accounts
-            EntitySchema admin_schema{"mb_admins", "auth"};
+            EntitySchema admin_schema{mbApp, "mb_admins", "auth"};
             admin_schema.removeField("name");
             admin_schema.setSystem(true);
             *sql << admin_schema.toDDL();
@@ -182,13 +187,13 @@ namespace mb {
             // Internal use for service accounts
             // Use `base` type to avoid login via /api/auth/*
             // Used for `id` to track given tokens for single use only
-            EntitySchema service_schema{"mb_service_acc", "base"};
+            EntitySchema service_schema{mbApp, "mb_service_acc", "base"};
             service_schema.setSystem(true);
             service_schema.setHasApi(false);
             *sql << service_schema.toDDL();
 
             // Create and manage other db tables, keeping track of access rules, schema, etc.!
-            EntitySchema tables_schema{"mb_tables", "base"};
+            EntitySchema tables_schema{mbApp, "mb_tables", "base"};
             tables_schema.setSystem(true);
             tables_schema.addField(EntitySchemaField({
                 {"name", "schema"}, {"type", "json"}, {"required", true}, {"system", true}
@@ -196,7 +201,7 @@ namespace mb {
             *sql << tables_schema.toDDL();
 
             // A Key - Value settings store, where the key is hashed as the table id
-            EntitySchema store_schema{"mb_store", "base"};
+            EntitySchema store_schema{mbApp, "mb_store", "base"};
             store_schema.setSystem(true);
             store_schema.addField(EntitySchemaField({
                 {"name", "value"}, {"type", "json"}, {"required", true}, {"system", true}

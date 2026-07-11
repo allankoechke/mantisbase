@@ -38,16 +38,23 @@ namespace mb {
     class EntitySchema {
     public:
         /**
-         * @brief Default constructor (creates empty schema).
+         * @brief Construct an empty schema bound to its application.
+         *
+         * Used by the fromSchema()/fromEntity() builders before fields are added.
+         * The app is injected at construction so DDL/validation can always reach
+         * the database without a separate bind step to forget.
+         *
+         * @param app Owning application. Stored non-owning; must outlive the schema.
          */
-        EntitySchema() = default;
-        
+        explicit EntitySchema(const MantisBase &app);
+
         /**
-         * @brief Construct schema with name and type.
+         * @brief Construct schema with name and type, bound to its application.
+         * @param app Owning application (see the app-only constructor).
          * @param entity_name Table name
          * @param entity_type Entity type ("base", "auth", or "view"), defaults to "base"
          */
-        explicit EntitySchema(const std::string &entity_name, const std::string &entity_type = "base");
+        EntitySchema(const MantisBase &app, const std::string &entity_name, const std::string &entity_type = "base");
 
         // Allow copy constructors & assignment ops for easy cloning
         EntitySchema(const EntitySchema &);
@@ -67,18 +74,20 @@ namespace mb {
         bool operator==(const EntitySchema &other) const;
 
         /**
-         * @brief Create schema from JSON object.
+         * @brief Create schema from JSON object, bound to an application.
+         * @param app Owning application (db access for DDL/validation).
          * @param entity_schema JSON schema object
          * @return EntitySchema instance
          */
-        static EntitySchema fromSchema(const json &entity_schema);
-        
+        static EntitySchema fromSchema(const MantisBase &app, const json &entity_schema);
+
         /**
-         * @brief Create schema from existing Entity.
+         * @brief Create schema from existing Entity, bound to an application.
+         * @param app Owning application (db access for DDL/validation).
          * @param entity Entity to convert from
          * @return EntitySchema instance
          */
-        static EntitySchema fromEntity(const Entity &entity);
+        static EntitySchema fromEntity(const MantisBase &app, const Entity &entity);
         
         /**
          * @brief Convert schema to Entity for database operations.
@@ -266,14 +275,15 @@ namespace mb {
          * @param opts Optional parameters (pagination, etc.)
          * @return JSON array of table schemas
          */
-        static nlohmann::json listTables(const nlohmann::json &opts = nlohmann::json::object());
+        static nlohmann::json listTables(const MantisBase &app, const nlohmann::json &opts = nlohmann::json::object());
 
         /**
          * @brief Get table schema by ID from database.
+         * @param app Owning application (db access).
          * @param table_id Table identifier
          * @return JSON schema object
          */
-        static nlohmann::json getTable(const std::string &table_id);
+        static nlohmann::json getTable(const MantisBase &app, const std::string &table_id);
 
         /**
          * @brief Create table in database from schema.
@@ -288,7 +298,7 @@ namespace mb {
          * @param new_schema Updated schema JSON
          * @return JSON object with updated table data
          */
-        static nlohmann::json updateTable(const std::string &table_id, const nlohmann::json &new_schema);
+        static nlohmann::json updateTable(const MantisBase &app, const std::string &table_id, const nlohmann::json &new_schema);
 
         /**
          * @brief Drop table from database.
@@ -300,14 +310,14 @@ namespace mb {
          * @brief Drop table by ID from database.
          * @param table_id Table identifier to drop
          */
-        static void dropTable(const std::string &table_id);
+        static void dropTable(const MantisBase &app, const std::string &table_id);
 
         /**
          * @brief Check if table exists by name.
          * @param table_name Table name to check
          * @return true if table exists
          */
-        static bool tableExists(const std::string &table_name);
+        static bool tableExists(const MantisBase &app, const std::string &table_name);
 
         /**
          * @brief Check if table exists (by schema name).
@@ -356,6 +366,13 @@ namespace mb {
 
         void addFieldsIfNotExist(const std::string &type);
 
+        /**
+         * @brief Owning application (db access for DDL/validation).
+         *
+         * Always valid: injected through the constructor.
+         */
+        [[nodiscard]] const MantisBase &app() const;
+
         std::string m_name;
         std::string m_type;
         std::string m_viewSqlQuery;
@@ -364,6 +381,7 @@ namespace mb {
         std::vector<EntitySchemaField> m_fields;
         std::vector<IndexDefinition> m_indexes;
         AccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
+        const MantisBase *m_app; ///< Non-owning; set from the constructor reference
     };
 } // mb
 

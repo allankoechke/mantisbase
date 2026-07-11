@@ -1,4 +1,7 @@
 #include <utility>
+#include <vector>
+#include <memory>
+#include <ranges>
 
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/core/ws.h"

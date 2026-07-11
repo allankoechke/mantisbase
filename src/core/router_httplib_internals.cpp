@@ -30,7 +30,7 @@ namespace mb {
                 }
 
                 const auto entity_name = trim(req.getPathParamValue("entity_name"));
-                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto entity = req.app().entity(entity_name);
 
                 auto opt_user = entity.queryFromCols(body["identity"].get<std::string>(), {"id", "email"});
                 if (!opt_user.has_value()) {

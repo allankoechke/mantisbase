@@ -313,10 +313,11 @@ All runtime configuration uses the `MB_*` prefix:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MB_JWT_SECRET` | JWT secret key for token signing (set in production) | (built-in default) |
+| `MB_JWT_SECRET` | JWT secret key for token signing. **Required in production** — the server refuses to start without it. In `--dev` mode an insecure default is used (with a warning). | (none) |
 | `MB_DISABLE_FILE_UPLOADS` | Set to `1` to disable file uploads | `0` |
 | `MB_DISABLE_ADMIN_ON_FIRST_BOOT` | Set to `1` to skip creating admin on first boot | `0` |
 | `MB_DISABLE_RATE_LIMIT` | Set to `1` to disable rate limiting | (enabled) |
+| `MB_MAX_WORKER_THREADS` | Max HTTP worker threads. Doubles as the budget for concurrent SSE/realtime connections + in-flight requests (each SSE connection holds one thread). | `512` |
 
 ```bash
 # Set JWT secret (important for production)

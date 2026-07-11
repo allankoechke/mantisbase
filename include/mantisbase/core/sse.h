@@ -67,7 +67,7 @@ namespace mb {
 
         const std::string &getClientID() const;
 
-        const std::set<std::string> &getTopics() const;
+        std::set<std::string> getTopics() const;
 
         void setTopics(const std::set<std::string> &topics);
     };

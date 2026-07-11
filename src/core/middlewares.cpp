@@ -23,8 +23,8 @@ namespace mb {
                                           const std::string &trace_msg) {
             TRACE_FUNC(trace_msg);
             try {
-                const auto entity = MantisBase::instance().entity(entity_name);
-                auto auth = req.getOr<json>("auth", json::object());
+                const auto entity = req.app().entity(entity_name);
+                const auto &auth = req.getOr<json>("auth", json::object());
                 auto method = req.getMethod();
 
                 if (!(method == "GET"
@@ -56,7 +56,7 @@ namespace mb {
 
                 if (rule.mode().empty()) {
                     LogOrigin::authTrace("Admin Access Required", "Restricted access, admin auth required!");
-                    auto verification = req.getOr<json>("verification", json::object());
+                    const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
                         res.sendJSON(403, {
                             {"data", json::object()},
@@ -91,7 +91,7 @@ namespace mb {
 
                 if (rule.mode() == "auth" || (auth["entity"].is_string() && auth["entity"].get<std::string>() == "mb_admins")) {
                     LogOrigin::authTrace("User/Admin Access Required", "Restricted access, admin/user auth required!");
-                    auto verification = req.getOr<json>("verification", json::object());
+                    const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
                         res.sendJSON(403, {
                             {"data", json::object()},
@@ -274,7 +274,7 @@ namespace mb {
                 // logEntry::trace("Authenticated on entity {} as user with id {}", user_table, user_id);
 
                 try {
-                    const auto user_entity = MantisBase::instance().entity(user_table);
+                    const auto user_entity = req.app().entity(user_table);
                     if (auto user = user_entity.read(user_id); user.has_value()) {
                         auth["user"] = user.value();
                     }
@@ -305,11 +305,11 @@ namespace mb {
                                                   : throw MantisException(400, "Invalid entity name/id"));
 
                 if (!schema_id_or_name.starts_with("mbt_") &&
-                    MantisBase::instance().hasEntity(schema_id_or_name)) {
+                    req.app().hasEntity(schema_id_or_name)) {
                     return HandlerResponse::Unhandled;
                 }
 
-                EntitySchema::getTable(schema_id);
+                EntitySchema::getTable(req.app(), schema_id);
                 return HandlerResponse::Unhandled;
             } catch (const MantisException &e) {
                 if (e.code() == 404 || e.code() == 400) {
@@ -337,12 +337,12 @@ namespace mb {
                 return HandlerResponse::Handled;
             }
 
-            if (!MantisBase::instance().hasEntity(entity_name)) {
+            if (!req.app().hasEntity(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
             }
 
-            const auto entity = MantisBase::instance().entity(entity_name);
+            const auto entity = req.app().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi() || entity.type() != "auth") {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
@@ -362,12 +362,12 @@ namespace mb {
                 return HandlerResponse::Handled;
             }
 
-            if (!MantisBase::instance().hasEntity(entity_name)) {
+            if (!req.app().hasEntity(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
             }
 
-            const auto entity = MantisBase::instance().entity(entity_name);
+            const auto entity = req.app().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi()) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
@@ -382,7 +382,7 @@ namespace mb {
         return [msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
-            const auto entity = MantisBase::instance().entity(entity_name);
+            const auto entity = req.app().entity(entity_name);
             if (entity.type() == "view") {
                 res.sendJSON(405, {
                     {"status", 405},
@@ -423,7 +423,7 @@ namespace mb {
         std::string msg = MB_FUNC();
         return [msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
-            const auto auth = req.getOr<json>("auth", json::object());
+            const auto &auth = req.getOr<json>("auth", json::object());
             if (auth["type"] == "guest")
                 return HandlerResponse::Unhandled;
 
@@ -442,7 +442,7 @@ namespace mb {
             TRACE_FUNC(msg);
             try {
                 // Require admin authentication
-                auto verification = req.getOr<json>("verification", json::object());
+                const auto &verification = req.getOr<json>("verification", json::object());
                 // logEntry::trace("Verification: {}", verification.dump());
 
                 if (verification.empty()) {
@@ -459,7 +459,7 @@ namespace mb {
                                 verification["verified"].is_boolean() &&
                                 verification["verified"].get<bool>();
                 if (ok) {
-                    auto auth = req.getOr<json>("auth", json::object());
+                    const auto &auth = req.getOr<json>("auth", json::object());
                     // logEntry::trace("Ver User Auth: {}", auth.dump());
 
                     // Check if verified user object is valid, if not throw auth error
@@ -530,7 +530,6 @@ namespace mb {
     namespace {
         struct RateLimitEntry {
             std::deque<std::chrono::steady_clock::time_point> requests;
-            std::chrono::steady_clock::time_point last_cleanup;
         };
 
         // In-memory storage for rate limit tracking
@@ -539,6 +538,18 @@ namespace mb {
         std::unordered_map<std::string, RateLimitEntry> rate_limit_store;
         std::mutex rate_limit_mutex;
         constexpr auto CLEANUP_INTERVAL = std::chrono::minutes(5);
+
+        // Timestamp of the last full sweep of rate_limit_store (guarded by
+        // rate_limit_mutex). The sweep evicts entries for identifiers that were
+        // seen once and never returned, which the per-identifier cleanup can
+        // never reach.
+        std::chrono::steady_clock::time_point last_global_sweep{};
+
+        // An entry whose most recent request is older than this is stale: all of
+        // its timestamps are outside every rate-limit window, so it can be
+        // evicted. MUST be >= the largest window passed to rateLimit() (the
+        // largest currently in use is 1 hour for admin setup).
+        constexpr auto STALE_ENTRY_TTL = std::chrono::hours(1);
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rateLimit(
@@ -563,7 +574,7 @@ namespace mb {
                 
                 if (use_user_id) {
                     // Try to get user ID from auth context
-                    auto auth = req.getOr<json>("auth", json::object());
+                    const auto &auth = req.getOr<json>("auth", json::object());
                     if (auth.contains("id") && !auth["id"].is_null()) {
                         identifier = auth["id"].get<std::string>();
                     } else {
@@ -588,25 +599,32 @@ namespace mb {
                 
                 // Lock for thread-safe access
                 std::lock_guard<std::mutex> lock(rate_limit_mutex);
-                
+
+                // Periodically sweep the whole store so entries for identifiers
+                // that were seen once and never came back (e.g. IP scans,
+                // spoofed source IPs) don't accumulate without bound. Throttled
+                // to once per CLEANUP_INTERVAL and piggybacked on request
+                // traffic, so it costs nothing when idle.
+                if (now - last_global_sweep > CLEANUP_INTERVAL) {
+                    last_global_sweep = now;
+                    for (auto it = rate_limit_store.begin(); it != rate_limit_store.end();) {
+                        const auto& reqs = it->second.requests;
+                        if (reqs.empty() || now - reqs.back() > STALE_ENTRY_TTL) {
+                            it = rate_limit_store.erase(it);
+                        } else {
+                            ++it;
+                        }
+                    }
+                }
+
                 // Get or create entry for this identifier
                 auto& entry = rate_limit_store[identifier];
-                
+
                 // Cleanup old requests outside the window
                 while (!entry.requests.empty() && entry.requests.front() < cutoff_time) {
                     entry.requests.pop_front();
                 }
-                
-                // Periodic cleanup of stale entries (every 5 minutes per identifier)
-                if (now - entry.last_cleanup > CLEANUP_INTERVAL) {
-                    entry.last_cleanup = now;
-                    // If no requests in window, remove the entry to save memory
-                    if (entry.requests.empty()) {
-                        rate_limit_store.erase(identifier);
-                        return HandlerResponse::Unhandled;
-                    }
-                }
-                
+
                 // Check if rate limit exceeded
                 if (entry.requests.size() >= static_cast<size_t>(max_requests)) {
                     // Calculate retry-after seconds (time until oldest request expires)

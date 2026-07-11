@@ -39,9 +39,12 @@ namespace mb {
     class Database {
     public:
         /**
-         * @brief Construct database instance.
+         * @brief Construct database instance bound to an application.
+         * @param app The owning application; used for config (pool size, db
+         *        type, data dir, dev mode). Stored by reference and must
+         *        outlive this Database.
          */
-        Database();
+        explicit Database(const MantisBase &app);
 
         /**
          * @brief Destructor (disconnects from database).
