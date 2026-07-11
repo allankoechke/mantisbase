@@ -13,6 +13,10 @@
 #include <soci/postgresql/soci-postgresql.h>
 #endif
 
+#if MB_HAS_MYSQL
+#include <soci/mysql/soci-mysql.h>
+#endif
+
 namespace mb {
     Database::Database() : m_connPool(nullptr), mbApp(MantisBase::instance()) {
     }
@@ -89,8 +93,20 @@ namespace mb {
                     return false;
 #endif
                 } else if (db_type == "mysql") {
-                    LogOrigin::dbWarn("MySQL Not Implemented", "Database Connection for `MySQL` not implemented yet!");
+#if MB_HAS_MYSQL
+                    soci::session &sql = m_connPool->at(i);
+                    sql.open(soci::mysql, m_connStr);
+                    sql.set_logger(new MantisLoggerImpl());
+
+                    if (mbApp.isDevMode())
+                        sql.set_query_context_logging_mode(soci::log_context::always);
+                    else
+                        sql.set_query_context_logging_mode(soci::log_context::on_error);
+#else
+                    LogOrigin::dbWarn("MySQL Not Available",
+                                      "MySQL support was not enabled at build time. Rebuild with -DMB_DB_MYSQL=ON");
                     return false;
+#endif
                 } else {
                     LogOrigin::dbWarn("Database Type Not Implemented",
                                       fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));

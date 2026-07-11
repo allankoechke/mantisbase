@@ -47,10 +47,21 @@ jobs:
         run: |
           brew install jsoncpp zlib zstd postgresql@16 openssl
 
-      - name: Install MinGW
+      - name: Install dependencies on Windows
         if: matrix.os == 'windows-latest'
         run: |
           choco install mingw --no-progress
+          choco install postgresql16 --params '/Password:postgres' --no-progress
+
+      - name: Add PostgreSQL to PATH (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $pgDir = "C:\Program Files\PostgreSQL\16"
+          if (Test-Path "$pgDir\bin") {
+            echo "$pgDir\bin" >> $env:GITHUB_PATH
+            echo "PostgreSQL_ROOT=$pgDir" >> $env:GITHUB_ENV
+          }
 
       - name: Add MinGW to PATH
         if: matrix.os == 'windows-latest'
@@ -102,6 +113,13 @@ jobs:
           
           Write-Host "Using make at: $makePath"
           
+          $pgRoot = $env:PostgreSQL_ROOT
+          $pgArgs = @()
+          if ($pgRoot -and (Test-Path "$pgRoot\lib")) {
+            $pgArgs += "-DMB_HAS_POSTGRESQL=ON"
+            $pgArgs += "-DPostgreSQL_ROOT=$pgRoot"
+          }
+
           cmake -B ${{ steps.strings.outputs.build-output-dir }} `
             -G "MinGW Makefiles" `
             -DCMAKE_CXX_COMPILER="$mingwBin\g++.exe" `
@@ -109,6 +127,7 @@ jobs:
             -DCMAKE_MAKE_PROGRAM="$makePath" `
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
             -DMB_BUILD_TESTS=true `
+            @pgArgs `
             -S ${{ github.workspace }}
 
       - name: Configure CMake (Linux/macOS)
