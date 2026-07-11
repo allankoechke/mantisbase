@@ -11,15 +11,19 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         build_type: [Release]
-        c_compiler: [gcc]
         include:
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
             platform: linux-x86_64
             arch: x86_64
+          - os: macos-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+            platform: macos-arm64
+            arch: arm64
           - os: windows-latest
             c_compiler: gcc
             cpp_compiler: g++
@@ -33,15 +37,35 @@ jobs:
           fetch-depth: 1
 
       - name: Install dependencies on Ubuntu
-        if: matrix.os != 'windows-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libzstd-dev libpq-dev
+          for i in 1 2 3; do
+            sudo apt-get update && break
+            echo "apt-get update failed (attempt $i), retrying..."
+            sleep 5
+          done
+          sudo apt-get install -y libzstd-dev libpq-dev zlib1g-dev uuid-dev
 
-      - name: Install MinGW
+      - name: Install dependencies on macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install zlib zstd postgresql@16 openssl
+
+      - name: Install dependencies on Windows
         if: matrix.os == 'windows-latest'
         run: |
           choco install mingw --no-progress
+          choco install postgresql16 --params '/Password:postgres' --no-progress
+
+      - name: Add PostgreSQL to PATH (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $pgDir = "C:\Program Files\PostgreSQL\16"
+          if (Test-Path "$pgDir\bin") {
+            echo "$pgDir\bin" >> $env:GITHUB_PATH
+            echo "PostgreSQL_ROOT=$pgDir" >> $env:GITHUB_ENV
+          }
 
       - name: Add MinGW to PATH
         if: matrix.os == 'windows-latest'
@@ -93,6 +117,13 @@ jobs:
           
           Write-Host "Using make at: $makePath"
           
+          $pgRoot = $env:PostgreSQL_ROOT
+          $pgArgs = @()
+          if ($pgRoot -and (Test-Path "$pgRoot\lib")) {
+            $pgArgs += "-DMB_HAS_POSTGRESQL=ON"
+            $pgArgs += "-DPostgreSQL_ROOT=$pgRoot"
+          }
+
           cmake -B ${{ steps.strings.outputs.build-output-dir }} `
             -G "MinGW Makefiles" `
             -DCMAKE_CXX_COMPILER="$mingwBin\g++.exe" `
@@ -100,10 +131,22 @@ jobs:
             -DCMAKE_MAKE_PROGRAM="$makePath" `
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
             -DMB_BUILD_TESTS=true `
+            @pgArgs `
+            -S ${{ github.workspace }}
+
+      - name: Configure CMake (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -G Ninja \
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DMB_BUILD_TESTS=true \
             -S ${{ github.workspace }}
 
       - name: Configure CMake (Linux)
-        if: matrix.os != 'windows-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
@@ -119,7 +162,7 @@ jobs:
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: ctest --build-config ${{ matrix.build_type }}
 
-      - name: Zip the build output (Linux)
+      - name: Zip the build output (Linux/macOS)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
         run: |
           cd ${{ github.workspace }}/build/bin

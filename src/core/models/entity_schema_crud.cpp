@@ -84,11 +84,18 @@ namespace mb {
             *sql << "INSERT INTO mb_tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",
                     soci::use(id), soci::use(schema), soci::use(created_tm), soci::use(created_tm);
 
-            // Create actual SQL table
+            // Create actual SQL table or view
             *sql << new_table.toDDL();
 
-            // Add hooks for this table
-            mb::RealtimeDB::addDbHooks(Entity{schema}, sql);
+            // Create indexes
+            for (const auto &idx_ddl : new_table.indexDDL()) {
+                *sql << idx_ddl;
+            }
+
+            // Add hooks for this table (not for views)
+            if (new_table.type() != "view") {
+                mb::RealtimeDB::addDbHooks(Entity{schema}, sql);
+            }
 
             // Commit changes
             tr.commit();
@@ -102,8 +109,10 @@ namespace mb {
                 obj["created"] = tmToStr(created_tm);
                 obj["updated"] = tmToStr(created_tm);
 
-                // Create files directory
-                Files::createDir(new_table.name());
+                // Create files directory (not for views)
+                if (new_table.type() != "view") {
+                    Files::createDir(new_table.name());
+                }
 
                 // Add created table to the routes
                 MantisBase::instance().router().addSchemaCache(schema);
@@ -617,13 +626,9 @@ namespace mb {
             }
 
             // --------- Handle View Query Changes -------------- //
-            // std::string m_viewSqlQuery;
-            if (old_entity.viewQuery() != new_entity.viewQuery()) {
-                throw MantisException(500, "View query has not been implemented yet!");
-
-                // TODO
-                // - Update view query
-                // - Drop all queries and recreate them to match new fields
+            if (old_entity.type() == "view" && old_entity.viewQuery() != new_entity.viewQuery()) {
+                *sql << "DROP VIEW IF EXISTS " + old_entity.name();
+                *sql << "CREATE VIEW " + new_entity.name() + " AS " + new_entity.viewQuery();
             }
 
             // --------- Handle Type Changes -------------------- //
@@ -768,15 +773,22 @@ namespace mb {
 
             const auto entity_name = schema.at("name").get<std::string>();
 
+            const auto entity_type = schema.value("type", "base");
+
             // Remove from DB
             *sql << "DELETE FROM mb_tables WHERE id = :id", soci::use(table_id);
-            *sql << "DROP TABLE IF EXISTS " + entity_name;
 
-            // Drop hooks for this table
-            MantisBase::instance().rt().dropDbHooks(entity_name, sql);
+            if (entity_type == "view") {
+                *sql << "DROP VIEW IF EXISTS " + entity_name;
+            } else {
+                *sql << "DROP TABLE IF EXISTS " + entity_name;
 
-            // Delete files directory
-            Files::deleteDir(entity_name);
+                // Drop hooks for this table
+                MantisBase::instance().rt().dropDbHooks(entity_name, sql);
+
+                // Delete files directory
+                Files::deleteDir(entity_name);
+            }
 
             // Remove route for this Entity
             MantisBase::instance().router().removeSchemaCache(entity_name);

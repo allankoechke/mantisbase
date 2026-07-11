@@ -88,32 +88,58 @@ namespace mb {
 
     Records Entity::list(const json &opts) const {
         const auto sql = MantisBase::instance().db().session();
-        int page = 1;
-        int per_page = 100;
+        int limit = 50;
+        std::string after;
+        std::string sort_field = "id";
+        std::string sort_dir = "ASC";
 
         if (opts.contains("pagination") && opts["pagination"].is_object()) {
             auto &pagination = opts["pagination"];
 
-            // Extract the page number and page size
-            if (pagination.contains("page_index") && pagination["page_index"].is_number())
-                page = pagination["page_index"].get<int>();
-            if (pagination.contains("per_page") && pagination["per_page"].is_number())
-                per_page = pagination["per_page"].get<int>();
+            if (pagination.contains("limit") && pagination["limit"].is_number()) {
+                limit = pagination["limit"].get<int>();
+                if (limit < 1) limit = 1;
+                if (limit > 500) limit = 500;
+            }
+            if (pagination.contains("after") && pagination["after"].is_string())
+                after = pagination["after"].get<std::string>();
+            if (pagination.contains("sort") && pagination["sort"].is_string()) {
+                auto sort_str = pagination["sort"].get<std::string>();
+                if (!sort_str.empty() && sort_str[0] == '-') {
+                    sort_dir = "DESC";
+                    sort_field = sort_str.substr(1);
+                } else {
+                    sort_field = sort_str;
+                }
+                bool valid = false;
+                for (const auto &f : fields()) {
+                    if (f.name() == sort_field) { valid = true; break; }
+                }
+                if (!valid) {
+                    sort_field = "id";
+                    sort_dir = "ASC";
+                }
+            }
         }
 
-        if (per_page <= 0) throw std::invalid_argument("Page size, `per_page` value must be greater than 0");
-        if (page <= 0) throw std::invalid_argument("Page number, `page` value must be greater than 0");
+        std::string query = "SELECT * FROM " + name();
+        if (!after.empty()) {
+            if (sort_dir == "ASC")
+                query += " WHERE " + sort_field + " > :after";
+            else
+                query += " WHERE " + sort_field + " < :after";
+        }
+        query += " ORDER BY " + sort_field + " " + sort_dir + " LIMIT :limit";
 
-        const auto offset = (page - 1) * per_page;
+        soci::rowset<soci::row> rs = after.empty()
+            ? (sql->prepare << query, soci::use(limit))
+            : (sql->prepare << query, soci::use(after), soci::use(limit));
 
-        const auto query = "SELECT * FROM " + name() + " ORDER BY created DESC LIMIT :limit OFFSET :offset";
-        const soci::rowset rs = (sql->prepare << query, soci::use(per_page), soci::use(offset));
         nlohmann::json record_list = nlohmann::json::array();
 
         for (const auto &row: rs) {
             auto row_json = sociRow2Json(row, fields());
             if (type() == "auth") {
-                // Remove password fields from the response data
                 row_json.erase("password");
             }
             record_list.push_back(row_json);

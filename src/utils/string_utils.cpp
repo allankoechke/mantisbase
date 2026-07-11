@@ -1,7 +1,6 @@
 #include "../../include/mantisbase/utils/utils.h"
 
 #include <algorithm>
-#include <httplib.h>
 
 namespace mb {
     std::optional<json> tryParseJsonStr(const std::string &json_str, std::optional<json> default_value) {

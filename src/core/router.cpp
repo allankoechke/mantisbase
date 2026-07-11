@@ -9,6 +9,7 @@
 #include <cmrc/cmrc.hpp>
 #include <chrono>
 #include <thread>
+#include <drogon/drogon.h>
 
 // For thread logger
 #include <spdlog/sinks/stdout_color_sinks-inl.h>
@@ -22,6 +23,9 @@
 #include "../include/mantisbase/core/logger/log_database.h"
 #include "../include/mantisbase/core/realtime.h"
 #include "../include/mantisbase/core/sse.h"
+#include "../include/mantisbase/core/ws.h"
+#include "../include/mantisbase/core/oauth.h"
+#include "../include/mantisbase/core/api_keys.h"
 
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
@@ -30,30 +34,14 @@ namespace mb {
     Router::Router()
         : mApp(MantisBase::instance()),
           m_sseMgr(std::make_unique<SSEMgr>()) {
-        // Let's fix timing initialization, set the start time to current time
-        svr.set_pre_routing_handler(preRoutingHandler());
-
-        // Add CORS headers to all responses
-        svr.set_post_routing_handler(postRoutingHandler());
-
-        svr.set_logger(routingLogger());
-
-        // Handle preflight OPTIONS requests
-        svr.Options(".*", optionsHandler());
-
-        // Set Error Handler
-        svr.set_error_handler(routingErrorHandler());
-
         // Add global middlewares to work across all routes
-        m_preRoutingMiddlewares.push_back(getAuthToken()); // Get auth token from the header
-        m_preRoutingMiddlewares.push_back(hydrateContextData()); // Fill request context with necessary data
+        m_preRoutingMiddlewares.push_back(getAuthToken());
+        m_preRoutingMiddlewares.push_back(hydrateContextData());
     }
 
     Router::~Router() {
-        if (svr.is_running())
-            svr.stop();
-
-        // std::cout << "Router Des()" << std::endl;
+        if (m_running.load())
+            close();
     }
 
     bool Router::init() {
@@ -95,13 +83,6 @@ namespace mb {
 
     bool Router::listen() {
         try {
-            // Check if server can bind to port before launching
-            if (!svr.is_valid()) {
-                LogOrigin::critical("Server Invalid",
-                                    "Server is not valid. Maybe port is in use or permissions issue.");
-                return false;
-            }
-
             const auto host = mApp.host();
             const auto port = mApp.port();
 
@@ -112,6 +93,47 @@ namespace mb {
             bool launch_admin_setup = !mApp.skipAdminSetup() && admin_entity.isEmpty();
 
             m_sseMgr->start();
+
+            // Configure Drogon
+            drogon::app()
+                .addListener(host, port)
+                .setThreadNum(4)
+                .enableRunAsDaemon(false);
+
+            // Register CORS pre-routing advice
+            drogon::app().registerPreRoutingAdvice([](const drogon::HttpRequestPtr &req,
+                                                      drogon::AdviceCallback &&callback,
+                                                      drogon::AdviceChainCallback &&chainCallback) {
+                // Handle OPTIONS preflight
+                if (req->method() == drogon::Options) {
+                    auto resp = drogon::HttpResponse::newHttpResponse();
+                    resp->setStatusCode(drogon::k204NoContent);
+                    resp->addHeader("Access-Control-Allow-Origin", "*");
+                    resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+                    resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+                    resp->addHeader("Access-Control-Max-Age", "86400");
+                    callback(resp);
+                    return;
+                }
+                chainCallback();
+            });
+
+            // Register post-routing advice for CORS headers on all responses
+            drogon::app().registerPostHandlingAdvice([](const drogon::HttpRequestPtr &,
+                                                        const drogon::HttpResponsePtr &resp) {
+                resp->addHeader("Access-Control-Allow-Origin", "*");
+                resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+                resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+            });
+
+            // Register default 404 handler
+            auto notFoundResp = drogon::HttpResponse::newHttpResponse();
+            notFoundResp->setStatusCode(drogon::k404NotFound);
+            notFoundResp->setContentTypeString("application/json");
+            notFoundResp->setBody(R"({"status":404,"error":"Not Found","data":{}})");
+            drogon::app().setCustom404Page(notFoundResp);
+
+            m_running.store(true);
 
             // Launch logging/browser in separate thread after listen starts
             std::thread notifier([host, port, launch_admin_setup]() -> void {
@@ -134,17 +156,18 @@ namespace mb {
                     MantisBase::instance().openBrowserOnStart();
             });
 
-            if (!svr.listen(host, port)) {
-                LogOrigin::critical("Server Bind Failed", fmt::format("Error: Failed to bind to {}:{}", host, port));
-                notifier.join();
-                return false;
-            }
+            notifier.detach();
 
-            notifier.join();
+            // drogon::app().run() blocks until quit() is called
+            drogon::app().run();
+
+            m_running.store(false);
             return true;
         } catch (const std::exception &e) {
+            m_running.store(false);
             LogOrigin::critical("Server Start Failed", fmt::format("Failed to start server: {}", e.what()));
         } catch (...) {
+            m_running.store(false);
             LogOrigin::critical("Server Start Failed", "Failed to start server: Unknown Error");
         }
 
@@ -157,15 +180,16 @@ namespace mb {
             m_sseMgr->stop();
 
         // Stop router and clear out objects
-        if (svr.is_running()) {
-            svr.stop();
+        if (m_running.load()) {
+            drogon::app().quit();
+            m_running.store(false);
             m_entityMap.clear();
             LogOrigin::info("Server Stopped", "HTTP Server Stopped.");
         }
     }
 
-    httplib::Server &Router::server() {
-        return svr;
+    bool Router::isRunning() const {
+        return m_running.load();
     }
 
     SSEMgr &Router::sseMgr() const {
@@ -261,7 +285,19 @@ namespace mb {
 
     void Router::generateMiscEndpoints() {
         auto &router = mApp.router();
-        router.Get(R"(/mb(/.*)?)", handleAdminDashboardRoute());
+
+        // Admin dashboard route - use Drogon regex handler
+        auto adminHandler = handleAdminDashboardRoute();
+        drogon::app().registerHandlerViaRegex(
+            R"(/mb(/.*)?)",
+            [adminHandler](const drogon::HttpRequestPtr &req,
+                          std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
+                MantisRequest ma_req{req};
+                MantisResponse ma_res{};
+                adminHandler(ma_req, ma_res);
+                callback(ma_res.drogonResponse());
+            },
+            {drogon::Get});
 
         router.Get("/api/v1/health", healthCheckHandler());
 
@@ -291,17 +327,18 @@ namespace mb {
         });
 
 
-        SSEMgr::createRoutes();
+        m_sseMgr->createRoutes();
 
         registerSchemaRoutes();
         registerEntityRoutes();
         registerAdminEntityRoutes();
+        registerApiKeyRoutes();
+        registerOAuthRoutes();
 
-        // Add /public static file serving directory
-        if (const auto mount_ok = svr.set_mount_point("/", mApp.publicDir()); !mount_ok) {
-            LogOrigin::critical("Mount Point Setup Failed", fmt::format(
-                                    "Failed to setup mount point directory for '/' at '{}'",
-                                    mApp.publicDir()));
+        // Static file serving: register a catch-all for the public directory
+        const auto publicDir = mApp.publicDir();
+        if (fs::exists(publicDir)) {
+            drogon::app().setDocumentRoot(publicDir);
         }
     }
 
@@ -309,7 +346,13 @@ namespace mb {
         return [](const MantisRequest &req, MantisResponse &res) {
             try {
                 const auto fs = cmrc::mantis::get_filesystem();
-                std::string path = req.matches()[1];
+
+                // Extract path after /mb
+                std::string full_path = req.getPath();
+                std::string path;
+                if (full_path.size() > 3) {
+                    path = full_path.substr(3); // strip "/mb"
+                }
 
                 // Normalize the path
                 if (path.empty() || path == "/") {
@@ -425,8 +468,8 @@ namespace mb {
                 }
 
                 // Parse query parameters
-                int page = 1;
-                int page_size = 50;
+                int limit = 50;
+                std::string after;
                 std::string level_filter;
                 std::string min_level_filter;
                 std::string search_filter;
@@ -435,32 +478,23 @@ namespace mb {
                 std::string sort_by = "timestamp";
                 std::string sort_order = "desc";
 
-                // Get page parameter
-                if (req.hasQueryParam("page")) {
+                if (req.hasQueryParam("after")) {
+                    after = req.getQueryParamValue("after");
+                }
+
+                if (req.hasQueryParam("limit")) {
                     try {
-                        page = std::stoi(req.getQueryParamValue("page"));
-                        if (page < 1) page = 1;
+                        limit = std::stoi(req.getQueryParamValue("limit"));
+                        if (limit < 1) limit = 1;
+                        if (limit > 1000) limit = 1000;
                     } catch (...) {
-                        page = 1;
+                        limit = 50;
                     }
                 }
 
-                // Get page_size parameter
-                if (req.hasQueryParam("page_size")) {
-                    try {
-                        page_size = std::stoi(req.getQueryParamValue("page_size"));
-                        if (page_size < 1) page_size = 1;
-                        if (page_size > 1000) page_size = 1000; // Limit to 1000
-                    } catch (...) {
-                        page_size = 50;
-                    }
-                }
-
-                // Get level filter
                 if (req.hasQueryParam("level")) {
                     level_filter = req.getQueryParamValue("level");
 
-                    // Validate level
                     if (level_filter != "trace" && level_filter != "debug" &&
                         level_filter != "info" && level_filter != "warn" &&
                         level_filter != "critical") {
@@ -471,7 +505,6 @@ namespace mb {
                 if (req.hasQueryParam("min_level")) {
                     min_level_filter = req.getQueryParamValue("min_level");
 
-                    // Validate level
                     if (min_level_filter != "trace" && min_level_filter != "debug" &&
                         min_level_filter != "info" && min_level_filter != "warn" &&
                         min_level_filter != "critical") {
@@ -479,12 +512,10 @@ namespace mb {
                     }
                 }
 
-                // Get search filter
                 if (req.hasQueryParam("search")) {
                     search_filter = req.getQueryParamValue("search");
                 }
 
-                // Get date filters
                 if (req.hasQueryParam("start_date")) {
                     start_date = req.getQueryParamValue("start_date");
                 }
@@ -492,10 +523,8 @@ namespace mb {
                     end_date = req.getQueryParamValue("end_date");
                 }
 
-                // Get sort parameters
                 if (req.hasQueryParam("sort_by")) {
                     std::string sort_param = req.getQueryParamValue("sort_by");
-                    // Validate sort_by to prevent SQL injection
                     if (sort_param == "level" || sort_param == "origin" || sort_param == "message" ||
                         sort_param == "timestamp" || sort_param == "created_at") {
                         sort_by = sort_param;
@@ -510,8 +539,7 @@ namespace mb {
 
                 if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
 
-                // Fetch logs
-                json result = logsDb.getLogs(page, page_size, level_filter,
+                json result = logsDb.getLogs(after, limit, level_filter,
                                              search_filter, start_date, end_date,
                                              sort_by, sort_order);
 
@@ -535,4 +563,5 @@ namespace mb {
             }
         };
     }
+
 }

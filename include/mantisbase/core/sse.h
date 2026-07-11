@@ -17,28 +17,25 @@
 #ifndef MANTISBASE_SSE_H
 #define MANTISBASE_SSE_H
 
-#include <condition_variable>
 #include <functional>
 #include <mutex>
-#include <queue>
 #include <set>
 #include <thread>
 #include <unordered_map>
 #include <nlohmann/json.hpp>
+#include <drogon/HttpResponse.h>
 
 #include "realtime.h"
 
 namespace mb {
     using json = nlohmann::json;
+    class WSMgr;
 
-    /** Per-client SSE session: holds subscribed topics, auth details, and queues events (change, ping). */
+    /** Per-client SSE session: holds subscribed topics and a Drogon async stream for zero-thread event delivery. */
     class SSESession {
         std::string m_clientID;
         std::set<std::string> m_topics;
-
-        std::mutex m_queueMutex;
-        std::condition_variable m_queueCV;
-        std::queue<std::pair<std::string, json> > m_eventQueue; // <event_type, data>
+        drogon::ResponseStreamPtr m_stream;
 
         std::atomic<bool> m_isActive;
         std::chrono::steady_clock::time_point m_lastActivity;
@@ -46,16 +43,10 @@ namespace mb {
     public:
         SSESession(std::string client_id,
                    const std::set<std::string> &topics,
-                   const json &auth = json::object(),
-                   const json &verification = json::object());
+                   drogon::ResponseStreamPtr stream);
 
-        // Queue an event to be sent
-        /** Queue an event (e.g. "change", "ping") to be sent to the client. */
-        void queueEvent(const std::string &eventType, const json &data);
-
-        /** Block until the next event is available or timeout; returns true if event was read. */
-        bool waitForEvent(std::string &eventType, json &data,
-                          std::chrono::milliseconds timeout);
+        /** Send an SSE-formatted event through the async stream. Returns false if stream is closed. */
+        bool sendEvent(const std::string &eventType, const json &data);
 
         /** True if this session is subscribed to the topic implied by change_event. */
         bool isInterestedIn(const json &change_event) const;
@@ -69,7 +60,7 @@ namespace mb {
 
         std::chrono::steady_clock::time_point getLastActivity() const;
 
-        /** Mark session inactive and wake any waiters (disconnect). */
+        /** Mark session inactive and close the stream. */
         void close();
 
         bool isActive() const;
@@ -81,22 +72,24 @@ namespace mb {
         void setTopics(const std::set<std::string> &topics);
     };
 
-    /** Manages SSE sessions, routes realtime change events, and registers GET/POST /api/v1/realtime. */
+    /** Manages SSE sessions, WebSocket connections, routes realtime change events, and registers GET/POST /api/v1/realtime. */
     class SSEMgr {
         std::unordered_map<std::string, std::shared_ptr<SSESession>> m_sessions;
         std::mutex m_sessions_mutex;
         std::condition_variable m_cv;
         std::thread m_cleanup_thread;
         std::atomic<bool> m_running{true};
+        std::unique_ptr<WSMgr> m_wsMgr;
 
     public:
-        SSEMgr() = default;
+        SSEMgr();
         ~SSEMgr();
 
         /** Register GET and POST /api/v1/realtime routes. */
-        static void createRoutes();
-        /** Create a new SSE session with the given topics and optional auth details; returns client_id (session id). */
-        std::string createSession(const std::set<std::string> &initial_topics);
+        void createRoutes();
+        /** Create a new SSE session with the given topics and stream; returns client_id. */
+        std::string createSession(const std::set<std::string> &initial_topics,
+                                  drogon::ResponseStreamPtr stream);
 
         std::shared_ptr<SSESession> fetchSession(const std::string &session_id);
         /** Remove session and close it (disconnect). */
@@ -105,16 +98,15 @@ namespace mb {
         void updateActivity(const std::string &session_id);
         std::shared_ptr<mb::SSESession> getSession(const std::string &sessionId);
 
-        /** Push a change event to all sessions interested in its topic. */
+        /** Push a change event to all SSE sessions and WS connections interested in its topic. */
         void broadcastChange(const json &change_event);
         size_t getSessionCount();
+
+        WSMgr &wsMgr() const;
 
         void start();
         void stop();
         bool isRunning() const;
-
-        static std::function<void(MantisRequest &, MantisResponse &)> handleSSESession();
-        static std::function<void(MantisRequest &, MantisResponse &)> handleSSESessionUpdate();
 
     private:
         static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> validateSubTopics(bool is_updating = false);

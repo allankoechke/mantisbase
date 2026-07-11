@@ -138,7 +138,7 @@ namespace mb {
         }
     }
 
-    json LogDatabase::getLogs(int page, int page_size,
+    json LogDatabase::getLogs(const std::string &after, int limit,
                               const std::string &level_filter,
                               const std::string &search_filter,
                               const std::string &start_date,
@@ -150,14 +150,13 @@ namespace mb {
             return json::object();
         }
 
+        if (limit < 1) limit = 1;
+        if (limit > 1000) limit = 1000;
+
         json result = json::object();
         json logs_array = json::array();
 
         try {
-            // Build WHERE clause
-            bool has_conditions = !level_filter.empty() || !search_filter.empty() || !start_date.empty() || !end_date.
-                                  empty();
-
             // Validate sort_by to prevent SQL injection
             std::string valid_sort_by = "timestamp";
             if (sort_by == "level" || sort_by == "origin" || sort_by == "message" || sort_by == "details" || sort_by ==
@@ -168,68 +167,66 @@ namespace mb {
             // Validate sort_order
             std::string valid_sort_order = (sort_order == "asc") ? "ASC" : "DESC";
 
-            // Calculate offset
-            int offset = (page - 1) * page_size;
-
-            // Build query with proper WHERE clause (inputs validated, safe to use)
             std::string query = "SELECT id, timestamp, level, origin, message, details, data, created_at FROM mb_logs";
 
-            // Build WHERE clause with actual values (after validation, safe)
-            if (has_conditions) {
-                query += " WHERE ";
-                bool first = true;
-                if (!level_filter.empty()) {
-                    if (level_filter.starts_with('>')) {
-                        query += (first ? "" : " AND ") + buildMinLogWhereCondition(level_filter.substr(1));;
-                    } else {
-                        // level_filter is validated to be one of: trace, debug, info, warn, critical
-                        query += (first ? "" : " AND ") + std::string("level = '") + level_filter + "'";
-                    }
+            std::vector<std::string> conditions;
 
-                    first = false;
+            if (!after.empty()) {
+                if (valid_sort_order == "ASC")
+                    conditions.push_back(valid_sort_by + " > '" + after + "'");
+                else
+                    conditions.push_back(valid_sort_by + " < '" + after + "'");
+            }
+
+            if (!level_filter.empty()) {
+                if (level_filter.starts_with('>')) {
+                    conditions.push_back(buildMinLogWhereCondition(level_filter.substr(1)));
+                } else {
+                    conditions.push_back(std::string("level = '") + level_filter + "'");
                 }
-                if (!search_filter.empty()) {
-                    // Escape single quotes for SQL
-                    std::string escaped = search_filter;
-                    size_t pos = 0;
-                    while ((pos = escaped.find('\'', pos)) != std::string::npos) {
-                        escaped.replace(pos, 1, "''");
-                        pos += 2;
-                    }
-                    query += (first ? "" : " AND ") + std::string("(message LIKE '%") + escaped +
-                            "%' OR details LIKE '%" + escaped + "%')";
-                    first = false;
+            }
+            if (!search_filter.empty()) {
+                std::string escaped = search_filter;
+                size_t pos = 0;
+                while ((pos = escaped.find('\'', pos)) != std::string::npos) {
+                    escaped.replace(pos, 1, "''");
+                    pos += 2;
                 }
-                if (!start_date.empty()) {
-                    // start_date is validated format
-                    std::string escaped = start_date;
-                    size_t pos = 0;
-                    while ((pos = escaped.find('\'', pos)) != std::string::npos) {
-                        escaped.replace(pos, 1, "''");
-                        pos += 2;
-                    }
-                    query += (first ? "" : " AND ") + std::string("timestamp >= '") + escaped + "'";
-                    first = false;
+                conditions.push_back(std::string("(message LIKE '%") + escaped +
+                        "%' OR details LIKE '%" + escaped + "%')");
+            }
+            if (!start_date.empty()) {
+                std::string escaped = start_date;
+                size_t pos = 0;
+                while ((pos = escaped.find('\'', pos)) != std::string::npos) {
+                    escaped.replace(pos, 1, "''");
+                    pos += 2;
                 }
-                if (!end_date.empty()) {
-                    std::string escaped = end_date;
-                    size_t pos = 0;
-                    while ((pos = escaped.find('\'', pos)) != std::string::npos) {
-                        escaped.replace(pos, 1, "''");
-                        pos += 2;
-                    }
-                    query += (first ? "" : " AND ") + std::string("timestamp <= '") + escaped + "'";
-                    first = false;
+                conditions.push_back(std::string("timestamp >= '") + escaped + "'");
+            }
+            if (!end_date.empty()) {
+                std::string escaped = end_date;
+                size_t pos = 0;
+                while ((pos = escaped.find('\'', pos)) != std::string::npos) {
+                    escaped.replace(pos, 1, "''");
+                    pos += 2;
+                }
+                conditions.push_back(std::string("timestamp <= '") + escaped + "'");
+            }
+
+            if (!conditions.empty()) {
+                query += " WHERE ";
+                for (size_t i = 0; i < conditions.size(); ++i) {
+                    if (i > 0) query += " AND ";
+                    query += conditions[i];
                 }
             }
 
             query += " ORDER BY " + valid_sort_by + " " + valid_sort_order;
-            query += " LIMIT " + std::to_string(page_size) + " OFFSET " + std::to_string(offset);
+            query += " LIMIT " + std::to_string(limit);
 
-            // Acquire lock
             std::lock_guard lock(m_dbMutexLock);
 
-            // Execute query using rowset and iterate over results
             for (const soci::rowset rs = (m_session->prepare << query); const auto &r: rs) {
                 json log_entry = json::object();
                 log_entry["id"] = r.get<std::string>(0);
@@ -252,14 +249,18 @@ namespace mb {
                 logs_array.push_back(log_entry);
             }
 
-            // Get total count
-            int total_count = -1; // getLogCount(level_filter, search_filter, start_date, end_date);
+            std::string cursor;
+            if (!logs_array.empty()) {
+                const auto &last = logs_array.back();
+                if (last.contains("id"))
+                    cursor = last["id"].get<std::string>();
+            }
 
             result["data"] = json::object();
-            result["data"]["page"] = page;
-            result["data"]["page_size"] = page_size;
-            result["data"]["total_count"] = total_count;
+            result["data"]["limit"] = limit;
+            result["data"]["cursor"] = cursor;
             result["data"]["items"] = logs_array;
+            result["data"]["items_count"] = logs_array.size();
         } catch (const std::exception &e) {
             throw MantisException(500, std::string("Failed to fetch logs: ") + e.what());
         }
