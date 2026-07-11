@@ -468,8 +468,8 @@ namespace mb {
                 }
 
                 // Parse query parameters
-                int page = 1;
-                int page_size = 50;
+                int limit = 50;
+                std::string after;
                 std::string level_filter;
                 std::string min_level_filter;
                 std::string search_filter;
@@ -478,32 +478,23 @@ namespace mb {
                 std::string sort_by = "timestamp";
                 std::string sort_order = "desc";
 
-                // Get page parameter
-                if (req.hasQueryParam("page")) {
+                if (req.hasQueryParam("after")) {
+                    after = req.getQueryParamValue("after");
+                }
+
+                if (req.hasQueryParam("limit")) {
                     try {
-                        page = std::stoi(req.getQueryParamValue("page"));
-                        if (page < 1) page = 1;
+                        limit = std::stoi(req.getQueryParamValue("limit"));
+                        if (limit < 1) limit = 1;
+                        if (limit > 1000) limit = 1000;
                     } catch (...) {
-                        page = 1;
+                        limit = 50;
                     }
                 }
 
-                // Get page_size parameter
-                if (req.hasQueryParam("page_size")) {
-                    try {
-                        page_size = std::stoi(req.getQueryParamValue("page_size"));
-                        if (page_size < 1) page_size = 1;
-                        if (page_size > 1000) page_size = 1000;
-                    } catch (...) {
-                        page_size = 50;
-                    }
-                }
-
-                // Get level filter
                 if (req.hasQueryParam("level")) {
                     level_filter = req.getQueryParamValue("level");
 
-                    // Validate level
                     if (level_filter != "trace" && level_filter != "debug" &&
                         level_filter != "info" && level_filter != "warn" &&
                         level_filter != "critical") {
@@ -514,7 +505,6 @@ namespace mb {
                 if (req.hasQueryParam("min_level")) {
                     min_level_filter = req.getQueryParamValue("min_level");
 
-                    // Validate level
                     if (min_level_filter != "trace" && min_level_filter != "debug" &&
                         min_level_filter != "info" && min_level_filter != "warn" &&
                         min_level_filter != "critical") {
@@ -522,12 +512,10 @@ namespace mb {
                     }
                 }
 
-                // Get search filter
                 if (req.hasQueryParam("search")) {
                     search_filter = req.getQueryParamValue("search");
                 }
 
-                // Get date filters
                 if (req.hasQueryParam("start_date")) {
                     start_date = req.getQueryParamValue("start_date");
                 }
@@ -535,10 +523,8 @@ namespace mb {
                     end_date = req.getQueryParamValue("end_date");
                 }
 
-                // Get sort parameters
                 if (req.hasQueryParam("sort_by")) {
                     std::string sort_param = req.getQueryParamValue("sort_by");
-                    // Validate sort_by to prevent SQL injection
                     if (sort_param == "level" || sort_param == "origin" || sort_param == "message" ||
                         sort_param == "timestamp" || sort_param == "created_at") {
                         sort_by = sort_param;
@@ -553,8 +539,7 @@ namespace mb {
 
                 if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
 
-                // Fetch logs
-                json result = logsDb.getLogs(page, page_size, level_filter,
+                json result = logsDb.getLogs(after, limit, level_filter,
                                              search_filter, start_date, end_date,
                                              sort_by, sort_order);
 

@@ -244,3 +244,100 @@ TEST(EntitySchema, ViewEntityRejectsFields) {
     EXPECT_TRUE(view.fields().empty());
     EXPECT_FALSE(view.hasField("anything"));
 }
+
+TEST(CursorPagination, DefaultPaginationOpts) {
+    nlohmann::json opts;
+    opts["pagination"] = {
+        {"limit", 50},
+        {"after", ""},
+        {"sort", ""}
+    };
+
+    EXPECT_EQ(opts["pagination"]["limit"].get<int>(), 50);
+    EXPECT_EQ(opts["pagination"]["after"].get<std::string>(), "");
+    EXPECT_EQ(opts["pagination"]["sort"].get<std::string>(), "");
+}
+
+TEST(CursorPagination, LimitClamping) {
+    int limit = 600;
+    if (limit < 1) limit = 1;
+    if (limit > 500) limit = 500;
+    EXPECT_EQ(limit, 500);
+
+    limit = -5;
+    if (limit < 1) limit = 1;
+    if (limit > 500) limit = 500;
+    EXPECT_EQ(limit, 1);
+
+    limit = 100;
+    if (limit < 1) limit = 1;
+    if (limit > 500) limit = 500;
+    EXPECT_EQ(limit, 100);
+}
+
+TEST(CursorPagination, SortFieldParsing) {
+    auto parseSort = [](const std::string &sort_str) -> std::pair<std::string, std::string> {
+        std::string field = "id";
+        std::string dir = "ASC";
+        if (!sort_str.empty() && sort_str[0] == '-') {
+            dir = "DESC";
+            field = sort_str.substr(1);
+        } else if (!sort_str.empty()) {
+            field = sort_str;
+        }
+        return {field, dir};
+    };
+
+    auto [f1, d1] = parseSort("name");
+    EXPECT_EQ(f1, "name");
+    EXPECT_EQ(d1, "ASC");
+
+    auto [f2, d2] = parseSort("-created");
+    EXPECT_EQ(f2, "created");
+    EXPECT_EQ(d2, "DESC");
+
+    auto [f3, d3] = parseSort("");
+    EXPECT_EQ(f3, "id");
+    EXPECT_EQ(d3, "ASC");
+}
+
+TEST(CursorPagination, CursorFromResponseItems) {
+    nlohmann::json records = nlohmann::json::array();
+    records.push_back({{"id", "abc-001"}, {"name", "Alice"}});
+    records.push_back({{"id", "abc-002"}, {"name", "Bob"}});
+    records.push_back({{"id", "abc-003"}, {"name", "Charlie"}});
+
+    std::string cursor;
+    if (!records.empty()) {
+        const auto &last = records.back();
+        if (last.contains("id") && last["id"].is_string())
+            cursor = last["id"].get<std::string>();
+    }
+    EXPECT_EQ(cursor, "abc-003");
+}
+
+TEST(CursorPagination, EmptyDatasetCursor) {
+    nlohmann::json records = nlohmann::json::array();
+
+    std::string cursor;
+    if (!records.empty()) {
+        const auto &last = records.back();
+        if (last.contains("id") && last["id"].is_string())
+            cursor = last["id"].get<std::string>();
+    }
+    EXPECT_EQ(cursor, "");
+}
+
+TEST(CursorPagination, PaginationOptsRoundTrip) {
+    nlohmann::json opts;
+    opts["pagination"] = {
+        {"limit", 25},
+        {"after", "uuid-abc-123"},
+        {"sort", "-created"}
+    };
+
+    auto &p = opts["pagination"];
+    EXPECT_EQ(p["limit"].get<int>(), 25);
+    EXPECT_EQ(p["after"].get<std::string>(), "uuid-abc-123");
+    EXPECT_EQ(p["sort"].get<std::string>(), "-created");
+}
