@@ -13,10 +13,6 @@
 #include <soci/postgresql/soci-postgresql.h>
 #endif
 
-#if MB_HAS_MYSQL
-#include <soci/mysql/soci-mysql.h>
-#endif
-
 namespace mb {
     Database::Database() : m_connPool(nullptr), mbApp(MantisBase::instance()) {
     }
@@ -93,20 +89,8 @@ namespace mb {
                     return false;
 #endif
                 } else if (db_type == "mysql") {
-#if MB_HAS_MYSQL
-                    soci::session &sql = m_connPool->at(i);
-                    sql.open(soci::mysql, m_connStr);
-                    sql.set_logger(new MantisLoggerImpl());
-
-                    if (mbApp.isDevMode())
-                        sql.set_query_context_logging_mode(soci::log_context::always);
-                    else
-                        sql.set_query_context_logging_mode(soci::log_context::on_error);
-#else
-                    LogOrigin::dbWarn("MySQL Not Available",
-                                      "MySQL support was not enabled at build time. Rebuild with -DMB_DB_MYSQL=ON");
+                    LogOrigin::dbWarn("MySQL Not Implemented", "Database Connection for `MySQL` not implemented yet!");
                     return false;
-#endif
                 } else {
                     LogOrigin::dbWarn("Database Type Not Implemented",
                                       fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));
@@ -203,82 +187,11 @@ namespace mb {
             }));
             *sql << store_schema.toDDL();
 
-            // Sessions table for JWT session tracking
-            *sql << "CREATE TABLE IF NOT EXISTS mb_sessions ("
-                    "id TEXT PRIMARY KEY, "
-                    "entity_name TEXT NOT NULL, "
-                    "user_id TEXT NOT NULL, "
-                    "token_hash TEXT NOT NULL, "
-                    "refresh_token_hash TEXT, "
-                    "expires_at TEXT NOT NULL, "
-                    "created TEXT NOT NULL"
-                    ")";
-
-            // API keys table
-            *sql << "CREATE TABLE IF NOT EXISTS mb_api_keys ("
-                    "id TEXT PRIMARY KEY, "
-                    "entity_name TEXT NOT NULL, "
-                    "user_id TEXT NOT NULL, "
-                    "key_hash TEXT NOT NULL UNIQUE, "
-                    "label TEXT NOT NULL DEFAULT 'API Key', "
-                    "permissions TEXT NOT NULL DEFAULT '[]', "
-                    "last_used TEXT, "
-                    "created TEXT NOT NULL, "
-                    "expires_at TEXT"
-                    ")";
-            *sql << "CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON mb_api_keys(key_hash)";
-
-            // OAuth providers table
-            *sql << "CREATE TABLE IF NOT EXISTS mb_oauth_providers ("
-                    "id TEXT PRIMARY KEY, "
-                    "name TEXT NOT NULL UNIQUE, "
-                    "client_id TEXT NOT NULL DEFAULT '', "
-                    "client_secret_encrypted TEXT NOT NULL DEFAULT '', "
-                    "discovery_url TEXT NOT NULL DEFAULT '', "
-                    "scopes TEXT NOT NULL DEFAULT 'openid email profile', "
-                    "is_preset INTEGER NOT NULL DEFAULT 0, "
-                    "enabled INTEGER NOT NULL DEFAULT 1"
-                    ")";
-
-            // Entity-specific OAuth configuration
-            *sql << "CREATE TABLE IF NOT EXISTS mb_entity_oauth_config ("
-                    "id TEXT PRIMARY KEY, "
-                    "entity_name TEXT NOT NULL, "
-                    "provider_id TEXT NOT NULL, "
-                    "enabled INTEGER NOT NULL DEFAULT 1, "
-                    "UNIQUE(entity_name, provider_id)"
-                    ")";
-
-            // OAuth state storage for PKCE flow
-            *sql << "CREATE TABLE IF NOT EXISTS mb_oauth_states ("
-                    "id TEXT PRIMARY KEY, "
-                    "state TEXT NOT NULL UNIQUE, "
-                    "pkce_verifier TEXT NOT NULL, "
-                    "entity_name TEXT NOT NULL, "
-                    "provider_id TEXT NOT NULL, "
-                    "redirect_uri TEXT NOT NULL, "
-                    "expires_at TEXT NOT NULL"
-                    ")";
-
-            // OAuth linked accounts
-            *sql << "CREATE TABLE IF NOT EXISTS mb_oauth_accounts ("
-                    "id TEXT PRIMARY KEY, "
-                    "entity_name TEXT NOT NULL, "
-                    "user_id TEXT NOT NULL, "
-                    "provider_id TEXT NOT NULL, "
-                    "provider_user_id TEXT NOT NULL, "
-                    "access_token_encrypted TEXT, "
-                    "refresh_token_encrypted TEXT, "
-                    "id_token_sub TEXT, "
-                    "linked_at TEXT NOT NULL, "
-                    "UNIQUE(entity_name, provider_id, provider_user_id)"
-                    ")";
-
-            // Seed default OAuth provider presets
-            seedOAuthPresets(*sql);
-
             // Commit changes
             tr.commit();
+
+            // Enforce migration once settings object is created!
+            // MantisBase::instance().settings().migrate();
 
             return true;
         } catch (std::exception &e) {
@@ -286,35 +199,6 @@ namespace mb {
             LogOrigin::dbCritical("System Tables Creation Failed",
                                   fmt::format("Create System Tables Failed: {}", e.what()));
             return false;
-        }
-    }
-
-    void Database::seedOAuthPresets(soci::session &sql) {
-        struct Preset {
-            std::string name;
-            std::string discovery_url;
-            std::string scopes;
-        };
-
-        const std::vector<Preset> presets = {
-            {"google", "https://accounts.google.com/.well-known/openid-configuration", "openid email profile"},
-            {"github", "", "read:user user:email"},
-            {"discord", "", "identify email"},
-            {"microsoft", "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration", "openid email profile"}
-        };
-
-        for (const auto &[name, discovery_url, scopes] : presets) {
-            int count = 0;
-            sql << "SELECT COUNT(*) FROM mb_oauth_providers WHERE name = :name",
-                soci::use(name), soci::into(count);
-
-            if (count == 0) {
-                auto id = generateTimeBasedId();
-                sql << "INSERT INTO mb_oauth_providers (id, name, client_id, client_secret_encrypted, "
-                        "discovery_url, scopes, is_preset, enabled) "
-                        "VALUES (:id, :name, '', '', :du, :sc, 1, 1)",
-                    soci::use(id), soci::use(name), soci::use(discovery_url), soci::use(scopes);
-            }
         }
     }
 
@@ -360,13 +244,13 @@ namespace mb {
     }
 
 #ifdef MB_SCRIPTING_ENABLED
-    void Database::registerDuktapeMethods() {
-        const auto ctx = MantisBase::instance().ctx();
+    void DatabaseUnit::registerDuktapeMethods() {
+        const auto ctx = MantisApp::instance().ctx();
 
-        // Database methods
-        dukglue_register_property(ctx, &Database::isConnected, nullptr, "connected");
-        dukglue_register_method(ctx, &Database::session, "session");
-        dukglue_register_method_varargs(ctx, &Database::query, "query");
+        // DatabaseUnit methods
+        dukglue_register_property(ctx, &DatabaseUnit::isConnected, nullptr, "connected");
+        dukglue_register_method(ctx, &DatabaseUnit::session, "session");
+        dukglue_register_method_varargs(ctx, &DatabaseUnit::query, "query");
 
         // soci::session methods
         dukglue_register_method(ctx, &soci::session::close, "close");
@@ -387,7 +271,7 @@ namespace mb {
 
 
 #ifdef MB_SCRIPTING_ENABLED
-    duk_ret_t Database::query(duk_context *ctx) {
+    duk_ret_t DatabaseUnit::query(duk_context *ctx) {
         // TRACE_CLASS_METHOD();
 
         // Get number of arguments

@@ -93,7 +93,7 @@ namespace mb {
         if (type() != "view")
             throw MantisException(500, "View Query only allowed for `view` types!");
 
-        if (!m_schema.contains("view_query"))
+        if (m_schema.contains("view_query"))
             throw std::invalid_argument("Missing view_query statement!");
 
         return m_schema.at("view_query").get<std::string>();

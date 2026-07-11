@@ -65,7 +65,7 @@ namespace mb
         // Convert std::any to DukValue based on stored type
         const std::any& value = it->second;
 
-        const auto ctx = MantisBase::instance().ctx();
+        const auto ctx = MantisApp::instance().ctx();
 
         if (value.type() == typeid(int))
         {
@@ -116,7 +116,7 @@ namespace mb
 
     void ContextStore::set_duk(const std::string& key, const DukValue& value)
     {
-        const auto ctx = MantisBase::instance().ctx();
+        const auto ctx = MantisApp::instance().ctx();
 
         // Convert DukValue to std::any based on JavaScript type
         switch (value.type())

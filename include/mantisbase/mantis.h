@@ -51,4 +51,6 @@ namespace mb {
 // Add soci include
 #include <soci/soci.h>
 
+#include <httplib.h>
+
 #endif // MB_MANTIS_H
