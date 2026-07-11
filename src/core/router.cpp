@@ -23,6 +23,7 @@
 #include "../include/mantisbase/core/logger/log_database.h"
 #include "../include/mantisbase/core/realtime.h"
 #include "../include/mantisbase/core/sse.h"
+#include "../include/mantisbase/core/ws.h"
 
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
@@ -324,7 +325,7 @@ namespace mb {
         });
 
 
-        SSEMgr::createRoutes();
+        m_sseMgr->createRoutes();
 
         registerSchemaRoutes();
         registerEntityRoutes();

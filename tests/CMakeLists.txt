@@ -36,6 +36,8 @@ file(GLOB TEST_FILES
         integration/test_integration_crud.cpp
         integration/test_integration_schema.cpp
         integration/test_integration_auth.cpp
+        integration/test_integration_sse.cpp
+        integration/test_integration_ws.cpp
 )
 
 add_executable(mantisbase_tests ${TEST_FILES})

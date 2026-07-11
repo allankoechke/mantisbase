@@ -41,6 +41,8 @@ namespace mb {
 
         bool isRunning() const;
 
+        const std::vector<MiddlewareFn> &preRoutingMiddlewares() const { return m_preRoutingMiddlewares; }
+
     private:
         void registerDrogonHandler(const std::string &method, const std::string &path);
         void registerDrogonHandlerWithReader(const std::string &method, const std::string &path);
