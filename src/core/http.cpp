@@ -132,7 +132,7 @@ namespace mb {
             const drogon::HttpRequestPtr &req,
             std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
 
-            MantisRequest ma_req{req};
+            MantisRequest ma_req{mApp, req};
             MantisResponse ma_res{};
 
             // Extract path params from the matched path
@@ -176,7 +176,7 @@ namespace mb {
             const drogon::HttpRequestPtr &req,
             std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
 
-            MantisRequest ma_req{req};
+            MantisRequest ma_req{mApp, req};
             MantisResponse ma_res{};
             MantisContentReader ma_cr{ma_req};
 

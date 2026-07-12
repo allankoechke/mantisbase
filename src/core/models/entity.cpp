@@ -5,7 +5,7 @@
 #include "mantisbase/utils/soci_wrappers.h"
 
 namespace mb {
-    Entity::Entity(const MantisBase &app, const nlohmann::json &schema) : m_app(&app) {
+    Entity::Entity(const MantisBase &app, const nlohmann::json &schema) : m_app(app) {
         LogOrigin::entityTrace("Entity Creation", "Creating Entity from JSON Schema", schema);
 
         if (!schema.contains("name") || !schema["name"].is_string() || schema["name"].empty())
@@ -74,7 +74,7 @@ namespace mb {
     }
 
     const MantisBase &Entity::app() const {
-        return *m_app;
+        return m_app;
     }
 
     std::string Entity::id() const {

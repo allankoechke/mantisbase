@@ -11,8 +11,9 @@
 #include <drogon/drogon.h>
 
 namespace mb {
-    SSEMgr::SSEMgr()
-        : m_wsMgr(std::make_unique<WSMgr>()) {}
+    SSEMgr::SSEMgr(const MantisBase &app)
+        : m_wsMgr(std::make_unique<WSMgr>(app)), m_app(app) {
+    }
 
     SSEMgr::~SSEMgr() { stop(); }
 
@@ -26,13 +27,12 @@ namespace mb {
             updateAuthTokenForSSE()
         };
 
-        auto sseGetMiddlewares = std::make_shared<std::vector<MiddlewareFn>>(std::move(getMiddlewares));
+        auto sseGetMiddlewares = std::make_shared<std::vector<MiddlewareFn> >(std::move(getMiddlewares));
 
         drogon::app().registerHandler(
             "/api/v1/realtime",
             [this, sseGetMiddlewares](const drogon::HttpRequestPtr &req,
-                        std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-
+                                      std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
                 // Check env var toggle
                 if (const char *env = std::getenv("MB_REALTIME_SSE"); env && std::string(env) == "false") {
                     auto resp = drogon::HttpResponse::newHttpResponse();
@@ -43,12 +43,13 @@ namespace mb {
                     return;
                 }
 
-                MantisRequest ma_req{req};
+
+                MantisRequest ma_req{this->m_app, req};
                 MantisResponse ma_res{};
 
                 // Run global pre-routing middlewares
                 auto &preMiddlewares = MantisBase::instance().router().preRoutingMiddlewares();
-                for (const auto &mw : preMiddlewares) {
+                for (const auto &mw: preMiddlewares) {
                     if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
                         callback(ma_res.drogonResponse());
                         return;
@@ -56,7 +57,7 @@ namespace mb {
                 }
 
                 // Run SSE-specific middlewares
-                for (const auto &mw : *sseGetMiddlewares) {
+                for (const auto &mw: *sseGetMiddlewares) {
                     if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
                         callback(ma_res.drogonResponse());
                         return;
@@ -66,7 +67,7 @@ namespace mb {
                 // Parse topics from middleware context
                 auto topics = ma_req.getOr<json>("topics", json::array());
                 std::set<std::string> topicSet;
-                for (const auto &topic : topics) {
+                for (const auto &topic: topics) {
                     auto entity_name = topic["entity"].get<std::string>();
                     auto record_id = topic["id"].get<std::string>();
                     if (!record_id.empty())
@@ -110,7 +111,7 @@ namespace mb {
     }
 
     std::string SSEMgr::createSession(const std::set<std::string> &initial_topics,
-                                       drogon::ResponseStreamPtr stream) {
+                                      drogon::ResponseStreamPtr stream) {
         std::lock_guard lock(m_sessions_mutex);
 
         std::string client_id = generateClientID();
@@ -167,7 +168,7 @@ namespace mb {
                 std::lock_guard lock(m_sessions_mutex);
                 std::vector<std::string> deadSessions;
 
-                for (const auto &[clientId, session] : m_sessions) {
+                for (const auto &[clientId, session]: m_sessions) {
                     if (!session->isActive()) {
                         deadSessions.push_back(clientId);
                         continue;
@@ -180,7 +181,7 @@ namespace mb {
                     }
                 }
 
-                for (const auto &id : deadSessions) {
+                for (const auto &id: deadSessions) {
                     if (auto it = m_sessions.find(id); it != m_sessions.end()) {
                         it->second->close();
                         m_sessions.erase(it);
@@ -207,7 +208,7 @@ namespace mb {
     }
 
     void SSEMgr::start() {
-        MantisBase::instance().rt().runWorker([this](const json &items) {
+        m_app.rt().runWorker([this](const json &items) {
             for (const auto &data_item: items) broadcastChange(data_item);
         });
 
@@ -224,7 +225,7 @@ namespace mb {
     }
 
     void SSEMgr::stop() {
-        MantisBase::instance().rt().stopWorker();
+        m_app.rt().stopWorker();
 
         m_running.store(false);
         m_cv.notify_all();
@@ -234,16 +235,16 @@ namespace mb {
         }
     }
 
-    bool SSEMgr::isRunning() const {return m_running.load();}
+    bool SSEMgr::isRunning() const { return m_running.load(); }
 
-    static std::function<void(mb::MantisRequest &, mb::MantisResponse &)> handleSSESessionUpdate() {
+    std::function<void(MantisRequest &, MantisResponse &)> handleSSESessionUpdate() {
         return [](mb::MantisRequest &req, mb::MantisResponse &res) {
             auto topics = req.getOr<json>("topics", json::array());
             auto client_id = req.getOr<std::string>("client_id", std::string{});
             auto auth = req.getOr<json>("auth", json::object());
             auto verification = req.getOr<json>("verification", json::object());
 
-            auto &sse_mgr = MantisBase::instance().router().sseMgr();
+            auto &sse_mgr = req.mApp().router().sseMgr();
 
             std::set<std::string> new_topics;
             for (const auto &topic: topics) {
@@ -265,7 +266,7 @@ namespace mb {
                                  },
                                  {"status", 200}
                              }
-                             );
+                );
                 return;
             }
 
@@ -328,8 +329,9 @@ namespace mb {
                     if (!body["topics"].is_array()) {
                         res.sendJSON(400, {
                                          {
-                                             "error", std::format("Expected topics array in request body but found `{}`.",
-                                                                  body["topics"].dump())
+                                             "error", std::format(
+                                                 "Expected topics array in request body but found `{}`.",
+                                                 body["topics"].dump())
                                          },
                                          {"data", json::object()},
                                          {"status", 400}
@@ -391,10 +393,10 @@ namespace mb {
             } catch (std::exception &e) {
                 std::cerr << e.what() << std::endl;
                 res.sendJSON(500, {
-                    {"status", 500},
-                    {"data", json::object()},
-                    {"error", e.what()}
-                });
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             });
             }
 
             return HandlerResponse::Unhandled;
@@ -447,7 +449,7 @@ namespace mb {
                         }
 
                         continue;
-                        }
+                    }
 
                     res.sendJSON(403, {
                                      {"data", json::object()},
@@ -481,7 +483,7 @@ namespace mb {
                         }
 
                         continue;
-                        }
+                    }
 
                     res.sendJSON(403, {
                                      {"data", json::object()},
@@ -489,7 +491,7 @@ namespace mb {
                                      {"error", verification["error"]}
                                  });
                     return HandlerResponse::Handled;
-                                              }
+                }
 
                 if (rule.mode() == "custom") {
                     const std::string expr = rule.expr();

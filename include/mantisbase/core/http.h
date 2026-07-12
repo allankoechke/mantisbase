@@ -121,7 +121,7 @@ namespace mb {
         const drogon::HttpResponsePtr& drogonResponse() const;
 
         [[nodiscard]] int getStatus() const;
-        void setStatus(int s);
+        void setStatus(int s) const;
 
         [[nodiscard]] std::string getVersion() const;
         void setVersion(const std::string &b);

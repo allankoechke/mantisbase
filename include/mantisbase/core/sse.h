@@ -81,9 +81,10 @@ namespace mb {
         std::thread m_cleanup_thread;
         std::atomic<bool> m_running{true};
         std::unique_ptr<WSMgr> m_wsMgr;
+        const MantisBase& m_app;
 
     public:
-        SSEMgr();
+        explicit SSEMgr(const MantisBase&);
         ~SSEMgr();
 
         /** Register GET and POST /api/v1/realtime routes. */
@@ -110,6 +111,8 @@ namespace mb {
         bool isRunning() const;
 
     private:
+        static std::function<void(MantisRequest &, MantisResponse &)> handleSSESessionUpdate();
+
         static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> validateSubTopics(bool is_updating = false);
 
         static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> validateHasAccess();

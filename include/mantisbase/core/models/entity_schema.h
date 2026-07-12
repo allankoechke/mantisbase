@@ -383,7 +383,7 @@ namespace mb {
         std::vector<EntitySchemaField> m_fields;
         std::vector<IndexDefinition> m_indexes;
         AccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
-        const MantisBase *m_app; ///< Non-owning; set from the constructor reference
+        const MantisBase& m_app; ///< Non-owning; set from the constructor reference
     };
 } // mb
 

@@ -35,7 +35,7 @@ namespace mb {
 
         const json &schemaCache(const std::string &table_name) const;
         bool hasSchemaCache(const std::string &table_name) const;
-        Entity schemaCacheEntity(const std::string &table_name) const;
+        const Entity schemaCacheEntity(const std::string &table_name) const;
         void addSchemaCache(const nlohmann::json &entity_schema);
         void updateSchemaCache(const std::string &old_entity_name, const json &new_schema);
         void removeSchemaCache(const std::string &entity_name);

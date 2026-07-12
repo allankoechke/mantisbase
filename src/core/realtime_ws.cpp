@@ -5,6 +5,7 @@
 namespace mb {
 
     // --- WSMgr ---
+    WSMgr::WSMgr(const MantisBase& app) : m_app(app) {}
 
     void WSMgr::addConnection(const drogon::WebSocketConnectionPtr &conn) {
         std::lock_guard lock(m_mutex);
@@ -117,7 +118,7 @@ namespace mb {
         logEntry::info("WebSocket", std::format("New WS connection from {}",
                        conn->peerAddr().toIpPort()));
 
-        auto &wsMgr = MantisBase::instance().router().sseMgr().wsMgr();
+        auto &wsMgr = m_app.router().sseMgr().wsMgr();
         wsMgr.addConnection(conn);
 
         json welcome = {{"type", "connected"}, {"message", "WebSocket connected"}};
@@ -139,7 +140,7 @@ namespace mb {
             if (msgType == "subscribe") {
                 auto topics = msg.value("topics", std::vector<std::string>{});
                 if (!topics.empty()) {
-                    auto &wsMgr = MantisBase::instance().router().sseMgr().wsMgr();
+                    auto &wsMgr = m_app.router().sseMgr().wsMgr();
                     wsMgr.subscribe(conn, topics);
 
                     json ack = {{"type", "subscribed"}, {"topics", topics}};
@@ -148,7 +149,7 @@ namespace mb {
             } else if (msgType == "unsubscribe") {
                 auto topics = msg.value("topics", std::vector<std::string>{});
                 if (!topics.empty()) {
-                    auto &wsMgr = MantisBase::instance().router().sseMgr().wsMgr();
+                    auto &wsMgr = m_app.router().sseMgr().wsMgr();
                     wsMgr.unsubscribe(conn, topics);
 
                     json ack = {{"type", "unsubscribed"}, {"topics", topics}};
@@ -169,7 +170,7 @@ namespace mb {
 
         logEntry::info("WebSocket", "WS connection closed");
 
-        auto &wsMgr = MantisBase::instance().router().sseMgr().wsMgr();
+        auto &wsMgr = m_app.router().sseMgr().wsMgr();
         wsMgr.removeConnection(conn);
     }
 

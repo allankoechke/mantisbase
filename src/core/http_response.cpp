@@ -12,12 +12,12 @@ namespace mb {
         return static_cast<int>(m_res->statusCode());
     }
 
-    void MantisResponse::setStatus(const int s) {
+    void MantisResponse::setStatus(const int s) const {
         m_res->setStatusCode(static_cast<drogon::HttpStatusCode>(s));
     }
 
     std::string MantisResponse::getVersion() const {
-        return m_res->getHeaderBy("version");
+        return m_res->getHeader("version");
     }
 
     void MantisResponse::setVersion(const std::string& b) {
@@ -33,7 +33,7 @@ namespace mb {
     }
 
     std::string MantisResponse::getLocation() const {
-        return m_res->getHeaderBy("Location");
+        return m_res->getHeader("Location");
     }
 
     void MantisResponse::setLocation(const std::string& b) {
@@ -49,22 +49,22 @@ namespace mb {
     }
 
     bool MantisResponse::hasHeader(const std::string& key) const {
-        return !m_res->getHeaderBy(key).empty();
+        return !m_res->getHeader(key).empty();
     }
 
     std::string MantisResponse::getHeaderValue(const std::string& key, const char* def, size_t id) const {
-        auto val = m_res->getHeaderBy(key);
+        auto val = m_res->getHeader(key);
         return val.empty() ? std::string(def) : val;
     }
 
     size_t MantisResponse::getHeaderValueU64(const std::string& key, size_t def, size_t id) const {
-        auto val = m_res->getHeaderBy(key);
+        auto val = m_res->getHeader(key);
         if (val.empty()) return def;
         try { return std::stoull(val); } catch (...) { return def; }
     }
 
     size_t MantisResponse::getHeaderValueCount(const std::string& key) const {
-        return m_res->getHeaderBy(key).empty() ? 0 : 1;
+        return m_res->getHeader(key).empty() ? 0 : 1;
     }
 
     void MantisResponse::setHeader(const std::string& key, const std::string& val) const {

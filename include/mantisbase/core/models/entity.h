@@ -66,6 +66,9 @@ namespace mb {
          */
         Entity(const MantisBase &app, const std::string &name, const std::string &type);
 
+        Entity(Entity&) = default; // default copy constructor
+        Entity(Entity&&) = default; // default move constructor
+
         // --------------- DB TABLE OPS ------------------ //
         /**
          * @brief Get entity unique identifier.
@@ -266,7 +269,7 @@ namespace mb {
         /// reference. A raw pointer (rather than a reference) keeps Entity
         /// copy/move-assignable, which the router's entity cache relies on; it is
         /// never null after construction.
-        const MantisBase *m_app;
+        const MantisBase& m_app;
     };
 } // mb
 

@@ -342,7 +342,7 @@ namespace mb {
         return *m_realtime;
     }
 
-    Entity MantisBase::entity(const std::string &entity_name) const {
+    Entity&& MantisBase::entity(const std::string &entity_name) const {
         if (!EntitySchema::isValidEntityName(entity_name))
             throw MantisException(400,
                                   std::format("Invalid entity name `{}` provided.", entity_name));

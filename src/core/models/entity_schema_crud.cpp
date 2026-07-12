@@ -94,7 +94,7 @@ namespace mb {
 
             // Add hooks for this table (not for views)
             if (new_table.type() != "view") {
-                mb::RealtimeDB::addDbHooks(Entity{schema}, sql);
+                mb::RealtimeDB::addDbHooks(Entity{new_table.app(), schema}, sql);
             }
 
             // Commit changes

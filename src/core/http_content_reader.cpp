@@ -1,5 +1,6 @@
 #include "../../include/mantisbase/core/http.h"
 #include "../../include/mantisbase/mantisbase.h"
+#include "drogon/MultiPart.h"
 
 namespace mb {
     MantisContentReader::MantisContentReader(const MantisRequest &req)
@@ -212,18 +213,20 @@ namespace mb {
     }
 
     void MantisContentReader::readMultipart() {
-        // In Drogon, multipart data is parsed automatically from the request
         const auto &dReq = m_req.drogonRequest();
 
-        // Get uploaded files
-        auto &uploadFiles = dReq->getUploadFiles();
-        for (auto &file : uploadFiles) {
-            FormDataItem item;
-            item.name = file.getItemName();
-            item.filename = file.getFileName();
-            item.content_type = file.getContentType();
-            item.content = std::string(file.fileData(), file.fileLength());
-            m_formData.push_back(std::move(item));
+        drogon::MultiPartParser fileUpload;
+        if (fileUpload.parse(dReq) == 0) {
+            auto &files = fileUpload.getFiles();
+            // Get uploaded files
+            for (auto &file : files) {
+                FormDataItem item;
+                item.name = file.getItemName();
+                item.filename = file.getFileName();
+                item.content_type = file.getContentType();
+                item.content = std::string(file.fileData(), file.fileLength());
+                m_formData.push_back(std::move(item));
+            }
         }
 
         // Get form parameters (non-file fields)

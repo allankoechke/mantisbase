@@ -8,13 +8,14 @@
 #include <unordered_set>
 #include <drogon/WebSocketController.h>
 #include <nlohmann/json.hpp>
+#include <mantisbase/mantis.h>
 
 namespace mb {
     using json = nlohmann::json;
 
     class WSMgr {
     public:
-        WSMgr() = default;
+        explicit WSMgr(const MantisBase&);
         ~WSMgr() = default;
 
         void addConnection(const drogon::WebSocketConnectionPtr &conn);
@@ -38,10 +39,16 @@ namespace mb {
                            std::set<std::string>> m_connTopics;
         std::unordered_map<std::string,
                            std::unordered_set<drogon::WebSocketConnectionPtr>> m_topicConns;
+        const MantisBase& m_app;
     };
 
-    class RealtimeWSController : public drogon::WebSocketController<RealtimeWSController> {
+    class RealtimeWSController : public drogon::WebSocketController<RealtimeWSController, false> {
+    private:
+        const MantisBase& m_app;
+
     public:
+        explicit RealtimeWSController(const MantisBase& app) : m_app(app) {}
+
         void handleNewMessage(const drogon::WebSocketConnectionPtr &,
                               std::string &&,
                               const drogon::WebSocketMessageType &) override;
@@ -50,7 +57,7 @@ namespace mb {
         void handleConnectionClosed(const drogon::WebSocketConnectionPtr &) override;
 
         WS_PATH_LIST_BEGIN
-        WS_PATH_ADD("/api/v1/realtime/ws")
+        WS_PATH_ADD("/api/v1/realtime/ws");
         WS_PATH_LIST_END
     };
 }

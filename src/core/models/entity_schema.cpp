@@ -1,12 +1,11 @@
 #include "../../../include/mantisbase/core/models/entity_schema.h"
-
 #include "mantisbase/core/exceptions.h"
 
 namespace mb {
-    EntitySchema::EntitySchema(const MantisBase &app) : m_app(&app) {}
+    EntitySchema::EntitySchema(const MantisBase &app) : m_app(app) {}
 
     EntitySchema::EntitySchema(const MantisBase &app, const std::string &entity_name, const std::string &entity_type)
-        : m_app(&app) {
+        : m_app(app) {
         // Ensure name is valid
         if (!EntitySchema::isValidEntityName(entity_name)) {
             throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", entity_name);
@@ -35,7 +34,7 @@ namespace mb {
             m_addRule = other.m_addRule;
             m_updateRule = other.m_updateRule;
             m_deleteRule = other.m_deleteRule;
-            m_app = other.m_app;
+            // m_app = other.m_app;
         }
         return *this;
     }
@@ -501,7 +500,7 @@ namespace mb {
     }
 
     const MantisBase &EntitySchema::app() const {
-        return *m_app;
+        return m_app;
     }
 
     std::string EntitySchema::toDDL() const {

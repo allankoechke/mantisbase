@@ -35,7 +35,7 @@ CMRC_DECLARE(mantis);
 namespace mb {
     Router::Router(const MantisBase &app)
         : mApp(app),
-          m_sseMgr(std::make_unique<SSEMgr>()) {
+          m_sseMgr(std::make_unique<SSEMgr>(app)) {
         // Add global middlewares to work across all routes
         m_preRoutingMiddlewares.push_back(getAuthToken());
         m_preRoutingMiddlewares.push_back(hydrateContextData());
@@ -221,7 +221,7 @@ namespace mb {
         return m_entityMap.contains(table_name);
     }
 
-    Entity Router::schemaCacheEntity(const std::string &table_name) const {
+    const Entity Router::schemaCacheEntity(const std::string &table_name) const {
         std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
             throw MantisException(404, "Entity schema for `" + table_name + "` was not found!");
@@ -254,15 +254,15 @@ namespace mb {
     }
 
     void Router::addSchemaCacheLocked(const nlohmann::json &entity_schema) {
-        const auto entity_name = entity_schema.at("name").get<std::string>();
+        auto entity_name = entity_schema.at("name").get<std::string>();
         if (m_entityMap.contains(entity_name)) {
             throw MantisException(500, "An entity exists with given entity_name");
         }
 
         // Create entity and cache it, bound to this application. Unified entity
         // routes resolve entities dynamically.
-        auto entity = Entity(mApp, entity_schema);
-        m_entityMap.insert_or_assign(entity_name, std::move(entity));
+        // auto entity = Entity(mApp, entity_schema);
+        m_entityMap.try_emplace(entity_name, Entity(mApp, entity_schema));
     }
 
     void Router::removeSchemaCacheLocked(const std::string &entity_name) {

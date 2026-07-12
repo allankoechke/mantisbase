@@ -289,7 +289,7 @@ namespace mb
          * @param entity_name Name of the table of interest
          * @return Entity object for the selected table
          */
-        [[nodiscard]] Entity entity(const std::string& entity_name) const;
+        [[nodiscard]] Entity&& entity(const std::string& entity_name) const;
 
         /**
          * @brief Check if table schema encapsulated by an `Entity` object from given the table name exists.
