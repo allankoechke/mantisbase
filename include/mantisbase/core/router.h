@@ -16,7 +16,7 @@ namespace mb {
 
     class Router {
     public:
-        Router();
+        explicit Router(const MantisBase& app);
         ~Router();
 
         bool init();
@@ -38,6 +38,10 @@ namespace mb {
         void addSchemaCache(const nlohmann::json &entity_schema);
         void updateSchemaCache(const std::string &old_entity_name, const json &new_schema);
         void removeSchemaCache(const std::string &entity_name);
+
+        void addSchemaCacheLocked(const nlohmann::json &entity_schema);
+
+        void removeSchemaCacheLocked(const std::string &entity_name);
 
         bool isRunning() const;
 
@@ -73,7 +77,7 @@ namespace mb {
 
         static std::function<void(const MantisRequest &, MantisResponse &)> handleLogs();
 
-        MantisBase &mApp;
+        const MantisBase &mApp;
         RouteRegistry m_routeRegistry;
         std::unique_ptr<SSEMgr> m_sseMgr;
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
@@ -84,6 +88,7 @@ namespace mb {
         /// access must be synchronized via m_entityMapMutex.
         std::unordered_map<std::string, Entity> m_entityMap;
         std::atomic<bool> m_running{false};
+        mutable std::mutex m_entityMapMutex;
     };
 } // mb
 

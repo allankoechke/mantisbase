@@ -2,6 +2,7 @@
 #include "../../include/mantisbase/core/exceptions.h"
 
 #include <algorithm>
+#include <regex>
 
 namespace mb {
     std::string sqlIdentifier(const std::string &ident) {

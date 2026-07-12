@@ -3,6 +3,9 @@
 //
 
 #include "../../../include/mantisbase/core/models/validators.h"
+
+#include <regex>
+
 #include "../../../include/mantisbase/mantisbase.h"
 #include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/utils.h"

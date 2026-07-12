@@ -15,7 +15,7 @@ namespace mb {
                 auto redirect_uri = req.getQueryParamValue("redirect_uri");
 
                 if (redirect_uri.empty()) {
-                    auto host_header = req.getHeader("Host");
+                    auto host_header = req.getHeaderValue("Host");
                     redirect_uri = "http://" + host_header + "/api/v1/auth/" + entity_name + "/oauth/callback/" + provider;
                 }
 
@@ -82,8 +82,8 @@ namespace mb {
 
         Delete("/api/v1/auth/:entity_name/oauth/link/:provider", [](const MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                auto auth = json::object(); // req.getOr<json>("auth", json::object());
+                auto verification = json::object(); // req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(403, {{"status", 403}, {"data", json::object()}, {"error", "Authentication required"}});
@@ -106,8 +106,8 @@ namespace mb {
 
         Get("/api/v1/auth/:entity_name/oauth/accounts", [](const MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                auto auth = json::object(); // req.getOr<json>("auth", json::object());
+                auto verification = json::object(); // req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(403, {{"status", 403}, {"data", json::object()}, {"error", "Authentication required"}});

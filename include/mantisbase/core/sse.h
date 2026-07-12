@@ -36,6 +36,7 @@ namespace mb {
         std::string m_clientID;
         std::set<std::string> m_topics;
         drogon::ResponseStreamPtr m_stream;
+        mutable std::mutex m_topicsMutex;
 
         std::atomic<bool> m_isActive;
         std::chrono::steady_clock::time_point m_lastActivity;

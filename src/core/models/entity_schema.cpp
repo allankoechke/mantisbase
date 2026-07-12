@@ -157,7 +157,7 @@ namespace mb {
 
         // For 'view' types, check for 'view_query'
         if (entity.type() == "view") {
-            const auto &schema_json = entity.toJSON();
+            const auto &schema_json = entity.schema();
             if (schema_json.contains("view_query") && schema_json["view_query"].is_string()
                 && !schema_json["view_query"].get<std::string>().empty()) {
                 eSchema.setViewQuery(schema_json["view_query"].get<std::string>());
@@ -165,7 +165,7 @@ namespace mb {
         }
 
         // Copy indexes
-        const auto &schema_json = entity.toJSON();
+        const auto &schema_json = entity.schema();
         if (schema_json.contains("indexes") && schema_json["indexes"].is_array()) {
             for (const auto &idx : schema_json["indexes"]) {
                 eSchema.addIndex(IndexDefinition::fromJSON(idx));

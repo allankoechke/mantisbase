@@ -48,12 +48,11 @@ namespace mb {
         /// Owning application, injected by the Router when the request is
         /// wrapped. Request-path code reaches shared services (db, router,
         /// realtime, config) via app() instead of the global singleton.
-        MantisBase &m_app;
-
-        const std::string __class_name__ = "mb::MantisRequest";
+        const MantisBase &m_app;
 
     public:
-        explicit MantisRequest(const drogon::HttpRequestPtr &_req);
+        explicit MantisRequest(const MantisBase& mb, const drogon::HttpRequestPtr &_req);
+        const MantisBase& mApp() const { return m_app; }
 
         void setPathParam(const std::string &key, const std::string &value);
         void setPathParams(const std::unordered_map<std::string, std::string> &params);

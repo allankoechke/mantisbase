@@ -218,12 +218,12 @@ namespace mb {
             // Restore base/auth entities first
             for (const auto &schema : base_entities) {
                 const auto name = schema.value("name", "");
-                if (EntitySchema::tableExists(name)) {
+                if (EntitySchema::tableExists(app, name)) {
                     LogOrigin::info("Migrate", fmt::format("Skipping existing entity `{}`", name));
                     continue;
                 }
 
-                const auto eSchema = EntitySchema::fromSchema(schema);
+                const auto eSchema = EntitySchema::fromSchema(app, schema);
                 if (const auto err = eSchema.validate(); err.has_value())
                     throw MantisException(400, std::format("Validation failed for `{}`: {}", name, err.value()));
 
@@ -235,12 +235,12 @@ namespace mb {
             // Then restore view entities
             for (const auto &schema : view_entities) {
                 const auto name = schema.value("name", "");
-                if (EntitySchema::tableExists(name)) {
+                if (EntitySchema::tableExists(app, name)) {
                     LogOrigin::info("Migrate", fmt::format("Skipping existing entity `{}`", name));
                     continue;
                 }
 
-                const auto eSchema = EntitySchema::fromSchema(schema);
+                const auto eSchema = EntitySchema::fromSchema(app, schema);
                 if (const auto err = eSchema.validate(); err.has_value())
                     throw MantisException(400, std::format("Validation failed for `{}`: {}", name, err.value()));
 

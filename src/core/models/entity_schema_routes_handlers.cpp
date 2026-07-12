@@ -23,7 +23,7 @@ namespace mb {
                     throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
 
                 const auto schema_id = schemaIdFromPathParam(schema_id_or_name);
-                const auto record = EntitySchema::getTable(req.app(), schema_id);
+                const auto record = EntitySchema::getTable(req.mApp(), schema_id);
 
                 res.sendJSON(200, {
                     {"data", record},
@@ -49,7 +49,7 @@ namespace mb {
     HandlerFn schemaGetManyHandler() {
         return [](MantisRequest &req, MantisResponse &res) {
             try {
-                const auto tables = EntitySchema::listTables(req.app());
+                const auto tables = EntitySchema::listTables(req.mApp());
                 res.sendJSON(200, {
                     {"data", tables},
                     {"error", ""},
@@ -84,7 +84,7 @@ namespace mb {
                     return;
                 }
 
-                auto eSchema = EntitySchema::fromSchema(req.app(), body);
+                auto eSchema = EntitySchema::fromSchema(req.mApp(), body);
                 auto _ = eSchema.dump();
 
                 if (const auto val_err = eSchema.validate(); val_err.has_value())
@@ -135,7 +135,7 @@ namespace mb {
                     return;
                 }
 
-                auto _schema = EntitySchema::updateTable(req.app(), schema_id, body);
+                auto _schema = EntitySchema::updateTable(req.mApp(), schema_id, body);
                 res.sendJSON(200, {
                     {"data", _schema},
                     {"error", ""},
@@ -165,7 +165,7 @@ namespace mb {
                     throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
 
                 const auto schema_id = schemaIdFromPathParam(schema_id_or_name);
-                EntitySchema::dropTable(req.app(), schema_id);
+                EntitySchema::dropTable(req.mApp(), schema_id);
                 res.sendEmpty();
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {

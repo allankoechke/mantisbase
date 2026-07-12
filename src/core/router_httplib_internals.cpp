@@ -30,7 +30,7 @@ namespace mb {
                 }
 
                 const auto entity_name = trim(req.getPathParamValue("entity_name"));
-                const auto entity = req.app().entity(entity_name);
+                const auto entity = req.mApp().entity(entity_name);
 
                 auto opt_user = entity.queryFromCols(body["identity"].get<std::string>(), {"id", "email"});
                 if (!opt_user.has_value()) {
@@ -330,7 +330,7 @@ namespace mb {
                     return;
                 }
 
-                if (const auto v_err = Validators::validateRequestBody(admin_entity.schema(), body);
+                if (const auto v_err = Validators::validateRequestBody(admin_entity, body);
                     v_err.has_value()) {
                     LogOrigin::critical("Request Validation Error", fmt::format("Error validating request body\n\t- {}", v_err.value()));
                     res.sendJSON(400, {

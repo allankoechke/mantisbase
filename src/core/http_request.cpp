@@ -2,8 +2,8 @@
 #include "../../include/mantisbase/core/http.h"
 
 namespace mb {
-MantisRequest::MantisRequest(const drogon::HttpRequestPtr &_req)
-    : m_req(_req), m_store(ContextStore{}) {}
+MantisRequest::MantisRequest(const MantisBase& &mb, const drogon::HttpRequestPtr &_req)
+    : m_req(_req), m_store(ContextStore{}), m_app(mb) {}
 
 void MantisRequest::setPathParam(const std::string &key, const std::string &value) {
     m_pathParams[key] = value;

@@ -66,5 +66,5 @@ docs/
 # Rust files
 target/
 .cargo-target/
-.claude
+.claude/
 changes.md

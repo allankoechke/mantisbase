@@ -12,6 +12,8 @@
 #include <drogon/drogon.h>
 
 // For thread logger
+#include <memory>
+#include <shared_mutex>
 #include <spdlog/sinks/stdout_color_sinks-inl.h>
 #include <spdlog/sinks/ansicolor_sink.h>
 
@@ -31,7 +33,7 @@
 CMRC_DECLARE(mantis);
 
 namespace mb {
-    Router::Router(MantisBase &app)
+    Router::Router(const MantisBase &app)
         : mApp(app),
           m_sseMgr(std::make_unique<SSEMgr>()) {
         // Add global middlewares to work across all routes
@@ -103,8 +105,8 @@ namespace mb {
             // Configure Drogon
             drogon::app()
                 .addListener(host, port)
-                .setThreadNum(4)
-                .enableRunAsDaemon(false);
+                .setThreadNum(4);
+                // .enableRunAsDaemon(false);
 
             // Register CORS pre-routing advice
             drogon::app().registerPreRoutingAdvice([](const drogon::HttpRequestPtr &req,
@@ -142,7 +144,7 @@ namespace mb {
             m_running.store(true);
 
             // Launch logging/browser in separate thread after listen starts
-            std::thread notifier([host, port, launch_admin_setup]() -> void {
+            std::thread notifier([&, host, port, launch_admin_setup]() -> void {
                 // Wait a little for the server to be fully ready
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 auto endpoint = std::format("{}:{}", host, port);
@@ -309,9 +311,9 @@ namespace mb {
         auto adminHandler = handleAdminDashboardRoute();
         drogon::app().registerHandlerViaRegex(
             R"(/mb(/.*)?)",
-            [adminHandler](const drogon::HttpRequestPtr &req,
-                          std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-                MantisRequest ma_req{req};
+            [adminHandler, this](const drogon::HttpRequestPtr &req,
+                                 std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
+                MantisRequest ma_req{mApp, req};
                 MantisResponse ma_res{};
                 adminHandler(ma_req, ma_res);
                 callback(ma_res.drogonResponse());
@@ -471,12 +473,10 @@ namespace mb {
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::handleLogs() {
-        const auto f = MB_FUNC();
-        return [f](const MantisRequest &req, MantisResponse &res) {
+        return [&](const MantisRequest &req, MantisResponse &res) {
             try {
-                TRACE_FUNC(f);
                 // Get log database instance
-                auto &logsDb = req.app().logs().logsDb();
+                auto &logsDb = req.mApp().logs().logsDb();
                 if (!Logger::isDbInitialized) {
                     json response;
                     response["error"] = "Log database not initialized";

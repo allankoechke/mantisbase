@@ -60,6 +60,8 @@ namespace mb {
         EntitySchema(const EntitySchema &);
         EntitySchema &operator=(const EntitySchema &);
 
+        static nlohmann::json listTables();
+
         // Move operators ...
         EntitySchema(EntitySchema &&) noexcept = default;
         EntitySchema &operator=(EntitySchema &&) noexcept = default;

@@ -40,8 +40,8 @@ namespace mb {
 
         Get("/api/v1/auth/:entity_name/api-keys", [](const MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                auto auth = json::object(); // req.getOr<json>("auth", json::object());
+                auto verification = json::object(); // req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(403, {{"status", 403}, {"data", json::object()}, {"error", "Authentication required"}});
@@ -60,8 +60,8 @@ namespace mb {
 
         Delete("/api/v1/auth/:entity_name/api-keys/:id", [](const MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                auto auth = json::object(); // req.getOr<json>("auth", json::object());
+                auto verification = json::object(); // req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(403, {{"status", 403}, {"data", json::object()}, {"error", "Authentication required"}});
@@ -118,7 +118,7 @@ namespace mb {
 
         Delete("/api/v1/sys/api-keys/:id", [](const MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
+                auto auth = json::object(); // req.getOr<json>("auth", json::object());
                 auto user_id = auth["id"].get<std::string>();
                 auto key_id = trim(req.getPathParamValue("id"));
 

@@ -56,11 +56,10 @@ mb::json mb::SSESession::formatEvent(const json &change_event) const {
     auto operation = change_event["type"].get<std::string>();
 
     toLowerCase(operation);
-
     std::string matched_topic = table;
-    std::string specific_topic = table + ":" + row_id;
 
     {
+        const std::string specific_topic = format("{}:{}", table, row_id);
         std::lock_guard<std::mutex> lock(m_topicsMutex);
         if (m_topics.contains(specific_topic)) {
             matched_topic = specific_topic;

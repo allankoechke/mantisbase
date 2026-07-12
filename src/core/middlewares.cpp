@@ -23,7 +23,7 @@ namespace mb {
                                           const std::string &trace_msg) {
             TRACE_FUNC(trace_msg);
             try {
-                const auto entity = req.app().entity(entity_name);
+                const auto entity = req.mApp().entity(entity_name);
                 const auto &auth = req.getOr<json>("auth", json::object());
                 auto method = req.getMethod();
 
@@ -274,7 +274,7 @@ namespace mb {
                 // logEntry::trace("Authenticated on entity {} as user with id {}", user_table, user_id);
 
                 try {
-                    const auto user_entity = req.app().entity(user_table);
+                    const auto user_entity = req.mApp().entity(user_table);
                     if (auto user = user_entity.read(user_id); user.has_value()) {
                         auth["user"] = user.value();
                     }
@@ -305,11 +305,11 @@ namespace mb {
                                                   : throw MantisException(400, "Invalid entity name/id"));
 
                 if (!schema_id_or_name.starts_with("mbt_") &&
-                    req.app().hasEntity(schema_id_or_name)) {
+                    req.mApp().hasEntity(schema_id_or_name)) {
                     return HandlerResponse::Unhandled;
                 }
 
-                EntitySchema::getTable(req.app(), schema_id);
+                EntitySchema::getTable(req.mApp(), schema_id);
                 return HandlerResponse::Unhandled;
             } catch (const MantisException &e) {
                 if (e.code() == 404 || e.code() == 400) {
@@ -337,12 +337,12 @@ namespace mb {
                 return HandlerResponse::Handled;
             }
 
-            if (!req.app().hasEntity(entity_name)) {
+            if (!req.mApp().hasEntity(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
             }
 
-            const auto entity = req.app().entity(entity_name);
+            const auto entity = req.mApp().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi() || entity.type() != "auth") {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
@@ -362,12 +362,12 @@ namespace mb {
                 return HandlerResponse::Handled;
             }
 
-            if (!req.app().hasEntity(entity_name)) {
+            if (!req.mApp().hasEntity(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
             }
 
-            const auto entity = req.app().entity(entity_name);
+            const auto entity = req.mApp().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi()) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
@@ -382,7 +382,7 @@ namespace mb {
         return [msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
-            const auto entity = req.app().entity(entity_name);
+            const auto entity = req.mApp().entity(entity_name);
             if (entity.type() == "view") {
                 res.sendJSON(405, {
                     {"status", 405},
