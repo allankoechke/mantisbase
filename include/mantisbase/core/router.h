@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <atomic>
+#include <shared_mutex>
 #include <nlohmann/json.hpp>
 
 #include "route_registry.h"
@@ -88,7 +89,7 @@ namespace mb {
         /// access must be synchronized via m_entityMapMutex.
         std::unordered_map<std::string, Entity> m_entityMap;
         std::atomic<bool> m_running{false};
-        mutable std::mutex m_entityMapMutex;
+        mutable std::shared_mutex m_entityMapMutex;
     };
 } // mb
 

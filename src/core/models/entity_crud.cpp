@@ -120,7 +120,10 @@ namespace mb {
                 }
                 bool valid = false;
                 for (const auto &f : fields()) {
-                    if (f.name() == sort_field) { valid = true; break; }
+                    if (f.contains("name") && f["name"].get<std::string>() == sort_field) {
+                        valid = true;
+                        break;
+                    }
                 }
                 if (!valid) {
                     sort_field = "id";
