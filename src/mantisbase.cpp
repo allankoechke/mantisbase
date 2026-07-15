@@ -342,13 +342,13 @@ namespace mb {
         return *m_realtime;
     }
 
-    Entity&& MantisBase::entity(const std::string &entity_name) const {
+    Entity MantisBase::entity(const std::string &entity_name) const {
         if (!EntitySchema::isValidEntityName(entity_name))
             throw MantisException(400,
                                   std::format("Invalid entity name `{}` provided.", entity_name));
 
         // Get schema cache from db, check if we have this data, return data if available
-        const auto entity_obj = m_router->schemaCacheEntity(entity_name);
+        auto entity_obj = m_router->schemaCacheEntity(entity_name);
         return entity_obj;
     }
 

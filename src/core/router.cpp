@@ -221,14 +221,14 @@ namespace mb {
         return m_entityMap.contains(table_name);
     }
 
-    const Entity Router::schemaCacheEntity(const std::string &table_name) const {
+    Entity Router::schemaCacheEntity(const std::string &table_name) const {
         std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
             throw MantisException(404, "Entity schema for `" + table_name + "` was not found!");
         }
 
         // Returns a copy, so it stays valid after the lock is released.
-        return m_entityMap.at(table_name);
+        return Entity(m_entityMap.at(table_name));
     }
 
     void Router::addSchemaCache(const nlohmann::json &entity_schema) {

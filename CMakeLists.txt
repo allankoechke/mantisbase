@@ -45,6 +45,7 @@ set( MB_SOURCES
         src/mantisbase.cpp
         src/core/database.cpp
         src/core/router.cpp
+        src/core/route_registry.cpp
         src/core/auth.cpp
 
         # Logging

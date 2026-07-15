@@ -35,7 +35,7 @@ namespace mb {
 
         const json &schemaCache(const std::string &table_name) const;
         bool hasSchemaCache(const std::string &table_name) const;
-        const Entity schemaCacheEntity(const std::string &table_name) const;
+        Entity schemaCacheEntity(const std::string &table_name) const;
         void addSchemaCache(const nlohmann::json &entity_schema);
         void updateSchemaCache(const std::string &old_entity_name, const json &new_schema);
         void removeSchemaCache(const std::string &entity_name);
@@ -87,7 +87,7 @@ namespace mb {
         /// Entity schema cache. Read on every request by the httplib worker
         /// threads and mutated at runtime by the schema CRUD endpoints, so all
         /// access must be synchronized via m_entityMapMutex.
-        std::unordered_map<std::string, Entity> m_entityMap;
+        mutable std::unordered_map<std::string, Entity> m_entityMap;
         std::atomic<bool> m_running{false};
         mutable std::shared_mutex m_entityMapMutex;
     };

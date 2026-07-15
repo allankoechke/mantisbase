@@ -157,7 +157,7 @@ namespace mb {
         }
 
         void runMigrateDump(MantisBase &app, const std::string &output_path) {
-            const auto tables = EntitySchema::listTables();
+            const auto tables = EntitySchema::listTables(app);
             json dump = json::array();
 
             for (const auto &row : tables) {

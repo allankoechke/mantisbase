@@ -4,9 +4,6 @@
 #include "../../include/mantisbase/core/http.h"
 #include "../../include/mantisbase/core/http.h"
 
-
-#define __file__ "core/http.cpp"
-
 namespace mb
 {
     size_t RouteKeyHash::operator()(const RouteKey& k) const

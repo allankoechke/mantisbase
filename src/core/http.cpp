@@ -78,7 +78,7 @@ namespace mb {
 
     void Router::Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
         LogOrigin::info("Route Created", fmt::format("Creating route [ GET ] {}", path));
-        m_routeRegistry.add("GET", path, handler, middlewares);
+        // m_routeRegistry.add("GET", path, handler, middlewares);
         registerDrogonHandler("GET", path);
     }
 
@@ -149,18 +149,18 @@ namespace mb {
                 }
             }
 
-            const auto route = m_routeRegistry.find(method, path);
-            if (!route) {
-                json response;
-                response["status"] = 404;
-                response["error"] = std::format("{} {} Route Not Found", method, path);
-                response["data"] = json::object();
-                ma_res.sendJSON(404, response);
-                callback(ma_res.drogonResponse());
-                return;
-            }
+            // const auto route = m_routeRegistry.find(method, path);
+            // if (!route) {
+            //     json response;
+            //     response["status"] = 404;
+            //     response["error"] = std::format("{} {} Route Not Found", method, path);
+            //     response["data"] = json::object();
+            //     ma_res.sendJSON(404, response);
+            //     callback(ma_res.drogonResponse());
+            //     return;
+            // }
 
-            executeMiddlewareChain(ma_req, ma_res, route);
+            executeMiddlewareChain(ma_req, ma_res, nullptr);
             callback(ma_res.drogonResponse());
         };
 

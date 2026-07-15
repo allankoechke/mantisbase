@@ -237,7 +237,7 @@ namespace mb {
 
     bool SSEMgr::isRunning() const { return m_running.load(); }
 
-    std::function<void(MantisRequest &, MantisResponse &)> handleSSESessionUpdate() {
+    std::function<void(MantisRequest &, MantisResponse &)> SSEMgr::handleSSESessionUpdate() {
         return [](mb::MantisRequest &req, mb::MantisResponse &res) {
             auto topics = req.getOr<json>("topics", json::array());
             auto client_id = req.getOr<std::string>("client_id", std::string{});
