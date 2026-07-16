@@ -14,6 +14,8 @@ option(MB_SCRIPTING_ENABLED "Enable JS Scripting" OFF)
 option(MB_SHARED_DEPS "Build MantisBase as a shared library" FALSE)
 option(MB_BUILD_SHARED_LIB "Build MantisBase as a shared library" OFF) # Override static build to also have shared lib built
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if(MB_SHARED_DEPS)
     set(BUILD_SHARED_LIBS TRUE)
     set(MB_LIB_TYPE SHARED)

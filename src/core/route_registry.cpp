@@ -29,8 +29,15 @@ namespace mb
 
     const RouteHandler* RouteRegistry::find(const std::string& method, const std::string& path) const
     {
-        const auto it = routes.find({method, path});
-        return it != routes.end() ? &it->second : nullptr;
+        try {
+            const auto it = routes.find({method, path});
+            std::cout << "it donee ..." << std::endl;
+            return it != routes.end() ? &it->second : nullptr;
+
+        } catch (const std::exception& e) {
+            std::cerr << "Finding error: " << e.what();
+            return nullptr;
+        }
     }
 
     json RouteRegistry::remove(const std::string& method, const std::string& path)

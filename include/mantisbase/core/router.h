@@ -55,7 +55,7 @@ namespace mb {
         static std::string convertPathToDrogon(const std::string &httplib_path);
         static std::vector<std::string> extractParamNames(const std::string &httplib_path);
 
-        void executeMiddlewareChain(MantisRequest &req, MantisResponse &res, const RouteHandler *route);
+        void executeMiddlewareChain(MantisRequest &req, MantisResponse &res, const RouteHandler *route) const;
 
         void generateMiscEndpoints();
         void registerEntityRoutes();
