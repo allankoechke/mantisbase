@@ -144,7 +144,7 @@ namespace mb {
             m_running.store(true);
 
             // Launch logging/browser in separate thread after listen starts
-            std::thread notifier([&, host, port, launch_admin_setup]() -> void {
+            std::thread notifier([this, host, port, launch_admin_setup]() -> void {
                 // Wait a little for the server to be fully ready
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 auto endpoint = std::format("{}:{}", host, port);
@@ -173,10 +173,10 @@ namespace mb {
             return true;
         } catch (const std::exception &e) {
             m_running.store(false);
-            LogOrigin::critical("Server Start Failed", fmt::format("Failed to start server: {}", e.what()));
+            LogOrigin::critical("Server", fmt::format("Failed to start server: {}", e.what()));
         } catch (...) {
             m_running.store(false);
-            LogOrigin::critical("Server Start Failed", "Failed to start server: Unknown Error");
+            LogOrigin::critical("Server", "Failed to start server: Unknown Error");
         }
 
         return false;
@@ -192,7 +192,7 @@ namespace mb {
             drogon::app().quit();
             m_running.store(false);
             m_entityMap.clear();
-            LogOrigin::info("Server Stopped", "HTTP Server Stopped.");
+            LogOrigin::info("Server", "HTTP Server Stopped.");
         }
     }
 
@@ -456,7 +456,7 @@ namespace mb {
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::healthCheckHandler() {
-        return [](const MantisRequest &, MantisResponse &res) {
+        return [](const MantisRequest &, const MantisResponse &res) {
             res.setHeader("Cache-Control", "no-cache");
             res.send(200, R"({"status": "OK"})", "application/json");
         };
@@ -475,8 +475,6 @@ namespace mb {
     std::function<void(const MantisRequest &, MantisResponse &)> Router::handleLogs() {
         return [&](const MantisRequest &req, MantisResponse &res) {
             try {
-                // Get log database instance
-                auto &logsDb = req.mApp().logs().logsDb();
                 if (!Logger::isDbInitialized) {
                     json response;
                     response["error"] = "Log database not initialized";
@@ -558,6 +556,8 @@ namespace mb {
 
                 if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
 
+                // Get log database instance
+                auto &logsDb = req.mApp().logs().logsDb();
                 json result = logsDb.getLogs(after, limit, level_filter,
                                              search_filter, start_date, end_date,
                                              sort_by, sort_order);
