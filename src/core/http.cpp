@@ -38,9 +38,6 @@ namespace mb {
 
     std::vector<std::string> Router::extractParamNames(const std::string &httplib_path) {
         std::vector<std::string> names;
-        std::cout << "HTTPLIB PATH: " << httplib_path << std::endl;
-        std::cout << "httplib path size? " << httplib_path.size() << std::endl;
-
         for (size_t i = 0; i < httplib_path.size(); ++i) {
             if (httplib_path[i] == ':' && (i == 0 || httplib_path[i - 1] == '/')) {
                 std::string name;
@@ -56,20 +53,13 @@ namespace mb {
     }
 
     void Router::executeMiddlewareChain(MantisRequest &req, MantisResponse &res, const RouteHandler *route) const {
-        return;
-
-        std::cout << "Exec middleware chain START" << std::endl;
         // Execute global pre-routing middlewares
         for (const auto &g_mw: m_preRoutingMiddlewares) {
             if (g_mw(req, res) == HandlerResponse::Handled) return;
         }
 
-        std::cout << "Pre routing done" << std::endl;
-
         // Execute route-specific middlewares
         if (route) {
-            std::cout << "Route was found!" << std::endl;
-
             for (const auto &mw: route->middlewares) {
                 if (mw(req, res) == HandlerResponse::Handled) return;
             }
@@ -80,14 +70,10 @@ namespace mb {
             }
         }
 
-        std::cout << "Execute post routing middlewares" << std::endl;
-
         // Post routing
         for (const auto &p_mw: m_postRoutingMiddlewares) {
             p_mw(req, res);
         }
-
-        std::cout << "Middleware chains done!" << std::endl;
     }
 
     void Router::Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
@@ -137,73 +123,52 @@ namespace mb {
         return drogon::Get;
     }
 
-    void Router::registerDrogonHandler(const std::string &method, const std::string &path) {
+    void Router::registerDrogonHandler(const std::string &method, const std::string &path) const {
         const auto drogon_path = convertPathToDrogon(path);
         const auto drogon_method = toDrogonMethod(method);
 
-        std::cout << "Registering Drogon Handler [Before] : " << method << " : " << path << std::endl;
-        std::cout << "BEFORE -> m = " << &method << ", p = " << &path << std::endl;
-
-        auto handler = [&method, &path](
+        auto handler = [
+                    this,
+                    _method = std::string(method),
+                    _path = std::string(path)
+                ](
             const drogon::HttpRequestPtr &req,
             std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-            std::cout << "AFTER -> m = " << &method << ", p = " << &path << std::endl;
-            std::cout << "IN" << std::endl;
+            MantisRequest ma_req{mApp, req};
+            MantisResponse ma_res{};
 
-            // std::cout << "Registering Drogon Handler [After] : " << method << " : " << path << std::endl;
-            // std::cout << "Method: " << method << ", Path: " << path << std::endl;
+            const auto param_names = req->getRoutingParameters();
 
-            // MantisRequest ma_req{mApp, req};
-            // MantisResponse ma_res{};
-            //
-            // const auto param_names = req->getRoutingParameters();
-            //
-            // // Extract path params from the matched path
-            // // Drogon stores them as positional params in the matched pattern
-            // if (!param_names.empty()) {
-            //     std::cout << "Parameter names not empty!" << std::endl;
-            //     // Parse path params by comparing actual path with pattern
-            //     auto actual_parts = splitString(std::string(req->path()), "/");
-            //     auto pattern_parts = splitString(_path, "/");
-            //
-            //     for (size_t i = 0; i < pattern_parts.size() && i < actual_parts.size(); ++i) {
-            //         if (!pattern_parts[i].empty() && pattern_parts[i][0] == ':') {
-            //             ma_req.setPathParam(pattern_parts[i].substr(1), actual_parts[i]);
-            //         }
-            //     }
-            // }
-            //
-            // std::cout << "Check if route exists in the registry: " << std::endl;
-            // std::cout << "Method: " << _method << ", Path: " << _path << std::endl;
-            //
-            // const auto route = m_routeRegistry.find(_method, _path);
-            //
-            // std::cout << "Route found? " << (route == nullptr) << std::endl;
-            //
-            // if (!route) {
-            //     json response;
-            //     response["status"] = 404;
-            //     response["error"] = std::format("{} {} Route Not Found", _method, _path);
-            //     response["data"] = json::object();
-            //     ma_res.sendJSON(404, response);
-            //     callback(ma_res.drogonResponse());
-            //     return;
-            // }
-            //
-            // std::cout << "Getting into middleware chains ..." << std::endl;
-            //
-            // executeMiddlewareChain(ma_req, ma_res, route);
-            // std::cout << "Middleware chains ended, calling response!" << std::endl;
-            // callback(ma_res.drogonResponse());
-            drogon::HttpResponsePtr m_res = drogon::HttpResponse::newHttpResponse();
-            m_res->setBody("OK");
-            m_res->setContentTypeString("text/plain");
-            m_res->setStatusCode(static_cast<drogon::HttpStatusCode>(200));
-            callback(m_res);
-            std::cout << "Response done!" << std::endl;
+            // Extract path params from the matched path
+            // Drogon stores them as positional params in the matched pattern
+            if (!param_names.empty()) {
+                // Parse path params by comparing actual path with pattern
+                auto actual_parts = splitString(std::string(req->path()), "/");
+                auto pattern_parts = splitString(_path, "/");
+
+                for (size_t i = 0; i < pattern_parts.size() && i < actual_parts.size(); ++i) {
+                    if (!pattern_parts[i].empty() && pattern_parts[i][0] == ':') {
+                        ma_req.setPathParam(pattern_parts[i].substr(1), actual_parts[i]);
+                    }
+                }
+            }
+
+            const auto route = m_routeRegistry.find(_method, _path);
+            if (!route) {
+                json response;
+                response["status"] = 404;
+                response["error"] = std::format("{} {} Route Not Found", _method, _path);
+                response["data"] = json::object();
+                ma_res.sendJSON(404, response);
+                callback(ma_res.drogonResponse());
+                return;
+            }
+
+            executeMiddlewareChain(ma_req, ma_res, route);
+            callback(ma_res.drogonResponse());
         };
 
-        drogon::app().registerHandler(drogon_path, handler, {drogon_method});
+        drogon::app().registerHandler(drogon_path, std::move(handler), {drogon_method});
     }
 
     void Router::registerDrogonHandlerWithReader(const std::string &method, const std::string &path) {
@@ -270,6 +235,6 @@ namespace mb {
             callback(ma_res.drogonResponse());
         };
 
-        drogon::app().registerHandler(drogon_path, handler, {drogon_method});
+        drogon::app().registerHandler(drogon_path, std::move(handler), {drogon_method});
     }
 }

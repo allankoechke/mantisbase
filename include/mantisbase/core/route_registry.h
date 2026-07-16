@@ -32,12 +32,12 @@ namespace mb
     public:
         void add(const std::string& method,
                  const std::string& path,
-                 HandlerFn handler,
+                 const HandlerFn &handler,
                  const Middlewares& middlewares);
 
         void add(const std::string& method,
                  const std::string& path,
-                 HandlerWithContentReaderFn handler,
+                 const HandlerWithContentReaderFn &handler,
                  const Middlewares& middlewares);
 
         const RouteHandler* find(const std::string& method, const std::string& path) const;

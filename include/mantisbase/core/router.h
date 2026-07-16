@@ -49,7 +49,7 @@ namespace mb {
         const std::vector<MiddlewareFn> &preRoutingMiddlewares() const { return m_preRoutingMiddlewares; }
 
     private:
-        void registerDrogonHandler(const std::string &method, const std::string &path);
+        void registerDrogonHandler(const std::string &method, const std::string &path) const;
         void registerDrogonHandlerWithReader(const std::string &method, const std::string &path);
 
         static std::string convertPathToDrogon(const std::string &httplib_path);
