@@ -142,6 +142,9 @@ if(MB_SCRIPTING_ENABLED)
     endif()
 endif (MB_SCRIPTING_ENABLED)
 
+# ZLIB for windows build
+include(cmake/add-zlib.cmake)
+
 # Add Drogon HTTP framework
 include(cmake/add-drogon.cmake)
 
