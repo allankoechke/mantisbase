@@ -38,11 +38,11 @@ namespace mb {
         Entity schemaCacheEntity(const std::string &table_name) const;
         void addSchemaCache(const nlohmann::json &entity_schema);
         void updateSchemaCache(const std::string &old_entity_name, const json &new_schema);
-        void removeSchemaCache(const std::string &entity_name);
+        void removeSchemaCache(const std::string &entity_name) const;
 
-        void addSchemaCacheLocked(const nlohmann::json &entity_schema);
+        void addSchemaCacheLocked(const nlohmann::json &entity_schema) const;
 
-        void removeSchemaCacheLocked(const std::string &entity_name);
+        void removeSchemaCacheLocked(const std::string &entity_name) const;
 
         bool isRunning() const;
 

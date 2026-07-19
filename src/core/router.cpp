@@ -46,8 +46,7 @@ namespace mb {
             close();
     }
 
-    bool Router::init() {
-        {
+    bool Router::init() { {
             // Runs before the server starts listening (single-threaded), but we
             // take the exclusive lock anyway to keep all m_entityMap access
             // uniformly synchronized and future-proof.
@@ -104,9 +103,25 @@ namespace mb {
 
             // Configure Drogon
             drogon::app()
-                .addListener(host, port)
-                .setThreadNum(4);
-                // .enableRunAsDaemon(false);
+                    .addListener(host, port)
+                    .setThreadNum(4);
+            // .enableRunAsDaemon(false);
+
+            drogon::app().registerPostHandlingAdvice(
+                [&](const drogon::HttpRequestPtr &req,
+                    const drogon::HttpResponsePtr &resp) {
+                    LogOrigin::info("HTTP",
+                                    fmt::format("{} {:<7} {} {}",
+                                                req->versionString(),
+                                                req->methodString(),
+                                                static_cast<int>(resp->getStatusCode()),
+                                                req->path()
+                                    )
+                    );
+                });
+
+
+            // LogOrigin::info("HTTP Request", fmt::format("{} {:<7} {}  - Status: {}  - Time: {}ms\n\t└──Body: {}",
 
             // Register CORS pre-routing advice
             drogon::app().registerPreRoutingAdvice([](const drogon::HttpRequestPtr &req,
@@ -248,12 +263,12 @@ namespace mb {
         addSchemaCacheLocked(new_schema);
     }
 
-    void Router::removeSchemaCache(const std::string &entity_name) {
+    void Router::removeSchemaCache(const std::string &entity_name) const {
         std::unique_lock lock(m_entityMapMutex);
         removeSchemaCacheLocked(entity_name);
     }
 
-    void Router::addSchemaCacheLocked(const nlohmann::json &entity_schema) {
+    void Router::addSchemaCacheLocked(const nlohmann::json &entity_schema) const {
         auto entity_name = entity_schema.at("name").get<std::string>();
         if (m_entityMap.contains(entity_name)) {
             throw MantisException(500, "An entity exists with given entity_name");
@@ -265,7 +280,7 @@ namespace mb {
         m_entityMap.try_emplace(entity_name, Entity(mApp, entity_schema));
     }
 
-    void Router::removeSchemaCacheLocked(const std::string &entity_name) {
+    void Router::removeSchemaCacheLocked(const std::string &entity_name) const {
         if (!m_entityMap.contains(entity_name)) {
             throw MantisException(404, "Could not find EntitySchema for " + entity_name);
         }
@@ -335,15 +350,15 @@ namespace mb {
         // /api/v1/files/*
         router.Get("/api/v1/files/:entity/:file", fileServingHandler());
 
-        router.Get("/api/v1/sys/settings/config", [](const MantisRequest&, const MantisResponse& res) {
+        router.Get("/api/v1/sys/settings/config", [](const MantisRequest &, const MantisResponse &res) {
             res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
         });
 
-        router.Post("/api/v1/sys/settings/config", [](const MantisRequest&, const MantisResponse& res) {
+        router.Post("/api/v1/sys/settings/config", [](const MantisRequest &, const MantisResponse &res) {
             res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
         });
 
-        router.Patch("/api/v1/sys/settings/config", [](const MantisRequest&, const MantisResponse& res) {
+        router.Patch("/api/v1/sys/settings/config", [](const MantisRequest &, const MantisResponse &res) {
             res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
         });
 
@@ -582,5 +597,4 @@ namespace mb {
             }
         };
     }
-
 }
