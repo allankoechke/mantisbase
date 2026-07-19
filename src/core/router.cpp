@@ -28,6 +28,7 @@
 #include "../include/mantisbase/core/ws.h"
 #include "../include/mantisbase/core/oauth.h"
 #include "../include/mantisbase/core/api_keys.h"
+#include "../include/mantisbase/utils/snowflake.hpp"
 
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
@@ -39,6 +40,8 @@ namespace mb {
         // Add global middlewares to work across all routes
         m_preRoutingMiddlewares.push_back(getAuthToken());
         m_preRoutingMiddlewares.push_back(hydrateContextData());
+
+        m_sfId.init(1, 1);
     }
 
     Router::~Router() {
@@ -106,16 +109,35 @@ namespace mb {
                     .addListener(host, port)
                     .setThreadNum(4);
 
+            drogon::app().registerSyncAdvice([this](const drogon::HttpRequestPtr &req) -> drogon::HttpResponsePtr {
+                // Generate and store request ID in attributes
+                std::string requestId = fmt::format("req_{}", m_sfId.nextID());
+                req->attributes()->insert("request_id", requestId);
+
+                // Return nullptr to continue normal processing
+                return nullptr;
+            });
+
             // Register logger func for all requests
             drogon::app().registerPostHandlingAdvice(
                 [&](const drogon::HttpRequestPtr &req,
                     const drogon::HttpResponsePtr &resp) {
+                    const auto start = req->creationDate();
+                    const auto end = trantor::Date::now();
+                    const auto duration = end.microSecondsSinceEpoch() - start.microSecondsSinceEpoch();
+                    auto seconds = static_cast<double>(duration) / 1000000.0;
+
                     LogOrigin::info("HTTP",
-                                    fmt::format("{} {:<7} {} {}",
-                                                req->versionString(),
+                                    fmt::format("{} {} {}{} {}s {}B {} {} {}",
                                                 req->methodString(),
+                                                req->path(),
+                                                req->query().empty() ? "" : "?" + req->query(),
                                                 static_cast<int>(resp->getStatusCode()),
-                                                req->path()
+                                                seconds,
+                                                resp->body().length(),
+                                                req->versionString(),
+                                                req->peerAddr().toIp(),
+                                                req->attributes()->get<std::string>("request_id")
                                     )
                     );
                 });

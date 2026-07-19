@@ -11,6 +11,7 @@
 #include "models/entity.h"
 #include "../utils/utils.h"
 #include "types.h"
+#include "mantisbase/utils/snowflake.hpp"
 
 namespace mb {
     class SSEMgr;
@@ -90,6 +91,8 @@ namespace mb {
         mutable std::unordered_map<std::string, Entity> m_entityMap;
         std::atomic<bool> m_running{false};
         mutable std::shared_mutex m_entityMapMutex;
+
+        Snowflake<1534832906275L> m_sfId;
     };
 } // mb
 
