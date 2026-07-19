@@ -105,8 +105,8 @@ namespace mb {
             drogon::app()
                     .addListener(host, port)
                     .setThreadNum(4);
-            // .enableRunAsDaemon(false);
 
+            // Register logger func for all requests
             drogon::app().registerPostHandlingAdvice(
                 [&](const drogon::HttpRequestPtr &req,
                     const drogon::HttpResponsePtr &resp) {
