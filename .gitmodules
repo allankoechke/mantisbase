@@ -6,10 +6,6 @@
 	path = 3rdParty/soci
 	url = https://github.com/allankoechke/soci.git
 	shallow = true
-[submodule "3rdParty/spdlog"]
-	path = 3rdParty/spdlog
-	url = https://github.com/gabime/spdlog.git
-	shallow = true
 [submodule "3rdParty/cmrc"]
 	path = 3rdParty/cmrc
 	url = https://github.com/vector-of-bool/cmrc.git
