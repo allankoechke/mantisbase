@@ -11,6 +11,7 @@
 #include "models/entity.h"
 #include "../utils/utils.h"
 #include "types.h"
+#include "drogon/drogon_callbacks.h"
 #include "mantisbase/utils/snowflake.hpp"
 
 namespace mb {
@@ -70,6 +71,25 @@ namespace mb {
         static std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute();
         static std::function<void(const MantisRequest &, MantisResponse &)> fileServingHandler();
         static std::function<void(const MantisRequest &, MantisResponse &)> healthCheckHandler();
+
+        ///> Sync Advice to return handler that generates unique IDs per request
+        const std::function<drogon::HttpResponsePtr(const drogon::HttpRequestPtr &)> reqIdSyncAdvice();
+
+        ///> Returns handler logger func for all requests before they return
+        std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)> loggerPostHandlingAdvice() const;
+
+        ///> Register CORS pre-routing advice
+        static std::function<void(const drogon::HttpRequestPtr &,
+                                  drogon::AdviceCallback &&,
+                                  drogon::AdviceChainCallback &&
+        )> corsPreRoutingAdvice();
+
+        ///> Register post-routing advice for CORS headers on all responses
+        static std::function<void(const drogon::HttpRequestPtr &,
+                                  const drogon::HttpResponsePtr &resp)> corsPostHandlingAdvice();
+
+        ///> Get default 404 handler
+        static drogon::HttpResponsePtr default404Response();
 
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogin();
         std::function<void(MantisRequest &, MantisResponse &)> handleAdminLogin();

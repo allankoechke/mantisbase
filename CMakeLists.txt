@@ -92,7 +92,7 @@ set( MB_SOURCES
         src/core/models/entity_schema_routes_handlers.cpp
 
         src/core/exceptions.cpp
-        src/core/router_httplib_internals.cpp
+        src/core/router_internals.cpp
         src/core/http_request.cpp
         src/core/http_response.cpp
         src/core/http_content_reader.cpp

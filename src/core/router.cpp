@@ -109,99 +109,43 @@ namespace mb {
                     .addListener(host, port)
                     .setThreadNum(4);
 
-            drogon::app().registerSyncAdvice([this](const drogon::HttpRequestPtr &req) -> drogon::HttpResponsePtr {
-                // Generate and store request ID in attributes
-                std::string requestId = fmt::format("req_{}", m_sfId.nextID());
-                req->attributes()->insert("request_id", requestId);
-
-                // Return nullptr to continue normal processing
-                return nullptr;
-            });
+            // Register hook to generate request IDs
+            drogon::app().registerSyncAdvice(reqIdSyncAdvice());
 
             // Register logger func for all requests
-            drogon::app().registerPostHandlingAdvice(
-                [&](const drogon::HttpRequestPtr &req,
-                    const drogon::HttpResponsePtr &resp) {
-                    const auto start = req->creationDate();
-                    const auto end = trantor::Date::now();
-                    const auto duration = end.microSecondsSinceEpoch() - start.microSecondsSinceEpoch();
-                    auto seconds = static_cast<double>(duration) / 1000000.0;
-
-                    LogOrigin::info("HTTP",
-                                    fmt::format("{} {} {}{} {}s {}B {} {} {}",
-                                                req->methodString(),
-                                                req->path(),
-                                                req->query().empty() ? "" : "?" + req->query(),
-                                                static_cast<int>(resp->getStatusCode()),
-                                                seconds,
-                                                resp->body().length(),
-                                                req->versionString(),
-                                                req->peerAddr().toIp(),
-                                                req->attributes()->get<std::string>("request_id")
-                                    )
-                    );
-                });
-
-
-            // LogOrigin::info("HTTP Request", fmt::format("{} {:<7} {}  - Status: {}  - Time: {}ms\n\t└──Body: {}",
+            drogon::app().registerPostHandlingAdvice(loggerPostHandlingAdvice());
 
             // Register CORS pre-routing advice
-            drogon::app().registerPreRoutingAdvice([](const drogon::HttpRequestPtr &req,
-                                                      drogon::AdviceCallback &&callback,
-                                                      drogon::AdviceChainCallback &&chainCallback) {
-                // Handle OPTIONS preflight
-                if (req->method() == drogon::Options) {
-                    auto resp = drogon::HttpResponse::newHttpResponse();
-                    resp->setStatusCode(drogon::k204NoContent);
-                    resp->addHeader("Access-Control-Allow-Origin", "*");
-                    resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-                    resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-                    resp->addHeader("Access-Control-Max-Age", "86400");
-                    callback(resp);
-                    return;
-                }
-                chainCallback();
-            });
+            drogon::app().registerPreRoutingAdvice(corsPreRoutingAdvice());
 
             // Register post-routing advice for CORS headers on all responses
-            drogon::app().registerPostHandlingAdvice([](const drogon::HttpRequestPtr &,
-                                                        const drogon::HttpResponsePtr &resp) {
-                resp->addHeader("Access-Control-Allow-Origin", "*");
-                resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-                resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-            });
+            drogon::app().registerPostHandlingAdvice(corsPostHandlingAdvice());
 
             // Register default 404 handler
-            auto notFoundResp = drogon::HttpResponse::newHttpResponse();
-            notFoundResp->setStatusCode(drogon::k404NotFound);
-            notFoundResp->setContentTypeString("application/json");
-            notFoundResp->setBody(R"({"status":404,"error":"Not Found","data":{}})");
-            drogon::app().setCustom404Page(notFoundResp);
+            drogon::app().setCustom404Page(default404Response());
 
             m_running.store(true);
 
-            // Launch logging/browser in separate thread after listen starts
-            std::thread notifier([this, host, port, launch_admin_setup]() -> void {
-                // Wait a little for the server to be fully ready
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                auto endpoint = std::format("{}:{}", host, port);
+            // Log API endpoints
+            LogOrigin::info(
+                fmt::format(
+                    "Starting Servers: \n\t"
+                    "├── API Endpoints: http://{0}:{1}/api/v1/ \n\t"
+                    "└── Admin Dashboard: http://{0}:{1}/mb\n",
+                    host, port)
+            );
 
-                auto t_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-                t_sink->set_level(spdlog::level::trace);
-                t_sink->set_pattern("[%Y-%m-%d %H:%M:%S] [%-8l] %v");
+            if (launch_admin_setup) {
+                // Launch logging/browser in separate thread after listen starts
+                std::thread notifier([this]() -> void {
+                    // Wait a little for the server to be fully ready
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-                spdlog::logger logger("t_sink", {t_sink});
-                logger.set_level(spdlog::level::trace);
-
-                logger.info(
-                    "Starting Servers: \n\t├── API Endpoints: http://{}/api/v1/ \n\t└── Admin Dashboard: http://{}/mb\n",
-                    endpoint, endpoint);
-
-                if (launch_admin_setup)
                     mApp.openBrowserOnStart();
-            });
+                });
 
-            notifier.detach();
+                notifier.detach();
+            }
 
             // drogon::app().run() blocks until quit() is called
             drogon::app().run();
