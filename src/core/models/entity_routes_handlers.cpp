@@ -8,7 +8,7 @@ namespace mb {
     namespace {
         void handleGetOne(const MantisRequest &req, const MantisResponse &res, const std::string &entity_name) {
             try {
-                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto entity = req.mApp().entity(entity_name);
 
                 const auto entity_id = trim(req.getPathParamValue("id"));
                 if (entity_id.empty())
@@ -44,7 +44,7 @@ namespace mb {
 
         void handleGetMany(const MantisRequest &req, const MantisResponse &res, const std::string &entity_name) {
             try {
-                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto entity = req.mApp().entity(entity_name);
 
                 auto page = req.hasQueryParam("page")
                                 ? safe_stoi(req.getQueryParamValue("page"), 1)
@@ -104,7 +104,7 @@ namespace mb {
         void handlePost(const MantisRequest &req, const MantisResponse &res, MantisContentReader &reader,
                         const std::string &entity_name) {
             try {
-                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto entity = req.mApp().entity(entity_name);
 
                 reader.parseFormDataToEntity(entity);
 
@@ -150,7 +150,7 @@ namespace mb {
         void handlePatch(MantisRequest &req, MantisResponse &res, MantisContentReader &reader,
                          const std::string &entity_name) {
             try {
-                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto entity = req.mApp().entity(entity_name);
 
                 const auto entity_id = trim(req.getPathParamValue("id"));
                 if (entity_id.empty())
@@ -199,7 +199,7 @@ namespace mb {
 
         void handleDelete(const MantisRequest &req, const MantisResponse &res, const std::string &entity_name) {
             try {
-                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto entity = req.mApp().entity(entity_name);
 
                 const auto entity_id = trim(req.getPathParamValue("id"));
                 if (entity_id.empty())

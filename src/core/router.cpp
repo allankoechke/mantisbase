@@ -9,8 +9,11 @@
 #include <cmrc/cmrc.hpp>
 #include <chrono>
 #include <thread>
+#include <drogon/drogon.h>
 
 // For thread logger
+#include <memory>
+#include <shared_mutex>
 #include <spdlog/sinks/stdout_color_sinks-inl.h>
 #include <spdlog/sinks/ansicolor_sink.h>
 
@@ -22,70 +25,65 @@
 #include "../include/mantisbase/core/logger/log_database.h"
 #include "../include/mantisbase/core/realtime.h"
 #include "../include/mantisbase/core/sse.h"
+#include "../include/mantisbase/core/ws.h"
+#include "../include/mantisbase/core/oauth.h"
+#include "../include/mantisbase/core/api_keys.h"
+#include "../include/mantisbase/utils/snowflake.hpp"
 
 // Declare a mantis namespace for the embedded FS
 CMRC_DECLARE(mantis);
 
 namespace mb {
-    Router::Router()
-        : mApp(MantisBase::instance()),
-          m_sseMgr(std::make_unique<SSEMgr>()) {
-        // Let's fix timing initialization, set the start time to current time
-        svr.set_pre_routing_handler(preRoutingHandler());
-
-        // Add CORS headers to all responses
-        svr.set_post_routing_handler(postRoutingHandler());
-
-        svr.set_logger(routingLogger());
-
-        // Handle preflight OPTIONS requests
-        svr.Options(".*", optionsHandler());
-
-        // Set Error Handler
-        svr.set_error_handler(routingErrorHandler());
-
+    Router::Router(const MantisBase &app)
+        : mApp(app),
+          m_sseMgr(std::make_unique<SSEMgr>(app)) {
         // Add global middlewares to work across all routes
-        m_preRoutingMiddlewares.push_back(getAuthToken()); // Get auth token from the header
-        m_preRoutingMiddlewares.push_back(hydrateContextData()); // Fill request context with necessary data
+        m_preRoutingMiddlewares.push_back(getAuthToken());
+        m_preRoutingMiddlewares.push_back(hydrateContextData());
+
+        m_sfId.init(1, 1);
     }
 
     Router::~Router() {
-        if (svr.is_running())
-            svr.stop();
-
-        // std::cout << "Router Des()" << std::endl;
+        if (m_running.load())
+            close();
     }
 
-    bool Router::init() {
-        {
+    bool Router::init() { {
+            // Runs before the server starts listening (single-threaded), but we
+            // take the exclusive lock anyway to keep all m_entityMap access
+            // uniformly synchronized and future-proof.
+            std::unique_lock lock(m_entityMapMutex);
+
             const auto sql = mApp.db().session();
             const soci::rowset rows = (sql->prepare << "SELECT schema FROM mb_tables");
 
             for (const auto &row: rows) {
                 const auto schema = row.get<nlohmann::json>("schema");
 
-                // Create entity based on the schema
-                Entity entity{schema};
+                // Create entity based on the schema, bound to this application
+                // so its CRUD ops can reach db/realtime without the singleton.
+                Entity entity{mApp, schema};
 
                 // Store this object to keep alive function pointers
                 // if not, possible access violation error
                 m_entityMap.emplace(entity.name(), std::move(entity));
             }
+
+            // Add admin routes
+            EntitySchema admin_schema{mApp, "mb_admins", "auth"};
+            admin_schema.removeField("name");
+            admin_schema.setSystem(true);
+            auto admin_entity = admin_schema.toEntity();
+            m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
+
+            // Service Schema [No routes]
+            EntitySchema service_schema{mApp, "mb_service_acc", "base"};
+            service_schema.setHasApi(false);
+            service_schema.setSystem(true);
+            auto service_entity = service_schema.toEntity();
+            m_entityMap.emplace(service_entity.name(), std::move(service_entity));
         }
-
-        // Add admin routes
-        EntitySchema admin_schema{"mb_admins", "auth"};
-        admin_schema.removeField("name");
-        admin_schema.setSystem(true);
-        auto admin_entity = admin_schema.toEntity();
-        m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
-
-        // Service Schema [No routes]
-        EntitySchema service_schema{"mb_service_acc", "base"};
-        service_schema.setHasApi(false);
-        service_schema.setSystem(true);
-        auto service_entity = service_schema.toEntity();
-        m_entityMap.emplace(service_entity.name(), std::move(service_entity));
 
         // Misc Endpoints [admin, auth, etc]
         generateMiscEndpoints();
@@ -95,13 +93,6 @@ namespace mb {
 
     bool Router::listen() {
         try {
-            // Check if server can bind to port before launching
-            if (!svr.is_valid()) {
-                LogOrigin::critical("Server Invalid",
-                                    "Server is not valid. Maybe port is in use or permissions issue.");
-                return false;
-            }
-
             const auto host = mApp.host();
             const auto port = mApp.port();
 
@@ -113,39 +104,60 @@ namespace mb {
 
             m_sseMgr->start();
 
-            // Launch logging/browser in separate thread after listen starts
-            std::thread notifier([host, port, launch_admin_setup]() -> void {
-                // Wait a little for the server to be fully ready
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                auto endpoint = std::format("{}:{}", host, port);
+            // Configure Drogon
+            drogon::app()
+                    .addListener(host, port)
+                    .setThreadNum(4);
 
-                auto t_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-                t_sink->set_level(spdlog::level::trace);
-                t_sink->set_pattern("[%Y-%m-%d %H:%M:%S] [%-8l] %v");
+            // Register hook to generate request IDs
+            drogon::app().registerSyncAdvice(reqIdSyncAdvice());
 
-                spdlog::logger logger("t_sink", {t_sink});
-                logger.set_level(spdlog::level::trace);
+            // Register logger func for all requests
+            drogon::app().registerPostHandlingAdvice(loggerPostHandlingAdvice());
 
-                logger.info(
-                    "Starting Servers: \n\t├── API Endpoints: http://{}/api/v1/ \n\t└── Admin Dashboard: http://{}/mb\n",
-                    endpoint, endpoint);
+            // Register CORS pre-routing advice
+            drogon::app().registerPreRoutingAdvice(corsPreRoutingAdvice());
 
-                if (launch_admin_setup)
-                    MantisBase::instance().openBrowserOnStart();
-            });
+            // Register post-routing advice for CORS headers on all responses
+            drogon::app().registerPostHandlingAdvice(corsPostHandlingAdvice());
 
-            if (!svr.listen(host, port)) {
-                LogOrigin::critical("Server Bind Failed", fmt::format("Error: Failed to bind to {}:{}", host, port));
-                notifier.join();
-                return false;
+            // Register default 404 handler
+            drogon::app().setCustom404Page(default404Response());
+
+            m_running.store(true);
+
+            // Log API endpoints
+            LogOrigin::info(
+                fmt::format(
+                    "Starting Servers: \n\t"
+                    "├── API Endpoints: http://{0}:{1}/api/v1/ \n\t"
+                    "└── Admin Dashboard: http://{0}:{1}/mb\n",
+                    host, port)
+            );
+
+            if (launch_admin_setup) {
+                // Launch logging/browser in separate thread after listen starts
+                std::thread notifier([this]() -> void {
+                    // Wait a little for the server to be fully ready
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+                    mApp.openBrowserOnStart();
+                });
+
+                notifier.detach();
             }
 
-            notifier.join();
+            // drogon::app().run() blocks until quit() is called
+            drogon::app().run();
+
+            m_running.store(false);
             return true;
         } catch (const std::exception &e) {
-            LogOrigin::critical("Server Start Failed", fmt::format("Failed to start server: {}", e.what()));
+            m_running.store(false);
+            LogOrigin::critical("Server", fmt::format("Failed to start server: {}", e.what()));
         } catch (...) {
-            LogOrigin::critical("Server Start Failed", "Failed to start server: Unknown Error");
+            m_running.store(false);
+            LogOrigin::critical("Server", "Failed to start server: Unknown Error");
         }
 
         return false;
@@ -157,15 +169,16 @@ namespace mb {
             m_sseMgr->stop();
 
         // Stop router and clear out objects
-        if (svr.is_running()) {
-            svr.stop();
+        if (m_running.load()) {
+            drogon::app().quit();
+            m_running.store(false);
             m_entityMap.clear();
-            LogOrigin::info("Server Stopped", "HTTP Server Stopped.");
+            LogOrigin::info("Server", "HTTP Server Stopped.");
         }
     }
 
-    httplib::Server &Router::server() {
-        return svr;
+    bool Router::isRunning() const {
+        return m_running.load();
     }
 
     SSEMgr &Router::sseMgr() const {
@@ -173,6 +186,10 @@ namespace mb {
     }
 
     const json &Router::schemaCache(const std::string &table_name) const {
+        // NOTE: returns a reference into the cache; the caller must not rely on
+        // it remaining valid across a concurrent schema mutation. Currently
+        // unused, kept for API completeness.
+        std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
             throw MantisException(404, "Entity schema for " + table_name + " was not found!");
         }
@@ -181,51 +198,60 @@ namespace mb {
     }
 
     bool Router::hasSchemaCache(const std::string &table_name) const {
+        std::shared_lock lock(m_entityMapMutex);
         return m_entityMap.contains(table_name);
     }
 
     Entity Router::schemaCacheEntity(const std::string &table_name) const {
+        std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
             throw MantisException(404, "Entity schema for `" + table_name + "` was not found!");
         }
 
-        return m_entityMap.at(table_name);
+        // Returns a copy, so it stays valid after the lock is released.
+        return Entity(m_entityMap.at(table_name));
     }
 
     void Router::addSchemaCache(const nlohmann::json &entity_schema) {
-        const auto entity_name = entity_schema.at("name").get<std::string>();
+        std::unique_lock lock(m_entityMapMutex);
+        addSchemaCacheLocked(entity_schema);
+    }
+
+    void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) {
+        std::unique_lock lock(m_entityMapMutex);
+
+        if (!m_entityMap.contains(old_entity_name))
+            throw MantisException(404, "Cannot update, schema not found for entity " + old_entity_name);
+
+        // Clean up old entity, then insert the new one, all under a single
+        // exclusive lock so readers never observe the intermediate state.
+        removeSchemaCacheLocked(old_entity_name);
+        addSchemaCacheLocked(new_schema);
+    }
+
+    void Router::removeSchemaCache(const std::string &entity_name) const {
+        std::unique_lock lock(m_entityMapMutex);
+        removeSchemaCacheLocked(entity_name);
+    }
+
+    void Router::addSchemaCacheLocked(const nlohmann::json &entity_schema) const {
+        auto entity_name = entity_schema.at("name").get<std::string>();
         if (m_entityMap.contains(entity_name)) {
             throw MantisException(500, "An entity exists with given entity_name");
         }
 
-        // Create entity and cache it. Unified entity routes resolve entities dynamically.
-        auto entity = Entity(entity_schema);
-        m_entityMap.insert_or_assign(entity_name, std::move(entity));
-        std::cout << std::endl;
+        // Create entity and cache it, bound to this application. Unified entity
+        // routes resolve entities dynamically.
+        // auto entity = Entity(mApp, entity_schema);
+        m_entityMap.try_emplace(entity_name, Entity(mApp, entity_schema));
     }
 
-    void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) {
-        if (!m_entityMap.contains(old_entity_name))
-            throw MantisException(404, "Cannot update, schema not found for entity " + old_entity_name);
-
-        // Clean up old entity route
-        removeSchemaCache(old_entity_name);
-
-        assert(!m_entityMap.contains(new_schema)); // Ensure we don't have any old schema data anymore
-
-        // Add new route
-        addSchemaCache(new_schema);
-
-        assert(m_entityMap.contains(new_schema)); // Ensure new entity has been added
-    }
-
-    void Router::removeSchemaCache(const std::string &entity_name) {
+    void Router::removeSchemaCacheLocked(const std::string &entity_name) const {
         if (!m_entityMap.contains(entity_name)) {
             throw MantisException(404, "Could not find EntitySchema for " + entity_name);
         }
 
         m_entityMap.erase(entity_name);
-        std::cout << std::endl;
     }
 
     void Router::registerAuthRoutes() {
@@ -261,7 +287,19 @@ namespace mb {
 
     void Router::generateMiscEndpoints() {
         auto &router = mApp.router();
-        router.Get(R"(/mb(/.*)?)", handleAdminDashboardRoute());
+
+        // Admin dashboard route - use Drogon regex handler
+        auto adminHandler = handleAdminDashboardRoute();
+        drogon::app().registerHandlerViaRegex(
+            R"(/mb(/.*)?)",
+            [adminHandler, this](const drogon::HttpRequestPtr &req,
+                                 std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
+                MantisRequest ma_req{mApp, req};
+                MantisResponse ma_res{};
+                adminHandler(ma_req, ma_res);
+                callback(ma_res.drogonResponse());
+            },
+            {drogon::Get});
 
         router.Get("/api/v1/health", healthCheckHandler());
 
@@ -278,30 +316,31 @@ namespace mb {
         // /api/v1/files/*
         router.Get("/api/v1/files/:entity/:file", fileServingHandler());
 
-        router.Get("/api/v1/sys/settings/config", [](const MantisRequest&, const MantisResponse& res) {
+        router.Get("/api/v1/sys/settings/config", [](const MantisRequest &, const MantisResponse &res) {
             res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
         });
 
-        router.Post("/api/v1/sys/settings/config", [](const MantisRequest&, const MantisResponse& res) {
+        router.Post("/api/v1/sys/settings/config", [](const MantisRequest &, const MantisResponse &res) {
             res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
         });
 
-        router.Patch("/api/v1/sys/settings/config", [](const MantisRequest&, const MantisResponse& res) {
+        router.Patch("/api/v1/sys/settings/config", [](const MantisRequest &, const MantisResponse &res) {
             res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
         });
 
 
-        SSEMgr::createRoutes();
+        m_sseMgr->createRoutes();
 
         registerSchemaRoutes();
         registerEntityRoutes();
         registerAdminEntityRoutes();
+        registerApiKeyRoutes();
+        registerOAuthRoutes();
 
-        // Add /public static file serving directory
-        if (const auto mount_ok = svr.set_mount_point("/", mApp.publicDir()); !mount_ok) {
-            LogOrigin::critical("Mount Point Setup Failed", fmt::format(
-                                    "Failed to setup mount point directory for '/' at '{}'",
-                                    mApp.publicDir()));
+        // Static file serving: register a catch-all for the public directory
+        const auto publicDir = mApp.publicDir();
+        if (fs::exists(publicDir)) {
+            drogon::app().setDocumentRoot(publicDir);
         }
     }
 
@@ -309,7 +348,13 @@ namespace mb {
         return [](const MantisRequest &req, MantisResponse &res) {
             try {
                 const auto fs = cmrc::mantis::get_filesystem();
-                std::string path = req.matches()[1];
+
+                // Extract path after /mb
+                std::string full_path = req.getPath();
+                std::string path;
+                if (full_path.size() > 3) {
+                    path = full_path.substr(3); // strip "/mb"
+                }
 
                 // Normalize the path
                 if (path.empty() || path == "/") {
@@ -392,7 +437,7 @@ namespace mb {
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::healthCheckHandler() {
-        return [](const MantisRequest &, MantisResponse &res) {
+        return [](const MantisRequest &, const MantisResponse &res) {
             res.setHeader("Cache-Control", "no-cache");
             res.send(200, R"({"status": "OK"})", "application/json");
         };
@@ -409,12 +454,8 @@ namespace mb {
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::handleLogs() {
-        const auto f = MB_FUNC();
-        return [f](const MantisRequest &req, MantisResponse &res) {
+        return [&](const MantisRequest &req, MantisResponse &res) {
             try {
-                TRACE_FUNC(f);
-                // Get log database instance
-                auto &logsDb = MantisBase::instance().logs().logsDb();
                 if (!Logger::isDbInitialized) {
                     json response;
                     response["error"] = "Log database not initialized";
@@ -425,8 +466,8 @@ namespace mb {
                 }
 
                 // Parse query parameters
-                int page = 1;
-                int page_size = 50;
+                int limit = 50;
+                std::string after;
                 std::string level_filter;
                 std::string min_level_filter;
                 std::string search_filter;
@@ -435,32 +476,23 @@ namespace mb {
                 std::string sort_by = "timestamp";
                 std::string sort_order = "desc";
 
-                // Get page parameter
-                if (req.hasQueryParam("page")) {
+                if (req.hasQueryParam("after")) {
+                    after = req.getQueryParamValue("after");
+                }
+
+                if (req.hasQueryParam("limit")) {
                     try {
-                        page = std::stoi(req.getQueryParamValue("page"));
-                        if (page < 1) page = 1;
+                        limit = std::stoi(req.getQueryParamValue("limit"));
+                        if (limit < 1) limit = 1;
+                        if (limit > 1000) limit = 1000;
                     } catch (...) {
-                        page = 1;
+                        limit = 50;
                     }
                 }
 
-                // Get page_size parameter
-                if (req.hasQueryParam("page_size")) {
-                    try {
-                        page_size = std::stoi(req.getQueryParamValue("page_size"));
-                        if (page_size < 1) page_size = 1;
-                        if (page_size > 1000) page_size = 1000; // Limit to 1000
-                    } catch (...) {
-                        page_size = 50;
-                    }
-                }
-
-                // Get level filter
                 if (req.hasQueryParam("level")) {
                     level_filter = req.getQueryParamValue("level");
 
-                    // Validate level
                     if (level_filter != "trace" && level_filter != "debug" &&
                         level_filter != "info" && level_filter != "warn" &&
                         level_filter != "critical") {
@@ -471,7 +503,6 @@ namespace mb {
                 if (req.hasQueryParam("min_level")) {
                     min_level_filter = req.getQueryParamValue("min_level");
 
-                    // Validate level
                     if (min_level_filter != "trace" && min_level_filter != "debug" &&
                         min_level_filter != "info" && min_level_filter != "warn" &&
                         min_level_filter != "critical") {
@@ -479,12 +510,10 @@ namespace mb {
                     }
                 }
 
-                // Get search filter
                 if (req.hasQueryParam("search")) {
                     search_filter = req.getQueryParamValue("search");
                 }
 
-                // Get date filters
                 if (req.hasQueryParam("start_date")) {
                     start_date = req.getQueryParamValue("start_date");
                 }
@@ -492,10 +521,8 @@ namespace mb {
                     end_date = req.getQueryParamValue("end_date");
                 }
 
-                // Get sort parameters
                 if (req.hasQueryParam("sort_by")) {
                     std::string sort_param = req.getQueryParamValue("sort_by");
-                    // Validate sort_by to prevent SQL injection
                     if (sort_param == "level" || sort_param == "origin" || sort_param == "message" ||
                         sort_param == "timestamp" || sort_param == "created_at") {
                         sort_by = sort_param;
@@ -510,8 +537,9 @@ namespace mb {
 
                 if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
 
-                // Fetch logs
-                json result = logsDb.getLogs(page, page_size, level_filter,
+                // Get log database instance
+                auto &logsDb = req.mApp().logs().logsDb();
+                json result = logsDb.getLogs(after, limit, level_filter,
                                              search_filter, start_date, end_date,
                                              sort_by, sort_order);
 

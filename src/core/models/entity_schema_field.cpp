@@ -217,14 +217,9 @@ namespace mb {
             throw MantisException(400, "Foreign key reference table cannot be empty!");
         }
 
-        // Validate entity exists which is being referenced
-        if (!MantisBase::instance().hasEntity(table)) {
-            throw MantisException(400, std::format("Entity `{}` being referenced was not found!", table));
-        }
-
-        if (const auto entity = MantisBase::instance().entity(table); !entity.hasField(column.empty() ? "id" : column)) {
-            throw MantisException(400, std::format("Invalid entity column name `{}` in the entity.", column));
-        }
+        // Note: existence of the referenced entity/column is validated at the
+        // schema level (EntitySchema::validate), which has the owning app. A
+        // field is a pure value type and does not reach into app state here.
 
         // Validate update/delete policies
         const std::vector<std::string> validPolicies = {

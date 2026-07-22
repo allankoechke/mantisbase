@@ -1,25 +1,105 @@
 #include <utility>
+#include <vector>
+#include <memory>
+#include <ranges>
 
 #include "../../include/mantisbase/core/sse.h"
+#include "../../include/mantisbase/core/ws.h"
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/utils/uuidv7.h"
 
+#include <drogon/drogon.h>
+
 namespace mb {
+    SSEMgr::SSEMgr(const MantisBase &app)
+        : m_wsMgr(std::make_unique<WSMgr>(app)), m_app(app) {
+    }
+
     SSEMgr::~SSEMgr() { stop(); }
 
     void SSEMgr::createRoutes() {
         auto &router = MantisBase::instance().router();
 
-        // Realtime endpoints
-        router.Get("/api/v1/realtime",
-                   handleSSESession(),
-                   {
-                       validateSubTopics(false),
-                       validateHasAccess(),
-                       updateAuthTokenForSSE()
-                   }
-        );
+        // SSE GET endpoint — registers directly with Drogon for async streaming
+        auto getMiddlewares = std::vector<MiddlewareFn>{
+            validateSubTopics(false),
+            validateHasAccess(),
+            updateAuthTokenForSSE()
+        };
 
+        auto sseGetMiddlewares = std::make_shared<std::vector<MiddlewareFn> >(std::move(getMiddlewares));
+
+        drogon::app().registerHandler(
+            "/api/v1/realtime",
+            [this, sseGetMiddlewares](const drogon::HttpRequestPtr &req,
+                                      std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
+                // Check env var toggle
+                if (const char *env = std::getenv("MB_REALTIME_SSE"); env && std::string(env) == "false") {
+                    auto resp = drogon::HttpResponse::newHttpResponse();
+                    resp->setStatusCode(drogon::k503ServiceUnavailable);
+                    resp->setContentTypeString("application/json");
+                    resp->setBody(R"({"status":503,"error":"SSE is disabled","data":{}})");
+                    callback(resp);
+                    return;
+                }
+
+
+                MantisRequest ma_req{this->m_app, req};
+                MantisResponse ma_res{};
+
+                // Run global pre-routing middlewares
+                auto &preMiddlewares = MantisBase::instance().router().preRoutingMiddlewares();
+                for (const auto &mw: preMiddlewares) {
+                    if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
+                        callback(ma_res.drogonResponse());
+                        return;
+                    }
+                }
+
+                // Run SSE-specific middlewares
+                for (const auto &mw: *sseGetMiddlewares) {
+                    if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
+                        callback(ma_res.drogonResponse());
+                        return;
+                    }
+                }
+
+                // Parse topics from middleware context
+                auto topics = ma_req.getOr<json>("topics", json::array());
+                std::set<std::string> topicSet;
+                for (const auto &topic: topics) {
+                    auto entity_name = topic["entity"].get<std::string>();
+                    auto record_id = topic["id"].get<std::string>();
+                    if (!record_id.empty())
+                        entity_name = std::format("{}:{}", entity_name, record_id);
+                    topicSet.insert(entity_name);
+                }
+
+                // Create async stream response for SSE
+                auto resp = drogon::HttpResponse::newAsyncStreamResponse(
+                    [this, topicSet](drogon::ResponseStreamPtr stream) {
+                        auto clientId = createSession(topicSet, std::move(stream));
+
+                        // Send the initial connected event through the session
+                        if (auto session = getSession(clientId); session) {
+                            json connected = {
+                                {"client_id", clientId},
+                                {"topics", topicSet}
+                            };
+                            session->sendEvent("connected", connected);
+                        }
+                    });
+
+                resp->setContentTypeString("text/event-stream");
+                resp->addHeader("Cache-Control", "no-cache");
+                resp->addHeader("Connection", "keep-alive");
+                resp->addHeader("X-Accel-Buffering", "no");
+                resp->addHeader("Access-Control-Allow-Origin", "*");
+                callback(resp);
+            },
+            {drogon::Get});
+
+        // POST /api/v1/realtime — update topics for existing session
         router.Post("/api/v1/realtime",
                     handleSSESessionUpdate(),
                     {
@@ -30,11 +110,12 @@ namespace mb {
         );
     }
 
-    std::string SSEMgr::createSession(const std::set<std::string> &initial_topics) {
+    std::string SSEMgr::createSession(const std::set<std::string> &initial_topics,
+                                      drogon::ResponseStreamPtr stream) {
         std::lock_guard lock(m_sessions_mutex);
 
         std::string client_id = generateClientID();
-        const auto session = std::make_shared<SSESession>(client_id, initial_topics);
+        auto session = std::make_shared<SSESession>(client_id, initial_topics, std::move(stream));
         m_sessions[client_id] = session;
 
         logEntry::info("SSE Manager",
@@ -80,16 +161,37 @@ namespace mb {
         return nullptr;
     }
 
-    // Broadcast change event to interested sessions
     void SSEMgr::broadcastChange(const json &change_event) {
         try {
-            std::lock_guard lock(m_sessions_mutex);
+            // Broadcast to SSE sessions
+            {
+                std::lock_guard lock(m_sessions_mutex);
+                std::vector<std::string> deadSessions;
 
-            for (const auto &session: m_sessions | std::views::values) {
-                if (session->isInterestedIn(change_event)) {
-                    json formatted = session->formatEvent(change_event);
-                    session->queueEvent("change", formatted);
+                for (const auto &[clientId, session]: m_sessions) {
+                    if (!session->isActive()) {
+                        deadSessions.push_back(clientId);
+                        continue;
+                    }
+                    if (session->isInterestedIn(change_event)) {
+                        json formatted = session->formatEvent(change_event);
+                        if (!session->sendEvent("change", formatted)) {
+                            deadSessions.push_back(clientId);
+                        }
+                    }
                 }
+
+                for (const auto &id: deadSessions) {
+                    if (auto it = m_sessions.find(id); it != m_sessions.end()) {
+                        it->second->close();
+                        m_sessions.erase(it);
+                    }
+                }
+            }
+
+            // Broadcast to WebSocket connections
+            if (m_wsMgr) {
+                m_wsMgr->broadcastChange(change_event);
             }
         } catch (const std::exception &e) {
             logEntry::info("SSE Manager", "Broadcasting message failed!", e.what());
@@ -101,8 +203,12 @@ namespace mb {
         return m_sessions.size();
     }
 
+    WSMgr &SSEMgr::wsMgr() const {
+        return *m_wsMgr;
+    }
+
     void SSEMgr::start() {
-        MantisBase::instance().rt().runWorker([this](const json &items) {
+        m_app.rt().runWorker([this](const json &items) {
             for (const auto &data_item: items) broadcastChange(data_item);
         });
 
@@ -119,7 +225,7 @@ namespace mb {
     }
 
     void SSEMgr::stop() {
-        MantisBase::instance().rt().stopWorker();
+        m_app.rt().stopWorker();
 
         m_running.store(false);
         m_cv.notify_all();
@@ -129,109 +235,16 @@ namespace mb {
         }
     }
 
-    bool SSEMgr::isRunning() const {return m_running.load();}
+    bool SSEMgr::isRunning() const { return m_running.load(); }
 
-    std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handleSSESession() {
-        return [](mb::MantisRequest &req, const mb::MantisResponse &res) {
-            res.setHeader("Cache-Control", "no-cache");
-            res.setHeader("Connection", "keep-alive");
-            res.setHeader("Access-Control-Allow-Origin", "*");
-
-            // Parse topics from query parameters
-            std::set<std::string> topics;
-
-            for (const auto &topic: req.getOr<json>("topics", json::array())) {
-                auto entity_name = topic["entity"].get<std::string>();
-                auto record_id = topic["id"].get<std::string>();
-                if (!record_id.empty()) entity_name = std::format("{}:{}", entity_name, record_id);
-                topics.insert(entity_name);
-            }
-
-            if (topics.empty()) {
-                res.sendJSON(400,
-                             {
-                                 {"error", "No topics specified to subscribe to."},
-                                 {"data", json::object()},
-                                 {"status", 400}
-                             }
-                );
-                return;
-            }
-
-            const json auth = req.getOr<json>("auth", json::object());
-            const json verification = req.getOr<json>("verification", json::object());
-
-            res.getResponse().set_chunked_content_provider(
-                "text/event-stream",
-                [topics, auth, verification](size_t, const httplib::DataSink &sink) -> bool {
-                    auto &sse_mgr = MantisBase::instance().router().sseMgr();
-
-                    // Helper to send SSE event
-                    auto sendSSE = [&sink](const std::string &eventType, const json &data) -> bool {
-                        if (!sink.is_writable()) {
-                            return false;
-                        }
-
-                        const std::string message = std::format(
-                            "event: {}\ndata: {}\n\n",
-                            eventType,
-                            data.dump()
-                        );
-
-                        return sink.write(message.data(), message.size());
-                    };
-
-                    // Create session with stored auth details for later re-validation
-                    std::string client_id = sse_mgr.createSession(topics);
-
-                    const auto session = sse_mgr.getSession(client_id);
-                    if (!session) return false;
-
-                    // Send connection event
-                    sendSSE("connected", {
-                                {"client_id", client_id},
-                                {"topics", topics},
-                                {"timestamp", std::time(nullptr)}
-                            }
-                    );
-
-                    // Event loop - wait for events or timeout
-                    while (sink.is_writable() && session->isActive()) {
-                        json data;
-
-                        // Wait for event with 30 second timeout
-                        if (std::string eventType; session->waitForEvent(eventType, data, std::chrono::seconds(30))) {
-                            // Send the event
-                            if (!sendSSE(eventType, data)) {
-                                break; // Failed to send, connection lost
-                            }
-
-                            // Update activity
-                            sse_mgr.updateActivity(client_id);
-                        } else {
-                            // Timeout - send ping to keep connection alive
-                            if (!sendSSE("ping", {{"timestamp", std::time(nullptr)}})) {
-                                break; // Failed to send ping, connection lost
-                            }
-                        }
-                    }
-
-                    // Clean up when client disconnects
-                    sse_mgr.removeSession(client_id);
-                    return false;
-                }
-            );
-        };
-    }
-
-    std::function<void(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::handleSSESessionUpdate() {
+    std::function<void(MantisRequest &, MantisResponse &)> SSEMgr::handleSSESessionUpdate() {
         return [](mb::MantisRequest &req, mb::MantisResponse &res) {
             auto topics = req.getOr<json>("topics", json::array());
             auto client_id = req.getOr<std::string>("client_id", std::string{});
             auto auth = req.getOr<json>("auth", json::object());
             auto verification = req.getOr<json>("verification", json::object());
 
-            auto &sse_mgr = MantisBase::instance().router().sseMgr();
+            auto &sse_mgr = req.mApp().router().sseMgr();
 
             std::set<std::string> new_topics;
             for (const auto &topic: topics) {
@@ -253,7 +266,7 @@ namespace mb {
                                  },
                                  {"status", 200}
                              }
-                             );
+                );
                 return;
             }
 
@@ -316,8 +329,9 @@ namespace mb {
                     if (!body["topics"].is_array()) {
                         res.sendJSON(400, {
                                          {
-                                             "error", std::format("Expected topics array in request body but found `{}`.",
-                                                                  body["topics"].dump())
+                                             "error", std::format(
+                                                 "Expected topics array in request body but found `{}`.",
+                                                 body["topics"].dump())
                                          },
                                          {"data", json::object()},
                                          {"status", 400}
@@ -368,7 +382,6 @@ namespace mb {
                         return HandlerResponse::Handled;
                     }
 
-                    // TODO user:id=12344,post:
                     _topics.push_back({
                         {"entity", entity_name},
                         {"id", record_id}
@@ -380,10 +393,10 @@ namespace mb {
             } catch (std::exception &e) {
                 std::cerr << e.what() << std::endl;
                 res.sendJSON(500, {
-                    {"status", 500},
-                    {"data", json::object()},
-                    {"error", e.what()}
-                });
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             });
             }
 
             return HandlerResponse::Unhandled;
@@ -392,17 +405,8 @@ namespace mb {
 
     std::function<mb::HandlerResponse(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::validateHasAccess() {
         return [](MantisRequest &req, const MantisResponse &res) -> HandlerResponse {
-            // Check for access permissions
-            // - users or users:* -> list access
-            // - users:id -> view access
-
-            // Get the auth var from the context, resort to empty object if it's not set.
             auto topics = req.getOr<json>("topics", json::array());
-
-            // Get the auth var from the context, resort to empty object if it's not set.
             auto auth = req.getOr<json>("auth", json::object());
-
-            // Require at least one valid auth on any table
             auto verification = req.getOr<json>("verification", json::object());
 
             for (const auto &topic: topics) {
@@ -414,12 +418,11 @@ namespace mb {
                 auto rule = record_id.empty() ? entity.listRule() : entity.getRule();
 
                 // For public access, allow access
-                if (rule.mode() == "public") continue; // Check remaining topics
+                if (rule.mode() == "public") continue;
 
                 // For empty mode (admin only)
                 if (rule.mode().empty()) {
                     if (verification.empty()) {
-                        // Send auth error
                         res.sendJSON(403, {
                                          {"data", json::object()},
                                          {"status", 403},
@@ -435,7 +438,6 @@ namespace mb {
                     if (verification.contains("verified") &&
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
-                        // Check if verified user object is valid, if not throw auth error
                         if (auth["user"].is_null() || !auth["user"].is_object()) {
                             res.sendJSON(403, {
                                              {"data", json::object()},
@@ -447,9 +449,8 @@ namespace mb {
                         }
 
                         continue;
-                        }
+                    }
 
-                    // Send auth error
                     res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
@@ -460,9 +461,7 @@ namespace mb {
 
                 if (rule.mode() == "auth" || (auth["entity"].is_string()
                                               && auth["entity"].get<std::string>() == "mb_admins")) {
-                    // Require at least one valid auth on any table
                     if (verification.empty()) {
-                        // Send auth error
                         res.sendJSON(403, {
                                          {"data", json::object()},
                                          {"status", 403},
@@ -474,7 +473,6 @@ namespace mb {
                     if (verification.contains("verified") &&
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
-                        // Check if verified user object is valid, if not throw auth error
                         if (auth["user"].is_null() || !auth["user"].is_object()) {
                             res.sendJSON(403, {
                                              {"data", json::object()},
@@ -485,28 +483,22 @@ namespace mb {
                         }
 
                         continue;
-                        }
+                    }
 
-                    // Send auth error
                     res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
                                      {"error", verification["error"]}
                                  });
                     return HandlerResponse::Handled;
-                                              }
+                }
 
                 if (rule.mode() == "custom") {
-                    // Evaluate expression
                     const std::string expr = rule.expr();
 
-                    // Token map variables for evaluation
                     json vars = json::object();
-
-                    // Add `auth` data to the json var
                     vars["auth"] = auth;
 
-                    // Request Token Map
                     json req_obj;
                     req_obj["remoteAddr"] = req.getRemoteAddr();
                     req_obj["remotePort"] = req.getRemotePort();
@@ -516,21 +508,16 @@ namespace mb {
 
                     try {
                         if (req.getMethod() == "POST" && !req.getBody().empty()) {
-                            // Parse request body and add it to the request json
                             req_obj["body"] = req.getBodyAsJson();
                         }
                     } catch (...) {
                     }
 
-                    // Add the request map to the vars
                     vars["req"] = req_obj;
 
-                    // If expression evaluation returns true, lets return allowing execution
-                    // continuation. Else, we'll craft an error response.
                     if (Expr::eval(expr, vars))
                         continue;
 
-                    // Evaluation yielded false, return generic access denied error
                     json response;
                     response["status"] = 403;
                     response["data"] = json::object();
@@ -572,14 +559,21 @@ namespace mb {
         std::vector<std::string> stale_sessions;
 
         for (auto &[sessionId, session]: m_sessions) {
+            if (!session->isActive()) {
+                stale_sessions.push_back(sessionId);
+                continue;
+            }
+
             auto idle_time = std::chrono::duration_cast<std::chrono::minutes>(
                 now - session->getLastActivity()
             ).count();
 
-            // Remove sessions idle for more than 10 minutes
-            // or having no topics subscribed to.
             if (idle_time > 10 || session->getTopics().empty()) {
                 stale_sessions.push_back(sessionId);
+            } else {
+                // Send keepalive ping to active sessions
+                json ping = {{"type", "keepalive"}};
+                session->sendEvent("ping", ping);
             }
         }
 

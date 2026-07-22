@@ -1,78 +1,92 @@
-//
-// Created by codeart on 17/11/2025.
-//
-
 #include "../../include/mantisbase/core/router.h"
+#include "../../include/mantisbase/mantisbase.h"
+#include "../../include/mantisbase/core/http.h"
+#include "../../include/mantisbase/core/auth.h"
+#include "../../include/mantisbase/core/models/validators.h"
+#include "drogon/drogon_callbacks.h"
 
 namespace mb {
-    std::function<HandlerResponse(const httplib::Request &, httplib::Response &)> Router::preRoutingHandler() {
-        return [](const httplib::Request &req, httplib::Response &_) -> HandlerResponse {
-            auto &mutable_req = const_cast<httplib::Request &>(req);
-            mutable_req.start_time_ = std::chrono::steady_clock::now(); // Set the start time
-            return HandlerResponse::Unhandled;
+    const std::function<drogon::HttpResponsePtr(const drogon::HttpRequestPtr &)> Router::reqIdSyncAdvice() {
+        return [this](const drogon::HttpRequestPtr &req) {
+            // Generate and store request ID in attributes
+            std::string requestId = fmt::format("req_{}", m_sfId.nextID());
+            req->attributes()->insert("request_id", requestId);
+
+            // Return nullptr to continue normal processing
+            return nullptr;
         };
     }
 
-    std::function<void(const httplib::Request &, httplib::Response &)> Router::postRoutingHandler() {
-        return [](const httplib::Request &, httplib::Response &res) {
-            res.set_header("Access-Control-Allow-Origin", "*");
-            res.set_header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
-            res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-            res.set_header("Access-Control-Max-Age", "86400");
+    std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)>
+    Router::loggerPostHandlingAdvice() const {
+        return [this](const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp) {
+            const auto start = req->creationDate();
+            const auto end = trantor::Date::now();
+            const auto duration = end.microSecondsSinceEpoch() - start.microSecondsSinceEpoch();
+            auto seconds = static_cast<double>(duration) / 1000000.0;
+
+            LogOrigin::info(
+                "HTTP",
+                fmt::format("{} {}{} {} {}s {}B {} {} {}",
+                            req->methodString(),
+                            req->path(),
+                            req->query().empty() ? "" : "?" + req->query(),
+                            static_cast<int>(resp->getStatusCode()),
+                            seconds,
+                            resp->body().length(),
+                            req->versionString(),
+                            req->peerAddr().toIp(),
+                            req->attributes()->get<std::string>("request_id")
+                )
+            );
         };
     }
 
-    std::function<void(const httplib::Request &, const httplib::Response &)> Router::routingLogger() {
-        return [this](const httplib::Request &req, const httplib::Response &res) {
-            // Calculate execution time (if start_time was set)
-            const auto end_time = std::chrono::steady_clock::now();
-            const auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                end_time - req.start_time_).count();
-
-            if (res.status < 400) {
-                LogOrigin::info("HTTP Request", fmt::format("{} {:<7} {}  - Status: {}  - Time: {}ms",
-                             req.version, req.method, req.path, res.status, duration_ms));
-            } else {
-                // Decompress if content is compressed
-                if (res.body.empty()) {
-                    LogOrigin::info("HTTP Request", fmt::format("{} {:<7} {}  - Status: {}  - Time: {}ms",
-                                 req.version, req.method, req.path, res.status, duration_ms));
-                } else {
-                    // Get the compression encoding
-                    const std::string encoding = res.get_header_value("Content-Encoding");
-
-                    auto body = encoding.empty() ? res.body : decompressResponseBody(res.body, encoding);
-                    LogOrigin::info("HTTP Request", fmt::format("{} {:<7} {}  - Status: {}  - Time: {}ms\n\t└──Body: {}",
-                                 req.version, req.method, req.path, res.status, duration_ms, body));
-                }
+    std::function<void(const drogon::HttpRequestPtr &,
+                       drogon::AdviceCallback &&,
+                       drogon::AdviceChainCallback &&
+    )>
+    Router::corsPreRoutingAdvice() {
+        return [](const drogon::HttpRequestPtr &req,
+                  drogon::AdviceCallback &&callback,
+                  drogon::AdviceChainCallback &&chainCallback) {
+            // Handle OPTIONS preflight
+            if (req->method() == drogon::Options) {
+                const auto resp = drogon::HttpResponse::newHttpResponse();
+                resp->setStatusCode(drogon::k204NoContent);
+                resp->addHeader("Access-Control-Allow-Origin", "*");
+                resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+                resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+                resp->addHeader("Access-Control-Max-Age", "86400");
+                callback(resp);
+                return;
             }
+            chainCallback();
         };
     }
 
-    std::function<void(const httplib::Request &, httplib::Response &)> Router::routingErrorHandler() {
-        return [](const httplib::Request &, httplib::Response &res) {
-            if (res.body.empty()) {
-                json response;
-                response["status"] = res.status;
-                response["data"] = json::object();
-
-                if (res.status == 404)
-                    response["error"] = "Resource not found!";
-                else if (res.status >= 500)
-                    response["error"] = "Internal server error, try again later!";
-                else
-                    response["error"] = "Something went wrong here!";
-
-                res.set_content(response.dump(), "application/json");
-            }
+    std::function<void(const drogon::HttpRequestPtr &,
+                       const drogon::HttpResponsePtr &resp)>
+    Router::corsPostHandlingAdvice() {
+        return [](const drogon::HttpRequestPtr &,
+                  const drogon::HttpResponsePtr &resp) {
+            resp->addHeader("Access-Control-Allow-Origin", "*");
+            resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+            resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
         };
+    }
+
+    drogon::HttpResponsePtr Router::default404Response() {
+        static auto notFoundResp = drogon::HttpResponse::newHttpResponse();
+        notFoundResp->setStatusCode(drogon::k404NotFound);
+        notFoundResp->setContentTypeString("application/json");
+        notFoundResp->setBody(R"({"status":404,"error":"Not Found","data":{}})");
+        return notFoundResp;
     }
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthLogin() {
         return [](const MantisRequest &req, const MantisResponse &res) {
-            // TRACE_FUNC("HandleAuthLogin()")
             try {
-                // Get JSON Body
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(500, {
@@ -83,7 +97,6 @@ namespace mb {
                     return;
                 }
 
-                // The body should contain `identity` and `password` keys
                 for (const auto &key: std::vector<std::string>{"identity", "password"}) {
                     if (!body.contains(key) || !body[key].is_string() || body[key].empty()) {
                         res.sendJSON(400, {
@@ -96,27 +109,33 @@ namespace mb {
                 }
 
                 const auto entity_name = trim(req.getPathParamValue("entity_name"));
-                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto entity = req.mApp().entity(entity_name);
 
-                // Get user for given identity
                 auto opt_user = entity.queryFromCols(body["identity"].get<std::string>(), {"id", "email"});
                 if (!opt_user.has_value()) {
-                    // No user found, return 404
                     res.sendJSON(404, {
                                      {"status", 404},
                                      {"data", json::object()},
+                                     {"error", "No user found for given `identity`, `password` & `entity` combination."}
+                                 });
+                    return;
+                }
+
+                auto &user = opt_user.value();
+
+                // OAuth-only users have no password
+                if (user["password"].is_null()) {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"data", json::object()},
                                      {
                                          "error",
-                                         "No user found for given `identity`, `password` & `entity` combination."
+                                         "This account uses OAuth login. Please sign in with your linked provider."
                                      }
                                  });
                     return;
                 }
 
-                // We have a valid user account, authenticate them
-                auto &user = opt_user.value();
-
-                // Validate password
                 if (!verifyPassword(body["password"].get<std::string>(), user["password"].get<std::string>())) {
                     res.sendJSON(404, {
                                      {"status", 404},
@@ -128,49 +147,38 @@ namespace mb {
                                  });
                     auto _body = body;
                     _body.erase("password");
-                    LogOrigin::authWarn("User Not Found", fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
+                    LogOrigin::authWarn("User Not Found",
+                                        fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
                     return;
                 }
 
-                // If verification was successful, generate token and return 200 OK
                 auto token = Auth::createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
-                // Remove password in response and send response obj.
                 user.erase("password");
                 res.sendJSON(200, {
                                  {"status", 200},
-                                 {
-                                     "data", {
-                                         {"token", token},
-                                         {"user", user}
-                                     }
-                                 },
+                                 {"data", {{"token", token}, {"user", user}}},
                                  {"error", ""}
-                             }
-                );
+                             });
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             }
         };
     }
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleAdminLogin() {
-         return [](const MantisRequest &req, const MantisResponse &res) {
-            // TRACE_FUNC("HandleAdminLogin()")
+        return [](const MantisRequest &req, const MantisResponse &res) {
             try {
-                // Get JSON Body
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(500, {
@@ -181,7 +189,6 @@ namespace mb {
                     return;
                 }
 
-                // The body should contain `identity` and `password` keys
                 for (const auto &key: std::vector<std::string>{"identity", "password"}) {
                     if (!body.contains(key) || !body[key].is_string() || body[key].empty()) {
                         res.sendJSON(400, {
@@ -193,32 +200,24 @@ namespace mb {
                     }
                 }
 
-                // Check that entity exists in database, throws an error if missing!
                 const auto entity = MantisBase::instance().entity("mb_admins");
 
-                // Get user for given identity
                 auto opt_user = entity.queryFromCols(
                     body["identity"].get<std::string>(),
                     {"id", "email"}
-                    );
+                );
 
                 if (!opt_user.has_value()) {
-                    // No user found, return 404
                     res.sendJSON(404, {
                                      {"status", 404},
                                      {"data", json::object()},
-                                     {
-                                         "error",
-                                         "No user found for given `identity` and `password` combination."
-                                     }
+                                     {"error", "No user found for given `identity` and `password` combination."}
                                  });
                     return;
                 }
 
-                // We have a valid user account, authenticate them
                 auto &user = opt_user.value();
 
-                // Validate password
                 if (!verifyPassword(body["password"].get<std::string>(), user["password"].get<std::string>())) {
                     res.sendJSON(404, {
                                      {"status", 404},
@@ -230,84 +229,131 @@ namespace mb {
                                  });
                     auto _body = body;
                     _body.erase("password");
-                    LogOrigin::authWarn("Admin User Not Found", fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
+                    LogOrigin::authWarn("Admin User Not Found",
+                                        fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
                     return;
                 }
 
-                // If verification was successful, generate token and return 200 OK
                 auto token = Auth::createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
-                // Remove password in response and send response obj.
                 user.erase("password");
                 res.sendJSON(200, {
                                  {"status", 200},
-                                 {
-                                     "data", {
-                                         {"token", token},
-                                         {"user", user}
-                                     }
-                                 },
+                                 {"data", {{"token", token}, {"user", user}}},
                                  {"error", ""}
-                             }
-                );
+                             });
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             }
         };
     }
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthRefresh() {
-        return [](MantisRequest &, const MantisResponse &res) {
+        return [](MantisRequest &req, const MantisResponse &res) {
             try {
-                // TODO - Add auth refresh tokens for admins
+                auto auth = req.getOr<json>("auth", json::object());
+                auto verification = req.getOr<json>("verification", json::object());
+
+                if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
+                    res.sendJSON(403, {
+                                     {"status", 403},
+                                     {"data", json::object()},
+                                     {"error", "Valid token required to refresh"}
+                                 });
+                    return;
+                }
+
+                auto claims = verification["claims"];
+                auto session_id = claims.value("session_id", "");
+                auto entity_name = claims["entity"].get<std::string>();
+                auto user_id = claims["id"].get<std::string>();
+
+                if (session_id.empty()) {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"data", json::object()},
+                                     {"error", "Token does not contain a session"}
+                                 });
+                    return;
+                }
+
+                auto result = Auth::refreshSession(session_id, entity_name, user_id);
+
+                // Get user record
+                const auto entity = MantisBase::instance().entity(entity_name);
+                auto user_opt = entity.read(user_id);
+                json user = user_opt.has_value() ? user_opt.value() : json::object();
+                user.erase("password");
+
+                res.sendJSON(200, {
+                                 {"status", 200},
+                                 {"data", {{"token", result["token"]}, {"user", user}}},
+                                 {"error", ""}
+                             });
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             }
         };
     }
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthLogout() {
-        return [](MantisRequest &, const MantisResponse &res) {
+        return [](MantisRequest &req, const MantisResponse &res) {
             try {
-                // TODO - Maybe create banned tokens for auth?
+                auto verification = req.getOr<json>("verification", json::object());
+
+                if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
+                    res.sendJSON(403, {
+                                     {"status", 403},
+                                     {"data", json::object()},
+                                     {"error", "Valid token required to logout"}
+                                 });
+                    return;
+                }
+
+                auto claims = verification["claims"];
+                auto session_id = claims.value("session_id", "");
+
+                if (!session_id.empty()) {
+                    Auth::deleteSession(session_id);
+                }
+
+                res.sendJSON(200, {
+                                 {"status", 200},
+                                 {"data", {{"logged_out", true}}},
+                                 {"error", ""}
+                             });
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             }
         };
     }
@@ -319,10 +365,8 @@ namespace mb {
                 auto auth = req.getOr("auth", json::object());
                 LogOrigin::authTrace("Auth Data", fmt::format("Auth Data: {}", auth.dump()));
 
-                // Require at least one valid auth on any table
                 auto verification = req.getOr<json>("verification", json::object());
                 if (verification.empty()) {
-                    // Send auth error
                     res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
@@ -336,7 +380,6 @@ namespace mb {
                                       verification["verified"].get<bool>();
 
                 if (!verified) {
-                    // Send auth error
                     res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
@@ -345,9 +388,7 @@ namespace mb {
                     return;
                 }
 
-                // Token must be signed to this entity to proceed
                 if (!auth["entity"].is_string() || auth["entity"].get<std::string>() != "mb_service_acc") {
-                    // Send auth error
                     res.sendJSON(403, {
                                      {"data", json::object()},
                                      {"status", 403},
@@ -357,7 +398,6 @@ namespace mb {
                 }
 
                 if (auth["user"].is_null()) {
-                    // Send auth error
                     res.sendJSON(404, {
                                      {"data", json::object()},
                                      {"status", 403},
@@ -366,7 +406,6 @@ namespace mb {
                     return;
                 }
 
-                // Check token table and user ...
                 const auto entity = MantisBase::instance().entity("mb_service_acc");
                 const auto admin_entity = MantisBase::instance().entity("mb_admins");
 
@@ -381,11 +420,10 @@ namespace mb {
                     return;
                 }
 
-                // Validate request body
-                if (const auto v_err = Validators::validateRequestBody(admin_entity.schema(), body);
+                if (const auto v_err = Validators::validateRequestBody(admin_entity, body);
                     v_err.has_value()) {
-                    LogOrigin::critical("Request Validation Error", fmt::format("Error validating request body\n\t— {}", v_err.value()));
-
+                    LogOrigin::critical("Request Validation Error",
+                                        fmt::format("Error validating request body\n\t- {}", v_err.value()));
                     res.sendJSON(400, {
                                      {"data", json::object()},
                                      {"status", 400},
@@ -394,81 +432,23 @@ namespace mb {
                     return;
                 }
 
-                // Create new admin user
                 const auto admin_user = admin_entity.create(body);
                 res.sendJSON(201, admin_user);
 
-                // At the end, remove auth account
                 entity.remove(auth["id"].get<std::string>());
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             } catch (const std::exception &e) {
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
                                  {"error", e.what()}
-                             }
-                );
+                             });
             }
         };
-    }
-
-    std::function<void(const httplib::Request &, httplib::Response &)> Router::optionsHandler() {
-        return [](const httplib::Request &, httplib::Response &res) {
-            // Headers are already set by post_routing_handler
-            res.status = 200;
-        };
-    }
-
-    std::string Router::decompressResponseBody(const std::string &body, const std::string &encoding) {
-        std::string decompressed_content;
-
-        if (encoding == "gzip" || encoding == "deflate") {
-#ifdef CPPHTTPLIB_ZLIB_SUPPORT
-            httplib::detail::gzip_decompressor decompressor;
-            if (decompressor.is_valid()) {
-                decompressor.decompress(
-                    body.data(), body.size(),
-                    [&](const char *data, const size_t len) {
-                        decompressed_content.append(data, len);
-                        return true;
-                    }
-                );
-            }
-#endif
-        } else if (encoding.find("br") != std::string::npos) {
-#ifdef CPPHTTPLIB_BROTLI_SUPPORT
-            httplib::detail::brotli_decompressor decompressor;
-            if (decompressor.is_valid()) {
-                decompressor.decompress(
-                    body.data(), body.size(),
-                    [&](const char *data, const size_t len) {
-                        decompressed_content.append(data, len);
-                        return true;
-                    }
-                );
-            }
-#endif
-        } else if (encoding == "zstd") {
-#ifdef CPPHTTPLIB_ZSTD_SUPPORT
-            httplib::detail::zstd_decompressor decompressor;
-            if (decompressor.is_valid()) {
-                decompressor.decompress(
-                    body.data(), body.size(),
-                    [&](const char *data, const size_t len) {
-                        decompressed_content.append(data, len);
-                        return true;
-                    }
-                );
-            }
-#endif
-        }
-
-        return decompressed_content;
     }
 }

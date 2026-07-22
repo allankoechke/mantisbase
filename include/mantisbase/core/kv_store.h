@@ -16,13 +16,20 @@
 
 namespace mb
 {
+    class MantisBase; // forward declaration; KeyValStore holds a reference to it
+
     /**
      * @brief Manages application settings
      */
     class KeyValStore
     {
     public:
-        KeyValStore() = default;
+        /**
+         * @brief Construct the settings store bound to an application.
+         * @param app Owning application (db + router access). Stored by
+         *        reference and must outlive this store.
+         */
+        explicit KeyValStore(MantisBase &app);
         ~KeyValStore() { std::cout << "KeyValStore Des()" << std::endl; }
 
         void close() {}
@@ -74,6 +81,8 @@ namespace mb
         // Cache settings config on create/read/update cycles to reduce database reads
         // may not be that significant though...!
         json m_configs;
+
+        MantisBase &mApp; ///< Owning application (injected)
     };
 } // mb
 

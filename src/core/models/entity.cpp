@@ -5,7 +5,7 @@
 #include "mantisbase/utils/soci_wrappers.h"
 
 namespace mb {
-    Entity::Entity(const nlohmann::json &schema) {
+    Entity::Entity(const MantisBase &app, const nlohmann::json &schema) : m_app(app) {
         LogOrigin::entityTrace("Entity Creation", "Creating Entity from JSON Schema", schema);
 
         if (!schema.contains("name") || !schema["name"].is_string() || schema["name"].empty())
@@ -24,17 +24,19 @@ namespace mb {
                                   schema["type"].get<std::string>());
         }
 
-        m_schema = schema;
+        // Build the schema locally with all defaults filled in, then freeze it
+        // into an immutable shared object (see m_schema docs).
+        json s = schema;
 
         // Ensure we have defaults for any missing fields so that T& does not fail
-        if (!m_schema.contains("id"))
-            m_schema["id"] = EntitySchema::genEntityId(m_schema.at("name").get<std::string>());
-        if (!m_schema.contains("system"))
-            m_schema["system"] = false;
-        if (!m_schema.contains("has_api"))
-            m_schema["has_api"] = true;
+        if (!s.contains("id"))
+            s["id"] = EntitySchema::genEntityId(s.at("name").get<std::string>());
+        if (!s.contains("system"))
+            s["system"] = false;
+        if (!s.contains("has_api"))
+            s["has_api"] = true;
 
-        json rules = m_schema.contains("rules") ? schema["rules"] : json::object();
+        json rules = s.contains("rules") ? schema["rules"] : json::object();
         if (!rules.contains("list"))
             rules = {{"list", AccessRule{}.toJSON()}};
         if (!rules.contains("get"))
@@ -46,19 +48,21 @@ namespace mb {
         if (!rules.contains("delete"))
             rules = {{"delete", AccessRule{}.toJSON()}};
 
-        m_schema["rules"] = rules;
+        s["rules"] = rules;
 
-        if (type() == "view") {
-            if (!m_schema.contains("view_query"))
-                m_schema["view_query"] = "";
+        if (s.at("type").get<std::string>() == "view") {
+            if (!s.contains("view_query"))
+                s["view_query"] = "";
         } else {
-            if (!m_schema.contains("fields"))
-                m_schema["fields"] = json::array();
+            if (!s.contains("fields"))
+                s["fields"] = json::array();
         }
+
+        m_schema = std::make_shared<const json>(std::move(s));
     }
 
-    Entity::Entity(const std::string &name, const std::string &type)
-        : Entity({{"name", name}, {"type", type}}) {
+    Entity::Entity(const MantisBase &app, const std::string &name, const std::string &type)
+        : Entity(app, {{"name", name}, {"type", type}}) {
         // Ensure name is valid
         if (!EntitySchema::isValidEntityName(name)) {
             throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", name);
@@ -69,43 +73,47 @@ namespace mb {
         }
     }
 
+    const MantisBase &Entity::app() const {
+        return m_app;
+    }
+
     std::string Entity::id() const {
-        return m_schema.at("id").get<std::string>();
+        return m_schema->at("id").get<std::string>();
     }
 
     std::string Entity::name() const {
-        return m_schema.at("name").get<std::string>();
+        return m_schema->at("name").get<std::string>();
     }
 
     std::string Entity::type() const {
-        return m_schema.at("type").get<std::string>();
+        return m_schema->at("type").get<std::string>();
     }
 
     bool Entity::isSystem() const {
-        return m_schema.contains("system") ? m_schema.at("system").get<bool>() : false;
+        return m_schema->contains("system") ? m_schema->at("system").get<bool>() : false;
     }
 
     bool Entity::hasApi() const {
-        return m_schema.contains("has_api") ? m_schema.at("has_api").get<bool>() : false;
+        return m_schema->contains("has_api") ? m_schema->at("has_api").get<bool>() : false;
     }
 
     std::string Entity::viewQuery() const {
         if (type() != "view")
             throw MantisException(500, "View Query only allowed for `view` types!");
 
-        if (m_schema.contains("view_query"))
+        if (!m_schema->contains("view_query"))
             throw std::invalid_argument("Missing view_query statement!");
 
-        return m_schema.at("view_query").get<std::string>();
+        return m_schema->at("view_query").get<std::string>();
     }
 
     const std::vector<json> &Entity::fields() const {
-        return m_schema.at("fields").get_ref<const std::vector<json> &>();
+        return m_schema->at("fields").get_ref<const std::vector<json> &>();
     }
 
     std::optional<json> Entity::field(const std::string &field_name) const {
-        if (!m_schema.contains("fields")) return std::nullopt;
-        for (auto _field: m_schema["fields"]) {
+        if (!m_schema->contains("fields")) return std::nullopt;
+        for (auto _field: (*m_schema)["fields"]) {
             if (_field.contains("name") && _field["name"].get<std::string>() == field_name)
                 return _field;
         }
@@ -117,7 +125,7 @@ namespace mb {
     }
 
     const json &Entity::rules() const {
-        return m_schema["rules"];
+        return (*m_schema)["rules"];
     }
 
     AccessRule Entity::listRule() const {
@@ -140,7 +148,7 @@ namespace mb {
         return AccessRule::fromJSON(rules()["delete"]);
     }
 
-    const json &Entity::schema() const { return m_schema; }
+    const json &Entity::schema() const { return *m_schema; }
 
     std::optional<json> Entity::findField(const std::string &field_name) const {
         if (field_name.empty()) return std::nullopt;

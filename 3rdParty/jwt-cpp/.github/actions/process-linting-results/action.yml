@@ -1,0 +1,13 @@
+name: Process Linting Results
+description: Add a comment to a pull request with when `git diff` present and save the changes as an artifact so they can be applied manually
+inputs:
+  linter_name:
+    description: The name of the tool to credit in the comment
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - run: git add --update
+      shell: bash
+    - id: stage
+      uses: Thalhammer/patch-generator-action@v3

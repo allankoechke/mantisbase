@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        MB_VERSION: "0.3.5"
+        MB_VERSION: "0.4.0"
     image: mantisbase:latest
     restart: unless-stopped
     ports:

@@ -1,8 +1,10 @@
 #include "../../../include/mantisbase/core/models/entity.h"
 #include "../../../include/mantisbase/core/models/entity_schema.h"
 #include "../../../include/mantisbase/core/models/entity_schema_field.h"
+#include "../../../include/mantisbase/utils/utils.h"
 #include "../../../include/mantisbase/utils/uuidv7.h"
 #include "mantisbase/utils/soci_wrappers.h"
+#include "mantisbase/core/realtime.h"
 
 
 namespace mb {
@@ -12,7 +14,7 @@ namespace mb {
 
     Record Entity::create(const json &record, const json &opts) const {
         // Database session & transaction instance
-        auto sql = MantisBase::instance().db().session();
+        auto sql = app().db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -30,7 +32,7 @@ namespace mb {
 
             // Create default time values
             std::time_t current_t = time(nullptr);
-            std::tm created_tm = *std::localtime(&current_t);
+            std::tm created_tm = toUtcTime(current_t);
             std::string columns, placeholders;
 
             // Clone record for editing ...
@@ -54,12 +56,16 @@ namespace mb {
                 if (auto field_schema = findField(field_name); !field_schema.has_value()) continue;
 
                 new_record[field_name] = record[field_name];
-                columns += columns.empty() ? field_name : ", " + field_name;
-                placeholders += placeholders.empty() ? (":" + field_name) : (", :" + field_name);
+                const auto col = sqlIdentifier(field_name);
+                columns += columns.empty() ? col : ", " + col;
+                placeholders += placeholders.empty() ? (":" + col) : (", :" + col);
             }
 
-            // Create the SQL Query
-            std::string sql_query = std::format("INSERT INTO {} ({}) VALUES ({})", name(), columns, placeholders);
+            // Create the SQL Query. RETURNING * lets us read the freshly stored
+            // row back in the same round-trip instead of issuing a separate
+            // SELECT (supported by SQLite >= 3.35 and PostgreSQL).
+            std::string sql_query = std::format("INSERT INTO {} ({}) VALUES ({}) RETURNING *",
+                                                sqlIdentifier(name()), columns, placeholders);
 
             // Bind soci::values to entity values
             auto vals = json2SociValue(new_record, fields());
@@ -67,13 +73,14 @@ namespace mb {
             vals.set("created", created_tm, soci::i_ok);
             vals.set("updated", created_tm, soci::i_ok);
 
-            // Execute sql query
-            *sql << sql_query, soci::use(vals);
+            // Execute the insert and fetch the newly-created row in one go
+            soci::row r;
+            *sql << sql_query, soci::use(vals), soci::into(r);
             tr.commit();
 
-            // Query back the created record and send it back to the client
-            soci::row r;
-            *sql << std::format("SELECT * FROM {} WHERE id = :id", name()), soci::use(id), soci::into(r);
+            // Wake the realtime worker to deliver the change immediately.
+            app().rt().notifyChange();
+
             auto added_row = sociRow2Json(r, fields());
 
             // Remove user password from the response
@@ -88,32 +95,61 @@ namespace mb {
 
     Records Entity::list(const json &opts) const {
         const auto sql = MantisBase::instance().db().session();
-        int page = 1;
-        int per_page = 100;
+        int limit = 50;
+        std::string after;
+        std::string sort_field = "id";
+        std::string sort_dir = "ASC";
 
         if (opts.contains("pagination") && opts["pagination"].is_object()) {
             auto &pagination = opts["pagination"];
 
-            // Extract the page number and page size
-            if (pagination.contains("page_index") && pagination["page_index"].is_number())
-                page = pagination["page_index"].get<int>();
-            if (pagination.contains("per_page") && pagination["per_page"].is_number())
-                per_page = pagination["per_page"].get<int>();
+            if (pagination.contains("limit") && pagination["limit"].is_number()) {
+                limit = pagination["limit"].get<int>();
+                if (limit < 1) limit = 1;
+                if (limit > 500) limit = 500;
+            }
+            if (pagination.contains("after") && pagination["after"].is_string())
+                after = pagination["after"].get<std::string>();
+            if (pagination.contains("sort") && pagination["sort"].is_string()) {
+                auto sort_str = pagination["sort"].get<std::string>();
+                if (!sort_str.empty() && sort_str[0] == '-') {
+                    sort_dir = "DESC";
+                    sort_field = sort_str.substr(1);
+                } else {
+                    sort_field = sort_str;
+                }
+                bool valid = false;
+                for (const auto &f : fields()) {
+                    if (f.contains("name") && f["name"].get<std::string>() == sort_field) {
+                        valid = true;
+                        break;
+                    }
+                }
+                if (!valid) {
+                    sort_field = "id";
+                    sort_dir = "ASC";
+                }
+            }
         }
 
-        if (per_page <= 0) throw std::invalid_argument("Page size, `per_page` value must be greater than 0");
-        if (page <= 0) throw std::invalid_argument("Page number, `page` value must be greater than 0");
+        std::string query = "SELECT * FROM " + name();
+        if (!after.empty()) {
+            if (sort_dir == "ASC")
+                query += " WHERE " + sort_field + " > :after";
+            else
+                query += " WHERE " + sort_field + " < :after";
+        }
+        query += " ORDER BY " + sort_field + " " + sort_dir + " LIMIT :limit";
 
-        const auto offset = (page - 1) * per_page;
+        soci::rowset<soci::row> rs = after.empty()
+            ? (sql->prepare << query, soci::use(limit))
+            : (sql->prepare << query, soci::use(after), soci::use(limit));
 
-        const auto query = "SELECT * FROM " + name() + " ORDER BY created DESC LIMIT :limit OFFSET :offset";
-        const soci::rowset rs = (sql->prepare << query, soci::use(per_page), soci::use(offset));
         nlohmann::json record_list = nlohmann::json::array();
 
         for (const auto &row: rs) {
             auto row_json = sociRow2Json(row, fields());
             if (type() == "auth") {
-                // Remove password fields from the response data
                 row_json.erase("password");
             }
             record_list.push_back(row_json);
@@ -124,10 +160,10 @@ namespace mb {
 
     std::optional<Record> Entity::read(const std::string &id, const json &opts) const {
         // Get a soci::session from the pool
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app().db().session();
 
         soci::row r; // To hold read data
-        *sql << std::format("SELECT * FROM {} WHERE id = :id", name()), soci::use(id), soci::into(r);
+        *sql << std::format("SELECT * FROM {} WHERE id = :id", sqlIdentifier(name())), soci::use(id), soci::into(r);
 
         // If no data was found, return a std::nullopt
         if (!sql->got_data()) return std::nullopt; // 404
@@ -149,13 +185,13 @@ namespace mb {
 
     Record Entity::update(const std::string &id, const json &data, const json &opts) const {
         // Database session & transaction instance
-        auto sql = MantisBase::instance().db().session();
+        auto sql = app().db().session();
         soci::transaction tr(*sql);
 
         try {
             // Create default time values
             std::time_t current_t = time(nullptr);
-            std::tm created_tm = *std::localtime(&current_t);
+            std::tm created_tm = toUtcTime(current_t);
             std::string columns, placeholders;
 
             // Store files to delete by filename
@@ -177,7 +213,8 @@ namespace mb {
                 auto schema = findField(key);
                 if (!schema.has_value()) continue;
 
-                columns += columns.empty() ? std::format("{0} = :{0}", key) : std::format(", {0} = :{0}", key);
+                const auto col = sqlIdentifier(key);
+                columns += columns.empty() ? std::format("{0} = :{0}", col) : std::format(", {0} = :{0}", col);
                 updateFields.push_back(key);
 
                 // Track file fields for use later on
@@ -210,12 +247,13 @@ namespace mb {
                 std::string fields_to_query{};
 
                 for (const auto &file: file_fields) {
-                    if (fields_to_query.empty()) fields_to_query = file["name"];
-                    else fields_to_query += ", " + file["name"].get<std::string>();
+                    const auto col = sqlIdentifier(file["name"].get<std::string>());
+                    if (fields_to_query.empty()) fields_to_query = col;
+                    else fields_to_query += ", " + col;
                 }
 
                 const std::string sql_str = std::format("SELECT {} FROM {} WHERE id = :id LIMIT 1",
-                                                        fields_to_query, name());
+                                                        fields_to_query, sqlIdentifier(name()));
 
                 soci::row r;
                 *sql << sql_str, soci::use(id), soci::into(r);
@@ -260,24 +298,28 @@ namespace mb {
                 }
             }
 
-            // Create the SQL Query
-            std::string sql_query = std::format("UPDATE {} SET {} WHERE id = :old_id", name(), columns);
+            // Create the SQL Query. RETURNING * reads the updated row back in
+            // the same round-trip instead of a separate SELECT (supported by
+            // SQLite >= 3.35 and PostgreSQL).
+            std::string sql_query = std::format("UPDATE {} SET {} WHERE id = :old_id RETURNING *",
+                                                sqlIdentifier(name()), columns);
 
             // Bind soci::values to entity values, throws an error if it fails
             auto vals = json2SociValue(data, fields());
             vals.set("old_id", id);
             vals.set("updated", created_tm);
 
-            // Bind values, then execute
-            *sql << sql_query, soci::use(vals);
+            // Bind values, execute, and fetch the updated row in one go
+            soci::row r;
+            *sql << sql_query, soci::use(vals), soci::into(r);
             tr.commit();
+
+            // Wake the realtime worker to deliver the change immediately.
+            app().rt().notifyChange();
 
             // Delete files, if any were removed ...
             Files::removeFiles(name(), files_to_delete);
 
-            // Query back the created record and send it back to the client
-            soci::row r;
-            *sql << std::format("SELECT * FROM {} WHERE id = :id", name()), soci::use(id), soci::into(r);
             Record new_record = sociRow2Json(r, fields());
 
             // Redact passwords
@@ -295,12 +337,12 @@ namespace mb {
         if (type() == "view")
             throw std::invalid_argument("Remove is not implemented for Entity of `view` type!");
 
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app().db().session();
         soci::transaction tr(*sql);
 
         // Check if item exists of given id
         soci::row row;
-        const std::string sqlStr = std::format("SELECT * FROM {} WHERE id = :id LIMIT 1", name());
+        const std::string sqlStr = std::format("SELECT * FROM {} WHERE id = :id LIMIT 1", sqlIdentifier(name()));
         *sql << sqlStr, soci::use(id), soci::into(row);
 
         if (!sql->got_data()) {
@@ -308,8 +350,11 @@ namespace mb {
         }
 
         // Remove from DB
-        *sql << std::format("DELETE FROM {} WHERE id = :id", name()), soci::use(id);
+        *sql << std::format("DELETE FROM {} WHERE id = :id", sqlIdentifier(name())), soci::use(id);
         tr.commit();
+
+        // Wake the realtime worker to deliver the change immediately.
+        app().rt().notifyChange();
 
         // Parse row to JSON
         const auto record = sociRow2Json(row, fields());
@@ -343,9 +388,9 @@ namespace mb {
     int Entity::countRecords() const {
         // TODO add record filtering ...
         try {
-            const auto sql = MantisBase::instance().db().session();
+            const auto sql = app().db().session();
             int count = 0;
-            *sql << std::format("SELECT COUNT(id) FROM {}", name()), soci::into(count);
+            *sql << std::format("SELECT COUNT(id) FROM {}", sqlIdentifier(name())), soci::into(count);
             return count;
         } catch (std::exception &e) {
             throw MantisException(500, e.what());
@@ -354,10 +399,10 @@ namespace mb {
 
     bool Entity::isEmpty() const {
         try {
-            const auto &sql = MantisBase::instance().db().session();
+            const auto &sql = app().db().session();
             int dummy = 0;
             soci::indicator ind = soci::i_null;
-            *sql << std::format("SELECT 1 FROM {} LIMIT 1", name()),
+            *sql << std::format("SELECT 1 FROM {} LIMIT 1", sqlIdentifier(name())),
                     soci::into(dummy, ind);
             return ind == soci::i_null;
         } catch (const std::exception &e) {
@@ -367,7 +412,7 @@ namespace mb {
 
     std::optional<json> Entity::queryFromCols(const std::string &value, const std::vector<std::string> &columns) const {
         // Get a session object
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app().db().session();
 
         // Validate all column names against entity schema
         std::vector<std::string> valid_columns;
@@ -389,12 +434,13 @@ namespace mb {
         std::string where_clause;
         soci::values bind_values;
         for (size_t i = 0; i < valid_columns.size(); ++i) {
+            const auto col = sqlIdentifier(valid_columns[i]);
             if (i > 0) where_clause += " OR ";
-            where_clause += std::format("{0} = :{0}{1}", valid_columns[i], i);
-            bind_values.set(std::format("{0}{1}", valid_columns[i], i), value);
+            where_clause += std::format("{0} = :{0}{1}", col, i);
+            bind_values.set(std::format("{0}{1}", col, i), value);
         }
 
-        const std::string query = std::format("SELECT * FROM {} WHERE {} LIMIT 1", name(), where_clause);
+        const std::string query = std::format("SELECT * FROM {} WHERE {} LIMIT 1", sqlIdentifier(name()), where_clause);
 
         // Run query
         soci::row r;
@@ -409,8 +455,8 @@ namespace mb {
     bool Entity::recordExists(const std::string &id) const {
         try {
             std::string _nid;
-            const auto sql = MantisBase::instance().db().session();
-            *sql << std::format("SELECT id FROM {} WHERE id = :id LIMIT 1", name()),
+            const auto sql = app().db().session();
+            *sql << std::format("SELECT id FROM {} WHERE id = :id LIMIT 1", sqlIdentifier(name())),
                     soci::use(id), soci::into(_nid);
             return sql->got_data();
         } catch (soci::soci_error &e) {

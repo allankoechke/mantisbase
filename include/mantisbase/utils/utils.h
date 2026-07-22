@@ -120,6 +120,23 @@ namespace mb {
     std::string trim(const std::string &s);
 
     /**
+     * @brief Validate a string as a safe SQL identifier and return it unchanged.
+     *
+     * This is the single choke point that every query builder must route
+     * interpolated identifiers (table and column names) through, since those
+     * cannot be passed as bound parameters. Only 1..64 characters of
+     * [A-Za-z0-9_] are accepted, which makes identifier-based SQL injection
+     * impossible (no quotes, whitespace or semicolons can appear). Column and
+     * row *values* must still be bound via soci::use — this is only for
+     * identifiers.
+     *
+     * @param ident Candidate identifier.
+     * @return The identifier unchanged if valid.
+     * @throws MantisException(400) if the identifier is not a valid SQL identifier.
+     */
+    std::string sqlIdentifier(const std::string &ident);
+
+    /**
      * @brief Attempt to parse a JSON string.
      * @param json_str JSON string to parse
      * @param default_value Optional default value if conversion fails
@@ -286,12 +303,43 @@ namespace mb {
     // AUTH UTILS
     // ----------------------------------------------------------------- //
 
+    /**
+     * @brief Thread-safe conversion of an epoch time to a UTC std::tm.
+     *
+     * std::gmtime returns a pointer to a shared static std::tm, so calling it
+     * from multiple threads concurrently is a data race. This wrapper
+     * serializes the call and returns a copy. UTC is the canonical timezone
+     * for all persisted timestamps so values are stable regardless of the
+     * server's local timezone or DST.
+     *
+     * @param t Epoch time value.
+     * @return std::tm in UTC.
+     */
+    std::tm toUtcTime(std::time_t t);
+
+    /**
+     * @brief Thread-safe conversion of an epoch time to a local-time std::tm.
+     *
+     * std::localtime returns a pointer to a shared static std::tm, so calling
+     * it from multiple threads concurrently is a data race. This wrapper
+     * serializes the call and returns a copy, making it safe to use from the
+     * request-handling worker threads. Portable across MinGW/MSVC/Linux
+     * without depending on the non-standard localtime_r/localtime_s.
+     *
+     * Prefer toUtcTime() for anything persisted to the database; this is only
+     * for values intended to be rendered in the server's local timezone.
+     *
+     * @param t Epoch time value.
+     * @return std::tm in the server's local timezone.
+     */
+    std::tm toLocalTime(std::time_t t);
+
     inline std::string getCurrentTimestampUTC() {
         const std::time_t now = std::time(nullptr);
-        const std::tm* utc = std::gmtime(&now);  // Use UTC time
+        const std::tm utc = toUtcTime(now);
 
         char buffer[20];
-        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", utc);
+        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &utc);
         return std::string{ buffer };
     }
 

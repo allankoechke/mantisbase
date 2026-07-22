@@ -6,117 +6,194 @@
 #include "../../include/mantisbase/core/http.h"
 #include "../../include/mantisbase/core/kv_store.h"
 
-#include <cmrc/cmrc.hpp>
-#include <chrono>
-#include <thread>
-
-// For thread logger
-#include <spdlog/sinks/stdout_color_sinks-inl.h>
-#include <spdlog/sinks/ansicolor_sink.h>
-
-#include "../include/mantisbase/core/exceptions.h"
-#include "../include/mantisbase/core/middlewares.h"
-#include "../include/mantisbase/core/models/entity_schema.h"
-#include "../include/mantisbase/core/models/entity_routes.h"
-#include "../include/mantisbase/core/models/entity_schema_routes.h"
-#include "../include/mantisbase/core/logger/log_database.h"
-#include "../include/mantisbase/core/realtime.h"
-#include "../include/mantisbase/core/sse.h"
+#include <drogon/drogon.h>
+#include <regex>
 
 namespace mb {
+    std::string Router::convertPathToDrogon(const std::string &httplib_path) {
+        // Convert httplib path params /:param to Drogon format /{param}
+        // Also handle regex patterns like R"(/mb(/.*)?)" -> /mb/{1}
+        std::string result;
+        result.reserve(httplib_path.size());
+
+        for (size_t i = 0; i < httplib_path.size(); ++i) {
+            if (httplib_path[i] == ':' && (i == 0 || httplib_path[i - 1] == '/')) {
+                result += '{';
+                ++i;
+                while (i < httplib_path.size() && httplib_path[i] != '/') {
+                    result += httplib_path[i];
+                    ++i;
+                }
+                result += '}';
+                if (i < httplib_path.size()) {
+                    result += httplib_path[i];
+                }
+            } else {
+                result += httplib_path[i];
+            }
+        }
+
+        return result;
+    }
+
+    std::vector<std::string> Router::extractParamNames(const std::string &httplib_path) {
+        std::vector<std::string> names;
+        for (size_t i = 0; i < httplib_path.size(); ++i) {
+            if (httplib_path[i] == ':' && (i == 0 || httplib_path[i - 1] == '/')) {
+                std::string name;
+                ++i;
+                while (i < httplib_path.size() && httplib_path[i] != '/') {
+                    name += httplib_path[i];
+                    ++i;
+                }
+                names.push_back(name);
+            }
+        }
+        return names;
+    }
+
+    void Router::executeMiddlewareChain(MantisRequest &req, MantisResponse &res, const RouteHandler *route) const {
+        // Execute global pre-routing middlewares
+        for (const auto &g_mw: m_preRoutingMiddlewares) {
+            if (g_mw(req, res) == HandlerResponse::Handled) return;
+        }
+
+        // Execute route-specific middlewares
+        if (route) {
+            for (const auto &mw: route->middlewares) {
+                if (mw(req, res) == HandlerResponse::Handled) return;
+            }
+
+            // Execute the handler
+            if (const auto func = std::get_if<HandlerFn>(&route->handler)) {
+                (*func)(req, res);
+            }
+        }
+
+        // Post routing
+        for (const auto &p_mw: m_postRoutingMiddlewares) {
+            p_mw(req, res);
+        }
+    }
+
     void Router::Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
-        LogOrigin::info("Route Created", fmt::format("Creating route [ GET ] {}", path));
+        LogOrigin::info("Route Created", fmt::format("GET {}", path));
         m_routeRegistry.add("GET", path, handler, middlewares);
-        globalRouteHandler("GET", path);
+        registerDrogonHandler("GET", path);
     }
 
     void Router::Post(const std::string &path, const HandlerWithContentReaderFn &handler,
                       const Middlewares &middlewares) {
-        LogOrigin::info("Route Created", fmt::format("Creating route [ POST ] {}", path));
+        LogOrigin::info("Route Created", fmt::format("POST {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
-        globalRouteHandlerWithReader("POST", path);
+        registerDrogonHandlerWithReader("POST", path);
     }
 
     void Router::Post(const std::string &path, const HandlerFn &handler,
                       const Middlewares &middlewares) {
-        LogOrigin::info("Route Created", fmt::format("Creating route [ POST ] {}", path));
+        LogOrigin::info("Route Created", fmt::format("POST {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
-        globalRouteHandler("POST", path);
+        registerDrogonHandler("POST", path);
     }
 
     void Router::Patch(const std::string &path, const HandlerWithContentReaderFn &handler,
                        const Middlewares &middlewares) {
         m_routeRegistry.add("PATCH", path, handler, middlewares);
-        globalRouteHandlerWithReader("PATCH", path);
+        registerDrogonHandlerWithReader("PATCH", path);
     }
 
     void Router::Patch(const std::string &path, const HandlerFn &handler,
                        const Middlewares &middlewares) {
         m_routeRegistry.add("PATCH", path, handler, middlewares);
-        globalRouteHandler("PATCH", path);
+        registerDrogonHandler("PATCH", path);
     }
 
     void Router::Delete(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
         m_routeRegistry.add("DELETE", path, handler, middlewares);
-        globalRouteHandler("DELETE", path);
+        registerDrogonHandler("DELETE", path);
     }
 
-    void Router::globalRouteHandler(const std::string &method, const std::string &path) {
-        const std::function handlerFunc = [this, method, path](const httplib::Request &req, httplib::Response &res) {
-            MantisRequest ma_req{req};
-            MantisResponse ma_res{res};
+    static drogon::HttpMethod toDrogonMethod(const std::string &method) {
+        if (method == "GET") return drogon::Get;
+        if (method == "POST") return drogon::Post;
+        if (method == "PATCH") return drogon::Patch;
+        if (method == "DELETE") return drogon::Delete;
+        if (method == "PUT") return drogon::Put;
+        if (method == "OPTIONS") return drogon::Options;
+        return drogon::Get;
+    }
 
-            const auto route = m_routeRegistry.find(method, path);
+    void Router::registerDrogonHandler(const std::string &method, const std::string &path) const {
+        const auto drogon_path = convertPathToDrogon(path);
+        const auto drogon_method = toDrogonMethod(method);
+
+        auto handler = [
+                    this,
+                    _method = std::string(method),
+                    _path = std::string(path)
+                ](
+            const drogon::HttpRequestPtr &req,
+            std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
+            MantisRequest ma_req{mApp, req};
+            MantisResponse ma_res{};
+
+            const auto param_names = req->getRoutingParameters();
+
+            // Extract path params from the matched path
+            // Drogon stores them as positional params in the matched pattern
+            if (!param_names.empty()) {
+                // Parse path params by comparing actual path with pattern
+                auto actual_parts = splitString(std::string(req->path()), "/");
+                auto pattern_parts = splitString(_path, "/");
+
+                for (size_t i = 0; i < pattern_parts.size() && i < actual_parts.size(); ++i) {
+                    if (!pattern_parts[i].empty() && pattern_parts[i][0] == ':') {
+                        ma_req.setPathParam(pattern_parts[i].substr(1), actual_parts[i]);
+                    }
+                }
+            }
+
+            const auto route = m_routeRegistry.find(_method, _path);
             if (!route) {
                 json response;
                 response["status"] = 404;
-                response["error"] = std::format("{} {} Route Not Found", method, path);
+                response["error"] = std::format("{} {} Route Not Found", _method, _path);
                 response["data"] = json::object();
-
                 ma_res.sendJSON(404, response);
+                callback(ma_res.drogonResponse());
                 return;
             }
 
-            // First, execute global middlewares
-            for (const auto &g_mw: m_preRoutingMiddlewares) {
-                if (g_mw(ma_req, ma_res) == HandlerResponse::Handled) return;
-            }
-
-            // Secondly, execute route specific middlewares
-            for (const auto &mw: route->middlewares) {
-                if (mw(ma_req, ma_res) == HandlerResponse::Handled) return;
-            }
-
-            // Finally, execute the handler function
-            if (const auto func = std::get_if<HandlerFn>(&route->handler)) {
-                (*func)(ma_req, ma_res);
-            }
-
-            // Any post routing checks?
-            for (const auto &p_mw: m_postRoutingMiddlewares) {
-                p_mw(ma_req, ma_res); // Execute all, no return types
-            }
+            executeMiddlewareChain(ma_req, ma_res, route);
+            callback(ma_res.drogonResponse());
         };
 
-        if (method == "GET") {
-            svr.Get(path, handlerFunc);
-        } else if (method == "PATCH") {
-            svr.Patch(path, handlerFunc);
-        } else if (method == "POST") {
-            svr.Post(path, handlerFunc);
-        } else if (method == "DELETE") {
-            svr.Delete(path, handlerFunc);
-        } else {
-            throw MantisException(500, "Router method `" + method + "` is not supported!");
-        }
+        drogon::app().registerHandler(drogon_path, std::move(handler), {drogon_method});
     }
 
-    void Router::globalRouteHandlerWithReader(const std::string &method, const std::string &path) {
-        const std::function handlerFuncWithContentReader = [this, method, path](
-            const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &cr) {
-            MantisRequest ma_req{req};
-            MantisResponse ma_res{res};
-            MantisContentReader ma_cr{cr, ma_req};
+    void Router::registerDrogonHandlerWithReader(const std::string &method, const std::string &path) {
+        const auto drogon_path = convertPathToDrogon(path);
+        const auto param_names = extractParamNames(path);
+        const auto drogon_method = toDrogonMethod(method);
+
+        auto handler = [this, method, path, param_names](
+            const drogon::HttpRequestPtr &req,
+            std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
+            MantisRequest ma_req{mApp, req};
+            MantisResponse ma_res{};
+            MantisContentReader ma_cr{ma_req};
+
+            // Extract path params
+            if (!param_names.empty()) {
+                auto actual_parts = splitString(std::string(req->path()), "/");
+                auto pattern_parts = splitString(path, "/");
+
+                for (size_t i = 0; i < pattern_parts.size() && i < actual_parts.size(); ++i) {
+                    if (!pattern_parts[i].empty() && pattern_parts[i][0] == ':') {
+                        ma_req.setPathParam(pattern_parts[i].substr(1), actual_parts[i]);
+                    }
+                }
+            }
 
             const auto route = m_routeRegistry.find(method, path);
             if (!route) {
@@ -125,36 +202,39 @@ namespace mb {
                                     {"error", std::format("{} {} Route Not Found", method, path)},
                                     {"data", json::object()}
                                 });
+                callback(ma_res.drogonResponse());
                 return;
             }
 
-            // First, execute global middlewares
+            // Execute global middlewares
             for (const auto &g_mw: m_preRoutingMiddlewares) {
-                if (g_mw(ma_req, ma_res) == HandlerResponse::Handled) return;
+                if (g_mw(ma_req, ma_res) == HandlerResponse::Handled) {
+                    callback(ma_res.drogonResponse());
+                    return;
+                }
             }
 
-            // Secondly, execute route specific middlewares
+            // Execute route-specific middlewares
             for (const auto &mw: route->middlewares) {
-                if (mw(ma_req, ma_res) == HandlerResponse::Handled) return;
+                if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
+                    callback(ma_res.drogonResponse());
+                    return;
+                }
             }
 
-            // Finally, execute the handler function
+            // Execute handler with content reader
             if (const auto func = std::get_if<HandlerWithContentReaderFn>(&route->handler)) {
                 (*func)(ma_req, ma_res, ma_cr);
             }
 
-            // Any post routing checks?
+            // Post routing
             for (const auto &p_mw: m_postRoutingMiddlewares) {
-                p_mw(ma_req, ma_res); // Execute all, no return types
+                p_mw(ma_req, ma_res);
             }
+
+            callback(ma_res.drogonResponse());
         };
 
-        if (method == "PATCH") {
-            svr.Patch(path, handlerFuncWithContentReader);
-        } else if (method == "POST") {
-            svr.Post(path, handlerFuncWithContentReader);
-        } else {
-            throw MantisException(500, "Router method `" + method + "` is not supported!");
-        }
+        drogon::app().registerHandler(drogon_path, std::move(handler), {drogon_method});
     }
 }

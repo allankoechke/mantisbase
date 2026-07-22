@@ -96,8 +96,8 @@ namespace mb {
             return EntitySchema::genEntityId(entity_name_or_id);
         }
 
-        void printSchemaList() {
-            const auto tables = EntitySchema::listTables();
+        void printSchemaList(MantisBase &app) {
+            const auto tables = EntitySchema::listTables(app);
             std::cout << std::left
                       << std::setw(24) << "NAME"
                       << std::setw(10) << "TYPE"
@@ -140,7 +140,7 @@ namespace mb {
             for (const auto &file: files) {
                 LogOrigin::info("Migrations", fmt::format("Applying migration `{}`", file.filename().string()));
                 const auto body = loadJsonInput(file.string());
-                const auto eSchema = EntitySchema::fromSchema(body);
+                auto eSchema = EntitySchema::fromSchema(app, body);
                 if (const auto err = eSchema.validate(); err.has_value())
                     throw MantisException(400, err.value());
 
@@ -154,6 +154,103 @@ namespace mb {
 
         int countExclusiveFlags(const std::initializer_list<bool> flags) {
             return static_cast<int>(std::ranges::count(flags, true));
+        }
+
+        void runMigrateDump(MantisBase &app, const std::string &output_path) {
+            const auto tables = EntitySchema::listTables(app);
+            json dump = json::array();
+
+            for (const auto &row : tables) {
+                const auto &schema = row.at("schema");
+                if (schema.value("system", false))
+                    continue;
+
+                dump.push_back({
+                    {"schema", schema}
+                });
+            }
+
+            std::ofstream out(output_path);
+            if (!out.is_open())
+                throw MantisException(500, std::format("Could not open output file `{}`", output_path));
+
+            out << dump.dump(2);
+            out.close();
+
+            LogOrigin::info("Migrate", fmt::format("Dumped {} entity schemas to `{}`",
+                            dump.size(), output_path));
+        }
+
+        void runMigrateUp(MantisBase &app, const std::string &input_path) {
+            const fs::path path = input_path;
+            if (!fs::exists(path) || !fs::is_regular_file(path))
+                throw MantisException(400, std::format("Dump file `{}` does not exist", input_path));
+
+            std::ifstream in(path);
+            if (!in.is_open())
+                throw MantisException(500, std::format("Could not open dump file `{}`", input_path));
+
+            json dump;
+            in >> dump;
+            in.close();
+
+            if (!dump.is_array())
+                throw MantisException(400, "Dump file must contain a JSON array");
+
+            // Separate base/auth entities from view entities for dependency ordering
+            std::vector<json> base_entities;
+            std::vector<json> view_entities;
+
+            for (const auto &entry : dump) {
+                if (!entry.contains("schema"))
+                    throw MantisException(400, "Each dump entry must contain a `schema` key");
+
+                const auto &schema = entry.at("schema");
+                const auto type = schema.value("type", "base");
+                if (type == "view")
+                    view_entities.push_back(schema);
+                else
+                    base_entities.push_back(schema);
+            }
+
+            int restored = 0;
+
+            // Restore base/auth entities first
+            for (const auto &schema : base_entities) {
+                const auto name = schema.value("name", "");
+                if (EntitySchema::tableExists(app, name)) {
+                    LogOrigin::info("Migrate", fmt::format("Skipping existing entity `{}`", name));
+                    continue;
+                }
+
+                const auto eSchema = EntitySchema::fromSchema(app, schema);
+                if (const auto err = eSchema.validate(); err.has_value())
+                    throw MantisException(400, std::format("Validation failed for `{}`: {}", name, err.value()));
+
+                EntitySchema::createTable(eSchema);
+                LogOrigin::info("Migrate", fmt::format("Restored entity `{}`", name));
+                ++restored;
+            }
+
+            // Then restore view entities
+            for (const auto &schema : view_entities) {
+                const auto name = schema.value("name", "");
+                if (EntitySchema::tableExists(app, name)) {
+                    LogOrigin::info("Migrate", fmt::format("Skipping existing entity `{}`", name));
+                    continue;
+                }
+
+                const auto eSchema = EntitySchema::fromSchema(app, schema);
+                if (const auto err = eSchema.validate(); err.has_value())
+                    throw MantisException(400, std::format("Validation failed for `{}`: {}", name, err.value()));
+
+                EntitySchema::createTable(eSchema);
+                LogOrigin::info("Migrate", fmt::format("Restored view entity `{}`", name));
+                ++restored;
+            }
+
+            LogOrigin::info("Migrate", fmt::format("Restored {} entity schemas from `{}`",
+                            restored, input_path));
         }
     }
 
@@ -248,10 +345,22 @@ namespace mb {
                 // .metavar("ENTITY", "JSON_OR_FILE")
                 .help("Update schema from JSON string or file path");
 
+        argparse::ArgumentParser migrate_command("migrate");
+        migrate_command.add_description("Dump or restore entity schemas");
+        migrate_command.add_argument("--dump")
+                .nargs(1)
+                .metavar("FILE")
+                .help("Dump all entity schemas to a JSON file");
+        migrate_command.add_argument("--up")
+                .nargs(1)
+                .metavar("FILE")
+                .help("Restore entity schemas from a JSON dump file");
+
         program.add_subparser(serve_command);
         program.add_subparser(admins_command);
         program.add_subparser(migrations_command);
         program.add_subparser(schema_command);
+        program.add_subparser(migrate_command);
 
         try {
             std::vector<const char *> argv;
@@ -448,14 +557,14 @@ namespace mb {
 
             try {
                 if (do_ls) {
-                    printSchemaList();
+                    printSchemaList(*this);
                     quit(0, "");
                 }
 
                 if (do_rm) {
                     const auto entity_name = schema_command.get<std::string>("--rm");
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
-                    EntitySchema::dropTable(schema_id);
+                    EntitySchema::dropTable(*this, schema_id);
                     LogOrigin::entitySchemaInfo("Schema Removed",
                                                 fmt::format("Removed schema `{}`", entity_name));
                     quit(0, "");
@@ -463,7 +572,7 @@ namespace mb {
 
                 if (do_add) {
                     const auto body = loadJsonInput(schema_command.get<std::string>("--add"));
-                    const auto eSchema = EntitySchema::fromSchema(body);
+                    auto eSchema = EntitySchema::fromSchema(*this, body);
                     if (const auto err = eSchema.validate(); err.has_value())
                         throw MantisException(400, err.value());
 
@@ -477,7 +586,7 @@ namespace mb {
                     const auto entity_name = parts.at(0);
                     const auto body = loadJsonInput(parts.at(1));
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
-                    const auto updated = EntitySchema::updateTable(schema_id, body);
+                    const auto updated = EntitySchema::updateTable(*this, schema_id, body);
                     std::cout << updated.dump(2) << std::endl;
                     quit(0, "");
                 }
@@ -490,7 +599,30 @@ namespace mb {
             }
         }
 
-        std::cout << "Unknown command. Available subcommands: serve, admins, migrations, schema\n\n"
+        if (program.is_subcommand_used("migrate")) {
+            const bool do_dump = migrate_command.is_used("--dump");
+            const bool do_up = migrate_command.is_used("--up");
+
+            if (countExclusiveFlags({do_dump, do_up}) != 1) {
+                quit(400, "migrate requires exactly one of --dump or --up.");
+            }
+
+            try {
+                if (do_dump)
+                    runMigrateDump(*this, migrate_command.get<std::string>("--dump"));
+                else
+                    runMigrateUp(*this, migrate_command.get<std::string>("--up"));
+                quit(0, "");
+            } catch (const MantisException &e) {
+                quit(e.code(), e.what());
+            } catch (const json::parse_error &e) {
+                quit(400, std::string("Invalid JSON in dump file: ") + e.what());
+            } catch (const std::exception &e) {
+                quit(500, e.what());
+            }
+        }
+
+        std::cout << "Unknown command. Available subcommands: serve, admins, migrations, schema, migrate\n\n"
                   << program;
         quit(400, "No subcommand specified.");
     }

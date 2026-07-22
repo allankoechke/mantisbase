@@ -1,4 +1,4 @@
-FROM debian:trixie-slim
+FROM debian:stable-slim
 
 ARG MB_VERSION=0.3.5
 

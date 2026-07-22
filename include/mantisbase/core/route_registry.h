@@ -63,7 +63,7 @@ namespace mb
          */
         void add(const std::string& method,
                  const std::string& path,
-                 HandlerFn handler,
+                 const HandlerFn &handler,
                  const Middlewares& middlewares);
         /**
          * @brief Add new route to the registry.
@@ -75,7 +75,7 @@ namespace mb
          */
         void add(const std::string& method,
                  const std::string& path,
-                 HandlerWithContentReaderFn handler,
+                 const HandlerWithContentReaderFn &handler,
                  const Middlewares& middlewares);
         /**
          * @brief Find a route in the registry matching given method and route.
