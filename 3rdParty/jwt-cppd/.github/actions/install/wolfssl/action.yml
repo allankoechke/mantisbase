@@ -1,0 +1,14 @@
+name: Install wolfSSL
+description: Install and setup wolfSSL for linking and building test application
+inputs:
+  version:
+    description: The desired stable wolfSSL version to install
+    required: false
+    default: "v4.8.1-stable"
+runs:
+  using: composite
+  steps:
+    - run: ${{ github.action_path }}/install-wolfssl.sh ${{ inputs.version }}
+      shell: bash
+    - run: sudo rm -rf /usr/include/openssl
+      shell: bash

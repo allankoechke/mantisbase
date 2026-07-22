@@ -1,0 +1,82 @@
+name: Lint CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        files:
+        - "include/jwt-cpp/*.h"
+        - "include/jwt-cpp/traits/**/*.h"
+        - "tests/*.cpp"
+        - "tests/**/*.cpp"
+        - "example/*.cpp"
+        - "example/**/*.cpp"
+    steps:
+      - run: |
+          sudo apt-get install clang-format-14
+          shopt -s globstar
+      - uses: actions/checkout@v4
+      - run: clang-format-14 -i ${{ matrix.files }}
+      - uses: ./.github/actions/process-linting-results
+        with:
+          linter_name: clang-format
+
+  cmake-format:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        files: ["**/CMakeLists.txt", "cmake/code-coverage.cmake", "cmake/generate-defaults-h.cmake"]
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: pip install cmakelang
+      - run: shopt -s globstar
+      - uses: actions/checkout@v4
+      - run: cmake-format -i ${{ matrix.files }}
+      - uses: ./.github/actions/process-linting-results
+        with:
+          linter_name: cmake-format
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: lukka/get-cmake@latest
+      - uses: actions/checkout@v4
+      - name: configure
+        run: cmake --preset examples -DCMAKE_CXX_CLANG_TIDY="clang-tidy;-fix"
+      - name: run
+        run: cmake --build --preset examples
+      - uses: ./.github/actions/process-linting-results
+        with:
+          linter_name: clang-tidy
+
+  generate-defaults:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install clang-format-14
+      - uses: ./.github/actions/generate-defaults-dot-h
+      - run: clang-format-14 -i include/jwt-cpp/traits/*/*.h
+      - run: git add include/jwt-cpp/traits/*/*.h
+      - uses: ./.github/actions/process-linting-results
+        with:
+          linter_name: generate-defaults
+
+  line-ending:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: git add --renormalize .
+      - uses: ./.github/actions/process-linting-results
+        with:
+          linter_name: line-ending
