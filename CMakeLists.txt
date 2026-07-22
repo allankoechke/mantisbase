@@ -147,6 +147,25 @@ endif (MB_SCRIPTING_ENABLED)
 # ZLIB for windows build
 include(cmake/add-zlib.cmake)
 
+find_path(UUID_INCLUDE_DIR
+        NAMES uuid.h
+        PATH_SUFFIXES uuid
+)
+
+find_library(UUID_LIBRARY
+        NAMES uuid
+)
+
+set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}" CACHE PATH "" FORCE)
+set(UUID_LIBRARIES "${UUID_LIBRARY}" CACHE FILEPATH "" FORCE)
+
+find_package(ZLIB)
+
+#message(STATUS "ZLIB_FOUND=${ZLIB_FOUND}")
+#message(STATUS "ZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIRS}")
+#message(STATUS "ZLIB_LIBRARIES=${ZLIB_LIBRARIES}")
+#message(STATUS "ZLIB_LIBRARY=${ZLIB_LIBRARY}")
+
 # Add Drogon HTTP framework
 include(cmake/add-drogon.cmake)
 

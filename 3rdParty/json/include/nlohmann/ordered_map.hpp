@@ -3,7 +3,7 @@
 // |  |  |__   |  |  | | | |  version 3.12.0
 // |_____|_____|_____|_|___|  https://github.com/nlohmann/json
 //
-// SPDX-FileCopyrightText: 2013-2026 Niels Lohmann <https://nlohmann.me>
+// SPDX-FileCopyrightText: 2013 - 2025 Niels Lohmann <https://nlohmann.me>
 // SPDX-License-Identifier: MIT
 
 #pragma once
@@ -50,25 +50,6 @@ template <class Key, class T, class IgnoredLess = std::less<Key>,
         : Container{first, last, alloc} {}
     ordered_map(std::initializer_list<value_type> init, const Allocator& alloc = Allocator() )
         : Container{init, alloc} {}
-    ordered_map(const ordered_map&) = default;
-    ordered_map(ordered_map&&) noexcept(std::is_nothrow_move_constructible<Container>::value) = default;
-    ~ordered_map() = default;
-
-    ordered_map& operator=(const ordered_map& other)
-    {
-        if (this != &other)
-        {
-            ordered_map tmp(other);
-            Container::operator=(std::move(static_cast<Container&>(tmp)));
-        }
-        return *this;
-    }
-
-    ordered_map& operator=(ordered_map&& other) noexcept(std::is_nothrow_move_assignable<Container>::value)
-    {
-        Container::operator=(std::move(static_cast<Container&>(other)));
-        return *this;
-    }
 
     std::pair<iterator, bool> emplace(const key_type& key, T&& t)
     {
@@ -245,7 +226,7 @@ template <class Key, class T, class IgnoredLess = std::less<Key>,
 
         // Since we cannot move const Keys, we re-construct them in place.
         // We start at first and re-construct (viz. copy) the elements from
-        // the back of the vector. Example for the first iteration:
+        // the back of the vector. Example for first iteration:
 
         //               ,--------.
         //               v        |   destroy e and re-construct with h
@@ -329,20 +310,6 @@ template <class Key, class T, class IgnoredLess = std::less<Key>,
     }
 
     const_iterator find(const key_type& key) const
-    {
-        for (auto it = this->begin(); it != this->end(); ++it)
-        {
-            if (m_compare(it->first, key))
-            {
-                return it;
-            }
-        }
-        return Container::end();
-    }
-
-    template<class KeyType, detail::enable_if_t<
-                 detail::is_usable_as_key_type<key_compare, key_type, KeyType>::value, int> = 0>
-    const_iterator find(KeyType && key) const // NOLINT(cppcoreguidelines-missing-std-forward)
     {
         for (auto it = this->begin(); it != this->end(); ++it)
         {

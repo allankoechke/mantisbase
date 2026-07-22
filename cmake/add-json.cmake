@@ -9,9 +9,3 @@ target_link_libraries(mantisbase
         PUBLIC
         nlohmann_json::nlohmann_json
 )
-
-# Include directories
-target_include_directories(mantisbase
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/json/single_include
-)

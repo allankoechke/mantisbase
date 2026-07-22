@@ -1,0 +1,557 @@
+/**
+ *
+ *  Date.cc
+ *  An Tao
+ *
+ *  Public header file in trantor lib.
+ *
+ *  Copyright 2018, An Tao.  All rights reserved.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the License file.
+ *
+ *
+ */
+
+#include "Date.h"
+#include "Funcs.h"
+#ifndef _WIN32
+#include <sys/time.h>
+#endif
+#include <cstdlib>
+#include <iostream>
+#include <string.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#include <time.h>
+#endif
+
+namespace trantor
+{
+#ifdef _WIN32
+int gettimeofday(timeval *tp, void *tzp)
+{
+    time_t clock;
+    struct tm tm;
+    SYSTEMTIME wtm;
+
+    GetLocalTime(&wtm);
+    tm.tm_year = wtm.wYear - 1900;
+    tm.tm_mon = wtm.wMonth - 1;
+    tm.tm_mday = wtm.wDay;
+    tm.tm_hour = wtm.wHour;
+    tm.tm_min = wtm.wMinute;
+    tm.tm_sec = wtm.wSecond;
+    tm.tm_isdst = -1;
+    clock = mktime(&tm);
+    tp->tv_sec = static_cast<long>(clock);
+    tp->tv_usec = wtm.wMilliseconds * 1000;
+
+    return (0);
+}
+#endif
+const Date Date::date()
+{
+#ifndef _WIN32
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    int64_t seconds = tv.tv_sec;
+    return Date(seconds * MICRO_SECONDS_PER_SEC + tv.tv_usec);
+#else
+    timeval tv;
+    gettimeofday(&tv, NULL);
+    int64_t seconds = tv.tv_sec;
+    return Date(seconds * MICRO_SECONDS_PER_SEC + tv.tv_usec);
+#endif
+}
+
+int64_t Date::timezoneOffset()
+{
+    static int64_t offset = -Date(1970, 1, 1).secondsSinceEpoch();
+    return offset;
+}
+
+const Date Date::after(double second) const
+{
+    return Date(static_cast<int64_t>(microSecondsSinceEpoch_ +
+                                     second * MICRO_SECONDS_PER_SEC));
+}
+const Date Date::roundSecond() const
+{
+    return Date(microSecondsSinceEpoch_ -
+                (microSecondsSinceEpoch_ % MICRO_SECONDS_PER_SEC));
+}
+const Date Date::roundDay() const
+{
+    struct tm t;
+    time_t seconds =
+        static_cast<time_t>(microSecondsSinceEpoch_ / MICRO_SECONDS_PER_SEC);
+#ifndef _WIN32
+    localtime_r(&seconds, &t);
+#else
+    localtime_s(&t, &seconds);
+#endif
+    t.tm_hour = 0;
+    t.tm_min = 0;
+    t.tm_sec = 0;
+    return Date(mktime(&t) * MICRO_SECONDS_PER_SEC);
+}
+struct tm Date::tmStruct() const
+{
+    time_t seconds =
+        static_cast<time_t>(microSecondsSinceEpoch_ / MICRO_SECONDS_PER_SEC);
+    struct tm tm_time;
+#ifndef _WIN32
+    gmtime_r(&seconds, &tm_time);
+#else
+    gmtime_s(&tm_time, &seconds);
+#endif
+    return tm_time;
+}
+std::string Date::toFormattedString(bool showMicroseconds) const
+{
+    //  std::cout<<"toFormattedString"<<std::endl;
+    char buf[128] = {0};
+    time_t seconds =
+        static_cast<time_t>(microSecondsSinceEpoch_ / MICRO_SECONDS_PER_SEC);
+    struct tm tm_time;
+#ifndef _WIN32
+    gmtime_r(&seconds, &tm_time);
+#else
+    gmtime_s(&tm_time, &seconds);
+#endif
+
+    if (showMicroseconds)
+    {
+        int microseconds =
+            static_cast<int>(microSecondsSinceEpoch_ % MICRO_SECONDS_PER_SEC);
+        snprintf(buf,
+                 sizeof(buf),
+                 "%4d%02d%02d %02d:%02d:%02d.%06d",
+                 tm_time.tm_year + 1900,
+                 tm_time.tm_mon + 1,
+                 tm_time.tm_mday,
+                 tm_time.tm_hour,
+                 tm_time.tm_min,
+                 tm_time.tm_sec,
+                 microseconds);
+    }
+    else
+    {
+        snprintf(buf,
+                 sizeof(buf),
+                 "%4d%02d%02d %02d:%02d:%02d",
+                 tm_time.tm_year + 1900,
+                 tm_time.tm_mon + 1,
+                 tm_time.tm_mday,
+                 tm_time.tm_hour,
+                 tm_time.tm_min,
+                 tm_time.tm_sec);
+    }
+    return buf;
+}
+std::string Date::toCustomFormattedString(const std::string &fmtStr,
+                                          bool showMicroseconds) const
+{
+    char buf[256] = {0};
+    time_t seconds =
+        static_cast<time_t>(microSecondsSinceEpoch_ / MICRO_SECONDS_PER_SEC);
+    struct tm tm_time;
+#ifndef _WIN32
+    gmtime_r(&seconds, &tm_time);
+#else
+    gmtime_s(&tm_time, &seconds);
+#endif
+    strftime(buf, sizeof(buf), fmtStr.c_str(), &tm_time);
+    if (!showMicroseconds)
+        return std::string(buf);
+    char decimals[12] = {0};
+    int microseconds =
+        static_cast<int>(microSecondsSinceEpoch_ % MICRO_SECONDS_PER_SEC);
+    snprintf(decimals, sizeof(decimals), ".%06d", microseconds);
+    return std::string(buf) + decimals;
+}
+void Date::toCustomFormattedString(const std::string &fmtStr,
+                                   char *str,
+                                   size_t len) const
+{
+    // not safe
+    time_t seconds =
+        static_cast<time_t>(microSecondsSinceEpoch_ / MICRO_SECONDS_PER_SEC);
+    struct tm tm_time;
+#ifndef _WIN32
+    gmtime_r(&seconds, &tm_time);
+#else
+    gmtime_s(&tm_time, &seconds);
+#endif
+    strftime(str, len, fmtStr.c_str(), &tm_time);
+}
+std::string Date::toFormattedStringLocal(bool showMicroseconds) const
+{
+    //  std::cout<<"toFormattedString"<<std::endl;
+    char buf[128] = {0};
+    time_t seconds =
+        static_cast<time_t>(microSecondsSinceEpoch_ / MICRO_SECONDS_PER_SEC);
+    struct tm tm_time;
+#ifndef _WIN32
+    localtime_r(&seconds, &tm_time);
+#else
+    localtime_s(&tm_time, &seconds);
+#endif
+
+    if (showMicroseconds)
+    {
+        int microseconds =
+            static_cast<int>(microSecondsSinceEpoch_ % MICRO_SECONDS_PER_SEC);
+        snprintf(buf,
+                 sizeof(buf),
+                 "%4d%02d%02d %02d:%02d:%02d.%06d",
+                 tm_time.tm_year + 1900,
+                 tm_time.tm_mon + 1,
+                 tm_time.tm_mday,
+                 tm_time.tm_hour,
+                 tm_time.tm_min,
+                 tm_time.tm_sec,
+                 microseconds);
+    }
+    else
+    {
+        snprintf(buf,
+                 sizeof(buf),
+                 "%4d%02d%02d %02d:%02d:%02d",
+                 tm_time.tm_year + 1900,
+                 tm_time.tm_mon + 1,
+                 tm_time.tm_mday,
+                 tm_time.tm_hour,
+                 tm_time.tm_min,
+                 tm_time.tm_sec);
+    }
+    return buf;
+}
+std::string Date::toDbStringLocal() const
+{
+    char buf[128] = {0};
+    time_t seconds =
+        static_cast<time_t>(microSecondsSinceEpoch_ / MICRO_SECONDS_PER_SEC);
+    struct tm tm_time;
+#ifndef _WIN32
+    localtime_r(&seconds, &tm_time);
+#else
+    localtime_s(&tm_time, &seconds);
+#endif
+    bool showMicroseconds =
+        (microSecondsSinceEpoch_ % MICRO_SECONDS_PER_SEC != 0);
+    if (showMicroseconds)
+    {
+        int microseconds =
+            static_cast<int>(microSecondsSinceEpoch_ % MICRO_SECONDS_PER_SEC);
+        snprintf(buf,
+                 sizeof(buf),
+                 "%4d-%02d-%02d %02d:%02d:%02d.%06d",
+                 tm_time.tm_year + 1900,
+                 tm_time.tm_mon + 1,
+                 tm_time.tm_mday,
+                 tm_time.tm_hour,
+                 tm_time.tm_min,
+                 tm_time.tm_sec,
+                 microseconds);
+    }
+    else
+    {
+        if (*this == roundDay())
+        {
+            snprintf(buf,
+                     sizeof(buf),
+                     "%4d-%02d-%02d",
+                     tm_time.tm_year + 1900,
+                     tm_time.tm_mon + 1,
+                     tm_time.tm_mday);
+        }
+        else
+        {
+            snprintf(buf,
+                     sizeof(buf),
+                     "%4d-%02d-%02d %02d:%02d:%02d",
+                     tm_time.tm_year + 1900,
+                     tm_time.tm_mon + 1,
+                     tm_time.tm_mday,
+                     tm_time.tm_hour,
+                     tm_time.tm_min,
+                     tm_time.tm_sec);
+        }
+    }
+    return buf;
+}
+std::string Date::toDbString() const
+{
+    return after(static_cast<double>(-timezoneOffset())).toDbStringLocal();
+}
+
+Date Date::fromDbStringLocal(const std::string &datetime)
+{
+    unsigned int year = {0}, month = {0}, day = {0}, hour = {0}, minute = {0},
+                 second = {0}, microSecond = {0};
+    std::vector<std::string> &&v = splitString(datetime, " ");
+
+    if (v.size() == 0)
+    {
+        throw std::invalid_argument("Invalid date string: " + datetime);
+    }
+    const std::vector<std::string> date = splitString(v[0], "-");
+    if (date.size() != 3)
+    {
+        throw std::invalid_argument("Invalid date string: " + datetime);
+    }
+    if (v.size() == 1)
+    {
+        // Fromat YYYY-MM-DD is given
+        try
+        {
+            year = std::stol(date[0]);
+            month = std::stol(date[1]);
+            day = std::stol(date[2]);
+        }
+        catch (...)
+        {
+            throw std::invalid_argument("Invalid date string: " + datetime);
+        }
+        return Date(year, month, day, hour, minute, second, microSecond);
+    }
+
+    if (v.size() == 2)
+    {
+        // Format YYYY-MM-DD HH:MM:SS[.UUUUUU] is given
+        try
+        {
+            year = std::stol(date[0]);
+            month = std::stol(date[1]);
+            day = std::stol(date[2]);
+            std::vector<std::string> time = splitString(v[1], ":");
+            if (2 < time.size())
+            {
+                hour = std::stol(time[0]);
+                minute = std::stol(time[1]);
+                auto seconds = splitString(time[2], ".");
+                second = std::stol(seconds[0]);
+                if (1 < seconds.size())
+                {
+                    if (seconds[1].length() > 6)
+                    {
+                        seconds[1].resize(6);
+                    }
+                    else if (seconds[1].length() < 6)
+                    {
+                        seconds[1].append(6 - seconds[1].length(), '0');
+                    }
+                    microSecond = std::stol(seconds[1]);
+                }
+            }
+        }
+        catch (...)
+        {
+            throw std::invalid_argument("Invalid date string: " + datetime);
+        }
+        return Date(year, month, day, hour, minute, second, microSecond);
+    }
+
+    throw std::invalid_argument("Invalid date string: " + datetime);
+}
+
+Date Date::fromDbString(const std::string &datetime)
+{
+    return fromDbStringLocal(datetime).after(
+        static_cast<double>(timezoneOffset()));
+}
+
+static int parseTzOffset(std::string &tz, int tzSign)
+{
+    if (tz.empty())
+    {
+        return 0;
+    }
+    if (tzSign == 0)
+    {
+        if (tz[0] == '-' || tz[0] == '+')
+        {
+            tzSign = tz[0] == '-' ? -1 : 1;
+            tz = tz.substr(1);
+        }
+        else
+        {
+            tzSign = 1;
+        }
+    }
+
+    if (tz == "Z")
+    {
+        return 0;
+    }
+
+    auto tzParts = splitString(tz, ":");
+    if (tzParts.size() == 1 && tz.size() >= 4)
+    {
+        tzParts = {tz.substr(0, 2), tz.substr(2)};  // 0800
+    }
+
+    int tzHour = tzParts.size() > 0 ? std::stoi(tzParts[0]) : 0;
+    int tzMin = tzParts.size() > 1 ? std::stoi(tzParts[1]) : 0;
+    return tzSign * (tzHour * 3600 + tzMin * 60);
+}
+
+// Variant of splitString(), accepts multiple single-char delimiters
+static std::vector<std::string> splitString2(const std::string &s,
+                                             const std::string &delimiters,
+                                             bool acceptEmptyString = false)
+{
+    if (delimiters.empty())
+        return std::vector<std::string>{};
+    std::vector<std::string> v;
+    size_t last = 0;
+    size_t next = 0;
+    while ((next = s.find_first_of(delimiters, last)) != std::string::npos)
+    {
+        if (next > last || acceptEmptyString)
+            v.push_back(s.substr(last, next - last));
+        last = next + 1;
+    }
+    if (s.length() > last || acceptEmptyString)
+        v.push_back(s.substr(last));
+    return v;
+}
+
+Date Date::fromISOString(const std::string &datetime)
+{
+    unsigned int year = {0}, month = {0}, day = {0}, hour = {0}, minute = {0},
+                 second = {0}, microSecond = {0};
+    int tzSign{0}, tzOffset{0};
+    std::vector<std::string> v = splitString2(datetime, "T ");
+    if (v.empty())
+    {
+        throw std::invalid_argument("Invalid date string: " + datetime);
+    }
+
+    // parse date
+    const std::vector<std::string> date = splitString(v[0], "-");
+    if (date.size() != 3)
+    {
+        throw std::invalid_argument("Invalid date string: " + datetime);
+    }
+    year = std::stol(date[0]);
+    month = std::stol(date[1]);
+    day = std::stol(date[2]);
+
+    // only have date part
+    if (v.size() <= 1)
+    {
+        return trantor::Date{year, month, day};
+    }
+
+    // check timezone without space separated
+    if (v.size() == 2)
+    {
+        auto pos = v[1].find('+');
+        if (pos != std::string::npos)
+        {
+            tzSign = 1;
+            v.push_back(v[1].substr(pos + 1));
+            v[1] = v[1].substr(0, pos);
+        }
+        else if ((pos = v[1].find('-')) != std::string::npos)
+        {
+            tzSign = -1;
+            v.push_back(v[1].substr(pos + 1));
+            v[1] = v[1].substr(0, pos);
+        }
+        else if (!v[1].empty() && v[1].back() == 'Z')
+        {
+            v[1].pop_back();
+            tzSign = 1;
+            v.emplace_back("Z");
+        }
+    }
+
+    // parse time
+    std::vector<std::string> timeParts = splitString(v[1], ":");
+    if (timeParts.size() < 2 || timeParts.size() > 3)
+    {
+        throw std::invalid_argument("Invalid time string: " + datetime);
+    }
+    hour = std::stol(timeParts[0]);
+    minute = std::stol(timeParts[1]);
+    if (timeParts.size() == 3)
+    {
+        auto secParts = splitString(timeParts[2], ".");
+        second = std::stol(secParts[0]);
+        // micro seconds
+        if (secParts.size() > 1)
+        {
+            if (secParts[1].length() > 6)
+            {
+                secParts[1].resize(6);
+            }
+            else if (secParts[1].length() < 6)
+            {
+                secParts[1].append(6 - secParts[1].length(), '0');
+            }
+            microSecond = std::stol(secParts[1]);
+        }
+    }
+
+    trantor::Date dt(year, month, day, hour, minute, second, microSecond);
+
+    // timezone
+    if (v.size() >= 3)
+    {
+        tzOffset = parseTzOffset(v[2], tzSign);
+        return dt.after(timezoneOffset() - tzOffset);
+    }
+    else
+    {
+        return dt;
+    }
+}
+
+std::string Date::toCustomFormattedStringLocal(const std::string &fmtStr,
+                                               bool showMicroseconds) const
+{
+    char buf[256] = {0};
+    time_t seconds =
+        static_cast<time_t>(microSecondsSinceEpoch_ / MICRO_SECONDS_PER_SEC);
+    struct tm tm_time;
+#ifndef _WIN32
+    localtime_r(&seconds, &tm_time);
+#else
+    localtime_s(&tm_time, &seconds);
+#endif
+    strftime(buf, sizeof(buf), fmtStr.c_str(), &tm_time);
+    if (!showMicroseconds)
+        return std::string(buf);
+    char decimals[12] = {0};
+    int microseconds =
+        static_cast<int>(microSecondsSinceEpoch_ % MICRO_SECONDS_PER_SEC);
+    snprintf(decimals, sizeof(decimals), ".%06d", microseconds);
+    return std::string(buf) + decimals;
+}
+Date::Date(unsigned int year,
+           unsigned int month,
+           unsigned int day,
+           unsigned int hour,
+           unsigned int minute,
+           unsigned int second,
+           unsigned int microSecond)
+{
+    struct tm tm;
+    memset(&tm, 0, sizeof(tm));
+    tm.tm_isdst = -1;
+    time_t epoch;
+    tm.tm_year = year - 1900;
+    tm.tm_mon = month - 1;
+    tm.tm_mday = day;
+    tm.tm_hour = hour;
+    tm.tm_min = minute;
+    tm.tm_sec = second;
+    epoch = mktime(&tm);
+    microSecondsSinceEpoch_ =
+        static_cast<int64_t>(epoch) * MICRO_SECONDS_PER_SEC + microSecond;
+}
+
+}  // namespace trantor

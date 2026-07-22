@@ -3,8 +3,8 @@
 // |  |  |__   |  |  | | | |  version 3.12.0
 // |_____|_____|_____|_|___|  https://github.com/nlohmann/json
 //
-// SPDX-FileCopyrightText: 2008, 2009 Björn Hoehrmann <bjoern@hoehrmann.de>
-// SPDX-FileCopyrightText: 2013-2026 Niels Lohmann <https://nlohmann.me>
+// SPDX-FileCopyrightText: 2008 - 2009 Björn Hoehrmann <bjoern@hoehrmann.de>
+// SPDX-FileCopyrightText: 2013 - 2025 Niels Lohmann <https://nlohmann.me>
 // SPDX-License-Identifier: MIT
 
 #pragma once
@@ -75,7 +75,7 @@ class serializer
         , error_handler(error_handler_)
     {}
 
-    // deleted because of pointer members
+    // delete because of pointer members
     serializer(const serializer&) = delete;
     serializer& operator=(const serializer&) = delete;
     serializer(serializer&&) = delete;
@@ -573,7 +573,7 @@ class serializer
                     break;
                 }
 
-                default:  // decode found yet incomplete multibyte code point
+                default:  // decode found yet incomplete multi-byte code point
                 {
                     if (!ensure_ascii)
                     {
@@ -762,7 +762,7 @@ class serializer
 
         // jump to the end to generate the string from backward,
         // so we later avoid reversing the result
-        buffer_ptr += static_cast<typename decltype(number_buffer)::difference_type>(n_chars);
+        buffer_ptr += n_chars;
 
         // Fast int2ascii implementation inspired by "Fastware" talk by Andrei Alexandrescu
         // See: https://www.youtube.com/watch?v=o4-CwDo2zpg
@@ -825,34 +825,21 @@ class serializer
         o->write_characters(begin, static_cast<size_t>(end - begin));
     }
 
-    JSON_HEDLEY_NON_NULL(1)
-    static int snprintf_float(char* buf, std::size_t size, int d, double x)
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
-        return (std::snprintf)(buf, size, "%.*g", d, x);
-    }
-
-    JSON_HEDLEY_NON_NULL(1)
-    static int snprintf_float(char* buf, std::size_t size, int d, long double x)
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
-        return (std::snprintf)(buf, size, "%.*Lg", d, x);
-    }
-
     void dump_float(number_float_t x, std::false_type /*is_ieee_single_or_double*/)
     {
-        // get the number of digits for a float -> text -> float round-trip
+        // get number of digits for a float -> text -> float round-trip
         static constexpr auto d = std::numeric_limits<number_float_t>::max_digits10;
 
         // the actual conversion
-        std::ptrdiff_t len = snprintf_float(number_buffer.data(), number_buffer.size(), d, x);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
+        std::ptrdiff_t len = (std::snprintf)(number_buffer.data(), number_buffer.size(), "%.*g", d, x);
 
         // negative value indicates an error
         JSON_ASSERT(len > 0);
-        // check if the buffer was large enough
+        // check if buffer was large enough
         JSON_ASSERT(static_cast<std::size_t>(len) < number_buffer.size());
 
-        // erase thousands separators
+        // erase thousands separator
         if (thousands_sep != '\0')
         {
             // NOLINTNEXTLINE(readability-qualified-auto,llvm-qualified-auto): std::remove returns an iterator, see https://github.com/nlohmann/json/issues/3081
@@ -932,7 +919,7 @@ class serializer
             }
         };
 
-        JSON_ASSERT(static_cast<std::size_t>(byte) < utf8d.size());
+        JSON_ASSERT(byte < utf8d.size());
         const std::uint8_t type = utf8d[byte];
 
         codep = (state != UTF8_ACCEPT)
@@ -960,8 +947,8 @@ class serializer
      * Helper function for dump_integer
      *
      * This function takes a negative signed integer and returns its absolute
-     * value as an unsigned integer. The plus/minus shuffling is necessary as we
-     * cannot directly remove the sign of an arbitrary signed integer as the
+     * value as unsigned integer. The plus/minus shuffling is necessary as we can
+     * not directly remove the sign of an arbitrary signed integer as the
      * absolute values of INT_MIN and INT_MAX are usually not the same. See
      * #1708 for details.
      */
