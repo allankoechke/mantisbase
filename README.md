@@ -273,7 +273,10 @@ See [File Handling](doc/11.files.md) for details.
 
 ### JavaScript Extensions
 
-Scripting is available when building with `-DMB_SCRIPTING_ENABLED=ON`. Extend functionality with JavaScript scripts:
+> [!CAUTION]   
+> CURRENTLY, SCRIPTING IS DISABLED UNTIL v0.3.x API IS STABLIZED!!!  
+
+Extend functionality with JavaScript scripts:
 
 ```javascript
 app.router().addRoute("GET", "/api/v1/custom", function(req, res) {
@@ -360,7 +363,7 @@ For full API documentation, visit [https://docs.mantisbase.dev](https://allankoe
 - **Language**: C++20
 - **Database**: SQLite (default), PostgreSQL (Linux)
 - **Build System**: CMake
-- **HTTP Server**: Drogon (async, HTTP/2, WebSocket)
+- **HTTP Server**: httplib-cpp
 - **JavaScript Engine**: Duktape
 - **Dependencies**: All included as submodules
 
@@ -371,14 +374,8 @@ For full API documentation, visit [https://docs.mantisbase.dev](https://allankoe
 ## Requirements
 
 - **Linux**: GCC with C++20 support, libzstd-dev, libpq-dev (for PostgreSQL)
-- **macOS**: Clang with C++20 support, zstd, postgresql, openssl (via Homebrew)
 - **Windows**: MinGW v13+ with std::format support
 - **No external runtime dependencies** - everything is bundled
-
-### GCC Debug Build Note
-
-> [!NOTE]
-> GCC `Debug` builds with full debug info (`-O0 -g`) may trigger object file size overflow errors on some translation units due to large template instantiations from Drogon and SOCI. Use `Release` or `RelWithDebInfo` build types for production and CI. If you need debug symbols, `RelWithDebInfo` (`-O2 -g`) is recommended as it keeps object sizes manageable while preserving debug info.
 
 ---
 

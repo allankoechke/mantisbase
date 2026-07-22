@@ -1,14 +1,13 @@
 FROM debian:stable-slim
 
-ARG MB_VERSION=0.4.0
+ARG MB_VERSION=0.3.5
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     unzip \
     ca-certificates \
     libpq5 \
-    libjsoncpp25 \
-    zlib1g \
+    libzstd1 \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /mb

@@ -125,8 +125,6 @@ namespace mb {
          */
         void writeCheckpoint() const;
 
-        static void seedOAuthPresets(soci::session &sql);
-
         std::string m_connStr;
         std::unique_ptr<soci::connection_pool> m_connPool;
         const MantisBase &mbApp;

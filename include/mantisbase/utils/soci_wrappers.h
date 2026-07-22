@@ -29,14 +29,12 @@ namespace mb {
             // Skip fields that are not in the JSON object
             if (!entity.contains(field_name)) continue;
 
-            // For password types, hash before binding (null password = OAuth-only user)
+            // For password types, let's hash them before binding to DB
             if (field_name == "password") {
-                if (entity[field_name].is_null() || (entity[field_name].is_string() && entity[field_name].get<std::string>().empty())) {
-                    std::optional<int> val;
-                    vals.set(field_name, val, soci::i_null);
-                    continue;
-                }
+                // Extract password value and hash it
                 auto hashed_password = hashPassword(entity.at(field_name).get<std::string>());
+
+                // Add the hashed password to the soci::vals
                 vals.set(field_name, hashed_password);
                 continue;
             }
@@ -65,14 +63,22 @@ namespace mb {
 
                     vals.set(field_name, tm);
                 }
-            } else if (field_type == "int") {
-                const int prec = field.value("precision", 32);
-                switch (prec) {
-                    case 8: vals.set(field_name, static_cast<int8_t>(entity.value(field_name, 0))); break;
-                    case 16: vals.set(field_name, static_cast<int16_t>(entity.value(field_name, 0))); break;
-                    case 64: vals.set(field_name, static_cast<int64_t>(entity.value(field_name, 0))); break;
-                    default: vals.set(field_name, static_cast<int32_t>(entity.value(field_name, 0))); break;
-                }
+            } else if (field_type == "int8") {
+                vals.set(field_name, static_cast<int8_t>(entity.value(field_name, 0)));
+            } else if (field_type == "uint8") {
+                vals.set(field_name, static_cast<uint8_t>(entity.value(field_name, 0)));
+            } else if (field_type == "int16") {
+                vals.set(field_name, static_cast<int16_t>(entity.value(field_name, 0)));
+            } else if (field_type == "uint16") {
+                vals.set(field_name, static_cast<uint16_t>(entity.value(field_name, 0)));
+            } else if (field_type == "int32") {
+                vals.set(field_name, static_cast<int32_t>(entity.value(field_name, 0)));
+            } else if (field_type == "uint32") {
+                vals.set(field_name, static_cast<uint32_t>(entity.value(field_name, 0)));
+            } else if (field_type == "int64") {
+                vals.set(field_name, static_cast<int64_t>(entity.value(field_name, 0)));
+            } else if (field_type == "uint64") {
+                vals.set(field_name, static_cast<uint64_t>(entity.value(field_name, 0)));
             } else if (field_type == "blob") {
                 // TODO implement BLOB type
                 // vals.set(field_name, entity.value(field_name, sql->empty_blob()));
@@ -86,14 +92,6 @@ namespace mb {
         }
 
         return vals;
-    }
-
-    inline int getColumnPrecision(const std::string &column_name, const std::vector<json> &fields) {
-        for (const auto &field: fields) {
-            if (field.value("name", "") == column_name)
-                return field.value("precision", 32);
-        }
-        return 32;
     }
 
     inline std::string getColumnType(const std::string &column_name, const std::vector<json> &fields) {
@@ -139,14 +137,22 @@ namespace mb {
                 res_json[colName] = row.get<double>(i);
             } else if (colType == "date") {
                 res_json[colName] = mb::dbDateToString(row, i);
-            } else if (colType == "int") {
-                const int prec = getColumnPrecision(colName, entity_fields);
-                switch (prec) {
-                    case 8: res_json[colName] = row.get<int8_t>(i); break;
-                    case 16: res_json[colName] = row.get<int16_t>(i); break;
-                    case 64: res_json[colName] = row.get<int64_t>(i); break;
-                    default: res_json[colName] = row.get<int32_t>(i); break;
-                }
+            } else if (colType == "int8") {
+                res_json[colName] = row.get<int8_t>(i);
+            } else if (colType == "uint8") {
+                res_json[colName] = row.get<uint8_t>(i);
+            } else if (colType == "int16") {
+                res_json[colName] = row.get<int16_t>(i);
+            } else if (colType == "uint16") {
+                res_json[colName] = row.get<uint16_t>(i);
+            } else if (colType == "int32") {
+                res_json[colName] = row.get<int32_t>(i);
+            } else if (colType == "uint32") {
+                res_json[colName] = row.get<uint32_t>(i);
+            } else if (colType == "int64") {
+                res_json[colName] = row.get<int64_t>(i);
+            } else if (colType == "uint64") {
+                res_json[colName] = row.get<uint64_t>(i);
             } else if (colType == "blob") {
                 // TODO ? How do we handle BLOB?
                 // j[colName] = row.get<std::string>(i);

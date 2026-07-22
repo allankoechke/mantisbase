@@ -4,9 +4,6 @@ set(JWT_SSL_LIBRARY wolfSSL)
 # Enable OpenSSL compatibility layer
 set(WOLFSSL_OPENSSLEXTRA ON CACHE BOOL "" FORCE)
 
-# Enable AES-256-GCM for OAuth token encryption
-set(WOLFSSL_AESGCM yes CACHE BOOL "" FORCE)
-
 # Disable tests and examples
 set(WOLFSSL_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(WOLFSSL_CRYPT_TESTS OFF CACHE BOOL "" FORCE)

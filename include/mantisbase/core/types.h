@@ -1,11 +1,16 @@
+/**
+ * @file types.h
+ * @brief Type definitions and aliases for MantisBase.
+ *
+ * Defines common types used throughout the MantisBase library including
+ * handler functions, middleware types, and route keys.
+ */
+
 #ifndef MANTISBASE_TYPES_H
 #define MANTISBASE_TYPES_H
 
+#include <httplib.h>
 #include <nlohmann/json.hpp>
-#include <functional>
-#include <string>
-#include <vector>
-#include <filesystem>
 
 namespace mb {
     class MantisBase;
@@ -25,19 +30,28 @@ namespace mb {
     class Files;
 
     using json = nlohmann::json;
+    using HandlerResponse = httplib::Server::HandlerResponse;
 
-    enum class HandlerResponse {
-        Handled,
-        Unhandled
-    };
-
+    ///> Route Handler function shorthand
     using HandlerFn = std::function<void(MantisRequest&, MantisResponse&)>;
+
+    ///> Route Handler function with content reader shorthand
     using HandlerWithContentReaderFn = std::function<void(MantisRequest&, MantisResponse&,
                                                                  MantisContentReader&)>;
+
+    ///> Middleware shorthand for the function
     using MiddlewareFn = std::function<HandlerResponse(MantisRequest&, MantisResponse&)>;
+
+    ///> Middleware function arrays
     using Middlewares = std::vector<MiddlewareFn>;
+
+    ///> Syntactic sugar for request method which is a std::string
     using Method = std::string;
+
+    ///> Syntactic sugar for request path which is a std::string
     using Path = std::string;
+
+    ///> Shorthand notation for the request's method, path pair.
     using RouteKey = std::pair<Method, Path>;
 
 #define REQUEST_HANDLED HandlerResponse::Handled;

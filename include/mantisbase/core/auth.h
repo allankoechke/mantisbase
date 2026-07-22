@@ -47,12 +47,22 @@ namespace mb
          */
         static std::string createToken(const json& claims_params, int timeout = -1);
 
+        /**
+         * @brief Verify JWT token and extract claims.
+         * @param token JWT token string to verify
+         * @return JSON object with:
+         *   - "verified": bool indicating if token is valid
+         *   - "id": user ID from token
+         *   - "entity": entity table name from token
+         *   - "error": error message if verification failed
+         * @code
+         * json result = Auth::verifyToken(token);
+         * if (result["verified"]) {
+         *     // Token is valid, use result["id"] and result["entity"]
+         * }
+         * @endcode
+         */
         static json verifyToken(const std::string& token);
-
-        static bool deleteSession(const std::string& session_id);
-
-        static json refreshSession(const std::string& old_session_id, const std::string& entity_name,
-                                   const std::string& user_id);
     };
 } // mb
 
