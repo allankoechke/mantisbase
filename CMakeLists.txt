@@ -19,10 +19,12 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(MB_SHARED_DEPS)
     set(BUILD_SHARED_LIBS TRUE)
     set(MB_LIB_TYPE SHARED)
+    set(USE_STATIC_LIBS_ONLY OFF)
     message("-- Building MantisBase dynamic libs")
 else()
     set(BUILD_SHARED_LIBS FALSE)
     set(MB_LIB_TYPE STATIC)
+    set(USE_STATIC_LIBS_ONLY ON)
 
     # For static builds, embed libstdgcc and libstdc++ to avoid binary loading fails
     # due to mismatch libstd* libs.
