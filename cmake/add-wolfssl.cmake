@@ -18,9 +18,8 @@ target_include_directories(mantisbase PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/wolfssl/wolfssl
 )
 
-# In 3rdParty/wolfssl/CMakeLists.txt
 if(CMAKE_C_COMPILER_ID MATCHES "GNU")
-    target_compile_options(wolfssl PRIVATE -Wno-stringop-overflow)
+    target_compile_options(wolfssl PRIVATE -Wno-stringop-overflow -Wno-error=stringop-truncation)
 endif()
 
 target_compile_definitions(mantisbase PUBLIC EXTERNAL_OPTS_OPENVPN)

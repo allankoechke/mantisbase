@@ -68,3 +68,4 @@ target/
 .cargo-target/
 .claude/
 changes.md
+.vscode

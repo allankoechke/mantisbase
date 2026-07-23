@@ -86,9 +86,7 @@ namespace mb {
                                     field_name, static_cast<int>(min_value));
             }
 
-            if (field_type == "double" || field_type == "int8" || field_type == "uint8" || field_type == "int16" ||
-                field_type == "uint16" || field_type == "int32" || field_type == "uint32" || field_type == "int64" ||
-                field_type == "uint64") {
+            if (field_type == "double" || field_type == "int") {
                 if (body.at(field_name) < min_value) {
                     return
                             std::format("Minimum Constraint Failed: Value for `{}` should be >= {}",
@@ -116,9 +114,7 @@ namespace mb {
                                     field_name, static_cast<int>(max_value));
             }
 
-            if (field_type == "double" || field_type == "int8" || field_type == "uint8" || field_type == "int16" ||
-                field_type == "uint16" || field_type == "int32" || field_type == "uint32" || field_type == "int64" ||
-                field_type == "uint64") {
+            if (field_type == "double" || field_type == "int") {
                 if (body.at(field_name) > max_value) {
                     return
                             std::format("Maximum Constraint Failed: Value for `{}` should be <= {}",

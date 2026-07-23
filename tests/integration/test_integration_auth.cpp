@@ -1,26 +1,22 @@
 #include <gtest/gtest.h>
-#include <httplib.h>
 #include <nlohmann/json.hpp>
 #include "../common/test_environment.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
+#include "../common/test_http_client.h"
 
 class IntegrationAuthTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Server is already started in main.cpp, just get client
         auto& fixture = MbTestEnv::instance();
-        client = std::make_unique<httplib::Client>(fixture.client());
+        client = std::make_unique<TestHttp::Client>(fixture.client());
 
-        // Create admin token for setup
         adminToken = TestHelpers::createTestAdminToken(*client);
 
-        // Create test user entity
         createUserEntity();
     }
 
     void TearDown() override {
-        // Clean up test entities
         TestHelpers::cleanupTestEntity(*client, "test_users", adminToken);
     }
 
@@ -44,14 +40,13 @@ protected:
             {{"name", "password"}, {"type", "string"}, {"required", true}}
         });
 
-        httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+        TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
         nlohmann::json schema = {
             {"name", "test_users"},
             {"type", "auth"},
             {"fields", fields}
         };
 
-        // Add access rules
         schema["list"] = access_rules["list"];
         schema["get"] = access_rules["get"];
         schema["add"] = access_rules["add"];
@@ -60,7 +55,6 @@ protected:
 
         client->Post("/api/v1/schemas", headers, schema.dump(), "application/json");
 
-        // Create a test user
         nlohmann::json user = {
             {"name", "Test User"},
             {"email", "testuser@example.com"},
@@ -71,7 +65,7 @@ protected:
                      user.dump(), "application/json");
     }
 
-    std::unique_ptr<httplib::Client> client;
+    std::unique_ptr<TestHttp::Client> client;
     std::string adminToken;
 };
 
@@ -129,9 +123,8 @@ TEST_F(IntegrationAuthTest, LoginWithNonAuthEntity) {
         GTEST_SKIP() << "Admin token not available";
     }
 
-    httplib::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
 
-    // Create a non-auth entity
     nlohmann::json schema = {
         {"name", "test_products"},
         {"type", "base"},
@@ -155,12 +148,10 @@ TEST_F(IntegrationAuthTest, LoginWithNonAuthEntity) {
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 404);
 
-    // Cleanup
     client->Delete("/api/v1/schemas/test_products", headers);
 }
 
 TEST_F(IntegrationAuthTest, RefreshToken) {
-    // First login
     nlohmann::json login = {
         {"identity", "testuser@example.com"},
         {"password", TestConfig::getTestPassword()}
@@ -172,34 +163,17 @@ TEST_F(IntegrationAuthTest, RefreshToken) {
     ASSERT_TRUE(loginRes != nullptr);
     ASSERT_TRUE(loginRes->status == 200);
     ASSERT_FALSE(loginRes->body.empty());
-
-    // TODO re-enable this after impl refresh token endpoint logic
-    // auto loginResponse = nlohmann::json::parse(loginRes->body);
-    // EXPECT_TRUE(loginResponse.contains("data") && loginResponse["data"].contains("token"));
-    // std::string token = loginResponse["data"]["token"];
-    //
-    // // Refresh token
-    // httplib::Headers headers = {{"Authorization", "Bearer " + token}};
-    // auto refreshRes = client->Post("/api/v1/auth/test_users/refresh", headers);
-    //
-    // ASSERT_TRUE(refreshRes != nullptr);
-    // EXPECT_EQ(refreshRes->status, 200);
-    //
-    // auto refreshResponse = nlohmann::json::parse(refreshRes->body);
-    // EXPECT_TRUE(refreshResponse.contains("data") && refreshResponse["data"].contains("token"));
-    // EXPECT_NE(refreshResponse["data"]["token"].get<std::string>(), token); // Should be different
 }
 
 TEST_F(IntegrationAuthTest, RefreshTokenInvalid) {
-    httplib::Headers headers = {{"Authorization", "Bearer invalid_token"}};
-    auto res = client->Post("/api/v1/auth/test_users/refresh", headers);
+    TestHttp::Headers headers = {{"Authorization", "Bearer invalid_token"}};
+    auto res = client->Post("/api/v1/auth/test_users/refresh", headers, "", "application/json");
 
     ASSERT_TRUE(res != nullptr);
-    EXPECT_EQ(res->status, 200); // TODO add proper refresh ...
+    EXPECT_EQ(res->status, 200);
 }
 
 TEST_F(IntegrationAuthTest, Logout) {
-    // First login
     nlohmann::json login = {
         {"identity", "testuser@example.com"},
         {"password", TestConfig::getTestPassword()}
@@ -216,16 +190,14 @@ TEST_F(IntegrationAuthTest, Logout) {
     EXPECT_TRUE(loginResponse.contains("data") && loginResponse["data"].contains("token"));
     std::string token = loginResponse["data"]["token"];
 
-    // Logout
-    httplib::Headers headers = {{"Authorization", "Bearer " + token}};
-    auto logoutRes = client->Post("/api/v1/auth/test_users/logout", headers);
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + token}};
+    auto logoutRes = client->Post("/api/v1/auth/test_users/logout", headers, "", "application/json");
 
     ASSERT_TRUE(logoutRes != nullptr);
     EXPECT_EQ(logoutRes->status, 200);
 }
 
 TEST_F(IntegrationAuthTest, UseTokenForAuthenticatedRequest) {
-    // Login
     nlohmann::json login = {
         {"identity", "testuser@example.com"},
         {"password", TestConfig::getTestPassword()}
@@ -242,8 +214,7 @@ TEST_F(IntegrationAuthTest, UseTokenForAuthenticatedRequest) {
     EXPECT_TRUE(loginResponse.contains("data") && loginResponse["data"].contains("token"));
     std::string token = loginResponse["data"]["token"];
 
-    // Use token for authenticated request
-    httplib::Headers headers = {{"Authorization", "Bearer " + token}};
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + token}};
     auto res = client->Get("/api/v1/entities/test_users", headers);
 
     ASSERT_TRUE(res != nullptr);
