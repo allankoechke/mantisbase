@@ -37,8 +37,8 @@ void mb::Logger::setLogLevel(const LogLevel &level) {
     }
 }
 
-mb::Logger::Logger()
-    : m_logsDb(std::make_unique<LogDatabase>()) {
+mb::Logger::Logger(const MantisBase &app)
+    : m_logsDb(std::make_unique<LogDatabase>()), mApp(app) {
     // Enable Multi Sinks
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_level(spdlog::level::info);
@@ -55,20 +55,22 @@ mb::LogDatabase &mb::Logger::logsDb() const {
     return *m_logsDb;
 }
 
-void mb::Logger::initDb(const std::string &data_dir) {
-    if (MantisBase::instance().logs().logsDb().init(data_dir))
+void mb::Logger::initDb(const std::string &data_dir) const {
+    if (mApp.logs().logsDb().init(data_dir))
         isDbInitialized.store(true);
 }
 
 void mb::Logger::logToDatabase(const std::string &level, const std::string &origin, const std::string &message,
-                               const std::string &details, const json &data) {
+                               const std::string &details, const json &data) const {
     if (isDbInitialized.load()) {
-        MantisBase::instance().logs().logsDb().insertLog(level, origin, message, details, data);
+        mApp.logs().logsDb().insertLog(level, origin, message, details, data);
     }
 }
 
-void mb::Logger::trace(const std::string &origin, const std::string &message, const std::string &details,
-                       const json &data) {
+void mb::Logger::trace(const std::string &origin,
+                       const std::string &message,
+                       const std::string &details,
+                       const json &data) const {
     // Format message for console output
     std::string formatted_msg;
     if (details.empty()) {
@@ -88,8 +90,10 @@ void mb::Logger::trace(const std::string &origin, const std::string &message, co
     logToDatabase("trace", origin, message, details, data);
 }
 
-void mb::Logger::info(const std::string &origin, const std::string &message, const std::string &details,
-                      const json &data) {
+void mb::Logger::info(const std::string &origin,
+                      const std::string &message,
+                      const std::string &details,
+                      const json &data) const {
     // Format message for console output
     std::string formatted_msg;
     if (details.empty()) {
@@ -109,8 +113,10 @@ void mb::Logger::info(const std::string &origin, const std::string &message, con
     logToDatabase("info", origin, message, details, data);
 }
 
-void mb::Logger::debug(const std::string &origin, const std::string &message, const std::string &details,
-                       const json &data) {
+void mb::Logger::debug(const std::string &origin,
+                       const std::string &message,
+                       const std::string &details,
+                       const json &data) const {
     // Format message for console output
     std::string formatted_msg;
     if (details.empty()) {
@@ -130,8 +136,10 @@ void mb::Logger::debug(const std::string &origin, const std::string &message, co
     logToDatabase("debug", origin, message, details, data);
 }
 
-void mb::Logger::warn(const std::string &origin, const std::string &message, const std::string &details,
-                      const json &data) {
+void mb::Logger::warn(const std::string &origin,
+                      const std::string &message,
+                      const std::string &details,
+                      const json &data) const {
     // Format message for console output
     std::string formatted_msg;
     if (details.empty()) {
@@ -151,8 +159,10 @@ void mb::Logger::warn(const std::string &origin, const std::string &message, con
     logToDatabase("warn", origin, message, details, data);
 }
 
-void mb::Logger::critical(const std::string &origin, const std::string &message, const std::string &details,
-                          const json &data) {
+void mb::Logger::critical(const std::string &origin,
+                          const std::string &message,
+                          const std::string &details,
+                          const json &data) const {
     // Format message for console output
     std::string formatted_msg;
     if (details.empty()) {

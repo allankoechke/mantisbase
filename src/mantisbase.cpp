@@ -11,17 +11,11 @@
 namespace mb {
     MantisBase::MantisBase()
         : m_dbType("sqlite3"),
-          m_startTime(std::chrono::steady_clock::now()),
-          m_logger(std::make_unique<Logger>()) {}
+          m_startTime(std::chrono::steady_clock::now()) {
+        m_logger = std::make_unique<Logger>(*this);
+    }
 
     MantisBase::~MantisBase() {
-        // if (!m_toStartServer) {
-        //     std::cout << std::endl;
-        //     LogOrigin::info(
-        //         "Exiting Application",
-        //         "Nothing else to do. Did you intend to run the server? Try `mantisbase serve` instead.");
-        // }
-
 #ifdef MB_SCRIPTING_ENABLED
         if (m_dukCtx) {
             duk_destroy_heap(m_dukCtx);
@@ -52,19 +46,8 @@ namespace mb {
 #endif
     }
 
-    MantisBase &MantisBase::instance() {
-        auto &app_instance = getInstanceImpl();
-        if (!app_instance.isCreated())
-            throw std::runtime_error("MantisBase not created yet");
-
-        return app_instance;
-    }
-
     MantisBase &MantisBase::create(const int argc, char **argv) {
-        auto &app = getInstanceImpl();
-        if (app.isCreated())
-            throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
-
+        MantisBase app{};
         // Initialize the app with passed in args
         app.init(argc, argv);
 
@@ -73,11 +56,7 @@ namespace mb {
     }
 
     MantisBase &MantisBase::create(const json &config) {
-        auto &app = getInstanceImpl();
-        if (app.isCreated())
-            throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
-
-        // logEntry::trace("MantisBase Config: {}", config.dump());
+        MantisBase app{};
 
         // Start from a clean slate: on a create() -> close() -> create() cycle
         // (e.g. across test runs in one process) the arg vector would otherwise
@@ -218,11 +197,6 @@ namespace mb {
         return app;
     }
 
-    MantisBase &MantisBase::getInstanceImpl() {
-        static std::unique_ptr<MantisBase> s_instance(new MantisBase());
-        return *s_instance;
-    }
-
     void MantisBase::init_units() {
         if (!ensureDirsAreCreated())
             quit(-1, "Failed to create database directories!");
@@ -233,11 +207,12 @@ namespace mb {
         m_router = std::make_unique<Router>(*this); // depends on db() & http()
         m_kvStore = std::make_unique<KeyValStore>(*this); // depends on db(), router() & http()
         m_opts = std::make_unique<argparse::ArgumentParser>();
+        m_files = std::make_unique<FilesMgr>(*this);
     }
 
     int MantisBase::quit(const int &exitCode, [[maybe_unused]] const std::string &reason) {
         // Stop server if running
-        instance().close();
+        close();
 
         if (exitCode != 0)
             LogOrigin::critical("Application Exit",
@@ -342,6 +317,10 @@ namespace mb {
         return *m_realtime;
     }
 
+    FilesMgr & MantisBase::files() const {
+        return *m_files;
+    }
+
     Entity MantisBase::entity(const std::string &entity_name) const {
         if (!EntitySchema::isValidEntityName(entity_name))
             throw MantisException(400,
@@ -425,7 +404,7 @@ namespace mb {
         throw MantisException(500, "Expected database type of either `sqlite3` or `postgresql` but got {}", dbType);
     }
 
-    std::string MantisBase::jwtSecretKey() {
+    std::string MantisBase::jwtSecretKey() const {
         // Prefer an explicitly configured secret. In production the server
         // refuses to start when this is unset (see MantisBase::run()), so we
         // never sign tokens with a shipped default.
@@ -435,7 +414,7 @@ namespace mb {
         // Development-only fallback. Reaching this in production would mean the
         // startup guard was bypassed, so fail loudly rather than emit a token
         // signed with a well-known key.
-        if (instance().isDevMode())
+        if (isDevMode())
             return "mb-insecure-dev-secret-do-not-use-in-production";
 
         throw MantisException(500, "MB_JWT_SECRET is not configured");

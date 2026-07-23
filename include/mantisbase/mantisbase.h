@@ -61,18 +61,8 @@ namespace mb
         MantisBase& operator=(MantisBase&&) = delete;
 
         /**
-         * @brief Retrieve the existing application instance.
-         * @return A reference to the single, already-created application instance.
-         * @throws std::runtime_error if create() has not been called yet.
-         */
-        static MantisBase& instance();
-
-        /**
          * @brief Create class instance given cmd args passed in.
          * @see parseArgs() for expected cmd args to be passed in.
-         *
-         * @note Only one instance may exist per process. Call this once at
-         *       startup and use instance() thereafter.
          *
          * @param argc Number of cmd args
          * @param argv Char array list
@@ -113,9 +103,6 @@ namespace mb
          * @note `admins` subcommand expects a subcommand with either the `add` or `rm`.
          * @note `serve` command can have an empty json object and the app will configure with defaults.
          *
-         * @note Only one instance may exist per process; call this once during
-         *       startup and use instance() thereafter.
-         *
          * @code
          * // Defaults only:
          * auto& app = MantisBase::create(json::object());
@@ -127,13 +114,10 @@ namespace mb
          * cfg["dev"] = true;
          * cfg["serve"] = json::object();
          * auto& app = MantisBase::create(cfg);
-         * // ...elsewhere in the process, retrieve the same instance:
-         * auto& same = MantisBase::instance();
          * @endcode
          *
          * @param config JSON Object bearing the cmd args values to be used
          * @return A reference to the created class instance
-         * @throws std::runtime_error if an instance has already been created.
          */
         static MantisBase& create(const json& config = json::object());
 
@@ -159,7 +143,7 @@ namespace mb
          * @param reason User-friendly reason for the exit.
          * @return `exitCode` value.
          */
-        static int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
+        int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
 
         /**
          * @brief Retrieve HTTP Listening port.
@@ -256,7 +240,7 @@ namespace mb
          * @brief Retrieve the JWT secret key.
          * @return JWT Secret value.
          */
-        static std::string jwtSecretKey();
+        std::string jwtSecretKey() const;
         /**
          * Fetch the application version
          * @return Application version
@@ -281,6 +265,10 @@ namespace mb
         [[nodiscard]] Logger& logs() const;
         /// Get the realtime unit (SQLite/PostgreSQL change detection for SSE /api/v1/realtime).
         [[nodiscard]] RealtimeDB& rt() const;
+        /// Get the FilesMgr instance
+        [[nodiscard]] FilesMgr& files() const;
+        /// Get Logger instance
+        [[nodiscard]] Logger& logger() const { return *m_logger; }
 
         /**
          * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
@@ -332,13 +320,6 @@ namespace mb
          * @brief Run initialization actions for Mantis, ensuring all objects are initialized properly before use.
          */
         void init(int argc = 0, char* argv[] = {});
-
-        /**
-         * Creates static instance if not created yet and returns it.
-         *
-         * @return instance of the MantisApp class
-         */
-        static MantisBase& getInstanceImpl();
 
         /**
          * @brief Set the database pool size value.
@@ -427,6 +408,7 @@ namespace mb
 
         std::unique_ptr<Logger> m_logger;
         std::unique_ptr<Database> m_database;
+        std::unique_ptr<FilesMgr> m_files;
         std::unique_ptr<RealtimeDB> m_realtime;
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KeyValStore> m_kvStore;

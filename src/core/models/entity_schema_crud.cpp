@@ -111,7 +111,7 @@ namespace mb {
 
                 // Create files directory (not for views)
                 if (new_table.type() != "view") {
-                    Files::createDir(new_table.name());
+                    FilesMgr::createDir(new_table.name());
                 }
 
                 // Add created table to the routes
@@ -731,7 +731,7 @@ namespace mb {
                     app.rt().dropDbHooks(old_entity.name(), sql);
 
                     // Update file table folder name
-                    Files::renameDir(old_entity.name(), new_entity.name());
+                    FilesMgr::renameDir(old_entity.name(), new_entity.name());
                 }
             } catch (std::exception &e) {
                 LogOrigin::entitySchemaCritical("Cache Update Error",
@@ -787,7 +787,7 @@ namespace mb {
                 MantisBase::instance().rt().dropDbHooks(entity_name, sql);
 
                 // Delete files directory
-                Files::deleteDir(entity_name);
+                FilesMgr::deleteDir(entity_name);
             }
 
             // Remove route for this Entity

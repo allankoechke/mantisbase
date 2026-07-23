@@ -64,7 +64,7 @@ namespace mb {
                     );
                 }
 
-                const auto dir = Files::dirPath(entity.name(), true);
+                const auto dir = FilesMgr::dirPath(entity.name(), true);
                 const auto new_filename = sanitizeFilename(form_data.filename);
                 std::string filepath = (fs::path(dir) / new_filename).string();
 
@@ -174,7 +174,7 @@ namespace mb {
 
         for (const auto &file: m_filesMetadata) {
             if (file.contains("filename")) {
-                [[maybe_unused]] auto _ = Files::removeFile(entity_name, file["filename"].get<std::string>());
+                [[maybe_unused]] auto _ = FilesMgr::removeFile(entity_name, file["filename"].get<std::string>());
             }
         }
     }
