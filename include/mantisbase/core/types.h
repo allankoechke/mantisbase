@@ -22,7 +22,7 @@ namespace mb {
     class Database;
     class Logger;
     class Router;
-    class Files;
+    class FilesMgr;
 
     using json = nlohmann::json;
 

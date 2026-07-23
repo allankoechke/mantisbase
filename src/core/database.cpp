@@ -21,10 +21,7 @@ namespace mb {
     Database::Database(const MantisBase &app) : m_connPool(nullptr), mbApp(app) {
     }
 
-    Database::~Database() {
-        disconnect();
-        std::cout << "Database Des()" << std::endl;
-    }
+    Database::~Database() { disconnect(); }
 
     bool Database::connect(const std::string &conn_str) {
         // If pool size is invalid, just return

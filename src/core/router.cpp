@@ -419,7 +419,7 @@ namespace mb {
                 return;
             }
 
-            if (const auto path_opt = Files::getFilePath(table_name, file_name);
+            if (const auto path_opt = FilesMgr::getFilePath(table_name, file_name);
                 path_opt.has_value()) {
                 // Return requested file
                 res.setStatus(200);

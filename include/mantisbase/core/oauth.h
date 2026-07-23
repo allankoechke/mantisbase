@@ -5,55 +5,66 @@
 #include <optional>
 #include <nlohmann/json.hpp>
 
+#include "mantisbase/mantisbase.h"
+
 namespace mb {
     using json = nlohmann::json;
 
     class OAuthManager {
+        MantisBase &mApp;
+
     public:
-        static json buildAuthorizeUrl(const std::string &entity_name,
-                                      const std::string &provider_name,
-                                      const std::string &redirect_uri);
+        explicit OAuthManager(MantisBase &app);
 
-        static json handleCallback(const std::string &entity_name,
-                                   const std::string &provider_name,
-                                   const std::string &code,
-                                   const std::string &state);
+        [[nodiscard]] json buildAuthorizeUrl(const std::string &entity_name,
+                                             const std::string &provider_name,
+                                             const std::string &redirect_uri) const;
 
-        static json linkAccount(const std::string &entity_name,
-                               const std::string &user_id,
-                               const std::string &provider_name,
-                               const std::string &code,
-                               const std::string &state);
+        [[nodiscard]] json handleCallback(const std::string &entity_name,
+                                          const std::string &provider_name,
+                                          const std::string &code,
+                                          const std::string &state) const;
 
-        static bool unlinkAccount(const std::string &entity_name,
-                                 const std::string &user_id,
-                                 const std::string &provider_name);
+        [[nodiscard]] json linkAccount(const std::string &entity_name,
+                                       const std::string &user_id,
+                                       const std::string &provider_name,
+                                       const std::string &code,
+                                       const std::string &state) const;
 
-        static json getLinkedAccounts(const std::string &entity_name,
-                                     const std::string &user_id);
+        [[nodiscard]] bool unlinkAccount(const std::string &entity_name,
+                                         const std::string &user_id,
+                                         const std::string &provider_name) const;
 
-        static json getProviders(const std::string &entity_name);
+        [[nodiscard]] json getLinkedAccounts(const std::string &entity_name,
+                                             const std::string &user_id) const;
 
-        static json addProvider(const json &provider_data);
-        static json updateProvider(const std::string &provider_id, const json &updates);
-        static bool removeProvider(const std::string &provider_id);
-        static json listProviders();
+        json getProviders(const std::string &entity_name);
 
-        static json enableProviderForEntity(const std::string &entity_name,
-                                           const std::string &provider_id);
-        static bool disableProviderForEntity(const std::string &entity_name,
-                                            const std::string &provider_id);
+        [[nodiscard]] json addProvider(const json &provider_data) const;
 
-        static std::string getEncryptionKey();
+        [[nodiscard]] json updateProvider(const std::string &provider_id, const json &updates) const;
+
+        [[nodiscard]] bool removeProvider(const std::string &provider_id) const;
+
+        [[nodiscard]] json listProviders() const;
+
+        json enableProviderForEntity(const std::string &entity_name,
+                                     const std::string &provider_id) const;
+
+        bool disableProviderForEntity(const std::string &entity_name,
+                                      const std::string &provider_id) const;
+
+        std::string getEncryptionKey() const;
 
     private:
         static json discoverOIDC(const std::string &discovery_url);
+
         static json exchangeCode(const std::string &token_endpoint,
-                                const std::string &code,
-                                const std::string &redirect_uri,
-                                const std::string &client_id,
-                                const std::string &client_secret,
-                                const std::string &pkce_verifier);
+                                 const std::string &code,
+                                 const std::string &redirect_uri,
+                                 const std::string &client_id,
+                                 const std::string &client_secret,
+                                 const std::string &pkce_verifier);
     };
 } // mb
 

@@ -11,8 +11,7 @@
 #include "mantisbase/mantisbase.h"
 
 namespace mb {
-    LogDatabase::LogDatabase() : m_running(false) {
-    }
+    LogDatabase::LogDatabase() : m_running(false) {}
 
     LogDatabase::~LogDatabase() {
         if (m_running.load()) {

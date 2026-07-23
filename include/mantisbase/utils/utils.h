@@ -19,6 +19,7 @@
 #include <nlohmann/json.hpp>
 
 #include "../core/logger/logger.h"
+#include "../core/types.h"
 
 #ifdef MB_SCRIPTING_ENABLED
 #include "dukglue/dukvalue.h"
@@ -363,7 +364,7 @@ namespace mb {
      * @param index Column index in the row
      * @return String representation of the date
      */
-    std::string dbDateToString(const soci::row &row, int index);
+    std::string dbDateToString(const MantisBase& app, const soci::row &row, int index);
 
     /**
      * @brief Safely convert string to integer with default fallback.

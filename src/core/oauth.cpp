@@ -7,10 +7,12 @@
 #include <drogon/HttpClient.h>
 
 namespace mb {
-    std::string OAuthManager::getEncryptionKey() {
+    OAuthManager::OAuthManager(MantisBase &app): mApp(app) {}
+
+    std::string OAuthManager::getEncryptionKey() const {
         auto key = getEnvOrDefault("MB_OAUTH_ENCRYPTION_KEY", "");
         if (key.empty()) {
-            key = MantisBase::jwtSecretKey();
+            key = mApp.jwtSecretKey();
         }
         if (key.size() < 32) {
             key.resize(32, '0');
@@ -19,9 +21,9 @@ namespace mb {
     }
 
     json OAuthManager::buildAuthorizeUrl(const std::string &entity_name,
-                                          const std::string &provider_name,
-                                          const std::string &redirect_uri) {
-        auto sql = MantisBase::instance().db().session();
+                                         const std::string &provider_name,
+                                         const std::string &redirect_uri) const {
+        const auto& sql = mApp.db().session();
 
         soci::row provider_row;
         *sql << "SELECT p.id, p.client_id, p.client_secret_encrypted, p.discovery_url, p.scopes "
@@ -34,10 +36,10 @@ namespace mb {
             throw std::runtime_error("OAuth provider '" + provider_name + "' is not enabled for entity '" + entity_name + "'");
         }
 
-        std::string provider_id = provider_row.get<std::string>(0);
-        std::string client_id = provider_row.get<std::string>(1);
-        std::string discovery_url = provider_row.get<std::string>(3);
-        std::string scopes = provider_row.get<std::string>(4);
+        auto provider_id = provider_row.get<std::string>(0);
+        auto client_id = provider_row.get<std::string>(1);
+        auto discovery_url = provider_row.get<std::string>(3);
+        auto scopes = provider_row.get<std::string>(4);
 
         auto verifier = generatePKCEVerifier();
         auto challenge = generatePKCEChallenge(verifier);
@@ -93,8 +95,8 @@ namespace mb {
     json OAuthManager::handleCallback(const std::string &entity_name,
                                        const std::string &provider_name,
                                        const std::string &code,
-                                       const std::string &state) {
-        auto sql = MantisBase::instance().db().session();
+                                       const std::string &state) const {
+        const auto& sql = mApp.db().session();
         auto now = getCurrentTimestampUTC();
 
         // Validate state
@@ -107,11 +109,11 @@ namespace mb {
             throw std::runtime_error("Invalid or expired OAuth state");
         }
 
-        std::string state_id = state_row.get<std::string>(0);
-        std::string pkce_verifier = state_row.get<std::string>(1);
-        std::string stored_entity = state_row.get<std::string>(2);
-        std::string provider_id = state_row.get<std::string>(3);
-        std::string redirect_uri = state_row.get<std::string>(4);
+        auto state_id = state_row.get<std::string>(0);
+        auto pkce_verifier = state_row.get<std::string>(1);
+        auto stored_entity = state_row.get<std::string>(2);
+        auto provider_id = state_row.get<std::string>(3);
+        auto redirect_uri = state_row.get<std::string>(4);
 
         if (stored_entity != entity_name) {
             throw std::runtime_error("Entity name mismatch in OAuth state");
@@ -130,9 +132,9 @@ namespace mb {
             throw std::runtime_error("OAuth provider not found");
         }
 
-        std::string client_id = provider_row.get<std::string>(0);
-        std::string client_secret_enc = provider_row.get<std::string>(1);
-        std::string discovery_url = provider_row.get<std::string>(2);
+        auto client_id = provider_row.get<std::string>(0);
+        auto client_secret_enc = provider_row.get<std::string>(1);
+        auto discovery_url = provider_row.get<std::string>(2);
 
         std::string client_secret;
         if (!client_secret_enc.empty()) {
@@ -183,7 +185,7 @@ namespace mb {
             user_id = linked_row.get<std::string>(0);
         } else if (!email.empty()) {
             // Try to find existing user by email
-            const auto entity = MantisBase::instance().entity(entity_name);
+            const auto entity = mApp.entity(entity_name);
             auto opt_user = entity.queryFromCols(email, {"email"});
             if (opt_user.has_value()) {
                 user_id = opt_user.value()["id"].get<std::string>();
@@ -224,7 +226,7 @@ namespace mb {
         auto token = Auth::createToken({{"id", user_id}, {"entity", entity_name}});
 
         // Get user record
-        const auto entity = MantisBase::instance().entity(entity_name);
+        const auto entity = mApp.entity(entity_name);
         auto user_opt = entity.read(user_id);
         json user = user_opt.has_value() ? user_opt.value() : json::object();
         user.erase("password");
@@ -240,15 +242,15 @@ namespace mb {
                                    const std::string &user_id,
                                    const std::string &provider_name,
                                    const std::string &code,
-                                   const std::string &state) {
+                                   const std::string &state) const {
         auto result = handleCallback(entity_name, provider_name, code, state);
         return result;
     }
 
     bool OAuthManager::unlinkAccount(const std::string &entity_name,
                                      const std::string &user_id,
-                                     const std::string &provider_name) {
-        auto sql = MantisBase::instance().db().session();
+                                     const std::string &provider_name) const {
+        const auto& sql = mApp.db().session();
         *sql << "DELETE FROM mb_oauth_accounts "
                 "WHERE entity_name = :entity AND user_id = :uid "
                 "AND provider_id = (SELECT id FROM mb_oauth_providers WHERE name = :name)",
@@ -260,9 +262,9 @@ namespace mb {
     }
 
     json OAuthManager::getLinkedAccounts(const std::string &entity_name,
-                                         const std::string &user_id) {
-        auto sql = MantisBase::instance().db().session();
-        soci::rowset<soci::row> rows = (sql->prepare <<
+                                         const std::string &user_id) const {
+        const auto& sql = mApp.db().session();
+        const soci::rowset<soci::row> rows = (sql->prepare <<
             "SELECT oa.id, p.name, oa.provider_user_id, oa.linked_at "
             "FROM mb_oauth_accounts oa "
             "JOIN mb_oauth_providers p ON p.id = oa.provider_id "
@@ -282,8 +284,8 @@ namespace mb {
     }
 
     json OAuthManager::getProviders(const std::string &entity_name) {
-        auto sql = MantisBase::instance().db().session();
-        soci::rowset<soci::row> rows = (sql->prepare <<
+        const auto& sql = mApp.db().session();
+        const soci::rowset<soci::row> rows = (sql->prepare <<
             "SELECT p.id, p.name, p.scopes, p.is_preset, ec.enabled "
             "FROM mb_oauth_providers p "
             "LEFT JOIN mb_entity_oauth_config ec ON ec.provider_id = p.id AND ec.entity_name = :entity "
@@ -303,12 +305,12 @@ namespace mb {
         return result;
     }
 
-    json OAuthManager::addProvider(const json &provider_data) {
-        auto sql = MantisBase::instance().db().session();
+    json OAuthManager::addProvider(const json &provider_data) const {
+        const auto& sql = mApp.db().session();
         auto id = generateTimeBasedId();
         auto name = provider_data.at("name").get<std::string>();
         auto client_id = provider_data.at("client_id").get<std::string>();
-        auto client_secret = provider_data.at("client_secret").get<std::string>();
+        const auto client_secret = provider_data.at("client_secret").get<std::string>();
         auto discovery_url = provider_data.value("discovery_url", "");
         auto scopes = provider_data.value("scopes", "openid email profile");
 
@@ -331,8 +333,8 @@ namespace mb {
         };
     }
 
-    json OAuthManager::updateProvider(const std::string &provider_id, const json &updates) {
-        auto sql = MantisBase::instance().db().session();
+    json OAuthManager::updateProvider(const std::string &provider_id, const json &updates) const {
+        const auto& sql = mApp.db().session();
 
         if (updates.contains("client_id")) {
             auto val = updates["client_id"].get<std::string>();
@@ -363,8 +365,8 @@ namespace mb {
         return {{"id", provider_id}, {"updated", true}};
     }
 
-    bool OAuthManager::removeProvider(const std::string &provider_id) {
-        auto sql = MantisBase::instance().db().session();
+    bool OAuthManager::removeProvider(const std::string &provider_id) const {
+        const auto& sql = mApp.db().session();
 
         // Only allow removing non-preset providers
         int is_preset = 0;
@@ -382,9 +384,9 @@ namespace mb {
         return affected > 0;
     }
 
-    json OAuthManager::listProviders() {
-        auto sql = MantisBase::instance().db().session();
-        soci::rowset<soci::row> rows = (sql->prepare <<
+    json OAuthManager::listProviders() const {
+        const auto& sql = mApp.db().session();
+        const soci::rowset<soci::row> rows = (sql->prepare <<
             "SELECT id, name, client_id, discovery_url, scopes, is_preset, enabled "
             "FROM mb_oauth_providers");
 
@@ -404,8 +406,8 @@ namespace mb {
     }
 
     json OAuthManager::enableProviderForEntity(const std::string &entity_name,
-                                               const std::string &provider_id) {
-        auto sql = MantisBase::instance().db().session();
+                                               const std::string &provider_id) const {
+        const auto& sql = mApp.db().session();
         auto id = generateTimeBasedId();
 
         // Check if already exists
@@ -428,8 +430,8 @@ namespace mb {
     }
 
     bool OAuthManager::disableProviderForEntity(const std::string &entity_name,
-                                                const std::string &provider_id) {
-        auto sql = MantisBase::instance().db().session();
+                                                const std::string &provider_id) const {
+        const auto& sql = mApp.db().session();
         *sql << "UPDATE mb_entity_oauth_config SET enabled = 0 "
                 "WHERE entity_name = :entity AND provider_id = :pid",
             soci::use(entity_name), soci::use(provider_id);
@@ -440,8 +442,8 @@ namespace mb {
 
     json OAuthManager::discoverOIDC(const std::string &discovery_url) {
         // Use Drogon's HttpClient synchronously
-        auto client = drogon::HttpClient::newHttpClient(discovery_url);
-        auto req = drogon::HttpRequest::newHttpRequest();
+        const auto client = drogon::HttpClient::newHttpClient(discovery_url);
+        const auto req = drogon::HttpRequest::newHttpRequest();
         req->setMethod(drogon::Get);
 
         auto [result, resp] = client->sendRequest(req, 5.0);
@@ -459,13 +461,13 @@ namespace mb {
                                     const std::string &client_id,
                                     const std::string &client_secret,
                                     const std::string &pkce_verifier) {
-        auto client = drogon::HttpClient::newHttpClient(token_endpoint);
-        auto req = drogon::HttpRequest::newHttpRequest();
+        const auto client = drogon::HttpClient::newHttpClient(token_endpoint);
+        const auto req = drogon::HttpRequest::newHttpRequest();
         req->setMethod(drogon::Post);
         req->setContentTypeString("application/x-www-form-urlencoded");
         req->addHeader("Accept", "application/json");
 
-        std::string body = "grant_type=authorization_code"
+        const std::string body = "grant_type=authorization_code"
             "&code=" + code +
             "&redirect_uri=" + redirect_uri +
             "&client_id=" + client_id +

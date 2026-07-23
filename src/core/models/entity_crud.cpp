@@ -318,7 +318,7 @@ namespace mb {
             app().rt().notifyChange();
 
             // Delete files, if any were removed ...
-            Files::removeFiles(name(), files_to_delete);
+            FilesMgr::removeFiles(name(), files_to_delete);
 
             Record new_record = sociRow2Json(r, fields());
 
@@ -378,7 +378,7 @@ namespace mb {
         });
 
         // For each file field, remove it in the filesystem
-        Files::removeFiles(name(), files_in_fields);
+        FilesMgr::removeFiles(name(), files_in_fields);
     }
 
     // --------------------------------------------------------------------------- //

@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include "../utils/utils.h"
+#include "mantisbase/mantisbase.h"
 
 namespace mb
 {
@@ -46,9 +47,13 @@ namespace mb
      * }
      * @endcode
      */
-    class Files
+    class FilesMgr
     {
+        const MantisBase& mApp;
+
     public:
+        explicit FilesMgr(const MantisBase& app);
+
         /**
          * @brief Create a directory for the given entity.
          *
