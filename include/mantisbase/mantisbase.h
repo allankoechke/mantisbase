@@ -15,8 +15,11 @@
 #include <string>
 #include <filesystem>
 #include <chrono>
+#include "export.h"
 #include <argparse/argparse.hpp>
-// #include <dukglue/dukglue.h>
+#ifdef MB_SCRIPTING_ENABLED
+#include <dukglue/dukglue.h>
+#endif
 
 #include "core/types.h"
 #include "core/kv_store.h"
@@ -46,7 +49,7 @@ namespace mb
      * own C++ process, not that you can run several independent instances side
      * by side.
      */
-    class MantisBase
+    class MANTISBASE_API MantisBase
     {
     public:
         ~MantisBase();
@@ -298,7 +301,9 @@ namespace mb
         [[nodiscard]] bool hasEntity(const std::string& entity_name) const;
 
         /// Get the duktape context
-        // [[nodiscard]] duk_context* ctx() const;
+#ifdef MB_SCRIPTING_ENABLED
+        [[nodiscard]] duk_context* ctx() const;
+#endif
 
 
         /**
@@ -426,7 +431,9 @@ namespace mb
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
-        // duk_context* m_dukCtx; // For duktape context
+#ifdef MB_SCRIPTING_ENABLED
+        duk_context* m_dukCtx = nullptr;
+#endif
     };
 }
 
