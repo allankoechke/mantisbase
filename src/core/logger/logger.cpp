@@ -62,11 +62,8 @@ void mb::Logger::initDb(const std::string &data_dir) {
 
 void mb::Logger::logToDatabase(const std::string &level, const std::string &origin, const std::string &message,
                                const std::string &details, const json &data) {
-    // std::cout << "Is DB Initialized? "<< isDbInitialized.load() << std::endl;
     if (isDbInitialized.load()) {
-        // std::cout << "BF DB Instance" << std::endl;
         MantisBase::instance().logs().logsDb().insertLog(level, origin, message, details, data);
-        // std::cout << "AF DB Instance" << std::endl;
     }
 }
 
@@ -108,7 +105,6 @@ void mb::Logger::info(const std::string &origin, const std::string &message, con
     // Call private template method for spdlog console logging
     info_spdlog("{}", formatted_msg);
 
-    // std::cout << "info" << std::endl;
     // Log to database with structured format
     logToDatabase("info", origin, message, details, data);
 }

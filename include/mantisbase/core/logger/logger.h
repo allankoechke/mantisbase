@@ -43,7 +43,6 @@ namespace mb {
 
     public:
         Logger();
-        ~Logger() { std::cout << "Logger Des()" << std::endl; }
 
         inline static std::atomic<bool> isDbInitialized = false;
 
