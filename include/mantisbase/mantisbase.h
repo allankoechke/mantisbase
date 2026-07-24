@@ -69,7 +69,7 @@ namespace mb
          * @return Reference to the created class instance
          * @throws std::runtime_error if an instance has already been created.
          */
-        static MantisBase& create(int argc, char** argv);
+        static std::unique_ptr<MantisBase> create(int argc, char** argv);
 
         /**
          * @brief Convenience function to allow creating class instance given the
@@ -119,7 +119,7 @@ namespace mb
          * @param config JSON Object bearing the cmd args values to be used
          * @return A reference to the created class instance
          */
-        static MantisBase& create(const json& config = json::object());
+        static std::unique_ptr<MantisBase> create(const json& config = json::object());
 
         /**
          * @brief Start the http server and start listening for requests.
@@ -240,7 +240,7 @@ namespace mb
          * @brief Retrieve the JWT secret key.
          * @return JWT Secret value.
          */
-        std::string jwtSecretKey() const;
+        [[nodiscard]] std::string jwtSecretKey() const;
         /**
          * Fetch the application version
          * @return Application version

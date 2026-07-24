@@ -38,7 +38,7 @@ void mb::Logger::setLogLevel(const LogLevel &level) {
 }
 
 mb::Logger::Logger(const MantisBase &app)
-    : m_logsDb(std::make_unique<LogDatabase>()), mApp(app) {
+    : m_logsDb(std::make_unique<LogDatabase>(app)), mApp(app) {
     // Enable Multi Sinks
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_level(spdlog::level::info);
@@ -183,9 +183,9 @@ void mb::Logger::critical(const std::string &origin,
 }
 
 mb::FuncLogger::FuncLogger(std::string msg) : m_msg(std::move(msg)) {
-    LogOrigin::trace("Function Entry", fmt::format("Enter: {}", m_msg));
+    // LogOrigin::trace("Function Entry", fmt::format("Enter: {}", m_msg));
 }
 
 mb::FuncLogger::~FuncLogger() {
-    LogOrigin::trace("Function Exit", fmt::format("Exit:  {}", m_msg));
+    // LogOrigin::trace("Function Exit", fmt::format("Exit:  {}", m_msg));
 }

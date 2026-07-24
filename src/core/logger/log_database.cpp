@@ -11,7 +11,8 @@
 #include "mantisbase/mantisbase.h"
 
 namespace mb {
-    LogDatabase::LogDatabase() : m_running(false) {}
+    LogDatabase::LogDatabase(const MantisBase &app) : m_running(false), mApp(app) {
+    }
 
     LogDatabase::~LogDatabase() {
         if (m_running.load()) {
@@ -22,7 +23,7 @@ namespace mb {
 
     bool LogDatabase::init(const std::string &data_dir) {
         try {
-            m_dataDir = trim(data_dir).empty() ? MantisBase::instance().dataDir() : data_dir;
+            m_dataDir = trim(data_dir).empty() ? mApp.dataDir() : data_dir;
 
             // Create log database path
             auto log_db_path = joinPaths(m_dataDir, "mantis_logs.db").string();
@@ -108,14 +109,14 @@ namespace mb {
             std::stringstream ss;
             ss << std::put_time(&utc, "%Y-%m-%dT%H:%M:%S");
             ss << "." << std::setfill('0') << std::setw(3) << ms.count() << "Z";
-            std::string timestamp = ss.str();
-
-            // Get Unix timestamp for sorting/cleanup
-            auto created_at = std::chrono::duration_cast<std::chrono::seconds>(
-                now.time_since_epoch()).count();
-
 
             {
+                std::string timestamp = ss.str();
+
+                // Get Unix timestamp for sorting/cleanup
+                auto created_at = std::chrono::duration_cast<std::chrono::seconds>(
+                    now.time_since_epoch()).count();
+
                 // Local scope
                 // Serialize data JSON
                 std::string data_str = data.empty() ? "" : data.dump();
@@ -193,7 +194,7 @@ namespace mb {
                     pos += 2;
                 }
                 conditions.push_back(std::string("(message LIKE '%") + escaped +
-                        "%' OR details LIKE '%" + escaped + "%')");
+                                     "%' OR details LIKE '%" + escaped + "%')");
             }
             if (!start_date.empty()) {
                 std::string escaped = start_date;

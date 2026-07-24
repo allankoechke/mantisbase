@@ -46,92 +46,92 @@ namespace mb {
 #endif
     }
 
-    MantisBase &MantisBase::create(const int argc, char **argv) {
-        MantisBase app{};
+    std::unique_ptr<MantisBase> MantisBase::create(const int argc, char **argv) {
+        auto app = std::make_unique<MantisBase>();
         // Initialize the app with passed in args
-        app.init(argc, argv);
+        app->init(argc, argv);
 
         // Return the instance
         return app;
     }
 
-    MantisBase &MantisBase::create(const json &config) {
-        MantisBase app{};
+    std::unique_ptr<MantisBase> MantisBase::create(const json &config) {
+        auto app = std::make_unique<MantisBase>();
 
         // Start from a clean slate: on a create() -> close() -> create() cycle
         // (e.g. across test runs in one process) the arg vector would otherwise
         // accumulate the previous run's arguments.
-        app.m_cmdArgs.clear();
-        app.m_cmdArgs.emplace_back("mantisbase");
+        app->m_cmdArgs.clear();
+        app->m_cmdArgs.emplace_back("mantisbase");
 
         if (config.contains("database") || config.contains("db")) {
-            app.m_cmdArgs.emplace_back("--db");
-            app.m_cmdArgs.push_back(config.contains("db")
+            app->m_cmdArgs.emplace_back("--db");
+            app->m_cmdArgs.push_back(config.contains("db")
                                          ? config.at("db").get<std::string>()
                                          : config.at("database").get<std::string>());
         }
 
         if (config.contains("connection") || config.contains("db_url")) {
-            app.m_cmdArgs.emplace_back("--db_url");
-            app.m_cmdArgs.push_back(config.contains("db_url")
+            app->m_cmdArgs.emplace_back("--db_url");
+            app->m_cmdArgs.push_back(config.contains("db_url")
                                         ? config.at("db_url").get<std::string>()
                                         : config.at("connection").get<std::string>());
         }
 
         if (config.contains("dataDir") || config.contains("data-dir")) {
-            app.m_cmdArgs.emplace_back("--data-dir");
-            app.m_cmdArgs.push_back(config.contains("data-dir")
+            app->m_cmdArgs.emplace_back("--data-dir");
+            app->m_cmdArgs.push_back(config.contains("data-dir")
                                         ? config.at("data-dir").get<std::string>()
                                         : config.at("dataDir").get<std::string>());
         }
 
         if (config.contains("publicDir") || config.contains("public-dir")) {
-            app.m_cmdArgs.emplace_back("--public-dir");
-            app.m_cmdArgs.push_back(config.contains("public-dir")
+            app->m_cmdArgs.emplace_back("--public-dir");
+            app->m_cmdArgs.push_back(config.contains("public-dir")
                                         ? config.at("public-dir").get<std::string>()
                                         : config.at("publicDir").get<std::string>());
         }
 
         if (config.contains("scriptsDir") || config.contains("scripts-dir")) {
-            app.m_cmdArgs.emplace_back("--scripts-dir");
-            app.m_cmdArgs.push_back(config.contains("scripts-dir")
+            app->m_cmdArgs.emplace_back("--scripts-dir");
+            app->m_cmdArgs.push_back(config.contains("scripts-dir")
                                         ? config.at("scripts-dir").get<std::string>()
                                         : config.at("scriptsDir").get<std::string>());
         }
 
         if (config.contains("migrationsDir") || config.contains("migrations-dir")) {
-            app.m_cmdArgs.emplace_back("--migrations-dir");
-            app.m_cmdArgs.push_back(config.contains("migrations-dir")
+            app->m_cmdArgs.emplace_back("--migrations-dir");
+            app->m_cmdArgs.push_back(config.contains("migrations-dir")
                                         ? config.at("migrations-dir").get<std::string>()
                                         : config.at("migrationsDir").get<std::string>());
         }
 
         if (config.contains("dev")) {
-            app.m_cmdArgs.emplace_back("--dev");
+            app->m_cmdArgs.emplace_back("--dev");
         }
 
         if (config.contains("serve")) {
-            app.m_cmdArgs.emplace_back("serve");
+            app->m_cmdArgs.emplace_back("serve");
             const auto &serve = config["serve"];
 
             if (serve.is_object()) {
                 if (serve.contains("host")) {
-                    app.m_cmdArgs.emplace_back("--host");
-                    app.m_cmdArgs.push_back(serve.at("host").get<std::string>());
+                    app->m_cmdArgs.emplace_back("--host");
+                    app->m_cmdArgs.push_back(serve.at("host").get<std::string>());
                 }
 
                 if (serve.contains("port")) {
-                    app.m_cmdArgs.emplace_back("--port");
-                    app.m_cmdArgs.push_back(std::to_string(serve.at("port").get<int>()));
+                    app->m_cmdArgs.emplace_back("--port");
+                    app->m_cmdArgs.push_back(std::to_string(serve.at("port").get<int>()));
                 }
 
                 if (serve.contains("skip-admin-setup") && serve.at("skip-admin-setup").get<bool>()) {
-                    app.m_cmdArgs.emplace_back("--skip-admin-setup");
+                    app->m_cmdArgs.emplace_back("--skip-admin-setup");
                 }
 
                 if (serve.contains("pool-size") || serve.contains("poolSize")) {
-                    app.m_cmdArgs.emplace_back("--pool-size");
-                    app.m_cmdArgs.push_back(std::to_string(serve.contains("pool-size")
+                    app->m_cmdArgs.emplace_back("--pool-size");
+                    app->m_cmdArgs.push_back(std::to_string(serve.contains("pool-size")
                                                                  ? serve.at("pool-size").get<int>()
                                                                  : serve.at("poolSize").get<int>()));
                 }
@@ -139,24 +139,24 @@ namespace mb {
         }
 
         if (config.contains("admins")) {
-            app.m_cmdArgs.emplace_back("admins");
+            app->m_cmdArgs.emplace_back("admins");
             const auto &admins = config["admins"];
 
             if (admins.contains("add")) {
-                app.m_cmdArgs.emplace_back("--add");
+                app->m_cmdArgs.emplace_back("--add");
                 if (admins["add"].is_array()) {
-                    app.m_cmdArgs.push_back(admins["add"].at(0).get<std::string>());
-                    app.m_cmdArgs.push_back(admins["add"].at(1).get<std::string>());
+                    app->m_cmdArgs.push_back(admins["add"].at(0).get<std::string>());
+                    app->m_cmdArgs.push_back(admins["add"].at(1).get<std::string>());
                 } else if (admins["add"].is_string()) {
-                    app.m_cmdArgs.push_back(admins["add"].get<std::string>());
+                    app->m_cmdArgs.push_back(admins["add"].get<std::string>());
                     if (admins.contains("password"))
-                        app.m_cmdArgs.push_back(admins.at("password").get<std::string>());
+                        app->m_cmdArgs.push_back(admins.at("password").get<std::string>());
                 }
             } else if (admins.contains("ls") && admins["ls"].get<bool>()) {
-                app.m_cmdArgs.emplace_back("--ls");
+                app->m_cmdArgs.emplace_back("--ls");
             } else if (admins.contains("rm")) {
-                app.m_cmdArgs.emplace_back("--rm");
-                app.m_cmdArgs.push_back(admins.at("rm").get<std::string>());
+                app->m_cmdArgs.emplace_back("--rm");
+                app->m_cmdArgs.push_back(admins.at("rm").get<std::string>());
             } else {
                 throw std::runtime_error(
                     "MantisBase `admins` command expects `add`, `ls`, or `rm`.");
@@ -164,34 +164,34 @@ namespace mb {
         }
 
         if (config.contains("migrations")) {
-            app.m_cmdArgs.emplace_back("migrations");
+            app->m_cmdArgs.emplace_back("migrations");
             const auto &migrations = config["migrations"];
             if (migrations.contains("up") && migrations["up"].get<bool>())
-                app.m_cmdArgs.emplace_back("--up");
+                app->m_cmdArgs.emplace_back("--up");
             else if (migrations.contains("down") && migrations["down"].get<bool>())
-                app.m_cmdArgs.emplace_back("--down");
+                app->m_cmdArgs.emplace_back("--down");
         }
 
         if (config.contains("schema")) {
-            app.m_cmdArgs.emplace_back("schema");
+            app->m_cmdArgs.emplace_back("schema");
             const auto &schema = config["schema"];
             if (schema.contains("ls") && schema["ls"].get<bool>()) {
-                app.m_cmdArgs.emplace_back("--ls");
+                app->m_cmdArgs.emplace_back("--ls");
             } else if (schema.contains("rm")) {
-                app.m_cmdArgs.emplace_back("--rm");
-                app.m_cmdArgs.push_back(schema.at("rm").get<std::string>());
+                app->m_cmdArgs.emplace_back("--rm");
+                app->m_cmdArgs.push_back(schema.at("rm").get<std::string>());
             } else if (schema.contains("add")) {
-                app.m_cmdArgs.emplace_back("--add");
-                app.m_cmdArgs.push_back(schema.at("add").get<std::string>());
+                app->m_cmdArgs.emplace_back("--add");
+                app->m_cmdArgs.push_back(schema.at("add").get<std::string>());
             } else if (schema.contains("update")) {
-                app.m_cmdArgs.emplace_back("--update");
-                app.m_cmdArgs.push_back(schema.at("update").at("entity").get<std::string>());
-                app.m_cmdArgs.push_back(schema.at("update").at("body").get<std::string>());
+                app->m_cmdArgs.emplace_back("--update");
+                app->m_cmdArgs.push_back(schema.at("update").at("entity").get<std::string>());
+                app->m_cmdArgs.push_back(schema.at("update").at("body").get<std::string>());
             }
         }
 
         // Initialize the app with passed in args
-        app.init();
+        app->init();
 
         // Return the instance
         return app;
