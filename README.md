@@ -7,6 +7,9 @@
   Portable. Embeddable. Built for speed and extensibility.
 </p>
 
+> [!IMPORTANT]
+> **`master` and `v0.4.x` are work-in-progress for v0.4.** APIs, docs, and behavior may change without notice. For the previous stable version, use the [`v0.3.x` branch](https://github.com/allankoechke/mantisbase/tree/v0.3) instead.
+
 ---
 
 ## What is MantisBase?
