@@ -1,24 +1,23 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "../common/test_environment.h"
+#include "../common/test_fixture.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
 #include "../common/test_http_client.h"
 
-class IntegrationCRUDTest : public ::testing::Test {
+class IntegrationCRUDTest : public MbServerFixture {
 protected:
     void SetUp() override {
-        auto& fixture = MbTestEnv::instance();
-        client = std::make_unique<TestHttp::Client>(fixture.client());
-
-        adminToken = TestHelpers::createTestAdminToken(*client);
-
+        MbServerFixture::SetUp();
+        client = std::make_unique<TestHttp::Client>("127.0.0.1", getPort());
+        adminToken = TestHelpers::createTestAdminToken(*client, mantis());
         createTestEntity();
     }
 
     void TearDown() override {
         TestHelpers::cleanupTestEntity(*client, "test_products", adminToken);
         TestHelpers::cleanupTestEntity(*client, "test_users", adminToken);
+        MbServerFixture::TearDown();
     }
 
     void createTestEntity() {
@@ -231,4 +230,123 @@ TEST_F(IntegrationCRUDTest, DeleteRecord) {
 
     auto getRes = client->Get("/api/v1/entities/test_products/" + recordId, headers);
     EXPECT_EQ(getRes->status, 404);
+}
+
+class IntegrationValidationTest : public MbServerFixture {
+protected:
+    void SetUp() override {
+        MbServerFixture::SetUp();
+        client = std::make_unique<TestHttp::Client>("127.0.0.1", getPort());
+        adminToken = TestHelpers::createTestAdminToken(*client, mantis());
+        createSchemas();
+    }
+
+    void TearDown() override {
+        TestHelpers::cleanupTestEntity(*client, "val_products", adminToken);
+        TestHelpers::cleanupTestEntity(*client, "val_users", adminToken);
+        TestHelpers::cleanupTestEntity(*client, "val_orders", adminToken);
+        MbServerFixture::TearDown();
+    }
+
+    void createSchemas() {
+        if (adminToken.empty()) return;
+
+        const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+
+        nlohmann::json products = {
+            {"name", "val_products"},
+            {"type", "base"},
+            {"rules", TestHelpers::publicAccessRules()},
+            {"fields", nlohmann::json::array({
+                {{"name", "name"}, {"type", "string"}, {"required", true}},
+                {{"name", "price"}, {"type", "double"}, {"required", true}}
+            })}
+        };
+        client->Post("/api/v1/schemas", headers, products.dump(), "application/json");
+
+        nlohmann::json users = {
+            {"name", "val_users"},
+            {"type", "auth"},
+            {"rules", TestHelpers::publicAccessRules()},
+            {"fields", nlohmann::json::array({
+                {{"name", "name"}, {"type", "string"}, {"required", true}},
+                {{"name", "email"}, {"type", "string"}, {"required", true},
+                 {"constraints", {{"validator", "@email"}}}},
+                {{"name", "password"}, {"type", "string"}, {"required", true},
+                 {"constraints", {{"validator", "@password"}}}}
+            })}
+        };
+        client->Post("/api/v1/schemas", headers, users.dump(), "application/json");
+
+        nlohmann::json orders = {
+            {"name", "val_orders"},
+            {"type", "base"},
+            {"rules", TestHelpers::publicAccessRules()},
+            {"fields", nlohmann::json::array({
+                {{"name", "label"}, {"type", "string"}, {"required", true}},
+                {{"name", "user_id"}, {"type", "string"},
+                 {"foreign_key", {{"entity", "missing_users"}, {"field", "id"}}}}
+            })}
+        };
+        client->Post("/api/v1/schemas", headers, orders.dump(), "application/json");
+    }
+
+    std::unique_ptr<TestHttp::Client> client;
+    std::string adminToken;
+};
+
+TEST_F(IntegrationValidationTest, RejectsMissingRequiredField) {
+    auto res = client->Post("/api/v1/entities/val_products",
+                            R"({"price": 9.99})", "application/json");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res->status, 400);
+}
+
+TEST_F(IntegrationValidationTest, RejectsInvalidEmailPreset) {
+    nlohmann::json body = {
+        {"name", "Bad User"},
+        {"email", "not-an-email"},
+        {"password", TestConfig::getTestPassword()}
+    };
+    auto res = client->Post("/api/v1/entities/val_users", body.dump(), "application/json");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res->status, 400);
+}
+
+TEST_F(IntegrationValidationTest, RejectsShortPasswordPreset) {
+    nlohmann::json body = {
+        {"name", "Bad User"},
+        {"email", "valid@example.com"},
+        {"password", "short"}
+    };
+    auto res = client->Post("/api/v1/entities/val_users", body.dump(), "application/json");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res->status, 400);
+}
+
+TEST_F(IntegrationValidationTest, RejectsUnknownFieldOnUpdate) {
+    nlohmann::json createBody = {{"name", "Widget"}, {"price", 1.0}};
+    auto createRes = client->Post("/api/v1/entities/val_products",
+                                  createBody.dump(), "application/json");
+    ASSERT_TRUE(createRes);
+    ASSERT_EQ(createRes->status, 201);
+
+    auto createJson = nlohmann::json::parse(createRes->body);
+    const auto id = createJson["data"]["id"].get<std::string>();
+
+    auto updateRes = client->Patch("/api/v1/entities/val_products/" + id,
+                                   TestHttp::Headers{},
+                                   R"({"unknown_field":"x"})", "application/json");
+    ASSERT_TRUE(updateRes);
+    EXPECT_TRUE(updateRes->status == 400 || updateRes->status == 500);
+}
+
+TEST_F(IntegrationValidationTest, RejectsForeignKeyToMissingEntity) {
+    nlohmann::json body = {
+        {"label", "order-1"},
+        {"user_id", "00000000-0000-0000-0000-000000000001"}
+    };
+    auto res = client->Post("/api/v1/entities/val_orders", body.dump(), "application/json");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res->status, 400);
 }

@@ -41,8 +41,7 @@ namespace mb {
             if (normalized == "psql" || normalized == "postgresql" || normalized == "postgres")
                 return "postgresql";
 
-            MantisBase::quit(-1, std::format("Backend Database `{}` is unsupported!", db));
-            return "sqlite3";
+            throw MantisException(500, std::format("Backend Database `{}` is unsupported!", db));
         }
 
         std::string resolveDbUrl(const std::optional<std::string> &cli_url) {
@@ -62,7 +61,7 @@ namespace mb {
                 const auto email = getEnvOrDefault("MB_DEFAULT_ADMIN_EMAIL", "");
                 const auto password = getEnvOrDefault("MB_DEFAULT_ADMIN_PASSWORD", "");
                 if (email.empty() || password.empty()) {
-                    MantisBase::quit(400, "admins --add requires email/password arguments or "
+                    throw MantisException(400, "admins --add requires email/password arguments or "
                               "MB_DEFAULT_ADMIN_EMAIL/MB_DEFAULT_ADMIN_PASSWORD env vars.");
                 }
 
@@ -121,7 +120,7 @@ namespace mb {
         void runMigrationsUp(MantisBase &app) {
             const auto dir = fs::path(app.migrationsDir());
             if (!fs::exists(dir)) {
-                LogOrigin::info("Migrations", fmt::format("No migrations directory at `{}`, nothing to apply.", dir.string()));
+                app.logger().info("Migrations", fmt::format("No migrations directory at `{}`, nothing to apply.", dir.string()));
                 return;
             }
 
@@ -133,12 +132,12 @@ namespace mb {
 
             std::ranges::sort(files);
             if (files.empty()) {
-                LogOrigin::info("Migrations", "No migration JSON files found.");
+                app.logger().info("Migrations", "No migration JSON files found.");
                 return;
             }
 
             for (const auto &file: files) {
-                LogOrigin::info("Migrations", fmt::format("Applying migration `{}`", file.filename().string()));
+                app.logger().info("Migrations", fmt::format("Applying migration `{}`", file.filename().string()));
                 const auto body = loadJsonInput(file.string());
                 auto eSchema = EntitySchema::fromSchema(app, body);
                 if (const auto err = eSchema.validate(); err.has_value())
@@ -149,7 +148,7 @@ namespace mb {
         }
 
         void runMigrationsDown(MantisBase &) {
-            LogOrigin::warn("Migrations", "Migration rollback (`--down`) is not implemented yet.");
+            // app.logger().warn("Migrations", "Migration rollback (`--down`) is not implemented yet.");
         }
 
         int countExclusiveFlags(const std::initializer_list<bool> flags) {
@@ -177,7 +176,7 @@ namespace mb {
             out << dump.dump(2);
             out.close();
 
-            LogOrigin::info("Migrate", fmt::format("Dumped {} entity schemas to `{}`",
+            app.logger().info("Migrate", fmt::format("Dumped {} entity schemas to `{}`",
                             dump.size(), output_path));
         }
 
@@ -219,7 +218,7 @@ namespace mb {
             for (const auto &schema : base_entities) {
                 const auto name = schema.value("name", "");
                 if (EntitySchema::tableExists(app, name)) {
-                    LogOrigin::info("Migrate", fmt::format("Skipping existing entity `{}`", name));
+                    app.logger().info("Migrate", fmt::format("Skipping existing entity `{}`", name));
                     continue;
                 }
 
@@ -228,7 +227,7 @@ namespace mb {
                     throw MantisException(400, std::format("Validation failed for `{}`: {}", name, err.value()));
 
                 EntitySchema::createTable(eSchema);
-                LogOrigin::info("Migrate", fmt::format("Restored entity `{}`", name));
+                app.logger().info("Migrate", fmt::format("Restored entity `{}`", name));
                 ++restored;
             }
 
@@ -236,7 +235,7 @@ namespace mb {
             for (const auto &schema : view_entities) {
                 const auto name = schema.value("name", "");
                 if (EntitySchema::tableExists(app, name)) {
-                    LogOrigin::info("Migrate", fmt::format("Skipping existing entity `{}`", name));
+                    app.logger().info("Migrate", fmt::format("Skipping existing entity `{}`", name));
                     continue;
                 }
 
@@ -245,11 +244,11 @@ namespace mb {
                     throw MantisException(400, std::format("Validation failed for `{}`: {}", name, err.value()));
 
                 EntitySchema::createTable(eSchema);
-                LogOrigin::info("Migrate", fmt::format("Restored view entity `{}`", name));
+                app.logger().info("Migrate", fmt::format("Restored view entity `{}`", name));
                 ++restored;
             }
 
-            LogOrigin::info("Migrate", fmt::format("Restored {} entity schemas from `{}`",
+            app.logger().info("Migrate", fmt::format("Restored {} entity schemas from `{}`",
                             restored, input_path));
         }
     }
@@ -406,8 +405,8 @@ namespace mb {
         const auto migrations_dir = dirFromPath(_migrationsDir);
         setMigrationsDir(migrations_dir.empty() ? dirFromPath("migrations") : migrations_dir);
 
-        Logger::initDb(dataDir());
-        LogOrigin::info("Initialization", fmt::format("Initializing mantisbase v{}", appVersion()));
+        logger().initDb(dataDir());
+        logger().info("Initialization", fmt::format("Initializing mantisbase v{}", appVersion()));
 
         init_units();
 
@@ -426,11 +425,11 @@ namespace mb {
             quit(500, "Database migration failed, exiting!");
         }
         if (!m_database->isConnected()) {
-            LogOrigin::dbCritical("Database Not Opened", "Database was not opened!");
+            logger().critical("Database", "Database Not Opened", "Database was not opened!");
             quit(500, "Database opening failed!");
         }
         if (!m_realtime->init()) {
-            LogOrigin::dbCritical("Database Not Opened", "Realtime Db Mgr failed to instantiate.");
+            logger().critical("Database", "Database Not Opened", "Realtime Db Mgr failed to instantiate.");
             quit(500, "Realtime Db Mgr failed to instantiate.");
         }
         if (!m_router->init()) {
@@ -463,25 +462,25 @@ namespace mb {
                 std::string password = creds.at(1);
 
                 if (const auto val_err = Validators::validatePreset("email", email); val_err.has_value()) {
-                    LogOrigin::authCritical("Email Validation Failed",
+                    logger().critical("Auth", "Email Validation Failed",
                                             fmt::format("Error validating admin email: {}", val_err.value()));
                     quit(-1, "Email validation failed!");
                 }
                 if (const auto val_pswd_err = Validators::validatePreset("password", password);
                     val_pswd_err.has_value()) {
-                    LogOrigin::authCritical("Password Validation Failed",
+                    logger().critical("Auth", "Password Validation Failed",
                                             fmt::format("Error validating password: {}", val_pswd_err.value()));
                     quit(-1, "Password validation failed!");
                 }
 
                 try {
                     const auto admin_user = admin_entity.create({{"email", email}, {"password", password}});
-                    LogOrigin::authInfo("Admin Created", fmt::format(
+                    logger().info("Auth", "Admin Created", fmt::format(
                                             "Admin account created, use '{}' to access the `/mb` dashboard.",
                                             admin_user.at("email").get<std::string>()));
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    LogOrigin::authCritical("Admin Creation Failed",
+                    logger().critical("Auth", "Admin Creation Failed",
                                             fmt::format("Failed to created Admin user: {}", e.what()));
                     quit(500, e.what());
                 }
@@ -501,23 +500,23 @@ namespace mb {
             if (do_rm) {
                 const std::string identifier = admins_command.get<std::string>("--rm");
                 if (identifier.empty()) {
-                    LogOrigin::authCritical("Invalid Admin Identifier", "Invalid admin `email` or `id` provided!");
+                    logger().critical("Auth", "Invalid Admin Identifier", "Invalid admin `email` or `id` provided!");
                     quit(400, "");
                 }
 
                 auto resp = admin_entity.queryFromCols(identifier, {"id", "email"});
                 if (!resp.has_value()) {
-                    LogOrigin::authCritical("Admin Not Found",
+                    logger().critical("Auth", "Admin Not Found",
                                             fmt::format("Admin not found matching id/email on '{}'", identifier));
                     quit(404, "");
                 }
 
                 try {
                     admin_entity.remove(resp.value().at("id").get<std::string>());
-                    LogOrigin::authInfo("Admin Removed", "Admin removed successfully.");
+                    logger().info("Auth", "Admin Removed", "Admin removed successfully.");
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    LogOrigin::authCritical("Admin Removal Failed",
+                    logger().critical("Auth", "Admin Removal Failed",
                                             fmt::format("Failed to remove admin account: {}", e.what()));
                     quit(500, e.what());
                 }
@@ -565,7 +564,7 @@ namespace mb {
                     const auto entity_name = schema_command.get<std::string>("--rm");
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
                     EntitySchema::dropTable(*this, schema_id);
-                    LogOrigin::entitySchemaInfo("Schema Removed",
+                    logger().info("EntitySchema", "Schema Removed",
                                                 fmt::format("Removed schema `{}`", entity_name));
                     quit(0, "");
                 }

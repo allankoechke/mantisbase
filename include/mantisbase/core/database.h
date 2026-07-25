@@ -144,7 +144,7 @@ namespace mb {
          */
         void start_query(std::string const &query) override {
             logger_impl::start_query(query);
-            LogOrigin::dbTrace(fmt::format("$ sql << {}", query));
+            // LogOrigin::dbTrace(fmt::format("$ sql << {}", query));
         }
 
     private:

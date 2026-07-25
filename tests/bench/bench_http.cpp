@@ -3,9 +3,11 @@
 #include <thread>
 #include <atomic>
 #include <filesystem>
+#include <memory>
 
 #include "mantisbase/mantis.h"
 #include "../common/test_config.h"
+#include "../common/test_fixture.h"
 #include "../common/test_http_client.h"
 
 namespace fs = std::filesystem;
@@ -14,33 +16,22 @@ static std::atomic<bool> server_ready{false};
 static std::thread server_thread;
 static int bench_port = 0;
 static fs::path bench_dir;
+static std::unique_ptr<mb::MantisBase> bench_app;
 
 static void startServer() {
     if (server_ready.load()) return;
 
-    bench_port = 7090;
-    bench_dir = fs::temp_directory_path() / "mantisbase_bench" / mb::generateShortId();
-    fs::create_directories(bench_dir);
+    TestFixture::setTestEnvVars();
+    bench_port = TestFixture::allocateEphemeralPort();
+    if (bench_port <= 0) {
+        bench_port = 7090;
+    }
 
-#ifdef _WIN32
-    _putenv_s("MB_DISABLE_RATE_LIMIT", "1");
-    _putenv_s("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "1");
-#else
-    setenv("MB_DISABLE_RATE_LIMIT", "1", 1);
-    setenv("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "1", 1);
-#endif
-
-    mb::json args;
-    args["dev"] = true;
-    args["database"] = "SQLITE";
-    args["dataDir"] = (bench_dir / "data").string();
-    args["publicDir"] = (bench_dir / "www").string();
-    args["serve"] = {{"port", bench_port}, {"host", "0.0.0.0"}};
-
-    mb::MantisBase::create(args);
+    bench_dir = TestFixture::makeTestBaseDir("bench");
+    bench_app = mb::MantisBase::create(TestFixture::buildAppConfig(bench_dir, bench_port));
 
     server_thread = std::thread([]() {
-        mb::MantisBase::instance().run();
+        bench_app->run();
     });
 
     TestHttp::Client cli("127.0.0.1", bench_port);
@@ -64,8 +55,7 @@ static std::string getAdminToken() {
     };
 
     try {
-        auto& app = mb::MantisBase::instance();
-        auto admin_entity = app.entity("mb_admins");
+        auto admin_entity = bench_app->entity("mb_admins");
         auto existing = admin_entity.queryFromCols("benchadmin@test.com", {"id", "email"});
         if (!existing.has_value()) {
             admin_entity.create(admin_data);

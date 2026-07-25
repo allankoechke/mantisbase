@@ -2,18 +2,17 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <filesystem>
-#include "../common/test_environment.h"
+#include "../common/test_fixture.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
 #include "../common/test_http_client.h"
 
-class IntegrationSchemaTest : public ::testing::Test {
+class IntegrationSchemaTest : public MbServerFixture {
 protected:
     void SetUp() override {
-        auto& fixture = MbTestEnv::instance();
-        client = std::make_unique<TestHttp::Client>(fixture.client());
-
-        adminToken = TestHelpers::createTestAdminToken(*client);
+        MbServerFixture::SetUp();
+        client = std::make_unique<TestHttp::Client>("127.0.0.1", getPort());
+        adminToken = TestHelpers::createTestAdminToken(*client, mantis());
         ASSERT_FALSE(adminToken.empty());
     }
 
@@ -22,6 +21,7 @@ protected:
         TestHelpers::cleanupTestEntity(*client, "test_schema_update", adminToken);
         TestHelpers::cleanupTestEntity(*client, "test_schema_delete", adminToken);
         TestHelpers::cleanupTestEntity(*client, "test_schema_rules", adminToken);
+        MbServerFixture::TearDown();
     }
 
     std::unique_ptr<TestHttp::Client> client;
@@ -214,13 +214,12 @@ TEST_F(IntegrationSchemaTest, SchemaWithAccessRules) {
     client->Delete("/api/v1/schemas/test_schema_rules", headers);
 }
 
-class IntegrationMigrateTest : public ::testing::Test {
+class IntegrationMigrateTest : public MbServerFixture {
 protected:
     void SetUp() override {
-        auto& fixture = MbTestEnv::instance();
-        client = std::make_unique<TestHttp::Client>(fixture.client());
-
-        adminToken = TestHelpers::createTestAdminToken(*client);
+        MbServerFixture::SetUp();
+        client = std::make_unique<TestHttp::Client>("127.0.0.1", getPort());
+        adminToken = TestHelpers::createTestAdminToken(*client, mantis());
         ASSERT_FALSE(adminToken.empty());
 
         dumpPath = std::filesystem::temp_directory_path() / "mantisbase_test_migrate_dump.json";
@@ -230,6 +229,7 @@ protected:
         TestHelpers::cleanupTestEntity(*client, "migrate_test_a", adminToken);
         TestHelpers::cleanupTestEntity(*client, "migrate_test_b", adminToken);
         std::filesystem::remove(dumpPath);
+        MbServerFixture::TearDown();
     }
 
     std::unique_ptr<TestHttp::Client> client;
@@ -319,7 +319,7 @@ TEST_F(IntegrationMigrateTest, DumpAndRestoreRoundTrip) {
         const auto &schema = entry["schema"];
         const auto name = schema.value("name", "");
 
-        auto eSchema = mb::EntitySchema::fromSchema(schema);
+        auto eSchema = mb::EntitySchema::fromSchema(mantis(), schema);
         auto err = eSchema.validate();
         ASSERT_FALSE(err.has_value()) << "Validation failed for " << name << ": " << err.value_or("");
 
@@ -343,7 +343,7 @@ TEST_F(IntegrationMigrateTest, DumpAndRestoreRoundTrip) {
         {"title", "test record"},
         {"count", 42}
     };
-    auto insert_res = client->Post("/api/v1/migrate_test_a/records", headers,
+    auto insert_res = client->Post("/api/v1/entities/migrate_test_a", headers,
                                     record.dump(), "application/json");
     ASSERT_TRUE(insert_res != nullptr);
     EXPECT_EQ(insert_res->status, 201);
@@ -365,8 +365,8 @@ TEST_F(IntegrationMigrateTest, RestoreSkipsExistingEntities) {
     EXPECT_EQ(res->status, 201);
 
     // Try to create the same entity again — should fail with 500 (table exists)
-    auto eSchema = mb::EntitySchema::fromSchema(schema_a);
-    EXPECT_TRUE(mb::EntitySchema::tableExists("migrate_test_a"));
+    auto eSchema = mb::EntitySchema::fromSchema(mantis(), schema_a);
+    EXPECT_TRUE(mb::EntitySchema::tableExists(mantis(), "migrate_test_a"));
 
     // Verify the entity is still accessible (wasn't corrupted)
     auto get_res = client->Get("/api/v1/schemas/migrate_test_a", headers);

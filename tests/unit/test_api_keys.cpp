@@ -2,16 +2,10 @@
 #include "mantisbase/core/api_keys.h"
 #include "mantisbase/utils/crypto_utils.h"
 #include "mantisbase/mantisbase.h"
-#include "../common/test_environment.h"
+#include "../common/test_fixture.h"
 #include "../common/test_config.h"
 
-class ApiKeyTestFixture : public ::testing::Test {
-protected:
-    void SetUp() override {
-        app = &mb::MantisBase::instance();
-    }
-
-    mb::MantisBase* app = nullptr;
+class ApiKeyTestFixture : public MbAppFixture {
 };
 
 TEST_F(ApiKeyTestFixture, GenerateApiKey) {
@@ -52,16 +46,16 @@ TEST_F(ApiKeyTestFixture, DifferentKeysDifferentHashes) {
 }
 
 TEST_F(ApiKeyTestFixture, CreateAndLookupApiKey) {
-    auto result = mb::ApiKeyManager::create("mb_admins", "test_user_id", "Test Key");
+    auto &keys = mantis().auth().apiKey();
+    auto result = keys.create("mb_admins", "test_user_id", "Test Key");
 
     EXPECT_TRUE(result.contains("id"));
     EXPECT_TRUE(result.contains("key"));
     EXPECT_TRUE(result["key"].get<std::string>().starts_with("mb_sk_"));
     EXPECT_EQ(result["label"].get<std::string>(), "Test Key");
 
-    // Lookup by hash
     auto key_hash = mb::ApiKeyManager::hashApiKey(result["key"].get<std::string>());
-    auto lookup = mb::ApiKeyManager::lookupByHash(key_hash);
+    auto lookup = keys.lookupByHash(key_hash);
 
     EXPECT_TRUE(lookup.has_value());
     EXPECT_EQ(lookup.value()["user_id"].get<std::string>(), "test_user_id");
@@ -69,20 +63,20 @@ TEST_F(ApiKeyTestFixture, CreateAndLookupApiKey) {
 }
 
 TEST_F(ApiKeyTestFixture, LookupNonExistentKey) {
-    auto result = mb::ApiKeyManager::lookupByHash("nonexistent_hash_value_that_does_not_exist");
-    EXPECT_FALSE(result.has_value());
+    auto lookup = mantis().auth().apiKey().lookupByHash("nonexistent_hash_value_that_does_not_exist");
+    EXPECT_FALSE(lookup.has_value());
 }
 
 TEST_F(ApiKeyTestFixture, CreateListAndRevokeApiKey) {
-    auto created = mb::ApiKeyManager::create("mb_admins", "list_test_user", "List Test Key");
+    auto &keys = mantis().auth().apiKey();
+    auto created = keys.create("mb_admins", "list_test_user", "List Test Key");
     auto key_id = created["id"].get<std::string>();
 
-    // List keys for this user
-    auto keys = mb::ApiKeyManager::list("mb_admins", "list_test_user");
-    EXPECT_GE(keys.size(), 1u);
+    auto key_list = keys.list("mb_admins", "list_test_user");
+    EXPECT_GE(key_list.size(), 1u);
 
     bool found = false;
-    for (const auto& k : keys) {
+    for (const auto &k : key_list) {
         if (k["id"].get<std::string>() == key_id) {
             found = true;
             break;
@@ -90,35 +84,31 @@ TEST_F(ApiKeyTestFixture, CreateListAndRevokeApiKey) {
     }
     EXPECT_TRUE(found);
 
-    // Revoke
-    bool revoked = mb::ApiKeyManager::revoke(key_id, "mb_admins", "list_test_user");
+    bool revoked = keys.revoke(key_id, "mb_admins", "list_test_user");
     EXPECT_TRUE(revoked);
 
-    // Lookup should fail after revocation
     auto key_hash = mb::ApiKeyManager::hashApiKey(created["key"].get<std::string>());
-    auto lookup = mb::ApiKeyManager::lookupByHash(key_hash);
+    auto lookup = keys.lookupByHash(key_hash);
     EXPECT_FALSE(lookup.has_value());
 }
 
 TEST_F(ApiKeyTestFixture, RevokeNonExistentKey) {
-    bool revoked = mb::ApiKeyManager::revoke("nonexistent_id", "mb_admins", "no_user");
+    bool revoked = mantis().auth().apiKey().revoke("nonexistent_id", "mb_admins", "no_user");
     EXPECT_FALSE(revoked);
 }
 
 TEST_F(ApiKeyTestFixture, ShownOnceVerification) {
-    auto result = mb::ApiKeyManager::create("mb_admins", "shown_once_user", "Shown Once Key");
+    auto &keys = mantis().auth().apiKey();
+    auto result = keys.create("mb_admins", "shown_once_user", "Shown Once Key");
 
-    // The raw key is returned only at creation time
     EXPECT_TRUE(result.contains("key"));
     auto raw_key = result["key"].get<std::string>();
     EXPECT_TRUE(raw_key.starts_with("mb_sk_"));
 
-    // Listing keys does NOT return the raw key
-    auto keys = mb::ApiKeyManager::list("mb_admins", "shown_once_user");
-    for (const auto& k : keys) {
+    auto key_list = keys.list("mb_admins", "shown_once_user");
+    for (const auto &k : key_list) {
         EXPECT_FALSE(k.contains("key"));
     }
 
-    // Clean up
-    mb::ApiKeyManager::revoke(result["id"].get<std::string>(), "mb_admins", "shown_once_user");
+    keys.revoke(result["id"].get<std::string>(), "mb_admins", "shown_once_user");
 }

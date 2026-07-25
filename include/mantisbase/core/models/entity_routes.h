@@ -15,7 +15,7 @@ namespace mb {
     HandlerWithContentReaderFn entityPatchHandler();
     HandlerFn entityDeleteHandler();
 
-    void registerAdminEntityRoutes();
+    void registerAdminEntityRoutes(const MantisBase& app);
 }
 
 #endif // MANTISBASE_ENTITY_ROUTES_H

@@ -77,21 +77,21 @@ namespace mb {
     }
 
     void Router::Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
-        LogOrigin::info("Route Created", fmt::format("GET {}", path));
+        logger().info("Route Created", fmt::format("GET {}", path));
         m_routeRegistry.add("GET", path, handler, middlewares);
         registerDrogonHandler("GET", path);
     }
 
     void Router::Post(const std::string &path, const HandlerWithContentReaderFn &handler,
                       const Middlewares &middlewares) {
-        LogOrigin::info("Route Created", fmt::format("POST {}", path));
+        logger().info("Route Created", fmt::format("POST {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         registerDrogonHandlerWithReader("POST", path);
     }
 
     void Router::Post(const std::string &path, const HandlerFn &handler,
                       const Middlewares &middlewares) {
-        LogOrigin::info("Route Created", fmt::format("POST {}", path));
+        logger().info("Route Created", fmt::format("POST {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         registerDrogonHandler("POST", path);
     }
@@ -134,8 +134,8 @@ namespace mb {
                 ](
             const drogon::HttpRequestPtr &req,
             std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-            MantisRequest ma_req{mApp, req};
-            MantisResponse ma_res{};
+            MantisRequest ma_req{mbApp(), req};
+            MantisResponse ma_res{mbApp()};
 
             const auto param_names = req->getRoutingParameters();
 
@@ -179,8 +179,8 @@ namespace mb {
         auto handler = [this, method, path, param_names](
             const drogon::HttpRequestPtr &req,
             std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-            MantisRequest ma_req{mApp, req};
-            MantisResponse ma_res{};
+            MantisRequest ma_req{mbApp(), req};
+            MantisResponse ma_res{mbApp()};
             MantisContentReader ma_cr{ma_req};
 
             // Extract path params

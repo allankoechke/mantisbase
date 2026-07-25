@@ -19,6 +19,7 @@
 #include <nlohmann/json.hpp>
 
 #include "../core/logger/logger.h"
+#include "../core/types.h"
 
 #ifdef MB_SCRIPTING_ENABLED
 #include "dukglue/dukvalue.h"
@@ -359,11 +360,12 @@ namespace mb {
 
     /**
      * @brief Convert database date value from SOCI row to string.
+     * @param db_type database type, ie `sqlite3`
      * @param row SOCI row containing the date value
      * @param index Column index in the row
      * @return String representation of the date
      */
-    std::string dbDateToString(const soci::row &row, int index);
+    std::string dbDateToString(const std::string& db_type, const soci::row &row, int index);
 
     /**
      * @brief Safely convert string to integer with default fallback.

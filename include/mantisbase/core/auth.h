@@ -10,7 +10,10 @@
 
 #include <string>
 #include <wolfssl/wolfio.h>
-#include "../utils/utils.h"
+
+#include "api_keys.h"
+#include "oauth.h"
+#include "../core/types.h"
 
 namespace mb
 {
@@ -34,7 +37,20 @@ namespace mb
      */
     class Auth
     {
+        const MantisBase& mApp;
+        std::unique_ptr<OAuthManager> m_oauth;
+        std::unique_ptr<ApiKeyManager> m_apiKeyManager;
+
     public:
+        /// Create Auth instance given a `const MantisBase&`
+        explicit Auth(const MantisBase& app);
+
+        /// Return a ref to OAuthManger instance
+        [[nodiscard]] OAuthManager& oauth() const;
+
+        /// Return a ref to ApiKeyManager instance
+        [[nodiscard]] ApiKeyManager& apiKey() const;
+
         /**
          * @brief Create JWT token with custom claims.
          * @param claims_params JSON object with claims (must include "id" and "table")
@@ -45,13 +61,13 @@ namespace mb
          * std::string token = Auth::createToken(claims, 3600);
          * @endcode
          */
-        static std::string createToken(const json& claims_params, int timeout = -1);
+        std::string createToken(const json& claims_params, int timeout = -1) const;
 
-        static json verifyToken(const std::string& token);
+        json verifyToken(const std::string& token) const;
 
-        static bool deleteSession(const std::string& session_id);
+        bool deleteSession(const std::string& session_id) const;
 
-        static json refreshSession(const std::string& old_session_id, const std::string& entity_name,
+        json refreshSession(const std::string& old_session_id, const std::string& entity_name,
                                    const std::string& user_id);
     };
 } // mb

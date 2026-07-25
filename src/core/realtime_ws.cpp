@@ -115,7 +115,7 @@ namespace mb {
             return;
         }
 
-        logEntry::info("WebSocket", std::format("New WS connection from {}",
+        m_app.logger().info("WebSocket", std::format("New WS connection from {}",
                        conn->peerAddr().toIpPort()));
 
         auto &wsMgr = m_app.router().sseMgr().wsMgr();
@@ -168,7 +168,7 @@ namespace mb {
     void RealtimeWSController::handleConnectionClosed(
         const drogon::WebSocketConnectionPtr &conn) {
 
-        logEntry::info("WebSocket", "WS connection closed");
+        m_app.logger().info("WebSocket", "WS connection closed");
 
         auto &wsMgr = m_app.router().sseMgr().wsMgr();
         wsMgr.removeConnection(conn);

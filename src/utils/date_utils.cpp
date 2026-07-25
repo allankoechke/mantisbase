@@ -48,9 +48,9 @@ namespace mb
         return t;
     }
 
-    std::string dbDateToString(const soci::row& row, const int index)
+    std::string dbDateToString(const std::string& db_type, const soci::row& row, const int index)
     {
-        if (const std::string& db_type = MantisBase::instance().dbType(); db_type == "sqlite3")
+        if (db_type == "sqlite3")
         {
             // Treat date as a string by default
             return row.get<std::string>(index);

@@ -22,6 +22,7 @@ namespace soci {
 }
 
 namespace mb {
+    class MantisBase;
     using json = nlohmann::json;
 
     /**
@@ -35,7 +36,7 @@ namespace mb {
         /**
          * @brief Construct LogDatabase instance.
          */
-        LogDatabase();
+        explicit LogDatabase(const MantisBase& app);
 
         /**
          * @brief Destructor - stops cleanup thread and closes database.
@@ -109,6 +110,7 @@ namespace mb {
         std::atomic<bool> m_running;
         std::condition_variable m_cv;
         std::mutex m_dbMutexLock;
+        const MantisBase& mApp;
 
         inline static const std::vector<std::string> m_logLevels{ "critical", "warn", "info", "debug", "trace"};
     };

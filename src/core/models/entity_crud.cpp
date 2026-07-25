@@ -14,7 +14,7 @@ namespace mb {
 
     Record Entity::create(const json &record, const json &opts) const {
         // Database session & transaction instance
-        auto sql = app().db().session();
+        const auto &sql = mbApp().db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -79,9 +79,9 @@ namespace mb {
             tr.commit();
 
             // Wake the realtime worker to deliver the change immediately.
-            app().rt().notifyChange();
+            mbApp().rt().notifyChange();
 
-            auto added_row = sociRow2Json(r, fields());
+            auto added_row = sociRow2Json(mbApp().dbType(), r, fields());
 
             // Remove user password from the response
             if (type() == "auth") added_row.erase("password");
@@ -94,7 +94,7 @@ namespace mb {
     }
 
     Records Entity::list(const json &opts) const {
-        const auto sql = MantisBase::instance().db().session();
+        const auto &sql = mbApp().db().session();
         int limit = 50;
         std::string after;
         std::string sort_field = "id";
@@ -119,7 +119,7 @@ namespace mb {
                     sort_field = sort_str;
                 }
                 bool valid = false;
-                for (const auto &f : fields()) {
+                for (const auto &f: fields()) {
                     if (f.contains("name") && f["name"].get<std::string>() == sort_field) {
                         valid = true;
                         break;
@@ -141,14 +141,14 @@ namespace mb {
         }
         query += " ORDER BY " + sort_field + " " + sort_dir + " LIMIT :limit";
 
-        soci::rowset<soci::row> rs = after.empty()
-            ? (sql->prepare << query, soci::use(limit))
-            : (sql->prepare << query, soci::use(after), soci::use(limit));
+        const soci::rowset<soci::row> rs = after.empty()
+                                               ? (sql->prepare << query, soci::use(limit))
+                                               : (sql->prepare << query, soci::use(after), soci::use(limit));
 
         nlohmann::json record_list = nlohmann::json::array();
 
         for (const auto &row: rs) {
-            auto row_json = sociRow2Json(row, fields());
+            auto row_json = sociRow2Json(mbApp().dbType(), row, fields());
             if (type() == "auth") {
                 row_json.erase("password");
             }
@@ -160,7 +160,7 @@ namespace mb {
 
     std::optional<Record> Entity::read(const std::string &id, const json &opts) const {
         // Get a soci::session from the pool
-        const auto sql = app().db().session();
+        const auto sql = mbApp().db().session();
 
         soci::row r; // To hold read data
         *sql << std::format("SELECT * FROM {} WHERE id = :id", sqlIdentifier(name())), soci::use(id), soci::into(r);
@@ -169,7 +169,7 @@ namespace mb {
         if (!sql->got_data()) return std::nullopt; // 404
 
         // Parse returned record to JSON
-        auto record = sociRow2Json(r, fields());
+        auto record = sociRow2Json(mbApp().dbType(), r, fields());
 
         if (opts.contains("keep_passwords") &&
             opts["keep_passwords"].is_boolean() &&
@@ -185,7 +185,7 @@ namespace mb {
 
     Record Entity::update(const std::string &id, const json &data, const json &opts) const {
         // Database session & transaction instance
-        auto sql = app().db().session();
+        auto sql = mbApp().db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -263,7 +263,7 @@ namespace mb {
                 }
 
                 // Parse soci::row to JSON object
-                auto record = sociRow2Json(r, fields());
+                auto record = sociRow2Json(mbApp().dbType(), r, fields());
 
                 // From the record, check for changes in files
                 // Assuming record order is maintained on query ...
@@ -315,12 +315,12 @@ namespace mb {
             tr.commit();
 
             // Wake the realtime worker to deliver the change immediately.
-            app().rt().notifyChange();
+            mbApp().rt().notifyChange();
 
             // Delete files, if any were removed ...
-            Files::removeFiles(name(), files_to_delete);
+            mbApp().files().removeFiles(name(), files_to_delete);
 
-            Record new_record = sociRow2Json(r, fields());
+            Record new_record = sociRow2Json(mbApp().dbType(), r, fields());
 
             // Redact passwords
             if (type() == "auth") new_record.erase("password");
@@ -337,7 +337,7 @@ namespace mb {
         if (type() == "view")
             throw std::invalid_argument("Remove is not implemented for Entity of `view` type!");
 
-        const auto sql = app().db().session();
+        const auto& sql = mbApp().db().session();
         soci::transaction tr(*sql);
 
         // Check if item exists of given id
@@ -354,10 +354,10 @@ namespace mb {
         tr.commit();
 
         // Wake the realtime worker to deliver the change immediately.
-        app().rt().notifyChange();
+        mbApp().rt().notifyChange();
 
         // Parse row to JSON
-        const auto record = sociRow2Json(row, fields());
+        const auto record = sociRow2Json(mbApp().dbType(), row, fields());
 
         // Extract all fields that have file/files as the underlying data
         std::vector<std::string> files_in_fields;
@@ -378,7 +378,7 @@ namespace mb {
         });
 
         // For each file field, remove it in the filesystem
-        Files::removeFiles(name(), files_in_fields);
+        mbApp().files().removeFiles(name(), files_in_fields);
     }
 
     // --------------------------------------------------------------------------- //
@@ -388,7 +388,7 @@ namespace mb {
     int Entity::countRecords() const {
         // TODO add record filtering ...
         try {
-            const auto sql = app().db().session();
+            const auto sql = mbApp().db().session();
             int count = 0;
             *sql << std::format("SELECT COUNT(id) FROM {}", sqlIdentifier(name())), soci::into(count);
             return count;
@@ -399,7 +399,7 @@ namespace mb {
 
     bool Entity::isEmpty() const {
         try {
-            const auto &sql = app().db().session();
+            const auto &sql = mbApp().db().session();
             int dummy = 0;
             soci::indicator ind = soci::i_null;
             *sql << std::format("SELECT 1 FROM {} LIMIT 1", sqlIdentifier(name())),
@@ -412,7 +412,7 @@ namespace mb {
 
     std::optional<json> Entity::queryFromCols(const std::string &value, const std::vector<std::string> &columns) const {
         // Get a session object
-        const auto sql = app().db().session();
+        const auto sql = mbApp().db().session();
 
         // Validate all column names against entity schema
         std::vector<std::string> valid_columns;
@@ -420,7 +420,7 @@ namespace mb {
             if (hasField(col_name).has_value()) {
                 valid_columns.push_back(col_name);
             } else {
-                LogOrigin::entityWarn("Invalid Column",
+                mbApp().logger().warn("Entity", "Invalid Column",
                                       fmt::format("Invalid column name '{}' in queryFromCols for entity '{}'", col_name,
                                                   name()));
             }
@@ -447,7 +447,7 @@ namespace mb {
         *sql << query, soci::use(bind_values), soci::into(r);
 
         if (sql->got_data())
-            return sociRow2Json(r, fields());
+            return sociRow2Json(mbApp().dbType(), r, fields());
 
         return std::nullopt;
     }
@@ -455,12 +455,12 @@ namespace mb {
     bool Entity::recordExists(const std::string &id) const {
         try {
             std::string _nid;
-            const auto sql = app().db().session();
+            const auto sql = mbApp().db().session();
             *sql << std::format("SELECT id FROM {} WHERE id = :id LIMIT 1", sqlIdentifier(name())),
                     soci::use(id), soci::into(_nid);
             return sql->got_data();
         } catch (soci::soci_error &e) {
-            LogOrigin::entityTrace("Record Exists Error", e.what());
+            mbApp().logger().trace("Entity", "Record Exists Error", e.what());
             return false;
         }
     }

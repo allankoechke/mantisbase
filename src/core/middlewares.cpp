@@ -23,7 +23,7 @@ namespace mb {
                                           const std::string &trace_msg) {
             TRACE_FUNC(trace_msg);
             try {
-                const auto entity = req.mApp().entity(entity_name);
+                const auto entity = req.mbApp().entity(entity_name);
                 const auto &auth = req.getOr<json>("auth", json::object());
                 auto method = req.getMethod();
 
@@ -50,12 +50,12 @@ namespace mb {
                                                   : entity.deleteRule();
 
                 if (rule.mode() == "public") {
-                    LogOrigin::authTrace("Public Access", "Public access, no auth required!");
+                    req.mbApp().logger().trace("Auth", "Public Access", "Public access, no auth required!");
                     return HandlerResponse::Unhandled;
                 }
 
                 if (rule.mode().empty()) {
-                    LogOrigin::authTrace("Admin Access Required", "Restricted access, admin auth required!");
+                    req.mbApp().logger().trace("Auth", "Admin Access Required", "Restricted access, admin auth required!");
                     const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
                         res.sendJSON(403, {
@@ -90,7 +90,7 @@ namespace mb {
                 }
 
                 if (rule.mode() == "auth" || (auth["entity"].is_string() && auth["entity"].get<std::string>() == "mb_admins")) {
-                    LogOrigin::authTrace("User/Admin Access Required", "Restricted access, admin/user auth required!");
+                    req.mbApp().logger().trace("Auth", "User/Admin Access Required", "Restricted access, admin/user auth required!");
                     const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
                         res.sendJSON(403, {
@@ -125,7 +125,7 @@ namespace mb {
                 }
 
                 if (rule.mode() == "custom") {
-                    LogOrigin::authTrace("Custom Expression Access", fmt::format("Restricted access, custom expression `{}` to be evaluated", rule.expr()));
+                    req.mbApp().logger().trace("Auth", "Custom Expression Access", fmt::format("Restricted access, custom expression `{}` to be evaluated", rule.expr()));
                     const std::string expr = rule.expr();
                     json vars = json::object();
                     vars["auth"] = auth;
@@ -191,8 +191,8 @@ namespace mb {
 
                     if (token.starts_with("mb_sk_")) {
                         // API key authentication
-                        auto key_hash = ApiKeyManager::hashApiKey(token);
-                        auto key_info = ApiKeyManager::lookupByHash(key_hash);
+                        const auto key_hash = ApiKeyManager::hashApiKey(token);
+                        auto key_info = req.mbApp().auth().apiKey().lookupByHash(key_hash);
 
                         if (key_info.has_value()) {
                             auto &info = key_info.value();
@@ -205,7 +205,7 @@ namespace mb {
                             try {
                                 auto entity_name = info["entity_name"].get<std::string>();
                                 auto user_id = info["user_id"].get<std::string>();
-                                const auto user_entity = MantisBase::instance().entity(entity_name);
+                                const auto user_entity = req.mbApp().entity(entity_name);
                                 if (auto user = user_entity.read(user_id); user.has_value()) {
                                     auto u = user.value();
                                     u.erase("password");
@@ -250,7 +250,7 @@ namespace mb {
                 const auto token = auth.at("token").get<std::string>();
 
                 // If token validation worked, lets get data from database
-                const json resp = Auth::verifyToken(token);
+                const json resp = req.mbApp().auth().verifyToken(token);
                 req.set("verification", resp);
 
                 // Update context data and exit from middleware if not verified
@@ -274,7 +274,7 @@ namespace mb {
                 // logEntry::trace("Authenticated on entity {} as user with id {}", user_table, user_id);
 
                 try {
-                    const auto user_entity = req.mApp().entity(user_table);
+                    const auto user_entity = req.mbApp().entity(user_table);
                     if (auto user = user_entity.read(user_id); user.has_value()) {
                         auth["user"] = user.value();
                     }
@@ -305,11 +305,11 @@ namespace mb {
                                                   : throw MantisException(400, "Invalid entity name/id"));
 
                 if (!schema_id_or_name.starts_with("mbt_") &&
-                    req.mApp().hasEntity(schema_id_or_name)) {
+                    req.mbApp().hasEntity(schema_id_or_name)) {
                     return HandlerResponse::Unhandled;
                 }
 
-                EntitySchema::getTable(req.mApp(), schema_id);
+                EntitySchema::getTable(req.mbApp(), schema_id);
                 return HandlerResponse::Unhandled;
             } catch (const MantisException &e) {
                 if (e.code() == 404 || e.code() == 400) {
@@ -337,12 +337,12 @@ namespace mb {
                 return HandlerResponse::Handled;
             }
 
-            if (!req.mApp().hasEntity(entity_name)) {
+            if (!req.mbApp().hasEntity(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
             }
 
-            const auto entity = req.mApp().entity(entity_name);
+            const auto entity = req.mbApp().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi() || entity.type() != "auth") {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
@@ -362,12 +362,12 @@ namespace mb {
                 return HandlerResponse::Handled;
             }
 
-            if (!req.mApp().hasEntity(entity_name)) {
+            if (!req.mbApp().hasEntity(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
             }
 
-            const auto entity = req.mApp().entity(entity_name);
+            const auto entity = req.mbApp().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi()) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
                 return HandlerResponse::Handled;
@@ -382,7 +382,7 @@ namespace mb {
         return [msg](MantisRequest &req, MantisResponse &res) {
             TRACE_FUNC(msg);
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
-            const auto entity = req.mApp().entity(entity_name);
+            const auto entity = req.mbApp().entity(entity_name);
             if (entity.type() == "view") {
                 res.sendJSON(405, {
                     {"status", 405},
@@ -496,7 +496,7 @@ namespace mb {
                              });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {
-                LogOrigin::authCritical("Admin Authentication Error", fmt::format("Error authenticating as admin: {}", e.what()));
+                req.mbApp().logger().critical("Auth", "Admin Authentication Error", fmt::format("Error authenticating as admin: {}", e.what()));
                 // Send auth error
                 res.sendJSON(500, {
                                  {"data", json::object()},
@@ -589,7 +589,7 @@ namespace mb {
                 if (identifier.empty()) {
                     // If we can't identify the client, allow the request
                     // (could also deny, but allowing is safer for legitimate users)
-                    LogOrigin::warn("Rate Limit Client Unknown", "Rate limit: Unable to identify client, allowing request");
+                    req.mbApp().logger().warn("Rate Limit Client Unknown", "Rate limit: Unable to identify client, allowing request");
                     return HandlerResponse::Unhandled;
                 }
                 
@@ -653,7 +653,7 @@ namespace mb {
                         )}
                     });
                     
-                    LogOrigin::warn("Rate Limit Exceeded", fmt::format("Rate limit exceeded for identifier: {} ({} requests in {}s window)",
+                    req.mbApp().logger().warn("Rate Limit Exceeded", fmt::format("Rate limit exceeded for identifier: {} ({} requests in {}s window)",
                                 identifier, entry.requests.size(), window_seconds));
                     
                     return HandlerResponse::Handled;
@@ -685,7 +685,7 @@ namespace mb {
                 return HandlerResponse::Unhandled;
                 
             } catch (const std::exception &e) {
-                LogOrigin::critical("Rate Limit Middleware Error", fmt::format("Rate limit middleware error: {}", e.what()));
+                req.mbApp().logger().critical("Rate Limit Middleware Error", fmt::format("Rate limit middleware error: {}", e.what()));
                 // On error, allow the request to proceed (fail open)
                 return HandlerResponse::Unhandled;
             }

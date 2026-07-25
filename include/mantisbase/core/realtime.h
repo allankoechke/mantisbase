@@ -49,7 +49,7 @@ namespace mb {
      * Initializes DB-specific hooks (triggers for PostgreSQL, polling for SQLite)
      * and runs a worker that invokes the registered callback with change events.
      */
-    class RealtimeDB {
+    class RealtimeDB: public IMantisBase {
     public:
         /** @param app Owning application (used for db access/config). Stored by reference. */
         explicit RealtimeDB(const MantisBase &app);
@@ -88,12 +88,11 @@ namespace mb {
     private:
 #if MB_HAS_POSTGRESQL
         // Create the notification trigger function
-        static void createNotifyFunction(soci::session &sql);
+        static void createNotifyFunction(const MantisBase& app, soci::session &sql);
 #endif
 
         static std::string buildTriggerObject(const Entity &entity, const std::string &action /*"NEW" or "OLD"*/);
 
-        const MantisBase &mApp;
         std::unique_ptr<RtDbWorker> m_rtDbWorker;
     };
 

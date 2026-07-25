@@ -17,6 +17,8 @@
 #include <chrono>
 #include "export.h"
 #include <argparse/argparse.hpp>
+
+#include "core/auth.h"
 #ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
 #endif
@@ -61,25 +63,15 @@ namespace mb
         MantisBase& operator=(MantisBase&&) = delete;
 
         /**
-         * @brief Retrieve the existing application instance.
-         * @return A reference to the single, already-created application instance.
-         * @throws std::runtime_error if create() has not been called yet.
-         */
-        static MantisBase& instance();
-
-        /**
          * @brief Create class instance given cmd args passed in.
          * @see parseArgs() for expected cmd args to be passed in.
-         *
-         * @note Only one instance may exist per process. Call this once at
-         *       startup and use instance() thereafter.
          *
          * @param argc Number of cmd args
          * @param argv Char array list
          * @return Reference to the created class instance
          * @throws std::runtime_error if an instance has already been created.
          */
-        static MantisBase& create(int argc, char** argv);
+        static std::unique_ptr<MantisBase> create(int argc, char** argv);
 
         /**
          * @brief Convenience function to allow creating class instance given the
@@ -113,9 +105,6 @@ namespace mb
          * @note `admins` subcommand expects a subcommand with either the `add` or `rm`.
          * @note `serve` command can have an empty json object and the app will configure with defaults.
          *
-         * @note Only one instance may exist per process; call this once during
-         *       startup and use instance() thereafter.
-         *
          * @code
          * // Defaults only:
          * auto& app = MantisBase::create(json::object());
@@ -127,15 +116,12 @@ namespace mb
          * cfg["dev"] = true;
          * cfg["serve"] = json::object();
          * auto& app = MantisBase::create(cfg);
-         * // ...elsewhere in the process, retrieve the same instance:
-         * auto& same = MantisBase::instance();
          * @endcode
          *
          * @param config JSON Object bearing the cmd args values to be used
          * @return A reference to the created class instance
-         * @throws std::runtime_error if an instance has already been created.
          */
-        static MantisBase& create(const json& config = json::object());
+        static std::unique_ptr<MantisBase> create(const json& config = json::object());
 
         /**
          * @brief Start the http server and start listening for requests.
@@ -159,7 +145,7 @@ namespace mb
          * @param reason User-friendly reason for the exit.
          * @return `exitCode` value.
          */
-        static int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
+        int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
 
         /**
          * @brief Retrieve HTTP Listening port.
@@ -256,7 +242,7 @@ namespace mb
          * @brief Retrieve the JWT secret key.
          * @return JWT Secret value.
          */
-        static std::string jwtSecretKey();
+        [[nodiscard]] std::string jwtSecretKey() const;
         /**
          * Fetch the application version
          * @return Application version
@@ -281,6 +267,12 @@ namespace mb
         [[nodiscard]] Logger& logs() const;
         /// Get the realtime unit (SQLite/PostgreSQL change detection for SSE /api/v1/realtime).
         [[nodiscard]] RealtimeDB& rt() const;
+        /// Get the FilesMgr instance
+        [[nodiscard]] FilesMgr& files() const;
+        /// Get Logger instance
+        [[nodiscard]] Logger& logger() const;
+        /// Get Auth instance
+        [[nodiscard]] Auth& auth() const;
 
         /**
          * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
@@ -332,13 +324,6 @@ namespace mb
          * @brief Run initialization actions for Mantis, ensuring all objects are initialized properly before use.
          */
         void init(int argc = 0, char* argv[] = {});
-
-        /**
-         * Creates static instance if not created yet and returns it.
-         *
-         * @return instance of the MantisApp class
-         */
-        static MantisBase& getInstanceImpl();
 
         /**
          * @brief Set the database pool size value.
@@ -427,7 +412,9 @@ namespace mb
 
         std::unique_ptr<Logger> m_logger;
         std::unique_ptr<Database> m_database;
+        std::unique_ptr<FilesMgr> m_files;
         std::unique_ptr<RealtimeDB> m_realtime;
+        std::unique_ptr<Auth> m_auth;
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;

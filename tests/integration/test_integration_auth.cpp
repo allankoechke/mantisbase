@@ -1,23 +1,22 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "../common/test_environment.h"
+#include "../common/test_fixture.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
 #include "../common/test_http_client.h"
 
-class IntegrationAuthTest : public ::testing::Test {
+class IntegrationAuthTest : public MbServerFixture {
 protected:
     void SetUp() override {
-        auto& fixture = MbTestEnv::instance();
-        client = std::make_unique<TestHttp::Client>(fixture.client());
-
-        adminToken = TestHelpers::createTestAdminToken(*client);
-
+        MbServerFixture::SetUp();
+        client = std::make_unique<TestHttp::Client>("127.0.0.1", getPort());
+        adminToken = TestHelpers::createTestAdminToken(*client, mantis());
         createUserEntity();
     }
 
     void TearDown() override {
         TestHelpers::cleanupTestEntity(*client, "test_users", adminToken);
+        MbServerFixture::TearDown();
     }
 
     void createUserEntity() {
@@ -170,7 +169,7 @@ TEST_F(IntegrationAuthTest, RefreshTokenInvalid) {
     auto res = client->Post("/api/v1/auth/test_users/refresh", headers, "", "application/json");
 
     ASSERT_TRUE(res != nullptr);
-    EXPECT_EQ(res->status, 200);
+    EXPECT_EQ(res->status, 403);
 }
 
 TEST_F(IntegrationAuthTest, Logout) {

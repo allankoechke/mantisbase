@@ -12,13 +12,14 @@
 
 namespace mb {
     SSEMgr::SSEMgr(const MantisBase &app)
-        : m_wsMgr(std::make_unique<WSMgr>(app)), m_app(app) {
+        : IMantisBase(app),
+          m_wsMgr(std::make_unique<WSMgr>(app)) {
     }
 
     SSEMgr::~SSEMgr() { stop(); }
 
     void SSEMgr::createRoutes() {
-        auto &router = MantisBase::instance().router();
+        auto &router = mbApp().router();
 
         // SSE GET endpoint — registers directly with Drogon for async streaming
         auto getMiddlewares = std::vector<MiddlewareFn>{
@@ -44,11 +45,11 @@ namespace mb {
                 }
 
 
-                MantisRequest ma_req{this->m_app, req};
-                MantisResponse ma_res{};
+                MantisRequest ma_req{mbApp(), req};
+                MantisResponse ma_res{mbApp()};
 
                 // Run global pre-routing middlewares
-                auto &preMiddlewares = MantisBase::instance().router().preRoutingMiddlewares();
+                auto &preMiddlewares = mbApp().router().preRoutingMiddlewares();
                 for (const auto &mw: preMiddlewares) {
                     if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
                         callback(ma_res.drogonResponse());
@@ -108,6 +109,9 @@ namespace mb {
                         updateAuthTokenForSSE()
                     }
         );
+
+        RealtimeWSController::initPathRouting();
+        drogon::app().registerController(std::make_shared<RealtimeWSController>(mbApp()));
     }
 
     std::string SSEMgr::createSession(const std::set<std::string> &initial_topics,
@@ -118,8 +122,8 @@ namespace mb {
         auto session = std::make_shared<SSESession>(client_id, initial_topics, std::move(stream));
         m_sessions[client_id] = session;
 
-        logEntry::info("SSE Manager",
-                       std::format("New SSE session: {} (Total: {})", client_id, m_sessions.size()));
+        logger().info("SSE Manager",
+                      std::format("New SSE session: {} (Total: {})", client_id, m_sessions.size()));
 
         return client_id;
     }
@@ -139,9 +143,9 @@ namespace mb {
             it->second->close();
             m_sessions.erase(it);
 
-            logEntry::info("SSE Manager",
-                           std::format("Removed SSE session: {} (Remaining: {})",
-                                       client_id, m_sessions.size()));
+            logger().info("SSE Manager",
+                          std::format("Removed SSE session: {} (Remaining: {})",
+                                      client_id, m_sessions.size()));
         }
     }
 
@@ -194,7 +198,7 @@ namespace mb {
                 m_wsMgr->broadcastChange(change_event);
             }
         } catch (const std::exception &e) {
-            logEntry::info("SSE Manager", "Broadcasting message failed!", e.what());
+            logger().info("SSE Manager", "Broadcasting message failed!", e.what());
         }
     }
 
@@ -208,7 +212,7 @@ namespace mb {
     }
 
     void SSEMgr::start() {
-        m_app.rt().runWorker([this](const json &items) {
+        mbApp().rt().runWorker([this](const json &items) {
             for (const auto &data_item: items) broadcastChange(data_item);
         });
 
@@ -225,7 +229,7 @@ namespace mb {
     }
 
     void SSEMgr::stop() {
-        m_app.rt().stopWorker();
+        mbApp().rt().stopWorker();
 
         m_running.store(false);
         m_cv.notify_all();
@@ -244,7 +248,7 @@ namespace mb {
             auto auth = req.getOr<json>("auth", json::object());
             auto verification = req.getOr<json>("verification", json::object());
 
-            auto &sse_mgr = req.mApp().router().sseMgr();
+            auto &sse_mgr = req.mbApp().router().sseMgr();
 
             std::set<std::string> new_topics;
             for (const auto &topic: topics) {
@@ -373,7 +377,7 @@ namespace mb {
                     auto entity_name = array.at(0);
                     auto record_id = array.size() > 1 && array.at(1) != "*" ? array.at(1) : "";
 
-                    if (!MantisBase::instance().hasEntity(entity_name)) {
+                    if (!req.mbApp().hasEntity(entity_name)) {
                         res.sendJSON(400, {
                                          {"error", "Invalid topic name, expected valid entity name."},
                                          {"data", json::object()},
@@ -413,7 +417,7 @@ namespace mb {
                 auto entity_name = topic["entity"].get<std::string>();
                 auto record_id = topic["id"].get<std::string>();
 
-                auto entity = MantisBase::instance().entity(entity_name);
+                auto entity = req.mbApp().entity(entity_name);
 
                 auto rule = record_id.empty() ? entity.listRule() : entity.getRule();
 
@@ -578,8 +582,8 @@ namespace mb {
         }
 
         for (const auto &sessionId: stale_sessions) {
-            logEntry::warn("SSE Manager",
-                           std::format("Removing stale session: {}", sessionId));
+            logger().warn("SSE Manager",
+                          std::format("Removing stale session: {}", sessionId));
 
             if (auto it = m_sessions.find(sessionId); it != m_sessions.end()) {
                 it->second->close();
@@ -588,9 +592,9 @@ namespace mb {
         }
 
         if (!stale_sessions.empty()) {
-            logEntry::info("SSE Manager",
-                           std::format("Cleaned up {} stale sessions (Active: {})",
-                                       stale_sessions.size(), m_sessions.size()));
+            logger().info("SSE Manager",
+                          std::format("Cleaned up {} stale sessions (Active: {})",
+                                      stale_sessions.size(), m_sessions.size()));
         }
     }
 }

@@ -23,7 +23,7 @@ namespace mb
         }
         catch (const std::exception& e)
         {
-            LogOrigin::critical("Route Setup Error", fmt::format("Error setting up settings routes: {}", e.what()));
+            mApp.logger().critical("Route Setup Error", fmt::format("Error setting up settings routes: {}", e.what()));
             return false;
         }
 
@@ -43,7 +43,7 @@ namespace mb
         {
             // TODO redact any sensitive values ...
             m_configs = settings;
-            LogOrigin::trace("Config Loaded", fmt::format("Config Values: {}", m_configs.dump()));
+            mApp.logger().trace("Config Loaded", fmt::format("Config Values: {}", m_configs.dump()));
         }
         // Create base data to config settings
         else
@@ -75,7 +75,7 @@ namespace mb
     HandlerResponse KeyValStore::hasAccess(MantisRequest& req, MantisResponse& res) const
     {
         // Get the auth var from the context, resort to empty object if it's not set.
-        auto& auth = req.getOr<json>("auth", json::object());
+        const auto& auth = req.getOr<json>("auth", json::object());
 
         // Ensure auth object is present in the request's context
         if (auth.empty())
@@ -105,7 +105,7 @@ namespace mb
         const auto& token = auth.at("token").get<std::string>();
 
         // Expand logged user if token is present
-        const auto resp = Auth::verifyToken(token);
+        const auto resp = req.mbApp().auth().verifyToken(token);
         if (!resp.value("verified", false) || !resp.value("error", "").empty())
         {
             json response;
