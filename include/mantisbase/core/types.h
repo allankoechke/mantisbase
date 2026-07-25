@@ -43,16 +43,27 @@ namespace mb {
     using Path = std::string;
     using RouteKey = std::pair<Method, Path>;
 
+    /**
+     * @brief Non-owning access to the active @ref MantisBase from DI-aware types.
+     *
+     * `Entity`, `Router`, `MantisRequest`, `ApiKeyManager`, `OAuthManager`, and
+     * other framework types inherit this mixin so handlers and services can call
+     * `mbApp()` instead of a removed global singleton.
+     *
+     * @code
+     * router.Get("/api/v1/stats", [](MantisRequest& req, MantisResponse& res) {
+     *     auto count = req.mbApp().entity("posts").countRecords();
+     *     res.sendJSON(200, {{"posts", count}});
+     * });
+     * @endcode
+     */
     class IMantisBase {
-        /// Non-owning pointer to the owning application, set from the constructor
-        /// reference. A raw pointer (rather than a reference) keeps Entity
-        /// copy/move-assignable, which the router's entity cache relies on; it is
-        /// never null after construction.
         const MantisBase& m_app;
 
     public:
         explicit IMantisBase(const MantisBase& app);
 
+        /** @brief Application that owns this service or request context. */
         [[nodiscard]] const MantisBase &mbApp() const;
 
         [[nodiscard]] const Logger& logger() const;

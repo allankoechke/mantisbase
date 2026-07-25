@@ -24,15 +24,20 @@ namespace mb
      * used for authentication and authorization.
      *
      * @code
-     * // Create token for user
-     * json claims = {{"id", "user123"}, {"table", "users"}};
-     * std::string token = Auth::createToken(claims, 3600); // 1 hour
+     * auto app = MantisBase::create();
+     * auto& auth = app->auth();
      *
-     * // Verify token
-     * json result = Auth::verifyToken(token);
+     * json claims = {{"id", "user123"}, {"table", "users"}};
+     * std::string token = auth.createToken(claims, 3600); // 1 hour
+     *
+     * json result = auth.verifyToken(token);
      * if (result["verified"].get<bool>()) {
      *     std::string userId = result["id"];
      * }
+     *
+     * // API keys and OAuth live on the same Auth instance:
+     * auth.apiKey().create("users", "user123", "Mobile app");
+     * auth.oauth().buildAuthorizeUrl("users", "google", redirect_uri);
      * @endcode
      */
     class Auth
@@ -57,8 +62,8 @@ namespace mb
          * @param timeout Token expiration in seconds (-1 for default, typically 1 hour)
          * @return JWT token string
          * @code
-         * json claims = {{"id", "user123"}, {"table", "users"}};
-         * std::string token = Auth::createToken(claims, 3600);
+         * std::string token = app.auth().createToken(
+         *     {{"id", "user123"}, {"table", "users"}}, 3600);
          * @endcode
          */
         std::string createToken(const json& claims_params, int timeout = -1) const;

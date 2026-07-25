@@ -17,7 +17,7 @@ MantisBase is a C++ library that provides a complete backend solution. Create da
 
 **Key Features:**
 - Auto-generated REST APIs for all your data
-- Built-in JWT authentication
+- Built-in JWT authentication, API keys, and OAuth
 - Access control with flexible rules
 - Admin dashboard for data management
 - File upload and serving
@@ -194,7 +194,7 @@ curl -H "Authorization: Bearer <token>" \
   http://localhost:7070/api/v1/entities/posts
 ```
 
-See [Authentication API](02.auth.md) for all auth endpoints.
+You can also create **API keys** (`mb_sk_...`) under `/api/v1/auth/<entity>/api-keys` and send them with the same `Authorization: Bearer` header. See [Authentication API](02.auth.md) for API keys and OAuth login flows.
 
 ---
 
@@ -265,6 +265,8 @@ Auth-type entities expose login under `/api/v1/auth/<entity>/`:
 - `POST /api/v1/auth/<entity>/login` - User login
 - `POST /api/v1/auth/<entity>/refresh` - Refresh token
 - `POST /api/v1/auth/<entity>/logout` - Logout
+- `GET|POST /api/v1/auth/<entity>/api-keys` - User API keys
+- `GET /api/v1/auth/<entity>/oauth/...` - OAuth authorize, callback, link, accounts
 
 ### Admin Endpoints (`/api/v1/sys/admins/`)
 
@@ -274,6 +276,9 @@ Auth-type entities expose login under `/api/v1/auth/<entity>/`:
 - `POST /api/v1/sys/admins/setup` - Create initial admin
 - `GET|POST /api/v1/sys/admins` - List or create admin accounts
 - `GET|PATCH|DELETE /api/v1/sys/admins/:id` - Manage admin account
+- `GET|POST /api/v1/sys/api-keys` - Admin API keys
+- `POST|GET|PATCH|DELETE /api/v1/sys/oauth/providers` - OAuth provider registry
+- `POST|DELETE /api/v1/sys/oauth/entity-config` - Enable OAuth per entity
 
 ### Schema Management (Admin Only)
 
@@ -335,8 +340,8 @@ Now that you have MantisBase running:
 2. **Read the API Documentation** - Learn about all available endpoints
 3. **Set Up Access Rules** - Configure who can access what
 4. **Try File Uploads** - Upload and serve files
-5. **Add Custom Endpoints** - Extend functionality with JavaScript or C++
-6. **Embed in Your App** - Use MantisBase as a library in your C++ project
+5. **Add Custom Endpoints** - Extend functionality with JavaScript or C++ ([Embedding Guide](05.embedding.md))
+6. **Embed in Your App** - Own a `MantisBase` instance in your C++ project ([Embedding Guide](05.embedding.md))
 
 ---
 
@@ -386,9 +391,9 @@ Deploy MantisBase as a standalone microservice for specific data management need
 
 MantisBase provides everything you need for a backend in a single C++ library:
 - Create tables and get instant REST APIs
-- Built-in authentication and access control
+- Built-in JWT, API key, and OAuth authentication with access control
 - Admin dashboard for easy management
 - File handling and JavaScript extensions
-- Embeddable in your applications
+- Embeddable via an owned `MantisBase` instance (no global singleton)
 
 Get started in minutes, scale as needed.

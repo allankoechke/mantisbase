@@ -33,6 +33,12 @@ namespace mb {
 
         static std::optional<std::string> validatorConstraintCheck(const json &field, const json &body);
 
+        /**
+         * @brief Validate a foreign-key field against a referenced entity record.
+         *
+         * Requires a @ref MantisBase reference so the check can load the target
+         * entity through `app.entity(...)` instead of a global accessor.
+         */
         static std::optional<std::string> foreignKeyConstraintCheck(const MantisBase& app, const json &field, const json &body);
 
         static std::optional<std::string> viewTypeSQLCheck(const json &body);

@@ -25,13 +25,12 @@ namespace mb {
      * fields, access rules, and converting to/from JSON and DDL.
      *
      * @code
-     * // Create a new schema
-     * EntitySchema schema("users", "base");
+     * auto app = MantisBase::create();
+     * EntitySchema schema(*app, "users", "base");
      * schema.addField(EntitySchemaField("name", "string").setRequired(true));
      * schema.addField(EntitySchemaField("email", "string").setIsUnique(true));
      * schema.setListRule(AccessRule("custom", "auth.id != \"\""));
      *
-     * // Convert to Entity for database operations
      * Entity entity = schema.toEntity();
      * @endcode
      */
