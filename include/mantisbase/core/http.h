@@ -98,9 +98,10 @@ namespace mb {
 
         template<typename T>
         const T &getOr(const std::string &key, T default_value) {
-            if (m_req->attributes()->find(key))
-                return m_req->attributes()->get<T>(key);
-            return default_value;
+            if (!m_req->attributes()->find(key)) {
+                m_req->attributes()->insert(key, std::any(std::move(default_value)));
+            }
+            return m_req->attributes()->get<T>(key);
         }
 
     private:
