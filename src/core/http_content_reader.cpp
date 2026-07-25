@@ -12,10 +12,10 @@ namespace mb {
         if (m_parsed) return;
 
         if (isMultipartFormData()) {
-            LogOrigin::trace("Content Reading", "Reading request as Multipart!");
+            m_req.mbApp().logger().trace("Content Reading", "Reading request as Multipart!");
             readMultipart();
         } else {
-            LogOrigin::trace("Content Reading", "Reading request as JSON!");
+            m_req.mbApp().logger().trace("Content Reading", "Reading request as JSON!");
             readJSON();
         }
 
@@ -64,7 +64,7 @@ namespace mb {
                     );
                 }
 
-                const auto dir = FilesMgr::dirPath(entity.name(), true);
+                const auto dir = m_req.mbApp().files().dirPath(entity.name(), true);
                 const auto new_filename = sanitizeFilename(form_data.filename);
                 std::string filepath = (fs::path(dir) / new_filename).string();
 
@@ -104,12 +104,12 @@ namespace mb {
 
                             if (type == "files") {
                                 auto data = trim(form_data.content).empty()
-                                    ? nullptr
-                                    : json::parse(form_data.content);
+                                                ? nullptr
+                                                : json::parse(form_data.content);
                                 if (!data.is_array() && !data.is_null()) {
                                     throw MantisException(400, std::format(
-                                        "Error parsing field `{}`, expected an array!",
-                                        form_data.name));
+                                                              "Error parsing field `{}`, expected an array!",
+                                                              form_data.name));
                                 }
 
                                 if (!json_body.contains(form_data.name))
@@ -174,7 +174,8 @@ namespace mb {
 
         for (const auto &file: m_filesMetadata) {
             if (file.contains("filename")) {
-                [[maybe_unused]] auto _ = FilesMgr::removeFile(entity_name, file["filename"].get<std::string>());
+                [[maybe_unused]] auto _ = m_req.mbApp().files().removeFile(
+                    entity_name, file["filename"].get<std::string>());
             }
         }
     }
@@ -219,7 +220,7 @@ namespace mb {
         if (fileUpload.parse(dReq) == 0) {
             auto &files = fileUpload.getFiles();
             // Get uploaded files
-            for (auto &file : files) {
+            for (auto &file: files) {
                 FormDataItem item;
                 item.name = file.getItemName();
                 item.filename = file.getFileName();
@@ -231,10 +232,10 @@ namespace mb {
 
         // Get form parameters (non-file fields)
         auto params = dReq->parameters();
-        for (const auto &[key, value] : params) {
+        for (const auto &[key, value]: params) {
             // Skip if this key was already handled as a file upload
             bool is_file = false;
-            for (const auto &fd : m_formData) {
+            for (const auto &fd: m_formData) {
                 if (fd.name == key && !fd.filename.empty()) {
                     is_file = true;
                     break;

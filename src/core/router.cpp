@@ -35,7 +35,7 @@ CMRC_DECLARE(mantis);
 
 namespace mb {
     Router::Router(const MantisBase &app)
-        : mApp(app),
+        : IMantisBase(app),
           m_sseMgr(std::make_unique<SSEMgr>(app)) {
         // Add global middlewares to work across all routes
         m_preRoutingMiddlewares.push_back(getAuthToken());
@@ -55,7 +55,7 @@ namespace mb {
             // uniformly synchronized and future-proof.
             std::unique_lock lock(m_entityMapMutex);
 
-            const auto sql = mApp.db().session();
+            const auto& sql = mbApp().db().session();
             const soci::rowset rows = (sql->prepare << "SELECT schema FROM mb_tables");
 
             for (const auto &row: rows) {
@@ -63,7 +63,7 @@ namespace mb {
 
                 // Create entity based on the schema, bound to this application
                 // so its CRUD ops can reach db/realtime without the singleton.
-                Entity entity{mApp, schema};
+                Entity entity{mbApp(), schema};
 
                 // Store this object to keep alive function pointers
                 // if not, possible access violation error
@@ -71,14 +71,14 @@ namespace mb {
             }
 
             // Add admin routes
-            EntitySchema admin_schema{mApp, "mb_admins", "auth"};
+            EntitySchema admin_schema{mbApp(), "mb_admins", "auth"};
             admin_schema.removeField("name");
             admin_schema.setSystem(true);
             auto admin_entity = admin_schema.toEntity();
             m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
 
             // Service Schema [No routes]
-            EntitySchema service_schema{mApp, "mb_service_acc", "base"};
+            EntitySchema service_schema{mbApp(), "mb_service_acc", "base"};
             service_schema.setHasApi(false);
             service_schema.setSystem(true);
             auto service_entity = service_schema.toEntity();
@@ -93,14 +93,14 @@ namespace mb {
 
     bool Router::listen() {
         try {
-            const auto host = mApp.host();
-            const auto port = mApp.port();
+            const auto host = mbApp().host();
+            const auto port = mbApp().port();
 
             // Get admin entity, query all admins
-            const auto admin_entity = mApp.entity("mb_admins");
+            const auto admin_entity = mbApp().entity("mb_admins");
 
             // If we don't have admin accounts, spin up admin dashboard
-            bool launch_admin_setup = !mApp.skipAdminSetup() && admin_entity.isEmpty();
+            bool launch_admin_setup = !mbApp().skipAdminSetup() && admin_entity.isEmpty();
 
             m_sseMgr->start();
 
@@ -127,13 +127,13 @@ namespace mb {
             m_running.store(true);
 
             // Log API endpoints
-            LogOrigin::info(
+            logger().info(
+                "Server",
                 fmt::format(
                     "Starting Servers: \n\t"
                     "├── API Endpoints: http://{0}:{1}/api/v1/ \n\t"
                     "└── Admin Dashboard: http://{0}:{1}/mb\n",
-                    host, port)
-            );
+                    host, port));
 
             if (launch_admin_setup) {
                 // Launch logging/browser in separate thread after listen starts
@@ -141,7 +141,7 @@ namespace mb {
                     // Wait a little for the server to be fully ready
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-                    mApp.openBrowserOnStart();
+                    mbApp().openBrowserOnStart();
                 });
 
                 notifier.detach();
@@ -154,10 +154,10 @@ namespace mb {
             return true;
         } catch (const std::exception &e) {
             m_running.store(false);
-            LogOrigin::critical("Server", fmt::format("Failed to start server: {}", e.what()));
+            logger().critical("Server", fmt::format("Failed to start server: {}", e.what()));
         } catch (...) {
             m_running.store(false);
-            LogOrigin::critical("Server", "Failed to start server: Unknown Error");
+            logger().critical("Server", "Failed to start server: Unknown Error");
         }
 
         return false;
@@ -173,7 +173,7 @@ namespace mb {
             drogon::app().quit();
             m_running.store(false);
             m_entityMap.clear();
-            LogOrigin::info("Server", "HTTP Server Stopped.");
+            logger().info("Server", "HTTP Server Stopped.");
         }
     }
 
@@ -209,15 +209,15 @@ namespace mb {
         }
 
         // Returns a copy, so it stays valid after the lock is released.
-        return Entity(m_entityMap.at(table_name));
+        return Entity{m_entityMap.at(table_name)};
     }
 
-    void Router::addSchemaCache(const nlohmann::json &entity_schema) {
+    void Router::addSchemaCache(const nlohmann::json &entity_schema) const {
         std::unique_lock lock(m_entityMapMutex);
         addSchemaCacheLocked(entity_schema);
     }
 
-    void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) {
+    void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) const {
         std::unique_lock lock(m_entityMapMutex);
 
         if (!m_entityMap.contains(old_entity_name))
@@ -243,7 +243,7 @@ namespace mb {
         // Create entity and cache it, bound to this application. Unified entity
         // routes resolve entities dynamically.
         // auto entity = Entity(mApp, entity_schema);
-        m_entityMap.try_emplace(entity_name, Entity(mApp, entity_schema));
+        m_entityMap.try_emplace(entity_name, Entity(mbApp(), entity_schema));
     }
 
     void Router::removeSchemaCacheLocked(const std::string &entity_name) const {
@@ -286,7 +286,7 @@ namespace mb {
     }
 
     void Router::generateMiscEndpoints() {
-        auto &router = mApp.router();
+        auto &router = mbApp().router();
 
         // Admin dashboard route - use Drogon regex handler
         auto adminHandler = handleAdminDashboardRoute();
@@ -294,8 +294,8 @@ namespace mb {
             R"(/mb(/.*)?)",
             [adminHandler, this](const drogon::HttpRequestPtr &req,
                                  std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-                MantisRequest ma_req{mApp, req};
-                MantisResponse ma_res{};
+                const MantisRequest ma_req{mbApp(), req};
+                MantisResponse ma_res{mbApp()};
                 adminHandler(ma_req, ma_res);
                 callback(ma_res.drogonResponse());
             },
@@ -333,12 +333,12 @@ namespace mb {
 
         registerSchemaRoutes();
         registerEntityRoutes();
-        registerAdminEntityRoutes();
+        registerAdminEntityRoutes(mbApp());
         registerApiKeyRoutes();
         registerOAuthRoutes();
 
         // Static file serving: register a catch-all for the public directory
-        const auto publicDir = mApp.publicDir();
+        const auto publicDir = mbApp().publicDir();
         if (fs::exists(publicDir)) {
             drogon::app().setDocumentRoot(publicDir);
         }
@@ -364,7 +364,7 @@ namespace mb {
                 }
 
                 if (!fs.exists(path)) {
-                    LogOrigin::trace("Path Missing", fmt::format("{} path does not exists", path));
+                    req.mbApp().logger().trace("Path Missing", fmt::format("{} path does not exists", path));
 
                     // fallback to index.html for React routes
                     path = "/public/index.html";
@@ -381,20 +381,20 @@ namespace mb {
 
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(404);
-                    LogOrigin::critical("Admin Response Error",
+                    req.mbApp().logger().critical("Admin Response Error",
                                         fmt::format("Error processing /admin response: {}", e.what()));
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
                 res.setReason(e.what());
-                LogOrigin::critical("Admin Request Error",
+                req.mbApp().logger().critical("Admin Request Error",
                                     fmt::format("Error processing /admin request: {}", e.what()));
             }
         };
     }
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
-        LogOrigin::trace("Endpoint Registration", "Registering /api/v1/files/:entity/:file GET endpoint ...");
+        // mApp.logger().trace("Endpoint Registration", "Registering /api/v1/files/:entity/:file GET endpoint ...");
         return [](const MantisRequest &req, MantisResponse &res) {
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");
@@ -419,7 +419,7 @@ namespace mb {
                 return;
             }
 
-            if (const auto path_opt = FilesMgr::getFilePath(table_name, file_name);
+            if (const auto path_opt = req.mbApp().files().getFilePath(table_name, file_name);
                 path_opt.has_value()) {
                 // Return requested file
                 res.setStatus(200);
@@ -538,7 +538,7 @@ namespace mb {
                 if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
 
                 // Get log database instance
-                auto &logsDb = req.mApp().logs().logsDb();
+                auto &logsDb = req.mbApp().logs().logsDb();
                 json result = logsDb.getLogs(after, limit, level_filter,
                                              search_filter, start_date, end_date,
                                              sort_by, sort_order);

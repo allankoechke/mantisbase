@@ -5,8 +5,9 @@
 #include "mantisbase/utils/soci_wrappers.h"
 
 namespace mb {
-    Entity::Entity(const MantisBase &app, const nlohmann::json &schema) : m_app(app) {
-        LogOrigin::entityTrace("Entity Creation", "Creating Entity from JSON Schema", schema);
+    Entity::Entity(const MantisBase &app, const nlohmann::json &schema)
+    : IMantisBase(app) {
+        logger().trace("Entity", "Entity Creation", "Creating Entity from JSON Schema", schema);
 
         if (!schema.contains("name") || !schema["name"].is_string() || schema["name"].empty())
             throw MantisException(400, "Missing required entity `name` in schema!", schema.dump());
@@ -71,10 +72,6 @@ namespace mb {
         if (!EntitySchema::isValidEntityType(type)) {
             throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", type);
         }
-    }
-
-    const MantisBase &Entity::app() const {
-        return m_app;
     }
 
     std::string Entity::id() const {

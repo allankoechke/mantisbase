@@ -17,6 +17,8 @@
 #include <chrono>
 #include "export.h"
 #include <argparse/argparse.hpp>
+
+#include "core/auth.h"
 #ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
 #endif
@@ -268,7 +270,9 @@ namespace mb
         /// Get the FilesMgr instance
         [[nodiscard]] FilesMgr& files() const;
         /// Get Logger instance
-        [[nodiscard]] Logger& logger() const { return *m_logger; }
+        [[nodiscard]] Logger& logger() const;
+        /// Get Auth instance
+        [[nodiscard]] Auth& auth() const;
 
         /**
          * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
@@ -410,6 +414,7 @@ namespace mb
         std::unique_ptr<Database> m_database;
         std::unique_ptr<FilesMgr> m_files;
         std::unique_ptr<RealtimeDB> m_realtime;
+        std::unique_ptr<Auth> m_auth;
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;

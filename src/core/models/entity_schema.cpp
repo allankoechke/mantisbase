@@ -2,10 +2,10 @@
 #include "mantisbase/core/exceptions.h"
 
 namespace mb {
-    EntitySchema::EntitySchema(const MantisBase &app) : m_app(app) {}
+    EntitySchema::EntitySchema(const MantisBase &app) : IMantisBase(app) {}
 
     EntitySchema::EntitySchema(const MantisBase &app, const std::string &entity_name, const std::string &entity_type)
-        : m_app(app) {
+        : IMantisBase(app) {
         // Ensure name is valid
         if (!EntitySchema::isValidEntityName(entity_name)) {
             throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", entity_name);
@@ -46,9 +46,10 @@ namespace mb {
     }
 
     EntitySchema EntitySchema::fromSchema(const MantisBase &app, const json &entity_schema) {
+
         EntitySchema eSchema(app);
 
-        LogOrigin::entitySchemaTrace("Schema Creation", fmt::format("Creating Entity Schema from JSON"), entity_schema);
+        app.logger().trace("EntitySchema", "Schema Creation", fmt::format("Creating Entity Schema from JSON"), entity_schema);
 
         if (!entity_schema.contains("name") || !entity_schema["name"].is_string() || entity_schema["name"].empty())
             throw MantisException(400, "Missing required entity `name` in schema!", entity_schema.dump());
@@ -175,7 +176,7 @@ namespace mb {
     }
 
     Entity EntitySchema::toEntity() const {
-        return Entity{app(), toJSON()};
+        return Entity{mbApp(), toJSON()};
     }
 
     std::string EntitySchema::id() const {
@@ -499,12 +500,8 @@ namespace mb {
         return j;
     }
 
-    const MantisBase &EntitySchema::app() const {
-        return m_app;
-    }
-
     std::string EntitySchema::toDDL() const {
-        const auto sql = app().db().session();
+        const auto sql = mbApp().db().session();
         const auto db_type = sql->get_backend()->get_backend_name();
 
         std::ostringstream ddl;
@@ -682,15 +679,15 @@ namespace mb {
 
                     // Check if referenced entity exists
                     // TODO
-                    if (tableExists(table_schema.app(), refEntity)) {
+                    if (tableExists(table_schema.mbApp(), refEntity)) {
                         // Check if referenced field exists in the referenced entity
                         try {
-                            const auto refEntityData = getTable(table_schema.app(), EntitySchema::genEntityId(refEntity));
+                            const auto refEntityData = getTable(table_schema.mbApp(), EntitySchema::genEntityId(refEntity));
                             if (!refEntityData.contains("schema")) {
                                 return "Invalid schema data for referenced entity: `" + refEntity + "`";
                             }
 
-                            EntitySchema refEntitySchema = EntitySchema::fromSchema(table_schema.app(), refEntityData["schema"]);
+                            EntitySchema refEntitySchema = EntitySchema::fromSchema(table_schema.mbApp(), refEntityData["schema"]);
 
                             if (!refEntitySchema.hasField(refField)) {
                                 return "Foreign key references non-existent field `" + refField +
@@ -706,7 +703,7 @@ namespace mb {
                                 !(field.type() == "string" && refFieldSchema.type() == "string")) {
                                 // Allow string types to reference string types, but warn about type mismatches
                                 // The database will enforce this more strictly
-                                LogOrigin::entitySchemaWarn("Foreign Key Type Mismatch", fmt::format(
+                                table_schema.logger().warn("EntitySchema", "Foreign Key Type Mismatch", fmt::format(
                                                                 "Foreign key field `{}` type `{}` may not match referenced field `{}` type `{}` in entity `{}`",
                                                                 field.name(), field.type(), refField,
                                                                 refFieldSchema.type(), refEntity));
@@ -720,7 +717,7 @@ namespace mb {
                     } else {
                         // Entity doesn't exist yet - this might be okay if entities are being created in sequence
                         // The database will enforce the constraint when the DDL is executed
-                        LogOrigin::entitySchemaWarn("Foreign Key Reference Missing", fmt::format(
+                        table_schema.logger().warn("EntitySchema", "Foreign Key Reference Missing", fmt::format(
                                                         "Foreign key references entity `{}` which does not exist yet. "
                                                         "Ensure the referenced entity is created before this entity.",
                                                         refEntity));

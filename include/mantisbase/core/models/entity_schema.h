@@ -35,7 +35,7 @@ namespace mb {
      * Entity entity = schema.toEntity();
      * @endcode
      */
-    class EntitySchema {
+    class EntitySchema: public IMantisBase {
     public:
         /**
          * @brief Construct an empty schema bound to its application.
@@ -366,13 +366,6 @@ namespace mb {
 
         void addFieldsIfNotExist(const std::string &type);
 
-        /**
-         * @brief Owning application (db access for DDL/validation).
-         *
-         * Always valid: injected through the constructor.
-         */
-        [[nodiscard]] const MantisBase &app() const;
-
         std::string m_name;
         std::string m_type;
         std::string m_viewSqlQuery;
@@ -381,7 +374,6 @@ namespace mb {
         std::vector<EntitySchemaField> m_fields;
         std::vector<IndexDefinition> m_indexes;
         AccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
-        const MantisBase& m_app; ///< Non-owning; set from the constructor reference
     };
 } // mb
 

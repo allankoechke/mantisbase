@@ -3,6 +3,7 @@
 
 #include "exceptions.h"
 #include "models/entity.h"
+#include "types.h"
 
 #ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
@@ -35,9 +36,8 @@ namespace mb {
     };
 #endif
 
-    class MantisRequest {
+    class MantisRequest: public IMantisBase {
         drogon::HttpRequestPtr m_req;
-        ContextStore m_store;
         std::unordered_map<std::string, std::string> m_pathParams;
 
         /// Lazily-parsed, cached request body. getBodyAsJson() is called
@@ -45,14 +45,8 @@ namespace mb {
         /// handler), so the body is parsed once and reused.
         mutable std::optional<std::pair<nlohmann::json, std::string>> m_bodyJsonCache;
 
-        /// Owning application, injected by the Router when the request is
-        /// wrapped. Request-path code reaches shared services (db, router,
-        /// realtime, config) via app() instead of the global singleton.
-        const MantisBase &m_app;
-
     public:
-        explicit MantisRequest(const MantisBase& mb, const drogon::HttpRequestPtr &_req);
-        const MantisBase& mApp() const { return m_app; }
+        explicit MantisRequest(const MantisBase& app, drogon::HttpRequestPtr _req);
 
         void setPathParam(const std::string &key, const std::string &value);
         void setPathParams(const std::unordered_map<std::string, std::string> &params);
@@ -92,12 +86,14 @@ namespace mb {
 
         template<typename T>
         void set(const std::string &key, T value) {
-            m_store.set(key, value);
+            m_req->attributes()->insert(key, value);
         }
 
         template<typename T>
-        T &getOr(const std::string &key, T default_value) {
-            return m_store.getOr<T>(key, default_value);
+        const T &getOr(const std::string &key, T default_value) {
+            if (m_req->attributes()->find(key))
+                return m_req->attributes()->get<T>(key);
+            return default_value;
         }
 
     private:
@@ -108,17 +104,15 @@ namespace mb {
 #endif
     };
 
-    class MantisResponse {
+    class MantisResponse: public IMantisBase {
         drogon::HttpResponsePtr m_res;
 
-        const std::string __class_name__ = "mb::MantisResponse";
-
     public:
-        explicit MantisResponse();
+        explicit MantisResponse(const MantisBase& app);
 
         ~MantisResponse() = default;
 
-        const drogon::HttpResponsePtr& drogonResponse() const;
+        [[nodiscard]] const drogon::HttpResponsePtr& drogonResponse() const;
 
         [[nodiscard]] int getStatus() const;
         void setStatus(int s) const;

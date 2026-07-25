@@ -47,7 +47,7 @@ namespace mb {
     }
 
     std::unique_ptr<MantisBase> MantisBase::create(const int argc, char **argv) {
-        auto app = std::make_unique<MantisBase>();
+        auto app = std::make_unique<MantisBase>(new MantisBase());
         // Initialize the app with passed in args
         app->init(argc, argv);
 
@@ -56,7 +56,7 @@ namespace mb {
     }
 
     std::unique_ptr<MantisBase> MantisBase::create(const json &config) {
-        auto app = std::make_unique<MantisBase>();
+        auto app = std::make_unique<MantisBase>(new MantisBase());
 
         // Start from a clean slate: on a create() -> close() -> create() cycle
         // (e.g. across test runs in one process) the arg vector would otherwise
@@ -208,6 +208,7 @@ namespace mb {
         m_kvStore = std::make_unique<KeyValStore>(*this); // depends on db(), router() & http()
         m_opts = std::make_unique<argparse::ArgumentParser>();
         m_files = std::make_unique<FilesMgr>(*this);
+        m_auth = std::make_unique<Auth>(*this);
     }
 
     int MantisBase::quit(const int &exitCode, [[maybe_unused]] const std::string &reason) {
@@ -215,7 +216,7 @@ namespace mb {
         close();
 
         if (exitCode != 0)
-            LogOrigin::critical("Application Exit",
+            logger().critical("Application Exit",
                 fmt::format("Exiting Application with Code = {}", exitCode));
 
         std::exit(exitCode);
@@ -227,21 +228,21 @@ namespace mb {
             return;
         }
 
-        LogOrigin::trace("MantisBase", "Closing units");
+        logger().trace("MantisBase", "Closing units");
         try {
             if (m_router && m_router->isRunning()) {
                 m_router->close();
-                LogOrigin::trace("Router", "Router stopped");
+                logger().trace("Router", "Router stopped");
             }
 
             if (m_kvStore) {
                 // m_kvStore.close();
-                // LogOrigin::trace("KV Store Shutdown", "[MB] Finished KV Store closing ...");
+                // logger().trace("KV Store Shutdown", "[MB] Finished KV Store closing ...");
             }
 
             if (m_database && m_database->isConnected()) {
                 m_database->disconnect();
-                LogOrigin::trace("Db Shutdown", "Completed Successfully!");
+                logger().trace("Db Shutdown", "Completed Successfully!");
             }
         } catch (const std::exception &e) {
             std::cerr << "Error during reset: " << e.what() << std::endl;
@@ -252,7 +253,7 @@ namespace mb {
 
         // Mark logger instance as destroyed
         Logger::isDbInitialized.store(false);
-        LogOrigin::debug("MantisBase", "Shutdown Complete");
+        logger().debug("MantisBase", "Shutdown Complete");
     }
 
     int MantisBase::run() {
@@ -273,7 +274,7 @@ namespace mb {
             // is allowed to run with an insecure, clearly-marked default.
             if (const auto secret = getEnvOrDefault("MB_JWT_SECRET", std::string{}); secret.empty()) {
                 if (!m_isDevMode) {
-                    LogOrigin::critical(
+                    logger().critical(
                         "Insecure Configuration",
                         "MB_JWT_SECRET is not set. Refusing to start the server without a "
                         "signing key in production. Set MB_JWT_SECRET to a strong, secret "
@@ -281,7 +282,7 @@ namespace mb {
                     return quit(1, "MB_JWT_SECRET not set");
                 }
 
-                LogOrigin::warn(
+                logger().warn(
                     "Insecure Configuration",
                     "MB_JWT_SECRET is not set; using an insecure development-only default. "
                     "Do NOT use this in production — set MB_JWT_SECRET.");
@@ -319,6 +320,14 @@ namespace mb {
 
     FilesMgr & MantisBase::files() const {
         return *m_files;
+    }
+
+    Logger & MantisBase::logger() const {
+        return *m_logger;
+    }
+
+    Auth & MantisBase::auth() const {
+        return *m_auth;
     }
 
     Entity MantisBase::entity(const std::string &entity_name) const {
@@ -359,10 +368,10 @@ namespace mb {
             claims["entity"] = "mb_service_acc";
 
             // Create token and pass it in
-            const auto token = Auth::createToken(claims, 30 * 60); // Token valid for 30mins
+            const auto token = m_auth->createToken(claims, 30 * 60); // Token valid for 30mins
 
             const std::string url = std::format("http://localhost:{}/mb/setup?token={}", m_port, token);
-            LogOrigin::info("Admin Setup", fmt::format(
+            logger().info("Admin Setup", fmt::format(
                                 "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins --add <email> <password>\n",
                                 url));
 
@@ -373,14 +382,14 @@ namespace mb {
 #elif __linux__
             const std::string command = "xdg-open " + url;
 #else
-            LogOrigin::critical("Unsupported Platform", "Unsupported platform");
+            logger().critical("Unsupported Platform", "Unsupported platform");
 #endif
 
             if (int result = std::system(command.c_str()); result != 0) {
-                LogOrigin::info("Browser Open Failed", fmt::format("Could not open browser, result code: {}", result));
+                logger().info("Browser Open Failed", fmt::format("Could not open browser, result code: {}", result));
             }
         } catch (const std::exception &e) {
-            LogOrigin::critical("Admin Dashboard Failed",
+            logger().critical("Admin Dashboard Failed",
                                 fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));
         }
 
@@ -449,7 +458,7 @@ namespace mb {
             return;
 
         m_port = port;
-        LogOrigin::debug("Server Configuration", fmt::format("Setting Server Port to {}", port));
+        logger().debug("Server Configuration", fmt::format("Setting Server Port to {}", port));
     }
 
     std::string MantisBase::host() const {
@@ -461,7 +470,7 @@ namespace mb {
             return;
 
         m_host = host;
-        LogOrigin::debug("Server Configuration", fmt::format("Setting Server Host to {}", host));
+        logger().debug("Server Configuration", fmt::format("Setting Server Host to {}", host));
     }
 
     int MantisBase::poolSize() const {
@@ -551,7 +560,7 @@ namespace mb {
     void MantisBase::initJSEngine() {
         m_dukCtx = duk_create_heap_default();
         if (!m_dukCtx) {
-            LogOrigin::critical("Scripting", "Failed to create Duktape heap");
+            logger().critical("Scripting", "Failed to create Duktape heap");
             return;
         }
 
@@ -614,7 +623,7 @@ namespace mb {
 
     void MantisBase::loadAndExecuteScript(const std::string &filePath) const {
         if (!fs::exists(fs::path(filePath))) {
-            LogOrigin::trace("File Execution",
+            logger().trace("File Execution",
                              fmt::format("Executing a file that does not exist, path `{}`", filePath));
             return;
         }
@@ -628,7 +637,7 @@ namespace mb {
         try {
             dukglue_peval<void>(m_dukCtx, scriptContent.c_str());
         } catch (const DukErrorException &e) {
-            LogOrigin::critical("File Load Error",
+            logger().critical("File Load Error",
                                 fmt::format("Error loading file at {} \n\tError: {}", filePath, e.what()));
         }
     }

@@ -26,6 +26,7 @@
 #include <drogon/HttpResponse.h>
 
 #include "realtime.h"
+#include "types.h"
 
 namespace mb {
     using json = nlohmann::json;
@@ -74,17 +75,16 @@ namespace mb {
     };
 
     /** Manages SSE sessions, WebSocket connections, routes realtime change events, and registers GET/POST /api/v1/realtime. */
-    class SSEMgr {
+    class SSEMgr : public IMantisBase {
         std::unordered_map<std::string, std::shared_ptr<SSESession>> m_sessions;
         std::mutex m_sessions_mutex;
         std::condition_variable m_cv;
         std::thread m_cleanup_thread;
         std::atomic<bool> m_running{true};
         std::unique_ptr<WSMgr> m_wsMgr;
-        const MantisBase& m_app;
 
     public:
-        explicit SSEMgr(const MantisBase&);
+        explicit SSEMgr(const MantisBase& app);
         ~SSEMgr();
 
         /** Register GET and POST /api/v1/realtime routes. */

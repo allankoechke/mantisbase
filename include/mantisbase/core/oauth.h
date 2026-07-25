@@ -5,16 +5,14 @@
 #include <optional>
 #include <nlohmann/json.hpp>
 
-#include "mantisbase/mantisbase.h"
+#include "mantisbase/core/types.h"
 
 namespace mb {
     using json = nlohmann::json;
 
-    class OAuthManager {
-        MantisBase &mApp;
-
+    class OAuthManager : public IMantisBase {
     public:
-        explicit OAuthManager(MantisBase &app);
+        explicit OAuthManager(const MantisBase &app);
 
         [[nodiscard]] json buildAuthorizeUrl(const std::string &entity_name,
                                              const std::string &provider_name,

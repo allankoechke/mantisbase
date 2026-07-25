@@ -16,13 +16,13 @@
 #include <condition_variable>
 #include <mutex>
 #include <nlohmann/json.hpp>
-#include <mantisbase/core/auth.h>
 
 namespace soci {
     class session;
 }
 
 namespace mb {
+    class MantisBase;
     using json = nlohmann::json;
 
     /**

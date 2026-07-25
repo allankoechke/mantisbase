@@ -107,7 +107,7 @@ namespace mb {
         throw std::runtime_error("No field type found matching column `" + column_name + "'");
     }
 
-    inline json sociRow2Json(const soci::row &row, const std::vector<json> &entity_fields) {
+    inline json sociRow2Json(const std::string& db_type, const soci::row &row, const std::vector<json> &entity_fields) {
         // Guard against empty reference schema fields
         if (entity_fields.empty())
             throw std::invalid_argument("Reference schema fields can't be empty!");
@@ -138,7 +138,7 @@ namespace mb {
             } else if (colType == "double") {
                 res_json[colName] = row.get<double>(i);
             } else if (colType == "date") {
-                res_json[colName] = mb::dbDateToString(row, i);
+                res_json[colName] = mb::dbDateToString(db_type, row, i);
             } else if (colType == "int") {
                 const int prec = getColumnPrecision(colName, entity_fields);
                 switch (prec) {

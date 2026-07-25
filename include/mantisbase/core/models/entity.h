@@ -44,7 +44,7 @@ namespace mb {
      * Entity entity("posts", "base");
      * @endcode
      */
-    class Entity {
+    class Entity: public IMantisBase {
     public:
         /**
          * @brief Construct entity from schema JSON object, bound to its app.
@@ -250,13 +250,6 @@ namespace mb {
                                                         const std::vector<std::string> &columns) const;
 
     private:
-        /**
-         * @brief Owning application for DB/realtime access.
-         *
-         * Always valid: injected through the constructor, so there is no unbound
-         * state to guard against.
-         */
-        [[nodiscard]] const MantisBase &app() const;
 
         /// Immutable schema shared across copies. An Entity is never mutated
         /// after construction, so copies (returned from the cache on every
@@ -264,12 +257,6 @@ namespace mb {
         /// the pointed-to schema is safe to read concurrently from multiple
         /// threads.
         std::shared_ptr<const nlohmann::json> m_schema;
-
-        /// Non-owning pointer to the owning application, set from the constructor
-        /// reference. A raw pointer (rather than a reference) keeps Entity
-        /// copy/move-assignable, which the router's entity cache relies on; it is
-        /// never null after construction.
-        const MantisBase& m_app;
     };
 } // mb
 

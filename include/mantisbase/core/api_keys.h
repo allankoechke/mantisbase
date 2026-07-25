@@ -5,7 +5,7 @@
 #include <optional>
 #include <nlohmann/json.hpp>
 
-#include "mantisbase/mantisbase.h"
+#include "mantisbase/core/types.h"
 
 namespace mb {
     using json = nlohmann::json;
@@ -16,11 +16,9 @@ namespace mb {
         std::string key_hash;
     };
 
-    class ApiKeyManager {
-        const MantisBase& mApp;
-
+    class ApiKeyManager: public IMantisBase {
     public:
-        explicit ApiKeyManager(const MantisBase& app) : mApp(app) {}
+        explicit ApiKeyManager(const MantisBase& app);
 
         static ApiKeyResult generateApiKey();
         static std::string hashApiKey(const std::string &raw_key);
@@ -29,20 +27,20 @@ namespace mb {
                           const std::string &label, const json &permissions = json::array(),
                           const std::string &expires_at = "") const;
 
-        json list(const std::string &entity_name, const std::string &user_id) const;
+        [[nodiscard]] json list(const std::string &entity_name, const std::string &user_id) const;
 
         [[nodiscard]] bool revoke(const std::string &key_id, const std::string &entity_name,
                           const std::string &user_id) const;
 
         [[nodiscard]] std::optional<json> lookupByHash(const std::string &key_hash) const;
 
-        json listAdmin();
+        [[nodiscard]] json listAdmin() const;
 
-        json createAdmin(const std::string &user_id, const std::string &label,
+        [[nodiscard]] json createAdmin(const std::string &user_id, const std::string &label,
                                const json &permissions = json::array(),
                                const std::string &expires_at = "") const;
 
-        bool revokeAdmin(const std::string &key_id, const std::string &user_id) const;
+        [[nodiscard]] bool revokeAdmin(const std::string &key_id, const std::string &user_id) const;
     };
 } // mb
 

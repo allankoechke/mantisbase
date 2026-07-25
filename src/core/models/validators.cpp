@@ -142,7 +142,7 @@ namespace mb {
 
             return std::nullopt;
         } catch (const std::exception &e) {
-            LogOrigin::trace("Validation Exception", fmt::format("Required Constraints Exception: {}", e.what()));
+            // LogOrigin::trace("Validation Exception", fmt::format("Required Constraints Exception: {}", e.what()));
             return std::nullopt;
         }
     }
@@ -211,7 +211,7 @@ namespace mb {
         }
 
         // Check if the referenced record exists
-        const auto &app = MantisBase::instance();
+        const auto &app = mbApp();
         if (!app.hasEntity(refTable)) {
             return std::format("Foreign Key ref table `{}` does not exist!", refTable);
         }

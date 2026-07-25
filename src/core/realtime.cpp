@@ -7,12 +7,11 @@
 #include "soci/sqlite3/soci-sqlite3.h"
 
 mb::RealtimeDB::RealtimeDB(const MantisBase &app)
-    : mApp(app) {
-}
+    : IMantisBase(app) {}
 
 bool mb::RealtimeDB::init() const {
     try {
-        const auto &sql = mApp.db().session();
+        const auto &sql = mbApp().db().session();
 
         // Create rt changelog table in the AUDIT database
         if (sql->get_backend_name() == "sqlite3") {
@@ -54,38 +53,38 @@ bool mb::RealtimeDB::init() const {
 #if MB_HAS_POSTGRESQL
         // For PostgreSQL, create the hook function
         if (sql->get_backend_name() == "postgresql") {
-            createNotifyFunction(*sql);
+            createNotifyFunction(mbApp(), *sql);
         }
 #endif
 
         return true;
     } catch (std::exception &e) {
-        LogOrigin::dbCritical(e.what());
+        mbApp().logger().critical("Database", e.what());
     }
 
     return false;
 }
 
 void mb::RealtimeDB::addDbHooks(const std::string &entity_name) const {
-    if (!mApp.hasEntity(entity_name)) {
+    if (!mbApp().hasEntity(entity_name)) {
         throw MantisException(400,
                               std::format("Expected a valid existing entity name, but `{}` was given instead.",
                                           entity_name));
     }
 
     // Get entity object
-    const auto entity = mApp.entity(entity_name);
+    const auto entity = mbApp().entity(entity_name);
     addDbHooks(entity);
 }
 
 void mb::RealtimeDB::addDbHooks(const Entity &entity) const {
     // Get session instance
-    const auto &sql = mApp.db().session();
+    const auto &sql = mbApp().db().session();
     addDbHooks(entity, sql);
 }
 
 void mb::RealtimeDB::addDbHooks(const Entity &entity, const std::shared_ptr<soci::session> &sess) {
-    logEntry::debug("Realtime Mgr", std::format("Creating Db Hooks on `{}`", entity.name()));
+    entity.mbApp().logger().debug("Realtime Mgr", std::format("Creating Db Hooks on `{}`", entity.name()));
 
     // Validate up front: the entity name is interpolated into trigger DDL below.
     const auto entity_name = sqlIdentifier(entity.name());
@@ -156,7 +155,7 @@ void mb::RealtimeDB::addDbHooks(const Entity &entity, const std::shared_ptr<soci
 }
 
 void mb::RealtimeDB::dropDbHooks(const std::string &entity_name) const {
-    const auto sql = mApp.db().session();
+    const auto& sql = mbApp().db().session();
     dropDbHooks(entity_name, sql);
 }
 
@@ -192,7 +191,7 @@ void mb::RealtimeDB::dropDbHooks(const std::string &entity_name, const std::shar
 
 void mb::RealtimeDB::runWorker(const RtCallback &callback) {
     if (!m_rtDbWorker) {
-        m_rtDbWorker = std::make_unique<RtDbWorker>(mApp);
+        m_rtDbWorker = std::make_unique<RtDbWorker>(mbApp());
         m_rtDbWorker->addCallback(callback);
     }
 }
@@ -213,7 +212,7 @@ void mb::RealtimeDB::notifyChange() const {
 }
 
 #if MB_HAS_POSTGRESQL
-void mb::RealtimeDB::createNotifyFunction(soci::session &sql) {
+void mb::RealtimeDB::createNotifyFunction(const MantisBase& app, soci::session &sql) {
     sql << R"(
             CREATE OR REPLACE FUNCTION mb_notify_changes()
             RETURNS TRIGGER AS $$
@@ -253,7 +252,7 @@ void mb::RealtimeDB::createNotifyFunction(soci::session &sql) {
             $$ LANGUAGE plpgsql;
         )";
 
-    logEntry::info("PostgreSQL Realtime",
+    app.logger().info("PostgreSQL Realtime",
                    "Created notification function 'mb_notify_changes'");
 }
 #endif
@@ -284,7 +283,7 @@ mb::RtDbWorker::RtDbWorker(const MantisBase &app)
         if (!initSQLite())
             throw MantisException(500, "Worker: SQLite db instantiation failed!");
 
-        logEntry::info("RTDb Worker",
+        mApp.logger().info("RTDb Worker",
                        "SQLite Database Status",
                        std::format("DB Connection should be active: {}", (isDbRunning() ? "true" : "false")));
     }
@@ -294,7 +293,7 @@ mb::RtDbWorker::RtDbWorker(const MantisBase &app)
         if (!initPSQL())
             throw MantisException(500, "Worker: PostgreSQL db instantiation failed!");
 
-        logEntry::info("RTDb Worker",
+        mApp.logger().info("RTDb Worker",
                        "PSQL Database Status",
                        std::format("DB Connection should be active: {}", (isDbRunning() ? "true" : "false")));
     }
@@ -359,7 +358,7 @@ void mb::RtDbWorker::run() {
 #endif
 
     else
-        logEntry::critical("RTDb Worker", "Unsupported database",
+        mApp.logger().critical("RTDb Worker", "Unsupported database",
                            std::format("Unsupported database type `{}`", m_db_type));
 }
 
@@ -442,7 +441,7 @@ void mb::RtDbWorker::runSQlite() {
                     break; // partial batch => nothing more to read for now
             }
         } catch (std::exception &e) {
-            logEntry::critical("RTDb Worker", "Realtime Db Worker Error", e.what());
+            mApp.logger().critical("RTDb Worker", "Realtime Db Worker Error", e.what());
         }
     }
 
@@ -468,7 +467,7 @@ void mb::RtDbWorker::pruneChangeLog(const int up_to_id) {
         *write_sql << "DELETE FROM mb_change_log WHERE id <= :id", soci::use(up_to_id);
         m_lastPrunedId = up_to_id;
     } catch (const std::exception &e) {
-        logEntry::warn("RTDb Worker", "Change log prune failed", e.what());
+        mApp.logger().warn("RTDb Worker", "Change log prune failed", e.what());
     }
 }
 
@@ -496,7 +495,7 @@ void mb::RtDbWorker::runPostgreSQL() {
                                       nullptr, nullptr, &timeout);
 
             if (result < 0) {
-                logEntry::critical("[PSQl] RTDb Worker", "PostgreSQL Notify Worker", "select() failed");
+                mApp.logger().critical("[PSQl] RTDb Worker", "PostgreSQL Notify Worker", "select() failed");
                 break;
             }
 
@@ -516,7 +515,7 @@ void mb::RtDbWorker::runPostgreSQL() {
                     // Parse the JSON payload
                     json notification = json::parse(notify->extra);
 
-                    logEntry::debug("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
+                    mApp.logger().debug("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
                                     std::format("Received notification: {}", notification.dump()));
 
                     // Call the callback
@@ -526,7 +525,7 @@ void mb::RtDbWorker::runPostgreSQL() {
                         m_callback(arr);
                     }
                 } catch (const std::exception &e) {
-                    logEntry::critical("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
+                    mApp.logger().critical("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
                                        std::format("Error processing notification: {}", e.what()));
                 }
 
@@ -535,20 +534,20 @@ void mb::RtDbWorker::runPostgreSQL() {
 
             // Check connection health
             if (PQstatus(psql.get()) != CONNECTION_OK) {
-                logEntry::warn("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
+                mApp.logger().warn("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
                                "Connection lost, reconnecting...");
                 PQfinish(psql.get());
                 psql.reset();
 
                 // Try to reconnect
                 if (!isDbRunning()) {
-                    logEntry::critical("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
+                    mApp.logger().critical("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
                                        "Reconnection failed, waiting before retry");
                     std::this_thread::sleep_for(std::chrono::seconds(5));
                 }
             }
         } catch (std::exception &e) {
-            logEntry::critical("[PSQl] RTDb Worker", "Realtime Db Worker Error", e.what());
+            mApp.logger().critical("[PSQl] RTDb Worker", "Realtime Db Worker Error", e.what());
         }
     }
 }
@@ -572,7 +571,7 @@ bool mb::RtDbWorker::initSQLite() {
         *sql_ro << "PRAGMA synchronous=NORMAL";
         return true;
     } catch (std::exception &e) {
-        logEntry::critical(
+        mApp.logger().critical(
             "Realtime Db Worker",
             "Failed to connect to mantis.db database for auditing",
             e.what()
@@ -589,7 +588,7 @@ bool mb::RtDbWorker::initPSQL() {
     psql = std::unique_ptr<PGconn, decltype(&PQfinish)>(PQconnectdb(conn_str.c_str()), &PQfinish);
 
     if (PQstatus(psql.get()) != CONNECTION_OK) {
-        logEntry::critical("PostgreSQL Notify Worker",
+        mApp.logger().critical("PostgreSQL Notify Worker",
                            std::format("Connection failed: {}", PQerrorMessage(psql.get())));
         // PQfinish(psql.get());
         psql.reset();
@@ -600,7 +599,7 @@ bool mb::RtDbWorker::initPSQL() {
     PGresult *res = PQexec(psql.get(), "LISTEN mb_db_changes");
 
     if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-        logEntry::critical("PostgreSQL Notify Worker",
+        mApp.logger().critical("PostgreSQL Notify Worker",
                            std::format("LISTEN failed: {}", PQerrorMessage(psql.get())));
         PQclear(res);
         // PQfinish(m_pgConn);
@@ -609,7 +608,7 @@ bool mb::RtDbWorker::initPSQL() {
     }
 
     PQclear(res);
-    logEntry::info("PostgreSQL Notify Worker",
+    mApp.logger().info("PostgreSQL Notify Worker",
                    "Connected and listening on channel 'mb_db_changes'");
     return true;
 }

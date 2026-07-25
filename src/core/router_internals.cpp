@@ -25,7 +25,7 @@ namespace mb {
             const auto duration = end.microSecondsSinceEpoch() - start.microSecondsSinceEpoch();
             auto seconds = static_cast<double>(duration) / 1000000.0;
 
-            LogOrigin::info(
+            logger().info(
                 "HTTP",
                 fmt::format("{} {}{} {} {}s {}B {} {} {}",
                             req->methodString(),
@@ -109,7 +109,7 @@ namespace mb {
                 }
 
                 const auto entity_name = trim(req.getPathParamValue("entity_name"));
-                const auto entity = req.mApp().entity(entity_name);
+                const auto entity = req.mbApp().entity(entity_name);
 
                 auto opt_user = entity.queryFromCols(body["identity"].get<std::string>(), {"id", "email"});
                 if (!opt_user.has_value()) {
@@ -147,12 +147,12 @@ namespace mb {
                                  });
                     auto _body = body;
                     _body.erase("password");
-                    LogOrigin::authWarn("User Not Found",
-                                        fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
+                    req.mbApp().logger().warn("Auth", "User Not Found",
+                                              fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
                     return;
                 }
 
-                auto token = Auth::createToken({{"id", user["id"]}, {"entity", entity.name()}});
+                auto token = req.mbApp().auth().createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
                 user.erase("password");
                 res.sendJSON(200, {
@@ -200,7 +200,7 @@ namespace mb {
                     }
                 }
 
-                const auto entity = MantisBase::instance().entity("mb_admins");
+                const auto entity = req.mbApp().entity("mb_admins");
 
                 auto opt_user = entity.queryFromCols(
                     body["identity"].get<std::string>(),
@@ -229,12 +229,12 @@ namespace mb {
                                  });
                     auto _body = body;
                     _body.erase("password");
-                    LogOrigin::authWarn("Admin User Not Found",
-                                        fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
+                    req.mbApp().logger().warn("Auth", "Admin User Not Found",
+                                              fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
                     return;
                 }
 
-                auto token = Auth::createToken({{"id", user["id"]}, {"entity", entity.name()}});
+                auto token = req.mbApp().auth().createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
                 user.erase("password");
                 res.sendJSON(200, {
@@ -258,7 +258,7 @@ namespace mb {
         };
     }
 
-    std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthRefresh() {
+    std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthRefresh() const {
         return [](MantisRequest &req, const MantisResponse &res) {
             try {
                 auto auth = req.getOr<json>("auth", json::object());
@@ -287,10 +287,10 @@ namespace mb {
                     return;
                 }
 
-                auto result = Auth::refreshSession(session_id, entity_name, user_id);
+                auto result = req.mbApp().auth().refreshSession(session_id, entity_name, user_id);
 
                 // Get user record
-                const auto entity = MantisBase::instance().entity(entity_name);
+                const auto entity = req.mbApp().entity(entity_name);
                 auto user_opt = entity.read(user_id);
                 json user = user_opt.has_value() ? user_opt.value() : json::object();
                 user.erase("password");
@@ -334,14 +334,24 @@ namespace mb {
                 auto session_id = claims.value("session_id", "");
 
                 if (!session_id.empty()) {
-                    Auth::deleteSession(session_id);
+                    res.sendJSON(500, {
+                                     {"status", 500},
+                                     {"data", nullptr},
+                                     {"error", "Missing session id"}
+                                 });
                 }
-
-                res.sendJSON(200, {
-                                 {"status", 200},
-                                 {"data", {{"logged_out", true}}},
-                                 {"error", ""}
-                             });
+                if (req.mbApp().auth().deleteSession(session_id))
+                    res.sendJSON(200, {
+                                     {"status", 200},
+                                     {"data", {{"logged_out", true}}},
+                                     {"error", ""}
+                                 });
+                else
+                    res.sendJSON(500, {
+                                     {"status", 500},
+                                     {"data", nullptr},
+                                     {"error", "Failed to delete session"}
+                                 });
             } catch (const MantisException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
@@ -360,10 +370,9 @@ namespace mb {
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleSetupAdmin() {
         return [](MantisRequest &req, const MantisResponse &res) {
-            TRACE_MB_FUNC();
             try {
-                auto auth = req.getOr("auth", json::object());
-                LogOrigin::authTrace("Auth Data", fmt::format("Auth Data: {}", auth.dump()));
+                auto auth = json::object(); // req.getOr("auth", json::object());
+                req.mbApp().logger().trace("Auth", "Auth Data", fmt::format("Auth Data: {}", auth.dump()));
 
                 auto verification = req.getOr<json>("verification", json::object());
                 if (verification.empty()) {
@@ -406,8 +415,8 @@ namespace mb {
                     return;
                 }
 
-                const auto entity = MantisBase::instance().entity("mb_service_acc");
-                const auto admin_entity = MantisBase::instance().entity("mb_admins");
+                const auto entity = req.mbApp().entity("mb_service_acc");
+                const auto admin_entity = req.mbApp().entity("mb_admins");
 
                 const auto &[body, err] = req.getBodyAsJson();
 
@@ -422,8 +431,8 @@ namespace mb {
 
                 if (const auto v_err = Validators::validateRequestBody(admin_entity, body);
                     v_err.has_value()) {
-                    LogOrigin::critical("Request Validation Error",
-                                        fmt::format("Error validating request body\n\t- {}", v_err.value()));
+                    req.mbApp().logger().critical("Request Validation Error",
+                                                  fmt::format("Error validating request body\n\t- {}", v_err.value()));
                     res.sendJSON(400, {
                                      {"data", json::object()},
                                      {"status", 400},

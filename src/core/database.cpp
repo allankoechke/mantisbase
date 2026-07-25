@@ -56,7 +56,7 @@ namespace mb {
             auto pool_size = static_cast<size_t>(mbApp.poolSize());
             // Populate the pools with db connections
             for (std::size_t i = 0; i < pool_size; ++i) {
-                LogOrigin::dbTrace("Session Creation",
+                mbApp.logger().trace("Database", "Session Creation",
                                    fmt::format("Creating db session for index `{}/{}`", i, pool_size));
 
                 if (db_type == "sqlite3") {
@@ -90,7 +90,7 @@ namespace mb {
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
 #else
-                    LogOrigin::dbWarn("PostgreSQL Not Implemented",
+                    mbApp.logger().warn("Database", "PostgreSQL Not Implemented",
                                       "Database Connection for `PostgreSQL` has not been implemented yet!");
                     return false;
 #endif
@@ -105,21 +105,21 @@ namespace mb {
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
 #else
-                    LogOrigin::dbWarn("MySQL Not Available",
+                    mbApp.logger().warn("Database", "MySQL Not Available",
                                       "MySQL support was not enabled at build time. Rebuild with -DMB_DB_MYSQL=ON");
                     return false;
 #endif
                 } else {
-                    LogOrigin::dbWarn("Database Type Not Implemented",
+                    mbApp.logger().warn("Database", "Database Type Not Implemented",
                                       fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));
                     return false;
                 }
             }
         } catch (const std::exception &e) {
-            LogOrigin::dbCritical("Connection Error", fmt::format("Database Connection error: {}", e.what()));
+            mbApp.logger().critical("Database", "Connection Error", fmt::format("Database Connection error: {}", e.what()));
             return false;
         } catch (...) {
-            LogOrigin::dbCritical("Connection Error", "Database Connection error: Unknown Error");
+            mbApp.logger().critical("Database", "Connection Error", "Database Connection error: Unknown Error");
             return false;
         }
 
@@ -148,16 +148,16 @@ namespace mb {
             try {
                 if (soci::session &sess = m_connPool->at(i); sess.is_connected()) {
                     sess.close();
-                    LogOrigin::dbDebug("Session Shutdown",
+                    mbApp.logger().debug("Database", "Session Shutdown",
                                        fmt::format("DB Shutdown: Closing soci::session object  {} of {} connections",
                                                    i + 1, pool_size));
                 } else {
-                    LogOrigin::dbDebug("Session Shutdown", fmt::format(
+                    mbApp.logger().debug("Database", "Session Shutdown", fmt::format(
                                            "DB Shutdown: soci::session object at index `{}` of {} connections is not connected.",
                                            i + 1, pool_size));
                 }
             } catch (const soci::soci_error &e) {
-                LogOrigin::dbCritical("Disconnection Error",
+                mbApp.logger().critical("Database", "Disconnection Error",
                                       fmt::format("Database disconnection soci::error at index `{}`: {}", i, e.what()));
             } catch (...) {
                 // Ignore other errors during session close
@@ -167,7 +167,7 @@ namespace mb {
         // Reset the connection pool
         m_connPool.reset();
 
-        LogOrigin::dbDebug("Shutdown Complete", "DB Shutdown: Session disconnection completed.");
+        mbApp.logger().debug("Database", "Shutdown Complete", "DB Shutdown: Session disconnection completed.");
     }
 
     bool Database::createSysTables() const {
@@ -285,7 +285,7 @@ namespace mb {
             return true;
         } catch (std::exception &e) {
             tr.rollback();
-            LogOrigin::dbCritical("System Tables Creation Failed",
+            mbApp.logger().critical("Database", "System Tables Creation Failed",
                                   fmt::format("Create System Tables Failed: {}", e.what()));
             return false;
         }
@@ -351,7 +351,7 @@ namespace mb {
                         *sql << "PRAGMA wal_checkpoint(TRUNCATE)";
                     }
                 } catch (std::exception &e) {
-                    LogOrigin::dbCritical("SOCI Connection Error",
+                    mbApp.logger().critical("Database", "SOCI Connection Error",
                                           fmt::format("Database Connection SOCI::Error: {}", e.what()));
                 }
             }
@@ -396,7 +396,7 @@ namespace mb {
         const int nargs = duk_get_top(ctx);
 
         if (nargs < 1) {
-            LogOrigin::dbCritical("Invalid Arguments", "[JS] Expected at least 1 argument (query string)");
+            mbApp.logger().critical("Database", "Invalid Arguments", "[JS] Expected at least 1 argument (query string)");
             duk_error(ctx, DUK_ERR_TYPE_ERROR, "Expected at least 1 argument (query string)");
             return DUK_RET_TYPE_ERROR;
         }
@@ -411,7 +411,7 @@ namespace mb {
         try {
             for (int i = 1; i < nargs; i++) {
                 if (!duk_is_object(ctx, i)) {
-                    LogOrigin::dbCritical("Invalid Arguments", "[JS] Arguments after query must be objects.");
+                    mbApp.logger().critical("Database", "Invalid Arguments", "[JS] Arguments after query must be objects.");
                     duk_error(ctx, DUK_ERR_TYPE_ERROR, "Arguments after query must be objects");
                     return DUK_RET_TYPE_ERROR;
                 }
@@ -430,56 +430,56 @@ namespace mb {
                     // Parse into nlohmann::json
                     json_obj = nlohmann::json::parse(json_str);
                 } catch (const std::exception &e) {
-                    LogOrigin::dbCritical("Parsing Exception", fmt::format("[JS] Parsing exception: {}", e.what()));
+                    mbApp.logger().critical("Database", "Parsing Exception", fmt::format("[JS] Parsing exception: {}", e.what()));
                 } catch (const char *e) {
-                    LogOrigin::dbCritical("Parsing Exception", "[JS] Unknown Parsing exception");
+                    mbApp.logger().critical("Database", "Parsing Exception", "[JS] Unknown Parsing exception");
                 }
-                LogOrigin::dbTrace("Parsing Complete", fmt::format("After Parsing, object? `{}`", json_obj.dump()));
+                mbApp.logger().trace("Database", "Parsing Complete", fmt::format("After Parsing, object? `{}`", json_obj.dump()));
 
                 for (auto &[key, value]: json_obj.items()) {
                     if (value.is_string()) {
                         auto str_val = value.get<std::string>();
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Str Value: `{}` - `{}`", key, str_val));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Str Value: `{}` - `{}`", key, str_val));
                         vals.set(key, str_val);
-                        LogOrigin::dbTrace("Value Binding", "[JS] After Set Value");
-                        LogOrigin::dbTrace("Value Binding",
+                        mbApp.logger().trace("Database", "Value Binding", "[JS] After Set Value");
+                        mbApp.logger().trace("Database", "Value Binding",
                                            fmt::format("[JS] After Set Value To: `{}`", vals.get<std::string>(key)));
                     } else if (value.is_number_integer()) {
                         int int_val = value.get<int>();
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Int Value: `{}`", int_val));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Int Value: `{}`", int_val));
                         vals.set(key, int_val);
                     } else if (value.is_number_float()) {
                         double double_val = value.get<double>();
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Double Value: `{}`", double_val));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Double Value: `{}`", double_val));
                         vals.set(key, double_val);
                     } else if (value.is_boolean()) {
                         bool bool_val = value.get<bool>();
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Bool Value: `{}`", bool_val));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Bool Value: `{}`", bool_val));
                         vals.set(key, bool_val);
                     } else if (value.is_null()) {
                         std::optional<int> val;
-                        LogOrigin::dbTrace("Value Binding", "[JS] Null Value: `null`");
+                        mbApp.logger().trace("Database", "Value Binding", "[JS] Null Value: `null`");
                         vals.set(key, val, soci::i_null);
                     } else if (value.is_object() || value.is_array()) {
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] JSON Value: `{}`", value.dump()));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] JSON Value: `{}`", value.dump()));
                         vals.set(key, value);
                     } else {
                         auto err = std::format("Could not cast type at {} to DB supported types.", (i - 1));
-                        LogOrigin::dbCritical("Value Casting Error", fmt::format("[JS] Casting Value > {}", err));
+                        mbApp.logger().critical("Database", "Value Casting Error", fmt::format("[JS] Casting Value > {}", err));
                         duk_error(ctx, DUK_ERR_TYPE_ERROR, err.c_str());
                         return DUK_RET_TYPE_ERROR;
                     }
                 }
             }
         } catch (const std::exception &e) {
-            LogOrigin::dbCritical("Binding Values Failed",
+            mbApp.logger().critical("Database", "Binding Values Failed",
                                   fmt::format("[JS] Getting Binding Values Failed: Why? {}", e.what()));
         }
 
         // Get SQL Session
         auto sql = session();
 
-        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] soci::value binding? {}", nargs - 1));
+        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] soci::value binding? {}", nargs - 1));
 
         // Execute SQL Statement
         soci::row data_row;
@@ -494,7 +494,7 @@ namespace mb {
             results.push_back(obj);
         }
 
-        LogOrigin::dbTrace("Query Results", fmt::format("[JS] Results: {}", results.dump()));
+        mbApp.logger().trace("Database", "Query Results", fmt::format("[JS] Results: {}", results.dump()));
 
         if (results.empty()) {
             // Return null

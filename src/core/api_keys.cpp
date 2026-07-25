@@ -4,6 +4,9 @@
 #include "mantisbase/utils/utils.h"
 
 namespace mb {
+    ApiKeyManager::ApiKeyManager(const MantisBase &app) : IMantisBase(app) {
+    }
+
     ApiKeyResult ApiKeyManager::generateApiKey() {
         const auto random_hex = generateSecureRandom(32);
         const std::string raw_key = "mb_sk_" + random_hex;
@@ -23,7 +26,7 @@ namespace mb {
         auto [id, key, key_hash] = generateApiKey();
         auto now = getCurrentTimestampUTC();
 
-        const auto& sql = mApp.db().session();
+        const auto &sql = mbApp().db().session();
 
         std::string perms_str = permissions.dump();
         std::string exp = expires_at.empty() ? "" : expires_at;
@@ -31,13 +34,14 @@ namespace mb {
         if (exp.empty()) {
             *sql << "INSERT INTO mb_api_keys (id, entity_name, user_id, key_hash, label, permissions, created) "
                     "VALUES (:id, :entity, :user_id, :hash, :label, :perms, :created)",
-                soci::use(id), soci::use(entity_name), soci::use(user_id),
-                soci::use(key_hash), soci::use(label), soci::use(perms_str), soci::use(now);
+                    soci::use(id), soci::use(entity_name), soci::use(user_id),
+                    soci::use(key_hash), soci::use(label), soci::use(perms_str), soci::use(now);
         } else {
-            *sql << "INSERT INTO mb_api_keys (id, entity_name, user_id, key_hash, label, permissions, created, expires_at) "
+            *sql <<
+                    "INSERT INTO mb_api_keys (id, entity_name, user_id, key_hash, label, permissions, created, expires_at) "
                     "VALUES (:id, :entity, :user_id, :hash, :label, :perms, :created, :exp)",
-                soci::use(id), soci::use(entity_name), soci::use(user_id),
-                soci::use(key_hash), soci::use(label), soci::use(perms_str), soci::use(now), soci::use(exp);
+                    soci::use(id), soci::use(entity_name), soci::use(user_id),
+                    soci::use(key_hash), soci::use(label), soci::use(perms_str), soci::use(now), soci::use(exp);
         }
 
         return {
@@ -52,14 +56,14 @@ namespace mb {
     }
 
     json ApiKeyManager::list(const std::string &entity_name, const std::string &user_id) const {
-        const auto& sql = mApp.db().session();
+        const auto &sql = mbApp().db().session();
         const soci::rowset<soci::row> rows = (sql->prepare <<
-            "SELECT id, entity_name, user_id, label, permissions, last_used, created, expires_at "
-            "FROM mb_api_keys WHERE entity_name = :entity AND user_id = :uid",
-            soci::use(entity_name), soci::use(user_id));
+                                              "SELECT id, entity_name, user_id, label, permissions, last_used, created, expires_at "
+                                              "FROM mb_api_keys WHERE entity_name = :entity AND user_id = :uid",
+                                              soci::use(entity_name), soci::use(user_id));
 
         json result = json::array();
-        for (const auto &row : rows) {
+        for (const auto &row: rows) {
             json item;
             item["id"] = row.get<std::string>(0);
             item["entity_name"] = row.get<std::string>(1);
@@ -76,9 +80,9 @@ namespace mb {
 
     bool ApiKeyManager::revoke(const std::string &key_id, const std::string &entity_name,
                                const std::string &user_id) const {
-        const auto& sql = mApp.db().session();
+        const auto &sql = mbApp().db().session();
         *sql << "DELETE FROM mb_api_keys WHERE id = :id AND entity_name = :entity AND user_id = :uid",
-            soci::use(key_id), soci::use(entity_name), soci::use(user_id);
+                soci::use(key_id), soci::use(entity_name), soci::use(user_id);
 
         int affected = 0;
         *sql << "SELECT changes()", soci::into(affected);
@@ -86,11 +90,11 @@ namespace mb {
     }
 
     std::optional<json> ApiKeyManager::lookupByHash(const std::string &key_hash) const {
-        const auto& sql = mApp.db().session();
+        const auto &sql = mbApp().db().session();
         soci::row row;
         *sql << "SELECT id, entity_name, user_id, label, permissions, last_used, created, expires_at "
                 "FROM mb_api_keys WHERE key_hash = :hash",
-            soci::use(key_hash), soci::into(row);
+                soci::use(key_hash), soci::into(row);
 
         if (!sql->got_data()) {
             return std::nullopt;
@@ -99,7 +103,7 @@ namespace mb {
         auto now = getCurrentTimestampUTC();
         auto key_id = row.get<std::string>(0);
         *sql << "UPDATE mb_api_keys SET last_used = :now WHERE id = :id",
-            soci::use(now), soci::use(key_id);
+                soci::use(now), soci::use(key_id);
 
         // Check expiration
         if (row.get_indicator(7) != soci::i_null) {
@@ -121,7 +125,7 @@ namespace mb {
         return result;
     }
 
-    json ApiKeyManager::listAdmin() {
+    json ApiKeyManager::listAdmin() const {
         return list("mb_admins", "");
     }
 

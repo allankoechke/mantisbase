@@ -17,7 +17,7 @@
 namespace mb {
     class SSEMgr;
 
-    class Router {
+    class Router: public IMantisBase {
     public:
         explicit Router(const MantisBase& app);
         ~Router();
@@ -38,8 +38,8 @@ namespace mb {
         const json &schemaCache(const std::string &table_name) const;
         bool hasSchemaCache(const std::string &table_name) const;
         Entity schemaCacheEntity(const std::string &table_name) const;
-        void addSchemaCache(const nlohmann::json &entity_schema);
-        void updateSchemaCache(const std::string &old_entity_name, const json &new_schema);
+        void addSchemaCache(const nlohmann::json &entity_schema) const;
+        void updateSchemaCache(const std::string &old_entity_name, const json &new_schema) const;
         void removeSchemaCache(const std::string &entity_name) const;
 
         void addSchemaCacheLocked(const nlohmann::json &entity_schema) const;
@@ -92,14 +92,13 @@ namespace mb {
         static drogon::HttpResponsePtr default404Response();
 
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogin();
-        std::function<void(MantisRequest &, MantisResponse &)> handleAdminLogin();
-        std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh();
+        static std::function<void(MantisRequest &, MantisResponse &)> handleAdminLogin();
+        std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh() const;
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogout();
         std::function<void(MantisRequest &, MantisResponse &)> handleSetupAdmin();
 
         static std::function<void(const MantisRequest &, MantisResponse &)> handleLogs();
 
-        const MantisBase &mApp;
         RouteRegistry m_routeRegistry;
         std::unique_ptr<SSEMgr> m_sseMgr;
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
