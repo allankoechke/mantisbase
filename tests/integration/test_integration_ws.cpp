@@ -46,12 +46,46 @@ protected:
     int port{0};
 };
 
-TEST_F(IntegrationWSTest, WebSocketConnectsAndReceivesWelcome) {
+struct ScopedWebSocketClient {
     trantor::EventLoopThread loopThread;
-    loopThread.run();
+    drogon::WebSocketClientPtr client;
 
-    auto wsClient = drogon::WebSocketClient::newWebSocketClient(
-        std::format("ws://127.0.0.1:{}", port), loopThread.getLoop());
+    explicit ScopedWebSocketClient(const std::string& url) {
+        loopThread.run();
+        client = drogon::WebSocketClient::newWebSocketClient(url, loopThread.getLoop());
+    }
+
+    void shutdown() {
+        if (!client) {
+            return;
+        }
+
+        if (auto* loop = loopThread.getLoop()) {
+            std::promise<void> done;
+            auto doneFuture = done.get_future();
+            loop->runInLoop([this, &done]() {
+                client->setMessageHandler(
+                    [](std::string&&, const drogon::WebSocketClientPtr&,
+                       const drogon::WebSocketMessageType&) {});
+                client->setConnectionClosedHandler(
+                    [](const drogon::WebSocketClientPtr&) {});
+                client->stop();
+                client.reset();
+                done.set_value();
+            });
+            doneFuture.wait();
+        } else {
+            client->stop();
+            client.reset();
+        }
+    }
+
+    ~ScopedWebSocketClient() { shutdown(); }
+};
+
+TEST_F(IntegrationWSTest, WebSocketConnectsAndReceivesWelcome) {
+    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
+    auto& wsClient = ws.client;
 
     std::promise<std::string> welcomePromise;
     auto welcomeFuture = welcomePromise.get_future();
@@ -95,11 +129,8 @@ TEST_F(IntegrationWSTest, WebSocketConnectsAndReceivesWelcome) {
 }
 
 TEST_F(IntegrationWSTest, WebSocketPingPong) {
-    trantor::EventLoopThread loopThread;
-    loopThread.run();
-
-    auto wsClient = drogon::WebSocketClient::newWebSocketClient(
-        std::format("ws://127.0.0.1:{}", port), loopThread.getLoop());
+    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
+    auto& wsClient = ws.client;
 
     std::promise<std::string> pongPromise;
     auto pongFuture = pongPromise.get_future();
@@ -153,11 +184,8 @@ TEST_F(IntegrationWSTest, WebSocketPingPong) {
 }
 
 TEST_F(IntegrationWSTest, WebSocketSubscribeAck) {
-    trantor::EventLoopThread loopThread;
-    loopThread.run();
-
-    auto wsClient = drogon::WebSocketClient::newWebSocketClient(
-        std::format("ws://127.0.0.1:{}", port), loopThread.getLoop());
+    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
+    auto& wsClient = ws.client;
 
     std::promise<std::string> subPromise;
     auto subFuture = subPromise.get_future();

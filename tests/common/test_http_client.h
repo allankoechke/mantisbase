@@ -34,18 +34,42 @@ public:
         client_->setUserAgent("MantisBase-Test/1.0");
     }
 
-    ~Client() = default;
+    ~Client() { shutdown(); }
+
+    void shutdown() {
+        if (!client_) {
+            return;
+        }
+
+        if (auto* loop = loopThread_.getLoop()) {
+            std::promise<void> done;
+            auto doneFuture = done.get_future();
+            loop->runInLoop([this, &done]() {
+                client_.reset();
+                done.set_value();
+            });
+            doneFuture.wait();
+        } else {
+            client_.reset();
+        }
+    }
 
     void set_connection_timeout(int sec, int usec) {
         // Drogon client handles timeouts differently
+        (void)sec;
+        (void)usec;
     }
 
     void set_read_timeout(int sec, int usec) {
         // Drogon client handles timeouts differently
+        (void)sec;
+        (void)usec;
     }
 
-    std::unique_ptr<Response> Get(const std::string& path, const Headers& headers = {}) {
-        return sendRequest(drogon::Get, path, headers);
+    std::unique_ptr<Response> Get(const std::string& path,
+                                  const Headers& headers = {},
+                                  double timeoutSec = 10.0) {
+        return sendRequest(drogon::Get, path, headers, "", "", timeoutSec);
     }
 
     std::unique_ptr<Response> Post(const std::string& path,
@@ -78,7 +102,8 @@ private:
                                            const std::string& path,
                                            const Headers& headers,
                                            const std::string& body = "",
-                                           const std::string& content_type = "") {
+                                           const std::string& content_type = "",
+                                           double timeoutSec = 10.0) {
         auto req = drogon::HttpRequest::newHttpRequest();
         req->setMethod(method);
         req->setPath(path);
@@ -105,15 +130,15 @@ private:
                 r->body = std::string(resp->body());
             }
             promise->set_value(std::move(r));
-        }, 10.0);  // 10 second timeout
+        }, timeoutSec);
 
         return future.get();
     }
 
     std::string host_;
     int port_;
-    trantor::EventLoopThread loopThread_;
     drogon::HttpClientPtr client_;
+    trantor::EventLoopThread loopThread_;
 };
 
 } // namespace TestHttp

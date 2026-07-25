@@ -34,9 +34,11 @@ inline void setTestEnvVars() {
 #ifdef _WIN32
     _putenv_s("MB_DISABLE_RATE_LIMIT", "1");
     _putenv_s("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "1");
+    _putenv_s("MB_JWT_SECRET", "mantisbase-test-jwt-secret-do-not-use-in-production");
 #else
     setenv("MB_DISABLE_RATE_LIMIT", "1", 1);
     setenv("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "1", 1);
+    setenv("MB_JWT_SECRET", "mantisbase-test-jwt-secret-do-not-use-in-production", 1);
 #endif
 }
 
@@ -94,7 +96,7 @@ inline fs::path makeTestBaseDir(const std::string &prefix) {
 
 inline mb::json buildAppConfig(const fs::path &baseDir, const std::optional<int> &port = std::nullopt) {
     mb::json args;
-    args["dev"] = true;
+    // args["dev"] = true;
     args["database"] = "SQLITE";
     args["dataDir"] = (baseDir / "data").string();
     args["publicDir"] = (baseDir / "www").string();

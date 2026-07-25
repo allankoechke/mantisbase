@@ -74,6 +74,9 @@ target_link_libraries(mantisbase_tests PRIVATE
 
 include(GoogleTest)
 add_test(NAME all_mantisbase_tests COMMAND mantisbase_tests)
+set_tests_properties(all_mantisbase_tests PROPERTIES
+        ENVIRONMENT "MB_JWT_SECRET=mantisbase-test-jwt-secret-do-not-use-in-production;MB_DISABLE_RATE_LIMIT=1;MB_DISABLE_ADMIN_ON_FIRST_BOOT=1"
+)
 
 # Benchmarks (optional, off by default)
 option(MB_BUILD_BENCHMARKS "Build MantisBase Benchmarks" OFF)
