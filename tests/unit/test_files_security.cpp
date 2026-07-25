@@ -11,7 +11,7 @@ class FilesSecurityTest : public ::testing::Test {
 protected:
     void SetUp() override {
         // Create a temporary test directory
-        test_base = fs::temp_directory_path() / "mantisbase_test_files" / mb::generateShortId();
+        test_base = fs::temp_directory_path() / "mantisbase_tests" / ("files_" + mb::generateShortId());
         fs::create_directories(test_base);
         
         // Set up test entity name
@@ -75,7 +75,7 @@ TEST_F(FilesSecurityTest, PathTraversalPrevention) {
     EXPECT_TRUE(fs::exists(valid_path));
     
     // Test path traversal attempts
-    // Note: getCanonicalPath and isCanonicalPath use filesBaseDir() which is based on MantisBase::instance().dataDir()
+    // Note: getCanonicalPath and isCanonicalPath use filesBaseDir() from a MantisBase dataDir()
     // For unit tests, we need to test the logic differently
     
     // Test that "../" in entity name is rejected

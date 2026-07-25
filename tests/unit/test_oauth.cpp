@@ -3,19 +3,10 @@
 #include "mantisbase/utils/crypto_utils.h"
 #include "mantisbase/core/oauth.h"
 #include "mantisbase/mantisbase.h"
-#include "../common/test_environment.h"
+#include "../common/test_fixture.h"
 #include "../common/test_config.h"
 
-class OAuthTestFixture : public ::testing::Test {
-protected:
-    void SetUp() override {
-        app = &mb::MantisBase::instance();
-    }
-
-    mb::MantisBase* app = nullptr;
-};
-
-TEST_F(OAuthTestFixture, PKCEVerifierGeneration) {
+TEST(OAuthCrypto, PKCEVerifierGeneration) {
     auto verifier = mb::generatePKCEVerifier();
     EXPECT_GE(verifier.size(), 43u);
 
@@ -26,19 +17,18 @@ TEST_F(OAuthTestFixture, PKCEVerifierGeneration) {
     }
 }
 
-TEST_F(OAuthTestFixture, PKCEChallengeGeneration) {
+TEST(OAuthCrypto, PKCEChallengeGeneration) {
     auto verifier = mb::generatePKCEVerifier();
     auto challenge = mb::generatePKCEChallenge(verifier);
 
     EXPECT_FALSE(challenge.empty());
     EXPECT_NE(challenge, verifier);
 
-    // Verify same verifier produces same challenge
     auto challenge2 = mb::generatePKCEChallenge(verifier);
     EXPECT_EQ(challenge, challenge2);
 }
 
-TEST_F(OAuthTestFixture, PKCEDifferentVerifiersDifferentChallenges) {
+TEST(OAuthCrypto, PKCEDifferentVerifiersDifferentChallenges) {
     auto verifier1 = mb::generatePKCEVerifier();
     auto verifier2 = mb::generatePKCEVerifier();
 
@@ -50,7 +40,7 @@ TEST_F(OAuthTestFixture, PKCEDifferentVerifiersDifferentChallenges) {
     EXPECT_NE(challenge1, challenge2);
 }
 
-TEST_F(OAuthTestFixture, SHA256HashConsistency) {
+TEST(OAuthCrypto, SHA256HashConsistency) {
     auto hash1 = mb::sha256Hex("test_input");
     auto hash2 = mb::sha256Hex("test_input");
     EXPECT_EQ(hash1, hash2);
@@ -59,12 +49,12 @@ TEST_F(OAuthTestFixture, SHA256HashConsistency) {
     EXPECT_NE(hash1, hash3);
 }
 
-TEST_F(OAuthTestFixture, SHA256HashLength) {
+TEST(OAuthCrypto, SHA256HashLength) {
     auto hash = mb::sha256Hex("hello");
     EXPECT_EQ(hash.size(), 64u);
 }
 
-TEST_F(OAuthTestFixture, Base64UrlRoundTrip) {
+TEST(OAuthCrypto, Base64UrlRoundTrip) {
     std::string original = "Hello, World! This is a test.";
     auto encoded = mb::base64UrlEncode(original);
 
@@ -78,7 +68,7 @@ TEST_F(OAuthTestFixture, Base64UrlRoundTrip) {
     EXPECT_EQ(result, original);
 }
 
-TEST_F(OAuthTestFixture, SecureRandomUniqueness) {
+TEST(OAuthCrypto, SecureRandomUniqueness) {
     auto rand1 = mb::generateSecureRandom(32);
     auto rand2 = mb::generateSecureRandom(32);
 
@@ -87,8 +77,8 @@ TEST_F(OAuthTestFixture, SecureRandomUniqueness) {
     EXPECT_NE(rand1, rand2);
 }
 
-TEST_F(OAuthTestFixture, AES256GCMRoundTrip) {
-    std::string key = "12345678901234567890123456789012"; // 32 bytes
+TEST(OAuthCrypto, AES256GCMRoundTrip) {
+    std::string key = "12345678901234567890123456789012";
     std::string plaintext = "sensitive OAuth token data";
 
     auto encrypted = mb::aes256GcmEncrypt(plaintext, key);
@@ -99,7 +89,7 @@ TEST_F(OAuthTestFixture, AES256GCMRoundTrip) {
     EXPECT_EQ(decrypted, plaintext);
 }
 
-TEST_F(OAuthTestFixture, AES256GCMWrongKey) {
+TEST(OAuthCrypto, AES256GCMWrongKey) {
     std::string key1 = "12345678901234567890123456789012";
     std::string key2 = "abcdefghijklmnopqrstuvwxyz123456";
     std::string plaintext = "sensitive data";
@@ -109,48 +99,48 @@ TEST_F(OAuthTestFixture, AES256GCMWrongKey) {
     EXPECT_THROW(mb::aes256GcmDecrypt(encrypted, key2), std::runtime_error);
 }
 
-TEST_F(OAuthTestFixture, AES256GCMShortKeyFails) {
+TEST(OAuthCrypto, AES256GCMShortKeyFails) {
     std::string short_key = "too_short";
     std::string plaintext = "test";
 
     EXPECT_THROW(mb::aes256GcmEncrypt(plaintext, short_key), std::runtime_error);
 }
 
-TEST_F(OAuthTestFixture, HandleCallbackRejectsInvalidState) {
-    EXPECT_THROW(
-        mb::OAuthManager::handleCallback("test_entity", "google", "fake_code", "invalid_state_value"),
-        std::runtime_error
-    );
-}
-
-TEST_F(OAuthTestFixture, HandleCallbackRejectsExpiredState) {
-    auto sql = app->db().session();
-    auto state_id = mb::generateTimeBasedId();
-    std::string state = mb::generateSecureRandom(32);
-    std::string verifier = mb::generatePKCEVerifier();
-
-    // Insert an already-expired state
-    *sql << "INSERT INTO mb_oauth_states (id, state, pkce_verifier, entity_name, provider_id, redirect_uri, expires_at) "
-            "VALUES (:id, :state, :verifier, 'test_entity', 'fake_provider', 'http://localhost/cb', datetime('now', '-1 hour'))",
-        soci::use(state_id), soci::use(state), soci::use(verifier);
-
-    EXPECT_THROW(
-        mb::OAuthManager::handleCallback("test_entity", "google", "fake_code", state),
-        std::runtime_error
-    );
-}
-
-TEST_F(OAuthTestFixture, AES256GCMDifferentCiphertexts) {
+TEST(OAuthCrypto, AES256GCMDifferentCiphertexts) {
     std::string key = "12345678901234567890123456789012";
     std::string plaintext = "same plaintext";
 
     auto encrypted1 = mb::aes256GcmEncrypt(plaintext, key);
     auto encrypted2 = mb::aes256GcmEncrypt(plaintext, key);
 
-    // Due to random IV, same plaintext produces different ciphertexts
     EXPECT_NE(encrypted1, encrypted2);
 
-    // But both decrypt to the same plaintext
     EXPECT_EQ(mb::aes256GcmDecrypt(encrypted1, key), plaintext);
     EXPECT_EQ(mb::aes256GcmDecrypt(encrypted2, key), plaintext);
+}
+
+class OAuthDbTest : public MbAppFixture {
+};
+
+TEST_F(OAuthDbTest, HandleCallbackRejectsInvalidState) {
+    EXPECT_THROW(
+        mantis().auth().oauth().handleCallback("test_entity", "google", "fake_code", "invalid_state_value"),
+        std::runtime_error
+    );
+}
+
+TEST_F(OAuthDbTest, HandleCallbackRejectsExpiredState) {
+    auto sql = mantis().db().session();
+    auto state_id = mb::generateTimeBasedId();
+    std::string state = mb::generateSecureRandom(32);
+    std::string verifier = mb::generatePKCEVerifier();
+
+    *sql << "INSERT INTO mb_oauth_states (id, state, pkce_verifier, entity_name, provider_id, redirect_uri, expires_at) "
+            "VALUES (:id, :state, :verifier, 'test_entity', 'fake_provider', 'http://localhost/cb', datetime('now', '-1 hour'))",
+        soci::use(state_id), soci::use(state), soci::use(verifier);
+
+    EXPECT_THROW(
+        mantis().auth().oauth().handleCallback("test_entity", "google", "fake_code", state),
+        std::runtime_error
+    );
 }

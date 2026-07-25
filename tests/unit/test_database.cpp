@@ -4,14 +4,17 @@
 
 #include <gtest/gtest.h>
 #include <mantisbase/mantis.h>
-#include "../common/test_environment.h"
+#include "../common/test_fixture.h"
 
-TEST(DatabaseTest, TestDatabaseConnected) {
-    EXPECT_TRUE(mb::MantisBase::instance().db().isConnected());
+class DatabaseTest : public MbAppFixture {
+};
+
+TEST_F(DatabaseTest, TestDatabaseConnected) {
+    EXPECT_TRUE(mantis().db().isConnected());
 }
 
-TEST(DatabaseTest, CheckSystemSchemaMigrated) {
-    auto& mApp = mb::MantisBase::instance();
+TEST_F(DatabaseTest, CheckSystemSchemaMigrated) {
+    auto &mApp = mantis();
     auto admin_entity = mApp.entity("mb_admins");
 
     EXPECT_EQ(admin_entity.type(), "auth");
@@ -19,7 +22,6 @@ TEST(DatabaseTest, CheckSystemSchemaMigrated) {
     EXPECT_TRUE(admin_entity.hasApi());
     EXPECT_TRUE(admin_entity.isSystem());
 
-    // Create schema, check fields
     mb::EntitySchema admin_schema = mb::EntitySchema::fromEntity(mApp, admin_entity);
 
     EXPECT_TRUE(admin_schema.hasField("id"));
@@ -43,23 +45,20 @@ TEST(DatabaseTest, CheckSystemSchemaMigrated) {
     EXPECT_EQ(c["validator"].get<std::string>(), "@password");
 }
 
-TEST(DatabaseTest, EntityOperations) {
-    const auto& mApp = mb::MantisBase::instance();
-    
-    // Check that we can get system entities
+TEST_F(DatabaseTest, EntityOperations) {
+    const auto &mApp = mantis();
+
     EXPECT_NO_THROW(auto _ = mApp.entity("mb_admins"));
     EXPECT_THROW(auto _ = mApp.entity("mb_tables"), mb::MantisException);
 
     const auto admin_entity = mApp.entity("mb_admins");
     EXPECT_TRUE(admin_entity.isSystem());
     EXPECT_EQ(admin_entity.type(), "auth");
-    
-    // Check entity methods
+
     EXPECT_TRUE(admin_entity.hasField("id"));
     EXPECT_TRUE(admin_entity.hasField("password"));
     EXPECT_TRUE(admin_entity.hasField("email"));
     EXPECT_TRUE(admin_entity.hasField("name"));
     EXPECT_TRUE(admin_entity.hasField("created"));
     EXPECT_TRUE(admin_entity.hasField("updated"));
-    // EXPECT_TRUE(admin_entity.isEmpty()); // When created, the table is empty
 }

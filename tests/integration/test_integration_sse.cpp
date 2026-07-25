@@ -2,24 +2,24 @@
 #include <nlohmann/json.hpp>
 #include <drogon/HttpClient.h>
 #include <trantor/net/EventLoopThread.h>
-#include "../common/test_environment.h"
+#include "../common/test_fixture.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
 #include "../common/test_http_client.h"
 
-class IntegrationSSETest : public ::testing::Test {
+class IntegrationSSETest : public MbServerFixture {
 protected:
     void SetUp() override {
-        auto &fixture = MbTestEnv::instance();
-        client = std::make_unique<TestHttp::Client>(fixture.client());
-        port = fixture.getPort();
-
-        adminToken = TestHelpers::createTestAdminToken(*client);
+        MbServerFixture::SetUp();
+        client = std::make_unique<TestHttp::Client>("127.0.0.1", getPort());
+        port = getPort();
+        adminToken = TestHelpers::createTestAdminToken(*client, mantis());
         createTestEntity();
     }
 
     void TearDown() override {
         TestHelpers::cleanupTestEntity(*client, "sse_test_items", adminToken);
+        MbServerFixture::TearDown();
     }
 
     void createTestEntity() {
@@ -30,11 +30,7 @@ protected:
         const nlohmann::json schema = {
             {"name", "sse_test_items"},
             {"type", "base"},
-            {"list", {{"mode", "public"}}},
-            {"get", {{"mode", "public"}}},
-            {"add", {{"mode", "public"}}},
-            {"update", {{"mode", "public"}}},
-            {"delete", {{"mode", "public"}}},
+            {"rules", TestHelpers::publicAccessRules()},
             {
                 "fields", nlohmann::json::array({
                     {{"name", "title"}, {"type", "string"}, {"required", true}}
@@ -73,7 +69,9 @@ TEST_F(IntegrationSSETest, SSEPostUpdateReturns404ForUnknownSession) {
         {"topics", nlohmann::json::array({"sse_test_items"})}
     };
 
-    auto res = client->Post("/api/v1/realtime", body.dump(), "application/json");
+    auto res = client->Post("/api/v1/realtime",
+                            TestHttp::Headers{{"Authorization", "Bearer " + adminToken}},
+                            body.dump(), "application/json");
     ASSERT_TRUE(res);
     EXPECT_EQ(res->status, 404);
 }

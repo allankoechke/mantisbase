@@ -4,10 +4,13 @@
 #include "mantisbase/core/models/entity_schema_field.h"
 #include "mantisbase/core/models/access_rules.h"
 #include <mantisbase/mantis.h>
+#include "../common/test_fixture.h"
 
-TEST(EntitySchema, EntitySchemaBaseType) {
-    // Base field type
-    mb::EntitySchema base{mb::MantisBase::instance(), "test", "base"};
+class ModelsAppTest : public MbAppFixture {
+};
+
+TEST_F(ModelsAppTest, EntitySchemaBaseType) {
+    mb::EntitySchema base{mantis(), "test", "base"};
 
     EXPECT_EQ(base.type(), "base");
     EXPECT_EQ(base.name(), "test");
@@ -32,9 +35,8 @@ TEST(EntitySchema, EntitySchemaBaseType) {
     EXPECT_EQ(base.field("created").type(), "date");
 }
 
-TEST(EntitySchema, EntitySchemaAuthType) {
-    // Auth Type
-    mb::EntitySchema auth{mb::MantisBase::instance(), "test", "auth"};
+TEST_F(ModelsAppTest, EntitySchemaAuthType) {
+    mb::EntitySchema auth{mantis(), "test", "auth"};
 
     EXPECT_EQ(auth.type(), "auth");
     EXPECT_EQ(auth.name(), "test");
@@ -61,9 +63,8 @@ TEST(EntitySchema, EntitySchemaAuthType) {
     EXPECT_EQ(c["validator"].get<std::string>(), "@password");
 }
 
-TEST(EntitySchema, EntitySchemaViewType) {
-    // View Type
-    const mb::EntitySchema view{mb::MantisBase::instance(), "test", "view"};
+TEST_F(ModelsAppTest, EntitySchemaViewType) {
+    const mb::EntitySchema view{mantis(), "test", "view"};
 
     EXPECT_EQ(view.type(), "view");
     EXPECT_EQ(view.name(), "test");
@@ -72,8 +73,8 @@ TEST(EntitySchema, EntitySchemaViewType) {
     EXPECT_TRUE(view.fields().empty());
 }
 
-TEST(EntitySchema, EntitySchemaAccessRules) {
-    mb::EntitySchema schema{mb::MantisBase::instance(), "test", "base"};
+TEST_F(ModelsAppTest, EntitySchemaAccessRules) {
+    mb::EntitySchema schema{mantis(), "test", "base"};
     
     // Set access rules with different modes
     schema.setListRule(mb::AccessRule("public", ""));
@@ -98,8 +99,8 @@ TEST(EntitySchema, EntitySchemaAccessRules) {
     EXPECT_EQ(schema.deleteRule().expr(), "auth.entity == \"mb_admins\"");
 }
 
-TEST(EntitySchema, EntitySchemaFieldOperations) {
-    mb::EntitySchema schema{mb::MantisBase::instance(), "test", "base"};
+TEST_F(ModelsAppTest, EntitySchemaFieldOperations) {
+    mb::EntitySchema schema{mantis(), "test", "base"};
     
     // Add custom fields
     mb::EntitySchemaField nameField("name", "string");
@@ -121,8 +122,8 @@ TEST(EntitySchema, EntitySchemaFieldOperations) {
     EXPECT_TRUE(schema.hasField("email"));
 }
 
-TEST(EntitySchema, EntitySchemaJSONConversion) {
-    mb::EntitySchema schema{mb::MantisBase::instance(), "test", "base"};
+TEST_F(ModelsAppTest, EntitySchemaJSONConversion) {
+    mb::EntitySchema schema{mantis(), "test", "base"};
     schema.addField(mb::EntitySchemaField("name", "string").setRequired(true));
     schema.setListRule(mb::AccessRule("public", ""));
 
@@ -134,7 +135,7 @@ TEST(EntitySchema, EntitySchemaJSONConversion) {
     EXPECT_TRUE(json.contains("fields"));
 
     // Create from JSON
-    auto newSchema = mb::EntitySchema::fromSchema(mb::MantisBase::instance(), json);
+    auto newSchema = mb::EntitySchema::fromSchema(mantis(), json);
     EXPECT_EQ(newSchema.name(), "test");
     EXPECT_EQ(newSchema.type(), "base");
     EXPECT_EQ(newSchema.listRule().mode(), "public");
@@ -195,8 +196,8 @@ TEST(EntitySchema, IndexDefinition) {
     EXPECT_EQ(idx2.columns[0], "email");
 }
 
-TEST(EntitySchema, SchemaWithIndexes) {
-    mb::EntitySchema schema{"test", "base"};
+TEST_F(ModelsAppTest, SchemaWithIndexes) {
+    mb::EntitySchema schema{mantis(), "test", "base"};
     EXPECT_TRUE(schema.indexes().empty());
 
     mb::IndexDefinition idx;
@@ -213,7 +214,7 @@ TEST(EntitySchema, SchemaWithIndexes) {
     EXPECT_EQ(j["indexes"].size(), 1);
     EXPECT_EQ(j["indexes"][0]["name"], "idx_test_name");
 
-    auto schema2 = mb::EntitySchema::fromSchema(j);
+    auto schema2 = mb::EntitySchema::fromSchema(mantis(), j);
     EXPECT_EQ(schema2.indexes().size(), 1);
     EXPECT_EQ(schema2.indexes()[0].name, "idx_test_name");
 
@@ -221,14 +222,14 @@ TEST(EntitySchema, SchemaWithIndexes) {
     EXPECT_TRUE(schema.indexes().empty());
 }
 
-TEST(EntitySchema, ViewEntityType) {
+TEST_F(ModelsAppTest, ViewEntityType) {
     nlohmann::json viewSchema = {
         {"name", "active_users"},
         {"type", "view"},
         {"view_query", "SELECT id, name FROM users WHERE active = 1"}
     };
 
-    auto schema = mb::EntitySchema::fromSchema(viewSchema);
+    auto schema = mb::EntitySchema::fromSchema(mantis(), viewSchema);
     EXPECT_EQ(schema.type(), "view");
     EXPECT_EQ(schema.name(), "active_users");
     EXPECT_EQ(schema.viewQuery(), "SELECT id, name FROM users WHERE active = 1");
@@ -239,8 +240,8 @@ TEST(EntitySchema, ViewEntityType) {
     EXPECT_FALSE(j.contains("fields"));
 }
 
-TEST(EntitySchema, ViewEntityRejectsFields) {
-    const mb::EntitySchema view{"test_view", "view"};
+TEST_F(ModelsAppTest, ViewEntityRejectsFields) {
+    const mb::EntitySchema view{mantis(), "test_view", "view"};
     EXPECT_TRUE(view.fields().empty());
     EXPECT_FALSE(view.hasField("anything"));
 }

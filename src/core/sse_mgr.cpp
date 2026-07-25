@@ -109,6 +109,9 @@ namespace mb {
                         updateAuthTokenForSSE()
                     }
         );
+
+        RealtimeWSController::initPathRouting();
+        drogon::app().registerController(std::make_shared<RealtimeWSController>(mbApp()));
     }
 
     std::string SSEMgr::createSession(const std::set<std::string> &initial_topics,

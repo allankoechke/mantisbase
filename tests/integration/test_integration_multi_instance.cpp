@@ -1,23 +1,23 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "../common/test_environment.h"
+#include "../common/test_fixture.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
 #include "../common/test_http_client.h"
 
-class MultiInstanceTest : public ::testing::Test {
+class MultiInstanceTest : public MbServerFixture {
 protected:
     void SetUp() override {
-        auto& fixture = MbTestEnv::instance();
-        client = std::make_unique<TestHttp::Client>(fixture.client());
-        port = fixture.getPort();
-
-        adminToken = TestHelpers::createTestAdminToken(*client);
+        MbServerFixture::SetUp();
+        client = std::make_unique<TestHttp::Client>("127.0.0.1", getPort());
+        port = getPort();
+        adminToken = TestHelpers::createTestAdminToken(*client, mantis());
     }
 
     void TearDown() override {
         TestHelpers::cleanupTestEntity(*client, "multi_inst_a", adminToken);
         TestHelpers::cleanupTestEntity(*client, "multi_inst_b", adminToken);
+        MbServerFixture::TearDown();
     }
 
     std::unique_ptr<TestHttp::Client> client;
@@ -39,11 +39,7 @@ TEST_F(MultiInstanceTest, IndependentEntitiesDontInterfere) {
     const nlohmann::json schema_a = {
         {"name", "multi_inst_a"},
         {"type", "base"},
-        {"list", {{"mode", "public"}}},
-        {"get", {{"mode", "public"}}},
-        {"add", {{"mode", "public"}}},
-        {"update", {{"mode", "public"}}},
-        {"delete", {{"mode", "public"}}},
+        {"rules", TestHelpers::publicAccessRules()},
         {"fields", nlohmann::json::array({
             {{"name", "label"}, {"type", "string"}, {"required", true}}
         })}
@@ -52,11 +48,7 @@ TEST_F(MultiInstanceTest, IndependentEntitiesDontInterfere) {
     const nlohmann::json schema_b = {
         {"name", "multi_inst_b"},
         {"type", "base"},
-        {"list", {{"mode", "public"}}},
-        {"get", {{"mode", "public"}}},
-        {"add", {{"mode", "public"}}},
-        {"update", {{"mode", "public"}}},
-        {"delete", {{"mode", "public"}}},
+        {"rules", TestHelpers::publicAccessRules()},
         {"fields", nlohmann::json::array({
             {{"name", "tag"}, {"type", "string"}, {"required", true}}
         })}
@@ -103,9 +95,7 @@ TEST_F(MultiInstanceTest, ConcurrentRequestsToSameInstance) {
     const nlohmann::json schema = {
         {"name", "multi_inst_a"},
         {"type", "base"},
-        {"list", {{"mode", "public"}}},
-        {"get", {{"mode", "public"}}},
-        {"add", {{"mode", "public"}}},
+        {"rules", TestHelpers::publicAccessRules()},
         {"fields", nlohmann::json::array({
             {{"name", "label"}, {"type", "string"}, {"required", true}}
         })}
@@ -143,7 +133,7 @@ TEST_F(MultiInstanceTest, ConcurrentRequestsToSameInstance) {
 }
 
 TEST_F(MultiInstanceTest, SubsystemsAccessible) {
-    auto& app = mb::MantisBase::instance();
+    auto &app = mantis();
 
     EXPECT_NO_THROW(app.db());
     EXPECT_NO_THROW(app.router());

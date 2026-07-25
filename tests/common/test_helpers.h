@@ -22,9 +22,8 @@ namespace TestHelpers {
         return false;
     }
 
-    inline std::string createTestAdminToken(TestHttp::Client& client) {
+    inline std::string createTestAdminToken(TestHttp::Client& client, mb::MantisBase& app) {
         try {
-            auto& app = mb::MantisBase::instance();
             auto admin_entity = app.entity("mb_admins");
 
             auto existing = admin_entity.queryFromCols(TestConfig::getAdminEmail(), {"id", "email"});
@@ -33,7 +32,7 @@ namespace TestHelpers {
                     {"email", TestConfig::getAdminEmail()},
                     {"password", TestConfig::getTestPassword()}
                 };
-                auto r = admin_entity.create(admin_data);
+                admin_entity.create(admin_data);
             }
 
             nlohmann::json login = {
@@ -50,17 +49,15 @@ namespace TestHelpers {
                     return response["data"]["token"].get<std::string>();
                 }
             }
-        } catch (const std::exception& e) {
+        } catch (const std::exception&) {
             try {
-                auto& app = mb::MantisBase::instance();
-
                 auto s_acc = app.entity("mb_service_acc");
                 auto record = s_acc.create({});
 
                 nlohmann::json claims;
                 claims["id"] = record["id"];
                 claims["entity"] = "mb_service_acc";
-                auto token = mb::Auth::createToken(claims, 30 * 60);
+                auto token = app.auth().createToken(claims, 30 * 60);
 
                 TestHttp::Headers headers = {{"Authorization", "Bearer " + token}};
                 nlohmann::json setupAdmin = {
@@ -106,6 +103,16 @@ namespace TestHelpers {
             {"email", email_prefix + "_" + unique_id + "@test.com"},
             {"password", TestConfig::getTestPassword()},
             {"name", "Test User " + unique_id}
+        };
+    }
+
+    inline nlohmann::json publicAccessRules() {
+        return {
+            {"list", {{"mode", "public"}}},
+            {"get", {{"mode", "public"}}},
+            {"add", {{"mode", "public"}}},
+            {"update", {{"mode", "public"}}},
+            {"delete", {{"mode", "public"}}}
         };
     }
 

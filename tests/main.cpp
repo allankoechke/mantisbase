@@ -1,10 +1,8 @@
 #include <gtest/gtest.h>
-#include "common/test_environment.h"
+#include "common/test_fixture.h"
 
-std::atomic<bool> MbTestEnv::server_ready{false};
-
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
-    ::testing::AddGlobalTestEnvironment(new MbTestEnv());
+    ::testing::AddGlobalTestEnvironment(new MbTestProcessGuard());
     return RUN_ALL_TESTS();
 }

@@ -157,7 +157,7 @@ namespace mb {
 
                 auto f = body.at(field_name).get<std::string>();
                 if (const std::regex r_pattern(reg); !std::regex_match(f, r_pattern)) {
-                    return std::nullopt;
+                    return err;
                 }
             }
         }

@@ -2,24 +2,24 @@
 #include <nlohmann/json.hpp>
 #include <drogon/WebSocketClient.h>
 #include <trantor/net/EventLoopThread.h>
-#include "../common/test_environment.h"
+#include "../common/test_fixture.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
 #include "../common/test_http_client.h"
 
-class IntegrationWSTest : public ::testing::Test {
+class IntegrationWSTest : public MbServerFixture {
 protected:
     void SetUp() override {
-        auto &fixture = MbTestEnv::instance();
-        client = std::make_unique<TestHttp::Client>(fixture.client());
-        port = fixture.getPort();
-
-        adminToken = TestHelpers::createTestAdminToken(*client);
+        MbServerFixture::SetUp();
+        client = std::make_unique<TestHttp::Client>("127.0.0.1", getPort());
+        port = getPort();
+        adminToken = TestHelpers::createTestAdminToken(*client, mantis());
         createTestEntity();
     }
 
     void TearDown() override {
         TestHelpers::cleanupTestEntity(*client, "ws_test_items", adminToken);
+        MbServerFixture::TearDown();
     }
 
     void createTestEntity() {
@@ -30,11 +30,7 @@ protected:
         const nlohmann::json schema = {
             {"name", "ws_test_items"},
             {"type", "base"},
-            {"list", {{"mode", "public"}}},
-            {"get", {{"mode", "public"}}},
-            {"add", {{"mode", "public"}}},
-            {"update", {{"mode", "public"}}},
-            {"delete", {{"mode", "public"}}},
+            {"rules", TestHelpers::publicAccessRules()},
             {
                 "fields", nlohmann::json::array({
                     {{"name", "title"}, {"type", "string"}, {"required", true}}
