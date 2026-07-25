@@ -145,6 +145,8 @@ namespace mb {
         }
     }
 
+    const drogon::HttpRequestPtr & MantisRequest::drogonRequest() const { return m_req; }
+
 #ifdef MB_SCRIPTING_ENABLED
     void MantisRequest::registerDuktapeMethods() {
         // TODO: Re-enable after Drogon migration

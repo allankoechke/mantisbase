@@ -47,7 +47,7 @@ namespace mb {
     }
 
     std::unique_ptr<MantisBase> MantisBase::create(const int argc, char **argv) {
-        auto app = std::make_unique<MantisBase>(new MantisBase());
+        auto app = std::unique_ptr<MantisBase>(new MantisBase());
         // Initialize the app with passed in args
         app->init(argc, argv);
 
@@ -56,7 +56,7 @@ namespace mb {
     }
 
     std::unique_ptr<MantisBase> MantisBase::create(const json &config) {
-        auto app = std::make_unique<MantisBase>(new MantisBase());
+        auto app = std::unique_ptr<MantisBase>(new MantisBase());
 
         // Start from a clean slate: on a create() -> close() -> create() cycle
         // (e.g. across test runs in one process) the arg vector would otherwise

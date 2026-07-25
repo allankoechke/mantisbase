@@ -82,7 +82,7 @@ namespace mb {
         std::string getBearerTokenAuth() const;
         std::pair<nlohmann::json, std::string> getBodyAsJson() const;
 
-        const drogon::HttpRequestPtr& drogonRequest() const { return m_req; }
+        const drogon::HttpRequestPtr& drogonRequest() const;
 
         template<typename T>
         void set(const std::string &key, T value) {
