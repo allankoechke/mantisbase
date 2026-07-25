@@ -13,7 +13,6 @@
 #include <string>
 
 #include "nlohmann/json.hpp"
-#include "nlohmann/json.hpp"
 #include "soci/soci-backend.h"
 
 namespace mb {
@@ -22,17 +21,9 @@ namespace mb {
         bool unique = false;
         std::vector<std::string> columns;
 
-        [[nodiscard]] nlohmann::json toJSON() const {
-            return {{"name", name}, {"unique", unique}, {"columns", columns}};
-        }
+        [[nodiscard]] nlohmann::json toJSON() const;
 
-        static IndexDefinition fromJSON(const nlohmann::json &j) {
-            IndexDefinition idx;
-            idx.name = j.at("name").get<std::string>();
-            idx.unique = j.value("unique", false);
-            idx.columns = j.at("columns").get<std::vector<std::string>>();
-            return idx;
-        }
+        static IndexDefinition fromJSON(const nlohmann::json &j);
     };
 
     class EntitySchemaField {
