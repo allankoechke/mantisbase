@@ -36,12 +36,12 @@ namespace mb {
      * schema information and access rules.
      *
      * @code
-     * // Create entity from schema JSON
-     * json schema = {{"name", "users"}, {"type", "base"}, {"fields", ...}};
-     * Entity entity(schema);
+     * auto app = MantisBase::create();
+     * json schema = {{"name", "users"}, {"type", "base"}, {"fields", json::array()}};
+     * Entity entity(*app, schema);
      *
-     * // Create entity with name and type
-     * Entity entity("posts", "base");
+     * // Or by name after the schema exists in the database:
+     * Entity users = app->entity("users");
      * @endcode
      */
     class Entity: public IMantisBase {
@@ -170,8 +170,9 @@ namespace mb {
          * @param opts Optional parameters (currently unused)
          * @return Created record with generated ID and timestamps
          * @code
+         * auto users = app.entity("users");
          * json newUser = {{"name", "John"}, {"email", "john@example.com"}};
-         * Record created = entity.create(newUser);
+         * Record created = users.create(newUser);
          * @endcode
          */
         [[nodiscard]] Record create(const json &record, const json &opts = json::object()) const;

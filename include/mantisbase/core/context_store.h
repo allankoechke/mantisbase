@@ -18,8 +18,9 @@ namespace mb
     using json = nlohmann::json;
 
     /**
-     * The `ContextStore` class provides a means to set/get a key-value data that can be shared uniquely between middlewares
-     * and the handler functions. This allows sending data down the chain from the first to the last handler.
+     * The `ContextStore` class provides a key-value store for scripting and
+     * internal utilities. HTTP handlers should use @ref MantisRequest::set and
+     * @ref MantisRequest::getOr for per-request attributes (`auth`, etc.).
      *
      * For instance, the auth middleware will inject user `id` and subsequent middlewares can retrieve it as needed.
      *

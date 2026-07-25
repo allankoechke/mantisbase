@@ -7,13 +7,16 @@
   Portable. Embeddable. Built for speed and extensibility.
 </p>
 
+> [!IMPORTANT]
+> **`master` and `v0.4.x` are work-in-progress for v0.4.** APIs, docs, and behavior may change without notice. For the previous stable version, use the [`v0.3.x` branch](https://github.com/allankoechke/mantisbase/tree/v0.3) instead.
+
 ---
 
 ## What is MantisBase?
 
 MantisBase is a lightweight C++ library that provides a complete backend solution with:
 - **Auto-generated REST APIs** - Create database tables and get instant REST endpoints
-- **Built-in Authentication** - JWT-based auth with access control rules
+- **Built-in Authentication** - JWT-based auth, API keys, OAuth, and access control rules
 - **Realtime Database Updates** - SSE (Server-Sent Events) for live changes on SQLite and PostgreSQL
 - **Admin Dashboard** - Web interface for managing your data
 - **File Uploads** - Handle file storage and serving
@@ -161,8 +164,8 @@ Add MantisBase as a submodule and link it in your CMake project:
 
 int main(int argc, char* argv[])
 {
-    auto& app = mb::MantisBase::create(argc, argv);
-    return app.run();
+    auto app = mb::MantisBase::create(argc, argv);
+    return app->run();
 }
 ```
 
@@ -212,13 +215,16 @@ Entity user authentication (auth-type entities):
 - `POST /api/v1/auth/<entity>/login` - User login
 - `POST /api/v1/auth/<entity>/refresh` - Refresh token
 - `POST /api/v1/auth/<entity>/logout` - Logout
+- `GET|POST /api/v1/auth/<entity>/api-keys` - Manage user API keys
+- `GET /api/v1/auth/<entity>/oauth/...` - OAuth login, link, and provider listing
 
 Admin authentication and accounts (`/api/v1/sys/admins/`):
 
 - `POST /api/v1/sys/admins/login` - Admin login
 - `POST /api/v1/sys/admins/setup` - Create initial admin
+- `GET|POST /api/v1/sys/api-keys` - Admin API keys
 
-See [Authentication API](doc/02.auth.md) for details.
+See [Authentication API](doc/02.auth.md) for JWT, API key, and OAuth details.
 
 ### Realtime (SSE)
 
@@ -410,8 +416,12 @@ curl -X POST http://localhost:7070/api/v1/auth/users/login \
 
 # Response: {"token": "...", "user": {...}}
 
-# 2. Use token in requests
+# 2. Use JWT in requests
 curl -H "Authorization: Bearer <token>" \
+  http://localhost:7070/api/v1/entities/posts
+
+# Or use an API key (prefix mb_sk_) the same way:
+curl -H "Authorization: Bearer mb_sk_..." \
   http://localhost:7070/api/v1/entities/posts
 ```
 

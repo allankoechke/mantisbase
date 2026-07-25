@@ -36,6 +36,13 @@ namespace mb {
     };
 #endif
 
+    /**
+     * @brief HTTP request wrapper bound to a @ref MantisBase instance.
+     *
+     * Per-request attributes (`auth`, `verification`, etc.) are stored on the
+     * underlying Drogon request via `set()` / `getOr()`, not a global context.
+     * Use `mbApp()` (from @ref IMantisBase) to reach application services.
+     */
     class MantisRequest: public IMantisBase {
         drogon::HttpRequestPtr m_req;
         std::unordered_map<std::string, std::string> m_pathParams;
@@ -91,9 +98,10 @@ namespace mb {
 
         template<typename T>
         const T &getOr(const std::string &key, T default_value) {
-            if (m_req->attributes()->find(key))
-                return m_req->attributes()->get<T>(key);
-            return default_value;
+            if (!m_req->attributes()->find(key)) {
+                m_req->attributes()->insert(key, std::any(std::move(default_value)));
+            }
+            return m_req->attributes()->get<T>(key);
         }
 
     private:
@@ -104,6 +112,12 @@ namespace mb {
 #endif
     };
 
+    /**
+     * @brief HTTP response wrapper bound to a @ref MantisBase instance.
+     *
+     * Constructed by the router for each request; use `sendJSON()`, `send()`,
+     * or header helpers to build the outgoing response.
+     */
     class MantisResponse: public IMantisBase {
         drogon::HttpResponsePtr m_res;
 

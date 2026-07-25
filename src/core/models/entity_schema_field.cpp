@@ -4,6 +4,18 @@
 #include "../../../include/mantisbase/utils/soci_wrappers.h"
 
 namespace mb {
+    nlohmann::json IndexDefinition::toJSON() const {
+        return {{"name", name}, {"unique", unique}, {"columns", columns}};
+    }
+
+    IndexDefinition IndexDefinition::fromJSON(const nlohmann::json &j) {
+        IndexDefinition idx;
+        idx.name = j.at("name").get<std::string>();
+        idx.unique = j.value("unique", false);
+        idx.columns = j.at("columns").get<std::vector<std::string>>();
+        return idx;
+    }
+
     EntitySchemaField::EntitySchemaField(std::string field_name, std::string field_type)
         : m_name(std::move(field_name)),
           m_type(std::move(field_type)),

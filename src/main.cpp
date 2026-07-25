@@ -27,7 +27,7 @@ int main(const int argc, char* argv[])
     //     }
     // }
     // const json args{{"dev", nullptr}, {"serve", {{"port", 9089}}}};
-    // auto& app = mb::MantisBase::create(args);
+    // auto app = mb::MantisBase::create(args);
 
     // Run the http server listening loop
     return app->run();

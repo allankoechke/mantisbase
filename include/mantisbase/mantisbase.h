@@ -41,15 +41,12 @@ namespace mb
      * - RouterMgr: High level routing wrapper on top of @see HttpMgr, @see RouterMgr for more details.
      * - ValidatorMgr: A validation store using regex, @see Validator for more details.
      *
-     * @note MantisBase is a single-instance-per-process type (a managed
-     * singleton): the whole codebase reaches the active instance through
-     * instance(). Call create() exactly once during startup, then use
-     * instance() everywhere else to obtain that same instance. Multiple
-     * concurrent instances in one process are not supported — create() throws
-     * if an instance already exists, and instance() throws if one has not been
-     * created yet. "Embeddable" means you link and drive MantisBase from your
-     * own C++ process, not that you can run several independent instances side
-     * by side.
+     * @note `create()` returns a `std::unique_ptr<MantisBase>` that you own.
+     * Pass a `const MantisBase&` (or capture it in lambdas) to reach services
+     * such as `auth()`, `entity()`, and `db()`. Types that participate in
+     * request handling (`MantisRequest`, `Entity`, `Router`, `ApiKeyManager`,
+     * etc.) inherit @ref IMantisBase and expose `mbApp()` for the same access.
+     * There is no global `instance()` accessor.
      */
     class MANTISBASE_API MantisBase
     {
@@ -68,8 +65,7 @@ namespace mb
          *
          * @param argc Number of cmd args
          * @param argv Char array list
-         * @return Reference to the created class instance
-         * @throws std::runtime_error if an instance has already been created.
+         * @return Owned application instance
          */
         static std::unique_ptr<MantisBase> create(int argc, char** argv);
 
@@ -107,7 +103,8 @@ namespace mb
          *
          * @code
          * // Defaults only:
-         * auto& app = MantisBase::create(json::object());
+         * auto app = MantisBase::create(json::object());
+         * return app->run();
          *
          * // With configuration:
          * json cfg;
@@ -115,11 +112,13 @@ namespace mb
          * cfg["db_url"] = "dbname=mantis user=postgres password=12342532";
          * cfg["dev"] = true;
          * cfg["serve"] = json::object();
-         * auto& app = MantisBase::create(cfg);
+         * auto app = MantisBase::create(cfg);
+         * auto token = app->auth().createToken({{"id", "u1"}, {"table", "users"}});
+         * return app->run();
          * @endcode
          *
          * @param config JSON Object bearing the cmd args values to be used
-         * @return A reference to the created class instance
+         * @return Owned application instance
          */
         static std::unique_ptr<MantisBase> create(const json& config = json::object());
 
@@ -316,8 +315,7 @@ namespace mb
         [[nodiscard]] bool isDevMode() const;
 
     private:
-        // Make class creation private to enforce
-        // singleton app pattern.
+        // Factory-only construction via create().
         MantisBase();
 
         /**

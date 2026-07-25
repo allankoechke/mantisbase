@@ -30,7 +30,8 @@ namespace mb {
      * and PostgreSQL.
      *
      * @code
-     * Database db;
+     * auto app = MantisBase::create();
+     * Database& db = app->db();
      * db.connect("dbname=mantis user=postgres password=pass");
      * auto session = db.session();
      * *session << "SELECT * FROM users", soci::into(rows);
