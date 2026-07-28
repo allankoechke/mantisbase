@@ -162,11 +162,6 @@ set(UUID_LIBRARIES "${UUID_LIBRARY}" CACHE FILEPATH "" FORCE)
 
 find_package(ZLIB)
 
-#message(STATUS "ZLIB_FOUND=${ZLIB_FOUND}")
-#message(STATUS "ZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIRS}")
-#message(STATUS "ZLIB_LIBRARIES=${ZLIB_LIBRARIES}")
-#message(STATUS "ZLIB_LIBRARY=${ZLIB_LIBRARY}")
-
 # Add Drogon HTTP framework
 include(cmake/add-drogon.cmake)
 
@@ -245,6 +240,7 @@ configure_file(
 target_link_libraries(mantisbase
         PUBLIC
         spdlog::spdlog
+        ZLIB::ZLIB
 )
 
 # Mirror compile environment from static target to shared target

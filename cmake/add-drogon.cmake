@@ -53,5 +53,5 @@ install(TARGETS jsoncpp_static EXPORT DrogonTargets
 target_link_libraries(mantisbase PUBLIC Drogon::Drogon)
 
 if(WIN32)
-    target_link_libraries(mantisbase PUBLIC ws2_32 rpcrt4 iphlpapi crypt32)
+    target_link_libraries(mantisbase PUBLIC ws2_32 rpcrt4 iphlpapi crypt32 ZLIB::ZLIB)
 endif()
