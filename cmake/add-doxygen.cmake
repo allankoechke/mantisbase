@@ -21,14 +21,14 @@ if(DOXYGEN_FOUND)
 
     configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
 
-    add_custom_target(doc
+    add_custom_target(mantisbase-docs
             COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMENT "Generating API documentation with Doxygen"
             VERBATIM
     )
 
-    add_custom_command(TARGET doc POST_BUILD
+    add_custom_command(TARGET mantisbase-docs POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/assets
             ${CMAKE_CURRENT_BINARY_DIR}/docs/html/assets
