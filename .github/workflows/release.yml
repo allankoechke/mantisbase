@@ -15,6 +15,9 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+      channel: ${{ steps.meta.outputs.channel }}
 
     steps:
       - uses: actions/download-artifact@v4
@@ -26,12 +29,27 @@ jobs:
       - name: Show artifact contents
         run: ls -lh ./artifacts/
 
+      - name: Classify tag
+        id: meta
+        run: |
+          tag="${{ github.ref_name }}"
+          version="${tag#v}"
+          if echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\.[0-9]+$'; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            channel=$(echo "$version" | sed -E 's/^[0-9]+\.[0-9]+\.[0-9]+-([a-z]+)\.[0-9]+$/\1/')
+            echo "channel=$channel" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "channel=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           generate_release_notes: true
+          prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
           files: ./artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,6 +59,8 @@ jobs:
     uses: ./.github/workflows/docker-publish.yml
     with:
       version: ${{ github.ref_name }}
+      prerelease: ${{ needs.release.outputs.prerelease }}
+      channel: ${{ needs.release.outputs.channel }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
