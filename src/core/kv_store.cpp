@@ -33,7 +33,7 @@ namespace mb
 
     void KeyValStore::migrate()
     {
-        const auto sql = mApp.db().session();
+        const auto& sql = mApp.db().session();
 
         // Check if we have settings data already, if not so, add base settings
         json settings;
