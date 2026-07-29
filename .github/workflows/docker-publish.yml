@@ -12,6 +12,16 @@ on:
         required: false
         type: string
         default: 'mantisbase'
+      prerelease:
+        description: 'Whether this is a pre-release (true/false)'
+        required: false
+        type: string
+        default: 'false'
+      channel:
+        description: 'Pre-release channel (alpha, beta, rc)'
+        required: false
+        type: string
+        default: ''
     secrets:
       DOCKERHUB_USERNAME:
         required: true
@@ -41,6 +51,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set Docker tags
+        id: docker_tags
+        run: |
+          repo="${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.image_name }}"
+          version="${{ steps.version.outputs.version }}"
+          {
+            echo "tags<<EOF"
+            echo "${repo}:${version}"
+            if [ "${{ inputs.prerelease }}" = "true" ] && [ -n "${{ inputs.channel }}" ]; then
+              echo "${repo}:${{ inputs.channel }}"
+            elif [ "${{ inputs.prerelease }}" != "true" ]; then
+              echo "${repo}:latest"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -49,6 +75,4 @@ jobs:
           build-args: |
             MB_VERSION=${{ steps.version.outputs.version }}
           push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.image_name }}:${{ steps.version.outputs.version }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.image_name }}:latest
+          tags: ${{ steps.docker_tags.outputs.tags }}
