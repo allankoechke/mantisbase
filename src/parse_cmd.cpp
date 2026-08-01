@@ -62,7 +62,7 @@ namespace mb {
                 const auto password = getEnvOrDefault("MB_DEFAULT_ADMIN_PASSWORD", "");
                 if (email.empty() || password.empty()) {
                     throw MantisException(400, "admins --add requires email/password arguments or "
-                              "MB_DEFAULT_ADMIN_EMAIL/MB_DEFAULT_ADMIN_PASSWORD env vars.");
+                                          "MB_DEFAULT_ADMIN_EMAIL/MB_DEFAULT_ADMIN_PASSWORD env vars.");
                 }
 
                 args.insert(args.begin() + static_cast<std::ptrdiff_t>(i + 2), {email, password});
@@ -98,29 +98,30 @@ namespace mb {
         void printSchemaList(MantisBase &app) {
             const auto tables = EntitySchema::listTables(app);
             std::cout << std::left
-                      << std::setw(24) << "NAME"
-                      << std::setw(10) << "TYPE"
-                      << std::setw(8) << "SYSTEM"
-                      << std::setw(8) << "HAS_API"
-                      << "ID"
-                      << std::endl;
+                    << std::setw(24) << "NAME"
+                    << std::setw(10) << "TYPE"
+                    << std::setw(8) << "SYSTEM"
+                    << std::setw(8) << "HAS_API"
+                    << "ID"
+                    << std::endl;
 
             for (const auto &row: tables) {
                 const auto &schema = row.at("schema");
                 std::cout << std::left
-                          << std::setw(24) << schema.value("name", "")
-                          << std::setw(10) << schema.value("type", "")
-                          << std::setw(8) << (schema.value("system", false) ? "true" : "false")
-                          << std::setw(8) << (schema.value("has_api", true) ? "true" : "false")
-                          << row.at("id").get<std::string>()
-                          << std::endl;
+                        << std::setw(24) << schema.value("name", "")
+                        << std::setw(10) << schema.value("type", "")
+                        << std::setw(8) << (schema.value("system", false) ? "true" : "false")
+                        << std::setw(8) << (schema.value("has_api", true) ? "true" : "false")
+                        << row.at("id").get<std::string>()
+                        << std::endl;
             }
         }
 
         void runMigrationsUp(const MantisBase &app) {
             const auto dir = fs::path(app.migrationsDir());
             if (!fs::exists(dir)) {
-                app.logger().info("Migrations", fmt::format("No migrations directory at `{}`, nothing to apply.", dir.string()));
+                app.logger().info("Migrations",
+                                  fmt::format("No migrations directory at `{}`, nothing to apply.", dir.string()));
                 return;
             }
 
@@ -147,7 +148,7 @@ namespace mb {
             }
         }
 
-        void runMigrationsDown(const MantisBase & app) {
+        void runMigrationsDown(const MantisBase &app) {
             app.logger().warn("Migrations", "Migration rollback (`--down`) is not implemented yet.");
         }
 
@@ -159,7 +160,7 @@ namespace mb {
             const auto tables = EntitySchema::listTables(app);
             json dump = json::array();
 
-            for (const auto &row : tables) {
+            for (const auto &row: tables) {
                 const auto &schema = row.at("schema");
                 if (schema.value("system", false))
                     continue;
@@ -177,7 +178,7 @@ namespace mb {
             out.close();
 
             app.logger().info("Migrate", fmt::format("Dumped {} entity schemas to `{}`",
-                            dump.size(), output_path));
+                                                     dump.size(), output_path));
         }
 
         void runMigrateUp(MantisBase &app, const std::string &input_path) {
@@ -200,7 +201,7 @@ namespace mb {
             std::vector<json> base_entities;
             std::vector<json> view_entities;
 
-            for (const auto &entry : dump) {
+            for (const auto &entry: dump) {
                 if (!entry.contains("schema"))
                     throw MantisException(400, "Each dump entry must contain a `schema` key");
 
@@ -215,7 +216,7 @@ namespace mb {
             int restored = 0;
 
             // Restore base/auth entities first
-            for (const auto &schema : base_entities) {
+            for (const auto &schema: base_entities) {
                 const auto name = schema.value("name", "");
                 if (EntitySchema::tableExists(app, name)) {
                     app.logger().info("Migrate", fmt::format("Skipping existing entity `{}`", name));
@@ -232,7 +233,7 @@ namespace mb {
             }
 
             // Then restore view entities
-            for (const auto &schema : view_entities) {
+            for (const auto &schema: view_entities) {
                 const auto name = schema.value("name", "");
                 if (EntitySchema::tableExists(app, name)) {
                     app.logger().info("Migrate", fmt::format("Skipping existing entity `{}`", name));
@@ -249,7 +250,7 @@ namespace mb {
             }
 
             app.logger().info("Migrate", fmt::format("Restored {} entity schemas from `{}`",
-                            restored, input_path));
+                                                     restored, input_path));
         }
     }
 
@@ -308,7 +309,8 @@ namespace mb {
         admins_command.add_argument("--add")
                 .nargs(2)
                 // .metavar("EMAIL", "PASSWORD")
-                .help("Add admin account (or use MB_DEFAULT_ADMIN_EMAIL/PASSWORD with `--add` alone via env expansion)");
+                .help(
+                    "Add admin account (or use MB_DEFAULT_ADMIN_EMAIL/PASSWORD with `--add` alone via env expansion)");
         admins_command.add_argument("--ls")
                 .flag()
                 .help("List admin accounts");
@@ -457,31 +459,31 @@ namespace mb {
             auto admin_entity = entity("mb_admins");
 
             if (do_add) {
-                const auto creds = admins_command.get<std::vector<std::string>>("--add");
+                const auto creds = admins_command.get<std::vector<std::string> >("--add");
                 std::string email = creds.at(0);
                 std::string password = creds.at(1);
 
                 if (const auto val_err = Validators::validatePreset("email", email); val_err.has_value()) {
                     logger().critical("Auth", "Email Validation Failed",
-                                            fmt::format("Error validating admin email: {}", val_err.value()));
+                                      fmt::format("Error validating admin email: {}", val_err.value()));
                     quit(-1, "Email validation failed!");
                 }
                 if (const auto val_pswd_err = Validators::validatePreset("password", password);
                     val_pswd_err.has_value()) {
                     logger().critical("Auth", "Password Validation Failed",
-                                            fmt::format("Error validating password: {}", val_pswd_err.value()));
+                                      fmt::format("Error validating password: {}", val_pswd_err.value()));
                     quit(-1, "Password validation failed!");
                 }
 
                 try {
                     const auto admin_user = admin_entity.create({{"email", email}, {"password", password}});
                     logger().info("Auth", "Admin Created", fmt::format(
-                                            "Admin account created, use '{}' to access the `/mb` dashboard.",
-                                            admin_user.at("email").get<std::string>()));
+                                      "Admin account created, use '{}' to access the `/mb` dashboard.",
+                                      admin_user.at("email").get<std::string>()));
                     quit(0, "");
                 } catch (const std::exception &e) {
                     logger().critical("Auth", "Admin Creation Failed",
-                                            fmt::format("Failed to created Admin user: {}", e.what()));
+                                      fmt::format("Failed to created Admin user: {}", e.what()));
                     quit(500, e.what());
                 }
             }
@@ -491,8 +493,8 @@ namespace mb {
                 std::cout << std::left << std::setw(40) << "ID" << "EMAIL" << std::endl;
                 for (const auto &admin: admins) {
                     std::cout << std::left << std::setw(40) << admin.value("id", "")
-                              << admin.value("email", "")
-                              << std::endl;
+                            << admin.value("email", "")
+                            << std::endl;
                 }
                 quit(0, "");
             }
@@ -507,7 +509,7 @@ namespace mb {
                 auto resp = admin_entity.queryFromCols(identifier, {"id", "email"});
                 if (!resp.has_value()) {
                     logger().critical("Auth", "Admin Not Found",
-                                            fmt::format("Admin not found matching id/email on '{}'", identifier));
+                                      fmt::format("Admin not found matching id/email on '{}'", identifier));
                     quit(404, "");
                 }
 
@@ -517,7 +519,7 @@ namespace mb {
                     quit(0, "");
                 } catch (const std::exception &e) {
                     logger().critical("Auth", "Admin Removal Failed",
-                                            fmt::format("Failed to remove admin account: {}", e.what()));
+                                      fmt::format("Failed to remove admin account: {}", e.what()));
                     quit(500, e.what());
                 }
             }
@@ -565,7 +567,7 @@ namespace mb {
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
                     EntitySchema::dropTable(*this, schema_id);
                     logger().info("EntitySchema", "Schema Removed",
-                                                fmt::format("Removed schema `{}`", entity_name));
+                                  fmt::format("Removed schema `{}`", entity_name));
                     quit(0, "");
                 }
 
@@ -581,7 +583,7 @@ namespace mb {
                 }
 
                 if (do_update) {
-                    const auto parts = schema_command.get<std::vector<std::string>>("--update");
+                    const auto parts = schema_command.get<std::vector<std::string> >("--update");
                     const auto entity_name = parts.at(0);
                     const auto body = loadJsonInput(parts.at(1));
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
@@ -621,9 +623,8 @@ namespace mb {
             }
         }
 
-        std::cout << "Unknown command. Available subcommands: serve, admins, migrations, schema, migrate\n\n"
-                  << program;
-        quit(400, "No subcommand specified.");
+        logger().info("", "No subcommand specified. Try `mantisbase --help` to see available commands.");
+        quit(0);
     }
 
     bool MantisBase::isCreated() const {
