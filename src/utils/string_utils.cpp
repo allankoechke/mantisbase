@@ -21,9 +21,6 @@ namespace mb {
                 return default_value.has_value() ? default_value.value() : json::object();
             return json::parse(json_str);
         } catch (const std::exception &e) {
-            // LogOrigin::critical("JSON Parse Error",
-            //                     fmt::format("JSON parse error: {}", e.what())
-            // );
             return default_value;
         }
     }

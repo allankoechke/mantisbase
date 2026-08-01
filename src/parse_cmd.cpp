@@ -82,7 +82,7 @@ namespace mb {
                 return body;
             }
 
-            return json::parse(value);
+            return tryParseJsonStr(value, json::object()).value();
         }
 
         std::string schemaIdFromNameOrId(const std::string &entity_name_or_id) {
@@ -408,7 +408,6 @@ namespace mb {
         setMigrationsDir(migrations_dir.empty() ? dirFromPath("migrations") : migrations_dir);
 
         logger().initDb(dataDir());
-        logger().info("", fmt::format("Initializing mantisbase v{}", appVersion()));
 
         init_units();
 
@@ -559,20 +558,25 @@ namespace mb {
             try {
                 if (do_ls) {
                     printSchemaList(*this);
-                    quit(0, "");
+                    quit(0);
                 }
 
                 if (do_rm) {
                     const auto entity_name = schema_command.get<std::string>("--rm");
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
                     EntitySchema::dropTable(*this, schema_id);
-                    logger().info("EntitySchema", "Schema Removed",
-                                  fmt::format("Removed schema `{}`", entity_name));
-                    quit(0, "");
+                    logger().info("Schema",
+                        fmt::format("Removed schema `{}`", entity_name));
+                    quit(0);
                 }
 
                 if (do_add) {
                     const auto body = loadJsonInput(schema_command.get<std::string>("--add"));
+
+                    if (body.empty()) {
+                        throw MantisException(400, "Cannot add empty schema");
+                    }
+
                     auto eSchema = EntitySchema::fromSchema(*this, body);
                     if (const auto err = eSchema.validate(); err.has_value())
                         throw MantisException(400, err.value());
@@ -584,12 +588,23 @@ namespace mb {
 
                 if (do_update) {
                     const auto parts = schema_command.get<std::vector<std::string> >("--update");
-                    const auto entity_name = parts.at(0);
+
+                    // Extract and validate entity name
+                    const auto& entity_name = parts.at(0);
+                    if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
+                        throw MantisException(400, "Invalid entity name");
+                    }
+
+                    // Extract and validate the JSON body
                     const auto body = loadJsonInput(parts.at(1));
+                    if (body.empty()) {
+                        throw MantisException(400, "Cannot update empty entity");
+                    }
+
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
                     const auto updated = EntitySchema::updateTable(*this, schema_id, body);
                     std::cout << updated.dump(2) << std::endl;
-                    quit(0, "");
+                    quit(0);
                 }
             } catch (const MantisException &e) {
                 quit(e.code(), e.what());
@@ -613,7 +628,7 @@ namespace mb {
                     runMigrateDump(*this, migrate_command.get<std::string>("--dump"));
                 else
                     runMigrateUp(*this, migrate_command.get<std::string>("--up"));
-                quit(0, "");
+                quit(0);
             } catch (const MantisException &e) {
                 quit(e.code(), e.what());
             } catch (const json::parse_error &e) {
@@ -623,7 +638,10 @@ namespace mb {
             }
         }
 
-        logger().info("", "No subcommand specified. Try `mantisbase --help` to see available commands.");
+        logger().info("", "No subcommand specified. Try: "
+                          "\n\t - `mantisbase --help` to see all available commands."
+                          "\n\t - `mantisbase serve` to start http server"
+                          "\n\t - `mantisbase admins [options]` for admin account management");
         quit(0);
     }
 

@@ -12,6 +12,7 @@ namespace mb {
     MantisBase::MantisBase()
         : m_dbType("sqlite3"),
           m_startTime(std::chrono::steady_clock::now()) {
+        std::cout << "mantisbase v" << appVersion() << std::endl << std::endl;
         m_logger = std::make_unique<Logger>(*this);
     }
 
@@ -22,8 +23,6 @@ namespace mb {
             m_dukCtx = nullptr;
         }
 #endif
-
-        // std::cout << "Exiting ~MantisBase()" << std::endl;
     }
 
     void MantisBase::init(const int argc, char *argv[]) {
@@ -211,13 +210,12 @@ namespace mb {
         m_auth = std::make_unique<Auth>(*this);
     }
 
-    int MantisBase::quit(const int &exitCode, [[maybe_unused]] const std::string &reason) {
+    int MantisBase::quit(const int &exitCode, const std::string &reason) {
         // Stop server if running
         close();
 
         if (exitCode != 0)
-            logger().critical("Bye",
-                fmt::format("Exiting Application with Code = {}", exitCode));
+            logger().critical(std::to_string(exitCode), reason);
 
         std::exit(exitCode);
     }
