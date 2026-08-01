@@ -21,7 +21,6 @@ namespace mb {
 
         HandlerResponse checkEntityAccess(MantisRequest &req, MantisResponse &res, const std::string &entity_name,
                                           const std::string &trace_msg) {
-            TRACE_FUNC(trace_msg);
             try {
                 const auto entity = req.mbApp().entity(entity_name);
                 const auto &auth = req.getOr<json>("auth", json::object());
@@ -175,9 +174,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> getAuthToken() {
-        std::string msg = MB_FUNC();
-        return [msg](MantisRequest &req, MantisResponse &_) {
-            TRACE_FUNC(msg);
+        return [](MantisRequest &req, MantisResponse &_) {
             try {
                 json auth;
                 auth["type"] = "guest";
@@ -239,9 +236,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hydrateContextData() {
-        std::string msg = MB_FUNC();
-        return [msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
+        return [](MantisRequest &req, MantisResponse &res) {
             // Get the auth var from the context, resort to empty object if it's not set.
             auto auth = req.getOr<json>("auth", json::object());
 
@@ -288,9 +283,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveSchema() {
-        std::string msg = MB_FUNC();
-        return [msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
+        return [](MantisRequest &req, MantisResponse &res) {
             const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
             if (schema_id_or_name.empty()) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
@@ -328,9 +321,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveAuthEntity() {
-        std::string msg = MB_FUNC();
-        return [msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
+        return [](MantisRequest &req, MantisResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
@@ -353,9 +344,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveEntity() {
-        std::string msg = MB_FUNC();
-        return [msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
+        return [](MantisRequest &req, MantisResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
@@ -378,9 +367,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rejectViewMutations() {
-        std::string msg = MB_FUNC();
-        return [msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
+        return [](MantisRequest &req, MantisResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             const auto entity = req.mbApp().entity(entity_name);
             if (entity.type() == "view") {
@@ -414,15 +401,12 @@ namespace mb {
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr) {
         std::string msg = MB_FUNC();
         return [expr, msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
             return REQUEST_PENDING;
         };
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireGuestOnly() {
-        std::string msg = MB_FUNC();
-        return [msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
+        return [](MantisRequest &req, MantisResponse &res) {
             const auto &auth = req.getOr<json>("auth", json::object());
             if (auth["type"] == "guest")
                 return HandlerResponse::Unhandled;
@@ -437,9 +421,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminAuth() {
-        std::string msg = MB_FUNC();
-        return [msg](MantisRequest &req, const MantisResponse &res) {
-            TRACE_FUNC(msg);
+        return [](MantisRequest &req, const MantisResponse &res) {
             try {
                 // Require admin authentication
                 const auto &verification = req.getOr<json>("verification", json::object());
@@ -510,18 +492,14 @@ namespace mb {
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
         const std::string &entity_name) {
-        std::string msg = MB_FUNC();
-        return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
+        return [entity_name](MantisRequest &req, MantisResponse &res) {
             return REQUEST_PENDING;
         };
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)>
     requireEntityAuth(const std::string &entity_name) {
-        std::string msg = MB_FUNC();
-        return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
+        return [entity_name](MantisRequest &req, MantisResponse &res) {
             return REQUEST_PENDING;
         };
     }
@@ -558,9 +536,8 @@ namespace mb {
         bool use_user_id) {
         std::string msg = MB_FUNC();
         
-        return [max_requests, window_seconds, use_user_id, msg](
+        return [max_requests, window_seconds, use_user_id](
             MantisRequest &req, MantisResponse &res) {
-            TRACE_FUNC(msg);
             
             // Skip rate limiting in test mode if disabled
             if (const char* test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");

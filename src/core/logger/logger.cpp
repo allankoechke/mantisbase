@@ -75,12 +75,12 @@ void mb::Logger::trace(const std::string &origin,
     std::string formatted_msg;
     if (details.empty()) {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {}", origin, message)
-                            : fmt::format("[{}] {}\n\t— {}", origin, message, data.dump());
+                            ? fmt::format("{}", message)
+                            : fmt::format("{}\n\t— {}", message, data.dump());
     } else {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {} - {}", origin, message, details)
-                            : fmt::format("[{}] {} - {}\n\t— {}", origin, message, details, data.dump());
+                            ? fmt::format("{} - {}", message, details)
+                            : fmt::format("{} - {}\n\t— {}", message, details, data.dump());
     }
 
     // Call private template method for spdlog console logging
@@ -98,12 +98,12 @@ void mb::Logger::info(const std::string &origin,
     std::string formatted_msg;
     if (details.empty()) {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {}", origin, message)
-                            : fmt::format("[{}] {}\n\t— {}", origin, message, data.dump());
+                            ? fmt::format("{}", message)
+                            : fmt::format("{}\n\t— {}", message, data.dump());
     } else {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {} - {}", origin, message, details)
-                            : fmt::format("[{}] {} - {}\n\t— {}", origin, message, details, data.dump());
+                            ? fmt::format("{} - {}",  message, details)
+                            : fmt::format("{} - {}\n\t— {}", message, details, data.dump());
     }
 
     // Call private template method for spdlog console logging
@@ -121,12 +121,12 @@ void mb::Logger::debug(const std::string &origin,
     std::string formatted_msg;
     if (details.empty()) {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {}", origin, message)
-                            : fmt::format("[{}] {}\n\t— {}", origin, message, data.dump());
+                            ? fmt::format("{}", message)
+                            : fmt::format("{}\n\t— {}", message, data.dump());
     } else {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {} - {}", origin, message, details)
-                            : fmt::format("[{}] {} - {}\n\t— {}", origin, message, details, data.dump());
+                            ? fmt::format("{} - {}", message, details)
+                            : fmt::format("{} - {}\n\t— {}", message, details, data.dump());
     }
 
     // Call private template method for spdlog console logging
@@ -144,12 +144,12 @@ void mb::Logger::warn(const std::string &origin,
     std::string formatted_msg;
     if (details.empty()) {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {}", origin, message)
-                            : fmt::format("[{}] {}\n\t— {}", origin, message, data.dump());
+                            ? fmt::format("{} | {}", origin, message)
+                            : fmt::format("{} | {}\n\t— {}", origin, message, data.dump());
     } else {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {} - {}", origin, message, details)
-                            : fmt::format("[{}] {} - {}\n\t— {}", origin, message, details, data.dump());
+                            ? fmt::format("{} | {} - {}", origin, message, details)
+                            : fmt::format("{} | {} - {}\n\t— {}", origin, message, details, data.dump());
     }
 
     // Call private template method for spdlog console logging
@@ -167,12 +167,12 @@ void mb::Logger::critical(const std::string &origin,
     std::string formatted_msg;
     if (details.empty()) {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {}", origin, message)
+                            ? fmt::format("{} | {}", origin, message)
                             : fmt::format("[{}] {}\n\t— {}", origin, message, data.dump());
     } else {
         formatted_msg = data.empty()
-                            ? fmt::format("[{}] {} - {}", origin, message, details)
-                            : fmt::format("[{}] {} - {}\n\t— {}", origin, message, details, data.dump());
+                            ? fmt::format("{} | {} - {}", origin, message, details)
+                            : fmt::format("{} | {} - {}\n\t— {}", origin, message, details, data.dump());
     }
 
     // Call private template method for spdlog console logging
@@ -180,12 +180,4 @@ void mb::Logger::critical(const std::string &origin,
 
     // Log to database with structured format
     logToDatabase("critical", origin, message, details, data);
-}
-
-mb::FuncLogger::FuncLogger(std::string msg) : m_msg(std::move(msg)) {
-    // LogOrigin::trace("Function Entry", fmt::format("Enter: {}", m_msg));
-}
-
-mb::FuncLogger::~FuncLogger() {
-    // LogOrigin::trace("Function Exit", fmt::format("Exit:  {}", m_msg));
 }

@@ -124,20 +124,6 @@ namespace mb {
                            const std::string &details,
                            const json &data = json::object()) const;
     };
-
-    /**
-     * @brief A class for tracing function execution [entry, exit]
-     * useful in following execution flow
-     */
-    class FuncLogger {
-    public:
-        explicit FuncLogger(std::string msg);
-
-        ~FuncLogger();
-
-    private:
-        std::string m_msg;
-    };
 }
 
 // Macro to automatically insert logger with function name
@@ -147,9 +133,5 @@ inline std::string getFile(const std::string &path) {
 }
 
 #define MB_FUNC() std::format("{} - {}()", getFile(__FILE__), __FUNCTION__)
-#define TRACE_FUNC(x) mb::FuncLogger _logger(x);
-#define TRACE_MB_FUNC() try{ mb::FuncLogger _logger(MB_FUNC()); } catch(...){}
-#define TRACE_CLASS_METHOD() mb::FuncLogger _logger(std::format("{} {}::{}()", getFile(__FILE__), "", __FUNCTION__));
-#define TRACE_METHOD() mb::FuncLogger _logger(std::format("{} {}()", getFile(__FILE__), __FUNCTION__));
 
 #endif // MB_LOGGER_H

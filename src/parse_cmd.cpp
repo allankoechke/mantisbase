@@ -54,7 +54,7 @@ namespace mb {
                 if (args[i] != "admins" || args[i + 1] != "--add")
                     continue;
 
-                const bool has_email = i + 2 < args.size() && !args[i + 2].starts_with("-");
+                const bool has_email = i + 2 < args.size() && !args[i + 2].starts_with('-');
                 if (has_email)
                     break;
 
@@ -117,7 +117,7 @@ namespace mb {
             }
         }
 
-        void runMigrationsUp(MantisBase &app) {
+        void runMigrationsUp(const MantisBase &app) {
             const auto dir = fs::path(app.migrationsDir());
             if (!fs::exists(dir)) {
                 app.logger().info("Migrations", fmt::format("No migrations directory at `{}`, nothing to apply.", dir.string()));
@@ -147,8 +147,8 @@ namespace mb {
             }
         }
 
-        void runMigrationsDown(MantisBase &) {
-            // app.logger().warn("Migrations", "Migration rollback (`--down`) is not implemented yet.");
+        void runMigrationsDown(const MantisBase & app) {
+            app.logger().warn("Migrations", "Migration rollback (`--down`) is not implemented yet.");
         }
 
         int countExclusiveFlags(const std::initializer_list<bool> flags) {
@@ -406,7 +406,7 @@ namespace mb {
         setMigrationsDir(migrations_dir.empty() ? dirFromPath("migrations") : migrations_dir);
 
         logger().initDb(dataDir());
-        logger().info("Initialization", fmt::format("Initializing mantisbase v{}", appVersion()));
+        logger().info("", fmt::format("Initializing mantisbase v{}", appVersion()));
 
         init_units();
 

@@ -77,38 +77,41 @@ namespace mb {
     }
 
     void Router::Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
-        logger().info("Route Created", fmt::format("GET {}", path));
+        logger().debug("Route Created", fmt::format("GET {}", path));
         m_routeRegistry.add("GET", path, handler, middlewares);
         registerDrogonHandler("GET", path);
     }
 
     void Router::Post(const std::string &path, const HandlerWithContentReaderFn &handler,
                       const Middlewares &middlewares) {
-        logger().info("Route Created", fmt::format("POST {}", path));
+        logger().debug("Route Created", fmt::format("POST {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         registerDrogonHandlerWithReader("POST", path);
     }
 
     void Router::Post(const std::string &path, const HandlerFn &handler,
                       const Middlewares &middlewares) {
-        logger().info("Route Created", fmt::format("POST {}", path));
+        logger().debug("Route Created", fmt::format("POST {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         registerDrogonHandler("POST", path);
     }
 
     void Router::Patch(const std::string &path, const HandlerWithContentReaderFn &handler,
                        const Middlewares &middlewares) {
+        logger().debug("Route Created", fmt::format("PATCH {}", path));
         m_routeRegistry.add("PATCH", path, handler, middlewares);
         registerDrogonHandlerWithReader("PATCH", path);
     }
 
     void Router::Patch(const std::string &path, const HandlerFn &handler,
                        const Middlewares &middlewares) {
+        logger().debug("Route Created", fmt::format("PATCH {}", path));
         m_routeRegistry.add("PATCH", path, handler, middlewares);
         registerDrogonHandler("PATCH", path);
     }
 
     void Router::Delete(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
+        logger().debug("Route Created", fmt::format("DELETE {}", path));
         m_routeRegistry.add("DELETE", path, handler, middlewares);
         registerDrogonHandler("DELETE", path);
     }

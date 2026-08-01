@@ -216,7 +216,7 @@ namespace mb {
         close();
 
         if (exitCode != 0)
-            logger().critical("Application Exit",
+            logger().critical("Bye",
                 fmt::format("Exiting Application with Code = {}", exitCode));
 
         std::exit(exitCode);
@@ -228,21 +228,16 @@ namespace mb {
             return;
         }
 
-        logger().trace("MantisBase", "Closing units");
+        logger().trace("Core", "Closing Units");
         try {
             if (m_router && m_router->isRunning()) {
                 m_router->close();
                 logger().trace("Router", "Router stopped");
             }
 
-            if (m_kvStore) {
-                // m_kvStore.close();
-                // logger().trace("KV Store Shutdown", "[MB] Finished KV Store closing ...");
-            }
-
             if (m_database && m_database->isConnected()) {
                 m_database->disconnect();
-                logger().trace("Db Shutdown", "Completed Successfully!");
+                logger().trace("DB", "Shutdown Completed!");
             }
         } catch (const std::exception &e) {
             std::cerr << "Error during reset: " << e.what() << std::endl;
@@ -253,7 +248,7 @@ namespace mb {
 
         // Mark logger instance as destroyed
         Logger::isDbInitialized.store(false);
-        logger().debug("MantisBase", "Shutdown Complete");
+        logger().debug("Core", "Shutdown Complete");
     }
 
     int MantisBase::run() {
@@ -275,15 +270,15 @@ namespace mb {
             if (const auto secret = getEnvOrDefault("MB_JWT_SECRET", std::string{}); secret.empty()) {
                 if (!m_isDevMode) {
                     logger().critical(
-                        "Insecure Configuration",
+                        "Config",
                         "MB_JWT_SECRET is not set. Refusing to start the server without a "
-                        "signing key in production. Set MB_JWT_SECRET to a strong, secret "
+                        "signing key in production. \n\t-> Set MB_JWT_SECRET to a strong, secret "
                         "value, or pass --dev for local development.");
                     return quit(1, "MB_JWT_SECRET not set");
                 }
 
                 logger().warn(
-                    "Insecure Configuration",
+                    "Config",
                     "MB_JWT_SECRET is not set; using an insecure development-only default. "
                     "Do NOT use this in production — set MB_JWT_SECRET.");
             }
@@ -386,7 +381,7 @@ namespace mb {
 #endif
 
             if (int result = std::system(command.c_str()); result != 0) {
-                logger().info("Browser Open Failed", fmt::format("Could not open browser, result code: {}", result));
+                logger().warn("Browser Open Failed", fmt::format("Could not open browser, result code: {}", result));
             }
         } catch (const std::exception &e) {
             logger().critical("Admin Dashboard Failed",
@@ -470,7 +465,7 @@ namespace mb {
             return;
 
         m_host = host;
-        logger().debug("Server Configuration", fmt::format("Setting Server Host to {}", host));
+        logger().debug("Config", fmt::format("Setting Server Host to {}", host));
     }
 
     int MantisBase::poolSize() const {
