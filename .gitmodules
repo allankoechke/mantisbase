@@ -2,10 +2,6 @@
 	path = 3rdParty/dukglue
 	url = https://github.com/Aloshi/dukglue.git
 	shallow = true
-[submodule "3rdParty/wolfssl"]
-	path = 3rdParty/wolfssl
-	url = https://github.com/wolfSSL/wolfssl.git
-	shallow = true
 [submodule "3rdParty/mb-admin"]
 	path = 3rdParty/mb-admin
 	url = https://github.com/allankoechke/mantisbase-admin.git
