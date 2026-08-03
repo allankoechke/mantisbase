@@ -167,6 +167,8 @@ namespace mb {
         }
 
         void runMigrateDump(MantisBase &app, const std::string &output_path) {
+            fs::path dump_path(output_path);
+
             const auto tables = EntitySchema::listTables(app);
             json dump = json::array();
 
@@ -180,9 +182,10 @@ namespace mb {
                 });
             }
 
-            std::ofstream out(output_path);
+            std::ofstream out(dump_path);
             if (!out.is_open())
-                throw MantisException(500, std::format("Could not open output file `{}`", output_path));
+                throw MantisException(500,
+                    std::format("Could not open output file `{}` for migration dump", dump_path.string()));
 
             out << dump.dump(2);
             out.close();
@@ -314,11 +317,11 @@ namespace mb {
                 .scan<'i', int>()
                 .help("Database connection pool size (default: 4 for sqlite3, 10 for postgresql)");
 
+        // `mantisbase admin` subcommand
         argparse::ArgumentParser admins_command("admins");
         admins_command.add_description("Manage admin accounts");
         admins_command.add_argument("--add")
                 .nargs(2)
-                // .metavar("EMAIL", "PASSWORD")
                 .help(
                     "Add admin account (or use MB_DEFAULT_ADMIN_EMAIL/PASSWORD with `--add` alone via env expansion)");
         admins_command.add_argument("--ls")
@@ -329,15 +332,7 @@ namespace mb {
                 .metavar("IDENTIFIER")
                 .help("Remove admin by email or id");
 
-        argparse::ArgumentParser migrations_command("migrations");
-        migrations_command.add_description("Apply or rollback schema migrations");
-        migrations_command.add_argument("--up")
-                .flag()
-                .help("Apply migrations from the migrations directory");
-        migrations_command.add_argument("--down")
-                .flag()
-                .help("Rollback migrations (not yet implemented)");
-
+        // `mantisbase schema [OPTIONS]` subcommand
         argparse::ArgumentParser schema_command("schema");
         schema_command.add_description("Manage entity schemas");
         schema_command.add_argument("--ls")
@@ -353,23 +348,41 @@ namespace mb {
                 .help("Create schema from JSON string or file path");
         schema_command.add_argument("--update")
                 .nargs(2)
-                // .metavar("ENTITY", "JSON_OR_FILE")
                 .help("Update schema from JSON string or file path");
 
-        argparse::ArgumentParser migrate_command("migrate");
-        migrate_command.add_description("Dump or restore entity schemas");
-        migrate_command.add_argument("--dump")
+        // `mantisbase migrate [subcommand]`
+        argparse::ArgumentParser migrate_schema_command("schema");
+        migrate_schema_command.add_description("Dump or restore entity schema");
+        migrate_schema_command.add_argument("--to")
                 .nargs(1)
                 .metavar("FILE")
                 .help("Dump all entity schemas to a JSON file");
-        migrate_command.add_argument("--up")
+        migrate_schema_command.add_argument("--from")
                 .nargs(1)
                 .metavar("FILE")
                 .help("Restore entity schemas from a JSON dump file");
 
+        // `mantisbase migrate apply [--up/--down]`
+        argparse::ArgumentParser migrations_command("apply");
+        migrations_command.add_description("Apply or rollback database migrations");
+        migrations_command.add_argument("--up")
+                .flag()
+                .help("Apply migrations from the migrations directory");
+        migrations_command.add_argument("--down")
+                .flag()
+                .help("Rollback migrations (not yet implemented)");
+
+        // `mantisbase migrate [subcommand]`
+        argparse::ArgumentParser migrate_command("migrate");
+        migrate_command.add_description("Handle migration and schema ops");
+
+        // Migrate subcommand parsers
+        migrate_command.add_subparser(migrations_command);
+        migrate_command.add_subparser(migrate_schema_command);
+
+        // Program sub parsers
         program.add_subparser(serve_command);
         program.add_subparser(admins_command);
-        program.add_subparser(migrations_command);
         program.add_subparser(schema_command);
         program.add_subparser(migrate_command);
 
@@ -417,36 +430,50 @@ namespace mb {
         const auto migrations_dir = dirFromPath(_migrationsDir);
         setMigrationsDir(migrations_dir.empty() ? dirFromPath("migrations") : migrations_dir);
 
+        // Start logger database thread
         logger().initDb(dataDir());
 
+        // Initialize all modules and start them
         init_units();
 
+        // Set database type
         setDbType(db_type);
 
+        // Set pool size for the db pool
         int pool_size = m_dbType == "sqlite3" ? 4 : 10;
         if (program.is_subcommand_used("serve") && serve_command.is_used("--pool-size")) {
             pool_size = serve_command.get<int>("--pool-size");
         }
         setPoolSize(pool_size);
 
+        // Check if database is connected
         if (!m_database->connect(conn_string)) {
             quit(500, "Database connection failed, exiting!");
         }
+
+        //Check that system tables were created
         if (!m_database->createSysTables()) {
             quit(500, "Database migration failed, exiting!");
         }
+
+        // Check that database connection was established
         if (!m_database->isConnected()) {
             logger().critical("Database", "Database Not Opened", "Database was not opened!");
             quit(500, "Database opening failed!");
         }
+
+        // Check that realtime database was started
         if (!m_realtime->init()) {
             logger().critical("Database", "Database Not Opened", "Realtime Db Mgr failed to instantiate.");
             quit(500, "Realtime Db Mgr failed to instantiate.");
         }
+
+        // Check that the router was initialized
         if (!m_router->init()) {
             quit(500, "Failed to initialize router!");
         }
 
+        // If we passed the `serve` sub command, set its options
         if (program.is_subcommand_used("serve")) {
             setHost(serve_command.get<std::string>("--host"));
             setPort(serve_command.get<int>("--port"));
@@ -509,7 +536,7 @@ namespace mb {
             }
 
             if (do_rm) {
-                const std::string identifier = admins_command.get<std::string>("--rm");
+                const auto identifier = admins_command.get<std::string>("--rm");
                 if (identifier.empty()) {
                     logger().critical("Auth", "Invalid Admin Identifier", "Invalid admin `email` or `id` provided!");
                     quit(400, "");
@@ -531,27 +558,6 @@ namespace mb {
                                       fmt::format("Failed to remove admin account: {}", e.what()));
                     quit(500, e.what());
                 }
-            }
-        }
-
-        if (program.is_subcommand_used("migrations")) {
-            const bool up = migrations_command.get<bool>("--up");
-            const bool down = migrations_command.get<bool>("--down");
-
-            if (countExclusiveFlags({up, down}) != 1) {
-                quit(400, "migrations requires exactly one of --up or --down.");
-            }
-
-            try {
-                if (up)
-                    runMigrationsUp(*this);
-                else
-                    runMigrationsDown(*this);
-                quit(0, "");
-            } catch (const MantisException &e) {
-                quit(e.code(), e.what());
-            } catch (const std::exception &e) {
-                quit(500, e.what());
             }
         }
 
@@ -630,26 +636,60 @@ namespace mb {
             }
         }
 
+        // `migrate` takes either `migrate apply` or `migrate schema`
         if (program.is_subcommand_used("migrate")) {
-            const bool do_dump = migrate_command.is_used("--dump");
-            const bool do_up = migrate_command.is_used("--up");
+            //Check if `apply` subcommand was invoked
+            if (migrate_command.is_subcommand_used("apply")) {
+                const bool up = migrations_command.get<bool>("--up");
+                const bool down = migrations_command.get<bool>("--down");
 
-            if (countExclusiveFlags({do_dump, do_up}) != 1) {
-                quit(400, "migrate requires exactly one of --dump or --up.");
+                if (countExclusiveFlags({up, down}) != 1) {
+                    quit(400, "`migrate apply` requires exactly one of --up or --down.");
+                }
+
+                try {
+                    if (up)
+                        runMigrationsUp(*this);
+                    else
+                        runMigrationsDown(*this);
+                    quit(0, "");
+                } catch (const MantisException &e) {
+                    quit(e.code(), e.what());
+                } catch (const std::exception &e) {
+                    quit(500, e.what());
+                }
             }
 
-            try {
-                if (do_dump)
-                    runMigrateDump(*this, migrate_command.get<std::string>("--dump"));
-                else
-                    runMigrateUp(*this, migrate_command.get<std::string>("--up"));
-                quit(0);
-            } catch (const MantisException &e) {
-                quit(e.code(), e.what());
-            } catch (const json::parse_error &e) {
-                quit(400, std::string("Invalid JSON in dump file: ") + e.what());
-            } catch (const std::exception &e) {
-                quit(500, e.what());
+            //Check if `schema` subcommand was invoked
+            if (migrate_command.is_subcommand_used("schema")) {
+                const bool do_dump = migrate_schema_command.is_used("--to");
+                const bool do_load = migrate_schema_command.is_used("--from");
+
+                if (countExclusiveFlags({do_dump, do_load}) != 1) {
+                    quit(400, "`migrate schema` requires exactly one of --to <file> or --from <file>.");
+                }
+
+                try {
+                    if (do_dump)
+                        runMigrateDump(*this, migrate_schema_command.get<std::string>("--to"));
+                    else if (do_load)
+                        runMigrateUp(*this, migrate_schema_command.get<std::string>("--from"));
+                    else
+                        throw MantisException(400,
+                            "`migrate schema` requires exactly one of --to <file> or --from <file>.");
+
+                    quit(0);
+                } catch (const MantisException &e) {
+                    quit(e.code(), e.what());
+                } catch (const json::parse_error &e) {
+                    quit(400, std::string("Invalid JSON in dump file: ") + e.what());
+                } catch (const std::exception &e) {
+                    quit(500, e.what());
+                }
+            }
+
+            else {
+                throw MantisException(400, "`migrate` command expected `apply` or `schema` subcommand!");
             }
         }
 
