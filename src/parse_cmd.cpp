@@ -11,7 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
-#include <boost/exception/exception.hpp>
+#include <exception>
 
 #include "mantisbase/core/realtime.h"
 #include "mantisbase/core/models/entity_schema.h"
