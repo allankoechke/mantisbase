@@ -15,13 +15,14 @@ namespace mb {
         return ident;
     }
 
-    std::optional<json> tryParseJsonStr(const std::string &json_str, std::optional<json> default_value) {
+    std::pair<json, std::string> tryParseJsonStr(const std::string &json_str) {
         try {
             if (trim(json_str).empty())
-                return default_value.has_value() ? default_value.value() : json::object();
-            return json::parse(json_str);
+                return std::make_pair(json::object(), "");
+            return std::make_pair(json::parse(json_str), "");
         } catch (const std::exception &e) {
-            return default_value;
+            // Empty object , error string
+            return std::make_pair(json::object(), e.what());
         }
     }
 

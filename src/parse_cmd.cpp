@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <boost/exception/exception.hpp>
 
 #include "mantisbase/core/realtime.h"
 #include "mantisbase/core/models/entity_schema.h"
@@ -70,19 +71,22 @@ namespace mb {
             }
         }
 
-        json loadJsonInput(const std::string &value) {
-            const fs::path path = value;
-            if (fs::exists(path) && fs::is_regular_file(path)) {
+        std::pair<json, std::string> loadJsonInput(const std::string &value) {
+            if (const fs::path path = value; fs::exists(path) && fs::is_regular_file(path)) {
                 std::ifstream file(path);
                 if (!file.is_open())
                     throw MantisException(400, std::format("Could not open JSON file `{}`", value));
 
-                json body;
-                file >> body;
-                return body;
+                try {
+                    json body;
+                    file >> body;
+                    return make_pair(body, "");
+                } catch (const std::exception &e) {
+                    return make_pair(json::object(), e.what());
+                }
             }
 
-            return tryParseJsonStr(value, json::object()).value();
+            return tryParseJsonStr(value);
         }
 
         std::string schemaIdFromNameOrId(const std::string &entity_name_or_id) {
@@ -117,7 +121,7 @@ namespace mb {
             }
         }
 
-        void runMigrationsUp(const MantisBase &app) {
+        void runMigrationsUp(MantisBase &app) {
             const auto dir = fs::path(app.migrationsDir());
             if (!fs::exists(dir)) {
                 app.logger().info("Migrations",
@@ -139,7 +143,13 @@ namespace mb {
 
             for (const auto &file: files) {
                 app.logger().info("Migrations", fmt::format("Applying migration `{}`", file.filename().string()));
-                const auto body = loadJsonInput(file.string());
+                const auto [body, parse_err] = loadJsonInput(file.string());
+
+                if (!parse_err.empty()) {
+                    app.logger().info("Migrations", "Migration Error", parse_err);
+                    app.quit(500);
+                }
+
                 auto eSchema = EntitySchema::fromSchema(app, body);
                 if (const auto err = eSchema.validate(); err.has_value())
                     throw MantisException(400, err.value());
@@ -571,10 +581,10 @@ namespace mb {
                 }
 
                 if (do_add) {
-                    const auto body = loadJsonInput(schema_command.get<std::string>("--add"));
+                    const auto [body, parse_err] = loadJsonInput(schema_command.get<std::string>("--add"));
 
-                    if (body.empty()) {
-                        throw MantisException(400, "Cannot add empty schema");
+                    if (!parse_err.empty()) {
+                        throw MantisException(400, std::format("Failed to parse schema: {}", parse_err));
                     }
 
                     auto eSchema = EntitySchema::fromSchema(*this, body);
@@ -596,9 +606,14 @@ namespace mb {
                     }
 
                     // Extract and validate the JSON body
-                    const auto body = loadJsonInput(parts.at(1));
-                    if (body.empty()) {
-                        throw MantisException(400, "Cannot update empty entity");
+                    if (parts.at(1).empty()) {
+                        throw MantisException(400, "Cannot update entity with an empty schema!");
+                    }
+
+                    const auto [body, parse_err] = loadJsonInput(parts.at(1));
+                    if (!parse_err.empty()) {
+                        throw MantisException(400,
+                            std::format("Failed to parse update schema: {}", parse_err));
                     }
 
                     const auto schema_id = schemaIdFromNameOrId(entity_name);

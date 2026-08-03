@@ -405,8 +405,10 @@ void mb::RtDbWorker::runSQlite() {
                     auto old_data = row.get_indicator(5) == soci::i_null ? "" : row.get<std::string>(5);
                     auto new_data = row.get_indicator(6) == soci::i_null ? "" : row.get<std::string>(6);
 
-                    auto od = tryParseJsonStr(old_data, json::object()).value();
-                    auto nd = tryParseJsonStr(new_data, json::object()).value();
+                    auto [od, _0] = tryParseJsonStr(old_data);
+                    auto [nd, _1] = tryParseJsonStr(new_data);
+
+                    // TODO: Handle the error gracefully?
 
                     res.push_back({
                         {"id", row.get<int>(0)},

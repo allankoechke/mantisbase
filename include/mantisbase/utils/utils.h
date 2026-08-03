@@ -138,19 +138,22 @@ namespace mb {
     std::string sqlIdentifier(const std::string &ident);
 
     /**
-     * @brief Attempt to parse a JSON string.
+     * @brief Try parsing a string to a JSON object and return the object and any error
+     * if parsing failed.
+     *
      * @param json_str JSON string to parse
-     * @param default_value Optional default value if conversion fails
-     * @return A JSON Object if successful, else a `std::nullopt`
+     * @return A pair with
+     *  - part 0: parsed JSON object
+     *  - part 1: Error string
      *
      * @code
-     * auto user = tryParseJsonStr("{\"name\": \"John Doe\"}");
-     * if(user.has_value()) {
+     * auto [user, err] = tryParseJsonStr("{\"name\": \"John Doe\"}");
+     * if(!err.empty()) {
      *      // Do something ...
      * }
      * @endcode
      */
-    std::optional<json> tryParseJsonStr(const std::string &json_str, std::optional<json> default_value = std::nullopt);
+    std::pair<json, std::string> tryParseJsonStr(const std::string &json_str);
 
     /**
      * @brief Convert given string value to boolean type.
