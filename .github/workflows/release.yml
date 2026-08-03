@@ -12,8 +12,45 @@ jobs:
   build:
     uses: ./.github/workflows/build-matrix.yml
 
-  release:
+  package-dev-zip:
     needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Linux libs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_linux-libs
+          path: ./dev-staging/
+
+      - name: Download Windows libs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_windows-libs
+          path: ./dev-staging/
+
+      - name: Assemble include directory
+        run: |
+          mkdir -p dev-staging/include
+          cp -r include/mantisbase dev-staging/include/mantisbase
+          cp dev-staging/generated-include/mantisbase/config.hpp dev-staging/include/mantisbase/config.hpp
+          rm -rf dev-staging/generated-include
+
+      - name: Create dev zip
+        run: |
+          cd dev-staging && zip -r ../mantisbase_${{ github.ref_name }}-dev.zip libs/ include/
+
+      - name: Upload dev zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}-dev.zip
+          path: mantisbase_${{ github.ref_name }}-dev.zip
+
+  release:
+    needs: [build, package-dev-zip]
     runs-on: ubuntu-latest
     outputs:
       prerelease: ${{ steps.meta.outputs.prerelease }}
@@ -22,7 +59,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: mantisbase_${{ github.ref_name }}_*.zip
+          pattern: mantisbase_${{ github.ref_name }}*.zip
           path: ./artifacts
           merge-multiple: true
 

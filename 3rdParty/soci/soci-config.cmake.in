@@ -1,0 +1,186 @@
+@PACKAGE_INIT@
+
+
+# Auto-generated stub to handle component-wise dependencies
+set(__dep_soci_comps  "@SOCI_DEPENDENCY_SOCI_COMPONENTS@")
+set(__dep_names       "@SOCI_DEPENDENCY_NAMES@")
+set(__dep_dep_targets "@SOCI_DEPENDENCY_TARGETS@")
+
+set(__dep_soci_boost "@SOCI_DEPENDENCY_BOOST@")
+set(__dep_soci_boost_components "@SOCI_DEPENDENCY_BOOST_COMPONENTS@")
+
+set(__prev_module_path "${CMAKE_MODULE_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/find_package_files/")
+
+if (${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
+  set(__quiet "QUIET")
+else()
+  set(__quiet "")
+endif()
+
+
+if (NOT DEFINED SOCI_FIND_COMPONENTS OR SOCI_FIND_COMPONENTS STREQUAL "")
+  set(SOCI_FIND_COMPONENTS "")
+
+  foreach(__current_comp IN LISTS __dep_soci_comps)
+    string(REPLACE "SOCI::" "" __comp_name "${__current_comp}")
+    string(TOUPPER "${__comp_name}" __comp_name_upper)
+
+    if (DEFINED "SOCI_${__comp_name_upper}")
+      message(WARNING "Setting SOCI_${__comp_name_upper} when using find_package has no effect - specify components in find_package instead")
+    endif()
+  endforeach()
+  unset(__current_comp)
+  unset(__comp_name)
+  unset(__comp_name_upper)
+
+  # Use all available SOCI components
+  set(SOCI_FIND_COMPONENTS "${__dep_soci_comps}")
+  list(REMOVE_DUPLICATES SOCI_FIND_COMPONENTS)
+  list(TRANSFORM SOCI_FIND_COMPONENTS REPLACE "SOCI::" "")
+endif()
+
+# Ensure that the Core target is always included (and as first component)
+list(REMOVE_ITEM SOCI_FIND_COMPONENTS Core)
+list(INSERT SOCI_FIND_COMPONENTS 0 Core)
+
+# Check (optional) Core dependency on Boost.
+if (${__dep_soci_boost})
+  if (NOT "${__dep_soci_boost_components}" STREQUAL "")
+    set(SOCI_BOOST_COMPONENTS COMPONENTS ${__dep_soci_boost_components})
+  endif()
+
+  # Don't use REQUIRED to be able to give a better error message below.
+  find_package(Boost ${SOCI_BOOST_COMPONENTS} ${__quiet})
+
+  if (NOT Boost_FOUND)
+    set(SOCI_FOUND FALSE)
+    set(SOCI_NOT_FOUND_MESSAGE "Unmet dependency 'Boost' for SOCI component 'Core'")
+  else()
+    # Check for all the components too
+    foreach (__soci_boost_component IN LISTS __dep_soci_boost_components)
+      if (NOT TARGET Boost::${__soci_boost_component})
+        set(SOCI_FOUND FALSE)
+        set(SOCI_NOT_FOUND_MESSAGE "Unmet dependency 'Boost::${__soci_boost_component}' for SOCI component 'Core'")
+      endif()
+    endforeach()
+  endif()
+endif()
+
+list(LENGTH __dep_soci_comps __list_size)
+foreach (__item IN ITEMS __dep_names __dep_dep_targets)
+    list(LENGTH ${__item} __current_size)
+    if (NOT (__list_size EQUAL __current_size))
+        message(FATAL_ERROR "SociConfig is invalid -> dependency lists have different sizes")
+    endif()
+endforeach()
+unset(__current_size)
+
+foreach(__comp IN LISTS SOCI_FIND_COMPONENTS)
+  if (NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/SOCI${__comp}Targets.cmake")
+    set(SOCI_FOUND FALSE)
+    set(SOCI_NOT_FOUND_MESSAGE "'${__comp}' is not a known SOCI component")
+    continue()
+  endif()
+
+  # Handle component-specific dependencies
+  set(__link_targets)
+  set(__skip_dependency FALSE)
+  foreach (__i RANGE ${__list_size})
+    # We want to iterate up to and excluding __list_size, but CMake RANGE
+    # doesn't allow this, so do it manually here.
+    if (${__i} EQUAL ${__list_size})
+      break()
+    endif()
+
+    list(GET __dep_soci_comps ${__i} __dep_comp)
+    if (__dep_comp MATCHES "::${__comp}$")
+      # This entry matches the current component
+      list(GET __dep_names ${__i} __dep)
+      list(GET __dep_dep_targets ${__i} __targets)
+
+      # Split list-valued entries to become actual lists
+      string(REPLACE "|" ";" __targets "${__targets}")
+
+      set(__already_found)
+      foreach (__tgt IN LISTS __targets)
+        if (TARGET ${__tgt})
+          set(__already_found ON)
+        else()
+          set(__already_found OFF)
+          break()
+        endif()
+      endforeach()
+
+      if (__already_found)
+        continue()
+      endif()
+
+      find_package(
+        ${__dep}
+        ${__quiet}
+      )
+
+      if (NOT ${__dep}_FOUND)
+        set(SOCI_FOUND FALSE)
+        set(SOCI_NOT_FOUND_MESSAGE "Unmet dependency '${__dep}' for SOCI component '${__comp}'")
+        set(__skip_dependency TRUE)
+      endif()
+
+      list(APPEND __link_targets  ${__targets})
+    endif()
+  endforeach()
+  unset(__i)
+
+  if (__skip_dependency)
+    continue()
+  endif()
+
+  include("${CMAKE_CURRENT_LIST_DIR}/SOCI${__comp}Targets.cmake")
+
+  set_property(
+    TARGET SOCI::${__comp}
+    APPEND
+    PROPERTY INTERFACE_LINK_LIBRARIES "${__link_targets}"
+  )
+  set(${CMAKE_FIND_PACKAGE_NAME}_${__comp}_FOUND ON)
+endforeach()
+unset(__comp)
+
+
+unset(__dep_soci_comps)
+unset(__dep_names)
+unset(__dep_dep_targets)
+
+
+check_required_components(SOCI)
+
+if (NOT DEFINED SOCI_FOUND OR SOCI_FOUND)
+  if (NOT TARGET SOCI::SOCI)
+    add_library(SOCI::SOCI INTERFACE IMPORTED)
+  endif()
+
+  foreach (__comp IN LISTS SOCI_FIND_COMPONENTS)
+      target_link_libraries(SOCI::SOCI INTERFACE SOCI::${__comp})
+  endforeach()
+
+  # Shall be removed in SOCI v5
+  if (NOT TARGET soci_interface_deprecated)
+    add_library(soci_interface_deprecated INTERFACE)
+  endif()
+  target_link_libraries(soci_interface_deprecated INTERFACE SOCI::SOCI)
+  set_target_properties(soci_interface_deprecated PROPERTIES DEPRECATION "Use SOCI::SOCI (all-uppercase) instead of SOCI::soci")
+  if (NOT TARGET SOCI::soci)
+    add_library(SOCI::soci ALIAS soci_interface_deprecated)
+  endif()
+
+  if (NOT SOCI_FIND_QUIETLY)
+      list(JOIN SOCI_FIND_COMPONENTS ", " __components)
+      message(STATUS "Found SOCI: ${CMAKE_CURRENT_LIST_FILE} (found version \"@PROJECT_VERSION@\") found components: ${__components}")
+  endif()
+endif()
+
+unset(__quiet)
+
+set(CMAKE_MODULE_PATH "${__prev_module_path}")
+unset(__prev_module_path)

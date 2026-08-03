@@ -30,9 +30,6 @@ namespace mb
          *        reference and must outlive this store.
          */
         explicit KeyValStore(MantisBase &app);
-        ~KeyValStore() { std::cout << "KeyValStore Des()" << std::endl; }
-
-        void close() {}
 
         /**
          * @brief Initialize and set up routes for fetching settings data

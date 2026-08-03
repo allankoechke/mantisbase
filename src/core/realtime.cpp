@@ -252,7 +252,7 @@ void mb::RealtimeDB::createNotifyFunction(const MantisBase& app, soci::session &
             $$ LANGUAGE plpgsql;
         )";
 
-    app.logger().info("PostgreSQL Realtime",
+    app.logger().debug("PSQL RTdb",
                    "Created notification function 'mb_notify_changes'");
 }
 #endif
@@ -283,8 +283,7 @@ mb::RtDbWorker::RtDbWorker(const MantisBase &app)
         if (!initSQLite())
             throw MantisException(500, "Worker: SQLite db instantiation failed!");
 
-        mApp.logger().info("RTDb Worker",
-                       "SQLite Database Status",
+        mApp.logger().debug("SQLite RTdb",
                        std::format("DB Connection should be active: {}", (isDbRunning() ? "true" : "false")));
     }
 
@@ -293,8 +292,7 @@ mb::RtDbWorker::RtDbWorker(const MantisBase &app)
         if (!initPSQL())
             throw MantisException(500, "Worker: PostgreSQL db instantiation failed!");
 
-        mApp.logger().info("RTDb Worker",
-                       "PSQL Database Status",
+        mApp.logger().debug("PSQL RTdb",
                        std::format("DB Connection should be active: {}", (isDbRunning() ? "true" : "false")));
     }
 #endif
@@ -358,8 +356,7 @@ void mb::RtDbWorker::run() {
 #endif
 
     else
-        mApp.logger().critical("RTDb Worker", "Unsupported database",
-                           std::format("Unsupported database type `{}`", m_db_type));
+        mApp.logger().critical("RTDb Worker", std::format("Unsupported database type `{}`", m_db_type));
 }
 
 void mb::RtDbWorker::runSQlite() {
@@ -408,8 +405,10 @@ void mb::RtDbWorker::runSQlite() {
                     auto old_data = row.get_indicator(5) == soci::i_null ? "" : row.get<std::string>(5);
                     auto new_data = row.get_indicator(6) == soci::i_null ? "" : row.get<std::string>(6);
 
-                    auto od = tryParseJsonStr(old_data, json::object()).value();
-                    auto nd = tryParseJsonStr(new_data, json::object()).value();
+                    auto [od, _0] = tryParseJsonStr(old_data);
+                    auto [nd, _1] = tryParseJsonStr(new_data);
+
+                    // TODO: Handle the error gracefully?
 
                     res.push_back({
                         {"id", row.get<int>(0)},
@@ -487,7 +486,7 @@ void mb::RtDbWorker::runPostgreSQL() {
             FD_ZERO(&input_mask);
             FD_SET(PQsocket(psql.get()), &input_mask);
 
-            struct timeval timeout;
+            struct timeval timeout{};
             timeout.tv_sec = 1; // 1 second timeout
             timeout.tv_usec = 0;
 
@@ -495,7 +494,7 @@ void mb::RtDbWorker::runPostgreSQL() {
                                       nullptr, nullptr, &timeout);
 
             if (result < 0) {
-                mApp.logger().critical("[PSQl] RTDb Worker", "PostgreSQL Notify Worker", "select() failed");
+                mApp.logger().critical("PSQL RTDb Worker", "PostgreSQL select() failed");
                 break;
             }
 
@@ -515,7 +514,7 @@ void mb::RtDbWorker::runPostgreSQL() {
                     // Parse the JSON payload
                     json notification = json::parse(notify->extra);
 
-                    mApp.logger().debug("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
+                    mApp.logger().debug("PSQL RTDb Worker",
                                     std::format("Received notification: {}", notification.dump()));
 
                     // Call the callback
@@ -525,7 +524,7 @@ void mb::RtDbWorker::runPostgreSQL() {
                         m_callback(arr);
                     }
                 } catch (const std::exception &e) {
-                    mApp.logger().critical("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
+                    mApp.logger().critical("PSQl RTDb Worker",
                                        std::format("Error processing notification: {}", e.what()));
                 }
 
@@ -534,20 +533,22 @@ void mb::RtDbWorker::runPostgreSQL() {
 
             // Check connection health
             if (PQstatus(psql.get()) != CONNECTION_OK) {
-                mApp.logger().warn("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
+                mApp.logger().warn("PSQl RTDb Worker",
                                "Connection lost, reconnecting...");
                 PQfinish(psql.get());
                 psql.reset();
 
                 // Try to reconnect
                 if (!isDbRunning()) {
-                    mApp.logger().critical("[PSQl] RTDb Worker", "PostgreSQL Notify Worker",
+                    mApp.logger().critical("PSQl RTDb Worker",
                                        "Reconnection failed, waiting before retry");
                     std::this_thread::sleep_for(std::chrono::seconds(5));
                 }
             }
         } catch (std::exception &e) {
-            mApp.logger().critical("[PSQl] RTDb Worker", "Realtime Db Worker Error", e.what());
+            mApp.logger().critical("PSQl RTDb Worker",
+                "Realtime Db Worker Error",
+                e.what());
         }
     }
 }
@@ -572,7 +573,7 @@ bool mb::RtDbWorker::initSQLite() {
         return true;
     } catch (std::exception &e) {
         mApp.logger().critical(
-            "Realtime Db Worker",
+            "RTDb Worker",
             "Failed to connect to mantis.db database for auditing",
             e.what()
         );
@@ -588,8 +589,9 @@ bool mb::RtDbWorker::initPSQL() {
     psql = std::unique_ptr<PGconn, decltype(&PQfinish)>(PQconnectdb(conn_str.c_str()), &PQfinish);
 
     if (PQstatus(psql.get()) != CONNECTION_OK) {
-        mApp.logger().critical("PostgreSQL Notify Worker",
-                           std::format("Connection failed: {}", PQerrorMessage(psql.get())));
+        mApp.logger().critical("PSQL Notify Worker",
+            "Connection failed",
+                           std::format("{}", PQerrorMessage(psql.get())));
         // PQfinish(psql.get());
         psql.reset();
         return false;
@@ -599,8 +601,9 @@ bool mb::RtDbWorker::initPSQL() {
     PGresult *res = PQexec(psql.get(), "LISTEN mb_db_changes");
 
     if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-        mApp.logger().critical("PostgreSQL Notify Worker",
-                           std::format("LISTEN failed: {}", PQerrorMessage(psql.get())));
+        mApp.logger().critical("PSQL Notify Worker",
+            "PSQL LISTEN failed",
+                           std::format("{}", PQerrorMessage(psql.get())));
         PQclear(res);
         // PQfinish(m_pgConn);
         psql.reset();
@@ -608,7 +611,7 @@ bool mb::RtDbWorker::initPSQL() {
     }
 
     PQclear(res);
-    mApp.logger().info("PostgreSQL Notify Worker",
+    mApp.logger().debug("PSQL Notify Worker",
                    "Connected and listening on channel 'mb_db_changes'");
     return true;
 }

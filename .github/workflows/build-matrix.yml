@@ -23,7 +23,7 @@ jobs:
           - os: windows-latest
             c_compiler: gcc
             cpp_compiler: g++
-            platform: windows-latest
+            platform: windows-x86_64
             arch: x86_64
 
     steps:
@@ -78,7 +78,7 @@ jobs:
         run: |
           $mingwBin = "C:\ProgramData\mingw64\mingw64\bin"
           $makePath = Join-Path $mingwBin "mingw32-make.exe"
-          
+
           # Check if make exists, if not try alternative locations
           if (-not (Test-Path $makePath)) {
             $makePath = "C:\mingw64\bin\mingw32-make.exe"
@@ -90,9 +90,9 @@ jobs:
               }
             }
           }
-          
+
           Write-Host "Using make at: $makePath"
-          
+
           cmake -B ${{ steps.strings.outputs.build-output-dir }} `
             -G "MinGW Makefiles" `
             -DCMAKE_CXX_COMPILER="$mingwBin\g++.exe" `
@@ -100,6 +100,7 @@ jobs:
             -DCMAKE_MAKE_PROGRAM="$makePath" `
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
             -DMB_BUILD_TESTS=true `
+            -DMB_BUILD_SHARED_LIB=ON `
             -S ${{ github.workspace }}
 
       - name: Configure CMake (Linux)
@@ -110,6 +111,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DMB_BUILD_TESTS=true \
+            -DMB_BUILD_SHARED_LIB=ON \
             -S ${{ github.workspace }}
 
       - name: Build
@@ -146,3 +148,38 @@ jobs:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip
           path: |
             ${{ github.workspace }}/build/bin/zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip
+
+      - name: Stage library files (Linux)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          mkdir -p lib-staging/libs/linux/static
+          mkdir -p lib-staging/libs/linux/dynamic
+          mkdir -p lib-staging/generated-include/mantisbase
+          cp ${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.a lib-staging/libs/linux/static/
+          cp ${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.so lib-staging/libs/linux/dynamic/
+          cp ${{ steps.strings.outputs.build-output-dir }}/include/mantisbase/config.hpp lib-staging/generated-include/mantisbase/config.hpp
+
+      - name: Upload library artifact (Linux)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_linux-libs
+          path: lib-staging/
+
+      - name: Stage library files (Windows)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "lib-staging\libs\win\static" | Out-Null
+          New-Item -ItemType Directory -Force -Path "lib-staging\libs\win\dynamic" | Out-Null
+          Copy-Item "build\lib\libmantisbase.a" -Destination "lib-staging\libs\win\static\"
+          Copy-Item "build\bin\libmantisbase.dll" -Destination "lib-staging\libs\win\dynamic\"
+          Copy-Item "build\lib\libmantisbase.dll.a" -Destination "lib-staging\libs\win\dynamic\"
+
+      - name: Upload library artifact (Windows)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_windows-libs
+          path: lib-staging\

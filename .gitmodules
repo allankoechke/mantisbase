@@ -1,14 +1,6 @@
-[submodule "3rdParty/soci"]
-	path = 3rdParty/soci
-	url = https://github.com/allankoechke/soci.git
-	shallow = true
 [submodule "3rdParty/dukglue"]
 	path = 3rdParty/dukglue
 	url = https://github.com/Aloshi/dukglue.git
-	shallow = true
-[submodule "3rdParty/wolfssl"]
-	path = 3rdParty/wolfssl
-	url = https://github.com/wolfSSL/wolfssl.git
 	shallow = true
 [submodule "3rdParty/mb-admin"]
 	path = 3rdParty/mb-admin
