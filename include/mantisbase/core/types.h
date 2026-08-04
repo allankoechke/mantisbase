@@ -66,6 +66,7 @@ namespace mb {
         /** @brief Application that owns this service or request context. */
         [[nodiscard]] const MantisBase &mbApp() const;
 
+        /// Get the logger instance
         [[nodiscard]] const Logger& logger() const;
     };
 
