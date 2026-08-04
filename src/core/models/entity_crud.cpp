@@ -19,14 +19,14 @@ namespace mb {
 
         try {
             // Create a random ID, then check if it exists already in the DB
-            std::string id = generate_uuidv7();
+            std::string id = mbApp().snowflakeId();
             int trials = 1;
             while (recordExists(id)) {
                 // Try getting a new ID ten times before giving up. Avoid infinite loops
                 if (trials >= 10)
                     break;
 
-                id = generate_uuidv7();
+                id = mbApp().snowflakeId();
                 trials++;
             }
 
@@ -337,7 +337,7 @@ namespace mb {
         if (type() == "view")
             throw std::invalid_argument("Remove is not implemented for Entity of `view` type!");
 
-        const auto& sql = mbApp().db().session();
+        const auto &sql = mbApp().db().session();
         soci::transaction tr(*sql);
 
         // Check if item exists of given id

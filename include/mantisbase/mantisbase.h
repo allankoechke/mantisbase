@@ -19,6 +19,7 @@
 #include <argparse/argparse.hpp>
 
 #include "core/auth.h"
+#include "utils/snowflake.hpp"
 #ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
 #endif
@@ -242,6 +243,10 @@ namespace mb
          * @return JWT Secret value.
          */
         [[nodiscard]] std::string jwtSecretKey() const;
+
+        /// Generate snowflake ID
+        std::string snowflakeId() const;
+
         /**
          * Fetch the application version
          * @return Application version
@@ -416,6 +421,7 @@ namespace mb
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
+        mutable Snowflake<1534832906275L> m_snowflakeId{};
 #ifdef MB_SCRIPTING_ENABLED
         duk_context* m_dukCtx = nullptr;
 #endif

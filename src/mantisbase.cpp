@@ -14,6 +14,7 @@ namespace mb {
           m_startTime(std::chrono::steady_clock::now()) {
         std::cout << "mantisbase v" << appVersion() << std::endl << std::endl;
         m_logger = std::make_unique<Logger>(*this);
+        m_snowflakeId.init(1, 1);
     }
 
     MantisBase::~MantisBase() {
@@ -420,6 +421,10 @@ namespace mb {
             return "mb-insecure-dev-secret-do-not-use-in-production";
 
         throw MantisException(500, "MB_JWT_SECRET is not configured");
+    }
+
+    std::string MantisBase::snowflakeId() const {
+        return std::to_string(m_snowflakeId.nextID());
     }
 
     std::string MantisBase::appVersion() {
