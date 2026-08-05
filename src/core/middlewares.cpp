@@ -182,6 +182,7 @@ namespace mb {
                 auth["id"] = nullptr;
                 auth["entity"] = nullptr;
                 auth["user"] = nullptr;
+                auth["auth_method"] = nullptr;
 
                 if (req.hasHeader("Authorization")) {
                     const auto token = trim(req.getBearerTokenAuth());
@@ -211,6 +212,7 @@ namespace mb {
                             } catch (...) {}
 
                             req.set("auth", auth);
+
                             // Fake a verified verification object for downstream middleware
                             json verification;
                             verification["verified"] = true;

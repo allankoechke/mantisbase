@@ -371,7 +371,7 @@ namespace mb {
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleSetupAdmin() {
         return [](MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = json::object(); // req.getOr("auth", json::object());
+                auto auth = req.getOr("auth", json::object());
                 req.mbApp().logger().trace("Auth", "Auth Data", fmt::format("Auth Data: {}", auth.dump()));
 
                 auto verification = req.getOr<json>("verification", json::object());
