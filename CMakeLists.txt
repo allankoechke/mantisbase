@@ -15,7 +15,6 @@ option(MB_SHARED_DEPS "Build MantisBase as a shared library" FALSE)
 option(MB_BUILD_SHARED_LIB "Build MantisBase as a shared library" OFF) # Override static build to also have shared lib built
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(ZLIB_USE_STATIC_LIBS ON) # Force static zlib package
 
 if(MB_SHARED_DEPS)
     set(BUILD_SHARED_LIBS TRUE)
@@ -146,7 +145,7 @@ if(MB_SCRIPTING_ENABLED)
     endif()
 endif (MB_SCRIPTING_ENABLED)
 
-# ZLIB for windows build
+# ZLIB Build
 include(cmake/add-zlib.cmake)
 
 find_path(UUID_INCLUDE_DIR
@@ -160,8 +159,6 @@ find_library(UUID_LIBRARY
 
 set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}" CACHE PATH "" FORCE)
 set(UUID_LIBRARIES "${UUID_LIBRARY}" CACHE FILEPATH "" FORCE)
-
-find_package(ZLIB)
 
 # Add Drogon HTTP framework
 include(cmake/add-drogon.cmake)
@@ -241,7 +238,6 @@ configure_file(
 target_link_libraries(mantisbase
         PUBLIC
         spdlog::spdlog
-        ZLIB::ZLIB
 )
 
 # Mirror compile environment from static target to shared target

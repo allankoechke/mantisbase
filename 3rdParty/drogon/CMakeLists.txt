@@ -515,8 +515,9 @@ if (BUILD_TESTING)
     add_subdirectory(nosql_lib/redis/tests)
 endif (BUILD_TESTING)
 
-find_package(ZLIB REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE ZLIB::ZLIB)
+# Lets build zlib and link to it ourself
+# find_package(ZLIB REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE ZLIB::ZLIBSTATIC)
 
 execute_process(COMMAND "git" rev-parse HEAD
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
