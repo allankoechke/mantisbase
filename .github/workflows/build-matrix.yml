@@ -121,7 +121,7 @@ jobs:
 
       - name: Test
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
-        run: ctest --build-config ${{ matrix.build_type }}
+        run: ctest --build-config --output-on-failure ${{ matrix.build_type }}
 
       - name: Zip the build output (Linux)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
