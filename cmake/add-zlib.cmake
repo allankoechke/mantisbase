@@ -1,16 +1,15 @@
-# Use bundled ZLIB package for windows builds
-# UNIX builds should pull package maintained version
-set(ZLIB_USE_STATIC_LIBS ON)
-if(WIN32)
-    set(ZLIB_ROOT "${CMAKE_SOURCE_DIR}/3rdParty/zlib")
-    set(ZLIB_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdParty/zlib/include")
-    set(ZLIB_LIBRARIES "${CMAKE_SOURCE_DIR}/3rdParty/zlib/lib")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(ZLIB_BUILD_SHARED OFF CACHE BOOL "")
+set(ZLIB_BUILD_TESTING OFF CACHE BOOL "")
+set(ZLIB_INSTALL OFF CACHE BOOL "")
+set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/zlib EXCLUDE_FROM_ALL)
 
-    target_include_directories(mantisbase PRIVATE
-            "${ZLIB_ROOT}/include"
-    )
+set(ZLIB_ROOT "${CMAKE_SOURCE_DIR}/3rdParty/zlib")
+set(ZLIB_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdParty/zlib/include")
+set(ZLIB_LIBRARIES "${CMAKE_SOURCE_DIR}/3rdParty/zlib/lib")
 
-    target_link_directories(mantisbase PRIVATE
-            "${ZLIB_ROOT}/lib"
-    )
-endif()
+target_link_libraries(mantisbase PRIVATE ZLIB::ZLIBSTATIC)
+target_include_directories(mantisbase PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/zlib"
+        "${CMAKE_CURRENT_BINARY_DIR}/3rdParty/zlib")
