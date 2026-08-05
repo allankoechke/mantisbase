@@ -216,7 +216,10 @@ target_link_libraries(mantisbase_app
 )
 
 # Check if Doxygen is installed, then build docs
-include(cmake/add-doxygen.cmake)
+option(MB_BUILD_DOCS "Build documentation if doxygen is installed" ON)
+if(MB_BUILD_DOCS)
+    include(cmake/add-doxygen.cmake)
+endif ()
 
 # Add SEMVER
 include(cmake/add-semver.cmake)
