@@ -28,6 +28,7 @@ set ( SOCI_ODBC OFF CACHE BOOL "Disable ODBC backend" FORCE )
 set ( SOCI_DB2 OFF CACHE BOOL "Disable DB2 backend" FORCE )
 set ( SOCI_FIREBIRD OFF CACHE BOOL "Disable Firebird backend" FORCE )
 set ( SOCI_EMPTY OFF CACHE BOOL "Disable empty backend" FORCE )
+set ( SOCI_FMT_BUILTIN OFF CACHE STRING "" FORCE )
 
 if(MB_HAS_POSTGRESQL)
     set ( SOCI_POSTGRESQL ON CACHE BOOL "Enable PostgreSQL backend" FORCE )

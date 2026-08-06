@@ -163,17 +163,10 @@ set(UUID_LIBRARIES "${UUID_LIBRARY}" CACHE FILEPATH "" FORCE)
 # Add Drogon HTTP framework
 include(cmake/add-drogon.cmake)
 
-# Add spdlog
-if(MB_SHARED_DEPS)
-    # Build Shared lib for spdlog
-    set(SPDLOG_BUILD_SHARED ON)
-else()
-    # Build static lib for spdlog
-    set(SPDLOG_BUILD_SHARED OFF)
-endif()
+# Add the independent FMT package
+include(cmake/add-fmt.cmake)
 
-# Add SPDLOG subdir
-add_subdirectory(3rdParty/spdlog)
+include(cmake/add-spdlog.cmake)
 
 # Add JSON
 include(cmake/add-json.cmake)
