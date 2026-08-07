@@ -28,10 +28,10 @@ jobs:
         run: sudo apt-get install -y doxygen graphviz uuid-dev
 
       - name: Configure CMake
-        run: cmake -B build -S .
+        run: cmake -B build -DMB_BUILD_DOCS=ON -S .
 
       - name: Build Doxygen Docs
-        run: cmake --build build --target doc
+        run: cmake --build build --target mantisbase-docs
 
       - name: Switch to pages branch and sync docs
         env:
