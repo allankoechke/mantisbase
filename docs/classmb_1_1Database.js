@@ -1,6 +1,6 @@
 var classmb_1_1Database =
 [
-    [ "Database", "classmb_1_1Database.html#af43e18e9d1f9cdfacbb45dcfb7e585a4", null ],
+    [ "Database", "classmb_1_1Database.html#aeea04a920c22345b483dcce0e4abc4fb", null ],
     [ "~Database", "classmb_1_1Database.html#a16f8063e970020fd99e50c6f0f253ff5", null ],
     [ "connect", "classmb_1_1Database.html#aa6539c4e6e5584226b9f504a331c58c6", null ],
     [ "connectionPool", "classmb_1_1Database.html#af2870d7587b4d2926b0848022cdcd8e2", null ],

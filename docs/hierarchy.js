@@ -1,18 +1,29 @@
 var hierarchy =
 [
     [ "mb::AccessRule", "classmb_1_1AccessRule.html", null ],
+    [ "mb::ApiKeyResult", "structmb_1_1ApiKeyResult.html", null ],
     [ "mb::Auth", "classmb_1_1Auth.html", null ],
     [ "mb::ContextStore", "classmb_1_1ContextStore.html", null ],
     [ "mb::Database", "classmb_1_1Database.html", null ],
-    [ "mb::Entity", "classmb_1_1Entity.html", null ],
-    [ "mb::EntitySchema", "classmb_1_1EntitySchema.html", null ],
     [ "mb::EntitySchemaField", "classmb_1_1EntitySchemaField.html", null ],
     [ "std::exception", null, [
       [ "mb::MantisException", "classmb_1_1MantisException.html", null ]
     ] ],
     [ "mb::Expr", "structmb_1_1Expr.html", null ],
-    [ "mb::Files", "classmb_1_1Files.html", null ],
-    [ "mb::FuncLogger", "classmb_1_1FuncLogger.html", null ],
+    [ "mb::FormDataItem", "structmb_1_1FormDataItem.html", null ],
+    [ "mb::IMantisBase", "classmb_1_1IMantisBase.html", [
+      [ "mb::ApiKeyManager", "classmb_1_1ApiKeyManager.html", null ],
+      [ "mb::Entity", "classmb_1_1Entity.html", null ],
+      [ "mb::EntitySchema", "classmb_1_1EntitySchema.html", null ],
+      [ "mb::FilesMgr", "classmb_1_1FilesMgr.html", null ],
+      [ "mb::MantisRequest", "classmb_1_1MantisRequest.html", null ],
+      [ "mb::MantisResponse", "classmb_1_1MantisResponse.html", null ],
+      [ "mb::OAuthManager", "classmb_1_1OAuthManager.html", null ],
+      [ "mb::RealtimeDB", "classmb_1_1RealtimeDB.html", null ],
+      [ "mb::Router", "classmb_1_1Router.html", null ],
+      [ "mb::SSEMgr", "classmb_1_1SSEMgr.html", null ]
+    ] ],
+    [ "mb::IndexDefinition", "structmb_1_1IndexDefinition.html", null ],
     [ "mb::KeyValStore", "classmb_1_1KeyValStore.html", null ],
     [ "mb::LogDatabase", "classmb_1_1LogDatabase.html", null ],
     [ "mb::Logger", "classmb_1_1Logger.html", null ],
@@ -21,15 +32,14 @@ var hierarchy =
     ] ],
     [ "mb::MantisBase", "classmb_1_1MantisBase.html", null ],
     [ "mb::MantisContentReader", "classmb_1_1MantisContentReader.html", null ],
-    [ "mb::MantisRequest", "classmb_1_1MantisRequest.html", null ],
-    [ "mb::MantisResponse", "classmb_1_1MantisResponse.html", null ],
-    [ "mb::RealtimeDB", "classmb_1_1RealtimeDB.html", null ],
     [ "mb::RouteHandler", "structmb_1_1RouteHandler.html", null ],
     [ "mb::RouteKeyHash", "structmb_1_1RouteKeyHash.html", null ],
-    [ "mb::Router", "classmb_1_1Router.html", null ],
     [ "mb::RouteRegistry", "classmb_1_1RouteRegistry.html", null ],
     [ "mb::RtDbWorker", "classmb_1_1RtDbWorker.html", null ],
-    [ "mb::SSEMgr", "classmb_1_1SSEMgr.html", null ],
     [ "mb::SSESession", "classmb_1_1SSESession.html", null ],
-    [ "mb::Validators", "classmb_1_1Validators.html", null ]
+    [ "mb::Validators", "classmb_1_1Validators.html", null ],
+    [ "drogon::WebSocketController", null, [
+      [ "mb::RealtimeWSController", "classmb_1_1RealtimeWSController.html", null ]
+    ] ],
+    [ "mb::WSMgr", "classmb_1_1WSMgr.html", null ]
 ];

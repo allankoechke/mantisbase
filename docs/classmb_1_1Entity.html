@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -102,15 +102,39 @@ $(document).ready(function(){initNavTree('classmb_1_1Entity.html',''); initResiz
  <a href="classmb_1_1Entity.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="entity_8h_source.html">entity.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for mb::Entity:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmb_1_1Entity__inherit__graph.png" border="0" usemap="#amb_1_1Entity_inherit__map" alt="Inheritance graph"/></div>
+<map name="amb_1_1Entity_inherit__map" id="amb_1_1Entity_inherit__map">
+<area shape="rect" title="Represents a database table/entity with schema and CRUD operations." alt="" coords="26,79,115,104"/>
+<area shape="rect" href="classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="5,5,136,31"/>
+<area shape="poly" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for mb::Entity:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmb_1_1Entity__coll__graph.png" border="0" usemap="#amb_1_1Entity_coll__map" alt="Collaboration graph"/></div>
+<map name="amb_1_1Entity_coll__map" id="amb_1_1Entity_coll__map">
+<area shape="rect" title="Represents a database table/entity with schema and CRUD operations." alt="" coords="26,79,115,104"/>
+<area shape="rect" href="classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="5,5,136,31"/>
+<area shape="poly" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5636ba006f4060a5a001f18c1905e30d" id="r_a5636ba006f4060a5a001f18c1905e30d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Entity.html#a5636ba006f4060a5a001f18c1905e30d">Entity</a> (const nlohmann::json &amp;<a class="el" href="classmb_1_1Entity.html#a4bbd23af80fc447b4c39f4b06c2a2afe">schema</a>)</td></tr>
-<tr class="memdesc:a5636ba006f4060a5a001f18c1905e30d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct entity from schema JSON object.  <br /></td></tr>
-<tr class="separator:a5636ba006f4060a5a001f18c1905e30d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a174cc1f2ba1366bdfb58afb6dd249814" id="r_a174cc1f2ba1366bdfb58afb6dd249814"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Entity.html#a174cc1f2ba1366bdfb58afb6dd249814">Entity</a> (const std::string &amp;<a class="el" href="classmb_1_1Entity.html#ac2fbf51307b6240ac9fb6ff8af16923c">name</a>, const std::string &amp;<a class="el" href="classmb_1_1Entity.html#a3d1fc7eab6f53ba13ab62a35310f452b">type</a>)</td></tr>
-<tr class="memdesc:a174cc1f2ba1366bdfb58afb6dd249814"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct entity with name and type.  <br /></td></tr>
-<tr class="separator:a174cc1f2ba1366bdfb58afb6dd249814"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a805eaf3ee3b2ecf38ea7ee53b016b064" id="r_a805eaf3ee3b2ecf38ea7ee53b016b064"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Entity.html#a805eaf3ee3b2ecf38ea7ee53b016b064">Entity</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const nlohmann::json &amp;<a class="el" href="classmb_1_1Entity.html#a4bbd23af80fc447b4c39f4b06c2a2afe">schema</a>)</td></tr>
+<tr class="memdesc:a805eaf3ee3b2ecf38ea7ee53b016b064"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct entity from schema JSON object, bound to its app.  <br /></td></tr>
+<tr class="separator:a805eaf3ee3b2ecf38ea7ee53b016b064"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ad2106ad8f36612acabe02e5c8c8ae8" id="r_a3ad2106ad8f36612acabe02e5c8c8ae8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Entity.html#a3ad2106ad8f36612acabe02e5c8c8ae8">Entity</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const std::string &amp;<a class="el" href="classmb_1_1Entity.html#ac2fbf51307b6240ac9fb6ff8af16923c">name</a>, const std::string &amp;<a class="el" href="classmb_1_1Entity.html#a3d1fc7eab6f53ba13ab62a35310f452b">type</a>)</td></tr>
+<tr class="memdesc:a3ad2106ad8f36612acabe02e5c8c8ae8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct entity with name and type, bound to its app.  <br /></td></tr>
+<tr class="separator:a3ad2106ad8f36612acabe02e5c8c8ae8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b134d29021f24b884b67a58346ef937" id="r_a9b134d29021f24b884b67a58346ef937"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Entity.html#a9b134d29021f24b884b67a58346ef937">Entity</a> (<a class="el" href="classmb_1_1Entity.html">Entity</a> &amp;)=default</td></tr>
+<tr class="separator:a9b134d29021f24b884b67a58346ef937"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96f16ea07c43791de07d27327118d836" id="r_a96f16ea07c43791de07d27327118d836"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Entity.html#a96f16ea07c43791de07d27327118d836">Entity</a> (<a class="el" href="classmb_1_1Entity.html">Entity</a> &amp;&amp;)=default</td></tr>
+<tr class="separator:a96f16ea07c43791de07d27327118d836"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa77642c6979f60660f5d79b4d6ee167b" id="r_aa77642c6979f60660f5d79b4d6ee167b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Entity.html#aa77642c6979f60660f5d79b4d6ee167b">id</a> () const</td></tr>
 <tr class="memdesc:aa77642c6979f60660f5d79b4d6ee167b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get entity unique identifier.  <br /></td></tr>
 <tr class="separator:aa77642c6979f60660f5d79b4d6ee167b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -189,47 +213,61 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a989ceb00a45ae7cbc505ca9538ff6499" id="r_a989ceb00a45ae7cbc505ca9538ff6499"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Entity.html#a989ceb00a45ae7cbc505ca9538ff6499">queryFromCols</a> (const std::string &amp;value, const std::vector&lt; std::string &gt; &amp;columns) const</td></tr>
 <tr class="memdesc:a989ceb00a45ae7cbc505ca9538ff6499"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query records by searching across multiple columns.  <br /></td></tr>
 <tr class="separator:a989ceb00a45ae7cbc505ca9538ff6499"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classmb_1_1IMantisBase"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmb_1_1IMantisBase')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmb_1_1IMantisBase.html">mb::IMantisBase</a></td></tr>
+<tr class="memitem:a2694758bb4c4f5705a5f26731f2f96d5 inherit pub_methods_classmb_1_1IMantisBase" id="r_a2694758bb4c4f5705a5f26731f2f96d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#a2694758bb4c4f5705a5f26731f2f96d5">IMantisBase</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app)</td></tr>
+<tr class="separator:a2694758bb4c4f5705a5f26731f2f96d5 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase" id="r_a94d6b28bd66767f7df7d7eb63c606801"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#a94d6b28bd66767f7df7d7eb63c606801">mbApp</a> () const</td></tr>
+<tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
+<tr class="separator:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase" id="r_aeb65d721822a05d100c547f8a32a8dcf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a> () const</td></tr>
+<tr class="memdesc:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the logger instance.  <br /></td></tr>
+<tr class="separator:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Represents a database table/entity with schema and CRUD operations. </p>
 <p><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a> provides methods to interact with database tables including creating, reading, updating, and deleting records. It encapsulates schema information and access rules.</p>
-<div class="fragment"><div class="line"><span class="comment">// Create entity from schema JSON</span></div>
-<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> <a class="code hl_function" href="classmb_1_1Entity.html#a4bbd23af80fc447b4c39f4b06c2a2afe">schema</a> = {{<span class="stringliteral">&quot;name&quot;</span>, <span class="stringliteral">&quot;users&quot;</span>}, {<span class="stringliteral">&quot;type&quot;</span>, <span class="stringliteral">&quot;base&quot;</span>}, {<span class="stringliteral">&quot;fields&quot;</span>, ...}};</div>
-<div class="line"><a class="code hl_function" href="classmb_1_1Entity.html#a5636ba006f4060a5a001f18c1905e30d">Entity</a> entity(<a class="code hl_function" href="classmb_1_1Entity.html#a4bbd23af80fc447b4c39f4b06c2a2afe">schema</a>);</div>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">MantisBase::create</a>();</div>
+<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> <a class="code hl_function" href="classmb_1_1Entity.html#a4bbd23af80fc447b4c39f4b06c2a2afe">schema</a> = {{<span class="stringliteral">&quot;name&quot;</span>, <span class="stringliteral">&quot;users&quot;</span>}, {<span class="stringliteral">&quot;type&quot;</span>, <span class="stringliteral">&quot;base&quot;</span>}, {<span class="stringliteral">&quot;fields&quot;</span>, json::array()}};</div>
+<div class="line"><a class="code hl_function" href="classmb_1_1Entity.html#a805eaf3ee3b2ecf38ea7ee53b016b064">Entity</a> entity(*app, <a class="code hl_function" href="classmb_1_1Entity.html#a4bbd23af80fc447b4c39f4b06c2a2afe">schema</a>);</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// Create entity with name and type</span></div>
-<div class="line"><a class="code hl_function" href="classmb_1_1Entity.html#a5636ba006f4060a5a001f18c1905e30d">Entity</a> entity(<span class="stringliteral">&quot;posts&quot;</span>, <span class="stringliteral">&quot;base&quot;</span>);</div>
-<div class="ttc" id="aclassmb_1_1Entity_html_a4bbd23af80fc447b4c39f4b06c2a2afe"><div class="ttname"><a href="classmb_1_1Entity.html#a4bbd23af80fc447b4c39f4b06c2a2afe">mb::Entity::schema</a></div><div class="ttdeci">const json &amp; schema() const</div><div class="ttdoc">Get complete entity schema JSON.</div><div class="ttdef"><b>Definition</b> entity.cpp:143</div></div>
-<div class="ttc" id="aclassmb_1_1Entity_html_a5636ba006f4060a5a001f18c1905e30d"><div class="ttname"><a href="classmb_1_1Entity.html#a5636ba006f4060a5a001f18c1905e30d">mb::Entity::Entity</a></div><div class="ttdeci">Entity(const nlohmann::json &amp;schema)</div><div class="ttdoc">Construct entity from schema JSON object.</div><div class="ttdef"><b>Definition</b> entity.cpp:8</div></div>
-<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> context_store.h:18</div></div>
+<div class="line"><span class="comment">// Or by name after the schema exists in the database:</span></div>
+<div class="line"><a class="code hl_function" href="classmb_1_1Entity.html#a805eaf3ee3b2ecf38ea7ee53b016b064">Entity</a> users = app-&gt;entity(<span class="stringliteral">&quot;users&quot;</span>);</div>
+<div class="ttc" id="aclassmb_1_1Entity_html_a4bbd23af80fc447b4c39f4b06c2a2afe"><div class="ttname"><a href="classmb_1_1Entity.html#a4bbd23af80fc447b4c39f4b06c2a2afe">mb::Entity::schema</a></div><div class="ttdeci">const json &amp; schema() const</div><div class="ttdoc">Get complete entity schema JSON.</div><div class="ttdef"><b>Definition</b> entity.cpp:148</div></div>
+<div class="ttc" id="aclassmb_1_1Entity_html_a805eaf3ee3b2ecf38ea7ee53b016b064"><div class="ttname"><a href="classmb_1_1Entity.html#a805eaf3ee3b2ecf38ea7ee53b016b064">mb::Entity::Entity</a></div><div class="ttdeci">Entity(const MantisBase &amp;app, const nlohmann::json &amp;schema)</div><div class="ttdoc">Construct entity from schema JSON object, bound to its app.</div><div class="ttdef"><b>Definition</b> entity.cpp:8</div></div>
+<div class="ttc" id="aclassmb_1_1MantisBase_html_a39320e2aeb02263d4bc2252e1853854a"><div class="ttname"><a href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a></div><div class="ttdeci">static std::unique_ptr&lt; MantisBase &gt; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:49</div></div>
+<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a5636ba006f4060a5a001f18c1905e30d" name="a5636ba006f4060a5a001f18c1905e30d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5636ba006f4060a5a001f18c1905e30d">&#9670;&#160;</a></span>Entity() <span class="overload">[1/2]</span></h2>
+<a id="a805eaf3ee3b2ecf38ea7ee53b016b064" name="a805eaf3ee3b2ecf38ea7ee53b016b064"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a805eaf3ee3b2ecf38ea7ee53b016b064">&#9670;&#160;</a></span>Entity() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">mb::Entity::Entity </td>
           <td>(</td>
-          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
-          <td class="paramname"><em>schema</em></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td>
+          <td class="paramname"><em>app</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>schema</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p>Construct entity from schema JSON object. </p>
+<p>Construct entity from schema JSON object, bound to its app. </p>
+<p>The app is injected at construction so every <a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a> is always bound to the services (database, realtime) its CRUD operations need — there is no separate bind step to forget. Copies carry the binding.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">app</td><td>Owning application. Stored non-owning; must outlive the entity. </td></tr>
     <tr><td class="paramname">schema</td><td>JSON object containing table schema (name, type, fields, rules, etc.) </td></tr>
   </table>
   </dd>
@@ -237,18 +275,21 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a174cc1f2ba1366bdfb58afb6dd249814" name="a174cc1f2ba1366bdfb58afb6dd249814"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a174cc1f2ba1366bdfb58afb6dd249814">&#9670;&#160;</a></span>Entity() <span class="overload">[2/2]</span></h2>
+<a id="a3ad2106ad8f36612acabe02e5c8c8ae8" name="a3ad2106ad8f36612acabe02e5c8c8ae8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ad2106ad8f36612acabe02e5c8c8ae8">&#9670;&#160;</a></span>Entity() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">mb::Entity::Entity </td>
           <td>(</td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td>
+          <td class="paramname"><em>app</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>name</em>, </td>
         </tr>
@@ -264,21 +305,69 @@ Public Member Functions</h2></td></tr>
           <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p>Construct entity with name and type. </p>
+<p>Construct entity with name and type, bound to its app. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">app</td><td>Owning application (see the schema constructor). </td></tr>
     <tr><td class="paramname">name</td><td>Table name </td></tr>
     <tr><td class="paramname">type</td><td><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a> type ("base", "auth", or "view") </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a9b134d29021f24b884b67a58346ef937" name="a9b134d29021f24b884b67a58346ef937"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b134d29021f24b884b67a58346ef937">&#9670;&#160;</a></span>Entity() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">mb::Entity::Entity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classmb_1_1Entity.html">Entity</a> &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a96f16ea07c43791de07d27327118d836" name="a96f16ea07c43791de07d27327118d836"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96f16ea07c43791de07d27327118d836">&#9670;&#160;</a></span>Entity() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">mb::Entity::Entity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classmb_1_1Entity.html">Entity</a> &amp;&amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -357,9 +446,10 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Created record with generated ID and timestamps <div class="fragment"><div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> newUser = {{<span class="stringliteral">&quot;name&quot;</span>, <span class="stringliteral">&quot;John&quot;</span>}, {<span class="stringliteral">&quot;email&quot;</span>, <span class="stringliteral">&quot;john@example.com&quot;</span>}};</div>
-<div class="line"><a class="code hl_typedef" href="namespacemb.html#a5343a89a02116de84a79039bb8acdd21">Record</a> created = entity.create(newUser);</div>
-<div class="ttc" id="anamespacemb_html_a5343a89a02116de84a79039bb8acdd21"><div class="ttname"><a href="namespacemb.html#a5343a89a02116de84a79039bb8acdd21">mb::Record</a></div><div class="ttdeci">nlohmann::json Record</div><div class="ttdoc">Single database record as JSON object.</div><div class="ttdef"><b>Definition</b> entity.h:20</div></div>
+<dl class="section return"><dt>Returns</dt><dd>Created record with generated ID and timestamps <div class="fragment"><div class="line"><span class="keyword">auto</span> users = app.entity(<span class="stringliteral">&quot;users&quot;</span>);</div>
+<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> newUser = {{<span class="stringliteral">&quot;name&quot;</span>, <span class="stringliteral">&quot;John&quot;</span>}, {<span class="stringliteral">&quot;email&quot;</span>, <span class="stringliteral">&quot;john@example.com&quot;</span>}};</div>
+<div class="line"><a class="code hl_typedef" href="namespacemb.html#a5343a89a02116de84a79039bb8acdd21">Record</a> created = users.create(newUser);</div>
+<div class="ttc" id="anamespacemb_html_a5343a89a02116de84a79039bb8acdd21"><div class="ttname"><a href="namespacemb.html#a5343a89a02116de84a79039bb8acdd21">mb::Record</a></div><div class="ttdeci">nlohmann::json Record</div><div class="ttdoc">Single database record as JSON object.</div><div class="ttdef"><b>Definition</b> entity.h:23</div></div>
 </div><!-- fragment --> </dd></dl>
 
 </div>

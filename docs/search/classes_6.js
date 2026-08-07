@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['logdatabase_0',['LogDatabase',['../classmb_1_1LogDatabase.html',1,'mb']]],
-  ['logger_1',['Logger',['../classmb_1_1Logger.html',1,'mb']]]
+  ['keyvalstore_0',['KeyValStore',['../classmb_1_1KeyValStore.html',1,'mb']]]
 ];

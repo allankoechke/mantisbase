@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -167,22 +167,6 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <div class="line">mantisbase admins --rm admin@example.com</div>
 </div><!-- fragment --><hr  />
 <h2><a class="anchor" id="autotoc_md17"></a>
-🛠️ migrations</h2>
-<p>Apply or rollback migrations from the migrations directory. Exactly <b>one</b> of <code>--up</code> or <code>--down</code> is required.</p>
-<div class="fragment"><div class="line">mantisbase migrations --up</div>
-<div class="line">mantisbase migrations --down</div>
-</div><!-- fragment --><table class="markdownTable">
-<tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Description    </th></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>--up</code>   </td><td class="markdownTableBodyNone">Apply sorted <code>*.json</code> migration files from <code>--migrations-dir</code>    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>--down</code>   </td><td class="markdownTableBodyNone">Rollback migrations *(not yet implemented)*   </td></tr>
-</table>
-<p><b>Example:</b></p>
-<div class="fragment"><div class="line">mantisbase --migrations-dir=./db/migrations migrations --up</div>
-</div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md19"></a>
 📋 schema</h2>
 <p>Manage entity schemas locally (without the HTTP API). Exactly <b>one</b> of <code>--ls</code>, <code>--rm</code>, <code>--add</code>, or <code>--update</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase schema --ls</div>
@@ -207,7 +191,48 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <div class="line">mantisbase schema --update posts ./schemas/posts-v2.json</div>
 <div class="line">mantisbase schema --rm posts</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md21"></a>
+<h2><a class="anchor" id="autotoc_md19"></a>
+🛠️ migrate</h2>
+<p>Exactly <b>one</b> of <code>apply</code> or <code>schema</code> is required.</p>
+<div class="fragment"><div class="line">mantisbase apply [options]</div>
+<div class="line">mantisbase schema [options]</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md20"></a>
+🛠️ apply</h3>
+<p>Apply or rollback migrations from the migrations directory. Exactly <b>one</b> of <code>--up</code> or <code>--down</code> is required.</p>
+<div class="fragment"><div class="line">mantisbase migrate apply --up</div>
+<div class="line">mantisbase migrate apply  --down</div>
+</div><!-- fragment --><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>--up</code>   </td><td class="markdownTableBodyNone">Apply sorted <code>*.json</code> migration files from <code>--migrations-dir</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>--down</code>   </td><td class="markdownTableBodyNone">Rollback migrations *(not yet implemented)*   </td></tr>
+</table>
+<p><b>Example:</b></p>
+<div class="fragment"><div class="line">mantisbase --migrations-dir=./db/migrations migrate apply --up</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md21"></a>
+🛠️ schema</h3>
+<p>Create or load schema dump from a given .json file. Exactly <b>one</b> of <code>--to</code> or <code>--from</code> is required.</p>
+<div class="fragment"><div class="line">mantisbase migrate schema --to &lt;file.json&gt;</div>
+<div class="line">mantisbase migrate apply  --from &lt;file.json&gt;</div>
+</div><!-- fragment --><blockquote class="doxtable">
+<p>&zwj;NB: <code>file.json</code> can be an absolute path or a relative path. <br  />
+ </p>
+</blockquote>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>--to</code>   </td><td class="markdownTableBodyNone">Dump current schema to <code>&lt;file.json&gt;</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>--from</code>   </td><td class="markdownTableBodyNone">Load schema from the provided <code>&lt;file.json&gt;</code>   </td></tr>
+</table>
+<p><b>Example:</b></p>
+<div class="fragment"><div class="line">mantisbase migrate schema --to 123.json</div>
+<div class="line">mantisbase migrate schema --from /path/to/123.json</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md23"></a>
 📚 See Also</h2>
 <ul>
 <li><a class="el" href="QuickStart_8md.html">Quick Start</a></li>

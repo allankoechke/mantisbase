@@ -13,9 +13,10 @@ var string__utils_8cpp =
     [ "sanitizeFilename_JSWrapper", "string__utils_8cpp.html#ac3176a96dbbc7784fb6638cad25c6030", null ],
     [ "sanitizeInPlace", "string__utils_8cpp.html#a8a3823264846aca9828eab91e2048b27", null ],
     [ "splitString", "string__utils_8cpp.html#a2496b58c49de9a3a1758c8fc6fee2996", null ],
+    [ "sqlIdentifier", "string__utils_8cpp.html#a49176a2c9bc24f9aa992eab803aa4d0c", null ],
     [ "strToBool", "string__utils_8cpp.html#ae77a8e2cd17097b492084ae16ef26fee", null ],
     [ "toLowerCase", "string__utils_8cpp.html#a610ae91c5e525b5899cf9445107360e9", null ],
     [ "toUpperCase", "string__utils_8cpp.html#abe6b794953335d0601b9fe55af49027f", null ],
     [ "trim", "string__utils_8cpp.html#a409c1fc8483d2c71f13abd04598f4db2", null ],
-    [ "tryParseJsonStr", "string__utils_8cpp.html#aa3ea2b27da77ae3202f7d32ef7f88b80", null ]
+    [ "tryParseJsonStr", "string__utils_8cpp.html#a407f3d861f56cbc663381da99b2cc4ed", null ]
 ];

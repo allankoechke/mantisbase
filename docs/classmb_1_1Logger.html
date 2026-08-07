@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -104,31 +104,29 @@ $(document).ready(function(){initNavTree('classmb_1_1Logger.html',''); initResiz
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a15080ceb64a341572e79709ed50404fd" id="r_a15080ceb64a341572e79709ed50404fd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a15080ceb64a341572e79709ed50404fd">Logger</a> ()</td></tr>
-<tr class="separator:a15080ceb64a341572e79709ed50404fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a596e1e6fc9de91c1609789e3f5a0ee8e" id="r_a596e1e6fc9de91c1609789e3f5a0ee8e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a596e1e6fc9de91c1609789e3f5a0ee8e">~Logger</a> ()</td></tr>
-<tr class="separator:a596e1e6fc9de91c1609789e3f5a0ee8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32872bc194433137cccc2af253fa8829" id="r_a32872bc194433137cccc2af253fa8829"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a32872bc194433137cccc2af253fa8829">Logger</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app)</td></tr>
+<tr class="separator:a32872bc194433137cccc2af253fa8829"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90b3f9457ce1b8c07aaf192e4e73a22b" id="r_a90b3f9457ce1b8c07aaf192e4e73a22b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1LogDatabase.html">LogDatabase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a90b3f9457ce1b8c07aaf192e4e73a22b">logsDb</a> () const</td></tr>
 <tr class="memdesc:a90b3f9457ce1b8c07aaf192e4e73a22b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the log database instance (for API access).  <br /></td></tr>
 <tr class="separator:a90b3f9457ce1b8c07aaf192e4e73a22b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5d4fc7c0c5cf0ea8fe4135bc4b225b1" id="r_aa5d4fc7c0c5cf0ea8fe4135bc4b225b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#aa5d4fc7c0c5cf0ea8fe4135bc4b225b1">initDb</a> (const std::string &amp;data_dir=&quot;&quot;) const</td></tr>
+<tr class="memdesc:aa5d4fc7c0c5cf0ea8fe4135bc4b225b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize database connection.  <br /></td></tr>
+<tr class="separator:aa5d4fc7c0c5cf0ea8fe4135bc4b225b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a527c23ded09fa2c747beaeb97d2420c6" id="r_a527c23ded09fa2c747beaeb97d2420c6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a527c23ded09fa2c747beaeb97d2420c6">trace</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object()) const</td></tr>
+<tr class="separator:a527c23ded09fa2c747beaeb97d2420c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae462cc738fcef268bf9e3a8f1031ff60" id="r_ae462cc738fcef268bf9e3a8f1031ff60"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#ae462cc738fcef268bf9e3a8f1031ff60">info</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object()) const</td></tr>
+<tr class="separator:ae462cc738fcef268bf9e3a8f1031ff60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad696ec844b9c3f11f10430f4e6f535c1" id="r_ad696ec844b9c3f11f10430f4e6f535c1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#ad696ec844b9c3f11f10430f4e6f535c1">debug</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object()) const</td></tr>
+<tr class="separator:ad696ec844b9c3f11f10430f4e6f535c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6340a6bbcb38645b8c6711700d654f7" id="r_ab6340a6bbcb38645b8c6711700d654f7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#ab6340a6bbcb38645b8c6711700d654f7">warn</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object()) const</td></tr>
+<tr class="separator:ab6340a6bbcb38645b8c6711700d654f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c83087a3c9ebf1c44b18f9de1cd77af" id="r_a4c83087a3c9ebf1c44b18f9de1cd77af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a4c83087a3c9ebf1c44b18f9de1cd77af">critical</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object()) const</td></tr>
+<tr class="separator:a4c83087a3c9ebf1c44b18f9de1cd77af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:aac705982365e9f4c2df900dfe0ad6503" id="r_aac705982365e9f4c2df900dfe0ad6503"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#aac705982365e9f4c2df900dfe0ad6503">setLogLevel</a> (const <a class="el" href="namespacemb.html#a45b395bbdb082a2a10815855bad98c81">LogLevel</a> &amp;level=LogLevel::INFO)</td></tr>
 <tr class="separator:aac705982365e9f4c2df900dfe0ad6503"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac155db0fa06b1b274ba99c25667b9174" id="r_ac155db0fa06b1b274ba99c25667b9174"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#ac155db0fa06b1b274ba99c25667b9174">initDb</a> (const std::string &amp;data_dir=&quot;&quot;)</td></tr>
-<tr class="memdesc:ac155db0fa06b1b274ba99c25667b9174"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize database connection.  <br /></td></tr>
-<tr class="separator:ac155db0fa06b1b274ba99c25667b9174"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24fdf7bd99f6f446781467bf5a4bd066" id="r_a24fdf7bd99f6f446781467bf5a4bd066"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a24fdf7bd99f6f446781467bf5a4bd066">trace</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object())</td></tr>
-<tr class="separator:a24fdf7bd99f6f446781467bf5a4bd066"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a306d55c017819b325b86a3d340221556" id="r_a306d55c017819b325b86a3d340221556"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a306d55c017819b325b86a3d340221556">info</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object())</td></tr>
-<tr class="separator:a306d55c017819b325b86a3d340221556"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07237c4b0b77b6c9d19c3644d48d1087" id="r_a07237c4b0b77b6c9d19c3644d48d1087"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a07237c4b0b77b6c9d19c3644d48d1087">debug</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object())</td></tr>
-<tr class="separator:a07237c4b0b77b6c9d19c3644d48d1087"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9cc844cbfaba8024accb9a58af99e08" id="r_ab9cc844cbfaba8024accb9a58af99e08"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#ab9cc844cbfaba8024accb9a58af99e08">warn</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object())</td></tr>
-<tr class="separator:ab9cc844cbfaba8024accb9a58af99e08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d5e18ca0bacee615c2423524a760427" id="r_a3d5e18ca0bacee615c2423524a760427"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Logger.html#a3d5e18ca0bacee615c2423524a760427">critical</a> (const std::string &amp;origin, const std::string &amp;message, const std::string &amp;details=&quot;&quot;, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data=json::object())</td></tr>
-<tr class="separator:a3d5e18ca0bacee615c2423524a760427"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -138,25 +136,8 @@ Static Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A wrapper class around the <code>spdlog's</code> logging functions. For more info, check docs here: </p><dl class="section see"><dt>See also</dt><dd><a href="https://github.com/gabime/spdlog">https://github.com/gabime/spdlog</a> </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a15080ceb64a341572e79709ed50404fd" name="a15080ceb64a341572e79709ed50404fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15080ceb64a341572e79709ed50404fd">&#9670;&#160;</a></span>Logger()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">mb::Logger::Logger </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a596e1e6fc9de91c1609789e3f5a0ee8e" name="a596e1e6fc9de91c1609789e3f5a0ee8e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a596e1e6fc9de91c1609789e3f5a0ee8e">&#9670;&#160;</a></span>~Logger()</h2>
+<a id="a32872bc194433137cccc2af253fa8829" name="a32872bc194433137cccc2af253fa8829"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32872bc194433137cccc2af253fa8829">&#9670;&#160;</a></span>Logger()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -165,15 +146,16 @@ Static Public Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">mb::Logger::~Logger </td>
+          <td class="memname">mb::Logger::Logger </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td>
+          <td class="paramname"><em>app</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -181,14 +163,11 @@ Static Public Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a3d5e18ca0bacee615c2423524a760427" name="a3d5e18ca0bacee615c2423524a760427"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3d5e18ca0bacee615c2423524a760427">&#9670;&#160;</a></span>critical()</h2>
+<a id="a4c83087a3c9ebf1c44b18f9de1cd77af" name="a4c83087a3c9ebf1c44b18f9de1cd77af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c83087a3c9ebf1c44b18f9de1cd77af">&#9670;&#160;</a></span>critical()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void mb::Logger::critical </td>
@@ -217,26 +196,18 @@ Static Public Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="a07237c4b0b77b6c9d19c3644d48d1087" name="a07237c4b0b77b6c9d19c3644d48d1087"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a07237c4b0b77b6c9d19c3644d48d1087">&#9670;&#160;</a></span>debug()</h2>
+<a id="ad696ec844b9c3f11f10430f4e6f535c1" name="ad696ec844b9c3f11f10430f4e6f535c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad696ec844b9c3f11f10430f4e6f535c1">&#9670;&#160;</a></span>debug()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void mb::Logger::debug </td>
@@ -265,26 +236,18 @@ Static Public Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="a306d55c017819b325b86a3d340221556" name="a306d55c017819b325b86a3d340221556"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a306d55c017819b325b86a3d340221556">&#9670;&#160;</a></span>info()</h2>
+<a id="ae462cc738fcef268bf9e3a8f1031ff60" name="ae462cc738fcef268bf9e3a8f1031ff60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae462cc738fcef268bf9e3a8f1031ff60">&#9670;&#160;</a></span>info()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void mb::Logger::info </td>
@@ -313,40 +276,27 @@ Static Public Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="ac155db0fa06b1b274ba99c25667b9174" name="ac155db0fa06b1b274ba99c25667b9174"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac155db0fa06b1b274ba99c25667b9174">&#9670;&#160;</a></span>initDb()</h2>
+<a id="aa5d4fc7c0c5cf0ea8fe4135bc4b225b1" name="aa5d4fc7c0c5cf0ea8fe4135bc4b225b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5d4fc7c0c5cf0ea8fe4135bc4b225b1">&#9670;&#160;</a></span>initDb()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void mb::Logger::initDb </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>data_dir</em> = <code>&quot;&quot;</code></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Initialize database connection. </p>
@@ -399,14 +349,11 @@ Static Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a24fdf7bd99f6f446781467bf5a4bd066" name="a24fdf7bd99f6f446781467bf5a4bd066"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24fdf7bd99f6f446781467bf5a4bd066">&#9670;&#160;</a></span>trace()</h2>
+<a id="a527c23ded09fa2c747beaeb97d2420c6" name="a527c23ded09fa2c747beaeb97d2420c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a527c23ded09fa2c747beaeb97d2420c6">&#9670;&#160;</a></span>trace()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void mb::Logger::trace </td>
@@ -435,26 +382,18 @@ Static Public Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="ab9cc844cbfaba8024accb9a58af99e08" name="ab9cc844cbfaba8024accb9a58af99e08"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab9cc844cbfaba8024accb9a58af99e08">&#9670;&#160;</a></span>warn()</h2>
+<a id="ab6340a6bbcb38645b8c6711700d654f7" name="ab6340a6bbcb38645b8c6711700d654f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6340a6bbcb38645b8c6711700d654f7">&#9670;&#160;</a></span>warn()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void mb::Logger::warn </td>
@@ -483,14 +422,9 @@ Static Public Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>

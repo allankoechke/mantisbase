@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -122,6 +122,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:acd5967d75b7c8a58fbfec8ce44cc8b22" id="r_acd5967d75b7c8a58fbfec8ce44cc8b22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#acd5967d75b7c8a58fbfec8ce44cc8b22">close</a> ()</td></tr>
 <tr class="memdesc:acd5967d75b7c8a58fbfec8ce44cc8b22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the application and reset object instances that are dependent on the class.  <br /></td></tr>
 <tr class="separator:acd5967d75b7c8a58fbfec8ce44cc8b22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a101567ba238672d54c65e5aa346bf710" id="r_a101567ba238672d54c65e5aa346bf710"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a101567ba238672d54c65e5aa346bf710">quit</a> (const int &amp;exitCode=0, const std::string &amp;reason=&quot;Something went wrong!&quot;)</td></tr>
+<tr class="memdesc:a101567ba238672d54c65e5aa346bf710"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quit the running application immediately.  <br /></td></tr>
+<tr class="separator:a101567ba238672d54c65e5aa346bf710"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c7a2835dcafa6caf374cbce4771d67d" id="r_a2c7a2835dcafa6caf374cbce4771d67d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a2c7a2835dcafa6caf374cbce4771d67d">port</a> () const</td></tr>
 <tr class="memdesc:a2c7a2835dcafa6caf374cbce4771d67d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve HTTP Listening port.  <br /></td></tr>
 <tr class="separator:a2c7a2835dcafa6caf374cbce4771d67d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -171,6 +174,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2a9a711b0c3c33ecdd2a0e2e4cd5e570"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb2144588a2543cc07cc53f03fcb6baf" id="r_acb2144588a2543cc07cc53f03fcb6baf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#acb2144588a2543cc07cc53f03fcb6baf">setDbType</a> (const std::string &amp;<a class="el" href="classmb_1_1MantisBase.html#a2a9a711b0c3c33ecdd2a0e2e4cd5e570">dbType</a>)</td></tr>
 <tr class="separator:acb2144588a2543cc07cc53f03fcb6baf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3076db65ddea48694928652ecb232ad6" id="r_a3076db65ddea48694928652ecb232ad6"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a3076db65ddea48694928652ecb232ad6">jwtSecretKey</a> () const</td></tr>
+<tr class="memdesc:a3076db65ddea48694928652ecb232ad6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the JWT secret key.  <br /></td></tr>
+<tr class="separator:a3076db65ddea48694928652ecb232ad6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cf7d3137d0d709329f7f81827f11078" id="r_a9cf7d3137d0d709329f7f81827f11078"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a9cf7d3137d0d709329f7f81827f11078">snowflakeId</a> () const</td></tr>
+<tr class="memdesc:a9cf7d3137d0d709329f7f81827f11078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate snowflake ID.  <br /></td></tr>
+<tr class="separator:a9cf7d3137d0d709329f7f81827f11078"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf263b88b0d221f9bc539714668b7d4b" id="r_acf263b88b0d221f9bc539714668b7d4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Database.html">Database</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#acf263b88b0d221f9bc539714668b7d4b">db</a> () const</td></tr>
 <tr class="memdesc:acf263b88b0d221f9bc539714668b7d4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the database unit object.  <br /></td></tr>
 <tr class="separator:acf263b88b0d221f9bc539714668b7d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -189,6 +198,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a470ee74c61556ca8105993f8df49dac1" id="r_a470ee74c61556ca8105993f8df49dac1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1RealtimeDB.html">RealtimeDB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a470ee74c61556ca8105993f8df49dac1">rt</a> () const</td></tr>
 <tr class="memdesc:a470ee74c61556ca8105993f8df49dac1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the realtime unit (SQLite/PostgreSQL change detection for SSE /api/v1/realtime).  <br /></td></tr>
 <tr class="separator:a470ee74c61556ca8105993f8df49dac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a766ac5f075b31a4b748f53fbbd9872db" id="r_a766ac5f075b31a4b748f53fbbd9872db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1FilesMgr.html">FilesMgr</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a766ac5f075b31a4b748f53fbbd9872db">files</a> () const</td></tr>
+<tr class="memdesc:a766ac5f075b31a4b748f53fbbd9872db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the <a class="el" href="classmb_1_1FilesMgr.html" title="File management for entity file assets.">FilesMgr</a> instance.  <br /></td></tr>
+<tr class="separator:a766ac5f075b31a4b748f53fbbd9872db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8d95de5b1456d77f0a7487f9d24e0f8" id="r_ac8d95de5b1456d77f0a7487f9d24e0f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#ac8d95de5b1456d77f0a7487f9d24e0f8">logger</a> () const</td></tr>
+<tr class="memdesc:ac8d95de5b1456d77f0a7487f9d24e0f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get <a class="el" href="classmb_1_1Logger.html">Logger</a> instance.  <br /></td></tr>
+<tr class="separator:ac8d95de5b1456d77f0a7487f9d24e0f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2416771f6717000a219a462f1f673fc9" id="r_a2416771f6717000a219a462f1f673fc9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Auth.html">Auth</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a2416771f6717000a219a462f1f673fc9">auth</a> () const</td></tr>
+<tr class="memdesc:a2416771f6717000a219a462f1f673fc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get <a class="el" href="classmb_1_1Auth.html" title="JWT token creation and verification utilities.">Auth</a> instance.  <br /></td></tr>
+<tr class="separator:a2416771f6717000a219a462f1f673fc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1043575a422c2c536b1022593bb977d2" id="r_a1043575a422c2c536b1022593bb977d2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Entity.html">Entity</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a1043575a422c2c536b1022593bb977d2">entity</a> (const std::string &amp;entity_name) const</td></tr>
 <tr class="memdesc:a1043575a422c2c536b1022593bb977d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch a table schema encapsulated by an <code><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a></code> object from given the table name. If table does not exist yet, return an emty object.  <br /></td></tr>
 <tr class="separator:a1043575a422c2c536b1022593bb977d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -206,21 +224,12 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aca64db86aff60b0a0730260576d3a0e0" id="r_aca64db86aff60b0a0730260576d3a0e0"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#aca64db86aff60b0a0730260576d3a0e0">instance</a> ()</td></tr>
-<tr class="memdesc:aca64db86aff60b0a0730260576d3a0e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve existing application instance.  <br /></td></tr>
-<tr class="separator:aca64db86aff60b0a0730260576d3a0e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d7db711bdbc3422e44c2138b71a155c" id="r_a4d7db711bdbc3422e44c2138b71a155c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">create</a> (int argc, char **argv)</td></tr>
-<tr class="memdesc:a4d7db711bdbc3422e44c2138b71a155c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create class instance given cmd args passed in.  <br /></td></tr>
-<tr class="separator:a4d7db711bdbc3422e44c2138b71a155c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9a7f82c194b120cfea5eb57f839eed5" id="r_ae9a7f82c194b120cfea5eb57f839eed5"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#ae9a7f82c194b120cfea5eb57f839eed5">create</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;config=json::object())</td></tr>
-<tr class="memdesc:ae9a7f82c194b120cfea5eb57f839eed5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function to allow creating class instance given the values needed to set up the app without any need for passing in cmd args.  <br /></td></tr>
-<tr class="separator:ae9a7f82c194b120cfea5eb57f839eed5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a101567ba238672d54c65e5aa346bf710" id="r_a101567ba238672d54c65e5aa346bf710"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a101567ba238672d54c65e5aa346bf710">quit</a> (const int &amp;exitCode=0, const std::string &amp;reason=&quot;Something went wrong!&quot;)</td></tr>
-<tr class="memdesc:a101567ba238672d54c65e5aa346bf710"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quit the running application immediately.  <br /></td></tr>
-<tr class="separator:a101567ba238672d54c65e5aa346bf710"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a946560e16179566a7155ae16202aa697" id="r_a946560e16179566a7155ae16202aa697"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a946560e16179566a7155ae16202aa697">jwtSecretKey</a> ()</td></tr>
-<tr class="memdesc:a946560e16179566a7155ae16202aa697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the JWT secret key.  <br /></td></tr>
-<tr class="separator:a946560e16179566a7155ae16202aa697"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39320e2aeb02263d4bc2252e1853854a" id="r_a39320e2aeb02263d4bc2252e1853854a"><td class="memItemLeft" align="right" valign="top">static std::unique_ptr&lt; <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">create</a> (int argc, char **argv)</td></tr>
+<tr class="memdesc:a39320e2aeb02263d4bc2252e1853854a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create class instance given cmd args passed in.  <br /></td></tr>
+<tr class="separator:a39320e2aeb02263d4bc2252e1853854a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c20c2f1ff72533e9eb7f980ec03a1fe" id="r_a0c20c2f1ff72533e9eb7f980ec03a1fe"><td class="memItemLeft" align="right" valign="top">static std::unique_ptr&lt; <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a0c20c2f1ff72533e9eb7f980ec03a1fe">create</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;config=json::object())</td></tr>
+<tr class="memdesc:a0c20c2f1ff72533e9eb7f980ec03a1fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function to allow creating class instance given the values needed to set up the app without any need for passing in cmd args.  <br /></td></tr>
+<tr class="separator:a0c20c2f1ff72533e9eb7f980ec03a1fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acff8b41afb6071721e34a0fcce975e8c" id="r_acff8b41afb6071721e34a0fcce975e8c"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#acff8b41afb6071721e34a0fcce975e8c">appVersion</a> ()</td></tr>
 <tr class="separator:acff8b41afb6071721e34a0fcce975e8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1719b93f9d70a6544afabd2c916c8211" id="r_a1719b93f9d70a6544afabd2c916c8211"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a1719b93f9d70a6544afabd2c916c8211">appMinorVersion</a> ()</td></tr>
@@ -248,7 +257,8 @@ RouterMgr for a high level routing methods.</dd></dl>
 <dd>
 RouterMgr for more details.</dd></dl>
 </li>
-<li>ValidatorMgr: A validation store using regex, <dl class="section see"><dt>See also</dt><dd>Validator for more details. </dd></dl>
+<li>ValidatorMgr: A validation store using regex, <dl class="section see"><dt>See also</dt><dd>Validator for more details.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd><code><a class="el" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a" title="Create class instance given cmd args passed in.">create()</a></code> returns a <code>std::unique_ptr&lt;<a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>&gt;</code> that you own. Pass a <code>const <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>&amp;</code> (or capture it in lambdas) to reach services such as <code><a class="el" href="classmb_1_1MantisBase.html#a2416771f6717000a219a462f1f673fc9" title="Get Auth instance.">auth()</a></code>, <code><a class="el" href="classmb_1_1MantisBase.html#a1043575a422c2c536b1022593bb977d2" title="Fetch a table schema encapsulated by an Entity object from given the table name. If table does not ex...">entity()</a></code>, and <code><a class="el" href="classmb_1_1MantisBase.html#acf263b88b0d221f9bc539714668b7d4b" title="Get the database unit object.">db()</a></code>. Types that participate in request handling (<code><a class="el" href="classmb_1_1MantisRequest.html" title="HTTP request wrapper bound to a MantisBase instance.">MantisRequest</a></code>, <code><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a></code>, <code><a class="el" href="classmb_1_1Router.html">Router</a></code>, <code><a class="el" href="classmb_1_1ApiKeyManager.html" title="Create, list, revoke, and resolve API keys for entity users and admins.">ApiKeyManager</a></code>, etc.) inherit <a class="el" href="classmb_1_1IMantisBase.html">IMantisBase</a> and expose <code>mbApp()</code> for the same access. There is no global <code>instance()</code> accessor. </dd></dl>
 </li>
 </ul>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -429,6 +439,25 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
+<a id="a2416771f6717000a219a462f1f673fc9" name="a2416771f6717000a219a462f1f673fc9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2416771f6717000a219a462f1f673fc9">&#9670;&#160;</a></span>auth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1Auth.html">Auth</a> &amp; mb::MantisBase::auth </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get <a class="el" href="classmb_1_1Auth.html" title="JWT token creation and verification utilities.">Auth</a> instance. </p>
+
+</div>
+</div>
 <a id="acd5967d75b7c8a58fbfec8ce44cc8b22" name="acd5967d75b7c8a58fbfec8ce44cc8b22"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acd5967d75b7c8a58fbfec8ce44cc8b22">&#9670;&#160;</a></span>close()</h2>
 
@@ -468,8 +497,8 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="ae9a7f82c194b120cfea5eb57f839eed5" name="ae9a7f82c194b120cfea5eb57f839eed5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae9a7f82c194b120cfea5eb57f839eed5">&#9670;&#160;</a></span>create() <span class="overload">[1/2]</span></h2>
+<a id="a0c20c2f1ff72533e9eb7f980ec03a1fe" name="a0c20c2f1ff72533e9eb7f980ec03a1fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c20c2f1ff72533e9eb7f980ec03a1fe">&#9670;&#160;</a></span>create() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -478,7 +507,7 @@ RouterMgr for more details.</dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp; mb::MantisBase::create </td>
+          <td class="memname">std::unique_ptr&lt; <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &gt; mb::MantisBase::create </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td>
           <td class="paramname"><em>config</em> = <code>json::object()</code></td><td>)</td>
@@ -499,28 +528,33 @@ RouterMgr for more details.</dd></dl>
 <code>admins</code> subcommand expects a subcommand with either the <code>add</code> or <code>rm</code>. </dd>
 <dd>
 <code>serve</code> command can have an empty json object and the app will configure with defaults.</dd></dl>
-<div class="fragment"><div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> arg1 = json::object();</div>
-<div class="line"><span class="keyword">auto</span>&amp; app1 = MantisApp::create(arg2);</div>
+<div class="fragment"><div class="line"><span class="comment">// Defaults only:</span></div>
+<div class="line"><span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">MantisBase::create</a>(json::object());</div>
+<div class="line"><span class="keywordflow">return</span> app-&gt;run();</div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> arg2;</div>
-<div class="line">arg2[<span class="stringliteral">&quot;database&quot;</span>] = <span class="stringliteral">&quot;PSQL&quot;</span>;</div>
-<div class="line">arg2[<span class="stringliteral">&quot;database&quot;</span>] = <span class="stringliteral">&quot;dbname=mantis username=postgres password=12342532&quot;</span>;</div>
-<div class="line">arg2[<span class="stringliteral">&quot;dev&quot;</span>] = <span class="keyword">true</span>;</div>
-<div class="line">arg2[<span class="stringliteral">&quot;serve&quot;</span>] = json::object{};</div>
-<div class="line"><span class="keyword">auto</span>&amp; app2 = MantisApp::create(arg2);</div>
-<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> context_store.h:18</div></div>
+<div class="line"><span class="comment">// With configuration:</span></div>
+<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> cfg;</div>
+<div class="line">cfg[<span class="stringliteral">&quot;db&quot;</span>] = <span class="stringliteral">&quot;postgresql&quot;</span>;</div>
+<div class="line">cfg[<span class="stringliteral">&quot;db_url&quot;</span>] = <span class="stringliteral">&quot;dbname=mantis user=postgres password=12342532&quot;</span>;</div>
+<div class="line">cfg[<span class="stringliteral">&quot;dev&quot;</span>] = <span class="keyword">true</span>;</div>
+<div class="line">cfg[<span class="stringliteral">&quot;serve&quot;</span>] = json::object();</div>
+<div class="line"><span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">MantisBase::create</a>(cfg);</div>
+<div class="line"><span class="keyword">auto</span> token = app-&gt;auth().createToken({{<span class="stringliteral">&quot;id&quot;</span>, <span class="stringliteral">&quot;u1&quot;</span>}, {<span class="stringliteral">&quot;table&quot;</span>, <span class="stringliteral">&quot;users&quot;</span>}});</div>
+<div class="line"><span class="keywordflow">return</span> app-&gt;run();</div>
+<div class="ttc" id="aclassmb_1_1MantisBase_html_a39320e2aeb02263d4bc2252e1853854a"><div class="ttname"><a href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a></div><div class="ttdeci">static std::unique_ptr&lt; MantisBase &gt; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:49</div></div>
+<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">config</td><td>JSON Object bearing the cmd args values to be used </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to the created class instance </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Owned application instance </dd></dl>
 
 </div>
 </div>
-<a id="a4d7db711bdbc3422e44c2138b71a155c" name="a4d7db711bdbc3422e44c2138b71a155c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d7db711bdbc3422e44c2138b71a155c">&#9670;&#160;</a></span>create() <span class="overload">[2/2]</span></h2>
+<a id="a39320e2aeb02263d4bc2252e1853854a" name="a39320e2aeb02263d4bc2252e1853854a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39320e2aeb02263d4bc2252e1853854a">&#9670;&#160;</a></span>create() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -529,7 +563,7 @@ RouterMgr for more details.</dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp; mb::MantisBase::create </td>
+          <td class="memname">std::unique_ptr&lt; <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &gt; mb::MantisBase::create </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>argc</em>, </td>
@@ -562,7 +596,7 @@ RouterMgr for more details.</dd></dl>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Reference to the created class instance </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Owned application instance </dd></dl>
 
 </div>
 </div>
@@ -652,6 +686,25 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
+<a id="a766ac5f075b31a4b748f53fbbd9872db" name="a766ac5f075b31a4b748f53fbbd9872db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a766ac5f075b31a4b748f53fbbd9872db">&#9670;&#160;</a></span>files()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1FilesMgr.html">FilesMgr</a> &amp; mb::MantisBase::files </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the <a class="el" href="classmb_1_1FilesMgr.html" title="File management for entity file assets.">FilesMgr</a> instance. </p>
+
+</div>
+</div>
 <a id="a1ee293d71f01befec02f0673df35ff7c" name="a1ee293d71f01befec02f0673df35ff7c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1ee293d71f01befec02f0673df35ff7c">&#9670;&#160;</a></span>hasEntity()</h2>
 
@@ -699,34 +752,6 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="aca64db86aff60b0a0730260576d3a0e0" name="aca64db86aff60b0a0730260576d3a0e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca64db86aff60b0a0730260576d3a0e0">&#9670;&#160;</a></span>instance()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp; mb::MantisBase::instance </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Retrieve existing application instance. </p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to the existing application instance. </dd></dl>
-
-</div>
-</div>
 <a id="a2718eb7c7053903a94b116dd50b7e6d0" name="a2718eb7c7053903a94b116dd50b7e6d0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2718eb7c7053903a94b116dd50b7e6d0">&#9670;&#160;</a></span>isDevMode()</h2>
 
@@ -744,31 +769,42 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="a946560e16179566a7155ae16202aa697" name="a946560e16179566a7155ae16202aa697"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a946560e16179566a7155ae16202aa697">&#9670;&#160;</a></span>jwtSecretKey()</h2>
+<a id="a3076db65ddea48694928652ecb232ad6" name="a3076db65ddea48694928652ecb232ad6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3076db65ddea48694928652ecb232ad6">&#9670;&#160;</a></span>jwtSecretKey()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">std::string mb::MantisBase::jwtSecretKey </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Retrieve the JWT secret key. </p>
 <dl class="section return"><dt>Returns</dt><dd>JWT Secret value. </dd></dl>
+
+</div>
+</div>
+<a id="ac8d95de5b1456d77f0a7487f9d24e0f8" name="ac8d95de5b1456d77f0a7487f9d24e0f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8d95de5b1456d77f0a7487f9d24e0f8">&#9670;&#160;</a></span>logger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1Logger.html">Logger</a> &amp; mb::MantisBase::logger </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get <a class="el" href="classmb_1_1Logger.html">Logger</a> instance. </p>
 
 </div>
 </div>
@@ -951,9 +987,6 @@ RouterMgr for more details.</dd></dl>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">int mb::MantisBase::quit </td>
@@ -973,11 +1006,6 @@ RouterMgr for more details.</dd></dl>
           <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Quit the running application immediately. </p>
@@ -1303,6 +1331,25 @@ RouterMgr for more details.</dd></dl>
 </div><div class="memdoc">
 
 <p>Whether first-boot admin setup (browser) should be skipped on serve. </p>
+
+</div>
+</div>
+<a id="a9cf7d3137d0d709329f7f81827f11078" name="a9cf7d3137d0d709329f7f81827f11078"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cf7d3137d0d709329f7f81827f11078">&#9670;&#160;</a></span>snowflakeId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::MantisBase::snowflakeId </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Generate snowflake ID. </p>
 
 </div>
 </div>

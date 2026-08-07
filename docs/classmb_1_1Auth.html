@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -92,7 +92,7 @@ $(document).ready(function(){initNavTree('classmb_1_1Auth.html',''); initResizab
 
 <div class="header">
   <div class="summary">
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classmb_1_1Auth-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">mb::Auth Class Reference</div></div>
 </div><!--header-->
@@ -103,39 +103,100 @@ $(document).ready(function(){initNavTree('classmb_1_1Auth.html',''); initResizab
 
 <p><code>#include &lt;<a class="el" href="auth_8h_source.html">auth.h</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a37e71e7d29fc994f7f183810f7ee0c0d" id="r_a37e71e7d29fc994f7f183810f7ee0c0d"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#a37e71e7d29fc994f7f183810f7ee0c0d">createToken</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;claims_params, int timeout=-1)</td></tr>
-<tr class="memdesc:a37e71e7d29fc994f7f183810f7ee0c0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create JWT token with custom claims.  <br /></td></tr>
-<tr class="separator:a37e71e7d29fc994f7f183810f7ee0c0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a031825f245bbb77de29e6e68bcfff756" id="r_a031825f245bbb77de29e6e68bcfff756"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#a031825f245bbb77de29e6e68bcfff756">verifyToken</a> (const std::string &amp;token)</td></tr>
-<tr class="memdesc:a031825f245bbb77de29e6e68bcfff756"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify JWT token and extract claims.  <br /></td></tr>
-<tr class="separator:a031825f245bbb77de29e6e68bcfff756"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:ae123c20659ab981185facd80fe6d29f4" id="r_ae123c20659ab981185facd80fe6d29f4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#ae123c20659ab981185facd80fe6d29f4">Auth</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app)</td></tr>
+<tr class="memdesc:ae123c20659ab981185facd80fe6d29f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create <a class="el" href="classmb_1_1Auth.html" title="JWT token creation and verification utilities.">Auth</a> instance given a <code>const <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>&amp;</code>  <br /></td></tr>
+<tr class="separator:ae123c20659ab981185facd80fe6d29f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62851e217afc42f62adfe26c60924911" id="r_a62851e217afc42f62adfe26c60924911"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1OAuthManager.html">OAuthManager</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#a62851e217afc42f62adfe26c60924911">oauth</a> () const</td></tr>
+<tr class="memdesc:a62851e217afc42f62adfe26c60924911"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a ref to OAuthManger instance.  <br /></td></tr>
+<tr class="separator:a62851e217afc42f62adfe26c60924911"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acec21bcb87677ecb937f02c13d807558" id="r_acec21bcb87677ecb937f02c13d807558"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1ApiKeyManager.html">ApiKeyManager</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#acec21bcb87677ecb937f02c13d807558">apiKey</a> () const</td></tr>
+<tr class="memdesc:acec21bcb87677ecb937f02c13d807558"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a ref to <a class="el" href="classmb_1_1ApiKeyManager.html" title="Create, list, revoke, and resolve API keys for entity users and admins.">ApiKeyManager</a> instance.  <br /></td></tr>
+<tr class="separator:acec21bcb87677ecb937f02c13d807558"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a791dc6c01a67f540d6f1953c012e4af8" id="r_a791dc6c01a67f540d6f1953c012e4af8"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#a791dc6c01a67f540d6f1953c012e4af8">createToken</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;claims_params, int timeout=-1) const</td></tr>
+<tr class="memdesc:a791dc6c01a67f540d6f1953c012e4af8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create JWT token with custom claims.  <br /></td></tr>
+<tr class="separator:a791dc6c01a67f540d6f1953c012e4af8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbda2e1689cce183f65525f331c8011a" id="r_afbda2e1689cce183f65525f331c8011a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#afbda2e1689cce183f65525f331c8011a">verifyToken</a> (const std::string &amp;token) const</td></tr>
+<tr class="separator:afbda2e1689cce183f65525f331c8011a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35154ad1dd27785bea12e1a610342485" id="r_a35154ad1dd27785bea12e1a610342485"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#a35154ad1dd27785bea12e1a610342485">deleteSession</a> (const std::string &amp;session_id) const</td></tr>
+<tr class="separator:a35154ad1dd27785bea12e1a610342485"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4207d702ab118370727700cf4aad4fa" id="r_ad4207d702ab118370727700cf4aad4fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#ad4207d702ab118370727700cf4aad4fa">refreshSession</a> (const std::string &amp;old_session_id, const std::string &amp;entity_name, const std::string &amp;user_id)</td></tr>
+<tr class="separator:ad4207d702ab118370727700cf4aad4fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>JWT token creation and verification utilities. </p>
 <p>Provides static methods for generating and validating JWT tokens used for authentication and authorization.</p>
-<div class="fragment"><div class="line"><span class="comment">// Create token for user</span></div>
-<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> claims = {{<span class="stringliteral">&quot;id&quot;</span>, <span class="stringliteral">&quot;user123&quot;</span>}, {<span class="stringliteral">&quot;table&quot;</span>, <span class="stringliteral">&quot;users&quot;</span>}};</div>
-<div class="line">std::string token = <a class="code hl_function" href="classmb_1_1Auth.html#a37e71e7d29fc994f7f183810f7ee0c0d">Auth::createToken</a>(claims, 3600); <span class="comment">// 1 hour</span></div>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">MantisBase::create</a>();</div>
+<div class="line"><span class="keyword">auto</span>&amp; auth = app-&gt;auth();</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// Verify token</span></div>
-<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> result = <a class="code hl_function" href="classmb_1_1Auth.html#a031825f245bbb77de29e6e68bcfff756">Auth::verifyToken</a>(token);</div>
+<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> claims = {{<span class="stringliteral">&quot;id&quot;</span>, <span class="stringliteral">&quot;user123&quot;</span>}, {<span class="stringliteral">&quot;table&quot;</span>, <span class="stringliteral">&quot;users&quot;</span>}};</div>
+<div class="line">std::string token = auth.createToken(claims, 3600); <span class="comment">// 1 hour</span></div>
+<div class="line"> </div>
+<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> result = auth.verifyToken(token);</div>
 <div class="line"><span class="keywordflow">if</span> (result[<span class="stringliteral">&quot;verified&quot;</span>].get&lt;bool&gt;()) {</div>
 <div class="line">    std::string userId = result[<span class="stringliteral">&quot;id&quot;</span>];</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassmb_1_1Auth_html_a031825f245bbb77de29e6e68bcfff756"><div class="ttname"><a href="classmb_1_1Auth.html#a031825f245bbb77de29e6e68bcfff756">mb::Auth::verifyToken</a></div><div class="ttdeci">static json verifyToken(const std::string &amp;token)</div><div class="ttdoc">Verify JWT token and extract claims.</div><div class="ttdef"><b>Definition</b> auth.cpp:54</div></div>
-<div class="ttc" id="aclassmb_1_1Auth_html_a37e71e7d29fc994f7f183810f7ee0c0d"><div class="ttname"><a href="classmb_1_1Auth.html#a37e71e7d29fc994f7f183810f7ee0c0d">mb::Auth::createToken</a></div><div class="ttdeci">static std::string createToken(const json &amp;claims_params, int timeout=-1)</div><div class="ttdoc">Create JWT token with custom claims.</div><div class="ttdef"><b>Definition</b> auth.cpp:10</div></div>
-<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> context_store.h:18</div></div>
-</div><!-- fragment --> </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a37e71e7d29fc994f7f183810f7ee0c0d" name="a37e71e7d29fc994f7f183810f7ee0c0d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a37e71e7d29fc994f7f183810f7ee0c0d">&#9670;&#160;</a></span>createToken()</h2>
+<div class="line"> </div>
+<div class="line"><span class="comment">// API keys and OAuth live on the same Auth instance:</span></div>
+<div class="line">auth.apiKey().create(<span class="stringliteral">&quot;users&quot;</span>, <span class="stringliteral">&quot;user123&quot;</span>, <span class="stringliteral">&quot;Mobile app&quot;</span>);</div>
+<div class="line">auth.oauth().buildAuthorizeUrl(<span class="stringliteral">&quot;users&quot;</span>, <span class="stringliteral">&quot;google&quot;</span>, redirect_uri);</div>
+<div class="ttc" id="aclassmb_1_1MantisBase_html_a39320e2aeb02263d4bc2252e1853854a"><div class="ttname"><a href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a></div><div class="ttdeci">static std::unique_ptr&lt; MantisBase &gt; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:49</div></div>
+<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
+</div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ae123c20659ab981185facd80fe6d29f4" name="ae123c20659ab981185facd80fe6d29f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae123c20659ab981185facd80fe6d29f4">&#9670;&#160;</a></span>Auth()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">mb::Auth::Auth </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td>
+          <td class="paramname"><em>app</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create <a class="el" href="classmb_1_1Auth.html" title="JWT token creation and verification utilities.">Auth</a> instance given a <code>const <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>&amp;</code> </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="acec21bcb87677ecb937f02c13d807558" name="acec21bcb87677ecb937f02c13d807558"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acec21bcb87677ecb937f02c13d807558">&#9670;&#160;</a></span>apiKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1ApiKeyManager.html">ApiKeyManager</a> &amp; mb::Auth::apiKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return a ref to <a class="el" href="classmb_1_1ApiKeyManager.html" title="Create, list, revoke, and resolve API keys for entity users and admins.">ApiKeyManager</a> instance. </p>
+
+</div>
+</div>
+<a id="a791dc6c01a67f540d6f1953c012e4af8" name="a791dc6c01a67f540d6f1953c012e4af8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a791dc6c01a67f540d6f1953c012e4af8">&#9670;&#160;</a></span>createToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">std::string mb::Auth::createToken </td>
@@ -152,14 +213,9 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Create JWT token with custom claims. </p>
@@ -170,54 +226,98 @@ Static Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>JWT token string <div class="fragment"><div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> claims = {{<span class="stringliteral">&quot;id&quot;</span>, <span class="stringliteral">&quot;user123&quot;</span>}, {<span class="stringliteral">&quot;table&quot;</span>, <span class="stringliteral">&quot;users&quot;</span>}};</div>
-<div class="line">std::string token = <a class="code hl_function" href="classmb_1_1Auth.html#a37e71e7d29fc994f7f183810f7ee0c0d">Auth::createToken</a>(claims, 3600);</div>
+<dl class="section return"><dt>Returns</dt><dd>JWT token string <div class="fragment"><div class="line">std::string token = app.auth().createToken(</div>
+<div class="line">    {{<span class="stringliteral">&quot;id&quot;</span>, <span class="stringliteral">&quot;user123&quot;</span>}, {<span class="stringliteral">&quot;table&quot;</span>, <span class="stringliteral">&quot;users&quot;</span>}}, 3600);</div>
 </div><!-- fragment --> </dd></dl>
 
 </div>
 </div>
-<a id="a031825f245bbb77de29e6e68bcfff756" name="a031825f245bbb77de29e6e68bcfff756"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a031825f245bbb77de29e6e68bcfff756">&#9670;&#160;</a></span>verifyToken()</h2>
+<a id="a35154ad1dd27785bea12e1a610342485" name="a35154ad1dd27785bea12e1a610342485"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35154ad1dd27785bea12e1a610342485">&#9670;&#160;</a></span>deleteSession()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::Auth::deleteSession </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>session_id</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a62851e217afc42f62adfe26c60924911" name="a62851e217afc42f62adfe26c60924911"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62851e217afc42f62adfe26c60924911">&#9670;&#160;</a></span>oauth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1OAuthManager.html">OAuthManager</a> &amp; mb::Auth::oauth </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return a ref to OAuthManger instance. </p>
+
+</div>
+</div>
+<a id="ad4207d702ab118370727700cf4aad4fa" name="ad4207d702ab118370727700cf4aad4fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4207d702ab118370727700cf4aad4fa">&#9670;&#160;</a></span>refreshSession()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::Auth::refreshSession </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>old_session_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>user_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afbda2e1689cce183f65525f331c8011a" name="afbda2e1689cce183f65525f331c8011a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbda2e1689cce183f65525f331c8011a">&#9670;&#160;</a></span>verifyToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::Auth::verifyToken </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>token</em></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
-
-<p>Verify JWT token and extract claims. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">token</td><td>JWT token string to verify </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>JSON object with:<ul>
-<li>"verified": bool indicating if token is valid</li>
-<li>"id": user ID from token</li>
-<li>"entity": entity table name from token</li>
-<li>"error": error message if verification failed <div class="fragment"><div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> result = <a class="code hl_function" href="classmb_1_1Auth.html#a031825f245bbb77de29e6e68bcfff756">Auth::verifyToken</a>(token);</div>
-<div class="line"><span class="keywordflow">if</span> (result[<span class="stringliteral">&quot;verified&quot;</span>]) {</div>
-<div class="line">    <span class="comment">// Token is valid, use result[&quot;id&quot;] and result[&quot;entity&quot;]</span></div>
-<div class="line">}</div>
-</div><!-- fragment --> </li>
-</ul>
-</dd></dl>
 
 </div>
 </div>

@@ -1,7 +1,9 @@
 var classmb_1_1Entity =
 [
-    [ "Entity", "classmb_1_1Entity.html#a5636ba006f4060a5a001f18c1905e30d", null ],
-    [ "Entity", "classmb_1_1Entity.html#a174cc1f2ba1366bdfb58afb6dd249814", null ],
+    [ "Entity", "classmb_1_1Entity.html#a805eaf3ee3b2ecf38ea7ee53b016b064", null ],
+    [ "Entity", "classmb_1_1Entity.html#a3ad2106ad8f36612acabe02e5c8c8ae8", null ],
+    [ "Entity", "classmb_1_1Entity.html#a9b134d29021f24b884b67a58346ef937", null ],
+    [ "Entity", "classmb_1_1Entity.html#a96f16ea07c43791de07d27327118d836", null ],
     [ "addRule", "classmb_1_1Entity.html#a682c09f27b0c1e8d6de5def9d7e291f7", null ],
     [ "countRecords", "classmb_1_1Entity.html#a1c0411def63d40216b6ebcc47936ac9a", null ],
     [ "create", "classmb_1_1Entity.html#a0bdd39d8e5658982f1886907f81d4974", null ],

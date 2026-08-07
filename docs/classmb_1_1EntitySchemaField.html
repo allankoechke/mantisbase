@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -99,15 +99,11 @@ $(document).ready(function(){initNavTree('classmb_1_1EntitySchemaField.html','')
 </div><!--header-->
 <div class="contents">
 
-<p>Represents a single field in a database table schema.  
- <a href="classmb_1_1EntitySchemaField.html#details">More...</a></p>
-
 <p><code>#include &lt;<a class="el" href="entity__schema__field_8h_source.html">entity_schema_field.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ae3a273e277829fb6aa0cb71254075e4f" id="r_ae3a273e277829fb6aa0cb71254075e4f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#ae3a273e277829fb6aa0cb71254075e4f">EntitySchemaField</a> (std::string field_name, std::string field_type)</td></tr>
-<tr class="memdesc:ae3a273e277829fb6aa0cb71254075e4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct field with name and type.  <br /></td></tr>
 <tr class="separator:ae3a273e277829fb6aa0cb71254075e4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a9189251397485237f318f349ebc140" id="r_a7a9189251397485237f318f349ebc140"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a7a9189251397485237f318f349ebc140">EntitySchemaField</a> (const nlohmann::json &amp;field_schema)</td></tr>
 <tr class="memdesc:a7a9189251397485237f318f349ebc140"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct field from JSON schema object.  <br /></td></tr>
@@ -129,8 +125,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a638b6d84ac73fc4c75492b902a43923a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get field type.  <br /></td></tr>
 <tr class="separator:a638b6d84ac73fc4c75492b902a43923a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af865543699296c056c51a41b98f1791e" id="r_af865543699296c056c51a41b98f1791e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#af865543699296c056c51a41b98f1791e">setType</a> (const std::string &amp;<a class="el" href="classmb_1_1EntitySchemaField.html#a638b6d84ac73fc4c75492b902a43923a">type</a>)</td></tr>
-<tr class="memdesc:af865543699296c056c51a41b98f1791e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set field type (fluent interface).  <br /></td></tr>
 <tr class="separator:af865543699296c056c51a41b98f1791e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38b001e1342ef61807931afee5f4bec9" id="r_a38b001e1342ef61807931afee5f4bec9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a38b001e1342ef61807931afee5f4bec9">precision</a> () const</td></tr>
+<tr class="separator:a38b001e1342ef61807931afee5f4bec9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc3879aeff037e44d14524bca24ae98b" id="r_abc3879aeff037e44d14524bca24ae98b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#abc3879aeff037e44d14524bca24ae98b">setPrecision</a> (int <a class="el" href="classmb_1_1EntitySchemaField.html#a38b001e1342ef61807931afee5f4bec9">precision</a>)</td></tr>
+<tr class="separator:abc3879aeff037e44d14524bca24ae98b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adebcd9adf5314a52fbf88dc291168cb0" id="r_adebcd9adf5314a52fbf88dc291168cb0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#adebcd9adf5314a52fbf88dc291168cb0">required</a> () const</td></tr>
 <tr class="memdesc:adebcd9adf5314a52fbf88dc291168cb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if field is required.  <br /></td></tr>
 <tr class="separator:adebcd9adf5314a52fbf88dc291168cb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -207,8 +206,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a74424fc7cf0b205a0e985da9e0ec4fd1" id="r_a74424fc7cf0b205a0e985da9e0ec4fd1"><td class="memItemLeft" align="right" valign="top">static const std::vector&lt; std::string &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a74424fc7cf0b205a0e985da9e0ec4fd1">defaultEntityFieldTypes</a> ()</td></tr>
 <tr class="separator:a74424fc7cf0b205a0e985da9e0ec4fd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c551f4b233f737b9185c6973ddcfb0b" id="r_a3c551f4b233f737b9185c6973ddcfb0b"><td class="memItemLeft" align="right" valign="top">static soci::db_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a3c551f4b233f737b9185c6973ddcfb0b">toSociType</a> (const std::string &amp;<a class="el" href="classmb_1_1EntitySchemaField.html#a638b6d84ac73fc4c75492b902a43923a">type</a>)</td></tr>
-<tr class="memdesc:a3c551f4b233f737b9185c6973ddcfb0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert type string to SOCI database type (static).  <br /></td></tr>
 <tr class="separator:a3c551f4b233f737b9185c6973ddcfb0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9c95f82803b650ae052279a8ac98043" id="r_aa9c95f82803b650ae052279a8ac98043"><td class="memItemLeft" align="right" valign="top">static soci::db_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#aa9c95f82803b650ae052279a8ac98043">toSociType</a> (const std::string &amp;<a class="el" href="classmb_1_1EntitySchemaField.html#a638b6d84ac73fc4c75492b902a43923a">type</a>, int <a class="el" href="classmb_1_1EntitySchemaField.html#a38b001e1342ef61807931afee5f4bec9">precision</a>)</td></tr>
+<tr class="separator:aa9c95f82803b650ae052279a8ac98043"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8435e9b5d3538c551acf5d51b00f62ae" id="r_a8435e9b5d3538c551acf5d51b00f62ae"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchemaField.html#a8435e9b5d3538c551acf5d51b00f62ae">isValidFieldType</a> (const std::string &amp;<a class="el" href="classmb_1_1EntitySchemaField.html#a638b6d84ac73fc4c75492b902a43923a">type</a>)</td></tr>
 <tr class="memdesc:a8435e9b5d3538c551acf5d51b00f62ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if field type is valid.  <br /></td></tr>
 <tr class="separator:a8435e9b5d3538c551acf5d51b00f62ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -219,18 +219,7 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memdesc:ac4ff037e526aad53e7f00486af2f4b1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get default constraints JSON.  <br /></td></tr>
 <tr class="separator:ac4ff037e526aad53e7f00486af2f4b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Represents a single field in a database table schema. </p>
-<p>Defines field properties including name, type, constraints, and validation rules. Supports fluent interface for building field definitions.</p>
-<div class="fragment"><div class="line"><span class="comment">// Create a required string field</span></div>
-<div class="line"><a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> nameField(<span class="stringliteral">&quot;name&quot;</span>, <span class="stringliteral">&quot;string&quot;</span>);</div>
-<div class="line">nameField.setRequired(<span class="keyword">true</span>);</div>
-<div class="line"> </div>
-<div class="line"><span class="comment">// Create a unique email field</span></div>
-<div class="line"><a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> emailField(<span class="stringliteral">&quot;email&quot;</span>, <span class="stringliteral">&quot;string&quot;</span>);</div>
-<div class="line">emailField.setIsUnique(<span class="keyword">true</span>).setRequired(<span class="keyword">true</span>);</div>
-<div class="ttc" id="aclassmb_1_1EntitySchemaField_html"><div class="ttname"><a href="classmb_1_1EntitySchemaField.html">mb::EntitySchemaField</a></div><div class="ttdoc">Represents a single field in a database table schema.</div><div class="ttdef"><b>Definition</b> entity_schema_field.h:36</div></div>
-</div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae3a273e277829fb6aa0cb71254075e4f" name="ae3a273e277829fb6aa0cb71254075e4f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae3a273e277829fb6aa0cb71254075e4f">&#9670;&#160;</a></span>EntitySchemaField() <span class="overload">[1/3]</span></h2>
 
@@ -256,15 +245,6 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Construct field with name and type. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">field_name</td><td>Field name </td></tr>
-    <tr><td class="paramname">field_type</td><td>Field type (e.g., "string", "int32", "bool", "date") </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -767,6 +747,23 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a38b001e1342ef61807931afee5f4bec9" name="a38b001e1342ef61807931afee5f4bec9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38b001e1342ef61807931afee5f4bec9">&#9670;&#160;</a></span>precision()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int mb::EntitySchemaField::precision </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a4917d298668d709f6e2737fad46bc25e" name="a4917d298668d709f6e2737fad46bc25e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4917d298668d709f6e2737fad46bc25e">&#9670;&#160;</a></span>removeForeignKey()</h2>
 
@@ -994,6 +991,24 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="abc3879aeff037e44d14524bca24ae98b" name="abc3879aeff037e44d14524bca24ae98b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc3879aeff037e44d14524bca24ae98b">&#9670;&#160;</a></span>setPrecision()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp; mb::EntitySchemaField::setPrecision </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>precision</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="af09253da0111fe25f51314adce5c45fd" name="af09253da0111fe25f51314adce5c45fd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af09253da0111fe25f51314adce5c45fd">&#9670;&#160;</a></span>setRequired()</h2>
 
@@ -1037,15 +1052,6 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Set field type (fluent interface). </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">type</td><td>Field type (e.g., "string", "int32", "bool") </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Reference to self for chaining </dd></dl>
-
 </div>
 </div>
 <a id="a008e06878a341a387e92c0c1d4e1c98d" name="a008e06878a341a387e92c0c1d4e1c98d"></a>
@@ -1069,7 +1075,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="ae6c5bb64dba8d05147f2858e62613da6" name="ae6c5bb64dba8d05147f2858e62613da6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6c5bb64dba8d05147f2858e62613da6">&#9670;&#160;</a></span>toSociType() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6c5bb64dba8d05147f2858e62613da6">&#9670;&#160;</a></span>toSociType() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1089,7 +1095,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="a3c551f4b233f737b9185c6973ddcfb0b" name="a3c551f4b233f737b9185c6973ddcfb0b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3c551f4b233f737b9185c6973ddcfb0b">&#9670;&#160;</a></span>toSociType() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c551f4b233f737b9185c6973ddcfb0b">&#9670;&#160;</a></span>toSociType() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1112,14 +1118,41 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Convert type string to SOCI database type (static). </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">type</td><td>Field type string </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>SOCI db_type enum value </dd></dl>
+</div>
+</div>
+<a id="aa9c95f82803b650ae052279a8ac98043" name="aa9c95f82803b650ae052279a8ac98043"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9c95f82803b650ae052279a8ac98043">&#9670;&#160;</a></span>toSociType() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">soci::db_type mb::EntitySchemaField::toSociType </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>precision</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

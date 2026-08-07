@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -98,104 +98,108 @@ $(document).ready(function(){initNavTree('classmb_1_1Router.html',''); initResiz
 </div><!--header-->
 <div class="contents">
 
-<p>HTTP router for managing routes and request handling.  
- <a href="classmb_1_1Router.html#details">More...</a></p>
-
 <p><code>#include &lt;<a class="el" href="router_8h_source.html">router.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for mb::Router:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmb_1_1Router__inherit__graph.png" border="0" usemap="#amb_1_1Router_inherit__map" alt="Inheritance graph"/></div>
+<map name="amb_1_1Router_inherit__map" id="amb_1_1Router_inherit__map">
+<area shape="rect" title=" " alt="" coords="23,79,118,104"/>
+<area shape="rect" href="classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="5,5,136,31"/>
+<area shape="poly" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for mb::Router:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmb_1_1Router__coll__graph.png" border="0" usemap="#amb_1_1Router_coll__map" alt="Collaboration graph"/></div>
+<map name="amb_1_1Router_coll__map" id="amb_1_1Router_coll__map">
+<area shape="rect" title=" " alt="" coords="23,79,118,104"/>
+<area shape="rect" href="classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="5,5,136,31"/>
+<area shape="poly" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab74f5a2f19c832dd0208261b4ee51329" id="r_ab74f5a2f19c832dd0208261b4ee51329"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ab74f5a2f19c832dd0208261b4ee51329">Router</a> ()</td></tr>
-<tr class="memdesc:ab74f5a2f19c832dd0208261b4ee51329"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct router instance.  <br /></td></tr>
-<tr class="separator:ab74f5a2f19c832dd0208261b4ee51329"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50d8e904d31e641417685b63a8656c6a" id="r_a50d8e904d31e641417685b63a8656c6a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a50d8e904d31e641417685b63a8656c6a">Router</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app)</td></tr>
+<tr class="separator:a50d8e904d31e641417685b63a8656c6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac177f14d5c6593ff2d46cdf02f784ea6" id="r_ac177f14d5c6593ff2d46cdf02f784ea6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ac177f14d5c6593ff2d46cdf02f784ea6">~Router</a> ()</td></tr>
-<tr class="memdesc:ac177f14d5c6593ff2d46cdf02f784ea6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <br /></td></tr>
 <tr class="separator:ac177f14d5c6593ff2d46cdf02f784ea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae149eebd50d577cdf9c2b7c6581d9626" id="r_ae149eebd50d577cdf9c2b7c6581d9626"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ae149eebd50d577cdf9c2b7c6581d9626">init</a> ()</td></tr>
-<tr class="memdesc:ae149eebd50d577cdf9c2b7c6581d9626"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize router: create system tables and admin routes.  <br /></td></tr>
 <tr class="separator:ae149eebd50d577cdf9c2b7c6581d9626"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81eac97d693020860c9cf686a7349246" id="r_a81eac97d693020860c9cf686a7349246"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a81eac97d693020860c9cf686a7349246">listen</a> ()</td></tr>
-<tr class="memdesc:a81eac97d693020860c9cf686a7349246"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start HTTP server and begin listening for connections.  <br /></td></tr>
 <tr class="separator:a81eac97d693020860c9cf686a7349246"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a219a5bab2cb5fec6d81233155b676b07" id="r_a219a5bab2cb5fec6d81233155b676b07"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a219a5bab2cb5fec6d81233155b676b07">close</a> ()</td></tr>
-<tr class="memdesc:a219a5bab2cb5fec6d81233155b676b07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close HTTP server and stop listening.  <br /></td></tr>
 <tr class="separator:a219a5bab2cb5fec6d81233155b676b07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad46c17ea6bd32b5c2e09b637c77cb67b" id="r_ad46c17ea6bd32b5c2e09b637c77cb67b"><td class="memItemLeft" align="right" valign="top">httplib::Server &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ad46c17ea6bd32b5c2e09b637c77cb67b">server</a> ()</td></tr>
-<tr class="memdesc:ad46c17ea6bd32b5c2e09b637c77cb67b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying httplib::Server instance.  <br /></td></tr>
-<tr class="separator:ad46c17ea6bd32b5c2e09b637c77cb67b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba0eb0e15e01a6085fb0a6bf9e8b0fd4" id="r_aba0eb0e15e01a6085fb0a6bf9e8b0fd4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1SSEMgr.html">SSEMgr</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aba0eb0e15e01a6085fb0a6bf9e8b0fd4">sseMgr</a> () const</td></tr>
 <tr class="separator:aba0eb0e15e01a6085fb0a6bf9e8b0fd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d2d6b3f6b968c4b784abd35d2dcb1ad" id="r_a3d2d6b3f6b968c4b784abd35d2dcb1ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a3d2d6b3f6b968c4b784abd35d2dcb1ad">Get</a> (const std::string &amp;path, const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares={})</td></tr>
-<tr class="memdesc:a3d2d6b3f6b968c4b784abd35d2dcb1ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register GET route.  <br /></td></tr>
 <tr class="separator:a3d2d6b3f6b968c4b784abd35d2dcb1ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3e0a75c3b5eed98d1041ed49b233951" id="r_ab3e0a75c3b5eed98d1041ed49b233951"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ab3e0a75c3b5eed98d1041ed49b233951">Post</a> (const std::string &amp;path, const <a class="el" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares={})</td></tr>
-<tr class="memdesc:ab3e0a75c3b5eed98d1041ed49b233951"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register POST route with content reader (for file uploads).  <br /></td></tr>
 <tr class="separator:ab3e0a75c3b5eed98d1041ed49b233951"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac76b0ecb14b11681c9f3e4e0602bd57c" id="r_ac76b0ecb14b11681c9f3e4e0602bd57c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ac76b0ecb14b11681c9f3e4e0602bd57c">Post</a> (const std::string &amp;path, const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares={})</td></tr>
-<tr class="memdesc:ac76b0ecb14b11681c9f3e4e0602bd57c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register POST route.  <br /></td></tr>
 <tr class="separator:ac76b0ecb14b11681c9f3e4e0602bd57c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b5c006a734bb393af9d80d92999afbf" id="r_a1b5c006a734bb393af9d80d92999afbf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a1b5c006a734bb393af9d80d92999afbf">Patch</a> (const std::string &amp;path, const <a class="el" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares={})</td></tr>
-<tr class="memdesc:a1b5c006a734bb393af9d80d92999afbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register PATCH route with content reader (for file uploads).  <br /></td></tr>
 <tr class="separator:a1b5c006a734bb393af9d80d92999afbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf04e0afecc80260f66a59dd15110db2" id="r_adf04e0afecc80260f66a59dd15110db2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#adf04e0afecc80260f66a59dd15110db2">Patch</a> (const std::string &amp;path, const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares={})</td></tr>
-<tr class="memdesc:adf04e0afecc80260f66a59dd15110db2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register PATCH route.  <br /></td></tr>
 <tr class="separator:adf04e0afecc80260f66a59dd15110db2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2acc8d159beb665b6bb1a43f8b72ebf" id="r_ac2acc8d159beb665b6bb1a43f8b72ebf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ac2acc8d159beb665b6bb1a43f8b72ebf">Delete</a> (const std::string &amp;path, const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares={})</td></tr>
-<tr class="memdesc:ac2acc8d159beb665b6bb1a43f8b72ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register DELETE route.  <br /></td></tr>
 <tr class="separator:ac2acc8d159beb665b6bb1a43f8b72ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b28b5c9521895ae6fcf278ae61813af" id="r_a2b28b5c9521895ae6fcf278ae61813af"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a2b28b5c9521895ae6fcf278ae61813af">schemaCache</a> (const std::string &amp;table_name) const</td></tr>
-<tr class="memdesc:a2b28b5c9521895ae6fcf278ae61813af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get cached schema JSON by table name.  <br /></td></tr>
 <tr class="separator:a2b28b5c9521895ae6fcf278ae61813af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf58352dbab6b95d4c025276830e049d" id="r_aaf58352dbab6b95d4c025276830e049d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aaf58352dbab6b95d4c025276830e049d">hasSchemaCache</a> (const std::string &amp;table_name) const</td></tr>
-<tr class="memdesc:aaf58352dbab6b95d4c025276830e049d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether schema cache for given name exists.  <br /></td></tr>
 <tr class="separator:aaf58352dbab6b95d4c025276830e049d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a9f50ee4e617c65296a641a123f80b2" id="r_a1a9f50ee4e617c65296a641a123f80b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Entity.html">Entity</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a1a9f50ee4e617c65296a641a123f80b2">schemaCacheEntity</a> (const std::string &amp;table_name) const</td></tr>
-<tr class="memdesc:a1a9f50ee4e617c65296a641a123f80b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get cached entity by table name.  <br /></td></tr>
 <tr class="separator:a1a9f50ee4e617c65296a641a123f80b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef061eca2fe1b13d6ff802a789533ba9" id="r_aef061eca2fe1b13d6ff802a789533ba9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aef061eca2fe1b13d6ff802a789533ba9">addSchemaCache</a> (const nlohmann::json &amp;entity_schema)</td></tr>
-<tr class="memdesc:aef061eca2fe1b13d6ff802a789533ba9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add schema to cache.  <br /></td></tr>
-<tr class="separator:aef061eca2fe1b13d6ff802a789533ba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28a492e40b98020d800db095f5f40c81" id="r_a28a492e40b98020d800db095f5f40c81"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a28a492e40b98020d800db095f5f40c81">updateSchemaCache</a> (const std::string &amp;old_entity_name, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;new_schema)</td></tr>
-<tr class="memdesc:a28a492e40b98020d800db095f5f40c81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update cached schema.  <br /></td></tr>
-<tr class="separator:a28a492e40b98020d800db095f5f40c81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b21c2af0d269b349271246e4d3accc2" id="r_a1b21c2af0d269b349271246e4d3accc2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a1b21c2af0d269b349271246e4d3accc2">removeSchemaCache</a> (const std::string &amp;entity_name)</td></tr>
-<tr class="memdesc:a1b21c2af0d269b349271246e4d3accc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove schema from cache.  <br /></td></tr>
-<tr class="separator:a1b21c2af0d269b349271246e4d3accc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d378dff36a7f2d3814e8fd1b1320584" id="r_a1d378dff36a7f2d3814e8fd1b1320584"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a1d378dff36a7f2d3814e8fd1b1320584">decompressResponseBody</a> (const std::string &amp;body, const std::string &amp;encoding)</td></tr>
-<tr class="memdesc:a1d378dff36a7f2d3814e8fd1b1320584"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decompress response body based on encoding.  <br /></td></tr>
-<tr class="separator:a1d378dff36a7f2d3814e8fd1b1320584"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63ce782cb30a1037f549db5565b0513b" id="r_a63ce782cb30a1037f549db5565b0513b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a63ce782cb30a1037f549db5565b0513b">addSchemaCache</a> (const nlohmann::json &amp;entity_schema) const</td></tr>
+<tr class="separator:a63ce782cb30a1037f549db5565b0513b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96586f2f56403f521066f6f399fb18ec" id="r_a96586f2f56403f521066f6f399fb18ec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a96586f2f56403f521066f6f399fb18ec">updateSchemaCache</a> (const std::string &amp;old_entity_name, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;new_schema) const</td></tr>
+<tr class="separator:a96586f2f56403f521066f6f399fb18ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad39b4035ae72eb9c23c95337b650087b" id="r_ad39b4035ae72eb9c23c95337b650087b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ad39b4035ae72eb9c23c95337b650087b">removeSchemaCache</a> (const std::string &amp;entity_name) const</td></tr>
+<tr class="separator:ad39b4035ae72eb9c23c95337b650087b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa86ab8304440c3b7658dc540d3dcbc95" id="r_aa86ab8304440c3b7658dc540d3dcbc95"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aa86ab8304440c3b7658dc540d3dcbc95">addSchemaCacheLocked</a> (const nlohmann::json &amp;entity_schema) const</td></tr>
+<tr class="separator:aa86ab8304440c3b7658dc540d3dcbc95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2172250e1e2426896ed28eae3555556" id="r_ac2172250e1e2426896ed28eae3555556"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ac2172250e1e2426896ed28eae3555556">removeSchemaCacheLocked</a> (const std::string &amp;entity_name) const</td></tr>
+<tr class="separator:ac2172250e1e2426896ed28eae3555556"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad60deda93033f65a89260bae85115dc4" id="r_ad60deda93033f65a89260bae85115dc4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ad60deda93033f65a89260bae85115dc4">isRunning</a> () const</td></tr>
+<tr class="separator:ad60deda93033f65a89260bae85115dc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec5a7d651d1806d6c5ebf27e9af28511" id="r_aec5a7d651d1806d6c5ebf27e9af28511"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">MiddlewareFn</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aec5a7d651d1806d6c5ebf27e9af28511">preRoutingMiddlewares</a> () const</td></tr>
+<tr class="separator:aec5a7d651d1806d6c5ebf27e9af28511"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classmb_1_1IMantisBase"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmb_1_1IMantisBase')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmb_1_1IMantisBase.html">mb::IMantisBase</a></td></tr>
+<tr class="memitem:a2694758bb4c4f5705a5f26731f2f96d5 inherit pub_methods_classmb_1_1IMantisBase" id="r_a2694758bb4c4f5705a5f26731f2f96d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#a2694758bb4c4f5705a5f26731f2f96d5">IMantisBase</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app)</td></tr>
+<tr class="separator:a2694758bb4c4f5705a5f26731f2f96d5 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase" id="r_a94d6b28bd66767f7df7d7eb63c606801"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#a94d6b28bd66767f7df7d7eb63c606801">mbApp</a> () const</td></tr>
+<tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
+<tr class="separator:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase" id="r_aeb65d721822a05d100c547f8a32a8dcf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a> () const</td></tr>
+<tr class="memdesc:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the logger instance.  <br /></td></tr>
+<tr class="separator:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>HTTP router for managing routes and request handling. </p>
-<p><a class="el" href="classmb_1_1Router.html" title="HTTP router for managing routes and request handling.">Router</a> provides methods to register HTTP routes with handlers and middlewares, manages entity schema cache, and handles request routing.</p>
-<div class="fragment"><div class="line"><span class="comment">// Register a GET route</span></div>
-<div class="line">router.Get(<span class="stringliteral">&quot;/users&quot;</span>, [](<a class="code hl_class" href="classmb_1_1MantisRequest.html">MantisRequest</a>&amp; req, <a class="code hl_class" href="classmb_1_1MantisResponse.html">MantisResponse</a>&amp; res) {</div>
-<div class="line">    res.<a class="code hl_function" href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">sendJSON</a>(200, {{<span class="stringliteral">&quot;users&quot;</span>, <span class="stringliteral">&quot;data&quot;</span>}});</div>
-<div class="line">});</div>
-<div class="line"> </div>
-<div class="line"><span class="comment">// Register a POST route with middleware</span></div>
-<div class="line">router.Post(<span class="stringliteral">&quot;/posts&quot;</span>, handler, {<a class="code hl_function" href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">requireAdminAuth</a>()});</div>
-<div class="ttc" id="aclassmb_1_1MantisRequest_html"><div class="ttname"><a href="classmb_1_1MantisRequest.html">mb::MantisRequest</a></div><div class="ttdoc">A wrapper class around httplib::Request offering a consistent API and allowing for easy wrapper metho...</div><div class="ttdef"><b>Definition</b> http.h:39</div></div>
-<div class="ttc" id="aclassmb_1_1MantisResponse_html"><div class="ttname"><a href="classmb_1_1MantisResponse.html">mb::MantisResponse</a></div><div class="ttdoc">Wrapper around httplib::Response for consistent API.</div><div class="ttdef"><b>Definition</b> http.h:315</div></div>
-<div class="ttc" id="aclassmb_1_1MantisResponse_html_af104ef1181023634e19eac48c5f1a34f"><div class="ttname"><a href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">mb::MantisResponse::sendJSON</a></div><div class="ttdeci">void sendJSON(int statusCode=200, const json &amp;data=json::object()) const</div><div class="ttdoc">Send JSON response.</div><div class="ttdef"><b>Definition</b> http_response.cpp:145</div></div>
-<div class="ttc" id="anamespacemb_html_ab7c5922d7edd2da97857b5383049101f"><div class="ttname"><a href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">mb::requireAdminAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireAdminAuth()</div><div class="ttdoc">Require admin authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:404</div></div>
-</div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ab74f5a2f19c832dd0208261b4ee51329" name="ab74f5a2f19c832dd0208261b4ee51329"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab74f5a2f19c832dd0208261b4ee51329">&#9670;&#160;</a></span>Router()</h2>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a50d8e904d31e641417685b63a8656c6a" name="a50d8e904d31e641417685b63a8656c6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50d8e904d31e641417685b63a8656c6a">&#9670;&#160;</a></span>Router()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">mb::Router::Router </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td>
+          <td class="paramname"><em>app</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-
-<p>Construct router instance. </p>
 
 </div>
 </div>
@@ -214,13 +218,11 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Destructor. </p>
-
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="aef061eca2fe1b13d6ff802a789533ba9" name="aef061eca2fe1b13d6ff802a789533ba9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef061eca2fe1b13d6ff802a789533ba9">&#9670;&#160;</a></span>addSchemaCache()</h2>
+<a id="a63ce782cb30a1037f549db5565b0513b" name="a63ce782cb30a1037f549db5565b0513b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63ce782cb30a1037f549db5565b0513b">&#9670;&#160;</a></span>addSchemaCache()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -230,18 +232,28 @@ Public Member Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype">const nlohmann::json &amp;&#160;</td>
           <td class="paramname"><em>entity_schema</em></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Add schema to cache. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">entity_schema</td><td>Schema JSON to cache </td></tr>
-  </table>
-  </dd>
-</dl>
+</div>
+</div>
+<a id="aa86ab8304440c3b7658dc540d3dcbc95" name="aa86ab8304440c3b7658dc540d3dcbc95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa86ab8304440c3b7658dc540d3dcbc95">&#9670;&#160;</a></span>addSchemaCacheLocked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::Router::addSchemaCacheLocked </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>entity_schema</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -259,46 +271,6 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Close HTTP server and stop listening. </p>
-
-</div>
-</div>
-<a id="a1d378dff36a7f2d3814e8fd1b1320584" name="a1d378dff36a7f2d3814e8fd1b1320584"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d378dff36a7f2d3814e8fd1b1320584">&#9670;&#160;</a></span>decompressResponseBody()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::string mb::Router::decompressResponseBody </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>body</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>encoding</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Decompress response body based on encoding. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">body</td><td>Compressed body data </td></tr>
-    <tr><td class="paramname">encoding</td><td>Encoding type (e.g., "gzip", "deflate") </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Decompressed body string </dd></dl>
 
 </div>
 </div>
@@ -334,16 +306,6 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Register DELETE route. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">path</td><td>Route path </td></tr>
-    <tr><td class="paramname">handler</td><td>Request handler function </td></tr>
-    <tr><td class="paramname">middlewares</td><td>Optional middleware functions </td></tr>
-  </table>
-  </dd>
-</dl>
-
 </div>
 </div>
 <a id="a3d2d6b3f6b968c4b784abd35d2dcb1ad" name="a3d2d6b3f6b968c4b784abd35d2dcb1ad"></a>
@@ -378,21 +340,6 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Register GET route. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">path</td><td>Route path (supports path parameters like /:id) </td></tr>
-    <tr><td class="paramname">handler</td><td>Request handler function </td></tr>
-    <tr><td class="paramname">middlewares</td><td>Optional middleware functions <div class="fragment"><div class="line">router.Get(<span class="stringliteral">&quot;/users/:id&quot;</span>, [](<a class="code hl_class" href="classmb_1_1MantisRequest.html">MantisRequest</a>&amp; req, <a class="code hl_class" href="classmb_1_1MantisResponse.html">MantisResponse</a>&amp; res) {</div>
-<div class="line">    std::string <span class="keywordtype">id</span> = req.<a class="code hl_function" href="classmb_1_1MantisRequest.html#a4a6fc55b1fc582e59acc4c9268182ffc">getPathParamValue</a>(<span class="stringliteral">&quot;id&quot;</span>);</div>
-<div class="line">    <span class="comment">// ... handle request</span></div>
-<div class="line">});</div>
-<div class="ttc" id="aclassmb_1_1MantisRequest_html_a4a6fc55b1fc582e59acc4c9268182ffc"><div class="ttname"><a href="classmb_1_1MantisRequest.html#a4a6fc55b1fc582e59acc4c9268182ffc">mb::MantisRequest::getPathParamValue</a></div><div class="ttdeci">std::string getPathParamValue(const std::string &amp;key) const</div><div class="ttdoc">Get path parameter value.</div><div class="ttdef"><b>Definition</b> http_request.cpp:109</div></div>
-</div><!-- fragment --> </td></tr>
-  </table>
-  </dd>
-</dl>
-
 </div>
 </div>
 <a id="aaf58352dbab6b95d4c025276830e049d" name="aaf58352dbab6b95d4c025276830e049d"></a>
@@ -411,15 +358,6 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Check whether schema cache for given name exists. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">table_name</td><td>Table name to lookup </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>true if found, false otherwise. </dd></dl>
-
 </div>
 </div>
 <a id="ae149eebd50d577cdf9c2b7c6581d9626" name="ae149eebd50d577cdf9c2b7c6581d9626"></a>
@@ -437,8 +375,22 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initialize router: create system tables and admin routes. </p>
-<dl class="section return"><dt>Returns</dt><dd>true if initialization successful </dd></dl>
+</div>
+</div>
+<a id="ad60deda93033f65a89260bae85115dc4" name="ad60deda93033f65a89260bae85115dc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad60deda93033f65a89260bae85115dc4">&#9670;&#160;</a></span>isRunning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::Router::isRunning </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -456,9 +408,6 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Start HTTP server and begin listening for connections. </p>
-<dl class="section return"><dt>Returns</dt><dd>true if server started successfully </dd></dl>
 
 </div>
 </div>
@@ -494,16 +443,6 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Register PATCH route. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">path</td><td>Route path </td></tr>
-    <tr><td class="paramname">handler</td><td>Request handler function </td></tr>
-    <tr><td class="paramname">middlewares</td><td>Optional middleware functions </td></tr>
-  </table>
-  </dd>
-</dl>
-
 </div>
 </div>
 <a id="a1b5c006a734bb393af9d80d92999afbf" name="a1b5c006a734bb393af9d80d92999afbf"></a>
@@ -537,16 +476,6 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Register PATCH route with content reader (for file uploads). </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">path</td><td>Route path </td></tr>
-    <tr><td class="paramname">handler</td><td>Handler with content reader </td></tr>
-    <tr><td class="paramname">middlewares</td><td>Optional middleware functions </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -582,16 +511,6 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Register POST route. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">path</td><td>Route path </td></tr>
-    <tr><td class="paramname">handler</td><td>Request handler function </td></tr>
-    <tr><td class="paramname">middlewares</td><td>Optional middleware functions </td></tr>
-  </table>
-  </dd>
-</dl>
-
 </div>
 </div>
 <a id="ab3e0a75c3b5eed98d1041ed49b233951" name="ab3e0a75c3b5eed98d1041ed49b233951"></a>
@@ -626,20 +545,35 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Register POST route with content reader (for file uploads). </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">path</td><td>Route path </td></tr>
-    <tr><td class="paramname">handler</td><td>Handler with content reader for multipart/form-data </td></tr>
-    <tr><td class="paramname">middlewares</td><td>Optional middleware functions </td></tr>
-  </table>
-  </dd>
-</dl>
+</div>
+</div>
+<a id="aec5a7d651d1806d6c5ebf27e9af28511" name="aec5a7d651d1806d6c5ebf27e9af28511"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec5a7d651d1806d6c5ebf27e9af28511">&#9670;&#160;</a></span>preRoutingMiddlewares()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; <a class="el" href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">MiddlewareFn</a> &gt; &amp; mb::Router::preRoutingMiddlewares </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
-<a id="a1b21c2af0d269b349271246e4d3accc2" name="a1b21c2af0d269b349271246e4d3accc2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b21c2af0d269b349271246e4d3accc2">&#9670;&#160;</a></span>removeSchemaCache()</h2>
+<a id="ad39b4035ae72eb9c23c95337b650087b" name="ad39b4035ae72eb9c23c95337b650087b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad39b4035ae72eb9c23c95337b650087b">&#9670;&#160;</a></span>removeSchemaCache()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -649,18 +583,28 @@ Public Member Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>entity_name</em></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Remove schema from cache. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">entity_name</td><td>Table name to remove </td></tr>
-  </table>
-  </dd>
-</dl>
+</div>
+</div>
+<a id="ac2172250e1e2426896ed28eae3555556" name="ac2172250e1e2426896ed28eae3555556"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2172250e1e2426896ed28eae3555556">&#9670;&#160;</a></span>removeSchemaCacheLocked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::Router::removeSchemaCacheLocked </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -680,15 +624,6 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Get cached schema JSON by table name. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">table_name</td><td>Table name to lookup </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Reference to cached schema JSON </dd></dl>
-
 </div>
 </div>
 <a id="a1a9f50ee4e617c65296a641a123f80b2" name="a1a9f50ee4e617c65296a641a123f80b2"></a>
@@ -706,35 +641,6 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Get cached entity by table name. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">table_name</td><td>Table name to lookup </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a> instance from cache </dd></dl>
-
-</div>
-</div>
-<a id="ad46c17ea6bd32b5c2e09b637c77cb67b" name="ad46c17ea6bd32b5c2e09b637c77cb67b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad46c17ea6bd32b5c2e09b637c77cb67b">&#9670;&#160;</a></span>server()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">httplib::Server &amp; mb::Router::server </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get underlying httplib::Server instance. </p>
-<dl class="section return"><dt>Returns</dt><dd>Reference to HTTP server </dd></dl>
 
 </div>
 </div>
@@ -755,8 +661,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a28a492e40b98020d800db095f5f40c81" name="a28a492e40b98020d800db095f5f40c81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a28a492e40b98020d800db095f5f40c81">&#9670;&#160;</a></span>updateSchemaCache()</h2>
+<a id="a96586f2f56403f521066f6f399fb18ec" name="a96586f2f56403f521066f6f399fb18ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96586f2f56403f521066f6f399fb18ec">&#9670;&#160;</a></span>updateSchemaCache()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -776,19 +682,10 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Update cached schema. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">old_entity_name</td><td>Old table name </td></tr>
-    <tr><td class="paramname">new_schema</td><td>Updated schema JSON </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -796,7 +693,9 @@ Public Member Functions</h2></td></tr>
 <li>/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/<a class="el" href="router_8h_source.html">router.h</a></li>
 <li>/home/runner/work/mantisbase/mantisbase/src/core/<a class="el" href="http_8cpp.html">http.cpp</a></li>
 <li>/home/runner/work/mantisbase/mantisbase/src/core/<a class="el" href="router_8cpp.html">router.cpp</a></li>
-<li>/home/runner/work/mantisbase/mantisbase/src/core/<a class="el" href="router__httplib__internals_8cpp.html">router_httplib_internals.cpp</a></li>
+<li>/home/runner/work/mantisbase/mantisbase/src/core/<a class="el" href="router__api__keys_8cpp.html">router_api_keys.cpp</a></li>
+<li>/home/runner/work/mantisbase/mantisbase/src/core/<a class="el" href="router__internals_8cpp.html">router_internals.cpp</a></li>
+<li>/home/runner/work/mantisbase/mantisbase/src/core/<a class="el" href="router__oauth_8cpp.html">router_oauth.cpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

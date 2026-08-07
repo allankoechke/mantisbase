@@ -1,0 +1,5 @@
+<map id="mb::ApiKeyManager" name="mb::ApiKeyManager">
+<area shape="rect" id="Node000001" title="Create, list, revoke, and resolve API keys for entity users and admins." alt="" coords="5,79,159,104"/>
+<area shape="rect" id="Node000002" href="$classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="17,5,147,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,44,85,79,79,79,79,44"/>
+</map>

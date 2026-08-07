@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -102,8 +102,8 @@ $(document).ready(function(){initNavTree('classmb_1_1RtDbWorker.html',''); initR
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a73ff972abd1d6e14e405d395919fe29b" id="r_a73ff972abd1d6e14e405d395919fe29b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RtDbWorker.html#a73ff972abd1d6e14e405d395919fe29b">RtDbWorker</a> ()</td></tr>
-<tr class="separator:a73ff972abd1d6e14e405d395919fe29b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af396d5f2782ed411f70bd522a51928a1" id="r_af396d5f2782ed411f70bd522a51928a1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RtDbWorker.html#af396d5f2782ed411f70bd522a51928a1">RtDbWorker</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app)</td></tr>
+<tr class="separator:af396d5f2782ed411f70bd522a51928a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb6d31fbf74d53a7143585eff8107f81" id="r_afb6d31fbf74d53a7143585eff8107f81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RtDbWorker.html#afb6d31fbf74d53a7143585eff8107f81">~RtDbWorker</a> ()</td></tr>
 <tr class="separator:afb6d31fbf74d53a7143585eff8107f81"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9c87b94da1e5f7121c99fe14fa35ffa" id="r_ac9c87b94da1e5f7121c99fe14fa35ffa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RtDbWorker.html#ac9c87b94da1e5f7121c99fe14fa35ffa">isDbRunning</a> () const</td></tr>
@@ -112,24 +112,41 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae8ce0a38d4d48b4ddbb737c177c5ee5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a144f3aafe468e516be450baf78ebef6a" id="r_a144f3aafe468e516be450baf78ebef6a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RtDbWorker.html#a144f3aafe468e516be450baf78ebef6a">stopWorker</a> ()</td></tr>
 <tr class="separator:a144f3aafe468e516be450baf78ebef6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acff0aca8810e3f302b9c146fdd384dc2" id="r_acff0aca8810e3f302b9c146fdd384dc2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RtDbWorker.html#acff0aca8810e3f302b9c146fdd384dc2">notify</a> ()</td></tr>
+<tr class="separator:acff0aca8810e3f302b9c146fdd384dc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Internal worker that polls (SQLite) or listens (PostgreSQL) for DB changes. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a73ff972abd1d6e14e405d395919fe29b" name="a73ff972abd1d6e14e405d395919fe29b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a73ff972abd1d6e14e405d395919fe29b">&#9670;&#160;</a></span>RtDbWorker()</h2>
+<a id="af396d5f2782ed411f70bd522a51928a1" name="af396d5f2782ed411f70bd522a51928a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af396d5f2782ed411f70bd522a51928a1">&#9670;&#160;</a></span>RtDbWorker()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">mb::RtDbWorker::RtDbWorker </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td>
+          <td class="paramname"><em>app</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">app</td><td>Owning application (used for db access/config). Stored by reference. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -183,6 +200,24 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="acff0aca8810e3f302b9c146fdd384dc2" name="acff0aca8810e3f302b9c146fdd384dc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acff0aca8810e3f302b9c146fdd384dc2">&#9670;&#160;</a></span>notify()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::RtDbWorker::notify </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Signal the worker (SQLite) to wake and drain the change log now. </p>
 
 </div>
 </div>

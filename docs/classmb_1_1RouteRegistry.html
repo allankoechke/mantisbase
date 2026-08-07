@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -103,17 +103,13 @@ $(document).ready(function(){initNavTree('classmb_1_1RouteRegistry.html',''); in
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a32c7274b592d6d8aced65708c983c3ea" id="r_a32c7274b592d6d8aced65708c983c3ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#a32c7274b592d6d8aced65708c983c3ea">add</a> (const std::string &amp;method, const std::string &amp;path, <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares)</td></tr>
-<tr class="memdesc:a32c7274b592d6d8aced65708c983c3ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add new route to the registry.  <br /></td></tr>
-<tr class="separator:a32c7274b592d6d8aced65708c983c3ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78f4f541d653854f59208138403fc976" id="r_a78f4f541d653854f59208138403fc976"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#a78f4f541d653854f59208138403fc976">add</a> (const std::string &amp;method, const std::string &amp;path, <a class="el" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a> handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares)</td></tr>
-<tr class="memdesc:a78f4f541d653854f59208138403fc976"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add new route to the registry.  <br /></td></tr>
-<tr class="separator:a78f4f541d653854f59208138403fc976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1c8a76ae6a18b5f29347598a42baf0b" id="r_af1c8a76ae6a18b5f29347598a42baf0b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#af1c8a76ae6a18b5f29347598a42baf0b">add</a> (const std::string &amp;method, const std::string &amp;path, const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares)</td></tr>
+<tr class="separator:af1c8a76ae6a18b5f29347598a42baf0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a587825ecfbf1557e83a8b0c7c3b86f02" id="r_a587825ecfbf1557e83a8b0c7c3b86f02"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#a587825ecfbf1557e83a8b0c7c3b86f02">add</a> (const std::string &amp;method, const std::string &amp;path, const <a class="el" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares)</td></tr>
+<tr class="separator:a587825ecfbf1557e83a8b0c7c3b86f02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8af23c11906981ab71df27f6ee4902db" id="r_a8af23c11906981ab71df27f6ee4902db"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structmb_1_1RouteHandler.html">RouteHandler</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#a8af23c11906981ab71df27f6ee4902db">find</a> (const std::string &amp;method, const std::string &amp;path) const</td></tr>
-<tr class="memdesc:a8af23c11906981ab71df27f6ee4902db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find a route in the registry matching given method and route.  <br /></td></tr>
 <tr class="separator:a8af23c11906981ab71df27f6ee4902db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0f1d98d8fec98cc41da8daede8a828f" id="r_aa0f1d98d8fec98cc41da8daede8a828f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#aa0f1d98d8fec98cc41da8daede8a828f">remove</a> (const std::string &amp;method, const std::string &amp;path)</td></tr>
-<tr class="memdesc:aa0f1d98d8fec98cc41da8daede8a828f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove find and remove existing route + path pair from the registry.  <br /></td></tr>
 <tr class="separator:aa0f1d98d8fec98cc41da8daede8a828f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
@@ -121,11 +117,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:ab46a6818c728ff91477a979599e16d88" id="r_ab46a6818c728ff91477a979599e16d88"><td class="memItemLeft" align="right" valign="top">const std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#ab46a6818c728ff91477a979599e16d88">__class_name__</a> = &quot;mb::RouteRegistry&quot;</td></tr>
 <tr class="separator:ab46a6818c728ff91477a979599e16d88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Class to manage route registration, removal and dynamic checks on request. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a32c7274b592d6d8aced65708c983c3ea" name="a32c7274b592d6d8aced65708c983c3ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a32c7274b592d6d8aced65708c983c3ea">&#9670;&#160;</a></span>add() <span class="overload">[1/2]</span></h2>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="af1c8a76ae6a18b5f29347598a42baf0b" name="af1c8a76ae6a18b5f29347598a42baf0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1c8a76ae6a18b5f29347598a42baf0b">&#9670;&#160;</a></span>add() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -145,7 +139,7 @@ Public Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;&#160;</td>
           <td class="paramname"><em>handler</em>, </td>
         </tr>
         <tr>
@@ -162,22 +156,10 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Add new route to the registry. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">method</td><td>Request method, i.e. GET, POST, PATCH, etc. </td></tr>
-    <tr><td class="paramname">path</td><td>Request path. </td></tr>
-    <tr><td class="paramname">handler</td><td>Request handler function. </td></tr>
-    <tr><td class="paramname">middlewares</td><td>List of </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section see"><dt>See also</dt><dd>Middleware to be imposed on this request * </dd></dl>
-
 </div>
 </div>
-<a id="a78f4f541d653854f59208138403fc976" name="a78f4f541d653854f59208138403fc976"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a78f4f541d653854f59208138403fc976">&#9670;&#160;</a></span>add() <span class="overload">[2/2]</span></h2>
+<a id="a587825ecfbf1557e83a8b0c7c3b86f02" name="a587825ecfbf1557e83a8b0c7c3b86f02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a587825ecfbf1557e83a8b0c7c3b86f02">&#9670;&#160;</a></span>add() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -197,7 +179,7 @@ Public Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a> &amp;&#160;</td>
           <td class="paramname"><em>handler</em>, </td>
         </tr>
         <tr>
@@ -213,18 +195,6 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Add new route to the registry. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">method</td><td>Request method, i.e. GET, POST, PATCH, etc. </td></tr>
-    <tr><td class="paramname">path</td><td>Request path. </td></tr>
-    <tr><td class="paramname">handler</td><td>Request handler function. </td></tr>
-    <tr><td class="paramname">middlewares</td><td>List of </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section see"><dt>See also</dt><dd>Middleware to be imposed on this request * </dd></dl>
 
 </div>
 </div>
@@ -254,17 +224,6 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Find a route in the registry matching given method and route. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">method</td><td>Request method. </td></tr>
-    <tr><td class="paramname">path</td><td>Request path. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd></dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="structmb_1_1RouteHandler.html" title="Struct encompassing the list of middlewares and the handler function registered to a specific route.">RouteHandler</a> struct having middlewares and handler func. </dd></dl>
-
 </div>
 </div>
 <a id="aa0f1d98d8fec98cc41da8daede8a828f" name="aa0f1d98d8fec98cc41da8daede8a828f"></a>
@@ -292,16 +251,6 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Remove find and remove existing route + path pair from the registry. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">method</td><td>Request method </td></tr>
-    <tr><td class="paramname">path</td><td>Request path </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>JSON Error object, error value contains data if operation fails. </dd></dl>
 
 </div>
 </div>

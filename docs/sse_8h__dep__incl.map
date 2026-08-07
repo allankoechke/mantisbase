@@ -1,7 +1,9 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/sse.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/sse.h">
-<area shape="rect" id="Node000001" title="Server&#45;Sent Events (SSE) manager for the realtime API." alt="" coords="125,5,359,60"/>
-<area shape="rect" id="Node000002" href="$sse__mgr_8cpp.html" title=" " alt="" coords="5,108,231,163"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,71,152,110,149,106,197,67"/>
-<area shape="rect" id="Node000003" href="$sse__session_8cpp.html" title=" " alt="" coords="255,108,480,163"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="287,67,336,106,333,110,284,71"/>
+<area shape="rect" id="Node000001" title="Server&#45;Sent Events (SSE) manager for the realtime API." alt="" coords="293,5,527,60"/>
+<area shape="rect" id="Node000002" href="$realtime__ws_8cpp.html" title=" " alt="" coords="5,115,273,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="328,67,191,118,189,113,326,62"/>
+<area shape="rect" id="Node000003" href="$sse__mgr_8cpp.html" title=" " alt="" coords="297,108,523,163"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="413,74,413,108,407,108,407,74"/>
+<area shape="rect" id="Node000004" href="$sse__session_8cpp.html" title=" " alt="" coords="547,108,772,163"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="488,63,595,105,593,110,486,67"/>
 </map>

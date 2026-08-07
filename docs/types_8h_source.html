@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -99,66 +99,91 @@ $(document).ready(function(){initNavTree('types_8h_source.html',''); initResizab
   <div class="headertitle"><div class="title">types.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="types_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#ifndef MANTISBASE_TYPES_H</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#define MANTISBASE_TYPES_H</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;httplib.h&gt;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;nlohmann/json.hpp&gt;</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a> {</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keyword">class </span>MantisBase;</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="keyword">class </span>MantisRequest;</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="keyword">class </span>MantisResponse;</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keyword">class </span>MantisContentReader;</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keyword">class </span>Entity;</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">class </span>EntitySchema;</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">class </span>EntitySchemaField;</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">namespace </span>fs = std::filesystem;</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">class </span>KeyValStore;</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">class </span>Database;</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">class </span>Logger;</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keyword">class </span>Router;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keyword">class </span>Files;</div>
+<a href="types_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef MANTISBASE_TYPES_H</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define MANTISBASE_TYPES_H</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;nlohmann/json.hpp&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;filesystem&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a> {</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <span class="keyword">class </span>MantisBase;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <span class="keyword">class </span>MantisRequest;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <span class="keyword">class </span>MantisResponse;</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    <span class="keyword">class </span>MantisContentReader;</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    <span class="keyword">class </span>Entity;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keyword">class </span>EntitySchema;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="keyword">class </span>EntitySchemaField;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keyword">namespace </span>fs = std::filesystem;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">class </span>KeyValStore;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">class </span>Database;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">class </span>Logger;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">class </span>Router;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keyword">class </span>FilesMgr;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">class </span>Auth;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">class </span>ApiKeyManager;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">class </span>OAuthManager;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> = nlohmann::json;</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> = nlohmann::json;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="namespacemb.html#adf14f234c6ec1371dde363714c0a546e">   33</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#adf14f234c6ec1371dde363714c0a546e">HandlerResponse</a> = httplib::Server::HandlerResponse;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">   36</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> = std::function&lt;void(<a class="code hl_class" href="classmb_1_1MantisRequest.html">MantisRequest</a>&amp;, <a class="code hl_class" href="classmb_1_1MantisResponse.html">MantisResponse</a>&amp;)&gt;;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">   39</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a> = std::function&lt;void(<a class="code hl_class" href="classmb_1_1MantisRequest.html">MantisRequest</a>&amp;, <a class="code hl_class" href="classmb_1_1MantisResponse.html">MantisResponse</a>&amp;,</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>                                                                 <a class="code hl_class" href="classmb_1_1MantisContentReader.html">MantisContentReader</a>&amp;)&gt;;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">   43</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">MiddlewareFn</a> = std::function&lt;<a class="code hl_typedef" href="namespacemb.html#adf14f234c6ec1371dde363714c0a546e">HandlerResponse</a>(<a class="code hl_class" href="classmb_1_1MantisRequest.html">MantisRequest</a>&amp;, <a class="code hl_class" href="classmb_1_1MantisResponse.html">MantisResponse</a>&amp;)&gt;;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">   46</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> = std::vector&lt;MiddlewareFn&gt;;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="namespacemb.html#ae79700c1a37575b76080e98b09dfa1cc">   49</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#ae79700c1a37575b76080e98b09dfa1cc">Method</a> = std::string;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="namespacemb.html#a61ada53e0ce0b4de0072032d07840925">   52</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#a61ada53e0ce0b4de0072032d07840925">Path</a> = std::string;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="namespacemb.html#a418920a172df52fe09c0c81787230888">   55</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#a418920a172df52fe09c0c81787230888">RouteKey</a> = std::pair&lt;Method, Path&gt;;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="types_8h.html#a4f08ea4b1e854e5b01082b2a1ea6ad5e">   57</a></span><span class="preprocessor">#define REQUEST_HANDLED HandlerResponse::Handled;</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="types_8h.html#ad5550135843ca34b930f5ceb0584adaa">   58</a></span><span class="preprocessor">#define REQUEST_PENDING HandlerResponse::Unhandled;</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>}</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#endif </span><span class="comment">//MANTISBASE_TYPES_H</span></div>
-<div class="ttc" id="aclassmb_1_1MantisContentReader_html"><div class="ttname"><a href="classmb_1_1MantisContentReader.html">mb::MantisContentReader</a></div><div class="ttdoc">‍Middleware shorthand for the content reader</div><div class="ttdef"><b>Definition</b> http.h:549</div></div>
-<div class="ttc" id="aclassmb_1_1MantisRequest_html"><div class="ttname"><a href="classmb_1_1MantisRequest.html">mb::MantisRequest</a></div><div class="ttdoc">A wrapper class around httplib::Request offering a consistent API and allowing for easy wrapper metho...</div><div class="ttdef"><b>Definition</b> http.h:39</div></div>
-<div class="ttc" id="aclassmb_1_1MantisResponse_html"><div class="ttname"><a href="classmb_1_1MantisResponse.html">mb::MantisResponse</a></div><div class="ttdoc">Wrapper around httplib::Response for consistent API.</div><div class="ttdef"><b>Definition</b> http.h:315</div></div>
-<div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdoc">router.h</div><div class="ttdef"><b>Definition</b> auth.h:16</div></div>
-<div class="ttc" id="anamespacemb_html_a418920a172df52fe09c0c81787230888"><div class="ttname"><a href="namespacemb.html#a418920a172df52fe09c0c81787230888">mb::RouteKey</a></div><div class="ttdeci">std::pair&lt; Method, Path &gt; RouteKey</div><div class="ttdoc">‍Shorthand notation for the request's method, path pair.</div><div class="ttdef"><b>Definition</b> types.h:55</div></div>
-<div class="ttc" id="anamespacemb_html_a5a39686a574a41ea8b04e7fb31320da5"><div class="ttname"><a href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">mb::Middlewares</a></div><div class="ttdeci">std::vector&lt; MiddlewareFn &gt; Middlewares</div><div class="ttdoc">‍Middleware function arrays</div><div class="ttdef"><b>Definition</b> types.h:46</div></div>
-<div class="ttc" id="anamespacemb_html_a61ada53e0ce0b4de0072032d07840925"><div class="ttname"><a href="namespacemb.html#a61ada53e0ce0b4de0072032d07840925">mb::Path</a></div><div class="ttdeci">std::string Path</div><div class="ttdoc">‍Syntactic sugar for request path which is a std::string</div><div class="ttdef"><b>Definition</b> types.h:52</div></div>
-<div class="ttc" id="anamespacemb_html_a833cdb89d0fc9038892f8ba3556c6d12"><div class="ttname"><a href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">mb::MiddlewareFn</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; MiddlewareFn</div><div class="ttdoc">‍Middleware shorthand for the function</div><div class="ttdef"><b>Definition</b> types.h:43</div></div>
-<div class="ttc" id="anamespacemb_html_ac74c76fe24192fde8f728c74c624f668"><div class="ttname"><a href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">mb::HandlerWithContentReaderFn</a></div><div class="ttdeci">std::function&lt; void(MantisRequest &amp;, MantisResponse &amp;, MantisContentReader &amp;)&gt; HandlerWithContentReaderFn</div><div class="ttdoc">‍Route Handler function with content reader shorthand</div><div class="ttdef"><b>Definition</b> types.h:40</div></div>
-<div class="ttc" id="anamespacemb_html_adf14f234c6ec1371dde363714c0a546e"><div class="ttname"><a href="namespacemb.html#adf14f234c6ec1371dde363714c0a546e">mb::HandlerResponse</a></div><div class="ttdeci">httplib::Server::HandlerResponse HandlerResponse</div><div class="ttdef"><b>Definition</b> types.h:33</div></div>
-<div class="ttc" id="anamespacemb_html_ae160f2b0075e55c0f7c0988279983f78"><div class="ttname"><a href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">mb::HandlerFn</a></div><div class="ttdeci">std::function&lt; void(MantisRequest &amp;, MantisResponse &amp;)&gt; HandlerFn</div><div class="ttdoc">‍Route Handler function shorthand</div><div class="ttdef"><b>Definition</b> types.h:36</div></div>
-<div class="ttc" id="anamespacemb_html_ae79700c1a37575b76080e98b09dfa1cc"><div class="ttname"><a href="namespacemb.html#ae79700c1a37575b76080e98b09dfa1cc">mb::Method</a></div><div class="ttdeci">std::string Method</div><div class="ttdoc">‍Syntactic sugar for request method which is a std::string</div><div class="ttdef"><b>Definition</b> types.h:49</div></div>
-<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> context_store.h:18</div></div>
+<div class="foldopen" id="foldopen00032" data-start="{" data-end="};">
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">   32</a></span>    <span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a> {</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <a class="code hl_enumvalue" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a827211270de454ea3e0df8f57995efed">Handled</a>,</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <a class="code hl_enumvalue" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a6fe9e16b804e1ce4ac5868be60615007">Unhandled</a></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    };</div>
+</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">   37</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> = std::function&lt;void(<a class="code hl_class" href="classmb_1_1MantisRequest.html">MantisRequest</a>&amp;, <a class="code hl_class" href="classmb_1_1MantisResponse.html">MantisResponse</a>&amp;)&gt;;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">   38</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a> = std::function&lt;void(<a class="code hl_class" href="classmb_1_1MantisRequest.html">MantisRequest</a>&amp;, <a class="code hl_class" href="classmb_1_1MantisResponse.html">MantisResponse</a>&amp;,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>                                                                 <a class="code hl_class" href="classmb_1_1MantisContentReader.html">MantisContentReader</a>&amp;)&gt;;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">   40</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">MiddlewareFn</a> = std::function&lt;<a class="code hl_enumeration" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>(<a class="code hl_class" href="classmb_1_1MantisRequest.html">MantisRequest</a>&amp;, <a class="code hl_class" href="classmb_1_1MantisResponse.html">MantisResponse</a>&amp;)&gt;;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">   41</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> = std::vector&lt;MiddlewareFn&gt;;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="namespacemb.html#ae79700c1a37575b76080e98b09dfa1cc">   42</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#ae79700c1a37575b76080e98b09dfa1cc">Method</a> = std::string;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="namespacemb.html#a61ada53e0ce0b4de0072032d07840925">   43</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#a61ada53e0ce0b4de0072032d07840925">Path</a> = std::string;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="namespacemb.html#a418920a172df52fe09c0c81787230888">   44</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#a418920a172df52fe09c0c81787230888">RouteKey</a> = std::pair&lt;Method, Path&gt;;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="foldopen" id="foldopen00060" data-start="{" data-end="};">
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classmb_1_1IMantisBase.html">   60</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classmb_1_1IMantisBase.html">IMantisBase</a> {</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a>&amp; m_app;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="keyword">explicit</span> <a class="code hl_class" href="classmb_1_1IMantisBase.html">IMantisBase</a>(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a>&amp; app);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        [[nodiscard]] <span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;<a class="code hl_function" href="classmb_1_1IMantisBase.html#a94d6b28bd66767f7df7d7eb63c606801">mbApp</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        [[nodiscard]] <span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1Logger.html">Logger</a>&amp; <a class="code hl_function" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    };</div>
+</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="types_8h.html#a4f08ea4b1e854e5b01082b2a1ea6ad5e">   73</a></span><span class="preprocessor">#define REQUEST_HANDLED HandlerResponse::Handled;</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="types_8h.html#ad5550135843ca34b930f5ceb0584adaa">   74</a></span><span class="preprocessor">#define REQUEST_PENDING HandlerResponse::Unhandled;</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>}</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#endif </span><span class="comment">//MANTISBASE_TYPES_H</span></div>
+<div class="ttc" id="aclassmb_1_1IMantisBase_html"><div class="ttname"><a href="classmb_1_1IMantisBase.html">mb::IMantisBase</a></div><div class="ttdoc">Non-owning access to the active MantisBase from DI-aware types.</div><div class="ttdef"><b>Definition</b> types.h:60</div></div>
+<div class="ttc" id="aclassmb_1_1IMantisBase_html_a94d6b28bd66767f7df7d7eb63c606801"><div class="ttname"><a href="classmb_1_1IMantisBase.html#a94d6b28bd66767f7df7d7eb63c606801">mb::IMantisBase::mbApp</a></div><div class="ttdeci">const MantisBase &amp; mbApp() const</div><div class="ttdoc">Application that owns this service or request context.</div><div class="ttdef"><b>Definition</b> types.cpp:8</div></div>
+<div class="ttc" id="aclassmb_1_1IMantisBase_html_aeb65d721822a05d100c547f8a32a8dcf"><div class="ttname"><a href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">mb::IMantisBase::logger</a></div><div class="ttdeci">const Logger &amp; logger() const</div><div class="ttdoc">Get the logger instance.</div><div class="ttdef"><b>Definition</b> types.cpp:12</div></div>
+<div class="ttc" id="aclassmb_1_1Logger_html"><div class="ttname"><a href="classmb_1_1Logger.html">mb::Logger</a></div><div class="ttdef"><b>Definition</b> logger.h:42</div></div>
+<div class="ttc" id="aclassmb_1_1MantisBase_html"><div class="ttname"><a href="classmb_1_1MantisBase.html">mb::MantisBase</a></div><div class="ttdoc">MantisBase entry point.</div><div class="ttdef"><b>Definition</b> mantisbase.h:53</div></div>
+<div class="ttc" id="aclassmb_1_1MantisContentReader_html"><div class="ttname"><a href="classmb_1_1MantisContentReader.html">mb::MantisContentReader</a></div><div class="ttdef"><b>Definition</b> http.h:181</div></div>
+<div class="ttc" id="aclassmb_1_1MantisRequest_html"><div class="ttname"><a href="classmb_1_1MantisRequest.html">mb::MantisRequest</a></div><div class="ttdoc">HTTP request wrapper bound to a MantisBase instance.</div><div class="ttdef"><b>Definition</b> http.h:46</div></div>
+<div class="ttc" id="aclassmb_1_1MantisResponse_html"><div class="ttname"><a href="classmb_1_1MantisResponse.html">mb::MantisResponse</a></div><div class="ttdoc">HTTP response wrapper bound to a MantisBase instance.</div><div class="ttdef"><b>Definition</b> http.h:121</div></div>
+<div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdef"><b>Definition</b> api_keys.h:32</div></div>
+<div class="ttc" id="anamespacemb_html_a418920a172df52fe09c0c81787230888"><div class="ttname"><a href="namespacemb.html#a418920a172df52fe09c0c81787230888">mb::RouteKey</a></div><div class="ttdeci">std::pair&lt; Method, Path &gt; RouteKey</div><div class="ttdef"><b>Definition</b> types.h:44</div></div>
+<div class="ttc" id="anamespacemb_html_a5a39686a574a41ea8b04e7fb31320da5"><div class="ttname"><a href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">mb::Middlewares</a></div><div class="ttdeci">std::vector&lt; MiddlewareFn &gt; Middlewares</div><div class="ttdef"><b>Definition</b> types.h:41</div></div>
+<div class="ttc" id="anamespacemb_html_a61ada53e0ce0b4de0072032d07840925"><div class="ttname"><a href="namespacemb.html#a61ada53e0ce0b4de0072032d07840925">mb::Path</a></div><div class="ttdeci">std::string Path</div><div class="ttdef"><b>Definition</b> types.h:43</div></div>
+<div class="ttc" id="anamespacemb_html_a833cdb89d0fc9038892f8ba3556c6d12"><div class="ttname"><a href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">mb::MiddlewareFn</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; MiddlewareFn</div><div class="ttdef"><b>Definition</b> types.h:40</div></div>
+<div class="ttc" id="anamespacemb_html_abd2c06555bb4b0872af4290f6c3596e6"><div class="ttname"><a href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">mb::HandlerResponse</a></div><div class="ttdeci">HandlerResponse</div><div class="ttdef"><b>Definition</b> types.h:32</div></div>
+<div class="ttc" id="anamespacemb_html_abd2c06555bb4b0872af4290f6c3596e6a6fe9e16b804e1ce4ac5868be60615007"><div class="ttname"><a href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a6fe9e16b804e1ce4ac5868be60615007">mb::HandlerResponse::Unhandled</a></div><div class="ttdeci">@ Unhandled</div></div>
+<div class="ttc" id="anamespacemb_html_abd2c06555bb4b0872af4290f6c3596e6a827211270de454ea3e0df8f57995efed"><div class="ttname"><a href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a827211270de454ea3e0df8f57995efed">mb::HandlerResponse::Handled</a></div><div class="ttdeci">@ Handled</div></div>
+<div class="ttc" id="anamespacemb_html_ac74c76fe24192fde8f728c74c624f668"><div class="ttname"><a href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">mb::HandlerWithContentReaderFn</a></div><div class="ttdeci">std::function&lt; void(MantisRequest &amp;, MantisResponse &amp;, MantisContentReader &amp;)&gt; HandlerWithContentReaderFn</div><div class="ttdef"><b>Definition</b> types.h:39</div></div>
+<div class="ttc" id="anamespacemb_html_ae160f2b0075e55c0f7c0988279983f78"><div class="ttname"><a href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">mb::HandlerFn</a></div><div class="ttdeci">std::function&lt; void(MantisRequest &amp;, MantisResponse &amp;)&gt; HandlerFn</div><div class="ttdef"><b>Definition</b> types.h:37</div></div>
+<div class="ttc" id="anamespacemb_html_ae79700c1a37575b76080e98b09dfa1cc"><div class="ttname"><a href="namespacemb.html#ae79700c1a37575b76080e98b09dfa1cc">mb::Method</a></div><div class="ttdeci">std::string Method</div><div class="ttdef"><b>Definition</b> types.h:42</div></div>
+<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

@@ -1,0 +1,19 @@
+<map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/api_keys.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/api_keys.h">
+<area shape="rect" id="Node000001" title="Programmatic and REST&#45;backed API key management." alt="" coords="109,5,342,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,181,64,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,62,61,174,57,170,192,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="407,108,481,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="293,58,403,100,401,105,291,63"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="88,181,235,207"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="213,61,189,109,170,168,165,167,184,107,208,59"/>
+<area shape="rect" id="Node000005" href="$types_8h.html" title=" " alt="" coords="199,108,382,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="247,58,276,95,271,99,243,62"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="250,136,78,183,77,178,249,131"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="271,136,196,177,194,172,269,131"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="259,181,346,207"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="295,133,301,167,296,168,290,134"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="370,181,433,207"/>
+<area shape="poly" id="edge8_Node000005_Node000007" title=" " alt="" coords="310,131,373,171,370,176,307,136"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="457,181,548,207"/>
+<area shape="poly" id="edge9_Node000005_Node000008" title=" " alt="" coords="326,131,456,174,455,179,324,136"/>
+</map>

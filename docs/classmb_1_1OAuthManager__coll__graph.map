@@ -1,0 +1,5 @@
+<map id="mb::OAuthManager" name="mb::OAuthManager">
+<area shape="rect" id="Node000001" title="OAuth provider registry, entity enablement, and login/link flows." alt="" coords="5,79,153,104"/>
+<area shape="rect" id="Node000002" href="$classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="14,5,145,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,44,82,79,77,79,77,44"/>
+</map>

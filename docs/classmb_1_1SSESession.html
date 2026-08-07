@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -102,12 +102,10 @@ $(document).ready(function(){initNavTree('classmb_1_1SSESession.html',''); initR
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a76fa818925d10dbaf890714dd864b71e" id="r_a76fa818925d10dbaf890714dd864b71e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a76fa818925d10dbaf890714dd864b71e">SSESession</a> (std::string client_id, const std::set&lt; std::string &gt; &amp;topics, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;auth=json::object(), const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;verification=json::object())</td></tr>
-<tr class="separator:a76fa818925d10dbaf890714dd864b71e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b53ec4991543aba285ac800c8afe628" id="r_a6b53ec4991543aba285ac800c8afe628"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a6b53ec4991543aba285ac800c8afe628">queueEvent</a> (const std::string &amp;eventType, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data)</td></tr>
-<tr class="separator:a6b53ec4991543aba285ac800c8afe628"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a016d7ae390daf8e1f5b1887c4939e735" id="r_a016d7ae390daf8e1f5b1887c4939e735"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a016d7ae390daf8e1f5b1887c4939e735">waitForEvent</a> (std::string &amp;eventType, <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data, std::chrono::milliseconds timeout)</td></tr>
-<tr class="separator:a016d7ae390daf8e1f5b1887c4939e735"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3896834d9bb2483cdda9568903a94bb" id="r_ab3896834d9bb2483cdda9568903a94bb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#ab3896834d9bb2483cdda9568903a94bb">SSESession</a> (std::string client_id, const std::set&lt; std::string &gt; &amp;topics, drogon::ResponseStreamPtr stream)</td></tr>
+<tr class="separator:ab3896834d9bb2483cdda9568903a94bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52a686a6402eb395377fbeef21f0956b" id="r_a52a686a6402eb395377fbeef21f0956b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a52a686a6402eb395377fbeef21f0956b">sendEvent</a> (const std::string &amp;eventType, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data)</td></tr>
+<tr class="separator:a52a686a6402eb395377fbeef21f0956b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a687c22179696b7d60a8d9277a1ed1484" id="r_a687c22179696b7d60a8d9277a1ed1484"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a687c22179696b7d60a8d9277a1ed1484">isInterestedIn</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;change_event) const</td></tr>
 <tr class="separator:a687c22179696b7d60a8d9277a1ed1484"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0dfe5a3edcc372032e454419ae916232" id="r_a0dfe5a3edcc372032e454419ae916232"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a0dfe5a3edcc372032e454419ae916232">formatEvent</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;change_event) const</td></tr>
@@ -124,16 +122,16 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae1f7cf3911a26c416130702747fae003"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a039fee58690ceab1fc6ebfc9d9d81540" id="r_a039fee58690ceab1fc6ebfc9d9d81540"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a039fee58690ceab1fc6ebfc9d9d81540">getClientID</a> () const</td></tr>
 <tr class="separator:a039fee58690ceab1fc6ebfc9d9d81540"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac958aae34b3f554d1d3e7109b2321164" id="r_ac958aae34b3f554d1d3e7109b2321164"><td class="memItemLeft" align="right" valign="top">const std::set&lt; std::string &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#ac958aae34b3f554d1d3e7109b2321164">getTopics</a> () const</td></tr>
-<tr class="separator:ac958aae34b3f554d1d3e7109b2321164"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7789a94be201224477a2dd7b191f5324" id="r_a7789a94be201224477a2dd7b191f5324"><td class="memItemLeft" align="right" valign="top">std::set&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a7789a94be201224477a2dd7b191f5324">getTopics</a> () const</td></tr>
+<tr class="separator:a7789a94be201224477a2dd7b191f5324"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92236779d461a3474fcf511f6354a6c2" id="r_a92236779d461a3474fcf511f6354a6c2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a92236779d461a3474fcf511f6354a6c2">setTopics</a> (const std::set&lt; std::string &gt; &amp;topics)</td></tr>
 <tr class="separator:a92236779d461a3474fcf511f6354a6c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Per-client SSE session: holds subscribed topics, auth details, and queues events (change, ping). </p>
+<div class="textblock"><p>Per-client SSE session: holds subscribed topics and a Drogon async stream for zero-thread event delivery. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a76fa818925d10dbaf890714dd864b71e" name="a76fa818925d10dbaf890714dd864b71e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a76fa818925d10dbaf890714dd864b71e">&#9670;&#160;</a></span>SSESession()</h2>
+<a id="ab3896834d9bb2483cdda9568903a94bb" name="ab3896834d9bb2483cdda9568903a94bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3896834d9bb2483cdda9568903a94bb">&#9670;&#160;</a></span>SSESession()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -153,14 +151,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td>
-          <td class="paramname"><em>auth</em> = <code>json::object()</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td>
-          <td class="paramname"><em>verification</em> = <code>json::object()</code>&#160;</td>
+          <td class="paramtype">drogon::ResponseStreamPtr&#160;</td>
+          <td class="paramname"><em>stream</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -187,7 +179,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Mark session inactive and wake any waiters (disconnect). </p>
+<p>Mark session inactive and close the stream. </p>
 
 </div>
 </div>
@@ -244,14 +236,14 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ac958aae34b3f554d1d3e7109b2321164" name="ac958aae34b3f554d1d3e7109b2321164"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac958aae34b3f554d1d3e7109b2321164">&#9670;&#160;</a></span>getTopics()</h2>
+<a id="a7789a94be201224477a2dd7b191f5324" name="a7789a94be201224477a2dd7b191f5324"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7789a94be201224477a2dd7b191f5324">&#9670;&#160;</a></span>getTopics()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const std::set&lt; std::string &gt; &amp; mb::SSESession::getTopics </td>
+          <td class="memname">std::set&lt; std::string &gt; mb::SSESession::getTopics </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -297,14 +289,14 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a6b53ec4991543aba285ac800c8afe628" name="a6b53ec4991543aba285ac800c8afe628"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b53ec4991543aba285ac800c8afe628">&#9670;&#160;</a></span>queueEvent()</h2>
+<a id="a52a686a6402eb395377fbeef21f0956b" name="a52a686a6402eb395377fbeef21f0956b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52a686a6402eb395377fbeef21f0956b">&#9670;&#160;</a></span>sendEvent()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void mb::SSESession::queueEvent </td>
+          <td class="memname">bool mb::SSESession::sendEvent </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>eventType</em>, </td>
@@ -322,7 +314,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Queue an event (e.g. "change", "ping") to be sent to the client. </p>
+<p>Send an SSE-formatted event through the async stream. Returns false if stream is closed. </p>
 
 </div>
 </div>
@@ -376,41 +368,6 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<a id="a016d7ae390daf8e1f5b1887c4939e735" name="a016d7ae390daf8e1f5b1887c4939e735"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a016d7ae390daf8e1f5b1887c4939e735">&#9670;&#160;</a></span>waitForEvent()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool mb::SSESession::waitForEvent </td>
-          <td>(</td>
-          <td class="paramtype">std::string &amp;&#160;</td>
-          <td class="paramname"><em>eventType</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td>
-          <td class="paramname"><em>data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::chrono::milliseconds&#160;</td>
-          <td class="paramname"><em>timeout</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Block until the next event is available or timeout; returns true if event was read. </p>
 
 </div>
 </div>

@@ -1,7 +1,7 @@
 var utils_8h =
 [
     [ "createDirs", "utils_8h.html#a3ffe08183ace9bad82bb563de7e2b162", null ],
-    [ "dbDateToString", "utils_8h.html#a49a5d0beca12bf0c7d5e3fef0d201f0b", null ],
+    [ "dbDateToString", "utils_8h.html#a6e069285d347076bd5b3c2e17b9b3de4", null ],
     [ "dirFromPath", "utils_8h.html#ac3fc0ede6c1f09686dcd3611ca307c78", null ],
     [ "generateReadableTimeId", "utils_8h.html#af1b47490bcd171b34e7371a721ec4d82", null ],
     [ "generateShortId", "utils_8h.html#ab5004cdfdf21f04cf630c15f7f191bac", null ],
@@ -20,12 +20,15 @@ var utils_8h =
     [ "sanitizeFilename_JSWrapper", "utils_8h.html#ac3176a96dbbc7784fb6638cad25c6030", null ],
     [ "sanitizeInPlace", "utils_8h.html#a8a3823264846aca9828eab91e2048b27", null ],
     [ "splitString", "utils_8h.html#a2496b58c49de9a3a1758c8fc6fee2996", null ],
+    [ "sqlIdentifier", "utils_8h.html#a49176a2c9bc24f9aa992eab803aa4d0c", null ],
     [ "strToBool", "utils_8h.html#ae77a8e2cd17097b492084ae16ef26fee", null ],
     [ "strToTM", "utils_8h.html#a6b72f6b349fd49a250bed27c2dd29fb2", null ],
     [ "tmToStr", "utils_8h.html#a71ef440b705eab6ad8dfd505e6e62664", null ],
+    [ "toLocalTime", "utils_8h.html#a2d71c0500dcfed8ef033eb8fbeb13e65", null ],
     [ "toLowerCase", "utils_8h.html#a610ae91c5e525b5899cf9445107360e9", null ],
     [ "toUpperCase", "utils_8h.html#abe6b794953335d0601b9fe55af49027f", null ],
+    [ "toUtcTime", "utils_8h.html#ae4d3d9830d695badbaa82fec75d2be94", null ],
     [ "trim", "utils_8h.html#a409c1fc8483d2c71f13abd04598f4db2", null ],
-    [ "tryParseJsonStr", "utils_8h.html#aa3ea2b27da77ae3202f7d32ef7f88b80", null ],
+    [ "tryParseJsonStr", "utils_8h.html#a407f3d861f56cbc663381da99b2cc4ed", null ],
     [ "verifyPassword", "utils_8h.html#aa3085c18b75188b1e46d16c21ab2e58b", null ]
 ];

@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.3.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
    </div>
   </td>
  </tr>
@@ -96,7 +96,7 @@ $(document).ready(function(){initNavTree('embedding.html',''); initResizable(); 
 <div class="contents">
 <div class="textblock"><p>MantisBase is designed as a lightweight C++ library that can be embedded directly into your desktop, mobile, or embedded application. This guide explains how to integrate MantisBase into your project and configure it.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md161"></a>
+<h2><a class="anchor" id="autotoc_md174"></a>
 Why Embed MantisBase?</h2>
 <ul>
 <li>Add full-featured local storage and REST API support to your Qt, Slint, or CLI app</li>
@@ -105,37 +105,42 @@ Why Embed MantisBase?</h2>
 <li>No separate server deployment required</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md163"></a>
+<h2><a class="anchor" id="autotoc_md176"></a>
 Dependencies</h2>
 <p>On Linux, MantisBase depends on ZSTD and libpq for PostgreSQL support:</p>
 <div class="fragment"><div class="line">sudo apt-get install -y libzstd-dev</div>
 <div class="line">sudo apt install libpq-dev</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md165"></a>
+<h2><a class="anchor" id="autotoc_md178"></a>
 Integration</h2>
-<h3><a class="anchor" id="autotoc_md166"></a>
+<h3><a class="anchor" id="autotoc_md179"></a>
 As a Static or Shared Library</h3>
 <p>Add MantisBase as a submodule or include it in your CMake project:</p>
 <div class="fragment"><div class="line">add_subdirectory(mantisbase)</div>
 <div class="line">target_link_libraries(your_app PRIVATE mantisbase)</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md168"></a>
+<h2><a class="anchor" id="autotoc_md181"></a>
+Application lifecycle</h2>
+<p><code>MantisBase::create()</code> returns a <code>std::unique_ptr&lt;MantisBase&gt;</code> that <b>you own</b>. There is no global <code>MantisBase::instance()</code> accessor. Hold the pointer in <code>main</code> (or your app object), pass <code>const MantisBase&amp;</code> into your own code, and call <code>app-&gt;run()</code> to start the HTTP server.</p>
+<p>Services that run inside MantisBase (<code>Entity</code>, <code>Router</code>, <code>MantisRequest</code>, <code>ApiKeyManager</code>, <code>OAuthManager</code>, etc.) inherit <code>IMantisBase</code> and expose <code>mbApp()</code> when you only have a request or service reference.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md183"></a>
 Basic Usage</h2>
-<h3><a class="anchor" id="autotoc_md169"></a>
+<h3><a class="anchor" id="autotoc_md184"></a>
 Using Command-Line Arguments</h3>
 <p>The simplest way to embed MantisBase is using command-line arguments:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[])</div>
 <div class="line">{</div>
-<div class="line">    <span class="keyword">auto</span>&amp; app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a>(argc, argv);</div>
-<div class="line">    <span class="keywordflow">return</span> app.run();</div>
+<div class="line">    <span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a>(argc, argv);</div>
+<div class="line">    <span class="keywordflow">return</span> app-&gt;run();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassmb_1_1MantisBase_html_a4d7db711bdbc3422e44c2138b71a155c"><div class="ttname"><a href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a></div><div class="ttdeci">static MantisBase &amp; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:60</div></div>
+<div class="ttc" id="aclassmb_1_1MantisBase_html_a39320e2aeb02263d4bc2252e1853854a"><div class="ttname"><a href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a></div><div class="ttdeci">static std::unique_ptr&lt; MantisBase &gt; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:49</div></div>
 <div class="ttc" id="amain_8cpp_html_a638b85ceffac097c2aa79b76ba8c055e"><div class="ttname"><a href="main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e">main</a></div><div class="ttdeci">int main(const int argc, char *argv[])</div><div class="ttdoc">MantisApp standalone entrypoint.</div><div class="ttdef"><b>Definition</b> main.cpp:16</div></div>
 <div class="ttc" id="amantisbase_8h_html"><div class="ttname"><a href="mantisbase_8h.html">mantisbase.h</a></div><div class="ttdoc">The main application for mantisbase.</div></div>
 </div><!-- fragment --><p>This allows your application to accept standard MantisBase CLI arguments like <code>--db</code>, <code>--db_url</code>, <code>--dev</code>, and subcommands such as <code>serve --host</code> / <code>serve --port</code>.</p>
-<h3><a class="anchor" id="autotoc_md170"></a>
+<h3><a class="anchor" id="autotoc_md185"></a>
 Using JSON Configuration</h3>
 <p>For more control when embedding, use JSON configuration:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -153,11 +158,11 @@ Using JSON Configuration</h3>
 <div class="line">    config[<span class="stringliteral">&quot;public-dir&quot;</span>] = <span class="stringliteral">&quot;./public&quot;</span>;</div>
 <div class="line">    config[<span class="stringliteral">&quot;scripts-dir&quot;</span>] = <span class="stringliteral">&quot;./scripts&quot;</span>;</div>
 <div class="line">    </div>
-<div class="line">    <span class="keyword">auto</span>&amp; app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a>(config);</div>
-<div class="line">    <span class="keywordflow">return</span> app.run();</div>
+<div class="line">    <span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a>(config);</div>
+<div class="line">    <span class="keywordflow">return</span> app-&gt;run();</div>
 <div class="line">}</div>
-<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> context_store.h:18</div></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md171"></a>
+<div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md186"></a>
 Minimal Configuration</h3>
 <p>You can also create an instance with default settings:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -165,11 +170,40 @@ Minimal Configuration</h3>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e">main</a>()</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">// Uses all defaults (port 7070, SQLite, etc.)</span></div>
-<div class="line">    <span class="keyword">auto</span>&amp; app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a>();</div>
-<div class="line">    <span class="keywordflow">return</span> app.run();</div>
+<div class="line">    <span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a>();</div>
+<div class="line">    <span class="keywordflow">return</span> app-&gt;run();</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md173"></a>
+<h2><a class="anchor" id="autotoc_md188"></a>
+Accessing services (DI)</h2>
+<p>Reach auth, entities, and database APIs through your owned app instance:</p>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a>(config);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// JWT tokens</span></div>
+<div class="line"><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a> claims = {{<span class="stringliteral">&quot;id&quot;</span>, <span class="stringliteral">&quot;user123&quot;</span>}, {<span class="stringliteral">&quot;table&quot;</span>, <span class="stringliteral">&quot;users&quot;</span>}};</div>
+<div class="line">std::string jwt = app-&gt;auth().createToken(claims);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// API keys (raw secret returned once at creation)</span></div>
+<div class="line"><span class="keyword">auto</span> key = app-&gt;auth().apiKey().create(<span class="stringliteral">&quot;users&quot;</span>, <span class="stringliteral">&quot;user123&quot;</span>, <span class="stringliteral">&quot;Desktop client&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// OAuth (admin setup + user flows)</span></div>
+<div class="line">app-&gt;auth().oauth().enableProviderForEntity(<span class="stringliteral">&quot;users&quot;</span>, provider_id);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Entities and database</span></div>
+<div class="line"><span class="keyword">auto</span> users = app-&gt;entity(<span class="stringliteral">&quot;users&quot;</span>);</div>
+<div class="line"><span class="keyword">auto</span> sql = app-&gt;db().session();</div>
+</div><!-- fragment --><p>Inside custom route handlers, use <code>req.mbApp()</code>:</p>
+<div class="fragment"><div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/custom&quot;</span>, [](<a class="code hl_class" href="classmb_1_1MantisRequest.html">mb::MantisRequest</a>&amp; req, <a class="code hl_class" href="classmb_1_1MantisResponse.html">mb::MantisResponse</a>&amp; res) {</div>
+<div class="line">    <span class="keyword">auto</span> count = req.<a class="code hl_function" href="classmb_1_1IMantisBase.html#a94d6b28bd66767f7df7d7eb63c606801">mbApp</a>().entity(<span class="stringliteral">&quot;posts&quot;</span>).countRecords();</div>
+<div class="line">    res.<a class="code hl_function" href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">sendJSON</a>(200, {{<span class="stringliteral">&quot;posts&quot;</span>, count}});</div>
+<div class="line">});</div>
+<div class="ttc" id="aclassmb_1_1IMantisBase_html_a94d6b28bd66767f7df7d7eb63c606801"><div class="ttname"><a href="classmb_1_1IMantisBase.html#a94d6b28bd66767f7df7d7eb63c606801">mb::IMantisBase::mbApp</a></div><div class="ttdeci">const MantisBase &amp; mbApp() const</div><div class="ttdoc">Application that owns this service or request context.</div><div class="ttdef"><b>Definition</b> types.cpp:8</div></div>
+<div class="ttc" id="aclassmb_1_1MantisRequest_html"><div class="ttname"><a href="classmb_1_1MantisRequest.html">mb::MantisRequest</a></div><div class="ttdoc">HTTP request wrapper bound to a MantisBase instance.</div><div class="ttdef"><b>Definition</b> http.h:46</div></div>
+<div class="ttc" id="aclassmb_1_1MantisResponse_html"><div class="ttname"><a href="classmb_1_1MantisResponse.html">mb::MantisResponse</a></div><div class="ttdoc">HTTP response wrapper bound to a MantisBase instance.</div><div class="ttdef"><b>Definition</b> http.h:121</div></div>
+<div class="ttc" id="aclassmb_1_1MantisResponse_html_af104ef1181023634e19eac48c5f1a34f"><div class="ttname"><a href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">mb::MantisResponse::sendJSON</a></div><div class="ttdeci">void sendJSON(int statusCode=200, const json &amp;data=json::object()) const</div><div class="ttdef"><b>Definition</b> http_response.cpp:128</div></div>
+</div><!-- fragment --><p>Per-request data (<code>auth</code>, <code>verification</code>, etc.) is stored on <code>MantisRequest</code> via <code>set()</code> / <code>getOr()</code>, not a global singleton.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md190"></a>
 Configuration Options</h2>
 <p>The JSON configuration supports the following options:</p>
 <div class="fragment"><div class="line">{</div>
@@ -200,7 +234,7 @@ Configuration Options</h2>
 <div class="line">}</div>
 </div><!-- fragment --><p>All options are optional and will use sensible defaults if omitted.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md175"></a>
+<h2><a class="anchor" id="autotoc_md192"></a>
 Adding Custom Routes</h2>
 <p>You can add custom API endpoints using the router:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -208,8 +242,8 @@ Adding Custom Routes</h2>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e">main</a>()</div>
 <div class="line">{</div>
-<div class="line">    <span class="keyword">auto</span>&amp; app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a>();</div>
-<div class="line">    <span class="keyword">auto</span>&amp; router = app.router();</div>
+<div class="line">    <span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a>();</div>
+<div class="line">    <span class="keyword">auto</span>&amp; router = app-&gt;router();</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Simple GET endpoint</span></div>
 <div class="line">    router.Get(<span class="stringliteral">&quot;/api/v2/custom&quot;</span>, [](<a class="code hl_class" href="classmb_1_1MantisRequest.html">mb::MantisRequest</a>&amp; req, <a class="code hl_class" href="classmb_1_1MantisResponse.html">mb::MantisResponse</a>&amp; res) {</div>
@@ -224,23 +258,19 @@ Adding Custom Routes</h2>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// GET endpoint with entity authentication</span></div>
 <div class="line">    router.Get(<span class="stringliteral">&quot;/api/v2/users/profile&quot;</span>, [](<a class="code hl_class" href="classmb_1_1MantisRequest.html">mb::MantisRequest</a>&amp; req, <a class="code hl_class" href="classmb_1_1MantisResponse.html">mb::MantisResponse</a>&amp; res) {</div>
-<div class="line">        <span class="keyword">auto</span> auth = req.<a class="code hl_function" href="classmb_1_1MantisRequest.html#acc5060d875c76ef1177d77426f4b33b4">getOr</a>&lt;<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a>&gt;(<span class="stringliteral">&quot;auth&quot;</span>, mb::json::object());</div>
+<div class="line">        <span class="keyword">auto</span> auth = req.<a class="code hl_function" href="classmb_1_1MantisRequest.html#a3d0c9a8518ff574fc92fa28536a38505">getOr</a>&lt;<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a>&gt;(<span class="stringliteral">&quot;auth&quot;</span>, mb::json::object());</div>
 <div class="line">        std::string userId = auth[<span class="stringliteral">&quot;id&quot;</span>];</div>
-<div class="line">        <span class="comment">// ... fetch and return user profile</span></div>
 <div class="line">        res.<a class="code hl_function" href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">sendJSON</a>(200, {{<span class="stringliteral">&quot;user_id&quot;</span>, userId}});</div>
 <div class="line">    }, {<a class="code hl_function" href="namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc">mb::requireEntityAuth</a>(<span class="stringliteral">&quot;users&quot;</span>)});</div>
 <div class="line">    </div>
-<div class="line">    <span class="keywordflow">return</span> app.run();</div>
+<div class="line">    <span class="keywordflow">return</span> app-&gt;run();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassmb_1_1MantisRequest_html"><div class="ttname"><a href="classmb_1_1MantisRequest.html">mb::MantisRequest</a></div><div class="ttdoc">A wrapper class around httplib::Request offering a consistent API and allowing for easy wrapper metho...</div><div class="ttdef"><b>Definition</b> http.h:39</div></div>
-<div class="ttc" id="aclassmb_1_1MantisRequest_html_acc5060d875c76ef1177d77426f4b33b4"><div class="ttname"><a href="classmb_1_1MantisRequest.html#acc5060d875c76ef1177d77426f4b33b4">mb::MantisRequest::getOr</a></div><div class="ttdeci">T &amp; getOr(const std::string &amp;key, T default_value)</div><div class="ttdoc">Get value from context store or return default.</div><div class="ttdef"><b>Definition</b> http.h:285</div></div>
-<div class="ttc" id="aclassmb_1_1MantisResponse_html"><div class="ttname"><a href="classmb_1_1MantisResponse.html">mb::MantisResponse</a></div><div class="ttdoc">Wrapper around httplib::Response for consistent API.</div><div class="ttdef"><b>Definition</b> http.h:315</div></div>
-<div class="ttc" id="aclassmb_1_1MantisResponse_html_af104ef1181023634e19eac48c5f1a34f"><div class="ttname"><a href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">mb::MantisResponse::sendJSON</a></div><div class="ttdeci">void sendJSON(int statusCode=200, const json &amp;data=json::object()) const</div><div class="ttdoc">Send JSON response.</div><div class="ttdef"><b>Definition</b> http_response.cpp:145</div></div>
+<div class="ttc" id="aclassmb_1_1MantisRequest_html_a3d0c9a8518ff574fc92fa28536a38505"><div class="ttname"><a href="classmb_1_1MantisRequest.html#a3d0c9a8518ff574fc92fa28536a38505">mb::MantisRequest::getOr</a></div><div class="ttdeci">const T &amp; getOr(const std::string &amp;key, T default_value)</div><div class="ttdef"><b>Definition</b> http.h:100</div></div>
 <div class="ttc" id="amiddlewares_8h_html"><div class="ttname"><a href="middlewares_8h.html">middlewares.h</a></div><div class="ttdoc">Middleware functions for request processing.</div></div>
-<div class="ttc" id="anamespacemb_html_ab7c5922d7edd2da97857b5383049101f"><div class="ttname"><a href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">mb::requireAdminAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireAdminAuth()</div><div class="ttdoc">Require admin authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:404</div></div>
-<div class="ttc" id="anamespacemb_html_ae3903a4fb6e5f572be9884d6768da4fc"><div class="ttname"><a href="namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc">mb::requireEntityAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireEntityAuth(const std::string &amp;entity_name)</div><div class="ttdoc">Require entity-specific authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:486</div></div>
+<div class="ttc" id="anamespacemb_html_ab7c5922d7edd2da97857b5383049101f"><div class="ttname"><a href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">mb::requireAdminAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireAdminAuth()</div><div class="ttdoc">Require admin authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:425</div></div>
+<div class="ttc" id="anamespacemb_html_ae3903a4fb6e5f572be9884d6768da4fc"><div class="ttname"><a href="namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc">mb::requireEntityAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireEntityAuth(const std::string &amp;entity_name)</div><div class="ttdoc">Require entity-specific authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:503</div></div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md177"></a>
+<h2><a class="anchor" id="autotoc_md194"></a>
 Accessing Database</h2>
 <p>You can access the database directly for custom operations:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -248,10 +278,10 @@ Accessing Database</h2>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e">main</a>()</div>
 <div class="line">{</div>
-<div class="line">    <span class="keyword">auto</span>&amp; app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a>();</div>
+<div class="line">    <span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a>();</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Get a database session</span></div>
-<div class="line">    <span class="keyword">auto</span> sql = app.db().session();</div>
+<div class="line">    <span class="keyword">auto</span> sql = app-&gt;db().session();</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Execute queries</span></div>
 <div class="line">    soci::row row;</div>
@@ -263,20 +293,20 @@ Accessing Database</h2>
 <div class="line">        <span class="comment">// Process row data</span></div>
 <div class="line">    }</div>
 <div class="line">    </div>
-<div class="line">    <span class="keywordflow">return</span> app.run();</div>
+<div class="line">    <span class="keywordflow">return</span> app-&gt;run();</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md179"></a>
+<h2><a class="anchor" id="autotoc_md196"></a>
 Working with Entities</h2>
 <p>You can interact with entities programmatically:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e">main</a>()</div>
 <div class="line">{</div>
-<div class="line">    <span class="keyword">auto</span>&amp; app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a>();</div>
+<div class="line">    <span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a>();</div>
 <div class="line">    </div>
-<div class="line">    <span class="comment">// Get an entity</span></div>
-<div class="line">    <span class="keyword">auto</span> users = app.entity(<span class="stringliteral">&quot;users&quot;</span>);</div>
+<div class="line">    <span class="comment">// Get an entity (bound to the app instance)</span></div>
+<div class="line">    <span class="keyword">auto</span> users = app-&gt;entity(<span class="stringliteral">&quot;users&quot;</span>);</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Create a record</span></div>
 <div class="line">    <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a> newUser = {</div>
@@ -300,10 +330,10 @@ Working with Entities</h2>
 <div class="line">    <span class="comment">// Delete a record</span></div>
 <div class="line">    users.remove(<span class="stringliteral">&quot;user123&quot;</span>);</div>
 <div class="line">    </div>
-<div class="line">    <span class="keywordflow">return</span> app.run();</div>
+<div class="line">    <span class="keywordflow">return</span> app-&gt;run();</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md181"></a>
+<h2><a class="anchor" id="autotoc_md198"></a>
 Project Structure</h2>
 <p>A typical embedded project structure:</p>
 <div class="fragment"><div class="line">your-app/</div>
@@ -314,7 +344,7 @@ Project Structure</h2>
 <div class="line">├── scripts/           # JavaScript extensions (optional)</div>
 <div class="line">└── mantisbase/        # MantisBase submodule</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md183"></a>
+<h2><a class="anchor" id="autotoc_md200"></a>
 Using as a Submodule</h2>
 <p>Add MantisBase as a git submodule:</p>
 <div class="fragment"><div class="line">git submodule add https://github.com/allankoechke/mantisbase.git</div>
@@ -323,7 +353,7 @@ Using as a Submodule</h2>
 <div class="fragment"><div class="line">add_subdirectory(mantisbase)</div>
 <div class="line">target_link_libraries(your_app PRIVATE mantisbase)</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md185"></a>
+<h2><a class="anchor" id="autotoc_md202"></a>
 Testing Embedded APIs</h2>
 <p>Once your app is running, test the APIs:</p>
 <div class="fragment"><div class="line"># Test entity endpoints</div>
@@ -332,49 +362,50 @@ Testing Embedded APIs</h2>
 <div class="line"># Test custom endpoints</div>
 <div class="line">curl http://localhost:7070/api/v1/custom</div>
 <div class="line"> </div>
-<div class="line"># Test with authentication</div>
+<div class="line"># Test with JWT or API key</div>
 <div class="line">curl -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
 <div class="line">     http://localhost:7070/api/v1/entities/posts</div>
+<div class="line"> </div>
+<div class="line">curl -H &quot;Authorization: Bearer mb_sk_...&quot; \</div>
+<div class="line">     http://localhost:7070/api/v1/entities/posts</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md187"></a>
+<h2><a class="anchor" id="autotoc_md204"></a>
 Notes</h2>
 <ul>
 <li>MantisBase APIs respect all access rules and authentication even in embedded mode</li>
 <li>The <code>run()</code> method is blocking - use a separate thread if you need non-blocking behavior</li>
 <li>All entity endpoints follow the pattern <code>/api/v1/entities/&lt;entity_name&gt;</code></li>
 <li>Authentication endpoints are at <code>/api/v1/auth/&lt;entity&gt;/</code> (auth-type entities only)</li>
+<li>API keys and OAuth routes live under <code>/api/v1/auth/&lt;entity&gt;/api-keys</code> and <code>/api/v1/auth/&lt;entity&gt;/oauth/</code></li>
 <li>Schema management endpoints are at <code>/api/v1/schemas/*</code> (admin only)</li>
 <li>File serving endpoints are at <code>/api/v1/files/*</code></li>
-<li>System endpoints are at <code>/api/v1/sys/*</code> (logs, admins, settings); health is at <code>/api/v1/health</code></li>
+<li>System endpoints are at <code>/api/v1/sys/*</code> (logs, admins, settings, api-keys, oauth); health is at <code>/api/v1/health</code></li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md189"></a>
+<h2><a class="anchor" id="autotoc_md206"></a>
 Complete Example</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;<a class="code" href="middlewares_8h.html">mantisbase/core/middlewares.h</a>&gt;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e">main</a>()</div>
 <div class="line">{</div>
-<div class="line">    <span class="comment">// Configure using JSON</span></div>
 <div class="line">    <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a> config;</div>
 <div class="line">    config[<span class="stringliteral">&quot;dev&quot;</span>] = <span class="keyword">true</span>;</div>
 <div class="line">    config[<span class="stringliteral">&quot;serve&quot;</span>] = {{<span class="stringliteral">&quot;port&quot;</span>, 8080}};</div>
 <div class="line">    </div>
-<div class="line">    <span class="keyword">auto</span>&amp; app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a4d7db711bdbc3422e44c2138b71a155c">mb::MantisBase::create</a>(config);</div>
-<div class="line">    <span class="keyword">auto</span>&amp; router = app.router();</div>
+<div class="line">    <span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a>(config);</div>
+<div class="line">    <span class="keyword">auto</span>&amp; router = app-&gt;router();</div>
 <div class="line">    </div>
-<div class="line">    <span class="comment">// Add custom route</span></div>
 <div class="line">    router.Get(<span class="stringliteral">&quot;/api/v1/hello&quot;</span>, [](<a class="code hl_class" href="classmb_1_1MantisRequest.html">mb::MantisRequest</a>&amp; req, <a class="code hl_class" href="classmb_1_1MantisResponse.html">mb::MantisResponse</a>&amp; res) {</div>
 <div class="line">        res.<a class="code hl_function" href="classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f">sendJSON</a>(200, {{<span class="stringliteral">&quot;message&quot;</span>, <span class="stringliteral">&quot;Hello from embedded MantisBase!&quot;</span>}});</div>
 <div class="line">    });</div>
 <div class="line">    </div>
-<div class="line">    <span class="comment">// Start server (blocking)</span></div>
-<div class="line">    <span class="keywordflow">return</span> app.run();</div>
+<div class="line">    <span class="keywordflow">return</span> app-&gt;run();</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md191"></a>
+<h2><a class="anchor" id="autotoc_md208"></a>
 Summary</h2>
-<p>By embedding MantisBase, you gain powerful backend features including database storage, authentication, and REST APIs without requiring a separate server deployment. The library integrates seamlessly into your C++ application with minimal configuration. </p>
+<p>By embedding MantisBase, you gain powerful backend features including database storage, JWT and API-key authentication, OAuth, and REST APIs without requiring a separate server deployment. Own the <code>MantisBase</code> instance in your process, inject <code>const MantisBase&amp;</code> (or use <code>mbApp()</code> in handlers), and integrate with minimal configuration. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

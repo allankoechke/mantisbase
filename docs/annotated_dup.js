@@ -2,15 +2,19 @@ var annotated_dup =
 [
     [ "mb", "namespacemb.html", [
       [ "AccessRule", "classmb_1_1AccessRule.html", "classmb_1_1AccessRule" ],
-      [ "Auth", "classmb_1_1Auth.html", null ],
+      [ "ApiKeyManager", "classmb_1_1ApiKeyManager.html", "classmb_1_1ApiKeyManager" ],
+      [ "ApiKeyResult", "structmb_1_1ApiKeyResult.html", "structmb_1_1ApiKeyResult" ],
+      [ "Auth", "classmb_1_1Auth.html", "classmb_1_1Auth" ],
       [ "ContextStore", "classmb_1_1ContextStore.html", "classmb_1_1ContextStore" ],
       [ "Database", "classmb_1_1Database.html", "classmb_1_1Database" ],
       [ "Entity", "classmb_1_1Entity.html", "classmb_1_1Entity" ],
       [ "EntitySchema", "classmb_1_1EntitySchema.html", "classmb_1_1EntitySchema" ],
       [ "EntitySchemaField", "classmb_1_1EntitySchemaField.html", "classmb_1_1EntitySchemaField" ],
       [ "Expr", "structmb_1_1Expr.html", null ],
-      [ "Files", "classmb_1_1Files.html", null ],
-      [ "FuncLogger", "classmb_1_1FuncLogger.html", "classmb_1_1FuncLogger" ],
+      [ "FilesMgr", "classmb_1_1FilesMgr.html", "classmb_1_1FilesMgr" ],
+      [ "FormDataItem", "structmb_1_1FormDataItem.html", "structmb_1_1FormDataItem" ],
+      [ "IMantisBase", "classmb_1_1IMantisBase.html", "classmb_1_1IMantisBase" ],
+      [ "IndexDefinition", "structmb_1_1IndexDefinition.html", "structmb_1_1IndexDefinition" ],
       [ "KeyValStore", "classmb_1_1KeyValStore.html", "classmb_1_1KeyValStore" ],
       [ "LogDatabase", "classmb_1_1LogDatabase.html", "classmb_1_1LogDatabase" ],
       [ "Logger", "classmb_1_1Logger.html", "classmb_1_1Logger" ],
@@ -20,7 +24,9 @@ var annotated_dup =
       [ "MantisLoggerImpl", "classmb_1_1MantisLoggerImpl.html", "classmb_1_1MantisLoggerImpl" ],
       [ "MantisRequest", "classmb_1_1MantisRequest.html", "classmb_1_1MantisRequest" ],
       [ "MantisResponse", "classmb_1_1MantisResponse.html", "classmb_1_1MantisResponse" ],
+      [ "OAuthManager", "classmb_1_1OAuthManager.html", "classmb_1_1OAuthManager" ],
       [ "RealtimeDB", "classmb_1_1RealtimeDB.html", "classmb_1_1RealtimeDB" ],
+      [ "RealtimeWSController", "classmb_1_1RealtimeWSController.html", "classmb_1_1RealtimeWSController" ],
       [ "RouteHandler", "structmb_1_1RouteHandler.html", "structmb_1_1RouteHandler" ],
       [ "RouteKeyHash", "structmb_1_1RouteKeyHash.html", "structmb_1_1RouteKeyHash" ],
       [ "Router", "classmb_1_1Router.html", "classmb_1_1Router" ],
@@ -28,6 +34,7 @@ var annotated_dup =
       [ "RtDbWorker", "classmb_1_1RtDbWorker.html", "classmb_1_1RtDbWorker" ],
       [ "SSEMgr", "classmb_1_1SSEMgr.html", "classmb_1_1SSEMgr" ],
       [ "SSESession", "classmb_1_1SSESession.html", "classmb_1_1SSESession" ],
-      [ "Validators", "classmb_1_1Validators.html", null ]
+      [ "Validators", "classmb_1_1Validators.html", null ],
+      [ "WSMgr", "classmb_1_1WSMgr.html", "classmb_1_1WSMgr" ]
     ] ]
 ];

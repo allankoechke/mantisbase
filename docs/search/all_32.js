@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🗂️_20api_20namespaces_0',['🗂️ API Namespaces',['../rest_api.html#autotoc_md26',1,'']]]
+  ['🗂️_20api_20namespaces_0',['🗂️ API Namespaces',['../rest_api.html#autotoc_md28',1,'']]]
 ];

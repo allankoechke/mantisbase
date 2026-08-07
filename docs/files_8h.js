@@ -1,4 +1,4 @@
 var files_8h =
 [
-    [ "mb::Files", "classmb_1_1Files.html", null ]
+    [ "mb::FilesMgr", "classmb_1_1FilesMgr.html", "classmb_1_1FilesMgr" ]
 ];

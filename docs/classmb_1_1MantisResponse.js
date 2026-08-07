@@ -1,20 +1,17 @@
 var classmb_1_1MantisResponse =
 [
-    [ "MantisResponse", "classmb_1_1MantisResponse.html#aefb7f95106fdfc426827818b789f79ce", null ],
+    [ "MantisResponse", "classmb_1_1MantisResponse.html#adf592f6d65ba7119ebf02c4a387f6999", null ],
     [ "~MantisResponse", "classmb_1_1MantisResponse.html#a6e9840b0c5c39c32fb5c9bd2040e6c0e", null ],
+    [ "drogonResponse", "classmb_1_1MantisResponse.html#aefac59e17f3703368b8b59b606a27faf", null ],
     [ "getBody", "classmb_1_1MantisResponse.html#a878043bf4ca23e77ec318d47647969a9", null ],
     [ "getHeaderValue", "classmb_1_1MantisResponse.html#a0167e3d9c6c0b1f41d6049b0a0bfa5b8", null ],
     [ "getHeaderValueCount", "classmb_1_1MantisResponse.html#a43f1046a17e84e6b4daf1623c86ec702", null ],
     [ "getHeaderValueU64", "classmb_1_1MantisResponse.html#ae586033e199b95075cd0c1625792f024", null ],
     [ "getLocation", "classmb_1_1MantisResponse.html#a397118714dab5432c31ca6cbbecc7882", null ],
     [ "getReason", "classmb_1_1MantisResponse.html#afbb2ba7b50c6cb8cced1c63b8b7402b1", null ],
-    [ "getResponse", "classmb_1_1MantisResponse.html#a9ecb8eec14c9d1bf88c94c117e3d7dc1", null ],
     [ "getStatus", "classmb_1_1MantisResponse.html#ac9608b04cea2a860591acc50f2978ba4", null ],
-    [ "getTrailerValue", "classmb_1_1MantisResponse.html#ac623990969d60a2e61135106025ed5ca", null ],
-    [ "getTrailerValueCount", "classmb_1_1MantisResponse.html#ae45a43def7dcfaccd86a5e34cc45d84d", null ],
     [ "getVersion", "classmb_1_1MantisResponse.html#aa4bd2ce8f4b2ebc0fe9d37aaab51fe3a", null ],
     [ "hasHeader", "classmb_1_1MantisResponse.html#a0b8aaf6fb9a501e1923133890f52f6f6", null ],
-    [ "hasTrailer", "classmb_1_1MantisResponse.html#aabb139f5b8988dea99d7496a312092e8", null ],
     [ "send", "classmb_1_1MantisResponse.html#a80de53d759b302e916e3a236ca90bdc2", null ],
     [ "sendEmpty", "classmb_1_1MantisResponse.html#aa8977cb3e800a97429dcf977a5e9b309", null ],
     [ "sendHtml", "classmb_1_1MantisResponse.html#a57454b1a20dc2dd29318f640e1c9819c", null ],
@@ -29,7 +26,7 @@ var classmb_1_1MantisResponse =
     [ "setHeader", "classmb_1_1MantisResponse.html#aaa0223b2967dd596187ae6307d8b4396", null ],
     [ "setLocation", "classmb_1_1MantisResponse.html#aa497277283166d25a424762e57f30147", null ],
     [ "setReason", "classmb_1_1MantisResponse.html#adbe4c996602da2a685032bb5c60a6fbf", null ],
-    [ "setRedirect", "classmb_1_1MantisResponse.html#a1c3c65f7bc91629d63ccc23b7fbfd7be", null ],
-    [ "setStatus", "classmb_1_1MantisResponse.html#add9f93b655f1f428d4f9942369fbdacf", null ],
+    [ "setRedirect", "classmb_1_1MantisResponse.html#a92eb7d6caa24371f4e03ba3e17dead56", null ],
+    [ "setStatus", "classmb_1_1MantisResponse.html#ad6d084b11323dcdd76b914dd341605d5", null ],
     [ "setVersion", "classmb_1_1MantisResponse.html#a793c1844eb179e9f92574014018ced4b", null ]
 ];
