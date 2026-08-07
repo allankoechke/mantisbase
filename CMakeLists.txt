@@ -230,6 +230,11 @@ configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/include/mantisbase/config.hpp
 )
 
+configure_file(
+        include/mantisbase/config.hpp.in
+        ${CMAKE_CURRENT_BINARY_DIR}/include/mantisbase/config.hpp
+)
+
 # Link to libs
 target_link_libraries(mantisbase
         PUBLIC
