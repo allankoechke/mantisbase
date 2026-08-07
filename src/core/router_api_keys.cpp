@@ -58,10 +58,10 @@ namespace mb {
             }
         }, authEntityMiddleware);
 
-        Delete("/api/v1/auth/:entity_name/api-keys/:id", [this](const MantisRequest &req, const MantisResponse &res) {
+        Delete("/api/v1/auth/:entity_name/api-keys/:id", [this](MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = json::object(); // req.getOr<json>("auth", json::object());
-                auto verification = json::object(); // req.getOr<json>("verification", json::object());
+                auto auth = req.getOr<json>("auth", json::object());
+                auto verification = req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(403, {{"status", 403}, {"data", json::object()}, {"error", "Authentication required"}});
@@ -116,9 +116,9 @@ namespace mb {
             }
         }, adminAuth);
 
-        Delete("/api/v1/sys/api-keys/:id", [](const MantisRequest &req, const MantisResponse &res) {
+        Delete("/api/v1/sys/api-keys/:id", [](MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = json::object(); // req.getOr<json>("auth", json::object());
+                auto auth = req.getOr<json>("auth", json::object());
                 const auto user_id = auth["id"].get<std::string>();
                 auto key_id = trim(req.getPathParamValue("id"));
 

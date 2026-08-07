@@ -9,7 +9,7 @@ namespace mb {
 
         // User-facing OAuth routes
         Get("/api/v1/auth/:entity_name/oauth/authorize/:provider",
-            [this](const MantisRequest &req, const MantisResponse &res) {
+            [](const MantisRequest &req, const MantisResponse &res) {
                 try {
                     const auto entity_name = trim(req.getPathParamValue("entity_name"));
                     const auto provider = trim(req.getPathParamValue("provider"));
@@ -29,7 +29,7 @@ namespace mb {
             }, authEntityMiddleware);
 
         Get("/api/v1/auth/:entity_name/oauth/callback/:provider",
-            [this](const MantisRequest &req, const MantisResponse &res) {
+            [](const MantisRequest &req, const MantisResponse &res) {
                 try {
                     const auto entity_name = trim(req.getPathParamValue("entity_name"));
                     const auto provider = trim(req.getPathParamValue("provider"));
@@ -53,7 +53,8 @@ namespace mb {
                 }
             }, authEntityMiddleware);
 
-        Post("/api/v1/auth/:entity_name/oauth/link/:provider", [this](MantisRequest &req, const MantisResponse &res) {
+        Post("/api/v1/auth/:entity_name/oauth/link/:provider",
+            [](MantisRequest &req, const MantisResponse &res) {
             try {
                 auto auth = req.getOr<json>("auth", json::object());
                 auto verification = req.getOr<json>("verification", json::object());
@@ -86,10 +87,10 @@ namespace mb {
         }, authEntityMiddleware);
 
         Delete("/api/v1/auth/:entity_name/oauth/link/:provider",
-               [this](const MantisRequest &req, const MantisResponse &res) {
+               [](MantisRequest &req, const MantisResponse &res) {
                    try {
-                       auto auth = json::object(); // req.getOr<json>("auth", json::object());
-                       auto verification = json::object(); // req.getOr<json>("verification", json::object());
+                       auto auth = req.getOr<json>("auth", json::object());
+                       auto verification = req.getOr<json>("verification", json::object());
 
                        if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                            res.sendJSON(403, {
@@ -116,10 +117,11 @@ namespace mb {
                    }
                }, authEntityMiddleware);
 
-        Get("/api/v1/auth/:entity_name/oauth/accounts", [this](const MantisRequest &req, const MantisResponse &res) {
+        Get("/api/v1/auth/:entity_name/oauth/accounts",
+            [](MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = json::object(); // req.getOr<json>("auth", json::object());
-                auto verification = json::object(); // req.getOr<json>("verification", json::object());
+                auto auth = req.getOr<json>("auth", json::object());
+                auto verification = req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(403, {
@@ -138,7 +140,8 @@ namespace mb {
             }
         }, authEntityMiddleware);
 
-        Get("/api/v1/auth/:entity_name/oauth/providers", [this](const MantisRequest &req, const MantisResponse &res) {
+        Get("/api/v1/auth/:entity_name/oauth/providers",
+            [](const MantisRequest &req, const MantisResponse &res) {
             try {
                 const auto entity_name = trim(req.getPathParamValue("entity_name"));
                 auto providers = req.mbApp().auth().oauth().getProviders(entity_name);
@@ -151,7 +154,8 @@ namespace mb {
         // Admin OAuth provider management routes
         const Middlewares adminAuth = {requireAdminAuth()};
 
-        Post("/api/v1/sys/oauth/providers", [](MantisRequest &req, const MantisResponse &res) {
+        Post("/api/v1/sys/oauth/providers",
+            [](MantisRequest &req, const MantisResponse &res) {
             try {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
@@ -176,7 +180,8 @@ namespace mb {
             }
         }, adminAuth);
 
-        Get("/api/v1/sys/oauth/providers", [](const MantisRequest &req, const MantisResponse &res) {
+        Get("/api/v1/sys/oauth/providers",
+            [](const MantisRequest &req, const MantisResponse &res) {
             try {
                 auto providers = req.mbApp().auth().oauth().listProviders();
                 res.sendJSON(200, {{"status", 200}, {"data", providers}, {"error", ""}});
@@ -185,7 +190,8 @@ namespace mb {
             }
         }, adminAuth);
 
-        Patch("/api/v1/sys/oauth/providers/:id", [](MantisRequest &req, const MantisResponse &res) {
+        Patch("/api/v1/sys/oauth/providers/:id",
+            [](const MantisRequest &req, const MantisResponse &res) {
             try {
                 const auto provider_id = trim(req.getPathParamValue("id"));
                 const auto &[body, err] = req.getBodyAsJson();
@@ -201,7 +207,8 @@ namespace mb {
             }
         }, adminAuth);
 
-        Delete("/api/v1/sys/oauth/providers/:id", [](const MantisRequest &req, const MantisResponse &res) {
+        Delete("/api/v1/sys/oauth/providers/:id",
+            [](const MantisRequest &req, const MantisResponse &res) {
             try {
                 const auto provider_id = trim(req.getPathParamValue("id"));
                 if (req.mbApp().auth().oauth().removeProvider(provider_id)) {
@@ -214,7 +221,8 @@ namespace mb {
             }
         }, adminAuth);
 
-        Post("/api/v1/sys/oauth/entity-config", [](MantisRequest &req, const MantisResponse &res) {
+        Post("/api/v1/sys/oauth/entity-config",
+            [](const MantisRequest &req, const MantisResponse &res) {
             try {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
@@ -232,7 +240,8 @@ namespace mb {
             }
         }, adminAuth);
 
-        Delete("/api/v1/sys/oauth/entity-config", [](MantisRequest &req, const MantisResponse &res) {
+        Delete("/api/v1/sys/oauth/entity-config",
+            [](const MantisRequest &req, const MantisResponse &res) {
             try {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {

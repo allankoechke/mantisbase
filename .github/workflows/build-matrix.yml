@@ -36,7 +36,7 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libzstd-dev libpq-dev uuid-dev
+          sudo apt-get install -y libpq-dev uuid-dev
 
       - name: Install MinGW
         if: matrix.os == 'windows-latest'
@@ -100,6 +100,7 @@ jobs:
             -DCMAKE_MAKE_PROGRAM="$makePath" `
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
             -DMB_BUILD_TESTS=true `
+            -DMB_BUILD_DOCS=OFF `
             -DMB_BUILD_SHARED_LIB=ON `
             -S ${{ github.workspace }}
 
@@ -110,7 +111,8 @@ jobs:
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
             -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DMB_BUILD_TESTS=true \
+            -DMB_BUILD_TESTS=ON \
+            -DMB_BUILD_DOCS=OFF \
             -DMB_BUILD_SHARED_LIB=ON \
             -S ${{ github.workspace }}
 
@@ -119,7 +121,7 @@ jobs:
 
       - name: Test
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
-        run: ctest --build-config ${{ matrix.build_type }}
+        run: ctest --build-config ${{ matrix.build_type }} --output-on-failure
 
       - name: Zip the build output (Linux)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'

@@ -163,17 +163,10 @@ set(UUID_LIBRARIES "${UUID_LIBRARY}" CACHE FILEPATH "" FORCE)
 # Add Drogon HTTP framework
 include(cmake/add-drogon.cmake)
 
-# Add spdlog
-if(MB_SHARED_DEPS)
-    # Build Shared lib for spdlog
-    set(SPDLOG_BUILD_SHARED ON)
-else()
-    # Build static lib for spdlog
-    set(SPDLOG_BUILD_SHARED OFF)
-endif()
+# Add the independent FMT package
+include(cmake/add-fmt.cmake)
 
-# Add SPDLOG subdir
-add_subdirectory(3rdParty/spdlog)
+include(cmake/add-spdlog.cmake)
 
 # Add JSON
 include(cmake/add-json.cmake)
@@ -216,7 +209,10 @@ target_link_libraries(mantisbase_app
 )
 
 # Check if Doxygen is installed, then build docs
-include(cmake/add-doxygen.cmake)
+option(MB_BUILD_DOCS "Build documentation if doxygen is installed" ON)
+if(MB_BUILD_DOCS)
+    include(cmake/add-doxygen.cmake)
+endif ()
 
 # Add SEMVER
 include(cmake/add-semver.cmake)
