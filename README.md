@@ -1,441 +1,155 @@
- <p align="center">
-  <img src="assets/mantisbase-banner.jpg" alt="MantisBase Cover" width="100%" />
+<p align="center">
+  <img src="assets/mantisbase-banner.jpg" alt="MantisBase" width="100%" />
 </p>
+
+<!-- Hero GIF: replace the line below with the actual GIF once recorded -->
+<!-- <img src="assets/demo.gif" alt="MantisBase Admin Dashboard Demo" width="100%" /> -->
 
 <p align="center">
-  <strong>A lightweight, pluggable Backend-as-a-Service (BaaS) library built in C++</strong><br />
-  Portable. Embeddable. Built for speed and extensibility.
+
+[![CI](https://github.com/allankoechke/mantisbase/actions/workflows/ci.yml/badge.svg)](https://github.com/allankoechke/mantisbase/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/allankoechke/mantisbase)](https://github.com/allankoechke/mantisbase/releases)
+[![License: MIT](https://img.shields.io/github/license/allankoechke/mantisbase)](LICENSE)
+[![Docker Pulls](https://img.shields.io/docker/pulls/allankoech/mantisbase)](https://hub.docker.com/r/allankoech/mantisbase)
+[![Discussions](https://img.shields.io/github/discussions/allankoechke/mantisbase)](https://github.com/allankoechke/mantisbase/discussions)
+
 </p>
 
----
+**MantisBase is a self-hosted C++20 BaaS — one binary gives you instant REST APIs, authentication, realtime SSE, file uploads, and a web admin dashboard.**
 
-## What is MantisBase?
-
-MantisBase is a lightweight C++ library that provides a complete backend solution with:
-- **Auto-generated REST APIs** - Create database tables and get instant REST endpoints
-- **Built-in Authentication** - JWT-based auth with access control rules
-- **Realtime Database Updates** - SSE (Server-Sent Events) for live changes on SQLite and PostgreSQL
-- **Admin Dashboard** - Web interface for managing your data
-- **File Uploads** - Handle file storage and serving
-- **JavaScript Extensions** - Extend functionality with scripts
-- **Embeddable** - Use as a library in your C++ applications
-
-Perfect for embedded devices, desktop apps, or standalone servers.
+Perfect for embedded devices, desktop apps, or standalone servers. No runtime dependencies.
 
 ---
 
 ## Quick Start
 
-### 1. Download and Run
-
-Download the latest release from [GitHub Releases](https://github.com/allankoechke/mantisbase/releases), extract it, and run:
+**1. Run it**
 
 ```bash
+# Option A: Download the latest binary from GitHub Releases
+wget https://github.com/allankoechke/mantisbase/releases/latest/download/mantisbase_linux-x86_64.zip
+unzip mantisbase_linux-x86_64.zip
 ./mantisbase serve
-```
 
-The server starts on `http://localhost:7070` with:
-- API endpoints at `http://localhost:7070/api/v1/`
-- Admin dashboard at `http://localhost:7070/mb`
-
-### 2. Create Admin Account
-
-Before using the admin dashboard, create an admin user:
-
-```bash
-./mantisbase admins --add admin@example.com very_string_password_123!@h
-```
-
-Once admin user has been created, log in at `http://localhost:7070/mb`.
-
-### Admin Dashboard
-
-MantisBase includes a powerful web-based admin dashboard that provides a visual interface for managing your data. The dashboard is **essential** for:
-
-- **Visual Data Management** - View, create, edit, and delete records through an intuitive interface
-- **Schema Management** - Create and configure entity schemas without writing API calls
-- **Access Control Configuration** - Set up access rules visually
-- **Real-time Data Exploration** - Browse your data with search, filtering, and pagination
-- **User Management** - Manage authentication entities and users
-
-![MantisBase Admin Dashboard](doc/mantisbase-admin.png)
-
-Access the dashboard at `http://localhost:7070/mb` after creating an admin account. The dashboard provides a complete GUI alternative to the REST API, making it perfect for non-technical users and rapid development.
-
-### 3. Create Your First Entity
-
-Use the admin dashboard or API to create a table. For example, create a `posts` table:
-
-```bash
-curl -X POST http://localhost:7070/api/v1/schemas \
-  -H "Authorization: Bearer <admin_token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "posts",
-    "type": "base",
-    "fields": [
-      {"name": "title", "type": "string", "required": true},
-      {"name": "content", "type": "string"}
-    ],
-    "rules": {
-      "list": {"mode": "public", "expr": ""},
-      "get": {"mode": "public", "expr": ""},
-      "add": {"mode": "auth", "expr": ""},
-      "update": {"mode": "auth", "expr": ""},
-      "delete": {"mode": "", "expr": ""}
-    }
-  }'
-```
-
-**Entity Name Rules:**
-- Entity names must be alphanumeric characters and underscores only
-- Maximum length: 64 characters
-- Names are validated automatically to prevent SQL injection
-
-**Entity Types:**
-- **`base`** - Standard database table with fields
-- **`auth`** - Authentication entity with built-in password and user management fields
-- **`view`** - SQL view based on a query (read-only, no fields)
-
-### 4. Use Your API
-
-Once created, your entity automatically gets REST endpoints:
-
-```bash
-# List all posts
-curl http://localhost:7070/api/v1/entities/posts
-
-# Create a post (requires authentication)
-curl -X POST http://localhost:7070/api/v1/entities/posts \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"title": "My First Post", "content": "Hello World!"}'
-
-# Get a specific post
-curl http://localhost:7070/api/v1/entities/posts/<id>
-
-# Update a post
-curl -X PATCH http://localhost:7070/api/v1/entities/posts/<id> \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"title": "Updated Title"}'
-
-# Delete a post
-curl -X DELETE http://localhost:7070/api/v1/entities/posts/<id> \
-  -H "Authorization: Bearer <token>"
-```
-
-That's it! You now have a fully functional backend with authentication and access control.
-
----
-
-## Installation Options
-
-### Option 1: Pre-built Binaries (Recommended for Beginners)
-
-1. Download from [GitHub Releases](https://github.com/allankoechke/mantisbase/releases)
-2. Extract the zip file
-3. Run `./mantisbase serve`
-
-### Option 2: Build from Source
-
-**Dependencies (Linux only):**
-```bash
-sudo apt-get install -y libzstd-dev libpq-dev
-```
-
-```bash
-git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git
-cd mantisbase
-cmake -B build
-cmake --build build
-./build/mantisbase serve
-```
-
-### Option 3: Embed in Your Project
-
-Add MantisBase as a submodule and link it in your CMake project:
-
-```cpp
-#include <mantisbase/mantisbase.h>
-
-int main(int argc, char* argv[])
-{
-    auto& app = mb::MantisBase::create(argc, argv);
-    return app.run();
-}
-```
-
-See [Embedding Guide](doc/05.embedding.md) for details.
-
-### Option 4: Docker
-
-```bash
+# Option B: Docker (one-liner)
 docker run -p 7070:80 allankoech/mantisbase
 ```
 
-See [Docker Guide](doc/06.docker.md) for details.
+The server starts on `http://localhost:7070` with the API at `/api/v1/` and admin dashboard at `/mb`.
+
+**2. Create your admin account**
+
+Visit `http://localhost:7070/mb` to create your admin credentials via the dashboard, or use the CLI:
+
+```bash
+./mantisbase admins --add admin@example.com your_strong_password
+```
+
+**3. Build your backend**
+
+Create entities (tables) from the admin dashboard or via the REST API — endpoints are generated instantly.
+
+```bash
+# Example: list records from an entity you created
+curl http://localhost:7070/api/v1/entities/posts
+```
+
+That's it — you have a full backend with auth, realtime, and file uploads in under a minute.
 
 ---
 
-## Key Features
+## Why MantisBase?
 
-### Admin Dashboard
+| Feature | MantisBase | PocketBase | Supabase | Firebase |
+|---|---|---|---|---|
+| Language | C++20 | Go | Elixir/Postgres | Proprietary |
+| Single binary | ✅ | ✅ | ❌ | ❌ |
+| Self-hosted | ✅ | ✅ | ✅ | ❌ |
+| Embeddable in C++ | ✅ | ❌ | ❌ | ❌ |
+| Realtime (SSE) | ✅ | ✅ | ✅ | ✅ |
+| Admin dashboard | ✅ | ✅ | ✅ | ✅ |
+| Auth & access rules | ✅ | ✅ | ✅ | ✅ |
+| File uploads | ✅ | ✅ | ✅ | ✅ |
+| Open source | MIT | MIT | Apache 2.0 | ❌ |
 
-The **MantisBase Admin Dashboard** is a fully-featured web interface that provides visual management of your entire backend:
+---
 
-- **Entity Management** - Create, view, edit, and delete records through an intuitive table interface
-- **Schema Builder** - Design database schemas with a visual form builder
-- **Access Rules Editor** - Configure permissions with a user-friendly interface
-- **File Management** - Upload and manage files associated with your entities
-- **Search & Filtering** - Quickly find and filter records across all entities
-- **Real-time Updates** - See changes reflected immediately
+## Features
+
+- **Auto-generated REST APIs** — create a table, get CRUD endpoints instantly → [API Reference](doc/02.api.md)
+- **Built-in authentication** — JWT-based auth with login, refresh, logout → [Auth API](doc/02.auth.md)
+- **Access control rules** — public, auth, or custom expression-based permissions → [Access Rules](doc/03.rules.md)
+- **Realtime updates** — SSE streams for live database changes (SQLite & PostgreSQL) → [API Reference](doc/02.api.md)
+- **Admin dashboard** — web UI for managing schemas, records, users, and files → [Quick Start](doc/QuickStart.md)
+- **File uploads** — multipart upload and serving tied to entity records → [File Handling](doc/11.files.md)
+- **Embeddable** — use as a C++ library in your own application → [Embedding Guide](doc/05.embedding.md)
+- **JavaScript extensions** — extend with custom routes and logic → [Scripting Guide](doc/13.scripting.md)
 
 ![MantisBase Admin Dashboard](doc/mantisbase-admin.png)
-
-The dashboard is accessible at `/mb` and requires admin authentication. It's the **recommended way** to interact with MantisBase during development and for non-technical team members.
-
-### Auto-generated REST APIs
-
-Every entity (table) you create automatically gets REST endpoints:
-
-- `GET /api/v1/entities/<entity>` - List records
-- `GET /api/v1/entities/<entity>/:id` - Get record
-- `POST /api/v1/entities/<entity>` - Create record
-- `PATCH /api/v1/entities/<entity>/:id` - Update record
-- `DELETE /api/v1/entities/<entity>/:id` - Delete record
-
-### Authentication
-
-Entity user authentication (auth-type entities):
-
-- `POST /api/v1/auth/<entity>/login` - User login
-- `POST /api/v1/auth/<entity>/refresh` - Refresh token
-- `POST /api/v1/auth/<entity>/logout` - Logout
-
-Admin authentication and accounts (`/api/v1/sys/admins/`):
-
-- `POST /api/v1/sys/admins/login` - Admin login
-- `POST /api/v1/sys/admins/setup` - Create initial admin
-
-See [Authentication API](doc/02.auth.md) for details.
-
-### Realtime (SSE)
-
-Subscribe to live database changes over Server-Sent Events:
-
-- `GET /api/v1/realtime?topics=...` - Open an SSE connection (comma-separated list of entity topics)
-- `POST /api/v1/realtime` - Update topics or clear topics for an existing session (JSON: `client_id`, `topics`)
-
-Works with both SQLite and PostgreSQL. See [API Reference – Realtime](doc/02.api.md#-realtime-api) for event formats and examples.
-
-### System Endpoints
-
-- `GET /api/v1/health` - Health check
-- `GET /api/v1/sys/logs` - System logs with filtering and pagination (admin only)
-- `GET|PATCH /api/v1/sys/settings/config` - Application settings
-- `GET /api/v1/files/<entity>/<filename>` - Serve uploaded files
-
-### Access Control
-
-Define who can access what using simple rules:
-
-```json
-{
-  "rules": {
-    "list": {"mode": "public", "expr": ""},      // Public access
-    "get": {"mode": "auth", "expr": ""},         // Any authenticated user
-    "add": {"mode": "custom", "expr": "auth.user.verified == true"},  // Custom condition
-    "update": {"mode": "", "expr": ""},          // Admin only
-    "delete": {"mode": "", "expr": ""}           // Admin only
-  }
-}
-```
-
-See [Access Rules](doc/03.rules.md) for details.
-
-### File Handling
-
-Upload and serve files with multipart/form-data:
-
-```bash
-# Upload file when creating record
-curl -X POST http://localhost:7070/api/v1/entities/posts \
-  -H "Authorization: Bearer <token>" \
-  -F "title=My Post" \
-  -F "image=@photo.jpg"
-
-# Access file
-curl http://localhost:7070/api/v1/files/posts/photo.jpg
-```
-
-See [File Handling](doc/11.files.md) for details.
-
-### JavaScript Extensions
-
-> [!CAUTION]   
-> CURRENTLY, SCRIPTING IS DISABLED UNTIL v0.3.x API IS STABLIZED!!!  
-
-Extend functionality with JavaScript scripts:
-
-```javascript
-app.router().addRoute("GET", "/api/v1/custom", function(req, res) {
-    res.json(200, {message: "Custom endpoint"});
-});
-```
-
-See [Scripting Guide](doc/13.scripting.md) for details.
 
 ---
 
 ## Configuration
 
-### Command-Line Options
+MantisBase supports SQLite (default) and PostgreSQL, with all options configurable via CLI flags or environment variables:
 
 ```bash
-# Start server on custom port
+# Custom port and host
 mantisbase serve --port 8080 --host 0.0.0.0
 
-# Use PostgreSQL
-mantisbase --db postgresql \
-  --db_url "dbname=mantis host=localhost user=postgres password=pass" \
-  serve
+# Use PostgreSQL instead of SQLite
+mantisbase --db postgresql --db_url "dbname=mydb host=localhost user=postgres password=pass" serve
 
-# Development mode (verbose logging)
+# Development mode (verbose logging, relaxed JWT defaults)
 mantisbase --dev serve
-
-# Custom directories
-mantisbase --data-dir ./my-data --public-dir ./my-public serve
 ```
 
-See [CLI Reference](doc/01.cmd.md) for all options.
-
-### Environment Variables
-
-All runtime configuration uses the `MB_*` prefix:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MB_JWT_SECRET` | JWT secret key for token signing (set in production) | (built-in default) |
-| `MB_DISABLE_FILE_UPLOADS` | Set to `1` to disable file uploads | `0` |
-| `MB_DISABLE_ADMIN_ON_FIRST_BOOT` | Set to `1` to skip creating admin on first boot | `0` |
-| `MB_DISABLE_RATE_LIMIT` | Set to `1` to disable rate limiting | (enabled) |
-
-```bash
-# Set JWT secret (important for production)
-export MB_JWT_SECRET=your-secret-key-here
-```
+Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Reference](doc/01.cmd.md) for all options.
 
 ---
 
-## Project Structure
+## Install
 
-```
-mantisbase/
-├── include/mantisbase/  # Public API headers
-├── src/                 # Implementation
-├── examples/            # Example projects
-├── tests/               # Test suite
-├── docker/              # Docker files
-└── doc/                 # Documentation
-```
+| Method | Details |
+|---|---|
+| **Pre-built binary** | Download from [GitHub Releases](https://github.com/allankoechke/mantisbase/releases), extract, and run `./mantisbase serve` → [Installation Guide](doc/00.installation.md) |
+| **Docker** | `docker run -p 7070:80 allankoech/mantisbase` → [Docker Guide](doc/06.docker.md) |
+| **Build from source** | `git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git && cd mantisbase && cmake -B build && cmake --build build` → [Installation Guide](doc/00.installation.md) |
+| **Embed in C++** | Add as a CMake submodule and `#include <mantisbase/mantisbase.h>` in your app → [Embedding Guide](doc/05.embedding.md) |
+
+> **Requirements**: C++20 compiler (GCC/MinGW 13+). Linux builds need `libzstd-dev` and `libpq-dev` for PostgreSQL support. No external runtime dependencies — everything is bundled.
 
 ---
 
 ## Documentation
 
-- [Quick Start Guide](doc/QuickStart.md) - Get started quickly
-- [CLI Reference](doc/01.cmd.md) - Command-line options
-- [API Reference](doc/02.api.md) - REST API documentation (entities, schemas, realtime/SSE)
-- [Authentication API](doc/02.auth.md) - Auth endpoints
-- [Access Rules](doc/03.rules.md) - Permission system
-- [Embedding Guide](doc/05.embedding.md) - Use as a library
-- [File Handling](doc/11.files.md) - File uploads
-- [Scripting Guide](doc/13.scripting.md) - JavaScript extensions
+| Doc | Description |
+|---|---|
+| [Quick Start](doc/QuickStart.md) | Get running in under 2 minutes |
+| [Installation](doc/00.installation.md) | Binary, source, and embedding setup |
+| [CLI Reference](doc/01.cmd.md) | Command-line options and flags |
+| [API Reference](doc/02.api.md) | REST endpoints, schemas, and realtime SSE |
+| [Authentication](doc/02.auth.md) | Auth endpoints and JWT flow |
+| [Access Rules](doc/03.rules.md) | Permission system and expressions |
+| [Docker](doc/06.docker.md) | Container deployment |
+| [File Handling](doc/11.files.md) | Upload and serve files |
+| [Health Check](doc/12.healthcheck.md) | Monitoring endpoint |
+| [Scripting](doc/13.scripting.md) | JavaScript extensions |
 
-For full API documentation, visit [https://docs.mantisbase.dev](https://allankoechke.github.io/mantisbase/).
-
----
-
-## Tech Stack
-
-- **Language**: C++20
-- **Database**: SQLite (default), PostgreSQL (Linux)
-- **Build System**: CMake
-- **HTTP Server**: httplib-cpp
-- **JavaScript Engine**: Duktape
-- **Dependencies**: All included as submodules
-
-**Note:** On Windows, use MinGW (v13+) instead of MSVC due to feature compatibility.
+Full API docs: [docs.mantisbase.dev](https://allankoechke.github.io/mantisbase/)
 
 ---
 
-## Requirements
+## Community
 
-- **Linux**: GCC with C++20 support, libzstd-dev, libpq-dev (for PostgreSQL)
-- **Windows**: MinGW v13+ with std::format support
-- **No external runtime dependencies** - everything is bundled
+Questions, ideas, or feedback? Join the conversation on [GitHub Discussions](https://github.com/allankoechke/mantisbase/discussions).
 
----
-
-## Examples
-
-### Create and Query Data
-
-```bash
-# 1. Create a schema
-curl -X POST http://localhost:7070/api/v1/schemas \
-  -H "Authorization: Bearer <admin_token>" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "users", "type": "base", "fields": [{"name": "name", "type": "string"}]}'
-
-# 2. Create a record
-curl -X POST http://localhost:7070/api/v1/entities/users \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "John Doe"}'
-
-# 3. List records
-curl http://localhost:7070/api/v1/entities/users
-```
-
-### Authentication Flow
-
-```bash
-# 1. Login (identity can be email or user ID)
-curl -X POST http://localhost:7070/api/v1/auth/users/login \
-  -H "Content-Type: application/json" \
-  -d '{"identity": "user@example.com", "password": "password"}'
-
-# Response: {"token": "...", "user": {...}}
-
-# 2. Use token in requests
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:7070/api/v1/entities/posts
-```
-
----
-
-## Status
-
-MantisBase is under active development. The API may change as the project stabilizes. Follow the [`v0.3`](https://github.com/allankoechke/mantisbase/tree/v0.3) branch for upcoming changes.
-
----
+Watch the [YouTube playlist](https://youtube.com/playlist?list=PLsG0sKNmNpyQwsZuReuqo_nl_j4SdJoiJ&si=a9jFK4QjFJb06NAw) for tutorials and walkthroughs.
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
----
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
 
 ## License
 
-MIT License © 2025 Allan K. Koech
-
----
-
-## Resources
-
-- [GitHub Repository](https://github.com/allankoechke/mantisbase)
-- [Documentation](https://docs.mantisbase.com)
-- [YouTube Playlist](https://youtube.com/playlist?list=PLsG0sKNmNpyQwsZuReuqo_nl_j4SdJoiJ&si=a9jFK4QjFJb06NAw)
+[MIT](LICENSE) © 2025 Allan K. Koech
