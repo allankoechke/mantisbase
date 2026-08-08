@@ -1,8 +1,8 @@
-@page setup Setting Up MantisBase
+﻿@page setup Setting Up MantisBase
 
 Getting started with **MantisBase** is simple. You can use the prebuilt binaries for a quick start, or embed the source code directly into your own C++ project.
 
-## 🧩 Installation Options
+## Installation Options
 
 MantisBase is available in two formats:
 
@@ -11,15 +11,15 @@ MantisBase is available in two formats:
   > _Currently, only 64-bit builds for Linux and Windows are provided. Support for other platforms is planned for future versions._
 
 - 💻 **Source code** for embedding into your own C++ application
-    - See the [Embedding Mantis](05.embedding.md) guide for details.
+    - See the [Embedding MantisBase](embedding.md) guide for details.
 
 ---
 
-## ⚡️ Using Precompiled Binaries
+## Using Precompiled Binaries
 
 Each release includes zipped binaries named like:
 
-### 🔧 Setup Steps:
+### Setup Steps:
 
 1. **Download** the appropriate zip file from [Releases](https://github.com/allankoechke/mantisbase/releases).
 2. **Extract** it using your preferred archive tool.
@@ -29,7 +29,7 @@ Place the binary wherever you want, then run it directly from the terminal.
 
 ---
 
-## 🚀 Running MantisBase
+## Running MantisBase
 
 Once extracted, run the app like this:
 
@@ -39,7 +39,7 @@ Once extracted, run the app like this:
 
 This starts the MantisBase server on port 7070, bound to localhost. You can now access its REST API or embedded dashboard.
 
-## 🎛️ Admin Dashboard
+## Admin Dashboard
 
 MantisBase includes a powerful web-based admin dashboard that provides a visual interface for managing your data. The dashboard is **essential** for development and data management:
 
@@ -52,10 +52,10 @@ MantisBase includes a powerful web-based admin dashboard that provides a visual 
 
 After creating an admin account (see [Quick Start Guide](QuickStart.md)), access the dashboard at `http://localhost:7070/mb`. The dashboard provides a complete GUI alternative to the REST API, making it perfect for non-technical users and rapid development.
 
-## 📚 Next Steps
-- Learn how to [Embed Mantis](05.embedding.md) into your C++ app (own a `MantisBase` instance via `create()`).
-- Explore the [REST API generation](02.api.md) to build your app.
-- Read [Authentication API](02.auth.md) for JWT, API keys, and OAuth.
+## Next Steps
+- Learn how to [Embed MantisBase](embedding.md) into your C++ app (own a `MantisBase` instance via `create()`).
+- Explore the [REST API generation](api.md) to build your app.
+- Read [Authentication API](auth.md) for JWT, API keys, and OAuth.
 - Access the [Admin Dashboard](QuickStart.md#2-access-the-admin-dashboard) to manage your data visually.
 
 ---

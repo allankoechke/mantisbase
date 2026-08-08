@@ -1,10 +1,10 @@
-@page rest_api REST API Reference Guide
+﻿@page rest_api REST API Reference Guide
 
 MantisBase provides auto-generated RESTful APIs for interacting with database entities. This document covers the entity endpoints, schema management, realtime (SSE) API for live database change notifications (SQLite and PostgreSQL), and request handling.
 
 ---
 
-## 🌐 Base URL
+## Base URL
 
 When MantisBase is running locally:
 
@@ -20,7 +20,7 @@ mantisbase serve --port 8000 --host 127.0.0.1
 
 ---
 
-## 🗂️ API Namespaces
+## API Namespaces
 
 All REST endpoints live under `/api/v1/` and are grouped by namespace:
 
@@ -37,10 +37,11 @@ All REST endpoints live under `/api/v1/` and are grouped by namespace:
 | `/api/v1/sys/oauth/` | OAuth provider registry and entity enablement (admin) |
 | `/api/v1/sys/settings/` | Application settings |
 | `/api/v1/realtime` | Server-Sent Events for live database changes |
+| `WS /api/v1/realtime/ws` | WebSocket for live database changes |
 
 ---
 
-## 📄 Entity Endpoints
+## Entity Endpoints
 
 MantisBase automatically exposes CRUD endpoints for each entity (table or view):
 
@@ -80,7 +81,7 @@ curl -X DELETE http://localhost:7070/api/v1/entities/users/123 \
 
 ---
 
-## 🔐 Authentication
+## Authentication
 
 All entity endpoints require authentication via JWT tokens. Include the token in the `Authorization` header:
 
@@ -88,11 +89,11 @@ All entity endpoints require authentication via JWT tokens. Include the token in
 Authorization: Bearer <token>
 ```
 
-For authentication endpoints, see [Authentication API](02.auth.md).
+For authentication endpoints, see [Authentication API](auth.md).
 
 ---
 
-## 🛡️ Middlewares
+## Middlewares
 
 Middlewares are functions that run before your route handler, allowing you to add authentication, authorization, and request processing logic.
 
@@ -200,7 +201,7 @@ router.Get("/api/v1/me", [](MantisRequest& req, MantisResponse& res) {
 
 ---
 
-## 🗃️ Schema Management API
+## Schema Management API
 
 Schema management endpoints allow you to create, read, update, and delete entity schemas. **These endpoints require admin authentication only.**
 
@@ -323,17 +324,44 @@ curl -X PATCH http://localhost:7070/api/v1/schemas/posts \
 
 ---
 
-## 🎛️ Query Parameters [PENDING]
+## Query Parameters
 
-Future support for filtering, sorting, and pagination:
+Entity list endpoints support cursor-based pagination and sorting:
 
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `limit` | `50` | Number of records to return (1–500) |
+| `after` | — | Cursor from the previous response — returns records after this value |
+| `sort` | `id` ASC | Field name to sort by. Prefix with `-` for descending (e.g., `-created`) |
+
+**Example:**
+
+```bash
+# First page
+curl "http://localhost:7070/api/v1/entities/posts?limit=20&sort=-created"
+
+# Next page (using cursor from previous response)
+curl "http://localhost:7070/api/v1/entities/posts?limit=20&sort=-created&after=<cursor>"
 ```
-GET /api/v1/entities/tasks?status=done&limit=10&offset=20&sort=-created_at
+
+**Response:**
+
+```json
+{
+  "status": 200,
+  "data": {
+    "items_count": 20,
+    "limit": 20,
+    "cursor": "019c1b81-364b-7000-8120-b5416b2c42c2",
+    "items": [...]
+  },
+  "error": ""
+}
 ```
 
 ---
 
-## ⚙️ Custom Endpoints
+## Custom Endpoints
 
 You can create custom API endpoints using the router:
 
@@ -343,11 +371,11 @@ router.Get("/api/v1/custom", [](MantisRequest& req, MantisResponse& res) {
 }, {requireAdminAuth()});
 ```
 
-Check the [Embedding Guide](05.embedding.md) for more details.
+Check the [Embedding Guide](embedding.md) for more details.
 
 ---
 
-## 📁 File Handling
+## File Handling
 
 Files uploaded via multipart/form-data are stored and can be accessed at:
 
@@ -355,74 +383,9 @@ Files uploaded via multipart/form-data are stored and can be accessed at:
 GET /api/v1/files/<entity>/<filename>
 ```
 
-See [File Handling](11.files.md) for more details.
+See [File Handling](files.md) for more details.
 
 ---
-
-## 🔍 Entity Types and Validation
-
-### Entity Types
-
-MantisBase supports three types of entities:
-
-#### Base Entities
-Standard database tables with fields. Use for most data storage needs.
-
-```json
-{
-  "name": "posts",
-  "type": "base",
-  "fields": [
-    {"name": "title", "type": "string", "required": true},
-    {"name": "content", "type": "string"}
-  ]
-}
-```
-
-#### Auth Entities
-Authentication entities with built-in password and user management fields. Automatically includes:
-- `password` - Hashed password field
-- `email` - Email field (typically unique)
-- Standard user management fields
-
-```json
-{
-  "name": "users",
-  "type": "auth",
-  "fields": [
-    {"name": "email", "type": "string", "required": true, "is_unique": true},
-    {"name": "full_name", "type": "string"}
-  ]
-}
-```
-
-#### View Entities
-SQL views based on queries. Read-only, no fields defined. Use `view_query` instead of `fields`.
-
-```json
-{
-  "name": "published_posts",
-  "type": "view",
-  "view_query": "SELECT * FROM posts WHERE status = 'published'"
-}
-```
-
-### Entity Name Validation
-
-All entity names are automatically validated to prevent SQL injection and ensure consistency:
-
-**Validation Rules:**
-- ✅ Alphanumeric characters and underscores only (`a-z`, `A-Z`, `0-9`, `_`)
-- ✅ Maximum 64 characters
-- ✅ Not empty
-
-**Invalid Examples:**
-- `my-table` (contains hyphen)
-- `my table` (contains space)
-- `my@table` (contains special character)
-- Names longer than 64 characters
-
-Invalid names will result in a `400 Bad Request` error with a descriptive message.
 
 ### Foreign Key Relationships
 
@@ -548,7 +511,7 @@ For example, a foreign key on `post_id` in the `comments` table would create a c
 
 ---
 
-## 📊 System Endpoints
+## System Endpoints
 
 Most system endpoints are grouped under `/api/v1/sys/`. The health check is at `/api/v1/health`.
 
@@ -558,7 +521,7 @@ Most system endpoints are grouped under `/api/v1/sys/`. The health check is at `
 |--------|----------|-------------|
 | GET | `/api/v1/health` | Server health and uptime |
 
-See [Healthcheck](12.healthcheck.md) for details.
+See [Healthcheck](healthcheck.md) for details.
 
 ### Settings
 
@@ -566,6 +529,22 @@ See [Healthcheck](12.healthcheck.md) for details.
 |--------|----------|-------------|
 | GET | `/api/v1/sys/settings/config` | Get application settings |
 | PATCH | `/api/v1/sys/settings/config` | Update application settings |
+
+The settings object contains the following fields:
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `appName` | string | `"ACME Project"` | Application display name |
+| `baseUrl` | string | `"https://acme.example.com"` | Base URL for the application |
+| `maintenanceMode` | boolean | `false` | Put the application in maintenance mode |
+| `maxFileSize` | integer | `10` | Max file upload size in MB (stored but not currently enforced) |
+| `allowRegistration` | boolean | `true` | Allow new user registration |
+| `emailVerificationRequired` | boolean | `false` | Require email verification on registration |
+| `sessionTimeout` | integer | `86400` | User session timeout in seconds (24 h) |
+| `adminSessionTimeout` | integer | `3600` | Admin session timeout in seconds (1 h) |
+| `mode` | string | `"PROD"` | Application mode: `PROD` or `TEST` |
+
+The GET response also includes `mantisVersion` (the running server version).
 
 ### Admin Accounts
 
@@ -595,26 +574,26 @@ The logs endpoint provides access to system logs with filtering, pagination, and
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `page` | integer | `1` | Page number (1-based) |
-| `page_size` | integer | `50` | Number of records per page (max 1000) |
-| `level` | string | - | Filter by exact log level: `trace`, `debug`, `info`, `warn`, `critical` |
-| `min_level` | string | - | Filter by minimum log level (includes that level and above) |
-| `search` | string | - | Search in log messages |
-| `start_date` | string | - | Start date filter (ISO 8601 format) |
-| `end_date` | string | - | End date filter (ISO 8601 format) |
+| `limit` | integer | `50` | Number of records per page (max 1000) |
+| `after` | string | — | Cursor from previous response for pagination |
+| `level` | string | — | Filter by exact log level: `trace`, `debug`, `info`, `warn`, `critical` |
+| `min_level` | string | — | Filter by minimum log level (includes that level and above) |
+| `search` | string | — | Search in log messages |
+| `start_date` | string | — | Start date filter (ISO 8601 format) |
+| `end_date` | string | — | End date filter (ISO 8601 format) |
 | `sort_by` | string | `"timestamp"` | Sort field: `level`, `origin`, `message`, `timestamp`, `created_at` |
 | `sort_order` | string | `"desc"` | Sort order: `asc` or `desc` |
 
 #### Example Requests
 
 ```bash
-# Get recent logs (default: page 1, 50 records)
+# Get recent logs (default: 50 records)
 curl -H "Authorization: Bearer <admin_token>" \
   http://localhost:7070/api/v1/sys/logs
 
-# Get logs with pagination
+# Next page using cursor
 curl -H "Authorization: Bearer <admin_token>" \
-  "http://localhost:7070/api/v1/sys/logs?page=2&page_size=100"
+  "http://localhost:7070/api/v1/sys/logs?limit=50&after=<cursor>"
 
 # Filter by log level
 curl -H "Authorization: Bearer <admin_token>" \
@@ -632,39 +611,35 @@ curl -H "Authorization: Bearer <admin_token>" \
 curl -H "Authorization: Bearer <admin_token>" \
   "http://localhost:7070/api/v1/sys/logs?start_date=2024-01-01T00:00:00Z&end_date=2024-01-31T23:59:59Z"
 
-# Sort by level, ascending
-curl -H "Authorization: Bearer <admin_token>" \
-  "http://localhost:7070/api/v1/sys/logs?sort_by=level&sort_order=asc"
-
 # Combined filters
 curl -H "Authorization: Bearer <admin_token>" \
-  "http://localhost:7070/api/v1/sys/logs?min_level=warn&search=error&page=1&page_size=20&sort_by=timestamp&sort_order=desc"
+  "http://localhost:7070/api/v1/sys/logs?min_level=warn&search=error&limit=20&sort_by=timestamp&sort_order=desc"
 ```
 
 #### Response Format
 
 ```json
 {
-  "logs": [
-    {
-      "id": "log_id_123",
-      "timestamp": "2024-01-15T10:30:45Z",
-      "level": "warn",
-      "origin": "entitySchema",
-      "message": "Foreign key validation warning",
-      "details": "Additional details about the log entry",
-      "data": {},
-      "created_at": "2024-01-15T10:30:45Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "page_size": 50,
-    "total": 1250,
-    "total_pages": 25
+  "data": {
+    "items_count": 50,
+    "limit": 50,
+    "cursor": "log_id_abc123",
+    "items": [
+      {
+        "id": "log_id_123",
+        "timestamp": "2024-01-15T10:30:45Z",
+        "level": "warn",
+        "origin": "entitySchema",
+        "message": "Foreign key validation warning",
+        "details": "Additional details about the log entry",
+        "created_at": "2024-01-15T10:30:45Z"
+      }
+    ]
   }
 }
 ```
+
+Pass the returned `cursor` value as the `after` parameter in subsequent requests to page through results.
 
 #### Log Levels
 
@@ -700,7 +675,7 @@ When using `min_level`, all logs at that level and above are included. For examp
 
 ---
 
-## 📡 Realtime API
+## Realtime API
 
 MantisBase provides **realtime database change notifications** over **Server-Sent Events (SSE)** for both SQLite and PostgreSQL backends. Clients subscribe to topics (entity names and optionally specific row IDs) and receive live `insert`, `update`, and `delete` events as they occur.
 
@@ -852,7 +827,73 @@ Realtime is supported for:
 
 ---
 
-## 🎛️ Admin Dashboard
+## WebSocket Realtime API
+
+In addition to SSE, MantisBase provides a **WebSocket endpoint** for realtime notifications. It uses the same topic model as SSE.
+
+### Endpoint
+
+```
+WS /api/v1/realtime/ws
+```
+
+### Connection
+
+Connect via any WebSocket client:
+
+```javascript
+const ws = new WebSocket("ws://localhost:7070/api/v1/realtime/ws");
+
+ws.onopen = () => {
+  // Subscribe to topics after connecting
+  ws.send(JSON.stringify({ topics: ["posts", "users"] }));
+};
+
+ws.onmessage = (event) => {
+  const msg = JSON.parse(event.data);
+  console.log(msg);
+};
+```
+
+### Welcome message
+
+On connect, the server sends:
+
+```json
+{
+  "type": "connected",
+  "message": "WebSocket connected"
+}
+```
+
+### Subscribing and unsubscribing
+
+Send a JSON message with a `topics` array to update your subscriptions. Topics follow the same format as the SSE endpoint — entity name or `entity:row_id`. Send an empty array to clear all subscriptions.
+
+```json
+{ "topics": ["posts", "comments", "posts:019c1b81-364b-7000-8120-b5416b2c42c2"] }
+```
+
+### Change events
+
+Database changes are delivered in the same format as SSE `change` events:
+
+```json
+{
+  "action": "insert",
+  "entity": "posts",
+  "row_id": "019c1b81-364b-7000-8120-b5416b2c42c2",
+  "topic": "posts",
+  "timestamp": 1769988013,
+  "data": { "id": "019c1b81-364b-7000-8120-b5416b2c42c2", "created": "2026-02-02T02:19:38" }
+}
+```
+
+WebSocket realtime can be disabled by setting the environment variable `MB_REALTIME_WS=false`.
+
+---
+
+## Admin Dashboard
 
 The MantisBase Admin Dashboard is a comprehensive web-based interface accessible at `/mb` (e.g., `http://localhost:7070/mb`). It provides a visual alternative to the REST API for managing your backend.
 

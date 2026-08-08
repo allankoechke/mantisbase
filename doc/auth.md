@@ -1,4 +1,4 @@
-@page auth_api Authentication API
+﻿@page auth_api Authentication API
 
 MantisBase provides authentication endpoints scoped to auth-type entities. Each auth entity exposes login, refresh, and logout under `/api/v1/auth/<entity>/`.
 
@@ -6,7 +6,7 @@ Admin authentication uses `/api/v1/sys/admins/` instead.
 
 ---
 
-## 🌐 Base URL
+## Base URL
 
 ```
 http://localhost:7070/api/v1/auth/<entity>/
@@ -22,7 +22,7 @@ If the entity is missing or does not meet these requirements, the route returns 
 
 ---
 
-## 📄 Authentication Endpoints
+## Authentication Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -30,11 +30,11 @@ If the entity is missing or does not meet these requirements, the route returns 
 | POST | `/api/v1/auth/<entity>/refresh` | Refresh an existing token |
 | POST | `/api/v1/auth/<entity>/logout` | Logout (invalidate token) |
 
-For admin authentication and initial setup, see [System Endpoints – Admin Accounts](02.api.md#admin-accounts) (`/api/v1/sys/admins/`).
+For admin authentication and initial setup, see [System Endpoints – Admin Accounts](api.md#admin-accounts) (`/api/v1/sys/admins/`).
 
 ---
 
-## 🔑 Login
+## Login
 
 Authenticate a user and receive a JWT token.
 
@@ -120,7 +120,7 @@ curl -X POST http://localhost:7070/api/v1/auth/users/login \
 
 ---
 
-## 🔄 Refresh Token
+## Refresh Token
 
 Refresh an existing JWT token to extend its validity.
 
@@ -134,11 +134,15 @@ Authorization: Bearer <existing_token>
 **Response (Success - 200):**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "123456",
-    "email": "user@example.com"
-  }
+  "status": 200,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "123456",
+      "email": "user@example.com"
+    }
+  },
+  "error": ""
 }
 ```
 
@@ -150,7 +154,7 @@ curl -X POST http://localhost:7070/api/v1/auth/users/refresh \
 
 ---
 
-## 🚪 Logout
+## Logout
 
 Logout and invalidate the current token.
 
@@ -164,7 +168,11 @@ Authorization: Bearer <token>
 **Response (Success - 200):**
 ```json
 {
-  "message": "Logged out successfully"
+  "status": 200,
+  "data": {
+    "logged_out": true
+  },
+  "error": ""
 }
 ```
 
@@ -176,9 +184,9 @@ curl -X POST http://localhost:7070/api/v1/auth/users/logout \
 
 ---
 
-## 👤 Admin Setup and Authentication
+## Admin Setup and Authentication
 
-Admin account setup and admin-only authentication use the `/api/v1/sys/admins/` namespace. See [System Endpoints – Admin Accounts](02.api.md#admin-accounts) in the API reference.
+Admin account setup and admin-only authentication use the `/api/v1/sys/admins/` namespace. See [System Endpoints – Admin Accounts](api.md#admin-accounts) in the API reference.
 
 **Initial setup:** `POST /api/v1/sys/admins/setup` (only when no admin accounts exist)
 
@@ -186,7 +194,7 @@ Admin account setup and admin-only authentication use the `/api/v1/sys/admins/` 
 
 ---
 
-## 🔐 Using Tokens
+## Using Tokens
 
 After receiving a token from the login endpoint, include it in all subsequent API requests:
 
@@ -200,7 +208,7 @@ The token contains user information (id, entity) and is validated automatically 
 
 ---
 
-## 🔑 API Keys
+## API Keys
 
 Long-lived API keys complement short-lived JWTs. Keys are scoped to an auth entity and user, stored hashed server-side, and shown **once** at creation.
 
@@ -269,7 +277,7 @@ auto created = keys.create("users", user_id, "Desktop client");
 
 ---
 
-## 🌐 OAuth
+## OAuth
 
 OAuth 2.0 / OIDC login and account linking for auth-type entities. Preset providers (`google`, `github`, `discord`, `microsoft`) are seeded at startup; admins configure client credentials and enable providers per entity.
 
@@ -322,12 +330,12 @@ auto url = oauth.buildAuthorizeUrl("users", "google", redirect_uri);
 
 ---
 
-## ⏱️ Token Expiration
+## Token Expiration
 
 By default, tokens expire after 1 hour. Use the refresh endpoint to extend token validity without requiring the user to log in again.
 
 ---
 
-## 🏁 Summary
+## Summary
 
 The authentication API provides JWT login, long-lived API keys (`mb_sk_...`), and OAuth for auth-type entities. All credential types use `Authorization: Bearer ...` and are validated before entity access rules run. Admin-only routes under `/api/v1/sys/` manage providers and system API keys.

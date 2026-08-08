@@ -1,7 +1,5 @@
 @page docker Running in Docker
 
-# Dockerizing MantisBase
-
 MantisBase provides Docker support for easy deployment and containerization. This guide covers building and running MantisBase in Docker containers.
 
 ---
@@ -75,11 +73,20 @@ You can configure MantisBase using environment variables or by mounting a config
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MB_JWT_SECRET` | JWT secret key for token signing (set in production) | (built-in default) |
+| `MB_JWT_SECRET` | JWT secret key for token signing. **Required in production** (server refuses to start without it when not in dev mode) | (dev mode fallback only) |
 | `MB_VERSION` | Build-time only: release version to download (Dockerfile `ARG`) | `0.3.4` |
-| `MB_DISABLE_FILE_UPLOADS` | Set to `1` to disable file uploads | `0` |
+| `MB_DISABLE_FILE_UPLOADS` | Set to `1` to disable file uploads (returns 403 on upload attempts) | `0` |
 | `MB_DISABLE_ADMIN_ON_FIRST_BOOT` | Set to `1` to skip creating admin on first boot | `0` |
 | `MB_DISABLE_RATE_LIMIT` | Set to `1` to disable rate limiting | (enabled) |
+| `MB_LOG_LEVEL` | Logging verbosity: `trace`, `debug`, `info`, `warn`, `critical` | `info` |
+| `MB_DATABASE_TYPE` | Database type: `sqlite3`, `postgresql` | `sqlite3` |
+| `MB_DATABASE_URL` | Database connection string (for PostgreSQL) | — |
+| `MB_SKIP_ADMIN_SETUP` | Set to `1` to skip the first-boot admin setup prompt | `0` |
+| `MB_DEFAULT_ADMIN_EMAIL` | Admin email for `admins --add` when no positional args given | — |
+| `MB_DEFAULT_ADMIN_PASSWORD` | Admin password for `admins --add` when no positional args given | — |
+| `MB_OAUTH_ENCRYPTION_KEY` | Encryption key for OAuth client secrets (32 chars; falls back to `MB_JWT_SECRET` padded to 32) | — |
+| `MB_REALTIME_SSE` | Set to `"false"` to disable the SSE realtime endpoint (returns 503) | enabled |
+| `MB_REALTIME_WS` | Set to `"false"` to disable the WebSocket realtime endpoint | enabled |
 
 Database connection is configured via command-line arguments or JSON config (e.g. `--db postgresql --db_url "..."`).
 
