@@ -1,6 +1,7 @@
 FROM debian:stable-slim
 
 ARG MB_VERSION=0.4.0
+ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
@@ -12,7 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /mb
 
-RUN wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/releases/download/v${MB_VERSION}/mantisbase_v${MB_VERSION}_linux-x86_64.zip \
+RUN ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "linux-aarch64" || echo "linux-x86_64") \
+    && wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/releases/download/v${MB_VERSION}/mantisbase_v${MB_VERSION}_${ARCH}.zip \
     && unzip /tmp/mantisbase.zip -d /mb \
     && chmod +x /mb/mantisbase \
     && rm /tmp/mantisbase.zip
@@ -20,4 +22,5 @@ RUN wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/relea
 EXPOSE 80
 
 ENTRYPOINT ["/mb/mantisbase"]
-CMD ["--dev", "serve", "-p", "80"]
+# Dev mode: docker run ... allankoech/mantisbase --dev serve -p 80
+CMD ["serve", "-p", "80"]
