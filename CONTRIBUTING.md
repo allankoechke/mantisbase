@@ -1,27 +1,27 @@
-# Contributing to Mantis  
-  
-Thank you for your interest in contributing to **Mantis**, a lightweight Backend-as-a-Service (BaaS) library built in C++!   
-  
-## 🚀 Getting Started  
-  
-### Prerequisites  
-  
-- **C++20** compatible compiler (GCC >= 8.3.0, Clang >= 7.0.0, or MSVC >= 16.8)  
-- **CMake** 3.30 or higher  
-- **Git** with submodule support  
-  
-### Setting Up the Development Environment  
-  
-#### 1. **Clone the repository with submodules:**  
-   ```bash  
-   git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git  
+# Contributing to MantisBase
+
+Thank you for your interest in contributing to **MantisBase**, a lightweight Backend-as-a-Service (BaaS) library built in C++!
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **C++20** compatible compiler (GCC >= 8.3.0, Clang >= 7.0.0, or MSVC >= 16.8)
+- **CMake** 3.30 or higher
+- **Git** with submodule support
+
+### Setting Up the Development Environment
+
+#### 1. **Clone the repository with submodules:**
+   ```bash
+   git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git
    cd mantisbase
    ```
 
 #### 2. Build the project:
 
 ```bash
-cmake -B build  
+cmake -B build
 cmake --build build
 ```
 
@@ -36,14 +36,14 @@ Check on commandline args by running `./build/mantisbase --help`
 Understanding the codebase organization will help you navigate and contribute effectively.
 
 ```
-mantis/  
-├── include/mantis/         # Public API headers  
-├── src/                    # Internal implementation  
-├── examples/               # Embedding examples  
-├── tests/                  # Unit & integration tests  
-├── docker/                 # Docker deployment  
-├── 3rdParty/              # Third-party dependencies  
-└── CMakeLists.txt         # Build configuration  
+mantisbase/
+├── include/mantisbase/      # Public API headers
+├── src/                     # Internal implementation
+├── examples/                # Embedding examples
+├── tests/                   # Unit & integration tests
+├── docker/                  # Docker deployment
+├── libs/                    # Third-party dependencies
+└── CMakeLists.txt           # Build configuration
 ```
 
 ### 🛠️ Build System
@@ -64,7 +64,7 @@ MantisBase uses CMake with the following key dependencies: README.md:46-53
 Run tests after building:
 
 ```bash
-cd build  
+cd build
 ctest --build-config Release
 ```
 
@@ -79,10 +79,10 @@ ctest --build-config Release
 Use clear, descriptive commit messages:
 
 ```
-feat: add JWT authentication middleware  
-fix: resolve database connection pooling issue  
-docs: update API documentation  
-test: add unit tests for table validation  
+feat: add JWT authentication middleware
+fix: resolve database connection pooling issue
+docs: update API documentation
+test: add unit tests for table validation
 ```
 
 #### Pull Request Process
@@ -103,13 +103,10 @@ Based on the current project status, here are areas where contributions are welc
 
 #### High Priority
 - Unit + integration tests (⬜ Planned)
-- Middleware support (🟡 In Progress)
 - Static file serving (⬜ Planned)
 
 #### Medium Priority
 - Client/server sync modes (⬜ Planned)
-- WebSocket sync support (⬜ Planned)
-- Docker-ready deployment (⬜ Planned)
 
 #### Documentation
 - API documentation improvements
@@ -132,7 +129,7 @@ When reporting bugs or requesting features:
 #### Working with Dependencies
 All third-party dependencies are managed through git submodules and CMake. When adding new dependencies:
 
-- Add as a git submodule in `3rdParty/`
+- Add as a git submodule in `libs/`
 - Update CMakeLists.txt with appropriate configuration
 - Consider creating a separate cmake module for complex integrations
 
