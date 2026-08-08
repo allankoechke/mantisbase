@@ -144,7 +144,7 @@ That's it! You now have a fully functional backend with authentication and acces
 
 **Dependencies (Linux only):**
 ```bash
-sudo apt-get install -y libzstd-dev libpq-dev
+sudo apt-get install -y libpq-dev uuid-dev
 ```
 
 ```bash
@@ -379,7 +379,7 @@ For full API documentation, visit [https://docs.mantisbase.dev](https://allankoe
 
 ## Requirements
 
-- **Linux**: GCC with C++20 support, libzstd-dev, libpq-dev (for PostgreSQL)
+- **Linux**: GCC with C++20 support, libpq-dev, uuid-dev (libpq for PostgreSQL)
 - **Windows**: MinGW v13+ with std::format support
 - **No external runtime dependencies** - everything is bundled
 

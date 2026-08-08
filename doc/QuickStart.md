@@ -42,7 +42,7 @@ The server starts on `http://localhost:7070`.
 
 **Linux Dependencies:**
 ```bash
-sudo apt-get install -y libzstd-dev libpq-dev
+sudo apt-get install -y libpq-dev uuid-dev
 ```
 
 ### Build from Source
