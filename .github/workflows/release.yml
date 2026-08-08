@@ -20,16 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download Linux libs artifact
+      - name: Download Linux lib artifact
         uses: actions/download-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}_linux-libs
+          name: mantisbase_${{ github.ref_name }}_linux-lib
           path: ./dev-staging/
 
-      - name: Download Windows libs artifact
+      - name: Download Windows lib artifact
         uses: actions/download-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}_windows-libs
+          name: mantisbase_${{ github.ref_name }}_windows-lib
           path: ./dev-staging/
 
       - name: Assemble include directory
@@ -38,10 +38,12 @@ jobs:
           cp -r include/mantisbase dev-staging/include/mantisbase
           cp dev-staging/generated-include/mantisbase/config.hpp dev-staging/include/mantisbase/config.hpp
           rm -rf dev-staging/generated-include
+          rm dev-staging/include/mantisbase/config.hpp.in
+          echo ${{ github.ref_name }} >> dev-staging/VERSION
 
       - name: Create dev zip
         run: |
-          cd dev-staging && zip -r ../mantisbase_${{ github.ref_name }}-dev.zip libs/ include/
+          cd dev-staging && zip -r ../mantisbase_${{ github.ref_name }}-dev.zip lib/ include/ VERSION
 
       - name: Upload dev zip artifact
         uses: actions/upload-artifact@v4

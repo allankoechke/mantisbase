@@ -155,33 +155,33 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
         shell: bash
         run: |
-          mkdir -p lib-staging/libs/linux/static
-          mkdir -p lib-staging/libs/linux/dynamic
+          mkdir -p lib-staging/lib/linux/static
+          mkdir -p lib-staging/lib/linux/shared
           mkdir -p lib-staging/generated-include/mantisbase
-          cp ${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.a lib-staging/libs/linux/static/
-          cp ${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.so lib-staging/libs/linux/dynamic/
+          cp ${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.a lib-staging/lib/linux/static/
+          cp ${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.so lib-staging/lib/linux/shared/
           cp ${{ steps.strings.outputs.build-output-dir }}/include/mantisbase/config.hpp lib-staging/generated-include/mantisbase/config.hpp
 
       - name: Upload library artifact (Linux)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}_linux-libs
+          name: mantisbase_${{ github.ref_name }}_linux-lib
           path: lib-staging/
 
       - name: Stage library files (Windows)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path "lib-staging\libs\win\static" | Out-Null
-          New-Item -ItemType Directory -Force -Path "lib-staging\libs\win\dynamic" | Out-Null
-          Copy-Item "build\lib\libmantisbase.a" -Destination "lib-staging\libs\win\static\"
-          Copy-Item "build\bin\libmantisbase.dll" -Destination "lib-staging\libs\win\dynamic\"
-          Copy-Item "build\lib\libmantisbase.dll.a" -Destination "lib-staging\libs\win\dynamic\"
+          New-Item -ItemType Directory -Force -Path "lib-staging\lib\windows\static" | Out-Null
+          New-Item -ItemType Directory -Force -Path "lib-staging\lib\windows\shared" | Out-Null
+          Copy-Item "build\lib\libmantisbase.a" -Destination "lib-staging\lib\windows\static\"
+          Copy-Item "build\bin\libmantisbase.dll" -Destination "lib-staging\lib\windows\shared\"
+          Copy-Item "build\lib\libmantisbase.dll.a" -Destination "lib-staging\lib\windows\shared\"
 
       - name: Upload library artifact (Windows)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}_windows-libs
+          name: mantisbase_${{ github.ref_name }}_windows-lib
           path: lib-staging\
