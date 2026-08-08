@@ -1,19 +1,28 @@
 #include "../../include/mantisbase/utils/utils.h"
+#include "../../include/mantisbase/core/exceptions.h"
 
 #include <algorithm>
-#include <httplib.h>
+#include <regex>
 
 namespace mb {
-    std::optional<json> tryParseJsonStr(const std::string &json_str, std::optional<json> default_value) {
+    std::string sqlIdentifier(const std::string &ident) {
+        const bool ok = !ident.empty() && ident.length() <= 64 &&
+                        std::ranges::all_of(ident, [](const unsigned char c) {
+                            return std::isalnum(c) || c == '_';
+                        });
+        if (!ok)
+            throw MantisException(400, std::format("Invalid SQL identifier `{}`", ident));
+        return ident;
+    }
+
+    std::pair<json, std::string> tryParseJsonStr(const std::string &json_str) {
         try {
             if (trim(json_str).empty())
-                return default_value.has_value() ? default_value.value() : json::object();
-            return json::parse(json_str);
+                return std::make_pair(json::object(), "");
+            return std::make_pair(json::parse(json_str), "");
         } catch (const std::exception &e) {
-            LogOrigin::critical("JSON Parse Error",
-                                fmt::format("JSON parse error: {}", e.what())
-            );
-            return default_value;
+            // Empty object , error string
+            return std::make_pair(json::object(), e.what());
         }
     }
 
@@ -61,7 +70,7 @@ namespace mb {
         const auto tt = system_clock::to_time_t(now);
         const auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;
 
-        const std::tm tm = *std::localtime(&tt);
+        const std::tm tm = toUtcTime(tt);
         std::ostringstream oss;
         oss << std::put_time(&tm, "%Y%m%dT%H%M%S");
         oss << std::setw(3) << std::setfill('0') << ms.count();

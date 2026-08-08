@@ -12,19 +12,75 @@ jobs:
   build:
     uses: ./.github/workflows/build-matrix.yml
 
-  release:
+  package-dev-zip:
     needs: build
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Linux lib artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_linux-lib
+          path: ./dev-staging/
+
+      - name: Download Windows lib artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_windows-lib
+          path: ./dev-staging/
+
+      - name: Assemble include directory
+        run: |
+          mkdir -p dev-staging/include
+          cp -r include/mantisbase dev-staging/include/mantisbase
+          cp dev-staging/generated-include/mantisbase/config.hpp dev-staging/include/mantisbase/config.hpp
+          rm -rf dev-staging/generated-include
+          rm dev-staging/include/mantisbase/config.hpp.in
+          echo ${{ github.ref_name }} >> dev-staging/VERSION
+
+      - name: Create dev zip
+        run: |
+          cd dev-staging && zip -r ../mantisbase_${{ github.ref_name }}-dev.zip lib/ include/ VERSION
+
+      - name: Upload dev zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}-dev.zip
+          path: mantisbase_${{ github.ref_name }}-dev.zip
+
+  release:
+    needs: [build, package-dev-zip]
+    runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+      channel: ${{ steps.meta.outputs.channel }}
 
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: mantisbase_${{ github.ref_name }}_*.zip
+          pattern: mantisbase_${{ github.ref_name }}*.zip
           path: ./artifacts
           merge-multiple: true
 
       - name: Show artifact contents
         run: ls -lh ./artifacts/
+
+      - name: Classify tag
+        id: meta
+        run: |
+          tag="${{ github.ref_name }}"
+          version="${tag#v}"
+          if echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\.[0-9]+$'; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            channel=$(echo "$version" | sed -E 's/^[0-9]+\.[0-9]+\.[0-9]+-([a-z]+)\.[0-9]+$/\1/')
+            echo "channel=$channel" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "channel=" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -32,6 +88,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           generate_release_notes: true
+          prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
           files: ./artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,6 +98,8 @@ jobs:
     uses: ./.github/workflows/docker-publish.yml
     with:
       version: ${{ github.ref_name }}
+      prerelease: ${{ needs.release.outputs.prerelease }}
+      channel: ${{ needs.release.outputs.channel }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

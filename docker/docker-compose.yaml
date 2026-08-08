@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        MB_VERSION: "0.3.5"
+        MB_VERSION: "0.4.0"
     image: mantisbase:latest
     restart: unless-stopped
     ports:
@@ -13,6 +13,7 @@ services:
       - ./data:/mb/data
       - ./www:/mb/public
       - ./scripts:/mb/scripts
+      - ./migrations:/mb/migrations
     # See doc/06.docker.md for all MB_* variables. Set via .env or here.
     environment:
       MB_JWT_SECRET: ${MB_JWT_SECRET:-}

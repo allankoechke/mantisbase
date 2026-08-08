@@ -15,8 +15,14 @@
 #include <string>
 #include <filesystem>
 #include <chrono>
+#include "export.h"
 #include <argparse/argparse.hpp>
-// #include <dukglue/dukglue.h>
+
+#include "core/auth.h"
+#include "utils/snowflake.hpp"
+#ifdef MB_SCRIPTING_ENABLED
+#include <dukglue/dukglue.h>
+#endif
 
 #include "core/types.h"
 #include "core/kv_store.h"
@@ -35,8 +41,15 @@ namespace mb
      * - LogsMgr: For logging capabilities, @see LoggingMgr for more details.
      * - RouterMgr: High level routing wrapper on top of @see HttpMgr, @see RouterMgr for more details.
      * - ValidatorMgr: A validation store using regex, @see Validator for more details.
+     *
+     * @note `create()` returns a `std::unique_ptr<MantisBase>` that you own.
+     * Pass a `const MantisBase&` (or capture it in lambdas) to reach services
+     * such as `auth()`, `entity()`, and `db()`. Types that participate in
+     * request handling (`MantisRequest`, `Entity`, `Router`, `ApiKeyManager`,
+     * etc.) inherit @ref IMantisBase and expose `mbApp()` for the same access.
+     * There is no global `instance()` accessor.
      */
-    class MantisBase
+    class MANTISBASE_API MantisBase
     {
     public:
         ~MantisBase();
@@ -48,20 +61,14 @@ namespace mb
         MantisBase& operator=(MantisBase&&) = delete;
 
         /**
-         * @brief Retrieve existing application instance.
-         * @return A reference to the existing application instance.
-         */
-        static MantisBase& instance();
-
-        /**
          * @brief Create class instance given cmd args passed in.
          * @see parseArgs() for expected cmd args to be passed in.
          *
          * @param argc Number of cmd args
          * @param argv Char array list
-         * @return Reference to the created class instance
+         * @return Owned application instance
          */
-        static MantisBase& create(int argc, char** argv);
+        static std::unique_ptr<MantisBase> create(int argc, char** argv);
 
         /**
          * @brief Convenience function to allow creating class instance given the
@@ -96,22 +103,25 @@ namespace mb
          * @note `serve` command can have an empty json object and the app will configure with defaults.
          *
          * @code
-         * json arg1 = json::object();
-         * auto& app1 = MantisApp::create(arg2);
+         * // Defaults only:
+         * auto app = MantisBase::create(json::object());
+         * return app->run();
          *
-         * json arg2;
-         * arg2["database"] = "PSQL";
-         * arg2["database"] = "dbname=mantis username=postgres password=12342532";
-         * arg2["dev"] = true;
-         * arg2["serve"] = json::object{};
-         * auto& app2 = MantisApp::create(arg2);
-         *
+         * // With configuration:
+         * json cfg;
+         * cfg["db"] = "postgresql";
+         * cfg["db_url"] = "dbname=mantis user=postgres password=12342532";
+         * cfg["dev"] = true;
+         * cfg["serve"] = json::object();
+         * auto app = MantisBase::create(cfg);
+         * auto token = app->auth().createToken({{"id", "u1"}, {"table", "users"}});
+         * return app->run();
          * @endcode
          *
          * @param config JSON Object bearing the cmd args values to be used
-         * @return A reference to the created class instance
+         * @return Owned application instance
          */
-        static MantisBase& create(const json& config = json::object());
+        static std::unique_ptr<MantisBase> create(const json& config = json::object());
 
         /**
          * @brief Start the http server and start listening for requests.
@@ -135,7 +145,7 @@ namespace mb
          * @param reason User-friendly reason for the exit.
          * @return `exitCode` value.
          */
-        static int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
+        int quit(const int& exitCode = 0, const std::string& reason = "Something went wrong!");
 
         /**
          * @brief Retrieve HTTP Listening port.
@@ -232,7 +242,11 @@ namespace mb
          * @brief Retrieve the JWT secret key.
          * @return JWT Secret value.
          */
-        static std::string jwtSecretKey();
+        [[nodiscard]] std::string jwtSecretKey() const;
+
+        /// Generate snowflake ID
+        std::string snowflakeId() const;
+
         /**
          * Fetch the application version
          * @return Application version
@@ -257,6 +271,12 @@ namespace mb
         [[nodiscard]] Logger& logs() const;
         /// Get the realtime unit (SQLite/PostgreSQL change detection for SSE /api/v1/realtime).
         [[nodiscard]] RealtimeDB& rt() const;
+        /// Get the FilesMgr instance
+        [[nodiscard]] FilesMgr& files() const;
+        /// Get Logger instance
+        [[nodiscard]] Logger& logger() const;
+        /// Get Auth instance
+        [[nodiscard]] Auth& auth() const;
 
         /**
          * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
@@ -277,7 +297,9 @@ namespace mb
         [[nodiscard]] bool hasEntity(const std::string& entity_name) const;
 
         /// Get the duktape context
-        // [[nodiscard]] duk_context* ctx() const;
+#ifdef MB_SCRIPTING_ENABLED
+        [[nodiscard]] duk_context* ctx() const;
+#endif
 
 
         /**
@@ -298,21 +320,13 @@ namespace mb
         [[nodiscard]] bool isDevMode() const;
 
     private:
-        // Make class creation private to enforce
-        // singleton app pattern.
+        // Factory-only construction via create().
         MantisBase();
 
         /**
          * @brief Run initialization actions for Mantis, ensuring all objects are initialized properly before use.
          */
         void init(int argc = 0, char* argv[] = {});
-
-        /**
-         * Creates static instance if not created yet and returns it.
-         *
-         * @return instance of the MantisApp class
-         */
-        static MantisBase& getInstanceImpl();
 
         /**
          * @brief Set the database pool size value.
@@ -401,11 +415,16 @@ namespace mb
 
         std::unique_ptr<Logger> m_logger;
         std::unique_ptr<Database> m_database;
+        std::unique_ptr<FilesMgr> m_files;
         std::unique_ptr<RealtimeDB> m_realtime;
+        std::unique_ptr<Auth> m_auth;
         std::unique_ptr<Router> m_router;
         std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
-        // duk_context* m_dukCtx; // For duktape context
+        mutable Snowflake<1534832906275L> m_snowflakeId{};
+#ifdef MB_SCRIPTING_ENABLED
+        duk_context* m_dukCtx = nullptr;
+#endif
     };
 }
 

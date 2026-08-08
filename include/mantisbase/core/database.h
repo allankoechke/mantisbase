@@ -30,7 +30,8 @@ namespace mb {
      * and PostgreSQL.
      *
      * @code
-     * Database db;
+     * auto app = MantisBase::create();
+     * Database& db = app->db();
      * db.connect("dbname=mantis user=postgres password=pass");
      * auto session = db.session();
      * *session << "SELECT * FROM users", soci::into(rows);
@@ -39,9 +40,12 @@ namespace mb {
     class Database {
     public:
         /**
-         * @brief Construct database instance.
+         * @brief Construct database instance bound to an application.
+         * @param app The owning application; used for config (pool size, db
+         *        type, data dir, dev mode). Stored by reference and must
+         *        outlive this Database.
          */
-        Database();
+        explicit Database(const MantisBase &app);
 
         /**
          * @brief Destructor (disconnects from database).
@@ -122,6 +126,8 @@ namespace mb {
          */
         void writeCheckpoint() const;
 
+        static void seedOAuthPresets(soci::session &sql);
+
         std::string m_connStr;
         std::unique_ptr<soci::connection_pool> m_connPool;
         const MantisBase &mbApp;
@@ -139,7 +145,7 @@ namespace mb {
          */
         void start_query(std::string const &query) override {
             logger_impl::start_query(query);
-            LogOrigin::dbTrace(fmt::format("$ sql << {}", query));
+            // LogOrigin::dbTrace(fmt::format("$ sql << {}", query));
         }
 
     private:

@@ -11,22 +11,19 @@
 namespace mb {
     MantisBase::MantisBase()
         : m_dbType("sqlite3"),
-          m_startTime(std::chrono::steady_clock::now()),
-          m_logger(std::make_unique<Logger>()) {}
-          // , m_dukCtx(duk_create_heap_default()) {}
+          m_startTime(std::chrono::steady_clock::now()) {
+        std::cout << "mantisbase v" << appVersion() << std::endl << std::endl;
+        m_logger = std::make_unique<Logger>(*this);
+        m_snowflakeId.init(1, 1);
+    }
 
     MantisBase::~MantisBase() {
-        // if (!m_toStartServer) {
-        //     std::cout << std::endl;
-        //     LogOrigin::info(
-        //         "Exiting Application",
-        //         "Nothing else to do. Did you intend to run the server? Try `mantisbase serve` instead.");
-        // }
-
-        // Destroy duk context
-        // duk_destroy_heap(m_dukCtx);
-
-        // std::cout << "Exiting ~MantisBase()" << std::endl;
+#ifdef MB_SCRIPTING_ENABLED
+        if (m_dukCtx) {
+            duk_destroy_heap(m_dukCtx);
+            m_dukCtx = nullptr;
+        }
+#endif
     }
 
     void MantisBase::init(const int argc, char *argv[]) {
@@ -49,103 +46,92 @@ namespace mb {
 #endif
     }
 
-    MantisBase &MantisBase::instance() {
-        auto &app_instance = getInstanceImpl();
-        if (!app_instance.isCreated())
-            throw std::runtime_error("MantisBase not created yet");
-
-        return app_instance;
-    }
-
-    MantisBase &MantisBase::create(const int argc, char **argv) {
-        auto &app = getInstanceImpl();
-        if (app.isCreated())
-            throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
-
+    std::unique_ptr<MantisBase> MantisBase::create(const int argc, char **argv) {
+        auto app = std::unique_ptr<MantisBase>(new MantisBase());
         // Initialize the app with passed in args
-        app.init(argc, argv);
+        app->init(argc, argv);
 
         // Return the instance
         return app;
     }
 
-    MantisBase &MantisBase::create(const json &config) {
-        auto &app = getInstanceImpl();
-        if (app.isCreated())
-            throw std::runtime_error("MantisBase already created, use MantisBase::instance() instead.");
+    std::unique_ptr<MantisBase> MantisBase::create(const json &config) {
+        auto app = std::unique_ptr<MantisBase>(new MantisBase());
 
-        // logEntry::trace("MantisBase Config: {}", config.dump());
-
-        app.m_cmdArgs.emplace_back("mantisbase");
+        // Start from a clean slate: on a create() -> close() -> create() cycle
+        // (e.g. across test runs in one process) the arg vector would otherwise
+        // accumulate the previous run's arguments.
+        app->m_cmdArgs.clear();
+        app->m_cmdArgs.emplace_back("mantisbase");
 
         if (config.contains("database") || config.contains("db")) {
-            app.m_cmdArgs.emplace_back("--db");
-            app.m_cmdArgs.push_back(config.contains("db")
+            app->m_cmdArgs.emplace_back("--db");
+            app->m_cmdArgs.push_back(config.contains("db")
                                          ? config.at("db").get<std::string>()
                                          : config.at("database").get<std::string>());
         }
 
         if (config.contains("connection") || config.contains("db_url")) {
-            app.m_cmdArgs.emplace_back("--db_url");
-            app.m_cmdArgs.push_back(config.contains("db_url")
+            app->m_cmdArgs.emplace_back("--db_url");
+            app->m_cmdArgs.push_back(config.contains("db_url")
                                         ? config.at("db_url").get<std::string>()
                                         : config.at("connection").get<std::string>());
         }
 
         if (config.contains("dataDir") || config.contains("data-dir")) {
-            app.m_cmdArgs.emplace_back("--data-dir");
-            app.m_cmdArgs.push_back(config.contains("data-dir")
+            app->m_cmdArgs.emplace_back("--data-dir");
+            app->m_cmdArgs.push_back(config.contains("data-dir")
                                         ? config.at("data-dir").get<std::string>()
                                         : config.at("dataDir").get<std::string>());
         }
 
         if (config.contains("publicDir") || config.contains("public-dir")) {
-            app.m_cmdArgs.emplace_back("--public-dir");
-            app.m_cmdArgs.push_back(config.contains("public-dir")
+            app->m_cmdArgs.emplace_back("--public-dir");
+            app->m_cmdArgs.push_back(config.contains("public-dir")
                                         ? config.at("public-dir").get<std::string>()
                                         : config.at("publicDir").get<std::string>());
         }
 
         if (config.contains("scriptsDir") || config.contains("scripts-dir")) {
-            app.m_cmdArgs.emplace_back("--scripts-dir");
-            app.m_cmdArgs.push_back(config.contains("scripts-dir")
+            app->m_cmdArgs.emplace_back("--scripts-dir");
+            app->m_cmdArgs.push_back(config.contains("scripts-dir")
                                         ? config.at("scripts-dir").get<std::string>()
                                         : config.at("scriptsDir").get<std::string>());
         }
 
         if (config.contains("migrationsDir") || config.contains("migrations-dir")) {
-            app.m_cmdArgs.emplace_back("--migrations-dir");
-            app.m_cmdArgs.push_back(config.contains("migrations-dir")
+            app->m_cmdArgs.emplace_back("--migrations-dir");
+            app->m_cmdArgs.push_back(config.contains("migrations-dir")
                                         ? config.at("migrations-dir").get<std::string>()
                                         : config.at("migrationsDir").get<std::string>());
         }
 
         if (config.contains("dev")) {
-            app.m_cmdArgs.emplace_back("--dev");
+            app->m_cmdArgs.emplace_back("--dev");
         }
 
         if (config.contains("serve")) {
-            app.m_cmdArgs.emplace_back("serve");
+            app->m_cmdArgs.emplace_back("serve");
             const auto &serve = config["serve"];
 
             if (serve.is_object()) {
                 if (serve.contains("host")) {
-                    app.m_cmdArgs.emplace_back("--host");
-                    app.m_cmdArgs.push_back(serve.at("host").get<std::string>());
+                    app->m_cmdArgs.emplace_back("--host");
+                    app->m_cmdArgs.push_back(serve.at("host").get<std::string>());
                 }
 
                 if (serve.contains("port")) {
-                    app.m_cmdArgs.emplace_back("--port");
-                    app.m_cmdArgs.push_back(std::to_string(serve.at("port").get<int>()));
+                    app->m_cmdArgs.emplace_back("--port");
+                    app->m_cmdArgs.push_back(std::to_string(serve.at("port").get<int>()));
                 }
 
                 if (serve.contains("skip-admin-setup") && serve.at("skip-admin-setup").get<bool>()) {
-                    app.m_cmdArgs.emplace_back("--skip-admin-setup");
+                    app->m_cmdArgs.emplace_back("--skip-admin-setup");
                 }
 
                 if (serve.contains("pool-size") || serve.contains("poolSize")) {
-                    app.m_cmdArgs.emplace_back("--pool-size");
-                    app.m_cmdArgs.push_back(std::to_string(serve.contains("pool-size")
+                    app->m_cmdArgs.emplace_back("--pool-size");
+                    app->m_cmdArgs.push_back(std::to_string(serve.contains("pool-size")
                                                                  ? serve.at("pool-size").get<int>()
                                                                  : serve.at("poolSize").get<int>()));
                 }
@@ -153,24 +139,24 @@ namespace mb {
         }
 
         if (config.contains("admins")) {
-            app.m_cmdArgs.emplace_back("admins");
+            app->m_cmdArgs.emplace_back("admins");
             const auto &admins = config["admins"];
 
             if (admins.contains("add")) {
-                app.m_cmdArgs.emplace_back("--add");
+                app->m_cmdArgs.emplace_back("--add");
                 if (admins["add"].is_array()) {
-                    app.m_cmdArgs.push_back(admins["add"].at(0).get<std::string>());
-                    app.m_cmdArgs.push_back(admins["add"].at(1).get<std::string>());
+                    app->m_cmdArgs.push_back(admins["add"].at(0).get<std::string>());
+                    app->m_cmdArgs.push_back(admins["add"].at(1).get<std::string>());
                 } else if (admins["add"].is_string()) {
-                    app.m_cmdArgs.push_back(admins["add"].get<std::string>());
+                    app->m_cmdArgs.push_back(admins["add"].get<std::string>());
                     if (admins.contains("password"))
-                        app.m_cmdArgs.push_back(admins.at("password").get<std::string>());
+                        app->m_cmdArgs.push_back(admins.at("password").get<std::string>());
                 }
             } else if (admins.contains("ls") && admins["ls"].get<bool>()) {
-                app.m_cmdArgs.emplace_back("--ls");
+                app->m_cmdArgs.emplace_back("--ls");
             } else if (admins.contains("rm")) {
-                app.m_cmdArgs.emplace_back("--rm");
-                app.m_cmdArgs.push_back(admins.at("rm").get<std::string>());
+                app->m_cmdArgs.emplace_back("--rm");
+                app->m_cmdArgs.push_back(admins.at("rm").get<std::string>());
             } else {
                 throw std::runtime_error(
                     "MantisBase `admins` command expects `add`, `ls`, or `rm`.");
@@ -178,42 +164,37 @@ namespace mb {
         }
 
         if (config.contains("migrations")) {
-            app.m_cmdArgs.emplace_back("migrations");
+            app->m_cmdArgs.emplace_back("migrations");
             const auto &migrations = config["migrations"];
             if (migrations.contains("up") && migrations["up"].get<bool>())
-                app.m_cmdArgs.emplace_back("--up");
+                app->m_cmdArgs.emplace_back("--up");
             else if (migrations.contains("down") && migrations["down"].get<bool>())
-                app.m_cmdArgs.emplace_back("--down");
+                app->m_cmdArgs.emplace_back("--down");
         }
 
         if (config.contains("schema")) {
-            app.m_cmdArgs.emplace_back("schema");
+            app->m_cmdArgs.emplace_back("schema");
             const auto &schema = config["schema"];
             if (schema.contains("ls") && schema["ls"].get<bool>()) {
-                app.m_cmdArgs.emplace_back("--ls");
+                app->m_cmdArgs.emplace_back("--ls");
             } else if (schema.contains("rm")) {
-                app.m_cmdArgs.emplace_back("--rm");
-                app.m_cmdArgs.push_back(schema.at("rm").get<std::string>());
+                app->m_cmdArgs.emplace_back("--rm");
+                app->m_cmdArgs.push_back(schema.at("rm").get<std::string>());
             } else if (schema.contains("add")) {
-                app.m_cmdArgs.emplace_back("--add");
-                app.m_cmdArgs.push_back(schema.at("add").get<std::string>());
+                app->m_cmdArgs.emplace_back("--add");
+                app->m_cmdArgs.push_back(schema.at("add").get<std::string>());
             } else if (schema.contains("update")) {
-                app.m_cmdArgs.emplace_back("--update");
-                app.m_cmdArgs.push_back(schema.at("update").at("entity").get<std::string>());
-                app.m_cmdArgs.push_back(schema.at("update").at("body").get<std::string>());
+                app->m_cmdArgs.emplace_back("--update");
+                app->m_cmdArgs.push_back(schema.at("update").at("entity").get<std::string>());
+                app->m_cmdArgs.push_back(schema.at("update").at("body").get<std::string>());
             }
         }
 
         // Initialize the app with passed in args
-        app.init();
+        app->init();
 
         // Return the instance
         return app;
-    }
-
-    MantisBase &MantisBase::getInstanceImpl() {
-        static std::unique_ptr<MantisBase> s_instance(new MantisBase());
-        return *s_instance;
     }
 
     void MantisBase::init_units() {
@@ -221,20 +202,21 @@ namespace mb {
             quit(-1, "Failed to create database directories!");
 
         // Create instance objects
-        m_database = std::make_unique<Database>(); // depends on log()
-        m_realtime = std::make_unique<RealtimeDB>(); // depends on db()
-        m_router = std::make_unique<Router>(); // depends on db() & http()
-        m_kvStore = std::make_unique<KeyValStore>(); // depends on db(), router() & http()
+        m_database = std::make_unique<Database>(*this); // depends on log()
+        m_realtime = std::make_unique<RealtimeDB>(*this); // depends on db()
+        m_router = std::make_unique<Router>(*this); // depends on db() & http()
+        m_kvStore = std::make_unique<KeyValStore>(*this); // depends on db(), router() & http()
         m_opts = std::make_unique<argparse::ArgumentParser>();
+        m_files = std::make_unique<FilesMgr>(*this);
+        m_auth = std::make_unique<Auth>(*this);
     }
 
-    int MantisBase::quit(const int &exitCode, [[maybe_unused]] const std::string &reason) {
+    int MantisBase::quit(const int &exitCode, const std::string &reason) {
         // Stop server if running
-        instance().close();
+        close();
 
         if (exitCode != 0)
-            LogOrigin::critical("Application Exit",
-                fmt::format("Exiting Application with Code = {}", exitCode));
+            logger().critical(std::to_string(exitCode), reason);
 
         std::exit(exitCode);
     }
@@ -245,21 +227,16 @@ namespace mb {
             return;
         }
 
-        LogOrigin::trace("MantisBase", "Closing units");
+        logger().trace("Core", "Closing Units");
         try {
-            if (m_router && m_router->server().is_running()) {
+            if (m_router && m_router->isRunning()) {
                 m_router->close();
-                LogOrigin::trace("Router", "Router stopped");
-            }
-
-            if (m_kvStore) {
-                // m_kvStore.close();
-                // LogOrigin::trace("KV Store Shutdown", "[MB] Finished KV Store closing ...");
+                logger().trace("Router", "Router stopped");
             }
 
             if (m_database && m_database->isConnected()) {
                 m_database->disconnect();
-                LogOrigin::trace("Db Shutdown", "Completed Successfully!");
+                logger().trace("DB", "Shutdown Completed!");
             }
         } catch (const std::exception &e) {
             std::cerr << "Error during reset: " << e.what() << std::endl;
@@ -270,7 +247,7 @@ namespace mb {
 
         // Mark logger instance as destroyed
         Logger::isDbInitialized.store(false);
-        LogOrigin::debug("MantisBase", "Shutdown Complete");
+        logger().debug("Core", "Shutdown Complete");
     }
 
     int MantisBase::run() {
@@ -285,6 +262,26 @@ namespace mb {
         // If server command is explicitly passed in, start listening,
         // else, exit!
         if (m_toStartServer) {
+            // Fail closed: never serve traffic in production with an unset/blank
+            // JWT secret. Otherwise token signing would fall back to a shipped
+            // default and anyone could forge admin/user tokens. Development mode
+            // is allowed to run with an insecure, clearly-marked default.
+            if (const auto secret = getEnvOrDefault("MB_JWT_SECRET", std::string{}); secret.empty()) {
+                if (!m_isDevMode) {
+                    logger().critical(
+                        "Config",
+                        "MB_JWT_SECRET is not set. Refusing to start the server without a "
+                        "signing key in production. \n\t-> Set MB_JWT_SECRET to a strong, secret "
+                        "value, or pass --dev for local development.");
+                    return quit(1, "MB_JWT_SECRET not set");
+                }
+
+                logger().warn(
+                    "Config",
+                    "MB_JWT_SECRET is not set; using an insecure development-only default. "
+                    "Do NOT use this in production — set MB_JWT_SECRET.");
+            }
+
             if (!m_router->listen())
                 return 500;
         }
@@ -315,13 +312,25 @@ namespace mb {
         return *m_realtime;
     }
 
+    FilesMgr & MantisBase::files() const {
+        return *m_files;
+    }
+
+    Logger & MantisBase::logger() const {
+        return *m_logger;
+    }
+
+    Auth & MantisBase::auth() const {
+        return *m_auth;
+    }
+
     Entity MantisBase::entity(const std::string &entity_name) const {
         if (!EntitySchema::isValidEntityName(entity_name))
             throw MantisException(400,
                                   std::format("Invalid entity name `{}` provided.", entity_name));
 
         // Get schema cache from db, check if we have this data, return data if available
-        const auto entity_obj = m_router->schemaCacheEntity(entity_name);
+        auto entity_obj = m_router->schemaCacheEntity(entity_name);
         return entity_obj;
     }
 
@@ -329,9 +338,11 @@ namespace mb {
         return m_router->hasSchemaCache(entity_name);
     }
 
-    // duk_context *MantisBase::ctx() const {
-    //     return m_dukCtx;
-    // }
+#ifdef MB_SCRIPTING_ENABLED
+    duk_context *MantisBase::ctx() const {
+        return m_dukCtx;
+    }
+#endif
 
     void MantisBase::openBrowserOnStart() const {
         // Skip spinning the default browser on first boot
@@ -351,10 +362,10 @@ namespace mb {
             claims["entity"] = "mb_service_acc";
 
             // Create token and pass it in
-            const auto token = Auth::createToken(claims, 30 * 60); // Token valid for 30mins
+            const auto token = m_auth->createToken(claims, 30 * 60); // Token valid for 30mins
 
             const std::string url = std::format("http://localhost:{}/mb/setup?token={}", m_port, token);
-            LogOrigin::info("Admin Setup", fmt::format(
+            logger().info("Admin Setup", fmt::format(
                                 "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins --add <email> <password>\n",
                                 url));
 
@@ -365,14 +376,14 @@ namespace mb {
 #elif __linux__
             const std::string command = "xdg-open " + url;
 #else
-            LogOrigin::critical("Unsupported Platform", "Unsupported platform");
+            logger().critical("Unsupported Platform", "Unsupported platform");
 #endif
 
             if (int result = std::system(command.c_str()); result != 0) {
-                LogOrigin::info("Browser Open Failed", fmt::format("Could not open browser, result code: {}", result));
+                logger().warn("Browser Open Failed", fmt::format("Could not open browser, result code: {}", result));
             }
         } catch (const std::exception &e) {
-            LogOrigin::critical("Admin Dashboard Failed",
+            logger().critical("Admin Dashboard Failed",
                                 fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));
         }
 
@@ -396,12 +407,24 @@ namespace mb {
         throw MantisException(500, "Expected database type of either `sqlite3` or `postgresql` but got {}", dbType);
     }
 
-    std::string MantisBase::jwtSecretKey() {
-        // This is the default secret key, override it through environment variable
-        // MB_JWT_SECRET, recommended to override this key
-        // TODO add commandline input for overriding the key
-        // or explictly require that key to be set before we boot.
-        return getEnvOrDefault("MB_JWT_SECRET", "<our-very-secret-JWT-key>");
+    std::string MantisBase::jwtSecretKey() const {
+        // Prefer an explicitly configured secret. In production the server
+        // refuses to start when this is unset (see MantisBase::run()), so we
+        // never sign tokens with a shipped default.
+        if (auto secret = getEnvOrDefault("MB_JWT_SECRET", std::string{}); !secret.empty())
+            return secret;
+
+        // Development-only fallback. Reaching this in production would mean the
+        // startup guard was bypassed, so fail loudly rather than emit a token
+        // signed with a well-known key.
+        if (isDevMode())
+            return "mb-insecure-dev-secret-do-not-use-in-production";
+
+        throw MantisException(500, "MB_JWT_SECRET is not configured");
+    }
+
+    std::string MantisBase::snowflakeId() const {
+        return std::to_string(m_snowflakeId.nextID());
     }
 
     std::string MantisBase::appVersion() {
@@ -433,7 +456,7 @@ namespace mb {
             return;
 
         m_port = port;
-        LogOrigin::debug("Server Configuration", fmt::format("Setting Server Port to {}", port));
+        logger().debug("Server Configuration", fmt::format("Setting Server Port to {}", port));
     }
 
     std::string MantisBase::host() const {
@@ -445,7 +468,7 @@ namespace mb {
             return;
 
         m_host = host;
-        LogOrigin::debug("Server Configuration", fmt::format("Setting Server Host to {}", host));
+        logger().debug("Config", fmt::format("Setting Server Host to {}", host));
     }
 
     int MantisBase::poolSize() const {
@@ -532,34 +555,34 @@ namespace mb {
     }
 
 #ifdef MB_SCRIPTING_ENABLED
-    void MantisApp::initJSEngine() {
-        // TRACE_CLASS_METHOD();
+    void MantisBase::initJSEngine() {
+        m_dukCtx = duk_create_heap_default();
+        if (!m_dukCtx) {
+            logger().critical("Scripting", "Failed to create Duktape heap");
+            return;
+        }
 
-        // ---------------------------------------------- //
-        // Register `app` object
-        // ---------------------------------------------- //
-        // Register the singleton instance as a global
         dukglue_register_global(m_dukCtx, this, "app");
 
         // Properties
-        dukglue_register_property(m_dukCtx, &MantisApp::host, &MantisApp::setHost, "host");
-        dukglue_register_property(m_dukCtx, &MantisApp::port, &MantisApp::setPort, "port");
-        dukglue_register_property(m_dukCtx, &MantisApp::poolSize, &MantisApp::setPoolSize, "poolSize");
-        dukglue_register_property(m_dukCtx, &MantisApp::publicDir, &MantisApp::setPublicDir, "publicDir");
-        dukglue_register_property(m_dukCtx, &MantisApp::dataDir, &MantisApp::setDataDir, "dataDir");
-        dukglue_register_property(m_dukCtx, &MantisApp::isDevMode, nullptr, "devMode");
-        dukglue_register_property(m_dukCtx, &MantisApp::dbTypeByName, nullptr, "dbType");
-        dukglue_register_property(m_dukCtx, &MantisApp::jwtSecretKey_JSWrapper, nullptr, "secretKey");
-        dukglue_register_property(m_dukCtx, &MantisApp::version_JSWrapper, nullptr, "version");
+        dukglue_register_property(m_dukCtx, &MantisBase::host, &MantisBase::setHost, "host");
+        dukglue_register_property(m_dukCtx, &MantisBase::port, &MantisBase::setPort, "port");
+        dukglue_register_property(m_dukCtx, &MantisBase::poolSize, &MantisBase::setPoolSize, "poolSize");
+        dukglue_register_property(m_dukCtx, &MantisBase::publicDir, &MantisBase::setPublicDir, "publicDir");
+        dukglue_register_property(m_dukCtx, &MantisBase::dataDir, &MantisBase::setDataDir, "dataDir");
+        dukglue_register_property(m_dukCtx, &MantisBase::isDevMode, nullptr, "devMode");
+        dukglue_register_property(m_dukCtx, &MantisBase::dbType, nullptr, "dbType");
+        dukglue_register_property(m_dukCtx, &MantisBase::jwtSecretKey_JSWrapper, nullptr, "secretKey");
+        dukglue_register_property(m_dukCtx, &MantisBase::version_JSWrapper, nullptr, "version");
 
         // `app.close()`
-        dukglue_register_method(m_dukCtx, &MantisApp::close, "close");
+        dukglue_register_method(m_dukCtx, &MantisBase::close, "close");
         // `app.quit(1, "Just crashed?")`
-        dukglue_register_method(m_dukCtx, &MantisApp::quit_JSWrapper, "quit");
+        dukglue_register_method(m_dukCtx, &MantisBase::quit_JSWrapper, "quit");
         // `app.db()`
-        dukglue_register_method(m_dukCtx, &MantisApp::duk_db, "db");
+        dukglue_register_method(m_dukCtx, &MantisBase::duk_db, "db");
         // `app.router()`
-        dukglue_register_method(m_dukCtx, &MantisApp::duk_router, "router");
+        dukglue_register_method(m_dukCtx, &MantisBase::duk_router, "router");
 
         MantisRequest::registerDuktapeMethods();
         MantisResponse::registerDuktapeMethods();
@@ -585,21 +608,20 @@ namespace mb {
         registerUtilsToDuktapeEngine();
 
         // DATABASE methods
-        DatabaseUnit::registerDuktapeMethods();
+        Database::registerDuktapeMethods();
 
-        // Router methods for dukttape
-        RouterUnit::registerDuktapeMethods();
+        // TODO: Router::registerDuktapeMethods() — not yet ported to Drogon
     }
 
-    void MantisApp::loadStartScript() const {
+    void MantisBase::loadStartScript() const {
         // Look for index.js as the entry point
         const auto entryPoint = (fs::path(m_scriptsDir) / "index.mantis.js").string();
         loadAndExecuteScript(entryPoint);
     }
 
-    void MantisApp::loadAndExecuteScript(const std::string &filePath) const {
+    void MantisBase::loadAndExecuteScript(const std::string &filePath) const {
         if (!fs::exists(fs::path(filePath))) {
-            LogOrigin::trace("File Execution",
+            logger().trace("File Execution",
                              fmt::format("Executing a file that does not exist, path `{}`", filePath));
             return;
         }
@@ -613,26 +635,26 @@ namespace mb {
         try {
             dukglue_peval<void>(m_dukCtx, scriptContent.c_str());
         } catch (const DukErrorException &e) {
-            LogOrigin::critical("File Load Error",
+            logger().critical("File Load Error",
                                 fmt::format("Error loading file at {} \n\tError: {}", filePath, e.what()));
         }
     }
 
-    void MantisApp::loadScript(const std::string &relativePath) const {
+    void MantisBase::loadScript(const std::string &relativePath) const {
         // Construct full path relative to scripts directory
         const auto fullPath = fs::path(m_scriptsDir) / relativePath;
         loadAndExecuteScript(fullPath.string());
     }
 
-    void MantisApp::quit_JSWrapper(const int code, const std::string &msg) {
+    void MantisBase::quit_JSWrapper(const int code, const std::string &msg) {
         quit(code, msg);
     }
 
-    DatabaseUnit *MantisApp::duk_db() const {
+    Database *MantisBase::duk_db() const {
         return m_database.get();
     }
 
-    RouterUnit *MantisApp::duk_router() const {
+    Router *MantisBase::duk_router() const {
         return m_router.get();
     }
 #endif

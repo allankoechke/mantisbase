@@ -13,14 +13,15 @@
 #include <soci/postgresql/soci-postgresql.h>
 #endif
 
+#if MB_HAS_MYSQL
+#include <soci/mysql/soci-mysql.h>
+#endif
+
 namespace mb {
-    Database::Database() : m_connPool(nullptr), mbApp(MantisBase::instance()) {
+    Database::Database(const MantisBase &app) : m_connPool(nullptr), mbApp(app) {
     }
 
-    Database::~Database() {
-        disconnect();
-        std::cout << "Database Des()" << std::endl;
-    }
+    Database::~Database() { disconnect(); }
 
     bool Database::connect(const std::string &conn_str) {
         // If pool size is invalid, just return
@@ -43,14 +44,19 @@ namespace mb {
                 // For SQLite, lets explicitly define location and name of the database
                 // we intend to use within the `dataDir`
                 auto sqlite_db_path = joinPaths(mbApp.dataDir(), "mantis.db").string();
-                m_connStr = std::format("db={} timeout=30 shared_cache=true synchronous=normal foreign_keys=on",
+                // Private cache (the default) + WAL gives concurrent readers with
+                // a single writer via the connection pool. shared_cache is a
+                // legacy mode discouraged with WAL (adds table-level lock
+                // contention), so it is intentionally not enabled. timeout=30
+                // sets a 30s busy timeout.
+                m_connStr = std::format("db={} timeout=30 synchronous=normal foreign_keys=on",
                                            sqlite_db_path);
             }
 
             auto pool_size = static_cast<size_t>(mbApp.poolSize());
             // Populate the pools with db connections
             for (std::size_t i = 0; i < pool_size; ++i) {
-                LogOrigin::dbTrace("Session Creation",
+                mbApp.logger().trace("Database", "Session Creation",
                                    fmt::format("Creating db session for index `{}/{}`", i, pool_size));
 
                 if (db_type == "sqlite3") {
@@ -79,33 +85,45 @@ namespace mb {
                     sql.set_logger(new MantisLoggerImpl()); // Set custom query logger
 
                     // Log SQL insert values in DevMode only!
-                    if (MantisBase::instance().isDevMode())
+                    if (mbApp.isDevMode())
                         sql.set_query_context_logging_mode(soci::log_context::always);
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
 #else
-                    LogOrigin::dbWarn("PostgreSQL Not Implemented",
+                    mbApp.logger().warn("Database", "PostgreSQL Not Implemented",
                                       "Database Connection for `PostgreSQL` has not been implemented yet!");
                     return false;
 #endif
                 } else if (db_type == "mysql") {
-                    LogOrigin::dbWarn("MySQL Not Implemented", "Database Connection for `MySQL` not implemented yet!");
+#if MB_HAS_MYSQL
+                    soci::session &sql = m_connPool->at(i);
+                    sql.open(soci::mysql, m_connStr);
+                    sql.set_logger(new MantisLoggerImpl());
+
+                    if (mbApp.isDevMode())
+                        sql.set_query_context_logging_mode(soci::log_context::always);
+                    else
+                        sql.set_query_context_logging_mode(soci::log_context::on_error);
+#else
+                    mbApp.logger().warn("Database", "MySQL Not Available",
+                                      "MySQL support was not enabled at build time. Rebuild with -DMB_DB_MYSQL=ON");
                     return false;
+#endif
                 } else {
-                    LogOrigin::dbWarn("Database Type Not Implemented",
+                    mbApp.logger().warn("Database", "Database Type Not Implemented",
                                       fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));
                     return false;
                 }
             }
         } catch (const std::exception &e) {
-            LogOrigin::dbCritical("Connection Error", fmt::format("Database Connection error: {}", e.what()));
+            mbApp.logger().critical("Database", "Connection Error", fmt::format("Database Connection error: {}", e.what()));
             return false;
         } catch (...) {
-            LogOrigin::dbCritical("Connection Error", "Database Connection error: Unknown Error");
+            mbApp.logger().critical("Database", "Connection Error", "Database Connection error: Unknown Error");
             return false;
         }
 
-        if (MantisBase::instance().dbType() == "sqlite3") writeCheckpoint();
+        if (mbApp.dbType() == "sqlite3") writeCheckpoint();
 
         return true;
     }
@@ -130,16 +148,16 @@ namespace mb {
             try {
                 if (soci::session &sess = m_connPool->at(i); sess.is_connected()) {
                     sess.close();
-                    LogOrigin::dbDebug("Session Shutdown",
+                    mbApp.logger().debug("Database", "Session Shutdown",
                                        fmt::format("DB Shutdown: Closing soci::session object  {} of {} connections",
                                                    i + 1, pool_size));
                 } else {
-                    LogOrigin::dbDebug("Session Shutdown", fmt::format(
+                    mbApp.logger().debug("Database", "Session Shutdown", fmt::format(
                                            "DB Shutdown: soci::session object at index `{}` of {} connections is not connected.",
                                            i + 1, pool_size));
                 }
             } catch (const soci::soci_error &e) {
-                LogOrigin::dbCritical("Disconnection Error",
+                mbApp.logger().critical("Database", "Disconnection Error",
                                       fmt::format("Database disconnection soci::error at index `{}`: {}", i, e.what()));
             } catch (...) {
                 // Ignore other errors during session close
@@ -149,7 +167,7 @@ namespace mb {
         // Reset the connection pool
         m_connPool.reset();
 
-        LogOrigin::dbDebug("Shutdown Complete", "DB Shutdown: Session disconnection completed.");
+        mbApp.logger().debug("Database", "Shutdown Complete", "DB Shutdown: Session disconnection completed.");
     }
 
     bool Database::createSysTables() const {
@@ -158,7 +176,7 @@ namespace mb {
 
         try {
             // Create admin table, for managing and auth for admin accounts
-            EntitySchema admin_schema{"mb_admins", "auth"};
+            EntitySchema admin_schema{mbApp, "mb_admins", "auth"};
             admin_schema.removeField("name");
             admin_schema.setSystem(true);
             *sql << admin_schema.toDDL();
@@ -166,13 +184,13 @@ namespace mb {
             // Internal use for service accounts
             // Use `base` type to avoid login via /api/auth/*
             // Used for `id` to track given tokens for single use only
-            EntitySchema service_schema{"mb_service_acc", "base"};
+            EntitySchema service_schema{mbApp, "mb_service_acc", "base"};
             service_schema.setSystem(true);
             service_schema.setHasApi(false);
             *sql << service_schema.toDDL();
 
             // Create and manage other db tables, keeping track of access rules, schema, etc.!
-            EntitySchema tables_schema{"mb_tables", "base"};
+            EntitySchema tables_schema{mbApp, "mb_tables", "base"};
             tables_schema.setSystem(true);
             tables_schema.addField(EntitySchemaField({
                 {"name", "schema"}, {"type", "json"}, {"required", true}, {"system", true}
@@ -180,25 +198,125 @@ namespace mb {
             *sql << tables_schema.toDDL();
 
             // A Key - Value settings store, where the key is hashed as the table id
-            EntitySchema store_schema{"mb_store", "base"};
+            EntitySchema store_schema{mbApp, "mb_store", "base"};
             store_schema.setSystem(true);
             store_schema.addField(EntitySchemaField({
                 {"name", "value"}, {"type", "json"}, {"required", true}, {"system", true}
             }));
             *sql << store_schema.toDDL();
 
+            // Sessions table for JWT session tracking
+            *sql << "CREATE TABLE IF NOT EXISTS mb_sessions ("
+                    "id TEXT PRIMARY KEY, "
+                    "entity_name TEXT NOT NULL, "
+                    "user_id TEXT NOT NULL, "
+                    "token_hash TEXT NOT NULL, "
+                    "refresh_token_hash TEXT, "
+                    "expires_at TEXT NOT NULL, "
+                    "created TEXT NOT NULL"
+                    ")";
+
+            // API keys table
+            *sql << "CREATE TABLE IF NOT EXISTS mb_api_keys ("
+                    "id TEXT PRIMARY KEY, "
+                    "entity_name TEXT NOT NULL, "
+                    "user_id TEXT NOT NULL, "
+                    "key_hash TEXT NOT NULL UNIQUE, "
+                    "label TEXT NOT NULL DEFAULT 'API Key', "
+                    "permissions TEXT NOT NULL DEFAULT '[]', "
+                    "last_used TEXT, "
+                    "created TEXT NOT NULL, "
+                    "expires_at TEXT"
+                    ")";
+            *sql << "CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON mb_api_keys(key_hash)";
+
+            // OAuth providers table
+            *sql << "CREATE TABLE IF NOT EXISTS mb_oauth_providers ("
+                    "id TEXT PRIMARY KEY, "
+                    "name TEXT NOT NULL UNIQUE, "
+                    "client_id TEXT NOT NULL DEFAULT '', "
+                    "client_secret_encrypted TEXT NOT NULL DEFAULT '', "
+                    "discovery_url TEXT NOT NULL DEFAULT '', "
+                    "scopes TEXT NOT NULL DEFAULT 'openid email profile', "
+                    "is_preset INTEGER NOT NULL DEFAULT 0, "
+                    "enabled INTEGER NOT NULL DEFAULT 1"
+                    ")";
+
+            // Entity-specific OAuth configuration
+            *sql << "CREATE TABLE IF NOT EXISTS mb_entity_oauth_config ("
+                    "id TEXT PRIMARY KEY, "
+                    "entity_name TEXT NOT NULL, "
+                    "provider_id TEXT NOT NULL, "
+                    "enabled INTEGER NOT NULL DEFAULT 1, "
+                    "UNIQUE(entity_name, provider_id)"
+                    ")";
+
+            // OAuth state storage for PKCE flow
+            *sql << "CREATE TABLE IF NOT EXISTS mb_oauth_states ("
+                    "id TEXT PRIMARY KEY, "
+                    "state TEXT NOT NULL UNIQUE, "
+                    "pkce_verifier TEXT NOT NULL, "
+                    "entity_name TEXT NOT NULL, "
+                    "provider_id TEXT NOT NULL, "
+                    "redirect_uri TEXT NOT NULL, "
+                    "expires_at TEXT NOT NULL"
+                    ")";
+
+            // OAuth linked accounts
+            *sql << "CREATE TABLE IF NOT EXISTS mb_oauth_accounts ("
+                    "id TEXT PRIMARY KEY, "
+                    "entity_name TEXT NOT NULL, "
+                    "user_id TEXT NOT NULL, "
+                    "provider_id TEXT NOT NULL, "
+                    "provider_user_id TEXT NOT NULL, "
+                    "access_token_encrypted TEXT, "
+                    "refresh_token_encrypted TEXT, "
+                    "id_token_sub TEXT, "
+                    "linked_at TEXT NOT NULL, "
+                    "UNIQUE(entity_name, provider_id, provider_user_id)"
+                    ")";
+
+            // Seed default OAuth provider presets
+            seedOAuthPresets(*sql);
+
             // Commit changes
             tr.commit();
-
-            // Enforce migration once settings object is created!
-            // MantisBase::instance().settings().migrate();
 
             return true;
         } catch (std::exception &e) {
             tr.rollback();
-            LogOrigin::dbCritical("System Tables Creation Failed",
+            mbApp.logger().critical("Database", "System Tables Creation Failed",
                                   fmt::format("Create System Tables Failed: {}", e.what()));
             return false;
+        }
+    }
+
+    void Database::seedOAuthPresets(soci::session &sql) {
+        struct Preset {
+            std::string name;
+            std::string discovery_url;
+            std::string scopes;
+        };
+
+        const std::vector<Preset> presets = {
+            {"google", "https://accounts.google.com/.well-known/openid-configuration", "openid email profile"},
+            {"github", "", "read:user user:email"},
+            {"discord", "", "identify email"},
+            {"microsoft", "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration", "openid email profile"}
+        };
+
+        for (const auto &[name, discovery_url, scopes] : presets) {
+            int count = 0;
+            sql << "SELECT COUNT(*) FROM mb_oauth_providers WHERE name = :name",
+                soci::use(name), soci::into(count);
+
+            if (count == 0) {
+                auto id = generateTimeBasedId();
+                sql << "INSERT INTO mb_oauth_providers (id, name, client_id, client_secret_encrypted, "
+                        "discovery_url, scopes, is_preset, enabled) "
+                        "VALUES (:id, :name, '', '', :du, :sc, 1, 1)",
+                    soci::use(id), soci::use(name), soci::use(discovery_url), soci::use(scopes);
+            }
         }
     }
 
@@ -233,7 +351,7 @@ namespace mb {
                         *sql << "PRAGMA wal_checkpoint(TRUNCATE)";
                     }
                 } catch (std::exception &e) {
-                    LogOrigin::dbCritical("SOCI Connection Error",
+                    mbApp.logger().critical("Database", "SOCI Connection Error",
                                           fmt::format("Database Connection SOCI::Error: {}", e.what()));
                 }
             }
@@ -244,13 +362,13 @@ namespace mb {
     }
 
 #ifdef MB_SCRIPTING_ENABLED
-    void DatabaseUnit::registerDuktapeMethods() {
-        const auto ctx = MantisApp::instance().ctx();
+    void Database::registerDuktapeMethods() {
+        const auto ctx = MantisBase::instance().ctx();
 
-        // DatabaseUnit methods
-        dukglue_register_property(ctx, &DatabaseUnit::isConnected, nullptr, "connected");
-        dukglue_register_method(ctx, &DatabaseUnit::session, "session");
-        dukglue_register_method_varargs(ctx, &DatabaseUnit::query, "query");
+        // Database methods
+        dukglue_register_property(ctx, &Database::isConnected, nullptr, "connected");
+        dukglue_register_method(ctx, &Database::session, "session");
+        dukglue_register_method_varargs(ctx, &Database::query, "query");
 
         // soci::session methods
         dukglue_register_method(ctx, &soci::session::close, "close");
@@ -271,14 +389,14 @@ namespace mb {
 
 
 #ifdef MB_SCRIPTING_ENABLED
-    duk_ret_t DatabaseUnit::query(duk_context *ctx) {
+    duk_ret_t Database::query(duk_context *ctx) {
         // TRACE_CLASS_METHOD();
 
         // Get number of arguments
         const int nargs = duk_get_top(ctx);
 
         if (nargs < 1) {
-            LogOrigin::dbCritical("Invalid Arguments", "[JS] Expected at least 1 argument (query string)");
+            mbApp.logger().critical("Database", "Invalid Arguments", "[JS] Expected at least 1 argument (query string)");
             duk_error(ctx, DUK_ERR_TYPE_ERROR, "Expected at least 1 argument (query string)");
             return DUK_RET_TYPE_ERROR;
         }
@@ -293,7 +411,7 @@ namespace mb {
         try {
             for (int i = 1; i < nargs; i++) {
                 if (!duk_is_object(ctx, i)) {
-                    LogOrigin::dbCritical("Invalid Arguments", "[JS] Arguments after query must be objects.");
+                    mbApp.logger().critical("Database", "Invalid Arguments", "[JS] Arguments after query must be objects.");
                     duk_error(ctx, DUK_ERR_TYPE_ERROR, "Arguments after query must be objects");
                     return DUK_RET_TYPE_ERROR;
                 }
@@ -312,56 +430,56 @@ namespace mb {
                     // Parse into nlohmann::json
                     json_obj = nlohmann::json::parse(json_str);
                 } catch (const std::exception &e) {
-                    LogOrigin::dbCritical("Parsing Exception", fmt::format("[JS] Parsing exception: {}", e.what()));
+                    mbApp.logger().critical("Database", "Parsing Exception", fmt::format("[JS] Parsing exception: {}", e.what()));
                 } catch (const char *e) {
-                    LogOrigin::dbCritical("Parsing Exception", "[JS] Unknown Parsing exception");
+                    mbApp.logger().critical("Database", "Parsing Exception", "[JS] Unknown Parsing exception");
                 }
-                LogOrigin::dbTrace("Parsing Complete", fmt::format("After Parsing, object? `{}`", json_obj.dump()));
+                mbApp.logger().trace("Database", "Parsing Complete", fmt::format("After Parsing, object? `{}`", json_obj.dump()));
 
                 for (auto &[key, value]: json_obj.items()) {
                     if (value.is_string()) {
                         auto str_val = value.get<std::string>();
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Str Value: `{}` - `{}`", key, str_val));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Str Value: `{}` - `{}`", key, str_val));
                         vals.set(key, str_val);
-                        LogOrigin::dbTrace("Value Binding", "[JS] After Set Value");
-                        LogOrigin::dbTrace("Value Binding",
+                        mbApp.logger().trace("Database", "Value Binding", "[JS] After Set Value");
+                        mbApp.logger().trace("Database", "Value Binding",
                                            fmt::format("[JS] After Set Value To: `{}`", vals.get<std::string>(key)));
                     } else if (value.is_number_integer()) {
                         int int_val = value.get<int>();
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Int Value: `{}`", int_val));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Int Value: `{}`", int_val));
                         vals.set(key, int_val);
                     } else if (value.is_number_float()) {
                         double double_val = value.get<double>();
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Double Value: `{}`", double_val));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Double Value: `{}`", double_val));
                         vals.set(key, double_val);
                     } else if (value.is_boolean()) {
                         bool bool_val = value.get<bool>();
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] Bool Value: `{}`", bool_val));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Bool Value: `{}`", bool_val));
                         vals.set(key, bool_val);
                     } else if (value.is_null()) {
                         std::optional<int> val;
-                        LogOrigin::dbTrace("Value Binding", "[JS] Null Value: `null`");
+                        mbApp.logger().trace("Database", "Value Binding", "[JS] Null Value: `null`");
                         vals.set(key, val, soci::i_null);
                     } else if (value.is_object() || value.is_array()) {
-                        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] JSON Value: `{}`", value.dump()));
+                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] JSON Value: `{}`", value.dump()));
                         vals.set(key, value);
                     } else {
                         auto err = std::format("Could not cast type at {} to DB supported types.", (i - 1));
-                        LogOrigin::dbCritical("Value Casting Error", fmt::format("[JS] Casting Value > {}", err));
+                        mbApp.logger().critical("Database", "Value Casting Error", fmt::format("[JS] Casting Value > {}", err));
                         duk_error(ctx, DUK_ERR_TYPE_ERROR, err.c_str());
                         return DUK_RET_TYPE_ERROR;
                     }
                 }
             }
         } catch (const std::exception &e) {
-            LogOrigin::dbCritical("Binding Values Failed",
+            mbApp.logger().critical("Database", "Binding Values Failed",
                                   fmt::format("[JS] Getting Binding Values Failed: Why? {}", e.what()));
         }
 
         // Get SQL Session
         auto sql = session();
 
-        LogOrigin::dbTrace("Value Binding", fmt::format("[JS] soci::value binding? {}", nargs - 1));
+        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] soci::value binding? {}", nargs - 1));
 
         // Execute SQL Statement
         soci::row data_row;
@@ -376,7 +494,7 @@ namespace mb {
             results.push_back(obj);
         }
 
-        LogOrigin::dbTrace("Query Results", fmt::format("[JS] Results: {}", results.dump()));
+        mbApp.logger().trace("Database", "Query Results", fmt::format("[JS] Results: {}", results.dump()));
 
         if (results.empty()) {
             // Return null

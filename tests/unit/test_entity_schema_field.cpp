@@ -140,14 +140,7 @@ TEST(EntitySchemaField, ValidFieldTypes) {
     EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("bool"));
     EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("file"));
     EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("files"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int8"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("uint8"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int16"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("uint16"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int32"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("uint32"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int64"));
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("uint64"));
+    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int"));
     EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("json"));
     
     EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("invalid"));

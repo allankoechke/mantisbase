@@ -34,9 +34,9 @@ namespace mb
         }
         catch (const fs::filesystem_error& e)
         {
-            LogOrigin::critical("Directory Creation Error",
-                fmt::format("Filesystem error while creating directory '{}', reason: {}",
-                          path.string(), e.what()));
+            // LogOrigin::critical("Directory Creation Error",
+            //     fmt::format("Filesystem error while creating directory '{}', reason: {}",
+            //               path.string(), e.what()));
             return false;
         }
     }

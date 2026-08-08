@@ -10,6 +10,7 @@
 #define MANTISBASE_ENTITY_H
 
 #include <string>
+#include <memory>
 #include "mantisbase/mantis.h"
 #include "mantisbase/core/exceptions.h"
 #include "mantisbase/utils/soci_wrappers.h"
@@ -17,8 +18,15 @@
 #include "access_rules.h"
 
 namespace mb {
+    class MantisBase; // forward declaration; Entity holds a non-owning pointer to it
+
     using Record = nlohmann::json;  ///< Single database record as JSON object
     using Records = std::vector<Record>;  ///< Collection of database records
+
+    /// Upper bound on the number of records returned by a single list() page.
+    /// Requests larger than this are clamped so one request cannot force an
+    /// unbounded query or response allocation.
+    inline constexpr int MAX_LIST_PAGE_SIZE = 500;
 
     /**
      * @brief Represents a database table/entity with schema and CRUD operations.
@@ -28,28 +36,38 @@ namespace mb {
      * schema information and access rules.
      *
      * @code
-     * // Create entity from schema JSON
-     * json schema = {{"name", "users"}, {"type", "base"}, {"fields", ...}};
-     * Entity entity(schema);
+     * auto app = MantisBase::create();
+     * json schema = {{"name", "users"}, {"type", "base"}, {"fields", json::array()}};
+     * Entity entity(*app, schema);
      *
-     * // Create entity with name and type
-     * Entity entity("posts", "base");
+     * // Or by name after the schema exists in the database:
+     * Entity users = app->entity("users");
      * @endcode
      */
-    class Entity {
+    class Entity: public IMantisBase {
     public:
         /**
-         * @brief Construct entity from schema JSON object.
+         * @brief Construct entity from schema JSON object, bound to its app.
+         *
+         * The app is injected at construction so every Entity is always bound to
+         * the services (database, realtime) its CRUD operations need — there is
+         * no separate bind step to forget. Copies carry the binding.
+         *
+         * @param app Owning application. Stored non-owning; must outlive the entity.
          * @param schema JSON object containing table schema (name, type, fields, rules, etc.)
          */
-        explicit Entity(const nlohmann::json &schema);
-        
+        Entity(const MantisBase &app, const nlohmann::json &schema);
+
         /**
-         * @brief Construct entity with name and type.
+         * @brief Construct entity with name and type, bound to its app.
+         * @param app Owning application (see the schema constructor).
          * @param name Table name
          * @param type Entity type ("base", "auth", or "view")
          */
-        explicit Entity(const std::string &name, const std::string& type);
+        Entity(const MantisBase &app, const std::string &name, const std::string &type);
+
+        Entity(Entity&) = default; // default copy constructor
+        Entity(Entity&&) = default; // default move constructor
 
         // --------------- DB TABLE OPS ------------------ //
         /**
@@ -152,8 +170,9 @@ namespace mb {
          * @param opts Optional parameters (currently unused)
          * @return Created record with generated ID and timestamps
          * @code
+         * auto users = app.entity("users");
          * json newUser = {{"name", "John"}, {"email", "john@example.com"}};
-         * Record created = entity.create(newUser);
+         * Record created = users.create(newUser);
          * @endcode
          */
         [[nodiscard]] Record create(const json &record, const json &opts = json::object()) const;
@@ -232,7 +251,13 @@ namespace mb {
                                                         const std::vector<std::string> &columns) const;
 
     private:
-        nlohmann::json m_schema;
+
+        /// Immutable schema shared across copies. An Entity is never mutated
+        /// after construction, so copies (returned from the cache on every
+        /// request) only bump a refcount instead of deep-copying the JSON, and
+        /// the pointed-to schema is safe to read concurrently from multiple
+        /// threads.
+        std::shared_ptr<const nlohmann::json> m_schema;
     };
 } // mb
 

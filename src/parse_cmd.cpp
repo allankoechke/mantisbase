@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <exception>
 
 #include "mantisbase/core/realtime.h"
 #include "mantisbase/core/models/entity_schema.h"
@@ -41,8 +42,7 @@ namespace mb {
             if (normalized == "psql" || normalized == "postgresql" || normalized == "postgres")
                 return "postgresql";
 
-            MantisBase::quit(-1, std::format("Backend Database `{}` is unsupported!", db));
-            return "sqlite3";
+            throw MantisException(500, std::format("Backend Database `{}` is unsupported!", db));
         }
 
         std::string resolveDbUrl(const std::optional<std::string> &cli_url) {
@@ -55,15 +55,15 @@ namespace mb {
                 if (args[i] != "admins" || args[i + 1] != "--add")
                     continue;
 
-                const bool has_email = i + 2 < args.size() && !args[i + 2].starts_with("-");
+                const bool has_email = i + 2 < args.size() && !args[i + 2].starts_with('-');
                 if (has_email)
                     break;
 
                 const auto email = getEnvOrDefault("MB_DEFAULT_ADMIN_EMAIL", "");
                 const auto password = getEnvOrDefault("MB_DEFAULT_ADMIN_PASSWORD", "");
                 if (email.empty() || password.empty()) {
-                    MantisBase::quit(400, "admins --add requires email/password arguments or "
-                              "MB_DEFAULT_ADMIN_EMAIL/MB_DEFAULT_ADMIN_PASSWORD env vars.");
+                    throw MantisException(400, "admins --add requires email/password arguments or "
+                                          "MB_DEFAULT_ADMIN_EMAIL/MB_DEFAULT_ADMIN_PASSWORD env vars.");
                 }
 
                 args.insert(args.begin() + static_cast<std::ptrdiff_t>(i + 2), {email, password});
@@ -71,19 +71,22 @@ namespace mb {
             }
         }
 
-        json loadJsonInput(const std::string &value) {
-            const fs::path path = value;
-            if (fs::exists(path) && fs::is_regular_file(path)) {
+        std::pair<json, std::string> loadJsonInput(const std::string &value) {
+            if (const fs::path path = value; fs::exists(path) && fs::is_regular_file(path)) {
                 std::ifstream file(path);
                 if (!file.is_open())
                     throw MantisException(400, std::format("Could not open JSON file `{}`", value));
 
-                json body;
-                file >> body;
-                return body;
+                try {
+                    json body;
+                    file >> body;
+                    return make_pair(body, "");
+                } catch (const std::exception &e) {
+                    return make_pair(json::object(), e.what());
+                }
             }
 
-            return json::parse(value);
+            return tryParseJsonStr(value);
         }
 
         std::string schemaIdFromNameOrId(const std::string &entity_name_or_id) {
@@ -96,32 +99,33 @@ namespace mb {
             return EntitySchema::genEntityId(entity_name_or_id);
         }
 
-        void printSchemaList() {
-            const auto tables = EntitySchema::listTables();
+        void printSchemaList(MantisBase &app) {
+            const auto tables = EntitySchema::listTables(app);
             std::cout << std::left
-                      << std::setw(24) << "NAME"
-                      << std::setw(10) << "TYPE"
-                      << std::setw(8) << "SYSTEM"
-                      << std::setw(8) << "HAS_API"
-                      << "ID"
-                      << std::endl;
+                    << std::setw(24) << "NAME"
+                    << std::setw(10) << "TYPE"
+                    << std::setw(8) << "SYSTEM"
+                    << std::setw(8) << "HAS_API"
+                    << "ID"
+                    << std::endl;
 
             for (const auto &row: tables) {
                 const auto &schema = row.at("schema");
                 std::cout << std::left
-                          << std::setw(24) << schema.value("name", "")
-                          << std::setw(10) << schema.value("type", "")
-                          << std::setw(8) << (schema.value("system", false) ? "true" : "false")
-                          << std::setw(8) << (schema.value("has_api", true) ? "true" : "false")
-                          << row.at("id").get<std::string>()
-                          << std::endl;
+                        << std::setw(24) << schema.value("name", "")
+                        << std::setw(10) << schema.value("type", "")
+                        << std::setw(8) << (schema.value("system", false) ? "true" : "false")
+                        << std::setw(8) << (schema.value("has_api", true) ? "true" : "false")
+                        << row.at("id").get<std::string>()
+                        << std::endl;
             }
         }
 
         void runMigrationsUp(MantisBase &app) {
             const auto dir = fs::path(app.migrationsDir());
             if (!fs::exists(dir)) {
-                LogOrigin::info("Migrations", fmt::format("No migrations directory at `{}`, nothing to apply.", dir.string()));
+                app.logger().info("Migrations",
+                                  fmt::format("No migrations directory at `{}`, nothing to apply.", dir.string()));
                 return;
             }
 
@@ -133,14 +137,20 @@ namespace mb {
 
             std::ranges::sort(files);
             if (files.empty()) {
-                LogOrigin::info("Migrations", "No migration JSON files found.");
+                app.logger().info("Migrations", "No migration JSON files found.");
                 return;
             }
 
             for (const auto &file: files) {
-                LogOrigin::info("Migrations", fmt::format("Applying migration `{}`", file.filename().string()));
-                const auto body = loadJsonInput(file.string());
-                const auto eSchema = EntitySchema::fromSchema(body);
+                app.logger().info("Migrations", fmt::format("Applying migration `{}`", file.filename().string()));
+                const auto [body, parse_err] = loadJsonInput(file.string());
+
+                if (!parse_err.empty()) {
+                    app.logger().info("Migrations", "Migration Error", parse_err);
+                    app.quit(500);
+                }
+
+                auto eSchema = EntitySchema::fromSchema(app, body);
                 if (const auto err = eSchema.validate(); err.has_value())
                     throw MantisException(400, err.value());
 
@@ -148,12 +158,112 @@ namespace mb {
             }
         }
 
-        void runMigrationsDown(MantisBase &) {
-            LogOrigin::warn("Migrations", "Migration rollback (`--down`) is not implemented yet.");
+        void runMigrationsDown(const MantisBase &app) {
+            app.logger().warn("Migrations", "Migration rollback (`--down`) is not implemented yet.");
         }
 
         int countExclusiveFlags(const std::initializer_list<bool> flags) {
             return static_cast<int>(std::ranges::count(flags, true));
+        }
+
+        void runMigrateDump(MantisBase &app, const std::string &output_path) {
+            fs::path dump_path(output_path);
+
+            const auto tables = EntitySchema::listTables(app);
+            json dump = json::array();
+
+            for (const auto &row: tables) {
+                const auto &schema = row.at("schema");
+                if (schema.value("system", false))
+                    continue;
+
+                dump.push_back({
+                    {"schema", schema}
+                });
+            }
+
+            std::ofstream out(dump_path);
+            if (!out.is_open())
+                throw MantisException(500,
+                    std::format("Could not open output file `{}` for migration dump", dump_path.string()));
+
+            out << dump.dump(2);
+            out.close();
+
+            app.logger().info("Migrate", fmt::format("Dumped {} entity schemas to `{}`",
+                                                     dump.size(), output_path));
+        }
+
+        void runMigrateUp(MantisBase &app, const std::string &input_path) {
+            const fs::path path = input_path;
+            if (!fs::exists(path) || !fs::is_regular_file(path))
+                throw MantisException(400, std::format("Dump file `{}` does not exist", input_path));
+
+            std::ifstream in(path);
+            if (!in.is_open())
+                throw MantisException(500, std::format("Could not open dump file `{}`", input_path));
+
+            json dump;
+            in >> dump;
+            in.close();
+
+            if (!dump.is_array())
+                throw MantisException(400, "Dump file must contain a JSON array");
+
+            // Separate base/auth entities from view entities for dependency ordering
+            std::vector<json> base_entities;
+            std::vector<json> view_entities;
+
+            for (const auto &entry: dump) {
+                if (!entry.contains("schema"))
+                    throw MantisException(400, "Each dump entry must contain a `schema` key");
+
+                const auto &schema = entry.at("schema");
+                const auto type = schema.value("type", "base");
+                if (type == "view")
+                    view_entities.push_back(schema);
+                else
+                    base_entities.push_back(schema);
+            }
+
+            int restored = 0;
+
+            // Restore base/auth entities first
+            for (const auto &schema: base_entities) {
+                const auto name = schema.value("name", "");
+                if (EntitySchema::tableExists(app, name)) {
+                    app.logger().info("Migrate", fmt::format("Skipping existing entity `{}`", name));
+                    continue;
+                }
+
+                const auto eSchema = EntitySchema::fromSchema(app, schema);
+                if (const auto err = eSchema.validate(); err.has_value())
+                    throw MantisException(400, std::format("Validation failed for `{}`: {}", name, err.value()));
+
+                EntitySchema::createTable(eSchema);
+                app.logger().info("Migrate", fmt::format("Restored entity `{}`", name));
+                ++restored;
+            }
+
+            // Then restore view entities
+            for (const auto &schema: view_entities) {
+                const auto name = schema.value("name", "");
+                if (EntitySchema::tableExists(app, name)) {
+                    app.logger().info("Migrate", fmt::format("Skipping existing entity `{}`", name));
+                    continue;
+                }
+
+                const auto eSchema = EntitySchema::fromSchema(app, schema);
+                if (const auto err = eSchema.validate(); err.has_value())
+                    throw MantisException(400, std::format("Validation failed for `{}`: {}", name, err.value()));
+
+                EntitySchema::createTable(eSchema);
+                app.logger().info("Migrate", fmt::format("Restored view entity `{}`", name));
+                ++restored;
+            }
+
+            app.logger().info("Migrate", fmt::format("Restored {} entity schemas from `{}`",
+                                                     restored, input_path));
         }
     }
 
@@ -207,12 +317,13 @@ namespace mb {
                 .scan<'i', int>()
                 .help("Database connection pool size (default: 4 for sqlite3, 10 for postgresql)");
 
+        // `mantisbase admin` subcommand
         argparse::ArgumentParser admins_command("admins");
         admins_command.add_description("Manage admin accounts");
         admins_command.add_argument("--add")
                 .nargs(2)
-                // .metavar("EMAIL", "PASSWORD")
-                .help("Add admin account (or use MB_DEFAULT_ADMIN_EMAIL/PASSWORD with `--add` alone via env expansion)");
+                .help(
+                    "Add admin account (or use MB_DEFAULT_ADMIN_EMAIL/PASSWORD with `--add` alone via env expansion)");
         admins_command.add_argument("--ls")
                 .flag()
                 .help("List admin accounts");
@@ -221,15 +332,7 @@ namespace mb {
                 .metavar("IDENTIFIER")
                 .help("Remove admin by email or id");
 
-        argparse::ArgumentParser migrations_command("migrations");
-        migrations_command.add_description("Apply or rollback schema migrations");
-        migrations_command.add_argument("--up")
-                .flag()
-                .help("Apply migrations from the migrations directory");
-        migrations_command.add_argument("--down")
-                .flag()
-                .help("Rollback migrations (not yet implemented)");
-
+        // `mantisbase schema [OPTIONS]` subcommand
         argparse::ArgumentParser schema_command("schema");
         schema_command.add_description("Manage entity schemas");
         schema_command.add_argument("--ls")
@@ -245,13 +348,43 @@ namespace mb {
                 .help("Create schema from JSON string or file path");
         schema_command.add_argument("--update")
                 .nargs(2)
-                // .metavar("ENTITY", "JSON_OR_FILE")
                 .help("Update schema from JSON string or file path");
 
+        // `mantisbase migrate [subcommand]`
+        argparse::ArgumentParser migrate_schema_command("schema");
+        migrate_schema_command.add_description("Dump or restore entity schema");
+        migrate_schema_command.add_argument("--to")
+                .nargs(1)
+                .metavar("FILE")
+                .help("Dump all entity schemas to a JSON file");
+        migrate_schema_command.add_argument("--from")
+                .nargs(1)
+                .metavar("FILE")
+                .help("Restore entity schemas from a JSON dump file");
+
+        // `mantisbase migrate apply [--up/--down]`
+        argparse::ArgumentParser migrations_command("apply");
+        migrations_command.add_description("Apply or rollback database migrations");
+        migrations_command.add_argument("--up")
+                .flag()
+                .help("Apply migrations from the migrations directory");
+        migrations_command.add_argument("--down")
+                .flag()
+                .help("Rollback migrations (not yet implemented)");
+
+        // `mantisbase migrate [subcommand]`
+        argparse::ArgumentParser migrate_command("migrate");
+        migrate_command.add_description("Handle migration and schema ops");
+
+        // Migrate subcommand parsers
+        migrate_command.add_subparser(migrations_command);
+        migrate_command.add_subparser(migrate_schema_command);
+
+        // Program sub parsers
         program.add_subparser(serve_command);
         program.add_subparser(admins_command);
-        program.add_subparser(migrations_command);
         program.add_subparser(schema_command);
+        program.add_subparser(migrate_command);
 
         try {
             std::vector<const char *> argv;
@@ -297,37 +430,50 @@ namespace mb {
         const auto migrations_dir = dirFromPath(_migrationsDir);
         setMigrationsDir(migrations_dir.empty() ? dirFromPath("migrations") : migrations_dir);
 
-        Logger::initDb(dataDir());
-        LogOrigin::info("Initialization", fmt::format("Initializing mantisbase v{}", appVersion()));
+        // Start logger database thread
+        logger().initDb(dataDir());
 
+        // Initialize all modules and start them
         init_units();
 
+        // Set database type
         setDbType(db_type);
 
+        // Set pool size for the db pool
         int pool_size = m_dbType == "sqlite3" ? 4 : 10;
         if (program.is_subcommand_used("serve") && serve_command.is_used("--pool-size")) {
             pool_size = serve_command.get<int>("--pool-size");
         }
         setPoolSize(pool_size);
 
+        // Check if database is connected
         if (!m_database->connect(conn_string)) {
             quit(500, "Database connection failed, exiting!");
         }
+
+        //Check that system tables were created
         if (!m_database->createSysTables()) {
             quit(500, "Database migration failed, exiting!");
         }
+
+        // Check that database connection was established
         if (!m_database->isConnected()) {
-            LogOrigin::dbCritical("Database Not Opened", "Database was not opened!");
+            logger().critical("Database", "Database Not Opened", "Database was not opened!");
             quit(500, "Database opening failed!");
         }
+
+        // Check that realtime database was started
         if (!m_realtime->init()) {
-            LogOrigin::dbCritical("Database Not Opened", "Realtime Db Mgr failed to instantiate.");
+            logger().critical("Database", "Database Not Opened", "Realtime Db Mgr failed to instantiate.");
             quit(500, "Realtime Db Mgr failed to instantiate.");
         }
+
+        // Check that the router was initialized
         if (!m_router->init()) {
             quit(500, "Failed to initialize router!");
         }
 
+        // If we passed the `serve` sub command, set its options
         if (program.is_subcommand_used("serve")) {
             setHost(serve_command.get<std::string>("--host"));
             setPort(serve_command.get<int>("--port"));
@@ -349,31 +495,31 @@ namespace mb {
             auto admin_entity = entity("mb_admins");
 
             if (do_add) {
-                const auto creds = admins_command.get<std::vector<std::string>>("--add");
+                const auto creds = admins_command.get<std::vector<std::string> >("--add");
                 std::string email = creds.at(0);
                 std::string password = creds.at(1);
 
                 if (const auto val_err = Validators::validatePreset("email", email); val_err.has_value()) {
-                    LogOrigin::authCritical("Email Validation Failed",
-                                            fmt::format("Error validating admin email: {}", val_err.value()));
+                    logger().critical("Auth", "Email Validation Failed",
+                                      fmt::format("Error validating admin email: {}", val_err.value()));
                     quit(-1, "Email validation failed!");
                 }
                 if (const auto val_pswd_err = Validators::validatePreset("password", password);
                     val_pswd_err.has_value()) {
-                    LogOrigin::authCritical("Password Validation Failed",
-                                            fmt::format("Error validating password: {}", val_pswd_err.value()));
+                    logger().critical("Auth", "Password Validation Failed",
+                                      fmt::format("Error validating password: {}", val_pswd_err.value()));
                     quit(-1, "Password validation failed!");
                 }
 
                 try {
                     const auto admin_user = admin_entity.create({{"email", email}, {"password", password}});
-                    LogOrigin::authInfo("Admin Created", fmt::format(
-                                            "Admin account created, use '{}' to access the `/mb` dashboard.",
-                                            admin_user.at("email").get<std::string>()));
+                    logger().info("Auth", "Admin Created", fmt::format(
+                                      "Admin account created, use '{}' to access the `/mb` dashboard.",
+                                      admin_user.at("email").get<std::string>()));
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    LogOrigin::authCritical("Admin Creation Failed",
-                                            fmt::format("Failed to created Admin user: {}", e.what()));
+                    logger().critical("Auth", "Admin Creation Failed",
+                                      fmt::format("Failed to created Admin user: {}", e.what()));
                     quit(500, e.what());
                 }
             }
@@ -383,56 +529,35 @@ namespace mb {
                 std::cout << std::left << std::setw(40) << "ID" << "EMAIL" << std::endl;
                 for (const auto &admin: admins) {
                     std::cout << std::left << std::setw(40) << admin.value("id", "")
-                              << admin.value("email", "")
-                              << std::endl;
+                            << admin.value("email", "")
+                            << std::endl;
                 }
                 quit(0, "");
             }
 
             if (do_rm) {
-                const std::string identifier = admins_command.get<std::string>("--rm");
+                const auto identifier = admins_command.get<std::string>("--rm");
                 if (identifier.empty()) {
-                    LogOrigin::authCritical("Invalid Admin Identifier", "Invalid admin `email` or `id` provided!");
+                    logger().critical("Auth", "Invalid Admin Identifier", "Invalid admin `email` or `id` provided!");
                     quit(400, "");
                 }
 
                 auto resp = admin_entity.queryFromCols(identifier, {"id", "email"});
                 if (!resp.has_value()) {
-                    LogOrigin::authCritical("Admin Not Found",
-                                            fmt::format("Admin not found matching id/email on '{}'", identifier));
+                    logger().critical("Auth", "Admin Not Found",
+                                      fmt::format("Admin not found matching id/email on '{}'", identifier));
                     quit(404, "");
                 }
 
                 try {
                     admin_entity.remove(resp.value().at("id").get<std::string>());
-                    LogOrigin::authInfo("Admin Removed", "Admin removed successfully.");
+                    logger().info("Auth", "Admin Removed", "Admin removed successfully.");
                     quit(0, "");
                 } catch (const std::exception &e) {
-                    LogOrigin::authCritical("Admin Removal Failed",
-                                            fmt::format("Failed to remove admin account: {}", e.what()));
+                    logger().critical("Auth", "Admin Removal Failed",
+                                      fmt::format("Failed to remove admin account: {}", e.what()));
                     quit(500, e.what());
                 }
-            }
-        }
-
-        if (program.is_subcommand_used("migrations")) {
-            const bool up = migrations_command.get<bool>("--up");
-            const bool down = migrations_command.get<bool>("--down");
-
-            if (countExclusiveFlags({up, down}) != 1) {
-                quit(400, "migrations requires exactly one of --up or --down.");
-            }
-
-            try {
-                if (up)
-                    runMigrationsUp(*this);
-                else
-                    runMigrationsDown(*this);
-                quit(0, "");
-            } catch (const MantisException &e) {
-                quit(e.code(), e.what());
-            } catch (const std::exception &e) {
-                quit(500, e.what());
             }
         }
 
@@ -448,22 +573,27 @@ namespace mb {
 
             try {
                 if (do_ls) {
-                    printSchemaList();
-                    quit(0, "");
+                    printSchemaList(*this);
+                    quit(0);
                 }
 
                 if (do_rm) {
                     const auto entity_name = schema_command.get<std::string>("--rm");
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
-                    EntitySchema::dropTable(schema_id);
-                    LogOrigin::entitySchemaInfo("Schema Removed",
-                                                fmt::format("Removed schema `{}`", entity_name));
-                    quit(0, "");
+                    EntitySchema::dropTable(*this, schema_id);
+                    logger().info("Schema",
+                        fmt::format("Removed schema `{}`", entity_name));
+                    quit(0);
                 }
 
                 if (do_add) {
-                    const auto body = loadJsonInput(schema_command.get<std::string>("--add"));
-                    const auto eSchema = EntitySchema::fromSchema(body);
+                    const auto [body, parse_err] = loadJsonInput(schema_command.get<std::string>("--add"));
+
+                    if (!parse_err.empty()) {
+                        throw MantisException(400, std::format("Failed to parse schema: {}", parse_err));
+                    }
+
+                    auto eSchema = EntitySchema::fromSchema(*this, body);
                     if (const auto err = eSchema.validate(); err.has_value())
                         throw MantisException(400, err.value());
 
@@ -473,13 +603,29 @@ namespace mb {
                 }
 
                 if (do_update) {
-                    const auto parts = schema_command.get<std::vector<std::string>>("--update");
-                    const auto entity_name = parts.at(0);
-                    const auto body = loadJsonInput(parts.at(1));
+                    const auto parts = schema_command.get<std::vector<std::string> >("--update");
+
+                    // Extract and validate entity name
+                    const auto& entity_name = parts.at(0);
+                    if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
+                        throw MantisException(400, "Invalid entity name");
+                    }
+
+                    // Extract and validate the JSON body
+                    if (parts.at(1).empty()) {
+                        throw MantisException(400, "Cannot update entity with an empty schema!");
+                    }
+
+                    const auto [body, parse_err] = loadJsonInput(parts.at(1));
+                    if (!parse_err.empty()) {
+                        throw MantisException(400,
+                            std::format("Failed to parse update schema: {}", parse_err));
+                    }
+
                     const auto schema_id = schemaIdFromNameOrId(entity_name);
-                    const auto updated = EntitySchema::updateTable(schema_id, body);
+                    const auto updated = EntitySchema::updateTable(*this, schema_id, body);
                     std::cout << updated.dump(2) << std::endl;
-                    quit(0, "");
+                    quit(0);
                 }
             } catch (const MantisException &e) {
                 quit(e.code(), e.what());
@@ -490,9 +636,68 @@ namespace mb {
             }
         }
 
-        std::cout << "Unknown command. Available subcommands: serve, admins, migrations, schema\n\n"
-                  << program;
-        quit(400, "No subcommand specified.");
+        // `migrate` takes either `migrate apply` or `migrate schema`
+        if (program.is_subcommand_used("migrate")) {
+            //Check if `apply` subcommand was invoked
+            if (migrate_command.is_subcommand_used("apply")) {
+                const bool up = migrations_command.get<bool>("--up");
+                const bool down = migrations_command.get<bool>("--down");
+
+                if (countExclusiveFlags({up, down}) != 1) {
+                    quit(400, "`migrate apply` requires exactly one of --up or --down.");
+                }
+
+                try {
+                    if (up)
+                        runMigrationsUp(*this);
+                    else
+                        runMigrationsDown(*this);
+                    quit(0, "");
+                } catch (const MantisException &e) {
+                    quit(e.code(), e.what());
+                } catch (const std::exception &e) {
+                    quit(500, e.what());
+                }
+            }
+
+            //Check if `schema` subcommand was invoked
+            if (migrate_command.is_subcommand_used("schema")) {
+                const bool do_dump = migrate_schema_command.is_used("--to");
+                const bool do_load = migrate_schema_command.is_used("--from");
+
+                if (countExclusiveFlags({do_dump, do_load}) != 1) {
+                    quit(400, "`migrate schema` requires exactly one of --to <file> or --from <file>.");
+                }
+
+                try {
+                    if (do_dump)
+                        runMigrateDump(*this, migrate_schema_command.get<std::string>("--to"));
+                    else if (do_load)
+                        runMigrateUp(*this, migrate_schema_command.get<std::string>("--from"));
+                    else
+                        throw MantisException(400,
+                            "`migrate schema` requires exactly one of --to <file> or --from <file>.");
+
+                    quit(0);
+                } catch (const MantisException &e) {
+                    quit(e.code(), e.what());
+                } catch (const json::parse_error &e) {
+                    quit(400, std::string("Invalid JSON in dump file: ") + e.what());
+                } catch (const std::exception &e) {
+                    quit(500, e.what());
+                }
+            }
+
+            else {
+                throw MantisException(400, "`migrate` command expected `apply` or `schema` subcommand!");
+            }
+        }
+
+        logger().info("", "No subcommand specified. Try: "
+                          "\n\t - `mantisbase --help` to see all available commands."
+                          "\n\t - `mantisbase serve` to start http server"
+                          "\n\t - `mantisbase admins [options]` for admin account management");
+        quit(0);
     }
 
     bool MantisBase::isCreated() const {

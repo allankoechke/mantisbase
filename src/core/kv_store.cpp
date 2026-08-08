@@ -13,6 +13,8 @@
 
 namespace mb
 {
+    KeyValStore::KeyValStore(MantisBase &app) : mApp(app) {}
+
     bool KeyValStore::setupRoutes()
     {
         try
@@ -21,7 +23,7 @@ namespace mb
         }
         catch (const std::exception& e)
         {
-            LogOrigin::critical("Route Setup Error", fmt::format("Error setting up settings routes: {}", e.what()));
+            mApp.logger().critical("Route Setup Error", fmt::format("Error setting up settings routes: {}", e.what()));
             return false;
         }
 
@@ -31,7 +33,7 @@ namespace mb
 
     void KeyValStore::migrate()
     {
-        const auto sql = MantisBase::instance().db().session();
+        const auto& sql = mApp.db().session();
 
         // Check if we have settings data already, if not so, add base settings
         json settings;
@@ -41,14 +43,14 @@ namespace mb
         {
             // TODO redact any sensitive values ...
             m_configs = settings;
-            LogOrigin::trace("Config Loaded", fmt::format("Config Values: {}", m_configs.dump()));
+            mApp.logger().trace("Config Loaded", fmt::format("Config Values: {}", m_configs.dump()));
         }
         // Create base data to config settings
         else
         {
             // Create default time values
             const std::time_t current_t = time(nullptr);
-            std::tm* created_tm = std::localtime(&current_t);
+            std::tm created_tm = toUtcTime(current_t);
 
             // Create data since it's missing
             settings.clear();
@@ -66,14 +68,14 @@ namespace mb
                 "INSERT INTO __settings (id, value, created, updated) VALUES (:id, :value, :created, :updated)"
                 ,
                 soci::use(id), soci::use(settings),
-                soci::use(*created_tm), soci::use(*created_tm);
+                soci::use(created_tm), soci::use(created_tm);
         }
     }
 
     HandlerResponse KeyValStore::hasAccess(MantisRequest& req, MantisResponse& res) const
     {
         // Get the auth var from the context, resort to empty object if it's not set.
-        auto& auth = req.getOr<json>("auth", json::object());
+        const auto& auth = req.getOr<json>("auth", json::object());
 
         // Ensure auth object is present in the request's context
         if (auth.empty())
@@ -103,7 +105,7 @@ namespace mb
         const auto& token = auth.at("token").get<std::string>();
 
         // Expand logged user if token is present
-        const auto resp = Auth::verifyToken(token);
+        const auto resp = req.mbApp().auth().verifyToken(token);
         if (!resp.value("verified", false) || !resp.value("error", "").empty())
         {
             json response;
@@ -136,7 +138,7 @@ namespace mb
         // the session context, queried by:
         //  ` ctx.get<json>("auth").value("id", ""); // returns the user ID
         //  ` ctx.get<json>("auth").value("name", ""); // returns the user's name
-        auto sql = MantisBase::instance().db().session();
+        auto sql = mApp.db().session();
         soci::row r;
         std::string query = "SELECT * FROM mb_admins WHERE id = :id LIMIT 1";
         *sql << query, soci::use(_id), soci::into(r);
@@ -179,7 +181,7 @@ namespace mb
     json KeyValStore::initSettingsConfig()
     {
         // Get app session
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = mApp.db().session();
 
         // Fetch settings
         json settings;
@@ -199,7 +201,7 @@ namespace mb
         // TRACE_CLASS_METHOD()
 
         // Set up settings get & update endpoints
-        MantisBase::instance().router().Get(
+        mApp.router().Get(
             "/api/v1/sys/settings/config",
             [this](MantisRequest& req, MantisResponse& res)
             {
@@ -218,7 +220,7 @@ namespace mb
                 }
 
                 // Get app session
-                const auto sql = MantisBase::instance().db().session();
+                const auto sql = mApp.db().session();
                 json response; // Response object
 
                 // Fetch settings
@@ -250,7 +252,7 @@ namespace mb
             }, { });
 
         // Update settings config
-        MantisBase::instance().router().Patch(
+        mApp.router().Patch(
             "/api/v1/sys/settings/config",
             [this](MantisRequest& req, MantisResponse& res)
             {
@@ -272,7 +274,7 @@ namespace mb
                 }
 
                 // Get app session
-                const auto sql = MantisBase::instance().db().session();
+                const auto sql = mApp.db().session();
 
                 // Create base data before we update.
                 if (m_configs.empty()) migrate();
@@ -317,14 +319,14 @@ namespace mb
 
                 // Create default time values
                 const std::time_t updated_t = time(nullptr);
-                std::tm* updated_tm = std::localtime(&updated_t);
+                std::tm updated_tm = toUtcTime(updated_t);
 
                 // Create config admin
                 auto id = std::to_string(std::hash<std::string>{}("configs"));
 
                 // Update config values
                 *sql << "UPDATE __settings SET value = :value, updated = :updated WHERE id = :id",
-                    soci::use(m_configs), soci::use(*updated_tm);
+                    soci::use(m_configs), soci::use(updated_tm);
 
                 json response;
                 response["status"] = 200;

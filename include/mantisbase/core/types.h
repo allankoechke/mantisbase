@@ -1,16 +1,11 @@
-/**
- * @file types.h
- * @brief Type definitions and aliases for MantisBase.
- *
- * Defines common types used throughout the MantisBase library including
- * handler functions, middleware types, and route keys.
- */
-
 #ifndef MANTISBASE_TYPES_H
 #define MANTISBASE_TYPES_H
 
-#include <httplib.h>
 #include <nlohmann/json.hpp>
+#include <functional>
+#include <string>
+#include <vector>
+#include <filesystem>
 
 namespace mb {
     class MantisBase;
@@ -27,32 +22,53 @@ namespace mb {
     class Database;
     class Logger;
     class Router;
-    class Files;
+    class FilesMgr;
+    class Auth;
+    class ApiKeyManager;
+    class OAuthManager;
 
     using json = nlohmann::json;
-    using HandlerResponse = httplib::Server::HandlerResponse;
 
-    ///> Route Handler function shorthand
+    enum class HandlerResponse {
+        Handled,
+        Unhandled
+    };
+
     using HandlerFn = std::function<void(MantisRequest&, MantisResponse&)>;
-
-    ///> Route Handler function with content reader shorthand
     using HandlerWithContentReaderFn = std::function<void(MantisRequest&, MantisResponse&,
                                                                  MantisContentReader&)>;
-
-    ///> Middleware shorthand for the function
     using MiddlewareFn = std::function<HandlerResponse(MantisRequest&, MantisResponse&)>;
-
-    ///> Middleware function arrays
     using Middlewares = std::vector<MiddlewareFn>;
-
-    ///> Syntactic sugar for request method which is a std::string
     using Method = std::string;
-
-    ///> Syntactic sugar for request path which is a std::string
     using Path = std::string;
-
-    ///> Shorthand notation for the request's method, path pair.
     using RouteKey = std::pair<Method, Path>;
+
+    /**
+     * @brief Non-owning access to the active @ref MantisBase from DI-aware types.
+     *
+     * `Entity`, `Router`, `MantisRequest`, `ApiKeyManager`, `OAuthManager`, and
+     * other framework types inherit this mixin so handlers and services can call
+     * `mbApp()` instead of a removed global singleton.
+     *
+     * @code
+     * router.Get("/api/v1/stats", [](MantisRequest& req, MantisResponse& res) {
+     *     auto count = req.mbApp().entity("posts").countRecords();
+     *     res.sendJSON(200, {{"posts", count}});
+     * });
+     * @endcode
+     */
+    class IMantisBase {
+        const MantisBase& m_app;
+
+    public:
+        explicit IMantisBase(const MantisBase& app);
+
+        /** @brief Application that owns this service or request context. */
+        [[nodiscard]] const MantisBase &mbApp() const;
+
+        /// Get the logger instance
+        [[nodiscard]] const Logger& logger() const;
+    };
 
 #define REQUEST_HANDLED HandlerResponse::Handled;
 #define REQUEST_PENDING HandlerResponse::Unhandled;

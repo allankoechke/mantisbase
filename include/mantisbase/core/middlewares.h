@@ -16,9 +16,12 @@
 
 namespace mb {
     /**
-     * @brief Extract and validate JWT token from Authorization header.
+     * @brief Extract JWT or API key from the Authorization header.
      *
-     * Parses Bearer token from request headers and stores user info in context.
+     * Parses `Authorization: Bearer <token>`. Tokens starting with `mb_sk_`
+     * are treated as API keys and resolved through @ref ApiKeyManager; JWTs are
+     * verified on later middleware. Sets `auth` and `verification` request
+     * attributes consumed by `requireEntityAuth()` and access-rule checks.
      * @return Middleware function
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> getAuthToken();

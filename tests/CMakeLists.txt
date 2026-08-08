@@ -33,9 +33,16 @@ file(GLOB TEST_FILES
         unit/test_entity_schema_field.cpp
         unit/test_files_security.cpp
         unit/test_ip_validation.cpp
+        unit/test_oauth.cpp
+        unit/test_api_keys.cpp
+        unit/test_validators.cpp
+        unit/test_http_request.cpp
         integration/test_integration_crud.cpp
         integration/test_integration_schema.cpp
         integration/test_integration_auth.cpp
+        integration/test_integration_sse.cpp
+        integration/test_integration_ws.cpp
+        integration/test_integration_multi_instance.cpp
 )
 
 add_executable(mantisbase_tests ${TEST_FILES})
@@ -67,3 +74,12 @@ target_link_libraries(mantisbase_tests PRIVATE
 
 include(GoogleTest)
 add_test(NAME all_mantisbase_tests COMMAND mantisbase_tests)
+set_tests_properties(all_mantisbase_tests PROPERTIES
+        ENVIRONMENT "MB_JWT_SECRET=mantisbase-test-jwt-secret-do-not-use-in-production;MB_DISABLE_RATE_LIMIT=1;MB_DISABLE_ADMIN_ON_FIRST_BOOT=1"
+)
+
+# Benchmarks (optional, off by default)
+option(MB_BUILD_BENCHMARKS "Build MantisBase Benchmarks" OFF)
+if (MB_BUILD_BENCHMARKS)
+    add_subdirectory(bench)
+endif ()

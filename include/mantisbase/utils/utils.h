@@ -19,6 +19,7 @@
 #include <nlohmann/json.hpp>
 
 #include "../core/logger/logger.h"
+#include "../core/types.h"
 
 #ifdef MB_SCRIPTING_ENABLED
 #include "dukglue/dukvalue.h"
@@ -120,19 +121,39 @@ namespace mb {
     std::string trim(const std::string &s);
 
     /**
-     * @brief Attempt to parse a JSON string.
+     * @brief Validate a string as a safe SQL identifier and return it unchanged.
+     *
+     * This is the single choke point that every query builder must route
+     * interpolated identifiers (table and column names) through, since those
+     * cannot be passed as bound parameters. Only 1..64 characters of
+     * [A-Za-z0-9_] are accepted, which makes identifier-based SQL injection
+     * impossible (no quotes, whitespace or semicolons can appear). Column and
+     * row *values* must still be bound via soci::use — this is only for
+     * identifiers.
+     *
+     * @param ident Candidate identifier.
+     * @return The identifier unchanged if valid.
+     * @throws MantisException(400) if the identifier is not a valid SQL identifier.
+     */
+    std::string sqlIdentifier(const std::string &ident);
+
+    /**
+     * @brief Try parsing a string to a JSON object and return the object and any error
+     * if parsing failed.
+     *
      * @param json_str JSON string to parse
-     * @param default_value Optional default value if conversion fails
-     * @return A JSON Object if successful, else a `std::nullopt`
+     * @return A pair with
+     *  - part 0: parsed JSON object
+     *  - part 1: Error string
      *
      * @code
-     * auto user = tryParseJsonStr("{\"name\": \"John Doe\"}");
-     * if(user.has_value()) {
+     * auto [user, err] = tryParseJsonStr("{\"name\": \"John Doe\"}");
+     * if(!err.empty()) {
      *      // Do something ...
      * }
      * @endcode
      */
-    std::optional<json> tryParseJsonStr(const std::string &json_str, std::optional<json> default_value = std::nullopt);
+    std::pair<json, std::string> tryParseJsonStr(const std::string &json_str);
 
     /**
      * @brief Convert given string value to boolean type.
@@ -286,12 +307,43 @@ namespace mb {
     // AUTH UTILS
     // ----------------------------------------------------------------- //
 
+    /**
+     * @brief Thread-safe conversion of an epoch time to a UTC std::tm.
+     *
+     * std::gmtime returns a pointer to a shared static std::tm, so calling it
+     * from multiple threads concurrently is a data race. This wrapper
+     * serializes the call and returns a copy. UTC is the canonical timezone
+     * for all persisted timestamps so values are stable regardless of the
+     * server's local timezone or DST.
+     *
+     * @param t Epoch time value.
+     * @return std::tm in UTC.
+     */
+    std::tm toUtcTime(std::time_t t);
+
+    /**
+     * @brief Thread-safe conversion of an epoch time to a local-time std::tm.
+     *
+     * std::localtime returns a pointer to a shared static std::tm, so calling
+     * it from multiple threads concurrently is a data race. This wrapper
+     * serializes the call and returns a copy, making it safe to use from the
+     * request-handling worker threads. Portable across MinGW/MSVC/Linux
+     * without depending on the non-standard localtime_r/localtime_s.
+     *
+     * Prefer toUtcTime() for anything persisted to the database; this is only
+     * for values intended to be rendered in the server's local timezone.
+     *
+     * @param t Epoch time value.
+     * @return std::tm in the server's local timezone.
+     */
+    std::tm toLocalTime(std::time_t t);
+
     inline std::string getCurrentTimestampUTC() {
         const std::time_t now = std::time(nullptr);
-        const std::tm* utc = std::gmtime(&now);  // Use UTC time
+        const std::tm utc = toUtcTime(now);
 
         char buffer[20];
-        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", utc);
+        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &utc);
         return std::string{ buffer };
     }
 
@@ -311,11 +363,12 @@ namespace mb {
 
     /**
      * @brief Convert database date value from SOCI row to string.
+     * @param db_type database type, ie `sqlite3`
      * @param row SOCI row containing the date value
      * @param index Column index in the row
      * @return String representation of the date
      */
-    std::string dbDateToString(const soci::row &row, int index);
+    std::string dbDateToString(const std::string& db_type, const soci::row &row, int index);
 
     /**
      * @brief Safely convert string to integer with default fallback.

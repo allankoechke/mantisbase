@@ -22,6 +22,7 @@ namespace soci {
 }
 
 namespace mb {
+    class MantisBase;
     using json = nlohmann::json;
 
     /**
@@ -35,7 +36,7 @@ namespace mb {
         /**
          * @brief Construct LogDatabase instance.
          */
-        LogDatabase();
+        explicit LogDatabase(const MantisBase& app);
 
         /**
          * @brief Destructor - stops cleanup thread and closes database.
@@ -61,18 +62,18 @@ namespace mb {
                        const std::string& details, const json& data = json::object());
 
         /**
-         * @brief Get logs with pagination, filtering, and sorting.
-         * @param page Page number (1-based)
-         * @param page_size Number of records per page
+         * @brief Get logs with cursor-based pagination, filtering, and sorting.
+         * @param after Cursor ID to fetch records after (empty = start from beginning)
+         * @param limit Maximum number of records to return (default 50, max 1000)
          * @param level_filter Optional level filter (empty = all levels)
          * @param search_filter Optional message search filter (empty = no filter)
          * @param start_date Optional start date filter (ISO 8601 format, empty = no filter)
          * @param end_date Optional end date filter (ISO 8601 format, empty = no filter)
          * @param sort_by Sort field (default: "timestamp")
          * @param sort_order Sort order ("asc" or "desc", default: "desc")
-         * @return JSON object with logs and pagination info
+         * @return JSON object with logs and cursor info
          */
-        json getLogs(int page = 1, int page_size = 50,
+        json getLogs(const std::string& after = "", int limit = 50,
                      const std::string& level_filter = "",
                      const std::string& search_filter = "",
                      const std::string& start_date = "",
@@ -109,6 +110,7 @@ namespace mb {
         std::atomic<bool> m_running;
         std::condition_variable m_cv;
         std::mutex m_dbMutexLock;
+        const MantisBase& mApp;
 
         inline static const std::vector<std::string> m_logLevels{ "critical", "warn", "info", "debug", "trace"};
     };

@@ -1,18 +1,20 @@
-FROM debian:trixie-slim
+FROM debian:stable-slim
 
-ARG MB_VERSION=0.3.5
+ARG MB_VERSION=0.4.0
+ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     unzip \
     ca-certificates \
     libpq5 \
-    libzstd1 \
+    libuuid1 \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /mb
 
-RUN wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/releases/download/v${MB_VERSION}/mantisbase_v${MB_VERSION}_linux-x86_64.zip \
+RUN ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "linux-aarch64" || echo "linux-x86_64") \
+    && wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/releases/download/v${MB_VERSION}/mantisbase_v${MB_VERSION}_${ARCH}.zip \
     && unzip /tmp/mantisbase.zip -d /mb \
     && chmod +x /mb/mantisbase \
     && rm /tmp/mantisbase.zip

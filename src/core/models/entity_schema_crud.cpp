@@ -11,8 +11,8 @@
 #include "mantisbase/core/realtime.h"
 
 namespace mb {
-    nlohmann::json EntitySchema::listTables(const json &) {
-        const auto sql = MantisBase::instance().db().session();
+    nlohmann::json EntitySchema::listTables(const MantisBase &app, const json &) {
+        const auto sql = app.db().session();
         const soci::rowset rs = (sql->prepare <<
                                  "SELECT id, schema, created, updated FROM mb_tables");
 
@@ -20,8 +20,8 @@ namespace mb {
         for (const auto &row: rs) {
             const auto id = row.get<std::string>(0);
             const auto schema = row.get<json>(1);
-            const auto created = dbDateToString(row, 2);
-            const auto updated = dbDateToString(row, 3);
+            const auto created = dbDateToString(app.dbType(), row, 2);
+            const auto updated = dbDateToString(app.dbType(), row, 3);
 
             response.push_back({
                 {"id", id},
@@ -34,11 +34,11 @@ namespace mb {
         return response;
     }
 
-    nlohmann::json EntitySchema::getTable(const std::string &table_id) {
+    nlohmann::json EntitySchema::getTable(const MantisBase &app, const std::string &table_id) {
         if (table_id.empty())
             throw MantisException(400, "Required table id/name is empty!");
 
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app.db().session();
 
         soci::row row;
         *sql << "SELECT id, schema, created, updated FROM mb_tables WHERE id = :id", soci::use(table_id),
@@ -48,8 +48,8 @@ namespace mb {
             throw MantisException(404, "No table for given id/name `" + table_id + "`");
 
         const auto schema = row.get<json>(1);
-        const auto created = dbDateToString(row, 2);
-        const auto updated = dbDateToString(row, 3);
+        const auto created = dbDateToString(app.dbType(), row, 2);
+        const auto updated = dbDateToString(app.dbType(), row, 3);
 
         return {
             {"id", table_id},
@@ -61,7 +61,7 @@ namespace mb {
 
     nlohmann::json EntitySchema::createTable(const EntitySchema &new_table) {
         // Database session & transaction instance
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = new_table.mbApp().db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -72,23 +72,30 @@ namespace mb {
             const auto schema = new_table.toJSON();
 
             // Check if item exits already in db
-            if (tableExists(schema.at("name").get<std::string>())) {
+            if (tableExists(new_table.mbApp(), schema.at("name").get<std::string>())) {
                 throw MantisException(500, "Table with similar name exists.");
             }
 
             // Create default time values
             const std::time_t t = time(nullptr);
-            std::tm created_tm = *std::localtime(&t);
+            std::tm created_tm = toUtcTime(t);
 
             // Execute DDL & Save to DB
             *sql << "INSERT INTO mb_tables (id, schema, created, updated) VALUES (:id, :schema, :created, :updated)",
                     soci::use(id), soci::use(schema), soci::use(created_tm), soci::use(created_tm);
 
-            // Create actual SQL table
+            // Create actual SQL table or view
             *sql << new_table.toDDL();
 
-            // Add hooks for this table
-            mb::RealtimeDB::addDbHooks(Entity{schema}, sql);
+            // Create indexes
+            for (const auto &idx_ddl: new_table.indexDDL()) {
+                *sql << idx_ddl;
+            }
+
+            // Add hooks for this table (not for views)
+            if (new_table.type() != "view") {
+                mb::RealtimeDB::addDbHooks(Entity{new_table.mbApp(), schema}, sql);
+            }
 
             // Commit changes
             tr.commit();
@@ -102,14 +109,17 @@ namespace mb {
                 obj["created"] = tmToStr(created_tm);
                 obj["updated"] = tmToStr(created_tm);
 
-                // Create files directory
-                Files::createDir(new_table.name());
+                // Create files directory (not for views)
+                if (new_table.type() != "view") {
+                    new_table.mbApp().files().createDir(new_table.name());
+                }
 
                 // Add created table to the routes
-                MantisBase::instance().router().addSchemaCache(schema);
+                new_table.mbApp().router().addSchemaCache(schema);
             } catch (const std::exception &e) {
-                LogOrigin::entitySchemaCritical("Parse Error",
-                                                fmt::format("Could not parse entity after creation\n\t- {}", e.what()));
+                new_table.mbApp().logger().critical("EntitySchema", "Parse Error",
+                                                    fmt::format("Could not parse entity after creation\n\t- {}",
+                                                                e.what()));
             }
 
             return obj;
@@ -122,11 +132,12 @@ namespace mb {
         }
     }
 
-    nlohmann::json EntitySchema::updateTable(const std::string &table_id, const nlohmann::json &new_schema) {
+    nlohmann::json EntitySchema::updateTable(const MantisBase &app, const std::string &table_id,
+                                             const nlohmann::json &new_schema) {
         if (new_schema.empty())
             throw MantisException(400, "Schema body is empty!");
 
-        const auto sql = MantisBase::instance().db().session();
+        const auto sql = app.db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -140,8 +151,8 @@ namespace mb {
                 throw MantisException(404, "Entity resource for given name/id was not found!");
             }
 
-            EntitySchema old_entity = EntitySchema::fromSchema(old_schema); // Old table data
-            EntitySchema new_entity{old_entity}; // New table data
+            EntitySchema old_entity = EntitySchema::fromSchema(app, old_schema); // Old table data
+            EntitySchema new_entity{old_entity}; // New table data (copy carries the app)
             assert(old_entity == new_entity); // These two objects should be same
             new_entity.updateWith(new_schema);
 
@@ -180,7 +191,7 @@ namespace mb {
             }
 
             // Get db type
-            const auto db_type = MantisBase::instance().dbType();
+            const auto db_type = app.dbType();
             const auto new_schema_fields = new_schema.contains("fields") && new_schema["fields"].is_array()
                                                ? new_schema["fields"]
                                                : json::array();
@@ -216,10 +227,10 @@ namespace mb {
                         if (db_type == "sqlite3") {
                             // SQLite doesn't support renaming constraints directly
                             // Constraints will need to be dropped and recreated if needed
-                            LogOrigin::entitySchemaWarn("Field Renamed", fmt::format(
-                                                            "Field renamed from `{}` to `{}` in SQLite. Constraint names may not match. "
-                                                            "Consider recreating constraints if needed.", old_name,
-                                                            new_name));
+                            app.logger().warn("EntitySchema", "Field Renamed", fmt::format(
+                                                  "Field renamed from `{}` to `{}` in SQLite. Constraint names may not match. "
+                                                  "Consider recreating constraints if needed.", old_name,
+                                                  new_name));
                         }
 
                         // ------------- POSTGRESQL ----------------- //
@@ -278,9 +289,9 @@ namespace mb {
                             // For UNIQUE and FOREIGN KEY, we need to drop and recreate
                             // This will be handled by the constraint change detection logic below
                             // which will see the field name change and update accordingly
-                            LogOrigin::entitySchemaWarn("Field Renamed", fmt::format(
-                                                            "Field renamed from `{}` to `{}` in MySQL. UNIQUE and FOREIGN KEY constraints "
-                                                            "will be recreated with new names.", old_name, new_name));
+                            app.logger().warn("EntitySchema", "Field Renamed", fmt::format(
+                                                  "Field renamed from `{}` to `{}` in MySQL. UNIQUE and FOREIGN KEY constraints "
+                                                  "will be recreated with new names.", old_name, new_name));
                         }
                     }
 
@@ -617,13 +628,9 @@ namespace mb {
             }
 
             // --------- Handle View Query Changes -------------- //
-            // std::string m_viewSqlQuery;
-            if (old_entity.viewQuery() != new_entity.viewQuery()) {
-                throw MantisException(500, "View query has not been implemented yet!");
-
-                // TODO
-                // - Update view query
-                // - Drop all queries and recreate them to match new fields
+            if (old_entity.type() == "view" && old_entity.viewQuery() != new_entity.viewQuery()) {
+                *sql << "DROP VIEW IF EXISTS " + old_entity.name();
+                *sql << "CREATE VIEW " + new_entity.name() + " AS " + new_entity.viewQuery();
             }
 
             // --------- Handle Type Changes -------------------- //
@@ -643,11 +650,11 @@ namespace mb {
                 // ------------- SQLite ----------------- //
                 if (db_type == "sqlite3") {
                     // SQLite doesn't support renaming constraints directly
-                    LogOrigin::entitySchemaWarn("Table Renamed",
-                                                fmt::format(
-                                                    "Table renamed from `{}` to `{}` in SQLite. Foreign key constraint names may not match. "
-                                                    "Consider recreating constraints if needed.",
-                                                    old_table_name, new_table_name));
+                    app.logger().warn("EntitySchema", "Table Renamed",
+                                      fmt::format(
+                                          "Table renamed from `{}` to `{}` in SQLite. Foreign key constraint names may not match. "
+                                          "Consider recreating constraints if needed.",
+                                          old_table_name, new_table_name));
                 }
 
                 // ------------- POSTGRESQL ----------------- //
@@ -676,10 +683,10 @@ namespace mb {
                     // The constraint names in this table (fk_<table>_<column>) will be outdated
                     // but MySQL will still work. For consistency, we could drop and recreate them,
                     // but that's complex and might fail if there are data integrity issues.
-                    LogOrigin::entitySchemaWarn("Table Renamed",
-                                                fmt::format(
-                                                    "Table renamed from `{}` to `{}` in MySQL. Foreign key constraint names (`fk_{}_{}`) will be outdated but will still function. Consider recreating constraints for consistency.",
-                                                    old_table_name, new_table_name, old_table_name, "{column}"));
+                    app.logger().warn("EntitySchema", "Table Renamed",
+                                      fmt::format(
+                                          "Table renamed from `{}` to `{}` in MySQL. Foreign key constraint names (`fk_{}_{}`) will be outdated but will still function. Consider recreating constraints for consistency.",
+                                          old_table_name, new_table_name, old_table_name, "{column}"));
                 }
 
                 // Note: Foreign keys in OTHER tables that reference this renamed table
@@ -690,7 +697,7 @@ namespace mb {
 
             // Get updated timestamp
             std::time_t t = time(nullptr);
-            std::tm updated_tm = *std::localtime(&t);
+            std::tm updated_tm = toUtcTime(t);
 
             // Update table record, if all went well.
             std::string query = "UPDATE mb_tables SET id = :id, schema = :schema,";
@@ -715,45 +722,44 @@ namespace mb {
             // Wrap in new try catch block to suppress any errors here to avoid rollbacks
             try {
                 // Update cache & subsequently the routes ...
-                MantisBase::instance().router().updateSchemaCache(old_entity.name(), updated_schema);
+                app.router().updateSchemaCache(old_entity.name(), updated_schema);
 
                 // Add hooks for this table
-                MantisBase::instance().rt().addDbHooks(new_entity.toEntity(), sql);
+                app.rt().addDbHooks(new_entity.toEntity(), sql);
 
                 // Only trigger routes to be reloaded if table name changes.
                 if (old_entity.name() != new_entity.name()) {
                     // Add hooks for this table
-                    MantisBase::instance().rt().dropDbHooks(old_entity.name(), sql);
+                    app.rt().dropDbHooks(old_entity.name(), sql);
 
                     // Update file table folder name
-                    Files::renameDir(old_entity.name(), new_entity.name());
+                    app.files().renameDir(old_entity.name(), new_entity.name());
                 }
             } catch (std::exception &e) {
-                LogOrigin::entitySchemaCritical("Cache Update Error",
-                                                fmt::format("Error updating entity schema cache\n\t- {}", e.what()));
+                app.logger().critical("EntitySchema", "Cache Update Error",
+                                      fmt::format("Error updating entity schema cache\n\t- {}", e.what()));
             }
 
             return record;
         } catch (const MantisException &e) {
             tr.rollback();
-            LogOrigin::entitySchemaCritical("Update Error",
-                                            fmt::format("Error Updating EntitySchema\n\t- {}", e.what()));
+            app.logger().critical("EntitySchema", "Update Error",
+                                  fmt::format("Error Updating EntitySchema\n\t- {}", e.what()));
             throw;
         } catch (const std::exception &e) {
             tr.rollback();
-            LogOrigin::entitySchemaCritical("Update Error",
-                                            fmt::format("Error Updating EntitySchema\n\t- {}", e.what()));
+            app.logger().critical("EntitySchema", "Update Error",
+                                  fmt::format("Error Updating EntitySchema\n\t- {}", e.what()));
             throw MantisException(500, e.what());
         }
     }
 
     void EntitySchema::dropTable(const EntitySchema &original_table) {
-        return dropTable(original_table.id());
+        return dropTable(original_table.mbApp(), original_table.id());
     }
 
-    void EntitySchema::dropTable(const std::string &table_id) {
-        TRACE_METHOD();
-        const auto sql = MantisBase::instance().db().session();
+    void EntitySchema::dropTable(const MantisBase &app, const std::string &table_id) {
+        const auto &sql = app.db().session();
         soci::transaction tr(*sql);
 
         try {
@@ -768,36 +774,43 @@ namespace mb {
 
             const auto entity_name = schema.at("name").get<std::string>();
 
+            const auto entity_type = schema.value("type", "base");
+
             // Remove from DB
             *sql << "DELETE FROM mb_tables WHERE id = :id", soci::use(table_id);
-            *sql << "DROP TABLE IF EXISTS " + entity_name;
 
-            // Drop hooks for this table
-            MantisBase::instance().rt().dropDbHooks(entity_name, sql);
+            if (entity_type == "view") {
+                *sql << "DROP VIEW IF EXISTS " + entity_name;
+            } else {
+                *sql << "DROP TABLE IF EXISTS " + entity_name;
 
-            // Delete files directory
-            Files::deleteDir(entity_name);
+                // Drop hooks for this table
+                app.rt().dropDbHooks(entity_name, sql);
+
+                // Delete files directory
+                app.files().deleteDir(entity_name);
+            }
 
             // Remove route for this Entity
-            MantisBase::instance().router().removeSchemaCache(entity_name);
+            app.router().removeSchemaCache(entity_name);
 
             tr.commit();
         } catch (const MantisException &e) {
             tr.rollback();
-            LogOrigin::entitySchemaCritical("Drop Error", fmt::format("Error dropping table schema: {}", e.what()));
+            app.logger().critical("EntitySchema", "Drop Error",
+                                  fmt::format("Error dropping table schema: {}", e.what()));
             throw;
         } catch (const std::exception &e) {
             tr.rollback();
-            LogOrigin::entitySchemaCritical("Drop Error", fmt::format("Error dropping table schema: {}", e.what()));
+            app.logger().critical("EntitySchema", "Drop Error",
+                                  fmt::format("Error dropping table schema: {}", e.what()));
             throw MantisException(500, e.what());
         }
     }
 
-    bool EntitySchema::tableExists(const std::string &table_name) {
+    bool EntitySchema::tableExists(const MantisBase &app, const std::string &table_name) {
         try {
-            const auto db_type = MantisBase::instance().dbType();
-            const auto sql = MantisBase::instance().db().session();
-
+            const auto db_type = app.dbType();
             if (!(db_type == "sqlite3" || db_type == "postgresql" || db_type == "mysql")) {
                 throw std::runtime_error("The database `" + db_type + "` is not supported yet!");
             }
@@ -809,16 +822,17 @@ namespace mb {
                                                 : "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = :name);";
 
             bool exists = false;
+            const auto &sql = app.db().session();
             *sql << query, soci::use(table_name, "name"), soci::into(exists);
             return exists;
         } catch (const std::exception &e) {
-            LogOrigin::entitySchemaCritical("Table Check Error",
-                                            fmt::format("Error checking table in database: {}", e.what()));
+            app.logger().critical("EntitySchema", "Table Check Error",
+                                  fmt::format("Error checking table in database: {}", e.what()));
             throw MantisException(500, e.what());
         }
     }
 
     bool EntitySchema::tableExists(const EntitySchema &table) {
-        return tableExists(table.name());
+        return tableExists(table.mbApp(), table.name());
     }
 } // mantis

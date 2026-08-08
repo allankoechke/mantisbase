@@ -15,35 +15,35 @@ namespace mb
             const auto i = "ContextStore::Dump";
             if (value.type() == typeid(std::string))
             {
-                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<std::string>(value)));
+                // LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<std::string>(value)));
             }
             else if (value.type() == typeid(const char*))
             {
-                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<const char*>(value)));
+                // LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<const char*>(value)));
             }
             else if (value.type() == typeid(int))
             {
-                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<int>(value)));
+                // LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<int>(value)));
             }
             else if (value.type() == typeid(double))
             {
-                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<double>(value)));
+                // LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<double>(value)));
             }
             else if (value.type() == typeid(float))
             {
-                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<float>(value)));
+                // LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<float>(value)));
             }
             else if (value.type() == typeid(bool))
             {
-                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, (std::any_cast<bool>(value) ? "true" : "false")));
+                // LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, (std::any_cast<bool>(value) ? "true" : "false")));
             }
             else if (value.type() == typeid(json))
             {
-                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<json>(value).dump()));
+                // LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<json>(value).dump()));
             }
             else
             {
-                LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, "<Unknown Type>"));
+                // LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, "<Unknown Type>"));
             }
         }
     }
@@ -65,7 +65,7 @@ namespace mb
         // Convert std::any to DukValue based on stored type
         const std::any& value = it->second;
 
-        const auto ctx = MantisApp::instance().ctx();
+        const auto ctx = MantisBase::instance().ctx();
 
         if (value.type() == typeid(int))
         {
@@ -97,7 +97,7 @@ namespace mb
         {
             // Unsupported type - throw error
             // Maybe supported later in future
-            LogOrigin::warn("Unsupported Type", fmt::format("Unsupported type stored for key `{}`", key));
+            // LogOrigin::warn("Unsupported Type", fmt::format("Unsupported type stored for key `{}`", key));
             duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported type stored for key '%s'", key.c_str());
         }
 
@@ -116,7 +116,7 @@ namespace mb
 
     void ContextStore::set_duk(const std::string& key, const DukValue& value)
     {
-        const auto ctx = MantisApp::instance().ctx();
+        const auto ctx = MantisBase::instance().ctx();
 
         // Convert DukValue to std::any based on JavaScript type
         switch (value.type())
@@ -148,7 +148,7 @@ namespace mb
         default:
             {
                 // Unsupported type - throw error
-                LogOrigin::warn("Unsupported Type", fmt::format("Unsupported type stored for key `{}`", key));
+                // LogOrigin::warn("Unsupported Type", fmt::format("Unsupported type stored for key `{}`", key));
                 duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported type stored for key '%s'", key.c_str());
             }
         }

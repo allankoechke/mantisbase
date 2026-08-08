@@ -13,9 +13,9 @@
 #include <string>
 #include <vector>
 #include "../utils/utils.h"
+#include "mantisbase/mantisbase.h"
 
-namespace mb
-{
+namespace mb {
     /**
      * @brief File management for entity file assets.
      *
@@ -46,9 +46,10 @@ namespace mb
      * }
      * @endcode
      */
-    class Files
-    {
+    class FilesMgr : public IMantisBase {
     public:
+        explicit FilesMgr(const MantisBase &app);
+
         /**
          * @brief Create a directory for the given entity.
          *
@@ -58,7 +59,7 @@ namespace mb
          * @param entity_name Entity/table name (must be valid alphanumeric + underscore)
          * @throws MantisException if entity name is invalid
          */
-        static void createDir(const std::string& entity_name);
+        void createDir(const std::string &entity_name) const;
 
         /**
          * @brief Rename an entity directory.
@@ -70,14 +71,14 @@ namespace mb
          * @param new_entity_name New entity name
          * @throws MantisException if either entity name is invalid
          */
-        static void renameDir(const std::string& old_entity_name, const std::string& new_entity_name);
+        void renameDir(const std::string &old_entity_name, const std::string &new_entity_name) const;
 
         /**
          * @brief Delete an entity directory and all its contents.
          *
          * @param entity_name Entity/table name
          */
-        static void deleteDir(const std::string& entity_name);
+        void deleteDir(const std::string &entity_name) const;
 
         /**
          * @brief Get the directory path for an entity.
@@ -90,7 +91,7 @@ namespace mb
          * @return Absolute path string to the entity's file directory
          * @throws MantisException if entity name is invalid or path traversal is detected
          */
-        static std::string dirPath(const std::string& entity_name, bool create_if_missing = false);
+        [[nodiscard]] std::string dirPath(const std::string &entity_name, bool create_if_missing = false) const;
 
         /**
          * @brief Get the absolute file path for an entity and filename.
@@ -103,7 +104,7 @@ namespace mb
          * @return Absolute canonical path string to the file
          * @throws MantisException if entity name is invalid, filename is empty, or path traversal is detected
          */
-        static std::string filePath(const std::string& entity_name, const std::string& filename);
+        [[nodiscard]] std::string filePath(const std::string &entity_name, const std::string &filename) const;
 
         /**
          * @brief Get file path only if the file exists.
@@ -116,7 +117,7 @@ namespace mb
          * @return Absolute file path if file exists, std::nullopt otherwise
          * @throws MantisException if entity name is invalid
          */
-        static std::optional<std::string> getFilePath(const std::string& entity_name, const std::string& filename);
+        std::optional<std::string> getFilePath(const std::string &entity_name, const std::string &filename);
 
         /**
          * @brief Remove a file from an entity's directory.
@@ -125,7 +126,7 @@ namespace mb
          * @param filename File name to remove
          * @return true if file was successfully removed, false otherwise
          */
-        static bool removeFile(const std::string& entity_name, const std::string& filename);
+        bool removeFile(const std::string &entity_name, const std::string &filename) const;
 
         /**
          * @brief Remove multiple files from an entity's directory.
@@ -133,7 +134,7 @@ namespace mb
          * @param entity_name Entity/table name
          * @param files Vector of file names to remove
          */
-        static void removeFiles(const std::string& entity_name, const std::vector<std::string>& files);
+        void removeFiles(const std::string &entity_name, const std::vector<std::string> &files) const;
 
         /**
          * @brief Check if a file exists in an entity's directory.
@@ -142,7 +143,7 @@ namespace mb
          * @param filename File name to check
          * @return true if file exists, false otherwise
          */
-        static bool fileExists(const std::string& entity_name, const std::string& filename);
+        bool fileExists(const std::string &entity_name, const std::string &filename) const;
 
         /**
          * @brief Get canonical path and verify it's within the files base directory.
@@ -154,7 +155,7 @@ namespace mb
          * @return Canonical path if valid
          * @throws MantisException if path traversal is detected (400 status)
          */
-        static fs::path getCanonicalPath(const fs::path& path);
+        [[nodiscard]] fs::path getCanonicalPath(const fs::path &path) const;
 
         /**
          * @brief Check if a path is canonical and within the files base directory.
@@ -165,7 +166,7 @@ namespace mb
          * @param path Path to check
          * @return true if path is canonical and within base directory, false otherwise
          */
-        static bool isCanonicalPath(const fs::path& path);
+        [[nodiscard]] bool isCanonicalPath(const fs::path &path) const;
 
         /**
          * @brief Get the base directory for all entity files.
@@ -174,7 +175,7 @@ namespace mb
          *
          * @return Filesystem path to the base files directory
          */
-        static fs::path filesBaseDir();
+        [[nodiscard]] fs::path filesBaseDir() const;
     };
 } // mb
 
