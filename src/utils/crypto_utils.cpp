@@ -13,7 +13,7 @@
 #include <cstring>
 
 namespace mb {
-    std::string generateSecureRandom(size_t length) {
+    std::string generateSecureRandom(const size_t length) {
         WC_RNG rng;
         if (wc_InitRng(&rng) != 0) {
             throw std::runtime_error("Failed to initialize RNG");
@@ -27,7 +27,7 @@ namespace mb {
         wc_FreeRng(&rng);
 
         std::ostringstream oss;
-        for (auto b : buf) {
+        for (const auto b : buf) {
             oss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(b);
         }
         return oss.str();
@@ -47,14 +47,14 @@ namespace mb {
         wc_Sha256Final(&sha, hash);
 
         std::ostringstream oss;
-        for (int i = 0; i < SHA256_DIGEST_SIZE; i++) {
-            oss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(hash[i]);
+        for (const unsigned char i : hash) {
+            oss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(i);
         }
         return oss.str();
     }
 
     std::string base64UrlEncode(const std::vector<uint8_t> &data) {
-        word32 outLen = static_cast<word32>(data.size() * 2 + 4);
+        auto outLen = static_cast<word32>(data.size() * 2 + 4);
         std::vector<byte> encoded(outLen);
 
         if (Base64_Encode_NoNl(data.data(), static_cast<word32>(data.size()),
@@ -77,7 +77,7 @@ namespace mb {
     }
 
     std::string base64UrlEncode(const std::string &data) {
-        std::vector<uint8_t> vec(data.begin(), data.end());
+        const std::vector<uint8_t> vec(data.begin(), data.end());
         return base64UrlEncode(vec);
     }
 
@@ -91,7 +91,7 @@ namespace mb {
             padded += '=';
         }
 
-        word32 outLen = static_cast<word32>(padded.size());
+        auto outLen = static_cast<word32>(padded.size());
         std::vector<byte> decoded(outLen);
 
         if (Base64_Decode(reinterpret_cast<const byte*>(padded.data()),
@@ -103,10 +103,10 @@ namespace mb {
         return decoded;
     }
 
-    std::string generatePKCEVerifier(size_t length) {
-        static const char charset[] =
+    std::string generatePKCEVerifier(const size_t length) {
+        static constexpr char charset[] =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
-        const size_t charset_size = sizeof(charset) - 1;
+        constexpr size_t charset_size = sizeof(charset) - 1;
 
         WC_RNG rng;
         if (wc_InitRng(&rng) != 0) {
@@ -141,7 +141,7 @@ namespace mb {
         byte hash[SHA256_DIGEST_SIZE];
         wc_Sha256Final(&sha, hash);
 
-        std::vector<uint8_t> hashVec(hash, hash + SHA256_DIGEST_SIZE);
+        const std::vector<uint8_t> hashVec(hash, hash + SHA256_DIGEST_SIZE);
         return base64UrlEncode(hashVec);
     }
 
@@ -150,8 +150,8 @@ namespace mb {
             throw std::runtime_error("AES-256-GCM requires a 32-byte key");
         }
 
-        const int IV_SIZE = 12;
-        const int TAG_SIZE = 16;
+        constexpr int IV_SIZE = 12;
+        constexpr int TAG_SIZE = 16;
 
         WC_RNG rng;
         if (wc_InitRng(&rng) != 0) {
@@ -162,11 +162,9 @@ namespace mb {
         wc_RNG_GenerateBlock(&rng, iv.data(), IV_SIZE);
         wc_FreeRng(&rng);
 
-        Aes aes;
-        std::memset(&aes, 0, sizeof(aes));
-
+        Aes aes = {};
         if (wc_AesGcmSetKey(&aes,
-                           reinterpret_cast<const byte*>(key.data()), 32) != 0) {
+                            reinterpret_cast<const byte*>(key.data()), 32) != 0) {
             throw std::runtime_error("Failed to set AES-GCM key");
         }
 
@@ -197,10 +195,10 @@ namespace mb {
             throw std::runtime_error("AES-256-GCM requires a 32-byte key");
         }
 
-        const int IV_SIZE = 12;
-        const int TAG_SIZE = 16;
+        constexpr int IV_SIZE = 12;
+        constexpr int TAG_SIZE = 16;
 
-        auto raw = base64UrlDecode(ciphertext_b64);
+        const auto raw = base64UrlDecode(ciphertext_b64);
         if (raw.size() < static_cast<size_t>(IV_SIZE + TAG_SIZE)) {
             throw std::runtime_error("Invalid ciphertext: too short");
         }
@@ -210,11 +208,9 @@ namespace mb {
         const byte* ct = raw.data() + IV_SIZE;
         const byte* tag = raw.data() + IV_SIZE + ct_len;
 
-        Aes aes;
-        std::memset(&aes, 0, sizeof(aes));
-
+        Aes aes = {};
         if (wc_AesGcmSetKey(&aes,
-                           reinterpret_cast<const byte*>(key.data()), 32) != 0) {
+                            reinterpret_cast<const byte*>(key.data()), 32) != 0) {
             throw std::runtime_error("Failed to set AES-GCM key");
         }
 

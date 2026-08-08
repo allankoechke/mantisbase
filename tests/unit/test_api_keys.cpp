@@ -9,44 +9,45 @@ class ApiKeyTestFixture : public MbAppFixture {
 };
 
 TEST_F(ApiKeyTestFixture, GenerateApiKey) {
-    auto result = mb::ApiKeyManager::generateApiKey();
+    auto [id, key, key_hash] = mb::ApiKeyManager::generateApiKey();
 
-    EXPECT_FALSE(result.id.empty());
-    EXPECT_TRUE(result.key.starts_with("mb_sk_"));
-    EXPECT_FALSE(result.key_hash.empty());
-    EXPECT_EQ(result.key_hash.size(), 64u);
+    EXPECT_FALSE(id.empty());
+    EXPECT_TRUE(key.starts_with("mb_sk_"));
+    EXPECT_FALSE(key_hash.empty());
+    EXPECT_EQ(key_hash.size(), 64u);
+
 }
 
 TEST_F(ApiKeyTestFixture, GenerateUniqueKeys) {
-    auto key1 = mb::ApiKeyManager::generateApiKey();
-    auto key2 = mb::ApiKeyManager::generateApiKey();
+    auto [id1, key1, key_hash1] = mb::ApiKeyManager::generateApiKey();
+    auto [id2, key2, key_hash2] = mb::ApiKeyManager::generateApiKey();
 
-    EXPECT_NE(key1.key, key2.key);
-    EXPECT_NE(key1.key_hash, key2.key_hash);
-    EXPECT_NE(key1.id, key2.id);
+    EXPECT_NE(key1, key2);
+    EXPECT_NE(key_hash1, key_hash2);
+    EXPECT_NE(id1, id2);
 }
 
 TEST_F(ApiKeyTestFixture, HashApiKeyConsistency) {
-    std::string raw_key = "mb_sk_abcdef1234567890abcdef1234567890abcdef1234567890abcdef12345678";
-    auto hash1 = mb::ApiKeyManager::hashApiKey(raw_key);
-    auto hash2 = mb::ApiKeyManager::hashApiKey(raw_key);
+    const std::string raw_key = "mb_sk_abcdef1234567890abcdef1234567890abcdef1234567890abcdef12345678";
+    const auto hash1 = mb::ApiKeyManager::hashApiKey(raw_key);
+    const auto hash2 = mb::ApiKeyManager::hashApiKey(raw_key);
 
     EXPECT_EQ(hash1, hash2);
     EXPECT_EQ(hash1.size(), 64u);
 }
 
 TEST_F(ApiKeyTestFixture, DifferentKeysDifferentHashes) {
-    std::string key1 = "mb_sk_aaaa";
-    std::string key2 = "mb_sk_bbbb";
+    const std::string key1 = "mb_sk_aaaa";
+    const std::string key2 = "mb_sk_bbbb";
 
-    auto hash1 = mb::ApiKeyManager::hashApiKey(key1);
-    auto hash2 = mb::ApiKeyManager::hashApiKey(key2);
+    const auto hash1 = mb::ApiKeyManager::hashApiKey(key1);
+    const auto hash2 = mb::ApiKeyManager::hashApiKey(key2);
 
     EXPECT_NE(hash1, hash2);
 }
 
 TEST_F(ApiKeyTestFixture, CreateAndLookupApiKey) {
-    auto &keys = mantis().auth().apiKey();
+    const auto &keys = mantis().auth().apiKey();
     auto result = keys.create("mb_admins", "test_user_id", "Test Key");
 
     EXPECT_TRUE(result.contains("id"));
@@ -54,7 +55,7 @@ TEST_F(ApiKeyTestFixture, CreateAndLookupApiKey) {
     EXPECT_TRUE(result["key"].get<std::string>().starts_with("mb_sk_"));
     EXPECT_EQ(result["label"].get<std::string>(), "Test Key");
 
-    auto key_hash = mb::ApiKeyManager::hashApiKey(result["key"].get<std::string>());
+    const auto key_hash = mb::ApiKeyManager::hashApiKey(result["key"].get<std::string>());
     auto lookup = keys.lookupByHash(key_hash);
 
     EXPECT_TRUE(lookup.has_value());
@@ -63,14 +64,14 @@ TEST_F(ApiKeyTestFixture, CreateAndLookupApiKey) {
 }
 
 TEST_F(ApiKeyTestFixture, LookupNonExistentKey) {
-    auto lookup = mantis().auth().apiKey().lookupByHash("nonexistent_hash_value_that_does_not_exist");
+    const auto lookup = mantis().auth().apiKey().lookupByHash("nonexistent_hash_value_that_does_not_exist");
     EXPECT_FALSE(lookup.has_value());
 }
 
 TEST_F(ApiKeyTestFixture, CreateListAndRevokeApiKey) {
-    auto &keys = mantis().auth().apiKey();
+    const auto &keys = mantis().auth().apiKey();
     auto created = keys.create("mb_admins", "list_test_user", "List Test Key");
-    auto key_id = created["id"].get<std::string>();
+    const auto key_id = created["id"].get<std::string>();
 
     auto key_list = keys.list("mb_admins", "list_test_user");
     EXPECT_GE(key_list.size(), 1u);
@@ -84,25 +85,25 @@ TEST_F(ApiKeyTestFixture, CreateListAndRevokeApiKey) {
     }
     EXPECT_TRUE(found);
 
-    bool revoked = keys.revoke(key_id, "mb_admins", "list_test_user");
+    const bool revoked = keys.revoke(key_id, "mb_admins", "list_test_user");
     EXPECT_TRUE(revoked);
 
-    auto key_hash = mb::ApiKeyManager::hashApiKey(created["key"].get<std::string>());
-    auto lookup = keys.lookupByHash(key_hash);
+    const auto key_hash = mb::ApiKeyManager::hashApiKey(created["key"].get<std::string>());
+    const auto lookup = keys.lookupByHash(key_hash);
     EXPECT_FALSE(lookup.has_value());
 }
 
 TEST_F(ApiKeyTestFixture, RevokeNonExistentKey) {
-    bool revoked = mantis().auth().apiKey().revoke("nonexistent_id", "mb_admins", "no_user");
+    const bool revoked = mantis().auth().apiKey().revoke("nonexistent_id", "mb_admins", "no_user");
     EXPECT_FALSE(revoked);
 }
 
 TEST_F(ApiKeyTestFixture, ShownOnceVerification) {
-    auto &keys = mantis().auth().apiKey();
+    const auto &keys = mantis().auth().apiKey();
     auto result = keys.create("mb_admins", "shown_once_user", "Shown Once Key");
 
     EXPECT_TRUE(result.contains("key"));
-    auto raw_key = result["key"].get<std::string>();
+    const auto raw_key = result["key"].get<std::string>();
     EXPECT_TRUE(raw_key.starts_with("mb_sk_"));
 
     auto key_list = keys.list("mb_admins", "shown_once_user");
@@ -110,5 +111,5 @@ TEST_F(ApiKeyTestFixture, ShownOnceVerification) {
         EXPECT_FALSE(k.contains("key"));
     }
 
-    keys.revoke(result["id"].get<std::string>(), "mb_admins", "shown_once_user");
+    auto _ = keys.revoke(result["id"].get<std::string>(), "mb_admins", "shown_once_user");
 }
