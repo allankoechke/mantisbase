@@ -1,8 +1,8 @@
-@page cli Command Line Usage
+﻿@page cli Command Line Usage
 
 MantisBase has a comprehensive CLI built on `argparse` for server management, admin accounts, migrations, and schema operations.
 
-# 🧭 mantisbase CLI Reference
+# mantisbase CLI Reference
 
 ```bash
 mantisbase [global options] <subcommand> [subcommand options]
@@ -12,7 +12,7 @@ Only **one subcommand** may be used per invocation: `serve`, `admins`, `migratio
 
 ---
 
-## ⚙️ Global Options
+## Global Options
 
 These options can appear before the subcommand:
 
@@ -30,7 +30,7 @@ When an environment variable is set, it overrides the matching CLI option. For l
 
 ---
 
-## 🚀 serve
+## serve
 
 Start the HTTP server.
 
@@ -56,7 +56,7 @@ mantisbase --dev serve --port=8000
 
 ---
 
-## 👤 admins
+## admins
 
 Manage admin accounts. Exactly **one** of `--add`, `--ls`, or `--rm` is required.
 
@@ -83,7 +83,7 @@ mantisbase admins --rm admin@example.com
 
 ---
 
-## 📋 schema
+## schema
 
 Manage entity schemas locally (without the HTTP API). Exactly **one** of `--ls`, `--rm`, `--add`, or `--update` is required.
 
@@ -113,7 +113,7 @@ mantisbase schema --rm posts
 ---
 
 
-## 🛠️ migrate
+## migrate
 
 Exactly **one** of `apply` or `schema` is required.
 
@@ -122,7 +122,7 @@ mantisbase apply [options]
 mantisbase schema [options]
 ```
 
-### 🛠️ apply
+### apply
 
 Apply or rollback migrations from the migrations directory. Exactly **one** of `--up` or `--down` is required.
 
@@ -142,7 +142,7 @@ mantisbase migrate apply  --down
 mantisbase --migrations-dir=./db/migrations migrate apply --up
 ```
 
-### 🛠️ schema
+### schema
 
 Create or load schema dump from a given .json file. Exactly **one** of `--to` or `--from` is required.
 
@@ -168,11 +168,11 @@ mantisbase migrate schema --from /path/to/123.json
 
 ---
 
-## 📚 See Also
+## See Also
 
 * [Quick Start](QuickStart.md)
-* [Embedding MantisBase](05.embedding.md)
-* [REST API Reference](02.api.md)
-* [Authentication API](02.auth.md)
+* [Embedding MantisBase](embedding.md)
+* [REST API Reference](api.md)
+* [Authentication API](auth.md)
 
 ---

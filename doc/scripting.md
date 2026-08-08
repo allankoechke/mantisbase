@@ -1,10 +1,9 @@
-@page scripting Scripting in MantisBase
+@page scripting Scripting
 
-# Scripting
-On server run execution, MantisBase searches for a script file named `index.mantis.js` as an entry point into loading scripts into context. Once file is executed, ay actions are evaluated and methods stored for subsequent invokation by the C++ engine as needed. This is important for tasks like requests that reqires signature registration then when a new request comes in, we will route the request to the Javascript handler and/or middlewares.
+On server run execution, MantisBase searches for a script file named `index.mantis.js` as an entry point into loading scripts into context. Once the file is executed, any actions are evaluated and methods stored for subsequent invocation by the C++ engine as needed. This is important for tasks like requests that require signature registration — when a new request comes in, it is routed to the JavaScript handler and/or middlewares.
 
 The file `index.mantis.js` is expected to be in the global apps scripts directory which is set either by:
-- By default, relative to the `mantisapp` binary in a directory called `scripts`
+- By default, relative to the `mantisbase` binary in a directory called `scripts`
 - We can override this directory by setting the desired directory using the cmd arg `--scriptsDir /some/path`. See CMD options in the docs for more information.
 
 ## Application

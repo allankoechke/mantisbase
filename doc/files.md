@@ -104,17 +104,38 @@ The backend detects the missing file and removes it from both the database and f
 
 ## File Storage
 
-Files are stored in the data directory under:
+Files are stored under a `files/` subdirectory inside the data directory:
 
 ```
-<dataDir>/<entity>/<filename>
+<dataDir>/files/<entity>/<filename>
 ```
 
 For example, if `dataDir` is `./data` and entity is `posts`, a file `image.jpg` would be stored at:
 
 ```
-./data/posts/image.jpg
+./data/files/posts/image.jpg
 ```
+
+### Filename Sanitization
+
+Uploaded filenames are automatically sanitized before storage:
+
+- A random 8-character prefix is prepended (e.g., `a3b7c2d1_image.jpg`) to prevent collisions
+- Invalid characters (control characters, `<>:"/\|?*+`, spaces, tabs, `%`, `=`) are replaced with underscores
+- Consecutive underscores are collapsed
+- Leading and trailing spaces or dots are trimmed
+- Filenames longer than 255 characters are truncated with `...` in the middle
+- If the result is empty after sanitization, the filename falls back to `"unnamed"`
+
+### Path Traversal Protection
+
+MantisBase uses multi-layered path traversal prevention on all file operations. Any request whose resolved path escapes the entity's storage directory is rejected with a `400 Bad Request` error.
+
+### Limitations
+
+- **File size**: A `maxFileSize` setting (default 10 MB) exists in the application config but is not currently enforced at upload time. Clients are not rejected for exceeding it.
+- **File types**: No MIME type or file extension validation is performed. All file types are accepted.
+- **Files per record**: No limit on the number of files per record.
 
 ---
 
@@ -140,7 +161,7 @@ When defining your schema:
 
 ---
 
-## Note that:
+## Important Notes
 
 - Always use the correct entity name and field names as defined in your schema
 - For `files` type fields, include all files you want to retain in update requests

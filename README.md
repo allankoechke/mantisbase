@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/mantisbase-banner.jpg" alt="MantisBase" width="100%" />
 </p>
 
@@ -76,14 +76,14 @@ That's it — you have a full backend with auth, realtime, and file uploads in u
 
 ## Features
 
-- **Auto-generated REST APIs** — create a table, get CRUD endpoints instantly → [API Reference](doc/02.api.md)
-- **Built-in authentication** — JWT-based auth with login, refresh, logout → [Auth API](doc/02.auth.md)
-- **Access control rules** — public, auth, or custom expression-based permissions → [Access Rules](doc/03.rules.md)
-- **Realtime updates** — SSE streams for live database changes (SQLite & PostgreSQL) → [API Reference](doc/02.api.md)
+- **Auto-generated REST APIs** — create a table, get CRUD endpoints instantly → [API Reference](doc/api.md)
+- **Built-in authentication** — JWT-based auth with login, refresh, logout → [Auth API](doc/auth.md)
+- **Access control rules** — public, auth, or custom expression-based permissions → [Access Rules](doc/rules.md)
+- **Realtime updates** — SSE streams for live database changes (SQLite & PostgreSQL) → [API Reference](doc/api.md)
 - **Admin dashboard** — web UI for managing schemas, records, users, and files → [Quick Start](doc/QuickStart.md)
-- **File uploads** — multipart upload and serving tied to entity records → [File Handling](doc/11.files.md)
-- **Embeddable** — use as a C++ library in your own application → [Embedding Guide](doc/05.embedding.md)
-- **JavaScript extensions** — extend with custom routes and logic → [Scripting Guide](doc/13.scripting.md)
+- **File uploads** — multipart upload and serving tied to entity records → [File Handling](doc/files.md)
+- **Embeddable** — use as a C++ library in your own application → [Embedding Guide](doc/embedding.md)
+- **JavaScript extensions** — extend with custom routes and logic → [Scripting Guide](doc/scripting.md)
 
 ![MantisBase Admin Dashboard](doc/mantisbase-admin.png)
 
@@ -104,7 +104,7 @@ mantisbase --db postgresql --db_url "dbname=mydb host=localhost user=postgres pa
 mantisbase --dev serve
 ```
 
-Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Reference](doc/01.cmd.md) for all options.
+Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Reference](doc/cmd.md) for all options.
 
 ---
 
@@ -112,10 +112,10 @@ Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Referen
 
 | Method | Details |
 |---|---|
-| **Pre-built binary** | Download from [GitHub Releases](https://github.com/allankoechke/mantisbase/releases), extract, and run `./mantisbase serve` → [Installation Guide](doc/00.installation.md) |
-| **Docker** | `docker run -p 7070:80 allankoech/mantisbase` → [Docker Guide](doc/06.docker.md) |
-| **Build from source** | `git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git && cd mantisbase && cmake -B build && cmake --build build` → [Installation Guide](doc/00.installation.md) |
-| **Embed in C++** | Add as a CMake submodule and `#include <mantisbase/mantisbase.h>` in your app → [Embedding Guide](doc/05.embedding.md) |
+| **Pre-built binary** | Download from [GitHub Releases](https://github.com/allankoechke/mantisbase/releases), extract, and run `./mantisbase serve` → [Installation Guide](doc/installation.md) |
+| **Docker** | `docker run -p 7070:80 allankoech/mantisbase` → [Docker Guide](doc/docker.md) |
+| **Build from source** | `git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git && cd mantisbase && cmake -B build && cmake --build build` → [Installation Guide](doc/installation.md) |
+| **Embed in C++** | Add as a CMake submodule and `#include <mantisbase/mantisbase.h>` in your app → [Embedding Guide](doc/embedding.md) |
 
 > **Requirements**: C++20 compiler (GCC/MinGW 13+). Linux builds need `libzstd-dev` and `libpq-dev` for PostgreSQL support. No external runtime dependencies — everything is bundled.
 
@@ -126,15 +126,15 @@ Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Referen
 | Doc | Description |
 |---|---|
 | [Quick Start](doc/QuickStart.md) | Get running in under 2 minutes |
-| [Installation](doc/00.installation.md) | Binary, source, and embedding setup |
-| [CLI Reference](doc/01.cmd.md) | Command-line options and flags |
-| [API Reference](doc/02.api.md) | REST endpoints, schemas, and realtime SSE |
-| [Authentication](doc/02.auth.md) | Auth endpoints and JWT flow |
-| [Access Rules](doc/03.rules.md) | Permission system and expressions |
-| [Docker](doc/06.docker.md) | Container deployment |
-| [File Handling](doc/11.files.md) | Upload and serve files |
-| [Health Check](doc/12.healthcheck.md) | Monitoring endpoint |
-| [Scripting](doc/13.scripting.md) | JavaScript extensions |
+| [Installation](doc/installation.md) | Binary, source, and embedding setup |
+| [CLI Reference](doc/cmd.md) | Command-line options and flags |
+| [API Reference](doc/api.md) | REST endpoints, schemas, and realtime SSE |
+| [Authentication](doc/auth.md) | Auth endpoints and JWT flow |
+| [Access Rules](doc/rules.md) | Permission system and expressions |
+| [Docker](doc/docker.md) | Container deployment |
+| [File Handling](doc/files.md) | Upload and serve files |
+| [Health Check](doc/healthcheck.md) | Monitoring endpoint |
+| [Scripting](doc/scripting.md) | JavaScript extensions |
 
 Full API docs: [docs.mantisbase.dev](https://allankoechke.github.io/mantisbase/)
 
