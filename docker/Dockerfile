@@ -20,4 +20,5 @@ RUN wget -O /tmp/mantisbase.zip https://github.com/allankoechke/mantisbase/relea
 EXPOSE 80
 
 ENTRYPOINT ["/mb/mantisbase"]
-CMD ["--dev", "serve", "-p", "80"]
+# Dev mode: docker run ... allankoech/mantisbase --dev serve -p 80
+CMD ["serve", "-p", "80"]
