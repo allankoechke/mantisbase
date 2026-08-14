@@ -117,7 +117,7 @@ Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Referen
 | **Build from source** | `git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git && cd mantisbase && cmake -B build && cmake --build build` → [Installation Guide](doc/installation.md) |
 | **Embed in C++** | Add as a CMake submodule and `#include <mantisbase/mantisbase.h>` in your app → [Embedding Guide](doc/embedding.md) |
 
-> **Requirements**: C++20 compiler (GCC/MinGW 13+). Linux builds need `libzstd-dev` and `libpq-dev` for PostgreSQL support. No external runtime dependencies — everything is bundled.
+> **Requirements**: C++20 compiler (GCC/MinGW 13+). Linux builds need `libpq-dev` and `uuid-dev` for PostgreSQL support. No external runtime dependencies — everything is bundled.
 
 ---
 

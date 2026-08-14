@@ -5,6 +5,7 @@ on:
 
 jobs:
   build:
+    name: Build (${{ matrix.platform }})
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -19,17 +20,23 @@ jobs:
             c_compiler: gcc
             cpp_compiler: g++
             platform: linux-x86_64
+            lib_platform: linux
             arch: x86_64
+            arch_label: x86-64
           - os: ubuntu-latest
             c_compiler: aarch64-linux-gnu-gcc
             cpp_compiler: aarch64-linux-gnu-g++
             platform: linux-aarch64
+            lib_platform: linux
             arch: aarch64
+            arch_label: aarch64
           - os: windows-latest
             c_compiler: gcc
             cpp_compiler: g++
             platform: windows-x86_64
+            lib_platform: windows
             arch: x86_64
+            arch_label: x86-64
 
     steps:
       - uses: actions/checkout@v4
@@ -37,19 +44,22 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
-      - name: Install dependencies on Ubuntu
-        if: matrix.os != 'windows-latest'
+      - name: Install dependencies (Linux x86_64)
+        if: matrix.os != 'windows-latest' && matrix.arch != 'aarch64'
         run: |
           sudo apt-get update
           sudo apt-get install -y libpq-dev uuid-dev
 
-      - name: Install ARM64 cross-compiler
+      - name: Install dependencies (Linux ARM64 cross-compile)
         if: matrix.arch == 'aarch64'
         run: |
-          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-          sudo apt-get install -y libpq-dev uuid-dev
+          sudo dpkg --add-architecture arm64
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+            libpq-dev:arm64 uuid-dev:arm64
 
-      - name: Install MinGW
+      - name: Install MinGW (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           choco install mingw --no-progress
@@ -83,18 +93,16 @@ jobs:
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-      - name: Configure CMake (Windows-latest)
+      - name: Configure CMake (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           $mingwBin = "C:\ProgramData\mingw64\mingw64\bin"
           $makePath = Join-Path $mingwBin "mingw32-make.exe"
 
-          # Check if make exists, if not try alternative locations
           if (-not (Test-Path $makePath)) {
             $makePath = "C:\mingw64\bin\mingw32-make.exe"
             if (-not (Test-Path $makePath)) {
-              # Try to find it
               $found = Get-ChildItem "C:\ProgramData\mingw64" -Recurse -Filter "mingw32-make.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
               if ($found) {
                 $makePath = $found.FullName
@@ -135,6 +143,11 @@ jobs:
             -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
             -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
+            -DCMAKE_FIND_ROOT_PATH=/usr/aarch64-linux-gnu \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DMB_BUILD_TESTS=OFF \
             -DMB_BUILD_DOCS=OFF \
@@ -154,22 +167,30 @@ jobs:
         run: |
           cd ${{ github.workspace }}/build/bin
           rm -f mantisbase_tests
+          STAGING="zip/staging"
+          mkdir -p "$STAGING"
+          cp mantisbase "$STAGING/"
+          cp "${{ github.workspace }}/LICENSE" "$STAGING/"
+          cp "${{ github.workspace }}/.github/release/README-linux-binary.md" "$STAGING/README.md"
           mkdir -p zip
-          zip -r zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip mantisbase*
+          (cd "$STAGING" && zip -r "../mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip" .)
 
-      - name: Zip the build output (Windows-latest)
+      - name: Zip the build output (Windows)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          del "${{ steps.strings.outputs.build-output-dir }}\bin\mantisbase_tests.exe"
+          del "${{ steps.strings.outputs.build-output-dir }}\bin\mantisbase_tests.exe" -ErrorAction SilentlyContinue
           $BinPath = "${{ steps.strings.outputs.build-output-dir }}\bin"
-          $ZipPath = "$BinPath\zip"
-          $ZipFile = "$ZipPath\mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip"
+          $Staging = "$BinPath\zip\staging"
+          $ZipFile = "$BinPath\zip\mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip"
 
-          New-Item -ItemType Directory -Force -Path $ZipPath | Out-Null
-          Compress-Archive -Path "$BinPath\mantisbase*.exe" -DestinationPath $ZipFile -Force
+          New-Item -ItemType Directory -Force -Path $Staging | Out-Null
+          Copy-Item "$BinPath\mantisbase.exe" -Destination $Staging
+          Copy-Item "${{ github.workspace }}\LICENSE" -Destination $Staging
+          Copy-Item "${{ github.workspace }}\.github\release\README-windows-binary.md" -Destination "$Staging\README.md"
+          Compress-Archive -Path "$Staging\*" -DestinationPath $ZipFile -Force
 
-      - name: Upload zipped artifact
+      - name: Upload platform binary artifact
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
@@ -181,33 +202,42 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
         shell: bash
         run: |
-          mkdir -p lib-staging/lib/linux/static
-          mkdir -p lib-staging/lib/linux/shared
-          mkdir -p lib-staging/generated-include/mantisbase
-          cp ${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.a lib-staging/lib/linux/static/
-          cp ${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.so lib-staging/lib/linux/shared/
-          cp ${{ steps.strings.outputs.build-output-dir }}/include/mantisbase/config.hpp lib-staging/generated-include/mantisbase/config.hpp
+          STAGING="lib-staging/lib/${{ matrix.lib_platform }}"
+          mkdir -p "${STAGING}/static/${{ matrix.arch_label }}"
+          mkdir -p "${STAGING}/shared/${{ matrix.arch_label }}"
+          cp "${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.a" \
+            "${STAGING}/static/${{ matrix.arch_label }}/"
+          cp "${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.so" \
+            "${STAGING}/shared/${{ matrix.arch_label }}/"
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            mkdir -p lib-staging/generated-include/mantisbase
+            cp "${{ steps.strings.outputs.build-output-dir }}/include/mantisbase/config.hpp" \
+              lib-staging/generated-include/mantisbase/config.hpp
+          fi
 
       - name: Upload library artifact (Linux)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}_linux-lib
+          name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-lib
           path: lib-staging/
 
       - name: Stage library files (Windows)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path "lib-staging\lib\windows\static" | Out-Null
-          New-Item -ItemType Directory -Force -Path "lib-staging\lib\windows\shared" | Out-Null
-          Copy-Item "build\lib\libmantisbase.a" -Destination "lib-staging\lib\windows\static\"
-          Copy-Item "build\bin\libmantisbase.dll" -Destination "lib-staging\lib\windows\shared\"
-          Copy-Item "build\lib\libmantisbase.dll.a" -Destination "lib-staging\lib\windows\shared\"
+          $Staging = "lib-staging\lib\${{ matrix.lib_platform }}"
+          New-Item -ItemType Directory -Force -Path "$Staging\static\${{ matrix.arch_label }}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$Staging\shared\${{ matrix.arch_label }}" | Out-Null
+          Copy-Item "build\lib\libmantisbase.a" -Destination "$Staging\static\${{ matrix.arch_label }}\"
+          Copy-Item "build\bin\libmantisbase.dll" -Destination "$Staging\shared\${{ matrix.arch_label }}\"
+          Copy-Item "build\lib\libmantisbase.dll.a" -Destination "$Staging\shared\${{ matrix.arch_label }}\"
+          New-Item -ItemType Directory -Force -Path "lib-staging\generated-include\mantisbase" | Out-Null
+          Copy-Item "build\include\mantisbase\config.hpp" -Destination "lib-staging\generated-include\mantisbase\"
 
       - name: Upload library artifact (Windows)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}_windows-lib
+          name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-lib
           path: lib-staging\
