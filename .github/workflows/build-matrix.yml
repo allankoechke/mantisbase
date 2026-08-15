@@ -23,9 +23,9 @@ jobs:
             lib_platform: linux
             arch: x86_64
             arch_label: x86-64
-          - os: ubuntu-latest
-            c_compiler: aarch64-linux-gnu-gcc
-            cpp_compiler: aarch64-linux-gnu-g++
+          - os: ubuntu-24.04-arm
+            c_compiler: gcc
+            cpp_compiler: g++
             platform: linux-aarch64
             lib_platform: linux
             arch: aarch64
@@ -44,20 +44,11 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
-      - name: Install dependencies (Linux x86_64)
-        if: matrix.os != 'windows-latest' && matrix.arch != 'aarch64'
+      - name: Install dependencies (Linux)
+        if: matrix.os != 'windows-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y libpq-dev uuid-dev
-
-      - name: Install dependencies (Linux ARM64 cross-compile)
-        if: matrix.arch == 'aarch64'
-        run: |
-          sudo dpkg --add-architecture arm64
-          sudo apt-get update
-          sudo apt-get install -y \
-            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
-            libpq-dev:arm64 uuid-dev:arm64
 
       - name: Install MinGW (Windows)
         if: matrix.os == 'windows-latest'
@@ -123,8 +114,8 @@ jobs:
             -DMB_BUILD_SHARED_LIB=ON `
             -S ${{ github.workspace }}
 
-      - name: Configure CMake (Linux x86_64)
-        if: matrix.os != 'windows-latest' && matrix.arch != 'aarch64'
+      - name: Configure CMake (Linux)
+        if: matrix.os != 'windows-latest'
         run: |
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
@@ -135,30 +126,11 @@ jobs:
             -DMB_BUILD_SHARED_LIB=ON \
             -S ${{ github.workspace }}
 
-      - name: Configure CMake (Linux ARM64)
-        if: matrix.arch == 'aarch64'
-        run: |
-          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
-            -DCMAKE_SYSTEM_NAME=Linux \
-            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
-            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
-            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
-            -DCMAKE_FIND_ROOT_PATH=/usr/aarch64-linux-gnu \
-            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
-            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
-            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-            -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DMB_BUILD_TESTS=OFF \
-            -DMB_BUILD_DOCS=OFF \
-            -DMB_BUILD_SHARED_LIB=ON \
-            -S ${{ github.workspace }}
-
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
       - name: Test
-        if: matrix.arch != 'aarch64'
+        if: matrix.os != 'windows-latest'
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: ctest --build-config ${{ matrix.build_type }} --output-on-failure
 
