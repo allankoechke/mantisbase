@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['3_20create_20your_20first_20entity_0',['3. Create Your First Entity',['../index.html#autotoc_md270',1,'']]],
-  ['3_20validate_20user_20data_20exists_1',['3. Validate User Data Exists',['../rest_api_rules.html#autotoc_md164',1,'']]]
+  ['4_20test_20edge_20cases_0',['4. Test Edge Cases',['../rest_api_rules.html#autotoc_md265',1,'']]],
+  ['4_20use_20your_20auto_20generated_20api_1',['4. Use Your Auto-generated API',['../index.html#autotoc_md213',1,'']]]
 ];

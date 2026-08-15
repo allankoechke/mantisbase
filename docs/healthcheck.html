@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MantisBase: Healthcheck Endpoint</title>
+<title>MantisBase: Health Check</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -91,51 +91,45 @@ $(document).ready(function(){initNavTree('healthcheck.html',''); initResizable()
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Healthcheck Endpoint</div></div>
+  <div class="headertitle"><div class="title">Health Check</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>The healthcheck endpoint provides a simple way to verify that the MantisBase server is running and responsive. It is useful for monitoring tools, load balancers, and deployment scripts.</p>
+<div class="textblock"><p>The health check endpoint provides a simple way to verify that the MantisBase server is running and responsive. It is useful for monitoring tools, load balancers, and deployment scripts.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md239"></a>
+<h2><a class="anchor" id="autotoc_md186"></a>
 Endpoint</h2>
 <div class="fragment"><div class="line">GET /api/v1/health</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md241"></a>
+<h2><a class="anchor" id="autotoc_md188"></a>
 Response</h2>
-<p>A successful request returns a JSON response with the following structure:</p>
+<p>A successful request returns:</p>
 <div class="fragment"><div class="line">{</div>
-<div class="line">  &quot;status&quot;: &quot;ok&quot;,</div>
-<div class="line">  &quot;uptime&quot;: 12345</div>
+<div class="line">  &quot;status&quot;: &quot;OK&quot;</div>
 <div class="line">}</div>
-</div><!-- fragment --><ul>
-<li><code>status</code>: Always set to <code>"ok"</code> if the server is healthy</li>
-<li><code>uptime</code>: Number of seconds the server has been running since startup</li>
-</ul>
-<p>The HTTP status code for a healthy response is <code>200 OK</code>.</p>
+</div><!-- fragment --><p>The HTTP status code for a healthy response is <code>200 OK</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md243"></a>
+<h2><a class="anchor" id="autotoc_md190"></a>
 Example</h2>
 <p><b>Request:</b></p>
 <div class="fragment"><div class="line">curl http://localhost:7070/api/v1/health</div>
 </div><!-- fragment --><p><b>Response:</b></p>
 <div class="fragment"><div class="line">{</div>
-<div class="line">  &quot;status&quot;: &quot;ok&quot;,</div>
-<div class="line">  &quot;uptime&quot;: 12345</div>
+<div class="line">  &quot;status&quot;: &quot;OK&quot;</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md245"></a>
+<h2><a class="anchor" id="autotoc_md192"></a>
 Error Handling</h2>
-<p>If the server encounters an error while processing the healthcheck, it may return a <code>500 Internal Server Error</code> with an appropriate error message.</p>
+<p>If the server encounters an error while processing the health check, it may return a <code>500 Internal Server Error</code> with an appropriate error message.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md247"></a>
+<h2><a class="anchor" id="autotoc_md194"></a>
 Usage</h2>
 <ul>
 <li>Verify server availability and responsiveness</li>
 <li>Integrate with monitoring systems (Prometheus, Nagios, etc.)</li>
-<li>Use in orchestration systems (Kubernetes liveness/readiness probes, Docker healthchecks)</li>
+<li>Use in orchestration systems (Kubernetes liveness/readiness probes, Docker health checks)</li>
 <li>Load balancer health checks</li>
 </ul>
-<p><b>Example Docker healthcheck:</b></p>
+<p><b>Example Docker health check:</b></p>
 <div class="fragment"><div class="line">HEALTHCHECK --interval=30s --timeout=3s \</div>
 <div class="line">  CMD curl -f http:<span class="comment">//localhost:7070/api/v1/health || exit 1</span></div>
 </div><!-- fragment --><p><b>Example Kubernetes liveness probe:</b></p>
@@ -145,11 +139,7 @@ Usage</h2>
 <div class="line">    port: 7070</div>
 <div class="line">  initialDelaySeconds: 30</div>
 <div class="line">  periodSeconds: 10</div>
-</div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md249"></a>
-Summary</h2>
-<p>The healthcheck endpoint provides a simple, lightweight way to monitor MantisBase server status and uptime, making it easy to integrate with various monitoring and orchestration systems. </p>
-</div></div><!-- contents -->
+</div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
 <!-- start footer part -->

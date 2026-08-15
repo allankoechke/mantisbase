@@ -96,15 +96,15 @@ $(document).ready(function(){initNavTree('rest_api.html',''); initResizable(); }
 <div class="contents">
 <div class="textblock"><p>MantisBase provides auto-generated RESTful APIs for interacting with database entities. This document covers the entity endpoints, schema management, realtime (SSE) API for live database change notifications (SQLite and PostgreSQL), and request handling.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md26"></a>
-🌐 Base URL</h2>
+<h2><a class="anchor" id="autotoc_md1"></a>
+Base URL</h2>
 <p>When MantisBase is running locally:</p>
 <div class="fragment"><div class="line">http://localhost:7070/api/v1/</div>
 </div><!-- fragment --><p>You can configure the port and host using command-line arguments:</p>
 <div class="fragment"><div class="line">mantisbase serve --port 8000 --host 127.0.0.1</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md28"></a>
-🗂️ API Namespaces</h2>
+<h2><a class="anchor" id="autotoc_md3"></a>
+API Namespaces</h2>
 <p>All REST endpoints live under <code>/api/v1/</code> and are grouped by namespace:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -130,11 +130,13 @@ $(document).ready(function(){initNavTree('rest_api.html',''); initResizable(); }
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>/api/v1/sys/settings/</code>   </td><td class="markdownTableBodyNone">Application settings    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>/api/v1/realtime</code>   </td><td class="markdownTableBodyNone">Server-Sent Events for live database changes   </td></tr>
+<td class="markdownTableBodyNone"><code>/api/v1/realtime</code>   </td><td class="markdownTableBodyNone">Server-Sent Events for live database changes    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>WS /api/v1/realtime/ws</code>   </td><td class="markdownTableBodyNone">WebSocket for live database changes   </td></tr>
 </table>
 <hr  />
-<h2><a class="anchor" id="autotoc_md30"></a>
-📄 Entity Endpoints</h2>
+<h2><a class="anchor" id="autotoc_md5"></a>
+Entity Endpoints</h2>
 <p>MantisBase automatically exposes CRUD endpoints for each entity (table or view):</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -150,7 +152,7 @@ $(document).ready(function(){initNavTree('rest_api.html',''); initResizable(); }
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">DELETE   </td><td class="markdownTableBodyNone"><code>/api/v1/entities/&lt;entity&gt;/:id</code>   </td><td class="markdownTableBodyNone">Delete a record   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md31"></a>
+<h3><a class="anchor" id="autotoc_md6"></a>
 Example Requests</h3>
 <div class="fragment"><div class="line"># List all users</div>
 <div class="line">curl http://localhost:7070/api/v1/entities/users</div>
@@ -174,16 +176,16 @@ Example Requests</h3>
 <div class="line">curl -X DELETE http://localhost:7070/api/v1/entities/users/123 \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md33"></a>
-🔐 Authentication</h2>
+<h2><a class="anchor" id="autotoc_md8"></a>
+Authentication</h2>
 <p>All entity endpoints require authentication via JWT tokens. Include the token in the <code>Authorization</code> header:</p>
 <div class="fragment"><div class="line">Authorization: Bearer &lt;token&gt;</div>
-</div><!-- fragment --><p>For authentication endpoints, see <a class="el" href="02_8auth_8md.html">Authentication API</a>.</p>
+</div><!-- fragment --><p>For authentication endpoints, see <a class="el" href="auth_8md.html">Authentication API</a>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md35"></a>
-🛡️ Middlewares</h2>
+<h2><a class="anchor" id="autotoc_md10"></a>
+Middlewares</h2>
 <p>Middlewares are functions that run before your route handler, allowing you to add authentication, authorization, and request processing logic.</p>
-<h3><a class="anchor" id="autotoc_md36"></a>
+<h3><a class="anchor" id="autotoc_md11"></a>
 Default Middlewares</h3>
 <p>Every endpoint automatically has two middlewares applied globally:</p>
 <ol type="1">
@@ -193,7 +195,7 @@ Default Middlewares</h3>
 <p>Additionally, entity endpoints automatically have:</p><ol type="1">
 <li>**<code>hasAccess(entity_name)</code>** - Evaluates entity access rules to determine if the authenticated user can perform the requested operation. Called automatically by entity endpoints to confirm access rules before data query.</li>
 </ol>
-<h3><a class="anchor" id="autotoc_md37"></a>
+<h3><a class="anchor" id="autotoc_md12"></a>
 Available Middlewares</h3>
 <p>You can use these middlewares when creating custom endpoints:</p>
 <table class="markdownTable">
@@ -218,7 +220,7 @@ Available Middlewares</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>rateLimit(max_requests, window_seconds, use_user_id)</code>   </td><td class="markdownTableBodyNone">Rate limiting middleware   </td><td class="markdownTableBodyNone">Limits requests per time window by IP or user ID   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md38"></a>
+<h3><a class="anchor" id="autotoc_md13"></a>
 Using Middlewares</h3>
 <p>When creating custom endpoints, you can specify middlewares as the third parameter:</p>
 <div class="fragment"><div class="line"><span class="comment">// Require admin authentication</span></div>
@@ -272,7 +274,7 @@ Using Middlewares</h3>
 <div class="ttc" id="anamespacemb_html_ab7c5922d7edd2da97857b5383049101f"><div class="ttname"><a href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">mb::requireAdminAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireAdminAuth()</div><div class="ttdoc">Require admin authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:425</div></div>
 <div class="ttc" id="anamespacemb_html_ae3903a4fb6e5f572be9884d6768da4fc"><div class="ttname"><a href="namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc">mb::requireEntityAuth</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; requireEntityAuth(const std::string &amp;entity_name)</div><div class="ttdoc">Require entity-specific authentication.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:503</div></div>
 <div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md39"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md14"></a>
 Accessing User Data in Handlers</h3>
 <p>After middlewares run, you can access authenticated user data from the request context:</p>
 <div class="fragment"><div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/me&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
@@ -294,10 +296,10 @@ Accessing User Data in Handlers</h3>
 </div><!-- fragment --><blockquote class="doxtable">
 <p>&zwj;<b>Note</b>: Middlewares execute in the order they are specified. If a middleware returns <code>HandlerResponse::Handled</code>, subsequent middlewares and the handler are skipped. </p>
 </blockquote>
-<h2><a class="anchor" id="autotoc_md40"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 &lt;/blockquote&gt;</h2>
-<h2><a class="anchor" id="autotoc_md41"></a>
-🗃️ Schema Management API</h2>
+<h2><a class="anchor" id="autotoc_md16"></a>
+Schema Management API</h2>
 <p>Schema management endpoints allow you to create, read, update, and delete entity schemas. <b>These endpoints require admin authentication only.</b></p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -313,7 +315,7 @@ Accessing User Data in Handlers</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">DELETE   </td><td class="markdownTableBodyNone"><code>/api/v1/schemas/:schema_name_or_id</code>   </td><td class="markdownTableBodyNone">Delete a schema   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md42"></a>
+<h3><a class="anchor" id="autotoc_md17"></a>
 Example: Create a Schema</h3>
 <p><b>Base Entity (Standard Table):</b></p>
 <div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/schemas \</div>
@@ -367,7 +369,7 @@ Example: Create a Schema</h3>
 <div class="line">      &quot;delete&quot;: {&quot;mode&quot;: &quot;&quot;, &quot;expr&quot;: &quot;&quot;}</div>
 <div class="line">    }</div>
 <div class="line">  }&#39;</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md43"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md18"></a>
 Entity Types</h3>
 <p>MantisBase supports three entity types:</p>
 <table class="markdownTable">
@@ -380,7 +382,7 @@ Entity Types</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>view</code>   </td><td class="markdownTableBodyNone">SQL view (read-only)   </td><td class="markdownTableBodyNone">No   </td><td class="markdownTableBodyNone">Requires <code>view_query</code> instead of fields   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md44"></a>
+<h3><a class="anchor" id="autotoc_md19"></a>
 Entity Name Validation</h3>
 <p>Entity names must follow these rules:</p><ul>
 <li><b>Alphanumeric and underscores only</b> - Only letters, numbers, and <code>_</code> characters allowed</li>
@@ -388,7 +390,7 @@ Entity Name Validation</h3>
 <li><b>Not empty</b> - Names must contain at least one character</li>
 </ul>
 <p>Invalid names will be rejected with a 400 error.</p>
-<h3><a class="anchor" id="autotoc_md45"></a>
+<h3><a class="anchor" id="autotoc_md20"></a>
 Updating Schemas</h3>
 <p>When updating a schema, you can add, update, or remove fields:</p>
 <div class="fragment"><div class="line">curl -X PATCH http://localhost:7070/api/v1/schemas/posts \</div>
@@ -409,85 +411,57 @@ Updating Schemas</h3>
 <blockquote class="doxtable">
 <p>&zwj;⚠️ <b>Admin Only</b>: All schema endpoints require admin authentication. Regular users cannot access these endpoints. </p>
 </blockquote>
-<h2><a class="anchor" id="autotoc_md46"></a>
+<h2><a class="anchor" id="autotoc_md21"></a>
 &lt;/blockquote&gt;</h2>
-<h2><a class="anchor" id="autotoc_md47"></a>
-🎛️ Query Parameters [PENDING]</h2>
-<p>Future support for filtering, sorting, and pagination:</p>
-<div class="fragment"><div class="line">GET /api/v1/entities/tasks?status=done&amp;limit=10&amp;offset=20&amp;sort=-created_at</div>
+<h2><a class="anchor" id="autotoc_md22"></a>
+Query Parameters</h2>
+<p>Entity list endpoints support cursor-based pagination and sorting:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Parameter   </th><th class="markdownTableHeadNone">Default   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>limit</code>   </td><td class="markdownTableBodyNone"><code>50</code>   </td><td class="markdownTableBodyNone">Number of records to return (1–500)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>after</code>   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">Cursor from the previous response — returns records after this value    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>sort</code>   </td><td class="markdownTableBodyNone"><code>id</code> ASC   </td><td class="markdownTableBodyNone">Field name to sort by. Prefix with <code>-</code> for descending (e.g., <code>-created</code>)   </td></tr>
+</table>
+<p><b>Example:</b></p>
+<div class="fragment"><div class="line"># First page</div>
+<div class="line">curl &quot;http://localhost:7070/api/v1/entities/posts?limit=20&amp;sort=-created&quot;</div>
+<div class="line"> </div>
+<div class="line"># Next page (using cursor from previous response)</div>
+<div class="line">curl &quot;http://localhost:7070/api/v1/entities/posts?limit=20&amp;sort=-created&amp;after=&lt;cursor&gt;&quot;</div>
+</div><!-- fragment --><p><b>Response:</b></p>
+<div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;status&quot;: 200,</div>
+<div class="line">  &quot;data&quot;: {</div>
+<div class="line">    &quot;items_count&quot;: 20,</div>
+<div class="line">    &quot;limit&quot;: 20,</div>
+<div class="line">    &quot;cursor&quot;: &quot;019c1b81-364b-7000-8120-b5416b2c42c2&quot;,</div>
+<div class="line">    &quot;items&quot;: [...]</div>
+<div class="line">  },</div>
+<div class="line">  &quot;error&quot;: &quot;&quot;</div>
+<div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md49"></a>
-⚙️ Custom Endpoints</h2>
+<h2><a class="anchor" id="autotoc_md24"></a>
+Custom Endpoints</h2>
 <p>You can create custom API endpoints using the router:</p>
 <div class="fragment"><div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/custom&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
 <div class="line">    res.sendJSON(200, {{<span class="stringliteral">&quot;message&quot;</span>, <span class="stringliteral">&quot;Custom endpoint&quot;</span>}});</div>
 <div class="line">}, {<a class="code hl_function" href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">requireAdminAuth</a>()});</div>
-</div><!-- fragment --><p>Check the <a class="el" href="05_8embedding_8md.html">Embedding Guide</a> for more details.</p>
+</div><!-- fragment --><p>Check the <a class="el" href="embedding_8md.html">Embedding Guide</a> for more details.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md51"></a>
-📁 File Handling</h2>
+<h2><a class="anchor" id="autotoc_md26"></a>
+File Handling</h2>
 <p>Files uploaded via multipart/form-data are stored and can be accessed at:</p>
 <div class="fragment"><div class="line">GET /api/v1/files/&lt;entity&gt;/&lt;filename&gt;</div>
-</div><!-- fragment --><p>See <a class="el" href="11_8files_8md.html">File Handling</a> for more details.</p>
+</div><!-- fragment --><p>See <a class="el" href="files_8md.html">File Handling</a> for more details.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md53"></a>
-🔍 Entity Types and Validation</h2>
-<h3><a class="anchor" id="autotoc_md54"></a>
-Entity Types</h3>
-<p>MantisBase supports three types of entities:</p>
-<h4><a class="anchor" id="autotoc_md55"></a>
-Base Entities</h4>
-<p>Standard database tables with fields. Use for most data storage needs.</p>
-<div class="fragment"><div class="line">{</div>
-<div class="line">  &quot;name&quot;: &quot;posts&quot;,</div>
-<div class="line">  &quot;type&quot;: &quot;base&quot;,</div>
-<div class="line">  &quot;fields&quot;: [</div>
-<div class="line">    {&quot;name&quot;: &quot;title&quot;, &quot;type&quot;: &quot;string&quot;, &quot;required&quot;: true},</div>
-<div class="line">    {&quot;name&quot;: &quot;content&quot;, &quot;type&quot;: &quot;string&quot;}</div>
-<div class="line">  ]</div>
-<div class="line">}</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md56"></a>
-Auth Entities</h4>
-<p>Authentication entities with built-in password and user management fields. Automatically includes:</p><ul>
-<li><code>password</code> - Hashed password field</li>
-<li><code>email</code> - Email field (typically unique)</li>
-<li>Standard user management fields</li>
-</ul>
-<div class="fragment"><div class="line">{</div>
-<div class="line">  &quot;name&quot;: &quot;users&quot;,</div>
-<div class="line">  &quot;type&quot;: &quot;auth&quot;,</div>
-<div class="line">  &quot;fields&quot;: [</div>
-<div class="line">    {&quot;name&quot;: &quot;email&quot;, &quot;type&quot;: &quot;string&quot;, &quot;required&quot;: true, &quot;is_unique&quot;: true},</div>
-<div class="line">    {&quot;name&quot;: &quot;full_name&quot;, &quot;type&quot;: &quot;string&quot;}</div>
-<div class="line">  ]</div>
-<div class="line">}</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md57"></a>
-View Entities</h4>
-<p>SQL views based on queries. Read-only, no fields defined. Use <code>view_query</code> instead of <code>fields</code>.</p>
-<div class="fragment"><div class="line">{</div>
-<div class="line">  &quot;name&quot;: &quot;published_posts&quot;,</div>
-<div class="line">  &quot;type&quot;: &quot;view&quot;,</div>
-<div class="line">  &quot;view_query&quot;: &quot;SELECT * FROM posts WHERE status = &#39;published&#39;&quot;</div>
-<div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md58"></a>
-Entity Name Validation</h3>
-<p>All entity names are automatically validated to prevent SQL injection and ensure consistency:</p>
-<p><b>Validation Rules:</b></p><ul>
-<li>✅ Alphanumeric characters and underscores only (<code>a-z</code>, <code>A-Z</code>, <code>0-9</code>, <code>_</code>)</li>
-<li>✅ Maximum 64 characters</li>
-<li>✅ Not empty</li>
-</ul>
-<p><b>Invalid Examples:</b></p><ul>
-<li><code>my-table</code> (contains hyphen)</li>
-<li><code>my table</code> (contains space)</li>
-<li><code>my@table</code> (contains special character)</li>
-<li>Names longer than 64 characters</li>
-</ul>
-<p>Invalid names will result in a <code>400 Bad Request</code> error with a descriptive message.</p>
-<h3><a class="anchor" id="autotoc_md59"></a>
+<h3><a class="anchor" id="autotoc_md28"></a>
 Foreign Key Relationships</h3>
 <p>Foreign keys allow you to establish relationships between entities. When creating or updating schemas with foreign key fields, MantisBase automatically validates the relationships.</p>
-<h4><a class="anchor" id="autotoc_md60"></a>
+<h4><a class="anchor" id="autotoc_md29"></a>
 Foreign Key Structure</h4>
 <p>Foreign keys are defined using a <code>foreign_key</code> object in the field definition:</p>
 <div class="fragment"><div class="line">{</div>
@@ -500,7 +474,7 @@ Foreign Key Structure</h4>
 <div class="line">    &quot;on_delete&quot;: &quot;CASCADE&quot;</div>
 <div class="line">  }</div>
 <div class="line">}</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md61"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md30"></a>
 Foreign Key Properties</h4>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -514,7 +488,7 @@ Foreign Key Properties</h4>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>on_delete</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">No   </td><td class="markdownTableBodyNone"><code>"RESTRICT"</code>   </td><td class="markdownTableBodyNone">Action when referenced record is deleted   </td></tr>
 </table>
-<h4><a class="anchor" id="autotoc_md62"></a>
+<h4><a class="anchor" id="autotoc_md31"></a>
 Foreign Key Policies</h4>
 <p>Both <code>on_update</code> and <code>on_delete</code> support the following policies:</p>
 <table class="markdownTable">
@@ -531,7 +505,7 @@ Foreign Key Policies</h4>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>SET DEFAULT</code>   </td><td class="markdownTableBodyNone">Set foreign key field to its default value   </td></tr>
 </table>
-<h4><a class="anchor" id="autotoc_md63"></a>
+<h4><a class="anchor" id="autotoc_md32"></a>
 Foreign Key Validation</h4>
 <p>When creating or updating schemas with foreign keys, MantisBase automatically validates:</p>
 <ol type="1">
@@ -540,7 +514,7 @@ Foreign Key Validation</h4>
 <li><b>Type Compatibility</b> - Field types should be compatible (warnings issued for mismatches)</li>
 </ol>
 <p><b>Note:</b> If the referenced entity doesn't exist yet, a warning is issued but the schema is still created. The database will enforce the constraint when the DDL is executed.</p>
-<h4><a class="anchor" id="autotoc_md64"></a>
+<h4><a class="anchor" id="autotoc_md33"></a>
 Examples</h4>
 <p><b>Example 1: Comments with Post Reference</b></p>
 <div class="fragment"><div class="line">{</div>
@@ -591,15 +565,15 @@ Examples</h4>
 <div class="line">    }</div>
 <div class="line">  ]</div>
 <div class="line">}</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md65"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md34"></a>
 Constraint Naming</h4>
 <p>Foreign key constraints are automatically named using the pattern: <code>fk_&lt;table_name&gt;_&lt;field_name&gt;</code></p>
 <p>For example, a foreign key on <code>post_id</code> in the <code>comments</code> table would create a constraint named <code>fk_comments_post_id</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md67"></a>
-📊 System Endpoints</h2>
+<h2><a class="anchor" id="autotoc_md36"></a>
+System Endpoints</h2>
 <p>Most system endpoints are grouped under <code>/api/v1/sys/</code>. The health check is at <code>/api/v1/health</code>.</p>
-<h3><a class="anchor" id="autotoc_md68"></a>
+<h3><a class="anchor" id="autotoc_md37"></a>
 Health Check</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -607,8 +581,8 @@ Health Check</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/health</code>   </td><td class="markdownTableBodyNone">Server health and uptime   </td></tr>
 </table>
-<p>See <a class="el" href="12_8healthcheck_8md.html">Healthcheck</a> for details.</p>
-<h3><a class="anchor" id="autotoc_md69"></a>
+<p>See <a class="el" href="healthcheck_8md.html">Healthcheck</a> for details.</p>
+<h3><a class="anchor" id="autotoc_md38"></a>
 Settings</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -618,7 +592,31 @@ Settings</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">PATCH   </td><td class="markdownTableBodyNone"><code>/api/v1/sys/settings/config</code>   </td><td class="markdownTableBodyNone">Update application settings   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md70"></a>
+<p>The settings object contains the following fields:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Field   </th><th class="markdownTableHeadNone">Type   </th><th class="markdownTableHeadNone">Default   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>appName</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone"><code>"ACME Project"</code>   </td><td class="markdownTableBodyNone">Application display name    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>baseUrl</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone"><code>"https://acme.example.com"</code>   </td><td class="markdownTableBodyNone">Base URL for the application    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>maintenanceMode</code>   </td><td class="markdownTableBodyNone">boolean   </td><td class="markdownTableBodyNone"><code>false</code>   </td><td class="markdownTableBodyNone">Put the application in maintenance mode    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>maxFileSize</code>   </td><td class="markdownTableBodyNone">integer   </td><td class="markdownTableBodyNone"><code>10</code>   </td><td class="markdownTableBodyNone">Max file upload size in MB (stored but not currently enforced)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>allowRegistration</code>   </td><td class="markdownTableBodyNone">boolean   </td><td class="markdownTableBodyNone"><code>true</code>   </td><td class="markdownTableBodyNone">Allow new user registration    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>emailVerificationRequired</code>   </td><td class="markdownTableBodyNone">boolean   </td><td class="markdownTableBodyNone"><code>false</code>   </td><td class="markdownTableBodyNone">Require email verification on registration    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>sessionTimeout</code>   </td><td class="markdownTableBodyNone">integer   </td><td class="markdownTableBodyNone"><code>86400</code>   </td><td class="markdownTableBodyNone">User session timeout in seconds (24 h)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>adminSessionTimeout</code>   </td><td class="markdownTableBodyNone">integer   </td><td class="markdownTableBodyNone"><code>3600</code>   </td><td class="markdownTableBodyNone">Admin session timeout in seconds (1 h)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>mode</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone"><code>"PROD"</code>   </td><td class="markdownTableBodyNone">Application mode: <code>PROD</code> or <code>TEST</code>   </td></tr>
+</table>
+<p>The GET response also includes <code>mantisVersion</code> (the running server version).</p>
+<h3><a class="anchor" id="autotoc_md39"></a>
 Admin Accounts</h3>
 <p>Admin account CRUD and authentication live under <code>/api/v1/sys/admins/</code>.</p>
 <table class="markdownTable">
@@ -643,7 +641,7 @@ Admin Accounts</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">DELETE   </td><td class="markdownTableBodyNone"><code>/api/v1/sys/admins/:id</code>   </td><td class="markdownTableBodyNone">Delete admin account   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md71"></a>
+<h3><a class="anchor" id="autotoc_md40"></a>
 Logs Endpoint</h3>
 <p>The logs endpoint provides access to system logs with filtering, pagination, and sorting capabilities. <b>Requires admin authentication.</b></p>
 <table class="markdownTable">
@@ -652,39 +650,39 @@ Logs Endpoint</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/sys/logs</code>   </td><td class="markdownTableBodyNone">Get system logs with filtering and pagination   </td></tr>
 </table>
-<h4><a class="anchor" id="autotoc_md72"></a>
+<h4><a class="anchor" id="autotoc_md41"></a>
 Query Parameters</h4>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Parameter   </th><th class="markdownTableHeadNone">Type   </th><th class="markdownTableHeadNone">Default   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>page</code>   </td><td class="markdownTableBodyNone">integer   </td><td class="markdownTableBodyNone"><code>1</code>   </td><td class="markdownTableBodyNone">Page number (1-based)    </td></tr>
+<td class="markdownTableBodyNone"><code>limit</code>   </td><td class="markdownTableBodyNone">integer   </td><td class="markdownTableBodyNone"><code>50</code>   </td><td class="markdownTableBodyNone">Number of records per page (max 1000)    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>page_size</code>   </td><td class="markdownTableBodyNone">integer   </td><td class="markdownTableBodyNone"><code>50</code>   </td><td class="markdownTableBodyNone">Number of records per page (max 1000)    </td></tr>
+<td class="markdownTableBodyNone"><code>after</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">Cursor from previous response for pagination    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>level</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">-   </td><td class="markdownTableBodyNone">Filter by exact log level: <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>critical</code>    </td></tr>
+<td class="markdownTableBodyNone"><code>level</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">Filter by exact log level: <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>critical</code>    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>min_level</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">-   </td><td class="markdownTableBodyNone">Filter by minimum log level (includes that level and above)    </td></tr>
+<td class="markdownTableBodyNone"><code>min_level</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">Filter by minimum log level (includes that level and above)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>search</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">-   </td><td class="markdownTableBodyNone">Search in log messages    </td></tr>
+<td class="markdownTableBodyNone"><code>search</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">Search in log messages    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>start_date</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">-   </td><td class="markdownTableBodyNone">Start date filter (ISO 8601 format)    </td></tr>
+<td class="markdownTableBodyNone"><code>start_date</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">Start date filter (ISO 8601 format)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>end_date</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">-   </td><td class="markdownTableBodyNone">End date filter (ISO 8601 format)    </td></tr>
+<td class="markdownTableBodyNone"><code>end_date</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">End date filter (ISO 8601 format)    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>sort_by</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone"><code>"timestamp"</code>   </td><td class="markdownTableBodyNone">Sort field: <code>level</code>, <code>origin</code>, <code>message</code>, <code>timestamp</code>, <code>created_at</code>    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>sort_order</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone"><code>"desc"</code>   </td><td class="markdownTableBodyNone">Sort order: <code>asc</code> or <code>desc</code>   </td></tr>
 </table>
-<h4><a class="anchor" id="autotoc_md73"></a>
+<h4><a class="anchor" id="autotoc_md42"></a>
 Example Requests</h4>
-<div class="fragment"><div class="line"># Get recent logs (default: page 1, 50 records)</div>
+<div class="fragment"><div class="line"># Get recent logs (default: 50 records)</div>
 <div class="line">curl -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
 <div class="line">  http://localhost:7070/api/v1/sys/logs</div>
 <div class="line"> </div>
-<div class="line"># Get logs with pagination</div>
+<div class="line"># Next page using cursor</div>
 <div class="line">curl -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
-<div class="line">  &quot;http://localhost:7070/api/v1/sys/logs?page=2&amp;page_size=100&quot;</div>
+<div class="line">  &quot;http://localhost:7070/api/v1/sys/logs?limit=50&amp;after=&lt;cursor&gt;&quot;</div>
 <div class="line"> </div>
 <div class="line"># Filter by log level</div>
 <div class="line">curl -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
@@ -702,36 +700,31 @@ Example Requests</h4>
 <div class="line">curl -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
 <div class="line">  &quot;http://localhost:7070/api/v1/sys/logs?start_date=2024-01-01T00:00:00Z&amp;end_date=2024-01-31T23:59:59Z&quot;</div>
 <div class="line"> </div>
-<div class="line"># Sort by level, ascending</div>
-<div class="line">curl -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
-<div class="line">  &quot;http://localhost:7070/api/v1/sys/logs?sort_by=level&amp;sort_order=asc&quot;</div>
-<div class="line"> </div>
 <div class="line"># Combined filters</div>
 <div class="line">curl -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
-<div class="line">  &quot;http://localhost:7070/api/v1/sys/logs?min_level=warn&amp;search=error&amp;page=1&amp;page_size=20&amp;sort_by=timestamp&amp;sort_order=desc&quot;</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md74"></a>
+<div class="line">  &quot;http://localhost:7070/api/v1/sys/logs?min_level=warn&amp;search=error&amp;limit=20&amp;sort_by=timestamp&amp;sort_order=desc&quot;</div>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md43"></a>
 Response Format</h4>
 <div class="fragment"><div class="line">{</div>
-<div class="line">  &quot;logs&quot;: [</div>
-<div class="line">    {</div>
-<div class="line">      &quot;id&quot;: &quot;log_id_123&quot;,</div>
-<div class="line">      &quot;timestamp&quot;: &quot;2024-01-15T10:30:45Z&quot;,</div>
-<div class="line">      &quot;level&quot;: &quot;warn&quot;,</div>
-<div class="line">      &quot;origin&quot;: &quot;entitySchema&quot;,</div>
-<div class="line">      &quot;message&quot;: &quot;Foreign key validation warning&quot;,</div>
-<div class="line">      &quot;details&quot;: &quot;Additional details about the log entry&quot;,</div>
-<div class="line">      &quot;data&quot;: {},</div>
-<div class="line">      &quot;created_at&quot;: &quot;2024-01-15T10:30:45Z&quot;</div>
-<div class="line">    }</div>
-<div class="line">  ],</div>
-<div class="line">  &quot;pagination&quot;: {</div>
-<div class="line">    &quot;page&quot;: 1,</div>
-<div class="line">    &quot;page_size&quot;: 50,</div>
-<div class="line">    &quot;total&quot;: 1250,</div>
-<div class="line">    &quot;total_pages&quot;: 25</div>
+<div class="line">  &quot;data&quot;: {</div>
+<div class="line">    &quot;items_count&quot;: 50,</div>
+<div class="line">    &quot;limit&quot;: 50,</div>
+<div class="line">    &quot;cursor&quot;: &quot;log_id_abc123&quot;,</div>
+<div class="line">    &quot;items&quot;: [</div>
+<div class="line">      {</div>
+<div class="line">        &quot;id&quot;: &quot;log_id_123&quot;,</div>
+<div class="line">        &quot;timestamp&quot;: &quot;2024-01-15T10:30:45Z&quot;,</div>
+<div class="line">        &quot;level&quot;: &quot;warn&quot;,</div>
+<div class="line">        &quot;origin&quot;: &quot;entitySchema&quot;,</div>
+<div class="line">        &quot;message&quot;: &quot;Foreign key validation warning&quot;,</div>
+<div class="line">        &quot;details&quot;: &quot;Additional details about the log entry&quot;,</div>
+<div class="line">        &quot;created_at&quot;: &quot;2024-01-15T10:30:45Z&quot;</div>
+<div class="line">      }</div>
+<div class="line">    ]</div>
 <div class="line">  }</div>
 <div class="line">}</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md75"></a>
+</div><!-- fragment --><p>Pass the returned <code>cursor</code> value as the <code>after</code> parameter in subsequent requests to page through results.</p>
+<h4><a class="anchor" id="autotoc_md44"></a>
 Log Levels</h4>
 <p>Log levels in order of severity (lowest to highest):</p>
 <ol type="1">
@@ -742,7 +735,7 @@ Log Levels</h4>
 <li><code>critical</code> - Critical errors</li>
 </ol>
 <p>When using <code>min_level</code>, all logs at that level and above are included. For example, <code>min_level=warn</code> includes <code>warn</code> and <code>critical</code> logs.</p>
-<h4><a class="anchor" id="autotoc_md76"></a>
+<h4><a class="anchor" id="autotoc_md45"></a>
 Error Responses</h4>
 <p><b>503 Service Unavailable</b> - Log database not initialized: </p><div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;error&quot;: &quot;Log database not initialized&quot;,</div>
@@ -755,10 +748,10 @@ Error Responses</h4>
 <div class="line">  &quot;data&quot;: {}</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md78"></a>
-📡 Realtime API</h2>
+<h2><a class="anchor" id="autotoc_md47"></a>
+Realtime API</h2>
 <p>MantisBase provides <b>realtime database change notifications</b> over <b>Server-Sent Events (SSE)</b> for both SQLite and PostgreSQL backends. Clients subscribe to topics (entity names and optionally specific row IDs) and receive live <code>insert</code>, <code>update</code>, and <code>delete</code> events as they occur.</p>
-<h3><a class="anchor" id="autotoc_md79"></a>
+<h3><a class="anchor" id="autotoc_md48"></a>
 Endpoints</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -768,7 +761,7 @@ Endpoints</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/realtime</code>   </td><td class="markdownTableBodyNone">Update topics for an existing session or clear topics to disconnect. Requires JSON body.   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md80"></a>
+<h3><a class="anchor" id="autotoc_md49"></a>
 GET /api/v1/realtime — Open SSE connection</h3>
 <p>Establishes a long-lived SSE stream. Pass a comma-separated list of <b>topics</b> in the query string.</p>
 <p><b>Query parameters</b></p>
@@ -787,7 +780,7 @@ GET /api/v1/realtime — Open SSE connection</h3>
 <li><b>Connection:</b> keep-alive</li>
 </ul>
 <p>The stream sends events in SSE format. Each event has an <code>event</code> type and a <code>data</code> line (JSON).</p>
-<h3><a class="anchor" id="autotoc_md81"></a>
+<h3><a class="anchor" id="autotoc_md50"></a>
 POST /api/v1/realtime — Update or disconnect session</h3>
 <p>Updates the list of topics for an existing SSE session, or clears topics to effectively disconnect. Requires the <code>client_id</code> (session identifier) returned in the <code>connected</code> event from the GET request.</p>
 <p><b>Request body (JSON)</b></p>
@@ -812,7 +805,7 @@ POST /api/v1/realtime — Update or disconnect session</h3>
 <div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
 <div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
 <div class="line">  -d &#39;{&quot;client_id&quot;: &quot;sse_1769987962000_0abc1&quot;, &quot;topics&quot;: []}&#39;</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md82"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md51"></a>
 SSE event types</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -824,7 +817,7 @@ SSE event types</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>change</code>   </td><td class="markdownTableBodyNone">A database change (insert, update, or delete) for a subscribed topic.   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md83"></a>
+<h3><a class="anchor" id="autotoc_md52"></a>
 Event data format</h3>
 <p><b>connected</b></p>
 <div class="fragment"><div class="line">{</div>
@@ -873,7 +866,7 @@ Event data format</h3>
 <div class="line">  &quot;timestamp&quot;: 1769988013,</div>
 <div class="line">  &quot;topic&quot;: &quot;test&quot;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md84"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md53"></a>
 Access control</h3>
 <p>Realtime endpoints use the same access rules as entity <code>list</code> and <code>get</code>:</p>
 <ul>
@@ -881,7 +874,7 @@ Access control</h3>
 <li>Subscribing to a specific row (e.g. <code>posts:&amp;lt;id&amp;gt;</code>) requires <b>get</b> access.</li>
 </ul>
 <p>Invalid or unauthorized topics result in <code>400</code> or <code>403</code> responses.</p>
-<h3><a class="anchor" id="autotoc_md85"></a>
+<h3><a class="anchor" id="autotoc_md54"></a>
 Backend support</h3>
 <p>Realtime is supported for:</p>
 <ul>
@@ -889,12 +882,56 @@ Backend support</h3>
 <li><b>PostgreSQL</b> — Change detection via <code>LISTEN</code>/<code>NOTIFY</code> and triggers.</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md87"></a>
-🎛️ Admin Dashboard</h2>
+<h2><a class="anchor" id="autotoc_md56"></a>
+WebSocket Realtime API</h2>
+<p>In addition to SSE, MantisBase provides a <b>WebSocket endpoint</b> for realtime notifications. It uses the same topic model as SSE.</p>
+<h3><a class="anchor" id="autotoc_md57"></a>
+Endpoint</h3>
+<div class="fragment"><div class="line">WS /api/v1/realtime/ws</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md58"></a>
+Connection</h3>
+<p>Connect via any WebSocket client:</p>
+<div class="fragment"><div class="line">const ws = new WebSocket(&quot;ws://localhost:7070/api/v1/realtime/ws&quot;);</div>
+<div class="line"> </div>
+<div class="line">ws.onopen = () =&gt; {</div>
+<div class="line">  // Subscribe to topics after connecting</div>
+<div class="line">  ws.send(JSON.stringify({ topics: [&quot;posts&quot;, &quot;users&quot;] }));</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line">ws.onmessage = (event) =&gt; {</div>
+<div class="line">  const msg = JSON.parse(event.data);</div>
+<div class="line">  console.log(msg);</div>
+<div class="line">};</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md59"></a>
+Welcome message</h3>
+<p>On connect, the server sends:</p>
+<div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;type&quot;: &quot;connected&quot;,</div>
+<div class="line">  &quot;message&quot;: &quot;WebSocket connected&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md60"></a>
+Subscribing and unsubscribing</h3>
+<p>Send a JSON message with a <code>topics</code> array to update your subscriptions. Topics follow the same format as the SSE endpoint — entity name or <code>entity:row_id</code>. Send an empty array to clear all subscriptions.</p>
+<div class="fragment"><div class="line">{ &quot;topics&quot;: [&quot;posts&quot;, &quot;comments&quot;, &quot;posts:019c1b81-364b-7000-8120-b5416b2c42c2&quot;] }</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md61"></a>
+Change events</h3>
+<p>Database changes are delivered in the same format as SSE <code>change</code> events:</p>
+<div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;action&quot;: &quot;insert&quot;,</div>
+<div class="line">  &quot;entity&quot;: &quot;posts&quot;,</div>
+<div class="line">  &quot;row_id&quot;: &quot;019c1b81-364b-7000-8120-b5416b2c42c2&quot;,</div>
+<div class="line">  &quot;topic&quot;: &quot;posts&quot;,</div>
+<div class="line">  &quot;timestamp&quot;: 1769988013,</div>
+<div class="line">  &quot;data&quot;: { &quot;id&quot;: &quot;019c1b81-364b-7000-8120-b5416b2c42c2&quot;, &quot;created&quot;: &quot;2026-02-02T02:19:38&quot; }</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>WebSocket realtime can be disabled by setting the environment variable <code>MB_REALTIME_WS=false</code>.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md63"></a>
+Admin Dashboard</h2>
 <p>The MantisBase Admin Dashboard is a comprehensive web-based interface accessible at <code>/mb</code> (e.g., <code><a href="http://localhost:7070/mb">http://localhost:7070/mb</a></code>). It provides a visual alternative to the REST API for managing your backend.</p>
-<h3><a class="anchor" id="autotoc_md88"></a>
+<h3><a class="anchor" id="autotoc_md64"></a>
 Dashboard Features</h3>
-<h4><a class="anchor" id="autotoc_md89"></a>
+<h4><a class="anchor" id="autotoc_md65"></a>
 Entity Management</h4>
 <ul>
 <li><b>Browse Entities</b> - View all entities (tables) in your database</li>
@@ -903,7 +940,7 @@ Entity Management</h4>
 <li><b>Edit Records</b> - Update existing records inline</li>
 <li><b>Delete Records</b> - Remove records with confirmation</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md90"></a>
+<h4><a class="anchor" id="autotoc_md66"></a>
 Schema Management</h4>
 <ul>
 <li><b>Schema Builder</b> - Create and configure entity schemas visually</li>
@@ -912,7 +949,7 @@ Schema Management</h4>
 <li><b>Foreign Key Setup</b> - Configure relationships between entities</li>
 <li><b>View Entity Support</b> - Create and manage SQL view entities</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md91"></a>
+<h4><a class="anchor" id="autotoc_md67"></a>
 Data Exploration</h4>
 <ul>
 <li><b>Search &amp; Filter</b> - Quickly find records with built-in search</li>
@@ -920,21 +957,21 @@ Data Exploration</h4>
 <li><b>Sorting</b> - Sort records by any column</li>
 <li><b>Real-time Updates</b> - See changes reflected immediately</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md92"></a>
+<h4><a class="anchor" id="autotoc_md68"></a>
 User Management</h4>
 <ul>
 <li><b>Authentication Entities</b> - Manage auth-type entities</li>
 <li><b>User Accounts</b> - View and manage user accounts</li>
 <li><b>Admin Accounts</b> - Manage admin users</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md93"></a>
+<h4><a class="anchor" id="autotoc_md69"></a>
 System Management</h4>
 <ul>
 <li><b>Logs Viewer</b> - Access system logs directly from the dashboard</li>
 <li><b>Health Status</b> - Monitor system health</li>
 <li><b>Configuration</b> - View and manage system settings</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md94"></a>
+<h3><a class="anchor" id="autotoc_md70"></a>
 Accessing the Dashboard</h3>
 <ol type="1">
 <li><b>Create an Admin Account</b> (if not already created): <div class="fragment"><div class="line">./mantisbase admins --add admin@example.com your_password</div>
@@ -943,7 +980,7 @@ Accessing the Dashboard</h3>
 </div><!-- fragment --></li>
 <li><b>Login</b> with your admin credentials</li>
 </ol>
-<h3><a class="anchor" id="autotoc_md95"></a>
+<h3><a class="anchor" id="autotoc_md71"></a>
 Dashboard Requirements</h3>
 <ul>
 <li><b>Admin Authentication Required</b> - Only users authenticated as admins can access the dashboard</li>

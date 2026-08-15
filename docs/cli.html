@@ -95,13 +95,13 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>MantisBase has a comprehensive CLI built on <code>argparse</code> for server management, admin accounts, migrations, and schema operations.</p>
-<h1><a class="anchor" id="autotoc_md9"></a>
-🧭 mantisbase CLI Reference</h1>
+<h1><a class="anchor" id="autotoc_md102"></a>
+mantisbase CLI Reference</h1>
 <div class="fragment"><div class="line">mantisbase [global options] &lt;subcommand&gt; [subcommand options]</div>
 </div><!-- fragment --><p>Only <b>one subcommand</b> may be used per invocation: <code>serve</code>, <code>admins</code>, <code>migrations</code>, or <code>schema</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md11"></a>
-⚙️ Global Options</h2>
+<h2><a class="anchor" id="autotoc_md104"></a>
+Global Options</h2>
 <p>These options can appear before the subcommand:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -123,8 +123,8 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 </table>
 <p>When an environment variable is set, it overrides the matching CLI option. For logging, <code>MB_LOG_LEVEL</code> (<code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>critical</code>) overrides <code>--dev</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md13"></a>
-🚀 serve</h2>
+<h2><a class="anchor" id="autotoc_md106"></a>
+serve</h2>
 <p>Start the HTTP server.</p>
 <div class="fragment"><div class="line">mantisbase serve [--host=&lt;host&gt;] [--port=&lt;port&gt;] [--pool-size=&lt;int&gt;] [--skip-admin-setup]</div>
 </div><!-- fragment --><table class="markdownTable">
@@ -144,8 +144,8 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <div class="fragment"><div class="line">mantisbase serve --host=127.0.0.1 --port=7070</div>
 <div class="line">mantisbase --dev serve --port=8000</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md15"></a>
-👤 admins</h2>
+<h2><a class="anchor" id="autotoc_md108"></a>
+admins</h2>
 <p>Manage admin accounts. Exactly <b>one</b> of <code>--add</code>, <code>--ls</code>, or <code>--rm</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase admins --add &lt;email&gt; &lt;password&gt;</div>
 <div class="line">mantisbase admins --add                    # uses MB_DEFAULT_ADMIN_EMAIL/PASSWORD</div>
@@ -166,8 +166,8 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <div class="line">mantisbase admins --ls</div>
 <div class="line">mantisbase admins --rm admin@example.com</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md17"></a>
-📋 schema</h2>
+<h2><a class="anchor" id="autotoc_md110"></a>
+schema</h2>
 <p>Manage entity schemas locally (without the HTTP API). Exactly <b>one</b> of <code>--ls</code>, <code>--rm</code>, <code>--add</code>, or <code>--update</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase schema --ls</div>
 <div class="line">mantisbase schema --rm &lt;entity&gt;</div>
@@ -191,13 +191,13 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <div class="line">mantisbase schema --update posts ./schemas/posts-v2.json</div>
 <div class="line">mantisbase schema --rm posts</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md19"></a>
-🛠️ migrate</h2>
+<h2><a class="anchor" id="autotoc_md112"></a>
+migrate</h2>
 <p>Exactly <b>one</b> of <code>apply</code> or <code>schema</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase apply [options]</div>
 <div class="line">mantisbase schema [options]</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md20"></a>
-🛠️ apply</h3>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md113"></a>
+apply</h3>
 <p>Apply or rollback migrations from the migrations directory. Exactly <b>one</b> of <code>--up</code> or <code>--down</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase migrate apply --up</div>
 <div class="line">mantisbase migrate apply  --down</div>
@@ -211,8 +211,8 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 </table>
 <p><b>Example:</b></p>
 <div class="fragment"><div class="line">mantisbase --migrations-dir=./db/migrations migrate apply --up</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md21"></a>
-🛠️ schema</h3>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md114"></a>
+schema</h3>
 <p>Create or load schema dump from a given .json file. Exactly <b>one</b> of <code>--to</code> or <code>--from</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase migrate schema --to &lt;file.json&gt;</div>
 <div class="line">mantisbase migrate apply  --from &lt;file.json&gt;</div>
@@ -232,13 +232,13 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 <div class="fragment"><div class="line">mantisbase migrate schema --to 123.json</div>
 <div class="line">mantisbase migrate schema --from /path/to/123.json</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md23"></a>
-📚 See Also</h2>
+<h2><a class="anchor" id="autotoc_md116"></a>
+See Also</h2>
 <ul>
 <li><a class="el" href="QuickStart_8md.html">Quick Start</a></li>
-<li><a class="el" href="05_8embedding_8md.html">Embedding MantisBase</a></li>
-<li><a class="el" href="02_8api_8md.html">REST API Reference</a></li>
-<li><a class="el" href="02_8auth_8md.html">Authentication API</a></li>
+<li><a class="el" href="embedding_8md.html">Embedding MantisBase</a></li>
+<li><a class="el" href="api_8md.html">REST API Reference</a></li>
+<li><a class="el" href="auth_8md.html">Authentication API</a></li>
 </ul>
 <hr  />
  </div></div><!-- contents -->
