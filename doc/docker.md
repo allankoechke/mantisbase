@@ -87,6 +87,7 @@ You can configure MantisBase using environment variables or by mounting a config
 | `MB_OAUTH_ENCRYPTION_KEY` | Encryption key for OAuth client secrets (32 chars; falls back to `MB_JWT_SECRET` padded to 32) | — |
 | `MB_REALTIME_SSE` | Set to `"false"` to disable the SSE realtime endpoint (returns 503) | enabled |
 | `MB_REALTIME_WS` | Set to `"false"` to disable the WebSocket realtime endpoint | enabled |
+| `MB_DISABLE_ADMIN_EDITS` | Set to `true` to disable admin accounts editing for production systems | disabled |
 
 Database connection is configured via command-line arguments or JSON config (e.g. `--db postgresql --db_url "..."`).
 

@@ -103,6 +103,17 @@ namespace mb {
      * @return Middleware function
      */
     std::function<HandlerResponse(MantisRequest&, MantisResponse&)> requireAdminAuth();
+
+    /**
+     * @brief Gate access to only to env variable is set
+     *
+     * Only allows requests if env var is set.
+     * @param env_var Environment var to check
+     * @param def_state State the env var should be set (true or false)
+     * @return Middleware function
+     */
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> envGateMiddleware(
+        const std::string &env_var, bool def_state);
     
     /**
      * @brief Require admin OR entity authentication.

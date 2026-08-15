@@ -122,6 +122,7 @@ You can use these middlewares when creating custom endpoints:
 | `requireGuestOnly()` | Require no authentication | Blocks authenticated users, only allows guests |
 | `requireExprEval(expr)` | Evaluate custom expression | Custom expression-based access control |
 | `rateLimit(max_requests, window_seconds, use_user_id)` | Rate limiting middleware | Limits requests per time window by IP or user ID |
+ | `envGateMiddleware(env_var, def_state)` | Env value Gate | Enable req downstaream if env var is set to `def_state` |
 
 ### Using Middlewares
 
@@ -492,7 +493,6 @@ To remove a foreign key constraint, set `foreign_key` to `null`:
 
 ```json
 PATCH /api/v1/schemas/comments
-
 {
   "fields": [
     {
