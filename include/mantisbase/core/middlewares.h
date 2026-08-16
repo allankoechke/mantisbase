@@ -119,6 +119,9 @@ namespace mb {
      * Example: `envGateMiddleware("MB_DISABLE_ADMIN_EDITS", true)` blocks admin account
      * mutations when `MB_DISABLE_ADMIN_EDITS` is set to `true`, `1`, `on`, or `yes`.
      *
+     * Example: `envGateMiddleware("MB_DISABLE_CONFIG_MUTATIONS", true)` blocks PATCH on
+     * `/api/v1/sys/settings/config` when `MB_DISABLE_CONFIG_MUTATIONS` is truthy.
+     *
      * @param env_var Environment variable name
      * @param block_when_truthy Truthy env value that triggers the 503 block
      * @return Middleware function

@@ -553,24 +553,31 @@ See [Healthcheck](healthcheck.md) for details.
 
 ### Settings
 
+Requires **admin authentication** for all settings endpoints.
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/v1/sys/settings/config` | Get application settings |
 | PATCH | `/api/v1/sys/settings/config` | Update application settings |
 
+PATCH returns **503** when `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value.
+
 The settings object contains the following fields:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `appName` | string | `"ACME Project"` | Application display name |
-| `baseUrl` | string | `"https://acme.example.com"` | Base URL for the application |
-| `maintenanceMode` | boolean | `false` | Put the application in maintenance mode |
-| `maxFileSize` | integer | `10` | Max file upload size in MB (stored but not currently enforced) |
+| `orgName` | string | `"ACME Corp"` | Organization display name |
+| `siteDomain` | string | `"https://acme.example.com"` | Public site URL (OAuth callbacks, JWT audience) |
+| `maxFileSize` | integer | `10485760` | Max file upload size in bytes (10 MiB; not currently enforced) |
 | `allowRegistration` | boolean | `true` | Allow new user registration |
 | `emailVerificationRequired` | boolean | `false` | Require email verification on registration |
 | `sessionTimeout` | integer | `86400` | User session timeout in seconds (24 h) |
 | `adminSessionTimeout` | integer | `3600` | Admin session timeout in seconds (1 h) |
-| `mode` | string | `"PROD"` | Application mode: `PROD` or `TEST` |
+| `jwtEnableSetIssuer` | boolean | `false` | Set JWT issuer from `orgName` |
+| `jwtEnableSetAudience` | boolean | `false` | Set JWT audience from `siteDomain` |
+| `smtp` | object | see below | Outbound mail configuration |
+
+SMTP object fields: `host`, `port` (default 587), `user`, `password`, `from`, `tls`. On GET, a non-empty password is returned as `"********"`. On PATCH, send `"********"` for `smtp.password` to keep the existing value.
 
 The GET response also includes `mantisVersion` (the running server version).
 

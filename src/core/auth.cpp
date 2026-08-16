@@ -22,7 +22,7 @@ namespace mb {
             throw std::invalid_argument("Missing `id` and/or `entity` fields in token claims.");
         }
 
-        const auto &config = json::object();
+        const auto &config = mApp.settings().configs();
         const int expiry_t = timeout > 0
                                  ? timeout
                                  : claims_params.at("entity").get<std::string>() == "mb_admins"
@@ -41,10 +41,10 @@ namespace mb {
                 .set_expires_at(time + std::chrono::seconds(expiry_t));
 
         if (config.value("jwtEnableSetIssuer", false)) {
-            token_builder.set_issuer(config.at("appName").get<std::string>());
+            token_builder.set_issuer(config.at("orgName").get<std::string>());
         }
         if (config.value("jwtEnableSetAudience", false)) {
-            token_builder.set_audience(config.at("baseUrl").get<std::string>());
+            token_builder.set_audience(config.at("siteDomain").get<std::string>());
         }
 
         // Add session_id to claims
@@ -95,12 +95,12 @@ namespace mb {
             auto verifier = jwt::verify()
                     .allow_algorithm(jwt::algorithm::hs256{secretKey});
 
-            const auto &config = json::object();
+            const auto &config = mApp.settings().configs();
             if (config.value("jwtEnableSetIssuer", false)) {
-                verifier.with_issuer(config.at("appName").get<std::string>());
+                verifier.with_issuer(config.at("orgName").get<std::string>());
             }
             if (config.value("jwtEnableSetAudience", false)) {
-                verifier.with_audience(config.at("baseUrl").get<std::string>());
+                verifier.with_audience(config.at("siteDomain").get<std::string>());
             }
 
             std::error_code ec;

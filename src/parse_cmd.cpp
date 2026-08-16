@@ -473,6 +473,9 @@ namespace mb {
             quit(500, "Failed to initialize router!");
         }
 
+        // Run settings migrations
+        settings().migrate();
+
         // If we passed the `serve` sub command, set its options
         if (program.is_subcommand_used("serve")) {
             setHost(serve_command.get<std::string>("--host"));

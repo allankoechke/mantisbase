@@ -16,9 +16,16 @@ namespace mb {
                     auto redirect_uri = req.getQueryParamValue("redirect_uri");
 
                     if (redirect_uri.empty()) {
-                        const auto host_header = req.getHeaderValue("Host");
-                        redirect_uri = std::format("http://{}/api/v1/auth/{}/oauth/callback/",
-                                                   host_header, entity_name, provider);
+                        auto base = req.mbApp().settings().configs().value("siteDomain", std::string{});
+                        if (base.empty()) {
+                            base = std::format("http://{}", req.getHeaderValue("Host"));
+                        }
+                        while (!base.empty() && base.back() == '/')
+                        {
+                            base.pop_back();
+                        }
+                        redirect_uri = std::format("{}/api/v1/auth/{}/oauth/callback/{}",
+                                                   base, entity_name, provider);
                     }
 
                     auto result = req.mbApp().auth().oauth().buildAuthorizeUrl(entity_name, provider, redirect_uri);

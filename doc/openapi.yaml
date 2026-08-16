@@ -1188,7 +1188,8 @@ paths:
     get:
       tags: [System]
       summary: Get application settings
-      security: []
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Settings object
@@ -1201,12 +1202,19 @@ paths:
                     properties:
                       data:
                         $ref: "#/components/schemas/AppSettings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
     patch:
       tags: [System]
       summary: Update application settings
-      security: []
+      description: |
+        Blocked with HTTP 503 when environment variable `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -1227,6 +1235,16 @@ paths:
                         $ref: "#/components/schemas/AppSettings"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          description: Config mutations disabled via MB_DISABLE_CONFIG_MUTATIONS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
 
   /sys/api-keys:
     get:
@@ -1845,16 +1863,17 @@ components:
     AppSettings:
       type: object
       properties:
-        appName:
+        orgName:
           type: string
-        baseUrl:
+          example: ACME Corp
+        siteDomain:
           type: string
           format: uri
-        maintenanceMode:
-          type: boolean
+          description: Public site URL (OAuth callbacks, links, JWT audience)
         maxFileSize:
           type: integer
-          description: Maximum upload size in MB
+          description: Maximum upload size in bytes
+          example: 10485760
         allowRegistration:
           type: boolean
         emailVerificationRequired:
@@ -1869,9 +1888,8 @@ components:
           type: boolean
         jwtEnableSetAudience:
           type: boolean
-        mode:
-          type: string
-          enum: [PROD, TEST]
+        smtp:
+          $ref: "#/components/schemas/SmtpConfig"
         mantisVersion:
           type: string
           readOnly: true
@@ -1880,14 +1898,13 @@ components:
       type: object
       description: Partial update; omitted fields retain current values.
       properties:
-        appName:
+        orgName:
           type: string
-        baseUrl:
+        siteDomain:
           type: string
-        maintenanceMode:
-          type: boolean
         maxFileSize:
           type: integer
+          description: Maximum upload size in bytes
         allowRegistration:
           type: boolean
         emailVerificationRequired:
@@ -1900,9 +1917,43 @@ components:
           type: boolean
         jwtEnableSetAudience:
           type: boolean
-        mode:
+        smtp:
+          $ref: "#/components/schemas/SmtpConfigPatch"
+
+    SmtpConfig:
+      type: object
+      properties:
+        host:
           type: string
-          enum: [PROD, TEST]
+        port:
+          type: integer
+          example: 587
+        user:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+        from:
+          type: string
+        tls:
+          type: boolean
+
+    SmtpConfigPatch:
+      type: object
+      description: Partial SMTP update. Send `"********"` for password to keep the existing value.
+      properties:
+        host:
+          type: string
+        port:
+          type: integer
+        user:
+          type: string
+        password:
+          type: string
+        from:
+          type: string
+        tls:
+          type: boolean
 
     OAuthProvider:
       type: object

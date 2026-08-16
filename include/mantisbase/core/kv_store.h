@@ -43,19 +43,6 @@ namespace mb
         void migrate();
 
         /**
-         * @brief Evaluate if request is authenticated and has permission to access this route.
-         *
-         * This route is exclusive to admin login only!
-         *
-         * @param req HTTP request
-         * @param res HTTP response
-         * @param ctx HTTP context
-         * @return `true` if access is granted, else, `false`
-         */
-        HandlerResponse hasAccess([[maybe_unused]] MantisRequest& req, MantisResponse& res) const;
-
-        // Getter sections
-        /**
          * @brief Get the current config data instance.
          *
          * @return Config data as a JSON object
@@ -63,20 +50,12 @@ namespace mb
         json& configs();
 
     private:
-        /**
-         * @brief Fetch config data from database, initializing it to defaults if not existing yet!
-         *
-         * @return json object having the config, or empty json object.
-         */
-        json initSettingsConfig();
-
-        /**
-         * @brief Called by @see setupRoutes() to initialize routes specific to settings config only!
-         */
         void setupConfigRoutes();
 
-        // Cache settings config on create/read/update cycles to reduce database reads
-        // may not be that significant though...!
+        json loadFromDb();
+        json redactForResponse(const json &configs) const;
+        void applyPatch(const json &body);
+
         json m_configs;
 
         MantisBase &mApp; ///< Owning application (injected)
