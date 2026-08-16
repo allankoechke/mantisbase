@@ -1,0 +1,1963 @@
+openapi: 3.1.0
+info:
+  title: MantisBase REST API
+  version: 1.0.0
+  description: |
+    OpenAPI specification for the MantisBase REST API (`/api/v1/`).
+
+    MantisBase auto-generates CRUD endpoints for registered entities. Authorization on entity
+    and realtime routes is evaluated per-entity via access rules (`public`, `auth`, `custom`, or
+    admin-only empty mode) — not every route requires a Bearer token.
+
+    **Credentials:** send JWTs or API keys (`mb_sk_...`) in the standard header:
+    `Authorization: Bearer <token>`.
+
+    **Response envelope:** most JSON endpoints return `{ "status", "data", "error" }`.
+    The health check is an exception (`{ "status": "OK" }`).
+
+    Generated from route registrations in `src/core/` and `doc/api.md` / `doc/auth.md`.
+  license:
+    name: MIT
+    url: https://github.com/allankoechke/mantisbase/blob/main/LICENSE
+
+servers:
+  - url: http://localhost:7070/api/v1
+    description: Local development (default `mantisbase serve`)
+  - url: http://localhost:7070/api/v1
+    description: Docker default (`docker run -p 7070:80 ...`)
+
+tags:
+  - name: Health
+  - name: Auth
+    description: Entity user authentication, token verify, API keys, and OAuth
+  - name: Entities
+    description: Auto-generated CRUD for registered entities
+  - name: Schemas
+    description: Entity schema management (admin only)
+  - name: Files
+  - name: Realtime
+    description: Server-Sent Events and WebSocket change notifications
+  - name: System
+    description: Admin accounts, logs, settings, system API keys, OAuth provider registry
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Lightweight liveness probe. Does not use the standard response envelope.
+      security: []
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+                required: [status]
+
+  /auth/verify:
+    get:
+      tags: [Auth]
+      summary: Verify current credentials
+      description: |
+        Checks whether the current JWT or API key is valid. Rate-limited to 5 requests/minute per IP.
+      responses:
+        "200":
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: OK
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/login:
+    post:
+      tags: [Auth]
+      summary: Entity user login
+      description: |
+        Authenticate against an auth-type entity and receive a JWT. Rate-limited to 5 attempts/minute per IP.
+        The entity must be type `auth`, API-enabled, and not a system entity.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh entity user token
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      responses:
+        "200":
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/logout:
+    post:
+      tags: [Auth]
+      summary: Logout entity user
+      description: Invalidates the current session when the JWT contains a `session_id` claim.
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          logged_out:
+                            type: boolean
+                            example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/api-keys:
+    get:
+      tags: [Auth]
+      summary: List entity user API keys
+      description: Returns metadata only; raw secrets are never included in list responses.
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      responses:
+        "200":
+          description: API key list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ApiKeyMetadata"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags: [Auth]
+      summary: Create entity user API key
+      description: Returns the raw `mb_sk_...` secret once at creation time.
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiKeyCreateRequest"
+      responses:
+        "201":
+          description: API key created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ApiKeyCreated"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/api-keys/{id}:
+    delete:
+      tags: [Auth]
+      summary: Revoke entity user API key
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Key revoked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          deleted:
+                            type: boolean
+                            example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/oauth/authorize/{provider}:
+    get:
+      tags: [Auth]
+      summary: Start OAuth login (redirect)
+      description: Redirects the browser to the OAuth provider authorization URL (PKCE).
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+        - $ref: "#/components/parameters/OAuthProvider"
+        - name: redirect_uri
+          in: query
+          description: Callback URL. Defaults to the server callback route when omitted.
+          schema:
+            type: string
+            format: uri
+      responses:
+        "302":
+          description: Redirect to provider
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /auth/{entity_name}/oauth/callback/{provider}:
+    get:
+      tags: [Auth]
+      summary: OAuth callback
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+        - $ref: "#/components/parameters/OAuthProvider"
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: error
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OAuth login succeeded
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        description: OAuth result (typically includes JWT token and user record)
+                        type: object
+                        additionalProperties: true
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /auth/{entity_name}/oauth/link/{provider}:
+    post:
+      tags: [Auth]
+      summary: Link OAuth provider to current user
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+        - $ref: "#/components/parameters/OAuthProvider"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                state:
+                  type: string
+      responses:
+        "200":
+          description: Provider linked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    delete:
+      tags: [Auth]
+      summary: Unlink OAuth provider from current user
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+        - $ref: "#/components/parameters/OAuthProvider"
+      responses:
+        "200":
+          description: Provider unlinked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          unlinked:
+                            type: boolean
+                            example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/oauth/accounts:
+    get:
+      tags: [Auth]
+      summary: List linked OAuth accounts
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      responses:
+        "200":
+          description: Linked accounts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/oauth/providers:
+    get:
+      tags: [Auth]
+      summary: List OAuth providers enabled for entity
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      responses:
+        "200":
+          description: Enabled providers
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /entities/{entity_name}:
+    get:
+      tags: [Entities]
+      summary: List entity records
+      description: Authorization depends on the entity `list` access rule.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/DynamicEntityName"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/AfterCursor"
+        - $ref: "#/components/parameters/Sort"
+      responses:
+        "200":
+          description: Paginated record list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntityListPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags: [Entities]
+      summary: Create entity record
+      description: Authorization depends on the entity `add` access rule. Supports JSON and multipart file uploads.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/DynamicEntityName"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityRecord"
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Record created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntityRecord"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /entities/{entity_name}/{id}:
+    get:
+      tags: [Entities]
+      summary: Get entity record
+      description: Authorization depends on the entity `get` access rule.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/DynamicEntityName"
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Record found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntityRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    patch:
+      tags: [Entities]
+      summary: Update entity record
+      description: Authorization depends on the entity `update` access rule. View entities reject mutations.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/DynamicEntityName"
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityRecord"
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Record updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntityRecord"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    delete:
+      tags: [Entities]
+      summary: Delete entity record
+      description: Authorization depends on the entity `delete` access rule.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/DynamicEntityName"
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Record deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /schemas:
+    get:
+      tags: [Schemas]
+      summary: List all schemas
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Schema list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/EntitySchema"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags: [Schemas]
+      summary: Create schema
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntitySchemaCreate"
+      responses:
+        "201":
+          description: Schema created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntitySchema"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /schemas/{schema_name_or_id}:
+    get:
+      tags: [Schemas]
+      summary: Get schema
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/SchemaNameOrId"
+      responses:
+        "200":
+          description: Schema details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntitySchema"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    patch:
+      tags: [Schemas]
+      summary: Update schema
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/SchemaNameOrId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntitySchemaPatch"
+      responses:
+        "200":
+          description: Schema updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntitySchema"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    delete:
+      tags: [Schemas]
+      summary: Delete schema
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/SchemaNameOrId"
+      responses:
+        "200":
+          description: Schema deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /files/{entity}/{file}:
+    get:
+      tags: [Files]
+      summary: Serve uploaded file
+      description: Returns the stored file for a given entity upload field.
+      security: []
+      parameters:
+        - name: entity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: file
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: File not found
+
+  /realtime:
+    get:
+      tags: [Realtime]
+      summary: Open SSE connection
+      description: |
+        Establishes a long-lived Server-Sent Events stream. Disabled when `MB_REALTIME_SSE=false`.
+
+        Subscribing to `entity` requires list access; subscribing to `entity:row_id` requires get access.
+      security: []
+      parameters:
+        - name: topics
+          in: query
+          required: true
+          description: Comma-separated topics (`posts`, `users`, `posts:019c...`).
+          schema:
+            type: string
+            example: posts,users,posts:019c1b81-364b-7000-8120-b5416b2c42c2
+      responses:
+        "200":
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  SSE events: `connected`, `ping`, and `change`.
+                  Each `data:` line contains JSON matching `RealtimeChangeEvent` or connection metadata.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          description: SSE disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+    post:
+      tags: [Realtime]
+      summary: Update SSE session topics
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RealtimeSessionUpdate"
+      responses:
+        "200":
+          description: Topics updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          client_id:
+                            type: string
+                          topics:
+                            type: array
+                            items:
+                              type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /realtime/ws:
+    get:
+      tags: [Realtime]
+      summary: WebSocket realtime connection
+      description: |
+        WebSocket endpoint at `WS /api/v1/realtime/ws`.
+
+        After connecting, send JSON messages such as `{ "topics": ["posts", "users"] }`.
+        Change events use the same payload shape as SSE `change` events.
+        Disabled when `MB_REALTIME_WS=false`.
+      security: []
+      responses:
+        "101":
+          description: Switching Protocols (WebSocket upgrade)
+
+  /sys/admins/login:
+    post:
+      tags: [System]
+      summary: Admin login
+      description: Rate-limited to 5 attempts/minute per IP.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Admin login successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/admins/refresh:
+    post:
+      tags: [System]
+      summary: Refresh admin token
+      responses:
+        "200":
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/admins/logout:
+    post:
+      tags: [System]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          logged_out:
+                            type: boolean
+                            example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/admins/setup:
+    post:
+      tags: [System]
+      summary: Create initial admin account
+      description: |
+        First-boot setup. Requires a valid service-account token (`mb_service_acc` entity).
+        Rate-limited to 3 requests/hour per IP.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityRecord"
+      responses:
+        "201":
+          description: Admin account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntityRecord"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/admins:
+    get:
+      tags: [System]
+      summary: List admin accounts
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/AfterCursor"
+        - $ref: "#/components/parameters/Sort"
+      responses:
+        "200":
+          description: Admin list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntityListPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags: [System]
+      summary: Create admin account
+      description: Blocked with 503 when `MB_DISABLE_ADMIN_EDITS` is truthy.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityRecord"
+      responses:
+        "201":
+          description: Admin created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntityRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/admins/{id}:
+    get:
+      tags: [System]
+      summary: Get admin account
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Admin record
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntityRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    patch:
+      tags: [System]
+      summary: Update admin account
+      description: Blocked with 503 when `MB_DISABLE_ADMIN_EDITS` is truthy.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityRecord"
+      responses:
+        "200":
+          description: Admin updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EntityRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    delete:
+      tags: [System]
+      summary: Delete admin account
+      description: Blocked with 503 when `MB_DISABLE_ADMIN_EDITS` is truthy.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Admin deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/logs:
+    get:
+      tags: [System]
+      summary: Query system logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - name: after
+          in: query
+          schema:
+            type: string
+          description: Cursor from a previous response
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [trace, debug, info, warn, critical]
+        - name: min_level
+          in: query
+          schema:
+            type: string
+            enum: [trace, debug, info, warn, critical]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [level, origin, message, timestamp, created_at]
+            default: timestamp
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        "200":
+          description: Log page
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LogListPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          description: Log database not initialized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/settings/config:
+    get:
+      tags: [System]
+      summary: Get application settings
+      security: []
+      responses:
+        "200":
+          description: Settings object
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AppSettings"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: [System]
+      summary: Update application settings
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppSettingsPatch"
+      responses:
+        "200":
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AppSettings"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /sys/api-keys:
+    get:
+      tags: [System]
+      summary: List admin API keys
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Admin API key list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ApiKeyMetadata"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags: [System]
+      summary: Create admin API key
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiKeyCreateRequest"
+      responses:
+        "201":
+          description: Admin API key created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ApiKeyCreated"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/api-keys/{id}:
+    delete:
+      tags: [System]
+      summary: Revoke admin API key
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Key revoked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          deleted:
+                            type: boolean
+                            example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/oauth/providers:
+    get:
+      tags: [System]
+      summary: List OAuth providers
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Provider list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/OAuthProvider"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags: [System]
+      summary: Add OAuth provider
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OAuthProviderCreate"
+      responses:
+        "201":
+          description: Provider created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/OAuthProvider"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sys/oauth/providers/{id}:
+    patch:
+      tags: [System]
+      summary: Update OAuth provider
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Provider updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/OAuthProvider"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    delete:
+      tags: [System]
+      summary: Remove OAuth provider
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Provider removed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          deleted:
+                            type: boolean
+                            example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /sys/oauth/entity-config:
+    post:
+      tags: [System]
+      summary: Enable OAuth provider for entity
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OAuthEntityConfig"
+      responses:
+        "200":
+          description: Provider enabled for entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      tags: [System]
+      summary: Disable OAuth provider for entity
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OAuthEntityConfig"
+      responses:
+        "200":
+          description: Provider disabled
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          disabled:
+                            type: boolean
+                            example: true
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT or mb_sk_ API key
+      description: |
+        JWT from login/refresh, or a long-lived API key prefixed with `mb_sk_`.
+        Both use `Authorization: Bearer <token>`.
+
+  parameters:
+    EntityName:
+      name: entity_name
+      in: path
+      required: true
+      description: Auth-type entity name (not a system entity).
+      schema:
+        type: string
+        pattern: "^[A-Za-z0-9_]{1,64}$"
+        example: users
+    DynamicEntityName:
+      name: entity_name
+      in: path
+      required: true
+      description: Registered entity name.
+      schema:
+        type: string
+        pattern: "^[A-Za-z0-9_]{1,64}$"
+        example: posts
+    SchemaNameOrId:
+      name: schema_name_or_id
+      in: path
+      required: true
+      schema:
+        type: string
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    OAuthProvider:
+      name: provider
+      in: path
+      required: true
+      schema:
+        type: string
+        example: google
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 50
+    AfterCursor:
+      name: after
+      in: query
+      schema:
+        type: string
+      description: Cursor from the previous list response.
+    Sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+        default: id
+      description: Sort field. Prefix with `-` for descending (e.g. `-created`).
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiEnvelope"
+    Unauthorized:
+      description: Missing, invalid, or expired credentials
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiEnvelope"
+    Forbidden:
+      description: Authenticated but not permitted
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiEnvelope"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiEnvelope"
+    InternalError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiEnvelope"
+    TooManyRequests:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiEnvelope"
+    ServiceUnavailable:
+      description: Route temporarily disabled (e.g. env gate)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiEnvelope"
+
+  schemas:
+    ApiEnvelope:
+      type: object
+      properties:
+        status:
+          type: integer
+        data:
+          description: Payload; shape varies by endpoint.
+        error:
+          oneOf:
+            - type: string
+            - type: "null"
+      required: [status, data, error]
+
+    LoginRequest:
+      type: object
+      required: [identity, password]
+      properties:
+        identity:
+          type: string
+          description: Email address or user ID
+          example: user@example.com
+        password:
+          type: string
+          format: password
+
+    AuthTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token
+        user:
+          $ref: "#/components/schemas/EntityRecord"
+      required: [token, user]
+
+    EntityRecord:
+      type: object
+      description: Dynamic record shape defined by entity schema.
+      additionalProperties: true
+
+    EntityListPage:
+      type: object
+      properties:
+        items_count:
+          type: integer
+        limit:
+          type: integer
+        cursor:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EntityRecord"
+
+    LogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          type: string
+          enum: [trace, debug, info, warn, critical]
+        origin:
+          type: string
+        message:
+          type: string
+        details:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    LogListPage:
+      type: object
+      properties:
+        items_count:
+          type: integer
+        limit:
+          type: integer
+        cursor:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogEntry"
+
+    ApiKeyCreateRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          default: API Key
+          example: Mobile app
+        permissions:
+          type: array
+          description: Stored metadata only; not enforced by middleware today.
+          items: {}
+          default: []
+        expires_at:
+          type: string
+          description: Optional UTC expiration timestamp. Empty or omitted means no expiration.
+          default: ""
+
+    ApiKeyCreated:
+      allOf:
+        - $ref: "#/components/schemas/ApiKeyMetadata"
+        - type: object
+          properties:
+            key:
+              type: string
+              description: Raw secret shown once (`mb_sk_...`).
+              example: mb_sk_a1b2c3d4...
+
+    ApiKeyMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+        entity_name:
+          type: string
+        user_id:
+          type: string
+        label:
+          type: string
+        permissions:
+          type: array
+          items: {}
+        last_used:
+          type: string
+          nullable: true
+        created:
+          type: string
+        expires_at:
+          type: string
+          nullable: true
+
+    AccessRule:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: ["", public, auth, custom]
+        expr:
+          type: string
+
+    EntitySchema:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [base, auth, view]
+        fields:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        rules:
+          type: object
+          properties:
+            list:
+              $ref: "#/components/schemas/AccessRule"
+            get:
+              $ref: "#/components/schemas/AccessRule"
+            add:
+              $ref: "#/components/schemas/AccessRule"
+            update:
+              $ref: "#/components/schemas/AccessRule"
+            delete:
+              $ref: "#/components/schemas/AccessRule"
+        view_query:
+          type: string
+          description: Required for `view` entities.
+      additionalProperties: true
+
+    EntitySchemaCreate:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+          pattern: "^[A-Za-z0-9_]{1,64}$"
+        type:
+          type: string
+          enum: [base, auth, view]
+        fields:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        rules:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/AccessRule"
+        view_query:
+          type: string
+
+    EntitySchemaPatch:
+      type: object
+      properties:
+        fields:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            description: 'Add by name, update by id, delete with op "delete".'
+        rules:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/AccessRule"
+        view_query:
+          type: string
+
+    AppSettings:
+      type: object
+      properties:
+        appName:
+          type: string
+        baseUrl:
+          type: string
+          format: uri
+        maintenanceMode:
+          type: boolean
+        maxFileSize:
+          type: integer
+          description: Maximum upload size in MB
+        allowRegistration:
+          type: boolean
+        emailVerificationRequired:
+          type: boolean
+        sessionTimeout:
+          type: integer
+          description: Entity user session timeout in seconds
+        adminSessionTimeout:
+          type: integer
+          description: Admin session timeout in seconds
+        jwtEnableSetIssuer:
+          type: boolean
+        jwtEnableSetAudience:
+          type: boolean
+        mode:
+          type: string
+          enum: [PROD, TEST]
+        mantisVersion:
+          type: string
+          readOnly: true
+
+    AppSettingsPatch:
+      type: object
+      description: Partial update; omitted fields retain current values.
+      properties:
+        appName:
+          type: string
+        baseUrl:
+          type: string
+        maintenanceMode:
+          type: boolean
+        maxFileSize:
+          type: integer
+        allowRegistration:
+          type: boolean
+        emailVerificationRequired:
+          type: boolean
+        sessionTimeout:
+          type: integer
+        adminSessionTimeout:
+          type: integer
+        jwtEnableSetIssuer:
+          type: boolean
+        jwtEnableSetAudience:
+          type: boolean
+        mode:
+          type: string
+          enum: [PROD, TEST]
+
+    OAuthProvider:
+      type: object
+      additionalProperties: true
+
+    OAuthProviderCreate:
+      type: object
+      required: [name, client_id, client_secret]
+      properties:
+        name:
+          type: string
+          example: google
+        client_id:
+          type: string
+        client_secret:
+          type: string
+          format: password
+
+    OAuthEntityConfig:
+      type: object
+      required: [entity_name, provider_id]
+      properties:
+        entity_name:
+          type: string
+        provider_id:
+          type: string
+
+    RealtimeSessionUpdate:
+      type: object
+      required: [client_id, topics]
+      properties:
+        client_id:
+          type: string
+          description: Session ID from the SSE `connected` event
+        topics:
+          type: array
+          items:
+            type: string
+          description: Entity names or `entity:row_id` strings. Empty array clears subscriptions.
+
+    RealtimeChangeEvent:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [insert, update, delete]
+        entity:
+          type: string
+        row_id:
+          type: string
+        topic:
+          type: string
+        timestamp:
+          type: integer
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/EntityRecord"
+            - type: "null"
