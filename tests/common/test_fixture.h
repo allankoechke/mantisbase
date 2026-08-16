@@ -25,6 +25,7 @@
 #include "test_config.h"
 #include "test_helpers.h"
 #include "test_http_client.h"
+#include "test_middleware_routes.h"
 
 namespace fs = std::filesystem;
 
@@ -135,6 +136,7 @@ public:
                 throw std::runtime_error("Failed to allocate ephemeral port");
             }
             app_ = mb::MantisBase::create(buildAppConfig(baseDir_, port_));
+            registerMiddlewareTestRoutes(app_->router());
         }
         ++refCount_;
         return *app_;

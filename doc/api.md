@@ -125,10 +125,10 @@ You can use these middlewares when creating custom endpoints:
 | `hydrateContextData()` | Validate token and load user data | Applied globally to all routes |
 | `hasAccess(entity_name)` | Check entity access rules | Applied automatically to entity endpoints |
 | `requireAdminAuth()` | Require admin authentication | Blocks non-admin users |
-| `requireEntityAuth(entity_name)` | Require authentication from specific entity | Only allows users from specified entity table |
-| `requireAdminOrEntityAuth(entity_name)` | Require admin OR entity auth | Allows admins or users from specified entity |
+| `requireExprEval(expr)` | Custom expression gate on a route | Evaluates `auth` / `req` context; **403** `"Access denied!"` when the expression is false (no upfront auth requirement) |
+| `requireEntityAuth(entity_name)` | Require auth from a specific entity | **401** without valid credentials; **403** when authenticated as another entity |
+| `requireAdminOrEntityAuth(entity_name)` | Require admin or entity auth | **401** without valid credentials; **403** when authenticated as neither admin nor the given entity |
 | `requireGuestOnly()` | Require no authentication | Blocks authenticated users, only allows guests |
-| `requireExprEval(expr)` | Evaluate custom expression | Custom expression-based access control |
 | `rateLimit(max_requests, window_seconds, use_user_id)` | Rate limiting middleware | Limits requests per time window by IP or user ID |
 | `envGateMiddleware(env_var, block_when_truthy)` | Environment gate | Blocks with **503** when the env var is truthy (`true`, `1`, `on`, `yes`); otherwise the request continues |
 

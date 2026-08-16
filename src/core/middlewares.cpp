@@ -3,11 +3,13 @@
 #include "../include/mantisbase/core/models/entity.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
 #include "../include/mantisbase/core/api_keys.h"
+#include "../include/mantisbase/core/expr_evaluator.h"
 #include "../include/mantisbase/utils/crypto_utils.h"
 #include <unordered_map>
 #include <deque>
 #include <chrono>
 #include <mutex>
+#include <optional>
 
 namespace mb {
     namespace {
@@ -17,6 +19,79 @@ namespace mb {
                 {"error", std::format("{} {} Route Not Found", method, path)},
                 {"data", json::object()}
             };
+        }
+
+        json buildMiddlewareExprVars(MantisRequest &req, const json &auth) {
+            json vars = json::object();
+            vars["auth"] = auth;
+
+            json req_obj;
+            req_obj["remoteAddr"] = req.getRemoteAddr();
+            req_obj["remotePort"] = req.getRemotePort();
+            req_obj["localAddr"] = req.getLocalAddr();
+            req_obj["localPort"] = req.getLocalPort();
+            req_obj["body"] = json::object();
+
+            try {
+                if (req.getMethod() == "POST" && !req.getBody().empty()) {
+                    const auto &[body, err] = req.getBodyAsJson();
+                    if (err.empty()) {
+                        req_obj["body"] = body;
+                    }
+                }
+            } catch (...) {
+            }
+
+            vars["req"] = req_obj;
+            return vars;
+        }
+
+        HandlerResponse sendAccessDenied(MantisResponse &res) {
+            res.sendJSON(403, {
+                             {"status", 403},
+                             {"data", json::object()},
+                             {"error", "Access denied!"}
+                         });
+            return HandlerResponse::Handled;
+        }
+
+        std::optional<json> requireAuthenticatedUser(MantisRequest &req, MantisResponse &res) {
+            const auto &verification = req.getOr<json>("verification", json::object());
+
+            if (verification.empty()) {
+                res.sendJSON(401, {
+                                 {"data", json::object()},
+                                 {"status", 401},
+                                 {"error", "Auth required to access this resource!"}
+                             });
+                return std::nullopt;
+            }
+
+            if (!verification.contains("verified") ||
+                !verification["verified"].is_boolean() ||
+                !verification["verified"].get<bool>()) {
+                const auto err_str = verification["error"].empty()
+                                         ? "Token Verification Error"
+                                         : verification["error"].get<std::string>();
+                res.sendJSON(401, {
+                                 {"data", json::object()},
+                                 {"status", 401},
+                                 {"error", err_str}
+                             });
+                return std::nullopt;
+            }
+
+            auto auth = req.getOr<json>("auth", json::object());
+            if (auth["user"].is_null() || !auth["user"].is_object()) {
+                res.sendJSON(401, {
+                                 {"data", json::object()},
+                                 {"status", 401},
+                                 {"error", "Auth user not found!"}
+                             });
+                return std::nullopt;
+            }
+
+            return auth;
         }
 
         HandlerResponse checkEntityAccess(MantisRequest &req, MantisResponse &res, const std::string &entity_name,
@@ -130,35 +205,12 @@ namespace mb {
                     req.mbApp().logger().trace("Auth", "Custom Expression Access",
                                                fmt::format("Restricted access, custom expression `{}` to be evaluated",
                                                            rule.expr()));
-                    const std::string expr = rule.expr();
-                    json vars = json::object();
-                    vars["auth"] = auth;
+                    const auto vars = buildMiddlewareExprVars(req, auth);
 
-                    json req_obj;
-                    req_obj["remoteAddr"] = req.getRemoteAddr();
-                    req_obj["remotePort"] = req.getRemotePort();
-                    req_obj["localAddr"] = req.getLocalAddr();
-                    req_obj["localPort"] = req.getLocalPort();
-                    req_obj["body"] = json::object();
-
-                    try {
-                        if (req.getMethod() == "POST" && !req.getBody().empty()) {
-                            req_obj["body"] = req.getBodyAsJson();
-                        }
-                    } catch (...) {
-                    }
-
-                    vars["req"] = req_obj;
-
-                    if (Expr::eval(expr, vars))
+                    if (Expr::eval(rule.expr(), vars))
                         return HandlerResponse::Unhandled;
 
-                    res.sendJSON(403, {
-                                     {"status", 403},
-                                     {"data", json::object()},
-                                     {"error", "Access denied!"}
-                                 });
-                    return HandlerResponse::Handled;
+                    return sendAccessDenied(res);
                 }
 
                 res.sendJSON(403, {
@@ -411,9 +463,15 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr) {
-        std::string msg = MB_FUNC();
-        return [expr, msg](MantisRequest &req, MantisResponse &res) {
-            return REQUEST_PENDING;
+        return [expr](MantisRequest &req, MantisResponse &res) {
+            const auto &auth = req.getOr<json>("auth", json::object());
+            const auto vars = buildMiddlewareExprVars(req, auth);
+
+            if (Expr::eval(expr, vars)) {
+                return HandlerResponse::Unhandled;
+            }
+
+            return sendAccessDenied(res);
         };
     }
 
@@ -523,14 +581,48 @@ namespace mb {
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
         const std::string &entity_name) {
         return [entity_name](MantisRequest &req, MantisResponse &res) {
-            return REQUEST_PENDING;
+            const auto auth = requireAuthenticatedUser(req, res);
+            if (!auth.has_value()) {
+                return HandlerResponse::Handled;
+            }
+
+            if (!auth->contains("entity") || !(*auth)["entity"].is_string()) {
+                return sendAccessDenied(res);
+            }
+
+            const auto user_entity = auth->at("entity").get<std::string>();
+            if (user_entity == "mb_admins" || user_entity == entity_name) {
+                return HandlerResponse::Unhandled;
+            }
+
+            res.sendJSON(403, {
+                             {"status", 403},
+                             {"data", json::object()},
+                             {"error", std::format("Admin or `{}` auth required to access this resource.", entity_name)}
+                         });
+            return HandlerResponse::Handled;
         };
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)>
     requireEntityAuth(const std::string &entity_name) {
         return [entity_name](MantisRequest &req, MantisResponse &res) {
-            return REQUEST_PENDING;
+            const auto auth = requireAuthenticatedUser(req, res);
+            if (!auth.has_value()) {
+                return HandlerResponse::Handled;
+            }
+
+            if (!auth->contains("entity") || !(*auth)["entity"].is_string() ||
+                auth->at("entity").get<std::string>() != entity_name) {
+                res.sendJSON(403, {
+                                 {"status", 403},
+                                 {"data", json::object()},
+                                 {"error", std::format("Auth required from entity `{}`.", entity_name)}
+                             });
+                return HandlerResponse::Handled;
+            }
+
+            return HandlerResponse::Unhandled;
         };
     }
 

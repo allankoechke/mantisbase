@@ -83,7 +83,12 @@ namespace mb {
 
     /**
      * @brief Require expression evaluation to pass.
-     * @param expr Expression string to evaluate
+     *
+     * Evaluates @p expr with `auth` and `req` variables (same context as entity
+     * custom access rules). Does not require authentication upfront — the
+     * expression decides. Returns **403** with `"Access denied!"` when false.
+     *
+     * @param expr Expression string to evaluate (`auth.id`, `@auth.id`, `req.body`, etc.)
      * @return Middleware function that evaluates expression
      */
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr);
@@ -123,6 +128,11 @@ namespace mb {
 
     /**
      * @brief Require admin OR entity authentication.
+     *
+     * Requires a valid JWT or API key. Allows `mb_admins` or users whose
+     * `auth.entity` matches @p entity_name. Missing/invalid credentials → **401**;
+     * authenticated but wrong entity → **403**.
+     *
      * @param entity_name Entity name for entity-based auth
      * @return Middleware function that allows admins or entity users
      */
@@ -131,6 +141,10 @@ namespace mb {
 
     /**
      * @brief Require entity-specific authentication.
+     *
+     * Requires a valid JWT or API key for @p entity_name only. Admins from other
+     * entities are rejected. Missing/invalid credentials → **401**; wrong entity → **403**.
+     *
      * @param entity_name Entity name to authenticate against
      * @return Middleware function that validates entity auth
      */
