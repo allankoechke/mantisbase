@@ -91,6 +91,13 @@ Authorization: Bearer <token>
 
 For authentication endpoints, see [Authentication API](auth.md).
 
+### HTTP status codes
+
+| Code | Meaning |
+|------|---------|
+| `401 Unauthorized` | Missing, invalid, or expired credentials (no valid JWT or API key) |
+| `403 Forbidden` | Valid credentials, but the authenticated user is not permitted to access the resource (access rules, admin-only routes, custom expressions) |
+
 ---
 
 ## Middlewares
@@ -816,7 +823,7 @@ Realtime endpoints use the same access rules as entity `list` and `get`:
 - Subscribing to an entity (e.g. `posts`) requires **list** access on that entity.
 - Subscribing to a specific row (e.g. `posts:&lt;id&gt;`) requires **get** access.
 
-Invalid or unauthorized topics result in `400` or `403` responses.
+Invalid or unauthorized topics result in `400`, `401`, or `403` responses depending on whether the request is malformed, unauthenticated, or forbidden by access rules.
 
 ### Backend support
 

@@ -427,9 +427,9 @@ namespace mb {
                 // For empty mode (admin only)
                 if (rule.mode().empty()) {
                     if (verification.empty()) {
-                        res.sendJSON(403, {
+                        res.sendJSON(401, {
                                          {"data", json::object()},
-                                         {"status", 403},
+                                         {"status", 401},
                                          {
                                              "error",
                                              std::format("Admin auth required to access record(s) in `{}` entity.",
@@ -443,9 +443,9 @@ namespace mb {
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
                         if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(403, {
+                            res.sendJSON(401, {
                                              {"data", json::object()},
-                                             {"status", 403},
+                                             {"status", 401},
                                              {"error", "Auth user not found!"}
                                          });
 
@@ -455,9 +455,9 @@ namespace mb {
                         continue;
                     }
 
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", verification["error"]}
                                  });
                     return HandlerResponse::Handled;
@@ -466,9 +466,9 @@ namespace mb {
                 if (rule.mode() == "auth" || (auth["entity"].is_string()
                                               && auth["entity"].get<std::string>() == "mb_admins")) {
                     if (verification.empty()) {
-                        res.sendJSON(403, {
+                        res.sendJSON(401, {
                                          {"data", json::object()},
-                                         {"status", 403},
+                                         {"status", 401},
                                          {"error", "Auth required to access this resource!"}
                                      });
                         return HandlerResponse::Handled;
@@ -478,9 +478,9 @@ namespace mb {
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
                         if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(403, {
+                            res.sendJSON(401, {
                                              {"data", json::object()},
-                                             {"status", 403},
+                                             {"status", 401},
                                              {"error", "Auth user not found!"}
                                          });
                             return HandlerResponse::Handled;
@@ -489,9 +489,9 @@ namespace mb {
                         continue;
                     }
 
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", verification["error"]}
                                  });
                     return HandlerResponse::Handled;

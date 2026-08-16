@@ -81,11 +81,11 @@ namespace mb
         if (auth.empty())
         {
             json response;
-            response["status"] = 403;
+            response["status"] = 401;
             response["data"] = json::object();
             response["error"] = "Auth token missing";
 
-            res.sendJSON(403, response);
+            res.sendJSON(401, response);
             return REQUEST_HANDLED;
         }
 
@@ -93,11 +93,11 @@ namespace mb
         if (auth.contains("token") && (auth["token"].is_null() || auth["token"].empty()))
         {
             json response;
-            response["status"] = 403;
+            response["status"] = 401;
             response["data"] = json::object();
             response["error"] = "Auth token missing";
 
-            res.sendJSON(403, response);
+            res.sendJSON(401, response);
             return REQUEST_HANDLED;
         }
 
@@ -109,11 +109,11 @@ namespace mb
         if (!resp.value("verified", false) || !resp.value("error", "").empty())
         {
             json response;
-            response["status"] = 403;
+            response["status"] = 401;
             response["data"] = json::object();
             response["error"] = resp.value("error", "");
 
-            res.sendJSON(403, response);
+            res.sendJSON(401, response);
             return REQUEST_HANDLED;
         }
 
@@ -125,11 +125,11 @@ namespace mb
         if (_id.empty() || _table.empty())
         {
             json response;
-            response["status"] = 403;
+            response["status"] = 401;
             response["data"] = json::object();
             response["error"] = "Auth token missing user id or table name";
 
-            res.sendJSON(403, response);
+            res.sendJSON(401, response);
             return REQUEST_HANDLED;
         }
 

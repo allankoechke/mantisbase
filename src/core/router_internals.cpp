@@ -315,8 +315,8 @@ namespace mb {
                 auto verification = req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
-                    res.sendJSON(403, {
-                                     {"status", 403},
+                    res.sendJSON(401, {
+                                     {"status", 401},
                                      {"data", json::object()},
                                      {"error", "Valid token required to refresh"}
                                  });
@@ -372,8 +372,8 @@ namespace mb {
                 auto verification = req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
-                    res.sendJSON(403, {
-                                     {"status", 403},
+                    res.sendJSON(401, {
+                                     {"status", 401},
                                      {"data", json::object()},
                                      {"error", "Valid token required to logout"}
                                  });
@@ -426,9 +426,9 @@ namespace mb {
 
                 auto verification = req.getOr<json>("verification", json::object());
                 if (verification.empty()) {
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", "Auth required to access this resource!"}
                                  });
                     return;
@@ -439,9 +439,9 @@ namespace mb {
                                       verification["verified"].get<bool>();
 
                 if (!verified) {
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", verification["error"]}
                                  });
                     return;

@@ -14,7 +14,7 @@ namespace mb {
                 auto verification = req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
-                    res.sendJSON(403, {{"status", 403}, {"data", json::object()}, {"error", "Authentication required"}});
+                    res.sendJSON(401, {{"status", 401}, {"data", json::object()}, {"error", "Authentication required"}});
                     return;
                 }
 
@@ -44,7 +44,7 @@ namespace mb {
                 auto& verification = req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
-                    res.sendJSON(403, {{"status", 403}, {"data", json::object()}, {"error", "Authentication required"}});
+                    res.sendJSON(401, {{"status", 401}, {"data", json::object()}, {"error", "Authentication required"}});
                     return;
                 }
 
@@ -64,7 +64,7 @@ namespace mb {
                 auto verification = req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
-                    res.sendJSON(403, {{"status", 403}, {"data", json::object()}, {"error", "Authentication required"}});
+                    res.sendJSON(401, {{"status", 401}, {"data", json::object()}, {"error", "Authentication required"}});
                     return;
                 }
 

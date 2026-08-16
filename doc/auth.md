@@ -4,6 +4,13 @@ MantisBase provides authentication endpoints scoped to auth-type entities. Each 
 
 Admin authentication uses `/api/v1/sys/admins/` instead.
 
+### HTTP status codes
+
+| Code | Meaning |
+|------|---------|
+| `401 Unauthorized` | Missing, invalid, or expired credentials |
+| `403 Forbidden` | Authenticated, but not allowed to perform the action (for example, a regular user token on an admin-only route) |
+
 ---
 
 ## Base URL
@@ -211,7 +218,7 @@ Authorization: Bearer <token>
 }
 ```
 
-**Response (Missing token - 403):**
+**Response (Missing token - 401):**
 ```json
 {
   "status": 401,

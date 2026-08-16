@@ -58,9 +58,9 @@ namespace mb {
                                                "Restricted access, admin auth required!");
                     const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
-                        res.sendJSON(403, {
+                        res.sendJSON(401, {
                                          {"data", json::object()},
-                                         {"status", 403},
+                                         {"status", 401},
                                          {"error", "Admin auth required to access this resource!"}
                                      });
                         return HandlerResponse::Handled;
@@ -70,9 +70,9 @@ namespace mb {
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
                         if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(403, {
+                            res.sendJSON(401, {
                                              {"data", json::object()},
-                                             {"status", 403},
+                                             {"status", 401},
                                              {"error", "Auth user not found!"}
                                          });
                             return HandlerResponse::Handled;
@@ -81,9 +81,9 @@ namespace mb {
                         return HandlerResponse::Unhandled;
                     }
 
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", verification["error"]}
                                  });
                     return HandlerResponse::Handled;
@@ -95,9 +95,9 @@ namespace mb {
                                                "Restricted access, admin/user auth required!");
                     const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
-                        res.sendJSON(403, {
+                        res.sendJSON(401, {
                                          {"data", json::object()},
-                                         {"status", 403},
+                                         {"status", 401},
                                          {"error", "Auth required to access this resource!"}
                                      });
                         return HandlerResponse::Handled;
@@ -107,9 +107,9 @@ namespace mb {
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
                         if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(403, {
+                            res.sendJSON(401, {
                                              {"data", json::object()},
-                                             {"status", 403},
+                                             {"status", 401},
                                              {"error", "Auth user not found!"}
                                          });
                             return HandlerResponse::Handled;
@@ -118,9 +118,9 @@ namespace mb {
                         return HandlerResponse::Unhandled;
                     }
 
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", verification["error"]}
                                  });
                     return HandlerResponse::Handled;
@@ -440,9 +440,9 @@ namespace mb {
 
                 if (verification.empty()) {
                     // Send auth error
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", "Auth required to access this resource!"}
                                  });
                     return HandlerResponse::Handled;
@@ -457,9 +457,9 @@ namespace mb {
 
                     // Check if verified user object is valid, if not throw auth error
                     if (auth["user"].is_null() || !auth["user"].is_object()) {
-                        res.sendJSON(403, {
+                        res.sendJSON(401, {
                                          {"data", json::object()},
-                                         {"status", 403},
+                                         {"status", 401},
                                          {"error", "Auth user not found!"}
                                      });
                         return HandlerResponse::Handled;
@@ -482,9 +482,9 @@ namespace mb {
 
                 // Send auth error
                 const auto err_str = verification["error"].empty() ? "Token Verification Error" : verification["error"];
-                res.sendJSON(403, {
+                res.sendJSON(401, {
                                  {"data", json::object()},
-                                 {"status", 403},
+                                 {"status", 401},
                                  {"error", err_str}
                              });
                 return HandlerResponse::Handled;

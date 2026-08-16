@@ -169,7 +169,7 @@ TEST_F(IntegrationAuthTest, RefreshTokenInvalid) {
     auto res = client->Post("/api/v1/auth/test_users/refresh", headers, "", "application/json");
 
     ASSERT_TRUE(res != nullptr);
-    EXPECT_EQ(res->status, 403);
+    EXPECT_EQ(res->status, 401);
 }
 
 TEST_F(IntegrationAuthTest, Logout) {
