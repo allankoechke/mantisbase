@@ -26,7 +26,7 @@ All REST endpoints live under `/api/v1/` and are grouped by namespace:
 
 | Prefix | Description |
 |--------|-------------|
-| `/api/v1/auth/<entity>/` | Entity user authentication (login, refresh, logout, API keys, OAuth) for auth-type entities |
+| `/api/v1/auth/` | Entity user authentication: token verify (`/verify`), plus per-entity login, refresh, logout, API keys, and OAuth |
 | `/api/v1/entities/` | Entity record CRUD |
 | `/api/v1/schemas/` | Schema management (admin only) |
 | `/api/v1/files/` | Uploaded file serving |

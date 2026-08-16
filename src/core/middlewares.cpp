@@ -437,7 +437,6 @@ namespace mb {
             try {
                 // Require admin authentication
                 const auto &verification = req.getOr<json>("verification", json::object());
-                // logEntry::trace("Verification: {}", verification.dump());
 
                 if (verification.empty()) {
                     // Send auth error

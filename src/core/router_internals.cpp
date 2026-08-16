@@ -84,6 +84,56 @@ namespace mb {
         return notFoundResp;
     }
 
+    std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthVerify() {
+        return [](MantisRequest &req, const MantisResponse &res) {
+            try {
+                // Require admin authentication
+                const auto &verification = req.getOr<json>("verification", json::object());
+
+                if (verification.empty()) {
+                    // Send auth error
+                    res.sendJSON(401, {
+                                     {"data", json::object()},
+                                     {"status", 401},
+                                     {"error", "Missing or invalid auth token"}
+                                 });
+                    return;
+                }
+
+                const bool ok = verification.contains("verified") &&
+                                verification["verified"].is_boolean() &&
+                                verification["verified"].get<bool>();
+                if (ok) {
+                    // Send verify success
+                    res.sendJSON(200, {
+                                     {"data", {{"status", "OK"}}},
+                                     {"status", 200},
+                                     {"error", ""}
+                                 });
+                    return;
+                }
+
+                // Send auth error
+                const auto err_str = verification["error"].empty() ? "Token Verification Error" : verification["error"];
+                res.sendJSON(401, {
+                                 {"data", json::object()},
+                                 {"status", 401},
+                                 {"error", err_str}
+                             });
+            } catch (std::exception &e) {
+                req.mbApp().logger().critical("Auth",
+                                              "Auth verification error",
+                                              e.what());
+                // Send verify error
+                res.sendJSON(500, {
+                                 {"data", json::object()},
+                                 {"status", 500},
+                                 {"error", e.what()}
+                             });
+            }
+        };
+    }
+
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthLogin() {
         return [](const MantisRequest &req, const MantisResponse &res) {
             try {

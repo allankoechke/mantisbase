@@ -258,6 +258,8 @@ namespace mb {
         const Middlewares authEntityMiddleware = {resolveAuthEntity()};
         const Middlewares authLoginMiddleware = {resolveAuthEntity(), rateLimit(5, 60, false)};
 
+        // Verify that the logged in user is valid or still 
+        Get("/api/v1/auth/verify", handleAuthVerify(), {rateLimit(5, 60, false)});
         Post("/api/v1/auth/:entity_name/login", handleAuthLogin(), authLoginMiddleware);
         Post("/api/v1/auth/:entity_name/refresh", handleAuthRefresh(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/logout", handleAuthLogout(), authEntityMiddleware);

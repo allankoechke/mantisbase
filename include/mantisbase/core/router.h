@@ -91,6 +91,8 @@ namespace mb {
         ///> Get default 404 handler
         static drogon::HttpResponsePtr default404Response();
 
+        std::function<void(MantisRequest &, MantisResponse &)> handleAuthVerify();
+
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogin();
         static std::function<void(MantisRequest &, MantisResponse &)> handleAdminLogin();
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh() const;
