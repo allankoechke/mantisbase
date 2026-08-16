@@ -383,12 +383,13 @@ namespace mb {
                 auto claims = verification["claims"];
                 auto session_id = claims.value("session_id", "");
 
-                if (!session_id.empty()) {
+                if (session_id.empty()) {
                     res.sendJSON(500, {
                                      {"status", 500},
                                      {"data", nullptr},
                                      {"error", "Missing session id"}
                                  });
+                    return;
                 }
                 if (req.mbApp().auth().deleteSession(session_id))
                     res.sendJSON(200, {

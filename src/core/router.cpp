@@ -49,13 +49,14 @@ namespace mb {
             close();
     }
 
-    bool Router::init() { {
+    bool Router::init() {
+        {
             // Runs before the server starts listening (single-threaded), but we
             // take the exclusive lock anyway to keep all m_entityMap access
             // uniformly synchronized and future-proof.
             std::unique_lock lock(m_entityMapMutex);
 
-            const auto& sql = mbApp().db().session();
+            const auto &sql = mbApp().db().session();
             const soci::rowset rows = (sql->prepare << "SELECT schema FROM mb_tables");
 
             for (const auto &row: rows) {
@@ -258,7 +259,7 @@ namespace mb {
         const Middlewares authEntityMiddleware = {resolveAuthEntity()};
         const Middlewares authLoginMiddleware = {resolveAuthEntity(), rateLimit(5, 60, false)};
 
-        // Verify that the logged in user is valid or still 
+        // Verify that the logged in user is valid or still
         Get("/api/v1/auth/verify", handleAuthVerify(), {rateLimit(5, 60, false)});
         Post("/api/v1/auth/:entity_name/login", handleAuthLogin(), authLoginMiddleware);
         Post("/api/v1/auth/:entity_name/refresh", handleAuthRefresh(), authEntityMiddleware);
@@ -384,13 +385,13 @@ namespace mb {
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(404);
                     req.mbApp().logger().critical("Admin Response Error",
-                                        fmt::format("Error processing /admin response: {}", e.what()));
+                                                  fmt::format("Error processing /admin response: {}", e.what()));
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
                 res.setReason(e.what());
                 req.mbApp().logger().critical("Admin Request Error",
-                                    fmt::format("Error processing /admin request: {}", e.what()));
+                                              fmt::format("Error processing /admin request: {}", e.what()));
             }
         };
     }

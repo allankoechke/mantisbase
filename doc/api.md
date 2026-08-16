@@ -97,6 +97,7 @@ For authentication endpoints, see [Authentication API](auth.md).
 |------|---------|
 | `401 Unauthorized` | Missing, invalid, or expired credentials (no valid JWT or API key) |
 | `403 Forbidden` | Valid credentials, but the authenticated user is not permitted to access the resource (access rules, admin-only routes, custom expressions) |
+| `503 Service Unavailable` | The route is temporarily disabled (for example, by an environment gate such as `MB_DISABLE_ADMIN_EDITS`) |
 
 ---
 
@@ -129,7 +130,27 @@ You can use these middlewares when creating custom endpoints:
 | `requireGuestOnly()` | Require no authentication | Blocks authenticated users, only allows guests |
 | `requireExprEval(expr)` | Evaluate custom expression | Custom expression-based access control |
 | `rateLimit(max_requests, window_seconds, use_user_id)` | Rate limiting middleware | Limits requests per time window by IP or user ID |
- | `envGateMiddleware(env_var, def_state)` | Env value Gate | Enable req downstaream if env var is set to `def_state` |
+| `envGateMiddleware(env_var, block_when_truthy)` | Environment gate | Blocks with **503** when the env var is truthy (`true`, `1`, `on`, `yes`); otherwise the request continues |
+
+#### `envGateMiddleware`
+
+Blocks route execution when an environment variable matches a configured truthy value. The env var is read on each request (not cached at startup).
+
+```cpp
+// Block admin account mutations when MB_DISABLE_ADMIN_EDITS is set to true/1/on/yes
+router.Post("/api/v1/sys/admins", handler, {
+    requireAdminAuth(),
+    envGateMiddleware("MB_DISABLE_ADMIN_EDITS", true)
+});
+```
+
+| Env value | Behavior |
+|-----------|----------|
+| Unset | Normal operation |
+| `false`, `0`, or any other non-truthy string | Normal operation (ignored) |
+| `true`, `1`, `on`, `yes`, `t` | **503** — `{"status":503,"error":"Resource action temporarily disabled","data":{}}` |
+
+See [Docker environment variables](docker.md#environment-variables) for production flags.
 
 ### Using Middlewares
 

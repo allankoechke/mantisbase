@@ -503,21 +503,20 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> envGateMiddleware(
-        const std::string &env_var, const bool def_state) {
-        return [env_var, def_state](MantisRequest &req, const MantisResponse &res) {
-            if (strToBool(getEnvOrDefault(env_var, "")) == def_state) {
-                return REQUEST_PENDING;
+        const std::string &env_var, const bool block_when_truthy) {
+        return [env_var, block_when_truthy](MantisRequest &req, const MantisResponse &res) {
+            if (strToBool(getEnvOrDefault(env_var, "")) == block_when_truthy) {
+                // Let the user know resource action is temporarily disabled
+                res.sendJSON(503, {
+                                 {"data", json::object()},
+                                 {"status", 503},
+                                 {"error", "Resource action temporarily disabled"}
+                             }
+                );
+                return REQUEST_HANDLED;
             }
 
-            // Let the user know resource is disabled/enabled
-            res.sendJSON(401, {
-                             {"data", json::object()},
-                             {"status", 401},
-                             {"error", "Resource action disabled"}
-                         }
-            );
-
-            return REQUEST_HANDLED;
+            return REQUEST_PENDING;
         };
     }
 

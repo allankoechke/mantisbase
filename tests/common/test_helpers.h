@@ -2,14 +2,49 @@
 #define MANTISBASE_TEST_HELPERS_H
 
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <thread>
 #include <chrono>
+#include <cstdlib>
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/core/auth.h"
 #include "test_config.h"
 #include "test_http_client.h"
 
 namespace TestHelpers {
+    inline void setEnvVar(const char *key, const std::optional<std::string> &value = std::nullopt) {
+#ifdef _WIN32
+        if (value.has_value()) {
+            _putenv_s(key, value->c_str());
+        } else {
+            _putenv_s(key, "");
+        }
+#else
+        if (value.has_value()) {
+            setenv(key, value->c_str(), 1);
+        } else {
+            unsetenv(key);
+        }
+#endif
+    }
+
+    inline std::string loginUser(TestHttp::Client &client,
+                                 const std::string &entity,
+                                 const std::string &identity,
+                                 const std::string &password) {
+        nlohmann::json login = {{"identity", identity}, {"password", password}};
+        auto res = client.Post("/api/v1/auth/" + entity + "/login",
+                               login.dump(), "application/json");
+        if (!res || res->status != 200) {
+            return "";
+        }
+        auto body = nlohmann::json::parse(res->body);
+        if (!body.contains("data") || !body["data"].contains("token")) {
+            return "";
+        }
+        return body["data"]["token"].get<std::string>();
+    }
+
     inline bool waitForServer(TestHttp::Client& client, int max_retries = 20, int initial_delay_ms = 50) {
         int delay_ms = initial_delay_ms;
         for (int i = 0; i < max_retries; ++i) {
