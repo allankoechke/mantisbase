@@ -97,7 +97,7 @@ For authentication endpoints, see [Authentication API](auth.md).
 |------|---------|
 | `401 Unauthorized` | Missing, invalid, or expired credentials (no valid JWT or API key) |
 | `403 Forbidden` | Valid credentials, but the authenticated user is not permitted to access the resource (access rules, admin-only routes, custom expressions) |
-| `503 Service Unavailable` | The route is temporarily disabled (for example, by an environment gate such as `MB_DISABLE_ADMIN_EDITS`) |
+| `503 Service Unavailable` | The route is temporarily disabled (for example, by an environment gate such as `MB_DISABLE_ADMIN_MUTATIONS`) |
 
 ---
 
@@ -137,10 +137,10 @@ You can use these middlewares when creating custom endpoints:
 Blocks route execution when an environment variable matches a configured truthy value. The env var is read on each request (not cached at startup).
 
 ```cpp
-// Block admin account mutations when MB_DISABLE_ADMIN_EDITS is set to true/1/on/yes
+// Block admin account mutations when MB_DISABLE_ADMIN_MUTATIONS is set to true/1/on/yes
 router.Post("/api/v1/sys/admins", handler, {
     requireAdminAuth(),
-    envGateMiddleware("MB_DISABLE_ADMIN_EDITS", true)
+    envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)
 });
 ```
 

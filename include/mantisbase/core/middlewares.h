@@ -116,8 +116,8 @@ namespace mb {
      * equals @p block_when_truthy, responds with HTTP 503 and stops the middleware chain.
      * Otherwise the request continues to the route handler.
      *
-     * Example: `envGateMiddleware("MB_DISABLE_ADMIN_EDITS", true)` blocks admin account
-     * mutations when `MB_DISABLE_ADMIN_EDITS` is set to `true`, `1`, `on`, or `yes`.
+     * Example: `envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)` blocks admin account
+     * mutations when `MB_DISABLE_ADMIN_MUTATIONS` is set to `true`, `1`, `on`, or `yes`.
      *
      * Example: `envGateMiddleware("MB_DISABLE_CONFIG_MUTATIONS", true)` blocks PATCH on
      * `/api/v1/sys/settings/config` when `MB_DISABLE_CONFIG_MUTATIONS` is truthy.

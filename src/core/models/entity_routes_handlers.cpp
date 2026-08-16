@@ -276,16 +276,16 @@ namespace mb {
                     [admin_entity](const MantisRequest &req, const MantisResponse &res, MantisContentReader &reader) {
                         handlePost(req, res, reader, admin_entity);
                     },
-                    {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_EDITS", true)});
+                    {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)});
         router.Patch("/api/v1/sys/admins/:id",
                      [admin_entity](MantisRequest &req, MantisResponse &res, MantisContentReader &reader) {
                          handlePatch(req, res, reader, admin_entity);
                      },
-                     {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_EDITS", true)});
+                     {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)});
         router.Delete("/api/v1/sys/admins/:id",
                       [admin_entity](const MantisRequest &req, const MantisResponse &res) {
                           handleDelete(req, res, admin_entity);
                       },
-                      {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_EDITS", true)});
+                      {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)});
     }
 }

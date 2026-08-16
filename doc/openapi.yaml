@@ -994,7 +994,7 @@ paths:
     post:
       tags: [System]
       summary: Create admin account
-      description: Blocked with 503 when `MB_DISABLE_ADMIN_EDITS` is truthy.
+      description: Blocked with 503 when `MB_DISABLE_ADMIN_MUTATIONS` is truthy.
       security:
         - bearerAuth: []
       requestBody:
@@ -1055,7 +1055,7 @@ paths:
     patch:
       tags: [System]
       summary: Update admin account
-      description: Blocked with 503 when `MB_DISABLE_ADMIN_EDITS` is truthy.
+      description: Blocked with 503 when `MB_DISABLE_ADMIN_MUTATIONS` is truthy.
       security:
         - bearerAuth: []
       parameters:
@@ -1089,7 +1089,7 @@ paths:
     delete:
       tags: [System]
       summary: Delete admin account
-      description: Blocked with 503 when `MB_DISABLE_ADMIN_EDITS` is truthy.
+      description: Blocked with 503 when `MB_DISABLE_ADMIN_MUTATIONS` is truthy.
       security:
         - bearerAuth: []
       parameters:

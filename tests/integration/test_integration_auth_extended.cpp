@@ -73,11 +73,11 @@ protected:
         client = std::make_unique<TestHttp::Client>("127.0.0.1", getPort());
         adminToken = TestHelpers::createTestAdminToken(*client, mantis());
         ASSERT_FALSE(adminToken.empty());
-        TestHelpers::setEnvVar("MB_DISABLE_ADMIN_EDITS");
+        TestHelpers::setEnvVar("MB_DISABLE_ADMIN_MUTATIONS");
     }
 
     void TearDown() override {
-        TestHelpers::setEnvVar("MB_DISABLE_ADMIN_EDITS");
+        TestHelpers::setEnvVar("MB_DISABLE_ADMIN_MUTATIONS");
         MbServerFixture::TearDown();
     }
 
@@ -343,7 +343,7 @@ TEST_F(IntegrationAuthExtendedTest, RefreshTokenSuccess) {
     EXPECT_FALSE(body["data"]["token"].get<std::string>().empty());
 }
 
-// --- MB_DISABLE_ADMIN_EDITS / envGateMiddleware ---
+// --- MB_DISABLE_ADMIN_MUTATIONS / envGateMiddleware ---
 
 TEST_F(IntegrationAdminEditsGateTest, AdminPatchAllowedWhenGateOpen) {
     const auto adminId = firstAdminId();
@@ -355,7 +355,7 @@ TEST_F(IntegrationAdminEditsGateTest, AdminPatchAllowedWhenGateOpen) {
 }
 
 TEST_F(IntegrationAdminEditsGateTest, AdminPatchBlockedWhenGateClosed) {
-    TestHelpers::setEnvVar("MB_DISABLE_ADMIN_EDITS", "true");
+    TestHelpers::setEnvVar("MB_DISABLE_ADMIN_MUTATIONS", "true");
     const auto adminId = firstAdminId();
     TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
     nlohmann::json patch = {{"email", TestConfig::getAdminEmail()}};
@@ -379,7 +379,7 @@ TEST_F(IntegrationAdminEditsGateTest, AdminCreateAllowedWhenGateOpen) {
 }
 
 TEST_F(IntegrationAdminEditsGateTest, AdminCreateBlockedWhenGateClosed) {
-    TestHelpers::setEnvVar("MB_DISABLE_ADMIN_EDITS", "true");
+    TestHelpers::setEnvVar("MB_DISABLE_ADMIN_MUTATIONS", "true");
     const std::string email = "admin_gate_closed_" + mb::generateShortId(8) + "@test.com";
     TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
     nlohmann::json body = {
@@ -394,7 +394,7 @@ TEST_F(IntegrationAdminEditsGateTest, AdminCreateBlockedWhenGateClosed) {
 }
 
 TEST_F(IntegrationAdminEditsGateTest, AdminEditsIgnoredWhenEnvNotTruthy) {
-    TestHelpers::setEnvVar("MB_DISABLE_ADMIN_EDITS", "false");
+    TestHelpers::setEnvVar("MB_DISABLE_ADMIN_MUTATIONS", "false");
     const std::string email = "admin_gate_ignored_" + mb::generateShortId(8) + "@test.com";
     TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
     nlohmann::json body = {
