@@ -47,7 +47,7 @@ namespace mb {
                              const json &field_def) {
             const auto field_type = field_def.at("type").get<std::string>();
 
-            if (field_type == "xml" || field_type == "string" || field_type == "file") {
+            if (field_type == "string" || field_type == "file") {
                 vals.set(field, value.get<std::string>());
             } else if (field_type == "double") {
                 vals.set(field, value.get<double>());

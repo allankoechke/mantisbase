@@ -145,6 +145,8 @@ TEST(EntitySchemaField, ValidFieldTypes) {
     
     EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("invalid"));
     EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("number"));
+    EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("xml"));
+    EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("blob"));
     EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType(""));
 }
 

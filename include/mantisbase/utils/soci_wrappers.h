@@ -51,7 +51,7 @@ namespace mb {
 
             // For non-null values, set the value accordingly
             const auto field_type = field.at("type").get<std::string>();
-            if (field_type == "xml" || field_type == "string" || field_type == "file") {
+            if (field_type == "string" || field_type == "file") {
                 vals.set(field_name, entity.value(field_name, ""));
             } else if (field_type == "double") {
                 vals.set(field_name, entity.value(field_name, 0.0));
@@ -68,9 +68,6 @@ namespace mb {
                 }
             } else if (field_type == "int") {
                 bindIntFieldValue(vals, field_name, entity.at(field_name), intPrecisionFromField(field));
-            } else if (field_type == "blob") {
-                // TODO implement BLOB type
-                // vals.set(field_name, entity.value(field_name, sql->empty_blob()));
             } else if (field_type == "json") {
                 vals.set(field_name, entity.value(field_name, json::object()));
             } else if (field_type == "bool") {
@@ -129,7 +126,7 @@ namespace mb {
             }
 
             // Handle type conversions
-            if (colType == "xml" || colType == "string") {
+            if (colType == "string") {
                 res_json[colName] = row.get<std::string>(i, "");
             } else if (colType == "double") {
                 res_json[colName] = row.get<double>(i);
@@ -137,9 +134,6 @@ namespace mb {
                 res_json[colName] = mb::dbDateToString(db_type, row, i);
             } else if (colType == "int") {
                 res_json[colName] = readIntFieldValue(row, i, getColumnIntPrecision(colName, entity_fields));
-            } else if (colType == "blob") {
-                // TODO ? How do we handle BLOB?
-                // j[colName] = row.get<std::string>(i);
             } else if (colType == "json" || colType == "list") {
                 res_json[colName] = row.get<json>(i);
             } else if (colType == "bool") {

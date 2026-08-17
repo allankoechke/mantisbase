@@ -367,16 +367,12 @@ namespace mb {
         if (trim(type).empty())
             throw MantisException(400, "Field type is required, none provided!");
 
-        if (type == "xml")
-            return soci::db_xml;
         if (type == "double")
             return soci::db_double;
         if (type == "date")
             return soci::db_date;
         if (type == "int")
             return intPrecisionToSociType(precision);
-        if (type == "blob")
-            return soci::db_blob;
         if (type == "bool")
             return soci::db_uint16;
         if (type == "json" || type == "string" || type == "file" || type == "files")

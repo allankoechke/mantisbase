@@ -599,12 +599,12 @@ namespace mb {
 
         if (v.is_null()) return "NULL";
 
-        if (type == "xml" || type == "string") {
+        if (type == "string") {
             return "'" + v.dump() + "'";
         }
 
         if (type == "double" || type == "int"
-            || type == "date" || type == "json" || type == "blob"
+            || type == "date" || type == "json"
             || type == "file" || type == "files") {
             return v.dump();
         }
