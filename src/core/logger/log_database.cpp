@@ -162,7 +162,7 @@ namespace mb {
             std::vector<std::string> conditions;
 
             if (!after.empty()) {
-                conditions.emplace_back("id > :after");
+                conditions.emplace_back("id < :after");
             }
 
             if (!level_filter.empty()) {
@@ -209,7 +209,7 @@ namespace mb {
                 }
             }
 
-            query += " ORDER BY id ASC LIMIT :limit";
+            query += " ORDER BY id DESC LIMIT :limit";
 
             std::lock_guard lock(m_dbMutexLock);
 
@@ -275,8 +275,25 @@ namespace mb {
                 m_cv.wait_for(lock, std::chrono::milliseconds(cleanup_interval));
             }
 
-            deleteOldLogs(5);
+            deleteOldLogs(configuredLogRetentionDays());
         }
+    }
+
+    int LogDatabase::configuredLogRetentionDays() const {
+        constexpr int kDefaultLogRetentionDays = 5;
+
+        try {
+            const auto &cfg = mApp.settings().configs();
+            if (cfg.contains("logRetentionDays") && cfg["logRetentionDays"].is_number_integer()) {
+                const int days = cfg["logRetentionDays"].get<int>();
+                if (days > 0) {
+                    return days;
+                }
+            }
+        } catch (...) {
+        }
+
+        return kDefaultLogRetentionDays;
     }
 
     void LogDatabase::deleteOldLogs(const int days) {
@@ -288,7 +305,7 @@ namespace mb {
 
             std::lock_guard lock(m_dbMutexLock);
 
-            // Calculate cutoff timestamp (5 days ago)
+            // Calculate cutoff timestamp
             const auto cutoff = std::chrono::system_clock::now() - std::chrono::hours(24 * days);
             auto cutoff_seconds = std::chrono::duration_cast<std::chrono::seconds>(
                 cutoff.time_since_epoch()).count();

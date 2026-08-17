@@ -29,7 +29,7 @@ namespace mb {
      * @brief Manages SQLite database for application logs.
      *
      * Provides methods to store logs in a separate SQLite database,
-     * with automatic cleanup of logs older than 5 days.
+     * with automatic cleanup of logs older than the configured retention period.
      */
     class LogDatabase {
     public:
@@ -94,9 +94,11 @@ namespace mb {
 
         /**
          * @brief Delete logs older than specified days.
-         * @param days Number of days to keep (default: 5)
+         * @param days Number of days to keep
          */
-        void deleteOldLogs(int days = 5);
+        void deleteOldLogs(int days);
+
+        [[nodiscard]] int configuredLogRetentionDays() const;
 
         static std::string buildMinLogWhereCondition(const std::string& level);
 

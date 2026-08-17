@@ -576,6 +576,7 @@ The settings object contains the following fields:
 | `siteDomain` | string | `"https://acme.example.com"` | Public site URL (OAuth callbacks, JWT audience) |
 | `corsAllowedOrigins` | array of strings | `["http://localhost:3000", "http://127.0.0.1:3000"]` | Browser origins allowed for cross-origin requests with credentials |
 | `maxFileSize` | integer | `10485760` | Max file upload size in bytes (10 MiB; not currently enforced) |
+| `logRetentionDays` | integer | `5` | Delete application logs older than this many days (hourly cleanup job) |
 | `allowRegistration` | boolean | `true` | Allow new user registration |
 | `emailVerificationRequired` | boolean | `false` | Require email verification on registration |
 | `sessionTimeout` | integer | `86400` | User session timeout in seconds (24 h) |

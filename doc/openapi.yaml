@@ -1885,6 +1885,10 @@ components:
           type: integer
           description: Maximum upload size in bytes
           example: 10485760
+        logRetentionDays:
+          type: integer
+          description: Delete stored application logs older than this many days
+          example: 5
         allowRegistration:
           type: boolean
         emailVerificationRequired:
@@ -1921,6 +1925,9 @@ components:
         maxFileSize:
           type: integer
           description: Maximum upload size in bytes
+        logRetentionDays:
+          type: integer
+          description: Delete stored application logs older than this many days
         allowRegistration:
           type: boolean
         emailVerificationRequired:

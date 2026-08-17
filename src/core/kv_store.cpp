@@ -15,6 +15,7 @@ namespace mb
     namespace
     {
         constexpr int kDefaultMaxFileSize = 10 * 1024 * 1024;
+        constexpr int kDefaultLogRetentionDays = 5;
 
         std::string configRowId()
         {
@@ -43,6 +44,7 @@ namespace mb
                     "http://127.0.0.1:3000"
                 })},
                 {"maxFileSize", kDefaultMaxFileSize},
+                {"logRetentionDays", kDefaultLogRetentionDays},
                 {"allowRegistration", true},
                 {"emailVerificationRequired", false},
                 {"sessionTimeout", 24 * 60 * 60},
@@ -168,6 +170,16 @@ namespace mb
                 throw MantisException(400, "maxFileSize must be a positive integer (bytes).");
             }
             m_configs["maxFileSize"] = size;
+        }
+
+        if (body.contains("logRetentionDays"))
+        {
+            const auto days = body.value("logRetentionDays", kDefaultLogRetentionDays);
+            if (!body["logRetentionDays"].is_number_integer() || days <= 0)
+            {
+                throw MantisException(400, "logRetentionDays must be a positive integer (days).");
+            }
+            m_configs["logRetentionDays"] = days;
         }
 
         if (body.contains("smtp") && body["smtp"].is_object())

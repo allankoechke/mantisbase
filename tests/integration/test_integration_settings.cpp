@@ -70,6 +70,7 @@ TEST_F(IntegrationSettingsTest, GetReturnsDefaultsForAdmin)
     EXPECT_TRUE(body["data"]["corsAllowedOrigins"].is_array());
     EXPECT_EQ(body["data"]["corsAllowedOrigins"].size(), 2u);
     EXPECT_EQ(body["data"]["maxFileSize"].get<int>(), 10 * 1024 * 1024);
+    EXPECT_EQ(body["data"]["logRetentionDays"].get<int>(), 5);
     EXPECT_TRUE(body["data"].contains("mantisVersion"));
     EXPECT_TRUE(body["data"].contains("smtp"));
 }
