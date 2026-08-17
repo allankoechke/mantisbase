@@ -2,6 +2,7 @@
 #include "mantisbase/core/models/entity.h"
 #include "mantisbase/core/models/entity_schema.h"
 #include "mantisbase/core/models/entity_schema_field.h"
+#include "mantisbase/core/models/int_precision.h"
 #include "mantisbase/core/models/access_rules.h"
 #include <mantisbase/mantis.h>
 #include "../common/test_fixture.h"
@@ -145,29 +146,70 @@ TEST_F(ModelsAppTest, EntitySchemaJSONConversion) {
 TEST(EntitySchema, IntTypeWithPrecision) {
     mb::EntitySchemaField field("count", "int");
     EXPECT_EQ(field.type(), "int");
-    EXPECT_EQ(field.precision(), 32);
+    EXPECT_EQ(field.intPrecision(), mb::IntPrecision::I32);
 
-    field.setPrecision(64);
-    EXPECT_EQ(field.precision(), 64);
+    field.setPrecision("i64");
+    EXPECT_EQ(field.intPrecision(), mb::IntPrecision::I64);
+
+    field.setPrecision("u16");
+    EXPECT_EQ(field.intPrecision(), mb::IntPrecision::U16);
 
     auto j = field.toJSON();
     EXPECT_EQ(j["type"], "int");
-    EXPECT_EQ(j["precision"], 64);
+    EXPECT_EQ(j["precision"], "u16");
 
     mb::EntitySchemaField field2(j);
     EXPECT_EQ(field2.type(), "int");
-    EXPECT_EQ(field2.precision(), 64);
+    EXPECT_EQ(field2.intPrecision(), mb::IntPrecision::U16);
 
-    EXPECT_THROW(field.setPrecision(128), mb::MantisException);
-    EXPECT_THROW(field.setPrecision(0), mb::MantisException);
+    EXPECT_THROW(field.setPrecision("u128"), mb::MantisException);
+    EXPECT_THROW(field.setPrecision("i0"), mb::MantisException);
+
+    mb::EntitySchemaField legacy_field({
+        {"name", "legacy"},
+        {"type", "int"},
+        {"precision", 64},
+    });
+    EXPECT_EQ(legacy_field.intPrecision(), mb::IntPrecision::I64);
 }
 
 TEST(EntitySchema, IntPrecisionSociTypes) {
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", 8), soci::db_int8);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", 16), soci::db_int16);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", 32), soci::db_int32);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", 64), soci::db_int64);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::I8), soci::db_int8);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::I16), soci::db_int16);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::I32), soci::db_int32);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::I64), soci::db_int64);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::U8), soci::db_uint8);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::U16), soci::db_uint16);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::U32), soci::db_uint32);
+    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::U64), soci::db_uint64);
     EXPECT_EQ(mb::EntitySchemaField::toSociType("int"), soci::db_int32);
+}
+
+TEST(EntitySchema, IntPrecisionValidation) {
+    nlohmann::json field = {
+        {"name", "qty"},
+        {"type", "int"},
+        {"precision", "u8"},
+        {"constraints", {{"min_value", 0}, {"max_value", 255}}},
+    };
+
+    EXPECT_FALSE(mb::validateIntFieldValue(10, mb::IntPrecision::U8).has_value());
+    EXPECT_TRUE(mb::validateIntFieldValue(256, mb::IntPrecision::U8).has_value());
+    EXPECT_TRUE(mb::validateIntFieldValue(-1, mb::IntPrecision::U8).has_value());
+    EXPECT_FALSE(mb::validateIntConstraintBounds(field).has_value());
+
+    field["constraints"]["max_value"] = 300;
+    EXPECT_TRUE(mb::validateIntConstraintBounds(field).has_value());
+
+    field = {
+        {"name", "delta"},
+        {"type", "int"},
+        {"precision", "i8"},
+        {"constraints", {{"min_value", -128}, {"max_value", 127}}},
+    };
+    EXPECT_FALSE(mb::validateIntFieldValue(-128, mb::IntPrecision::I8).has_value());
+    EXPECT_TRUE(mb::validateIntFieldValue(-129, mb::IntPrecision::I8).has_value());
+    EXPECT_FALSE(mb::validateIntConstraintBounds(field).has_value());
 }
 
 TEST(EntitySchema, IntTypeInFieldTypes) {

@@ -361,7 +361,8 @@ namespace mb {
         static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
 
     private:
-        static std::string getFieldType(const std::string &type, std::shared_ptr<soci::session> sql, int precision = 32);
+        static std::string getFieldType(const std::string &type, std::shared_ptr<soci::session> sql,
+                                        IntPrecision precision = IntPrecision::I32);
 
         void addFieldsIfNotExist(const std::string &type);
 

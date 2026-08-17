@@ -29,6 +29,8 @@ namespace mb {
 
         static std::optional<std::string> maximumConstraintCheck(const json &field, const json &body);
 
+        static std::optional<std::string> intPrecisionValueCheck(const json &field, const json &body);
+
         static std::optional<std::string> requiredConstraintCheck(const json &field, const json &body);
 
         static std::optional<std::string> validatorConstraintCheck(const json &field, const json &body);

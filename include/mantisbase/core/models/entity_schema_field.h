@@ -14,6 +14,7 @@
 
 #include "nlohmann/json.hpp"
 #include "soci/soci-backend.h"
+#include "mantisbase/core/models/int_precision.h"
 
 namespace mb {
     struct IndexDefinition {
@@ -76,9 +77,11 @@ namespace mb {
 
         EntitySchemaField &setType(const std::string &type);
 
-        [[nodiscard]] int precision() const;
+        [[nodiscard]] IntPrecision intPrecision() const;
 
-        EntitySchemaField &setPrecision(int precision);
+        EntitySchemaField &setIntPrecision(IntPrecision precision);
+
+        EntitySchemaField &setPrecision(const std::string &precision);
 
         /**
          * @brief Check if field is required.
@@ -223,7 +226,7 @@ namespace mb {
 
         [[nodiscard]] static soci::db_type toSociType(const std::string &type);
 
-        [[nodiscard]] static soci::db_type toSociType(const std::string &type, int precision);
+        [[nodiscard]] static soci::db_type toSociType(const std::string &type, IntPrecision precision);
 
         /**
          * @brief Validate field definition.
@@ -253,7 +256,7 @@ namespace mb {
 
     private:
         std::string m_id, m_name, m_type;
-        int m_precision = 32;
+        IntPrecision m_intPrecision = IntPrecision::I32;
         bool m_required = false, m_primaryKey = false, m_isSystem = false, m_isUnique = false;
         nlohmann::json m_constraints{}, m_foreignKey{};
     };

@@ -1,6 +1,7 @@
 #include "../../../include/mantisbase/core/models/entity.h"
 #include "../../../include/mantisbase/core/models/entity_schema.h"
 #include "../../../include/mantisbase/core/models/entity_schema_field.h"
+#include "../../../include/mantisbase/core/models/int_precision.h"
 #include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/utils.h"
 #include "../../../include/mantisbase/utils/uuidv7.h"
@@ -57,13 +58,7 @@ namespace mb {
                 ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
                 vals.set(field, tm);
             } else if (field_type == "int") {
-                const int prec = field_def.value("precision", 32);
-                switch (prec) {
-                    case 8: vals.set(field, static_cast<int8_t>(value.get<int>())); break;
-                    case 16: vals.set(field, static_cast<int16_t>(value.get<int>())); break;
-                    case 64: vals.set(field, static_cast<int64_t>(value.get<int>())); break;
-                    default: vals.set(field, static_cast<int32_t>(value.get<int>())); break;
-                }
+                bindIntFieldValue(vals, field, value, intPrecisionFromField(field_def));
             } else if (field_type == "bool") {
                 vals.set(field, value.get<bool>());
             } else if (field_type == "json") {
