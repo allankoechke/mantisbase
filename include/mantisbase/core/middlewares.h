@@ -18,7 +18,8 @@ namespace mb {
     /**
      * @brief Extract JWT or API key from the Authorization header.
      *
-     * Parses `Authorization: Bearer <token>`. Tokens starting with `mb_sk_`
+     * Parses `Authorization: Bearer <token>` or the `mb_token` HttpOnly cookie.
+     * Bearer is preferred when both are present. Tokens starting with `mb_sk_`
      * are treated as API keys and resolved through @ref ApiKeyManager; JWTs are
      * verified on later middleware. Sets `auth` and `verification` request
      * attributes consumed by `requireEntityAuth()` and access-rule checks.

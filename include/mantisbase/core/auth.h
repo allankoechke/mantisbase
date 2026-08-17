@@ -17,6 +17,9 @@
 
 namespace mb
 {
+    /// HttpOnly cookie name used for JWT session tokens on login/refresh responses.
+    inline constexpr const char kAuthTokenCookieName[] = "mb_token";
+
     /**
      * @brief JWT token creation and verification utilities.
      *
@@ -67,6 +70,9 @@ namespace mb
          * @endcode
          */
         std::string createToken(const json& claims_params, int timeout = -1) const;
+
+        /** Default session lifetime in seconds for an entity (or @p timeout when positive). */
+        [[nodiscard]] int sessionTimeoutSeconds(const std::string &entity_name, int timeout = -1) const;
 
         json verifyToken(const std::string& token) const;
 

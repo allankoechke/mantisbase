@@ -16,18 +16,26 @@ namespace mb {
 
     ApiKeyManager & Auth::apiKey() const { return *m_apiKeyManager; }
 
+    int Auth::sessionTimeoutSeconds(const std::string &entity_name, const int timeout) const {
+        if (timeout > 0) {
+            return timeout;
+        }
+
+        const auto &config = mApp.settings().configs();
+        return entity_name == "mb_admins"
+                   ? config.value("adminSessionTimeout", 1 * 60 * 60)
+                   : config.value("sessionTimeout", 24 * 60 * 60);
+    }
+
     std::string Auth::createToken(const json &claims_params, const int timeout) const {
         const auto secretKey = mApp.jwtSecretKey();
         if (claims_params.empty() || !claims_params.contains("id") || !claims_params.contains("entity")) {
             throw std::invalid_argument("Missing `id` and/or `entity` fields in token claims.");
         }
 
+        const auto entity_name = claims_params.at("entity").get<std::string>();
+        const int expiry_t = sessionTimeoutSeconds(entity_name, timeout);
         const auto &config = mApp.settings().configs();
-        const int expiry_t = timeout > 0
-                                 ? timeout
-                                 : claims_params.at("entity").get<std::string>() == "mb_admins"
-                                       ? config.value("adminSessionTimeout", 1 * 60 * 60)
-                                       : config.value("sessionTimeout", 24 * 60 * 60);
 
         // Create a session record
         auto session_id = generateTimeBasedId();

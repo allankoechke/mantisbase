@@ -241,9 +241,9 @@ namespace mb {
                 auth["user"] = nullptr;
                 auth["auth_method"] = nullptr;
 
-                if (req.hasHeader("Authorization")) {
-                    const auto token = trim(req.getBearerTokenAuth());
+                const auto token = trim(req.resolveAuthToken());
 
+                if (!token.empty()) {
                     if (token.starts_with("mb_sk_")) {
                         // API key authentication
                         const auto key_hash = ApiKeyManager::hashApiKey(token);

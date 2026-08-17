@@ -268,6 +268,7 @@ namespace mb {
                 auto token = req.mbApp().auth().createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
                 user.erase("password");
+                res.setAuthTokenCookie(token, req.mbApp().auth().sessionTimeoutSeconds(entity.name()));
                 res.sendJSON(200, {
                                  {"status", 200},
                                  {"data", {{"token", token}, {"user", user}}},
@@ -350,6 +351,7 @@ namespace mb {
                 auto token = req.mbApp().auth().createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
                 user.erase("password");
+                res.setAuthTokenCookie(token, req.mbApp().auth().sessionTimeoutSeconds(entity.name()));
                 res.sendJSON(200, {
                                  {"status", 200},
                                  {"data", {{"token", token}, {"user", user}}},
@@ -408,9 +410,11 @@ namespace mb {
                 json user = user_opt.has_value() ? user_opt.value() : json::object();
                 user.erase("password");
 
+                const auto new_token = result["token"].get<std::string>();
+                res.setAuthTokenCookie(new_token, req.mbApp().auth().sessionTimeoutSeconds(entity_name));
                 res.sendJSON(200, {
                                  {"status", 200},
-                                 {"data", {{"token", result["token"]}, {"user", user}}},
+                                 {"data", {{"token", new_token}, {"user", user}}},
                                  {"error", ""}
                              });
             } catch (const MantisException &e) {
@@ -454,13 +458,14 @@ namespace mb {
                                  });
                     return;
                 }
-                if (req.mbApp().auth().deleteSession(session_id))
+                if (req.mbApp().auth().deleteSession(session_id)) {
+                    res.clearAuthTokenCookie();
                     res.sendJSON(200, {
                                      {"status", 200},
                                      {"data", {{"logged_out", true}}},
                                      {"error", ""}
                                  });
-                else
+                } else
                     res.sendJSON(500, {
                                      {"status", 500},
                                      {"data", nullptr},

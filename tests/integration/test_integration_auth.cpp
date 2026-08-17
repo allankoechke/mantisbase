@@ -150,6 +150,29 @@ TEST_F(IntegrationAuthTest, LoginWithNonAuthEntity) {
     client->Delete("/api/v1/schemas/test_products", headers);
 }
 
+TEST_F(IntegrationAuthTest, CookieAuthAcceptedWithoutBearer) {
+    nlohmann::json login = {
+        {"identity", "testuser@example.com"},
+        {"password", TestConfig::getTestPassword()}
+    };
+
+    auto loginRes = client->Post("/api/v1/auth/test_users/login",
+                                 login.dump(), "application/json");
+    ASSERT_TRUE(loginRes != nullptr);
+    ASSERT_EQ(loginRes->status, 200);
+
+    const auto loginResponse = nlohmann::json::parse(loginRes->body);
+    const std::string token = loginResponse["data"]["token"].get<std::string>();
+
+    TestHttp::Headers cookieHeader = {{"Cookie", std::string("mb_token=") + token}};
+    auto verifyRes = client->Get("/api/v1/auth/verify", cookieHeader);
+    ASSERT_TRUE(verifyRes != nullptr);
+    EXPECT_EQ(verifyRes->status, 200);
+
+    const auto verifyBody = nlohmann::json::parse(verifyRes->body);
+    EXPECT_EQ(verifyBody["data"]["status"].get<std::string>(), "OK");
+}
+
 TEST_F(IntegrationAuthTest, RefreshToken) {
     nlohmann::json login = {
         {"identity", "testuser@example.com"},

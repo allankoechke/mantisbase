@@ -1,5 +1,7 @@
 #include "../../include/mantisbase/core/http.h"
+#include "../../include/mantisbase/core/auth.h"
 #include "../../include/mantisbase/mantisbase.h"
+#include <drogon/Cookie.h>
 #include <fstream>
 
 namespace mb {
@@ -71,6 +73,21 @@ namespace mb {
 
     void MantisResponse::setHeader(const std::string &key, const std::string &val) const {
         m_res->addHeader(key, val);
+    }
+
+    void MantisResponse::setAuthTokenCookie(const std::string &token, const int max_age_seconds) const {
+        drogon::Cookie cookie(kAuthTokenCookieName, token);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(max_age_seconds);
+        m_res->addCookie(std::move(cookie));
+    }
+
+    void MantisResponse::clearAuthTokenCookie() const {
+        drogon::Cookie cookie(kAuthTokenCookieName, "");
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        m_res->addCookie(std::move(cookie));
     }
 
     void MantisResponse::setRedirect(const std::string &url, int status) const {
