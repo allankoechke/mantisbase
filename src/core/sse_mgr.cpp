@@ -95,7 +95,7 @@ namespace mb {
                 resp->addHeader("Cache-Control", "no-cache");
                 resp->addHeader("Connection", "keep-alive");
                 resp->addHeader("X-Accel-Buffering", "no");
-                resp->addHeader("Access-Control-Allow-Origin", "*");
+                mbApp().router().applyCorsHeaders(req, resp);
                 callback(resp);
             },
             {drogon::Get});

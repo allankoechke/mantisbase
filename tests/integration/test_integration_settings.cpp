@@ -67,6 +67,8 @@ TEST_F(IntegrationSettingsTest, GetReturnsDefaultsForAdmin)
     EXPECT_TRUE(body.contains("data"));
     EXPECT_EQ(body["data"]["orgName"].get<std::string>(), "ACME Corp");
     EXPECT_EQ(body["data"]["siteDomain"].get<std::string>(), "https://acme.example.com");
+    EXPECT_TRUE(body["data"]["corsAllowedOrigins"].is_array());
+    EXPECT_EQ(body["data"]["corsAllowedOrigins"].size(), 2u);
     EXPECT_EQ(body["data"]["maxFileSize"].get<int>(), 10 * 1024 * 1024);
     EXPECT_TRUE(body["data"].contains("mantisVersion"));
     EXPECT_TRUE(body["data"].contains("smtp"));

@@ -3,6 +3,7 @@
 #include "../../include/mantisbase/core/http.h"
 #include "../../include/mantisbase/core/auth.h"
 #include "../../include/mantisbase/core/models/validators.h"
+#include "../../include/mantisbase/utils/utils.h"
 #include "drogon/drogon_callbacks.h"
 
 namespace mb {
@@ -42,22 +43,86 @@ namespace mb {
         };
     }
 
+    void Router::reloadCorsOrigins() {
+        auto origins = std::make_shared<std::set<std::string>>();
+
+        const auto &cfg = mbApp().settings().configs();
+        if (cfg.contains("corsAllowedOrigins") && cfg["corsAllowedOrigins"].is_array()) {
+            for (const auto &item : cfg["corsAllowedOrigins"]) {
+                if (item.is_string()) {
+                    const auto value = trim(item.get<std::string>());
+                    if (!value.empty()) {
+                        origins->insert(value);
+                    }
+                }
+            }
+        }
+
+        if (const auto raw = getEnvOrDefault("MB_CORS_ORIGINS", ""); !raw.empty()) {
+            for (const auto &part : splitString(raw, ",")) {
+                const auto value = trim(part);
+                if (!value.empty()) {
+                    origins->insert(value);
+                }
+            }
+        }
+
+        m_corsAllowedOrigins.store(origins);
+
+        logger().info("CORS", fmt::format("Loaded {} allowed origin(s)", origins->size()));
+    }
+
+    bool Router::isOriginAllowed(const std::string &origin) const {
+        const auto allowed = m_corsAllowedOrigins.load();
+        return allowed && allowed->count(origin) > 0;
+    }
+
+    void Router::applyCorsHeaders(const drogon::HttpRequestPtr &req,
+                                  const drogon::HttpResponsePtr &resp) const {
+        const auto &origin = req->getHeader("Origin");
+        if (origin.empty() || !isOriginAllowed(origin)) {
+            return;
+        }
+
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        resp->addHeader("Access-Control-Allow-Credentials", "true");
+    }
+
     std::function<void(const drogon::HttpRequestPtr &,
                        drogon::AdviceCallback &&,
                        drogon::AdviceChainCallback &&
     )>
     Router::corsPreRoutingAdvice() {
-        return [](const drogon::HttpRequestPtr &req,
-                  drogon::AdviceCallback &&callback,
-                  drogon::AdviceChainCallback &&chainCallback) {
-            // Handle OPTIONS preflight
+        return [this](const drogon::HttpRequestPtr &req,
+                      drogon::AdviceCallback &&callback,
+                      drogon::AdviceChainCallback &&chainCallback) {
             if (req->method() == drogon::Options) {
                 const auto resp = drogon::HttpResponse::newHttpResponse();
                 resp->setStatusCode(drogon::k204NoContent);
-                resp->addHeader("Access-Control-Allow-Origin", "*");
-                resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-                resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-                resp->addHeader("Access-Control-Max-Age", "86400");
+
+                applyCorsHeaders(req, resp);
+
+                const auto &origin = req->getHeader("Origin");
+                if (!origin.empty() && isOriginAllowed(origin)) {
+                    const auto &requestMethod = req->getHeader("Access-Control-Request-Method");
+                    if (!requestMethod.empty()) {
+                        resp->addHeader("Access-Control-Allow-Methods", requestMethod);
+                    } else {
+                        resp->addHeader("Access-Control-Allow-Methods",
+                                        "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+                    }
+
+                    const auto &requestHeaders = req->getHeader("Access-Control-Request-Headers");
+                    if (!requestHeaders.empty()) {
+                        resp->addHeader("Access-Control-Allow-Headers", requestHeaders);
+                    } else {
+                        resp->addHeader("Access-Control-Allow-Headers",
+                                        "Content-Type, Authorization, X-Requested-With");
+                    }
+
+                    resp->addHeader("Access-Control-Max-Age", "86400");
+                }
+
                 callback(resp);
                 return;
             }
@@ -68,11 +133,9 @@ namespace mb {
     std::function<void(const drogon::HttpRequestPtr &,
                        const drogon::HttpResponsePtr &resp)>
     Router::corsPostHandlingAdvice() {
-        return [](const drogon::HttpRequestPtr &,
-                  const drogon::HttpResponsePtr &resp) {
-            resp->addHeader("Access-Control-Allow-Origin", "*");
-            resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-            resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+        return [this](const drogon::HttpRequestPtr &req,
+                      const drogon::HttpResponsePtr &resp) {
+            applyCorsHeaders(req, resp);
         };
     }
 

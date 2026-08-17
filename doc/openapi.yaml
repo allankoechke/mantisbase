@@ -1575,7 +1575,7 @@ components:
       in: query
       schema:
         type: string
-      description: URL-encoded JSON object of `{field: value}` equality filters.
+      description: "URL-encoded JSON object of `{field: value}` equality filters."
 
   responses:
     BadRequest:
@@ -1861,6 +1861,18 @@ components:
           type: string
           format: uri
           description: Public site URL (OAuth callbacks, links, JWT audience)
+        corsAllowedOrigins:
+          type: array
+          description: >-
+            Browser origins allowed for cross-origin requests with credentials.
+            Merged at runtime with comma-separated values in the MB_CORS_ORIGINS
+            environment variable.
+          items:
+            type: string
+            format: uri
+          example:
+            - http://localhost:3000
+            - http://127.0.0.1:3000
         maxFileSize:
           type: integer
           description: Maximum upload size in bytes
@@ -1893,6 +1905,11 @@ components:
           type: string
         siteDomain:
           type: string
+        corsAllowedOrigins:
+          type: array
+          items:
+            type: string
+            format: uri
         maxFileSize:
           type: integer
           description: Maximum upload size in bytes

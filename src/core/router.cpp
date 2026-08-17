@@ -36,7 +36,8 @@ CMRC_DECLARE(mantis);
 namespace mb {
     Router::Router(const MantisBase &app)
         : IMantisBase(app),
-          m_sseMgr(std::make_unique<SSEMgr>(app)) {
+          m_sseMgr(std::make_unique<SSEMgr>(app)),
+          m_corsAllowedOrigins(std::make_shared<const std::set<std::string>>()) {
         // Add global middlewares to work across all routes
         m_preRoutingMiddlewares.push_back(getAuthToken());
         m_preRoutingMiddlewares.push_back(hydrateContextData());
@@ -115,6 +116,8 @@ namespace mb {
 
             // Register logger func for all requests
             drogon::app().registerPostHandlingAdvice(loggerPostHandlingAdvice());
+
+            reloadCorsOrigins();
 
             // Register CORS pre-routing advice
             drogon::app().registerPreRoutingAdvice(corsPreRoutingAdvice());

@@ -38,6 +38,10 @@ namespace mb
             return {
                 {"orgName", "ACME Corp"},
                 {"siteDomain", "https://acme.example.com"},
+                {"corsAllowedOrigins", json::array({
+                    "http://localhost:3000",
+                    "http://127.0.0.1:3000"
+                })},
                 {"maxFileSize", kDefaultMaxFileSize},
                 {"allowRegistration", true},
                 {"emailVerificationRequired", false},
@@ -188,6 +192,33 @@ namespace mb
                 smtp[key] = value;
             }
         }
+
+        if (body.contains("corsAllowedOrigins"))
+        {
+            if (!body["corsAllowedOrigins"].is_array())
+            {
+                throw MantisException(400, "corsAllowedOrigins must be an array of origin strings.");
+            }
+
+            json validated = json::array();
+            for (const auto &item : body["corsAllowedOrigins"])
+            {
+                if (!item.is_string())
+                {
+                    throw MantisException(400, "corsAllowedOrigins must contain only strings.");
+                }
+
+                const auto value = trim(item.get<std::string>());
+                if (value.empty())
+                {
+                    throw MantisException(400, "corsAllowedOrigins entries must be non-empty strings.");
+                }
+
+                validated.push_back(value);
+            }
+
+            m_configs["corsAllowedOrigins"] = validated;
+        }
     }
 
     void KeyValStore::setupConfigRoutes()
@@ -250,6 +281,8 @@ namespace mb
 
                     *sql << "UPDATE mb_store SET value = :value, updated = :updated WHERE id = :id",
                         soci::use(m_configs), soci::use(updated_tm), soci::use(id);
+
+                    mApp.router().reloadCorsOrigins();
 
                     auto data = redactForResponse(m_configs);
                     data["mantisVersion"] = MantisBase::appVersion();

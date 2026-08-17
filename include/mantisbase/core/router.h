@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <set>
 #include <atomic>
 #include <shared_mutex>
 #include <nlohmann/json.hpp>
@@ -48,6 +49,13 @@ namespace mb {
 
         bool isRunning() const;
 
+        /** Reload allowed CORS origins from settings and MB_CORS_ORIGINS. */
+        void reloadCorsOrigins();
+
+        /** Add CORS headers when the request Origin is in the allowlist. */
+        void applyCorsHeaders(const drogon::HttpRequestPtr &req,
+                              const drogon::HttpResponsePtr &resp) const;
+
         const std::vector<MiddlewareFn> &preRoutingMiddlewares() const { return m_preRoutingMiddlewares; }
 
     private:
@@ -78,15 +86,17 @@ namespace mb {
         ///> Returns handler logger func for all requests before they return
         std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)> loggerPostHandlingAdvice() const;
 
+        bool isOriginAllowed(const std::string &origin) const;
+
         ///> Register CORS pre-routing advice
-        static std::function<void(const drogon::HttpRequestPtr &,
-                                  drogon::AdviceCallback &&,
-                                  drogon::AdviceChainCallback &&
+        std::function<void(const drogon::HttpRequestPtr &,
+                           drogon::AdviceCallback &&,
+                           drogon::AdviceChainCallback &&
         )> corsPreRoutingAdvice();
 
         ///> Register post-routing advice for CORS headers on all responses
-        static std::function<void(const drogon::HttpRequestPtr &,
-                                  const drogon::HttpResponsePtr &resp)> corsPostHandlingAdvice();
+        std::function<void(const drogon::HttpRequestPtr &,
+                           const drogon::HttpResponsePtr &resp)> corsPostHandlingAdvice();
 
         ///> Get default 404 handler
         static drogon::HttpResponsePtr default404Response();
@@ -114,6 +124,8 @@ namespace mb {
         mutable std::shared_mutex m_entityMapMutex;
 
         Snowflake<1534832906275L> m_sfId;
+
+        std::atomic<std::shared_ptr<const std::set<std::string>>> m_corsAllowedOrigins;
     };
 } // mb
 
