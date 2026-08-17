@@ -83,8 +83,8 @@ namespace mb {
         ///> Sync Advice to return handler that generates unique IDs per request
         const std::function<drogon::HttpResponsePtr(const drogon::HttpRequestPtr &)> reqIdSyncAdvice();
 
-        ///> Returns handler logger func for all requests before they return
-        std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)> loggerPostHandlingAdvice() const;
+        ///> Returns handler logger func for all requests before they are sent
+        std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)> loggerPreSendingAdvice() const;
 
         bool isOriginAllowed(const std::string &origin) const;
 
@@ -94,9 +94,9 @@ namespace mb {
                            drogon::AdviceChainCallback &&
         )> corsPreRoutingAdvice();
 
-        ///> Register post-routing advice for CORS headers on all responses
+        ///> Register pre-sending advice for CORS headers on all responses
         std::function<void(const drogon::HttpRequestPtr &,
-                           const drogon::HttpResponsePtr &resp)> corsPostHandlingAdvice();
+                           const drogon::HttpResponsePtr &resp)> corsPreSendingAdvice();
 
         ///> Get default 404 handler
         static drogon::HttpResponsePtr default404Response();

@@ -114,16 +114,16 @@ namespace mb {
             // Register hook to generate request IDs
             drogon::app().registerSyncAdvice(reqIdSyncAdvice());
 
-            // Register logger func for all requests
-            drogon::app().registerPostHandlingAdvice(loggerPostHandlingAdvice());
+            // Register logger func for all responses (including 404/static)
+            drogon::app().registerPreSendingAdvice(loggerPreSendingAdvice());
 
             reloadCorsOrigins();
 
             // Register CORS pre-routing advice
             drogon::app().registerPreRoutingAdvice(corsPreRoutingAdvice());
 
-            // Register post-routing advice for CORS headers on all responses
-            drogon::app().registerPostHandlingAdvice(corsPostHandlingAdvice());
+            // Register pre-sending advice for CORS headers on all responses
+            drogon::app().registerPreSendingAdvice(corsPreSendingAdvice());
 
             // Register default 404 handler
             drogon::app().setCustom404Page(default404Response());

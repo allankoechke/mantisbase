@@ -19,7 +19,7 @@ namespace mb {
     }
 
     std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)>
-    Router::loggerPostHandlingAdvice() const {
+    Router::loggerPreSendingAdvice() const {
         return [this](const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp) {
             const auto start = req->creationDate();
             const auto end = trantor::Date::now();
@@ -132,7 +132,7 @@ namespace mb {
 
     std::function<void(const drogon::HttpRequestPtr &,
                        const drogon::HttpResponsePtr &resp)>
-    Router::corsPostHandlingAdvice() {
+    Router::corsPreSendingAdvice() {
         return [this](const drogon::HttpRequestPtr &req,
                       const drogon::HttpResponsePtr &resp) {
             applyCorsHeaders(req, resp);
