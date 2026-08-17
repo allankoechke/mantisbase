@@ -272,7 +272,11 @@ namespace mb {
                     [admin_entity](const MantisRequest &req, const MantisResponse &res, MantisContentReader &reader) {
                         handlePost(req, res, reader, admin_entity);
                     },
-                    {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)});
+                    {
+                        requireAdminAuth(),
+                        settingsFeatureGate("disableAdminRegistration"),
+                        envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)
+                    });
         router.Patch("/api/v1/sys/admins/:id",
                      [admin_entity](MantisRequest &req, MantisResponse &res, MantisContentReader &reader) {
                          handlePatch(req, res, reader, admin_entity);

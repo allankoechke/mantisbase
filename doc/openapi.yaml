@@ -1889,8 +1889,21 @@ components:
           type: integer
           description: Delete stored application logs older than this many days
           example: 5
-        allowRegistration:
+        disableAdminRegistration:
           type: boolean
+          description: >-
+            When true, disables creating new admin accounts via
+            POST /api/v1/sys/admins and POST /api/v1/sys/admins/setup (HTTP 503).
+            When false or unset, admin API registration is allowed.
+            Does not affect the mantisbase admins CLI.
+          default: false
+        disableSchemaMutations:
+          type: boolean
+          description: >-
+            When true, disables schema mutations via the API
+            (POST/PATCH/DELETE /api/v1/schemas/*) with HTTP 503.
+            GET schema endpoints remain available. Does not affect mantisbase schema CLI.
+          default: false
         emailVerificationRequired:
           type: boolean
         sessionTimeout:
@@ -1928,7 +1941,9 @@ components:
         logRetentionDays:
           type: integer
           description: Delete stored application logs older than this many days
-        allowRegistration:
+        disableAdminRegistration:
+          type: boolean
+        disableSchemaMutations:
           type: boolean
         emailVerificationRequired:
           type: boolean

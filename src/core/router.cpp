@@ -271,13 +271,22 @@ namespace mb {
 
     void Router::registerSchemaRoutes() {
         const Middlewares adminAuth = {requireAdminAuth()};
-        const Middlewares schemaItemMiddleware = {requireAdminAuth(), resolveSchema()};
+        const Middlewares schemaMutateMiddleware = {
+            requireAdminAuth(),
+            settingsFeatureGate("disableSchemaMutations")
+        };
+        const Middlewares schemaItemMutateMiddleware = {
+            requireAdminAuth(),
+            resolveSchema(),
+            settingsFeatureGate("disableSchemaMutations")
+        };
+        const Middlewares schemaItemReadMiddleware = {requireAdminAuth(), resolveSchema()};
 
         Get("/api/v1/schemas", schemaGetManyHandler(), adminAuth);
-        Post("/api/v1/schemas", schemaPostHandler(), adminAuth);
-        Get("/api/v1/schemas/:schema_name_or_id", schemaGetOneHandler(), schemaItemMiddleware);
-        Patch("/api/v1/schemas/:schema_name_or_id", schemaPatchHandler(), schemaItemMiddleware);
-        Delete("/api/v1/schemas/:schema_name_or_id", schemaDeleteHandler(), schemaItemMiddleware);
+        Post("/api/v1/schemas", schemaPostHandler(), schemaMutateMiddleware);
+        Get("/api/v1/schemas/:schema_name_or_id", schemaGetOneHandler(), schemaItemReadMiddleware);
+        Patch("/api/v1/schemas/:schema_name_or_id", schemaPatchHandler(), schemaItemMutateMiddleware);
+        Delete("/api/v1/schemas/:schema_name_or_id", schemaDeleteHandler(), schemaItemMutateMiddleware);
     }
 
     void Router::registerEntityRoutes() {
@@ -314,7 +323,8 @@ namespace mb {
         router.Post("/api/v1/sys/admins/login", handleAdminLogin(), {rateLimit(5, 60, false)});
         router.Post("/api/v1/sys/admins/refresh", handleAuthRefresh());
         router.Post("/api/v1/sys/admins/logout", handleAuthLogout());
-        router.Post("/api/v1/sys/admins/setup", handleSetupAdmin(), {rateLimit(3, 3600, false)});
+        router.Post("/api/v1/sys/admins/setup", handleSetupAdmin(),
+                    {settingsFeatureGate("disableAdminRegistration"), rateLimit(3, 3600, false)});
 
         // /api/v1/auth/<entity>/*
         registerAuthRoutes();

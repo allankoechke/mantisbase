@@ -577,7 +577,8 @@ The settings object contains the following fields:
 | `corsAllowedOrigins` | array of strings | `["http://localhost:3000", "http://127.0.0.1:3000"]` | Browser origins allowed for cross-origin requests with credentials |
 | `maxFileSize` | integer | `10485760` | Max file upload size in bytes (10 MiB; not currently enforced) |
 | `logRetentionDays` | integer | `5` | Delete application logs older than this many days (hourly cleanup job) |
-| `allowRegistration` | boolean | `true` | Allow new user registration |
+| `disableAdminRegistration` | boolean | `false` | When **true**, blocks creating new admin accounts via the API (`POST /api/v1/sys/admins`, `POST /api/v1/sys/admins/setup`) with **503**. When false or unset, admin API registration is allowed. Does not affect `mantisbase admins --add`. |
+| `disableSchemaMutations` | boolean | `false` | When **true**, blocks schema mutations via the API (`POST`, `PATCH`, `DELETE` on `/api/v1/schemas/*`) with **503**. `GET` remains available. Does not affect `mantisbase schema` CLI commands. |
 | `emailVerificationRequired` | boolean | `false` | Require email verification on registration |
 | `sessionTimeout` | integer | `86400` | User session timeout in seconds (24 h) |
 | `adminSessionTimeout` | integer | `3600` | Admin session timeout in seconds (1 h) |

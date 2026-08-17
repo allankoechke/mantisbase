@@ -61,7 +61,7 @@ namespace mb {
                           const std::string &label, const json &permissions = json::array(),
                           const std::string &expires_at = "") const;
 
-        /** List key metadata for a user (never includes raw secrets). */
+        /** List key metadata for a user/entity (never includes raw secrets). */
         [[nodiscard]] json list(const std::string &entity_name, const std::string &user_id) const;
 
         [[nodiscard]] bool revoke(const std::string &key_id, const std::string &entity_name,

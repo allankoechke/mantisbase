@@ -45,7 +45,8 @@ namespace mb
                 })},
                 {"maxFileSize", kDefaultMaxFileSize},
                 {"logRetentionDays", kDefaultLogRetentionDays},
-                {"allowRegistration", true},
+                {"disableAdminRegistration", false},
+                {"disableSchemaMutations", false},
                 {"emailVerificationRequired", false},
                 {"sessionTimeout", 24 * 60 * 60},
                 {"adminSessionTimeout", 1 * 60 * 60},
@@ -155,7 +156,8 @@ namespace mb
 
         merge_scalar("orgName", std::string{});
         merge_scalar("siteDomain", std::string{});
-        merge_scalar("allowRegistration", false);
+        merge_scalar("disableAdminRegistration", false);
+        merge_scalar("disableSchemaMutations", false);
         merge_scalar("emailVerificationRequired", false);
         merge_scalar("sessionTimeout", 24 * 60 * 60);
         merge_scalar("adminSessionTimeout", 1 * 60 * 60);

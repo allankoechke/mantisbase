@@ -578,6 +578,22 @@ namespace mb {
         };
     }
 
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> settingsFeatureGate(
+        const std::string &setting_key) {
+        return [setting_key](const MantisRequest &req, const MantisResponse &res) {
+            if (!req.mbApp().settings().configs().value(setting_key, false)) {
+                return HandlerResponse::Unhandled;
+            }
+
+            res.sendJSON(503, {
+                             {"data", json::object()},
+                             {"status", 503},
+                             {"error", "This feature has been disabled."}
+                         });
+            return HandlerResponse::Handled;
+        };
+    }
+
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
         const std::string &entity_name) {
         return [entity_name](MantisRequest &req, MantisResponse &res) {

@@ -131,6 +131,18 @@ namespace mb {
         const std::string &env_var, bool block_when_truthy);
 
     /**
+     * @brief Block the request when an app-settings flag is truthy.
+     *
+     * Reads @p setting_key from `settings().configs()` at request time (default `false`).
+     * When the value is truthy per `strToBool`, responds with HTTP **503** and stops the chain.
+     *
+     * Used for production safety toggles such as `allowRegistration` (when true, blocks admin
+     * API signup) and `disableSchemaMutations` (when true, blocks schema POST/PATCH/DELETE).
+     */
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> settingsFeatureGate(
+        const std::string &setting_key);
+
+    /**
      * @brief Require admin OR entity authentication.
      *
      * Requires a valid JWT or API key. Allows `mb_admins` or users whose

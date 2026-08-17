@@ -2,6 +2,7 @@
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
 #include "../common/test_http_client.h"
+#include "../../include/mantisbase/utils/utils.h"
 
 #include <gtest/gtest.h>
 
@@ -107,6 +108,70 @@ TEST_F(IntegrationSettingsTest, PatchRejectsInvalidMaxFileSize)
     auto res = client->Patch("/api/v1/sys/settings/config", headers, patch.dump(), "application/json");
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 400);
+}
+
+TEST_F(IntegrationSettingsTest, AdminCreateBlockedWhenRegistrationDisabled)
+{
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+
+    auto disableRes = client->Patch("/api/v1/sys/settings/config", headers,
+                                    nlohmann::json{{"disableAdminRegistration", true}}.dump(),
+                                    "application/json");
+    ASSERT_TRUE(disableRes != nullptr);
+    ASSERT_EQ(disableRes->status, 200);
+
+    const std::string email = "admin_reg_blocked_" + mb::generateShortId(8) + "@test.com";
+    nlohmann::json body = {
+        {"email", email},
+        {"password", TestConfig::getTestPassword()}
+    };
+    auto createRes = client->Post("/api/v1/sys/admins", headers, body.dump(), "application/json");
+    ASSERT_TRUE(createRes != nullptr);
+    EXPECT_EQ(createRes->status, 503);
+    EXPECT_EQ(parseBody(*createRes)["error"].get<std::string>(), "This feature has been disabled.");
+
+    auto enableRes = client->Patch("/api/v1/sys/settings/config", headers,
+                                   nlohmann::json{{"disableAdminRegistration", false}}.dump(),
+                                   "application/json");
+    ASSERT_TRUE(enableRes != nullptr);
+    EXPECT_EQ(enableRes->status, 200);
+}
+
+TEST_F(IntegrationSettingsTest, SchemaMutationsBlockedWhenDisabled)
+{
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+
+    auto disableRes = client->Patch("/api/v1/sys/settings/config", headers,
+                                    nlohmann::json{{"disableSchemaMutations", true}}.dump(),
+                                    "application/json");
+    ASSERT_TRUE(disableRes != nullptr);
+    ASSERT_EQ(disableRes->status, 200);
+
+    nlohmann::json schema = {
+        {"name", "schema_gate_test"},
+        {"type", "base"},
+        {"list", {{"mode", "public"}}},
+        {"get", {{"mode", "public"}}},
+        {"add", {{"mode", "public"}}},
+        {"update", {{"mode", "public"}}},
+        {"delete", {{"mode", ""}}},
+        {"fields", nlohmann::json::array({{{"name", "title"}, {"type", "string"}}})}
+    };
+
+    auto createRes = client->Post("/api/v1/schemas", headers, schema.dump(), "application/json");
+    ASSERT_TRUE(createRes != nullptr);
+    EXPECT_EQ(createRes->status, 503);
+    EXPECT_EQ(parseBody(*createRes)["error"].get<std::string>(), "This feature has been disabled.");
+
+    auto listRes = client->Get("/api/v1/schemas", headers);
+    ASSERT_TRUE(listRes != nullptr);
+    EXPECT_EQ(listRes->status, 200);
+
+    auto enableRes = client->Patch("/api/v1/sys/settings/config", headers,
+                                   nlohmann::json{{"disableSchemaMutations", false}}.dump(),
+                                   "application/json");
+    ASSERT_TRUE(enableRes != nullptr);
+    EXPECT_EQ(enableRes->status, 200);
 }
 
 TEST_F(IntegrationSettingsGateTest, PatchAllowedWhenGateOpen)
