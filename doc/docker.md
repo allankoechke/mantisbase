@@ -87,7 +87,9 @@ You can configure MantisBase using environment variables or by mounting a config
 | `MB_OAUTH_ENCRYPTION_KEY` | Encryption key for OAuth client secrets (32 chars; falls back to `MB_JWT_SECRET` padded to 32) | — |
 | `MB_REALTIME_SSE` | Set to `"false"` to disable the SSE realtime endpoint (returns 503) | enabled |
 | `MB_REALTIME_WS` | Set to `"false"` to disable the WebSocket realtime endpoint | enabled |
+| `MB_CORS_ORIGINS` | Comma-separated browser origins allowed for cross-origin API requests with credentials (merged with `corsAllowedOrigins` from app settings). Example: `http://localhost:3000,https://app.example.com` | — |
 | `MB_DISABLE_ADMIN_MUTATIONS` | Set to `true`, `1`, `on`, or `yes` to block admin account create/update/delete via the API (returns **503**). Unset or any other value: edits allowed. | unset (edits allowed) |
+| `MB_DISABLE_CONFIG_MUTATIONS` | Set to `true`, `1`, `on`, or `yes` to block `PATCH /api/v1/sys/settings/config` (returns **503**) | unset (edits allowed) |
 
 Database connection is configured via command-line arguments or JSON config (e.g. `--db postgresql --db_url "..."`).
 

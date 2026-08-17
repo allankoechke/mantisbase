@@ -566,7 +566,7 @@ Requires **admin authentication** for all settings endpoints.
 | GET | `/api/v1/sys/settings/config` | Get application settings |
 | PATCH | `/api/v1/sys/settings/config` | Update application settings |
 
-PATCH returns **503** when `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value.
+PATCH returns **503** when `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value. A successful PATCH reloads the CORS allowlist immediately (no server restart required).
 
 The settings object contains the following fields:
 
@@ -574,6 +574,7 @@ The settings object contains the following fields:
 |-------|------|---------|-------------|
 | `orgName` | string | `"ACME Corp"` | Organization display name |
 | `siteDomain` | string | `"https://acme.example.com"` | Public site URL (OAuth callbacks, JWT audience) |
+| `corsAllowedOrigins` | array of strings | `["http://localhost:3000", "http://127.0.0.1:3000"]` | Browser origins allowed for cross-origin requests with credentials |
 | `maxFileSize` | integer | `10485760` | Max file upload size in bytes (10 MiB; not currently enforced) |
 | `allowRegistration` | boolean | `true` | Allow new user registration |
 | `emailVerificationRequired` | boolean | `false` | Require email verification on registration |
@@ -586,6 +587,36 @@ The settings object contains the following fields:
 SMTP object fields: `host`, `port` (default 587), `user`, `password`, `from`, `tls`. On GET, a non-empty password is returned as `"********"`. On PATCH, send `"********"` for `smtp.password` to keep the existing value.
 
 The GET response also includes `mantisVersion` (the running server version).
+
+#### Cross-Origin Resource Sharing (CORS)
+
+MantisBase enables credentialed cross-origin browser access when the request `Origin` header matches an entry in the allowlist. Allowed origins are loaded from:
+
+1. **`corsAllowedOrigins`** in application settings (GET/PATCH `/api/v1/sys/settings/config`)
+2. **`MB_CORS_ORIGINS`** environment variable — comma-separated list, merged with settings at server startup and after each settings PATCH
+
+Example environment variable:
+
+```bash
+export MB_CORS_ORIGINS="http://localhost:3000,https://app.example.com"
+```
+
+Example settings PATCH (admin auth required):
+
+```json
+{
+  "corsAllowedOrigins": [
+    "http://localhost:3000",
+    "https://app.example.com"
+  ]
+}
+```
+
+For credentialed requests (`fetch(..., { credentials: "include" })`), responses echo the exact matching origin and set `Access-Control-Allow-Credentials: true`. Wildcard `Access-Control-Allow-Origin: *` is not used.
+
+`http://localhost:3000` and `http://127.0.0.1:3000` are different origins; list each host your frontend uses. Preflight `OPTIONS` requests are handled automatically for allowed origins.
+
+See also [Docker configuration](docker.md) for `MB_CORS_ORIGINS` in container deployments.
 
 ### Admin Accounts
 

@@ -47,6 +47,12 @@ mantisbase serve [--host=<host>] [--port=<port>] [--pool-size=<int>] [--skip-adm
 
 `MB_SKIP_ADMIN_SETUP=1` also skips admin setup (even without the flag).
 
+| Env variable | Description |
+|--------------|-------------|
+| `MB_CORS_ORIGINS` | Comma-separated browser origins allowed for cross-origin API requests with credentials. Merged with `corsAllowedOrigins` from app settings. Requires a server restart to pick up changes (unlike PATCH settings). Example: `http://localhost:3000,https://app.example.com` |
+
+See [REST API Reference — CORS](api.md#cross-origin-resource-sharing-cors) for runtime updates via settings PATCH.
+
 **Example:**
 
 ```bash

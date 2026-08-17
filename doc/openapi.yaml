@@ -12,6 +12,11 @@ info:
     **Credentials:** send JWTs or API keys (`mb_sk_...`) in the standard header:
     `Authorization: Bearer <token>`.
 
+    **CORS:** credentialed cross-origin browser access is allowed only for origins listed in
+    `corsAllowedOrigins` (settings) and/or the `MB_CORS_ORIGINS` environment variable
+    (comma-separated, merged at runtime). See `AppSettings.corsAllowedOrigins` and
+    [doc/api.md](api.md#cross-origin-resource-sharing-cors).
+
     **Response envelope:** most JSON endpoints return `{ "status", "data", "error" }`.
     The health check is an exception (`{ "status": "OK" }`).
 
@@ -1201,6 +1206,9 @@ paths:
       summary: Update application settings
       description: |
         Blocked with HTTP 503 when environment variable `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value.
+
+        Updating `corsAllowedOrigins` reloads the CORS allowlist immediately (no server restart).
+        Origins from `MB_CORS_ORIGINS` remain merged after reload.
       security:
         - bearerAuth: []
       requestBody:
