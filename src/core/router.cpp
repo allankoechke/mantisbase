@@ -467,8 +467,6 @@ namespace mb {
                 std::string search_filter;
                 std::string start_date;
                 std::string end_date;
-                std::string sort_by = "timestamp";
-                std::string sort_order = "desc";
 
                 if (req.hasQueryParam("after")) {
                     after = req.getQueryParamValue("after");
@@ -515,27 +513,12 @@ namespace mb {
                     end_date = req.getQueryParamValue("end_date");
                 }
 
-                if (req.hasQueryParam("sort_by")) {
-                    std::string sort_param = req.getQueryParamValue("sort_by");
-                    if (sort_param == "level" || sort_param == "origin" || sort_param == "message" ||
-                        sort_param == "timestamp" || sort_param == "created_at") {
-                        sort_by = sort_param;
-                    }
-                }
-
-                if (req.hasQueryParam("sort_order")) {
-                    if (std::string order = req.getQueryParamValue("sort_order"); order == "asc" || order == "desc") {
-                        sort_order = order;
-                    }
-                }
-
                 if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
 
                 // Get log database instance
                 auto &logsDb = req.mbApp().logs().logsDb();
                 json result = logsDb.getLogs(after, limit, level_filter,
-                                             search_filter, start_date, end_date,
-                                             sort_by, sort_order);
+                                             search_filter, start_date, end_date);
 
                 json response;
                 response["error"] = "";

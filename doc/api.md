@@ -355,22 +355,25 @@ curl -X PATCH http://localhost:7070/api/v1/schemas/posts \
 
 ## Query Parameters
 
-Entity list endpoints support cursor-based pagination and sorting:
+Entity list endpoints use cursor-based pagination ordered by record `id` (ascending):
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `limit` | `50` | Number of records to return (1–500) |
-| `after` | — | Cursor from the previous response — returns records after this value |
-| `sort` | `id` ASC | Field name to sort by. Prefix with `-` for descending (e.g., `-created`) |
+| `after` | — | Cursor (`id` of the last item from the previous page) |
+| `filter` | — | URL-encoded JSON object of field equality filters, e.g. `{"status":"active"}` |
 
 **Example:**
 
 ```bash
 # First page
-curl "http://localhost:7070/api/v1/entities/posts?limit=20&sort=-created"
+curl "http://localhost:7070/api/v1/entities/posts?limit=20"
 
 # Next page (using cursor from previous response)
-curl "http://localhost:7070/api/v1/entities/posts?limit=20&sort=-created&after=<cursor>"
+curl "http://localhost:7070/api/v1/entities/posts?limit=20&after=<cursor>"
+
+# Filtered list
+curl "http://localhost:7070/api/v1/entities/posts?filter=%7B%22status%22%3A%22active%22%7D"
 ```
 
 **Response:**
@@ -381,12 +384,15 @@ curl "http://localhost:7070/api/v1/entities/posts?limit=20&sort=-created&after=<
   "data": {
     "items_count": 20,
     "limit": 20,
+    "has_more": true,
     "cursor": "019c1b81-364b-7000-8120-b5416b2c42c2",
     "items": [...]
   },
   "error": ""
 }
 ```
+
+When `has_more` is `false`, you have reached the last page.
 
 ---
 
@@ -599,7 +605,7 @@ Admin account CRUD and authentication live under `/api/v1/sys/admins/`.
 
 ### Logs Endpoint
 
-The logs endpoint provides access to system logs with filtering, pagination, and sorting capabilities. **Requires admin authentication.**
+The logs endpoint provides access to system logs with filtering and cursor pagination. **Requires admin authentication.** Results are ordered by log `id` (ascending).
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -610,14 +616,12 @@ The logs endpoint provides access to system logs with filtering, pagination, and
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `limit` | integer | `50` | Number of records per page (max 1000) |
-| `after` | string | — | Cursor from previous response for pagination |
+| `after` | string | — | Cursor (`id` of last item from previous page) |
 | `level` | string | — | Filter by exact log level: `trace`, `debug`, `info`, `warn`, `critical` |
 | `min_level` | string | — | Filter by minimum log level (includes that level and above) |
 | `search` | string | — | Search in log messages |
 | `start_date` | string | — | Start date filter (ISO 8601 format) |
 | `end_date` | string | — | End date filter (ISO 8601 format) |
-| `sort_by` | string | `"timestamp"` | Sort field: `level`, `origin`, `message`, `timestamp`, `created_at` |
-| `sort_order` | string | `"desc"` | Sort order: `asc` or `desc` |
 
 #### Example Requests
 
@@ -648,7 +652,7 @@ curl -H "Authorization: Bearer <admin_token>" \
 
 # Combined filters
 curl -H "Authorization: Bearer <admin_token>" \
-  "http://localhost:7070/api/v1/sys/logs?min_level=warn&search=error&limit=20&sort_by=timestamp&sort_order=desc"
+  "http://localhost:7070/api/v1/sys/logs?min_level=warn&search=error&limit=20"
 ```
 
 #### Response Format
@@ -658,6 +662,7 @@ curl -H "Authorization: Bearer <admin_token>" \
   "data": {
     "items_count": 50,
     "limit": 50,
+    "has_more": true,
     "cursor": "log_id_abc123",
     "items": [
       {
@@ -674,7 +679,7 @@ curl -H "Authorization: Bearer <admin_token>" \
 }
 ```
 
-Pass the returned `cursor` value as the `after` parameter in subsequent requests to page through results.
+Pass the returned `cursor` value as the `after` parameter in subsequent requests to page through results. When `has_more` is `false`, you have reached the last page.
 
 #### Log Levels
 

@@ -250,13 +250,22 @@ TEST(CursorPagination, DefaultPaginationOpts) {
     nlohmann::json opts;
     opts["pagination"] = {
         {"limit", 50},
-        {"after", ""},
-        {"sort", ""}
+        {"after", ""}
     };
 
     EXPECT_EQ(opts["pagination"]["limit"].get<int>(), 50);
     EXPECT_EQ(opts["pagination"]["after"].get<std::string>(), "");
-    EXPECT_EQ(opts["pagination"]["sort"].get<std::string>(), "");
+}
+
+TEST(CursorPagination, HasMoreDetection) {
+    mb::EntityListPage page;
+    page.items = nlohmann::json::array();
+    page.items.push_back({{"id", "a"}});
+    page.items.push_back({{"id", "b"}});
+    page.has_more = true;
+
+    EXPECT_TRUE(page.has_more);
+    EXPECT_EQ(page.items.size(), 2u);
 }
 
 TEST(CursorPagination, LimitClamping) {
@@ -274,32 +283,6 @@ TEST(CursorPagination, LimitClamping) {
     if (limit < 1) limit = 1;
     if (limit > 500) limit = 500;
     EXPECT_EQ(limit, 100);
-}
-
-TEST(CursorPagination, SortFieldParsing) {
-    auto parseSort = [](const std::string &sort_str) -> std::pair<std::string, std::string> {
-        std::string field = "id";
-        std::string dir = "ASC";
-        if (!sort_str.empty() && sort_str[0] == '-') {
-            dir = "DESC";
-            field = sort_str.substr(1);
-        } else if (!sort_str.empty()) {
-            field = sort_str;
-        }
-        return {field, dir};
-    };
-
-    auto [f1, d1] = parseSort("name");
-    EXPECT_EQ(f1, "name");
-    EXPECT_EQ(d1, "ASC");
-
-    auto [f2, d2] = parseSort("-created");
-    EXPECT_EQ(f2, "created");
-    EXPECT_EQ(d2, "DESC");
-
-    auto [f3, d3] = parseSort("");
-    EXPECT_EQ(f3, "id");
-    EXPECT_EQ(d3, "ASC");
 }
 
 TEST(CursorPagination, CursorFromResponseItems) {
@@ -333,12 +316,12 @@ TEST(CursorPagination, PaginationOptsRoundTrip) {
     nlohmann::json opts;
     opts["pagination"] = {
         {"limit", 25},
-        {"after", "uuid-abc-123"},
-        {"sort", "-created"}
+        {"after", "uuid-abc-123"}
     };
+    opts["filter"] = R"({"status":"active"})";
 
     auto &p = opts["pagination"];
     EXPECT_EQ(p["limit"].get<int>(), 25);
     EXPECT_EQ(p["after"].get<std::string>(), "uuid-abc-123");
-    EXPECT_EQ(p["sort"].get<std::string>(), "-created");
+    EXPECT_EQ(opts["filter"].get<std::string>(), R"({"status":"active"})");
 }

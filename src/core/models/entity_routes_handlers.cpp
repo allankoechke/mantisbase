@@ -54,10 +54,6 @@ namespace mb {
                                         ? req.getQueryParamValue("after")
                                         : "";
 
-                std::string sort = req.hasQueryParam("sort")
-                                       ? req.getQueryParamValue("sort")
-                                       : "";
-
                 std::string filter = req.hasQueryParam("filter")
                                          ? req.getQueryParamValue("filter")
                                          : "";
@@ -65,16 +61,15 @@ namespace mb {
                 nlohmann::json opts;
                 opts["pagination"] = {
                     {"limit", limit},
-                    {"after", after},
-                    {"sort", sort}
+                    {"after", after}
                 };
                 opts["filter"] = filter;
 
-                const auto records = entity.list(opts);
+                const auto page = entity.listPage(opts);
 
                 std::string cursor;
-                if (!records.empty()) {
-                    const auto &last = records.back();
+                if (!page.items.empty()) {
+                    const auto &last = page.items.back();
                     if (last.contains("id") && last["id"].is_string())
                         cursor = last["id"].get<std::string>();
                 }
@@ -82,10 +77,11 @@ namespace mb {
                 res.sendJSON(200, {
                                  {
                                      "data", {
-                                         {"items_count", records.size()},
+                                         {"items_count", page.items.size()},
                                          {"limit", limit},
+                                         {"has_more", page.has_more},
                                          {"cursor", cursor},
-                                         {"items", records}
+                                         {"items", page.items}
                                      }
                                  },
                                  {"error", ""},

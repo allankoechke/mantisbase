@@ -62,24 +62,20 @@ namespace mb {
                        const std::string& details, const json& data = json::object());
 
         /**
-         * @brief Get logs with cursor-based pagination, filtering, and sorting.
+         * @brief Get logs with cursor-based pagination and filtering (ordered by `id` ASC).
          * @param after Cursor ID to fetch records after (empty = start from beginning)
          * @param limit Maximum number of records to return (default 50, max 1000)
          * @param level_filter Optional level filter (empty = all levels)
          * @param search_filter Optional message search filter (empty = no filter)
          * @param start_date Optional start date filter (ISO 8601 format, empty = no filter)
          * @param end_date Optional end date filter (ISO 8601 format, empty = no filter)
-         * @param sort_by Sort field (default: "timestamp")
-         * @param sort_order Sort order ("asc" or "desc", default: "desc")
-         * @return JSON object with logs and cursor info
+         * @return JSON object with logs, cursor, and has_more
          */
         json getLogs(const std::string& after = "", int limit = 50,
                      const std::string& level_filter = "",
                      const std::string& search_filter = "",
                      const std::string& start_date = "",
-                     const std::string& end_date = "",
-                     const std::string& sort_by = "timestamp",
-                     const std::string& sort_order = "desc");
+                     const std::string& end_date = "");
     private:
         /**
          * @brief Shutdown and clean up log database.

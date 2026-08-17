@@ -129,7 +129,7 @@ TEST_F(MultiInstanceTest, ConcurrentRequestsToSameInstance) {
     ASSERT_TRUE(list_res);
     EXPECT_EQ(list_res->status, 200);
     auto body = nlohmann::json::parse(list_res->body);
-    EXPECT_EQ(body["data"]["items_count"], num_requests);
+    EXPECT_EQ(body["data"]["items"].size(), num_requests);
 }
 
 TEST_F(MultiInstanceTest, SubsystemsAccessible) {

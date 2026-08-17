@@ -433,13 +433,13 @@ paths:
     get:
       tags: [Entities]
       summary: List entity records
-      description: Authorization depends on the entity `list` access rule.
+      description: Authorization depends on the entity `list` access rule. Results are ordered by record `id` ascending.
       security: []
       parameters:
         - $ref: "#/components/parameters/DynamicEntityName"
         - $ref: "#/components/parameters/Limit"
         - $ref: "#/components/parameters/AfterCursor"
-        - $ref: "#/components/parameters/Sort"
+        - $ref: "#/components/parameters/Filter"
       responses:
         "200":
           description: Paginated record list
@@ -972,7 +972,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/Limit"
         - $ref: "#/components/parameters/AfterCursor"
-        - $ref: "#/components/parameters/Sort"
+        - $ref: "#/components/parameters/Filter"
       responses:
         "200":
           description: Admin list
@@ -1147,18 +1147,6 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: sort_by
-          in: query
-          schema:
-            type: string
-            enum: [level, origin, message, timestamp, created_at]
-            default: timestamp
-        - name: sort_order
-          in: query
-          schema:
-            type: string
-            enum: [asc, desc]
-            default: desc
       responses:
         "200":
           description: Log page
@@ -1581,14 +1569,13 @@ components:
       in: query
       schema:
         type: string
-      description: Cursor from the previous list response.
-    Sort:
-      name: sort
+      description: Cursor (`id` of the last item from the previous page).
+    Filter:
+      name: filter
       in: query
       schema:
         type: string
-        default: id
-      description: Sort field. Prefix with `-` for descending (e.g. `-created`).
+      description: URL-encoded JSON object of `{field: value}` equality filters.
 
   responses:
     BadRequest:
@@ -1686,6 +1673,8 @@ components:
           type: integer
         limit:
           type: integer
+        has_more:
+          type: boolean
         cursor:
           type: string
           nullable: true
@@ -1722,6 +1711,8 @@ components:
           type: integer
         limit:
           type: integer
+        has_more:
+          type: boolean
         cursor:
           type: string
           nullable: true
