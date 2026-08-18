@@ -1,158 +1,108 @@
 # Contributing to MantisBase
 
-Thank you for your interest in contributing to **MantisBase**, a lightweight Backend-as-a-Service (BaaS) library built in C++!
+Thank you for contributing to MantisBase — a self-hosted C++20 Backend-as-a-Service with auto-generated REST APIs, authentication, realtime SSE, file uploads, and an admin dashboard.
 
-## 🚀 Getting Started
+## Development setup
 
 ### Prerequisites
 
-- **C++20** compatible compiler (GCC >= 8.3.0, Clang >= 7.0.0, or MSVC >= 16.8)
-- **CMake** 3.30 or higher
-- **Git** with submodule support
+- C++20 compiler (GCC or MinGW 13+)
+- CMake 3.22 or higher
+- Git with submodule support
+- Linux only: `libpq-dev` and `uuid-dev` (PostgreSQL support)
 
-### Setting Up the Development Environment
-
-#### 1. **Clone the repository with submodules:**
-   ```bash
-   git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git
-   cd mantisbase
-   ```
-
-#### 2. Build the project:
+### Build
 
 ```bash
+git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git
+cd mantisbase
 cmake -B build
 cmake --build build
+./build/bin/mantisbase serve
 ```
 
-#### 3. Run the application:
-Check on commandline args by running `./build/mantisbase --help`
+### Tests
+
+Tests are disabled by default. Enable them at configure time:
 
 ```bash
-./build/mantisbase serve
+cmake -B build -DMB_BUILD_TESTS=ON
+cmake --build build
+cd build && ctest --output-on-failure
 ```
 
-### 📁 Project Structure
-Understanding the codebase organization will help you navigate and contribute effectively.
+CI runs the same test suite on Linux for every pull request.
+
+### Useful CMake options
+
+| Option | Default | Description |
+|---|---|---|
+| `MB_BUILD_TESTS` | OFF | Build and register unit/integration tests |
+| `MB_SHARED_DEPS` | OFF | Build dependencies as shared libraries |
+| `MB_BUILD_SHARED_LIB` | OFF | Also produce a shared `libmantisbase` alongside the static library |
+| `MB_SCRIPTING_ENABLED` | OFF | Enable JavaScript extensions via Duktape |
+| `MB_BUILD_DOCS` | OFF | Generate Doxygen documentation |
+| `MB_BUILD_WITH_ASAN` | ON | AddressSanitizer on Linux debug builds |
+
+## Project layout
 
 ```
 mantisbase/
-├── include/mantisbase/      # Public API headers
-├── src/                     # Internal implementation
-├── examples/                # Embedding examples
-├── tests/                   # Unit & integration tests
-├── docker/                  # Docker deployment
-├── libs/                    # Third-party dependencies
-└── CMakeLists.txt           # Build configuration
+├── include/mantisbase/   # Public headers
+├── src/                  # Core implementation
+├── tests/                # Unit and integration tests
+├── doc/                  # User and API documentation
+├── cmake/                # Dependency and build modules
+├── 3rdParty/             # Git submodules (Drogon, SOCI, etc.)
+├── libs/                 # Additional bundled libraries
+└── docker/               # Container deployment
 ```
 
-### 🛠️ Build System
-MantisBase uses CMake with the following key dependencies: README.md:46-53
+Key dependencies are managed as git submodules under `3rdParty/` and wired in through `cmake/`.
 
-- httplib-cpp: HTTP server framework
-- spdlog: Structured logging
-- SOCI: Database abstraction layer
-- nlohmann/json: JSON processing
-- jwt-cpp: JWT token handling
-- bcrypt-cpp: Password hashing
-- argparse: Command-line parsing
-- Build Options
-  - *MB_SHARED_DEPS*: Build dependencies as shared libraries (default: ON)
-  - *MB_BUILD_TESTS*: Enable test compilation (default: ON)
+## Guidelines
 
-### 🧪 Testing
-Run tests after building:
+### Code style
 
-```bash
-cd build
-ctest --build-config Release
-```
+- Use C++20 and match existing patterns in the surrounding code.
+- Keep changes focused; avoid unrelated refactors in the same pull request.
 
-### 📋 Development Guidelines
-#### Code Style
-- Follow C++20 standards and best practices
-- Use meaningful variable and function names
-- Include appropriate comments for complex logic
-- Maintain consistent indentation and formatting
+### Commit messages
 
-#### Commit Messages
-Use clear, descriptive commit messages:
+Use clear, descriptive messages. Conventional prefixes are welcome:
 
 ```
-feat: add JWT authentication middleware
-fix: resolve database connection pooling issue
-docs: update API documentation
-test: add unit tests for table validation
+feat: add API key rotation endpoint
+fix: resolve SSE reconnect race on PostgreSQL
+docs: update auth guide for OAuth providers
+test: cover expired JWT refresh flow
 ```
 
-#### Pull Request Process
-1. Fork the repository
-2. Create a feature branch from master:
-```
-git checkout -b feature/your-feature-name
-```
-3. Make your changes with appropriate tests
-4. Ensure all tests pass and the build succeeds
-5. Submit a pull request with:
-   - Clear description of changes
-   - Reference to any related issues
-   - Screenshots/examples if applicable
+### Pull requests
 
-### 🎯 Areas for Contribution
-Based on the current project status, here are areas where contributions are welcome:
+1. Fork the repository and create a branch from `master`.
+2. Make your changes and add tests when behavior changes.
+3. Ensure the project builds and tests pass (`-DMB_BUILD_TESTS=ON`).
+4. Open a pull request with a short summary and links to related issues.
 
-#### High Priority
-- Unit + integration tests (⬜ Planned)
-- Static file serving (⬜ Planned)
+When changing the HTTP API, update `doc/openapi.yaml` and the relevant guides under `doc/`.
 
-#### Medium Priority
-- Client/server sync modes (⬜ Planned)
+## Reporting issues
 
-#### Documentation
-- API documentation improvements
-- Code examples and tutorials
-- Architecture documentation
+Search [existing issues](https://github.com/allankoechke/mantisbase/issues) first. Include:
 
-#### 🐛 Reporting Issues
-When reporting bugs or requesting features:
+- OS, compiler, and MantisBase version
+- Steps to reproduce
+- Expected vs actual behavior
+- Relevant logs (omit secrets and tokens)
 
-1. Search existing issues to avoid duplicates
-2. Use issue templates when available
-3. Provide detailed information:
-    - Operating system and version
-    - Compiler and version
-    - Steps to reproduce
-    - Expected vs actual behavior
-    - Relevant logs or error messages
+## Getting help
 
-### 🔧 Development Tips
-#### Working with Dependencies
-All third-party dependencies are managed through git submodules and CMake. When adding new dependencies:
+- [Discord](https://discord.gg/9437XTKRvN) — chat and community discussion
+- [GitHub Discussions](https://github.com/allankoechke/mantisbase/discussions) — questions and ideas
+- [GitHub Issues](https://github.com/allankoechke/mantisbase/issues) — bugs and feature requests
+- [Documentation](https://allankoechke.github.io/mantisbase/) — guides and API reference
 
-- Add as a git submodule in `libs/`
-- Update CMakeLists.txt with appropriate configuration
-- Consider creating a separate cmake module for complex integrations
+## License
 
-#### Database Development
-The system uses SOCI for database abstraction with SQLite as the default backend. When working with database features:
-
-- Test with SQLite first
-- Consider multi-database compatibility
-- Update migration scripts if needed
-
-#### API Development
-MantisBase auto-generates REST APIs from database table definitions. When adding API features:
-
-- Follow RESTful conventions
-- Maintain backward compatibility
-- Update API documentation
-
-### 📞 Getting Help
-GitHub Issues: For bug reports and feature requests
-GitHub Discussions: For questions and general discussion
-Wiki: For detailed documentation and guides
-
-### 📜 License
-By contributing to MantisBase, you agree that your contributions will be licensed under the MIT License.
-
-Thank you for helping make MantisBase better! 🚀
+By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE).

@@ -48,6 +48,7 @@ This binary bundles most dependencies. If you use PostgreSQL, ensure client libr
 
 - Quick Start: https://github.com/allankoechke/mantisbase/blob/master/doc/QuickStart.md
 - Documentation: https://allankoechke.github.io/mantisbase/
+- Discord: https://discord.gg/9437XTKRvN
 - GitHub Discussions: https://github.com/allankoechke/mantisbase/discussions
 - Issues: https://github.com/allankoechke/mantisbase/issues
 

@@ -51,5 +51,6 @@ Linux build dependencies: `libpq-dev`, `uuid-dev`. See [doc/embedding.md](https:
 ## Help
 
 - Documentation: https://allankoechke.github.io/mantisbase/
+- Discord: https://discord.gg/9437XTKRvN
 - GitHub Discussions: https://github.com/allankoechke/mantisbase/discussions
 - Issues: https://github.com/allankoechke/mantisbase/issues
