@@ -129,8 +129,8 @@ namespace mb {
                 }
 
                 if (rule.mode().empty()) {
-                    req.mbApp().logger().trace("Auth", "Admin Access Required",
-                                               "Restricted access, admin auth required!");
+                    // req.mbApp().logger().trace("Auth", "Admin Access Required",
+                    //                            "Restricted access, admin auth required!");
                     const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
                         res.sendJSON(401, {
