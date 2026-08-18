@@ -402,7 +402,7 @@ namespace mb {
 
     std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
         // mApp.logger().trace("Endpoint Registration", "Registering /api/v1/files/:entity/:file GET endpoint ...");
-        return [](const MantisRequest &req, MantisResponse &res) {
+        return [](const MantisRequest &req, const MantisResponse &res) {
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");
 

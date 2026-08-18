@@ -90,6 +90,7 @@ set( MB_SOURCES
         src/core/models/entity_schema_base_fields.cpp
         src/core/models/entity_schema_crud.cpp
         src/core/models/entity_schema_field.cpp
+        src/core/models/int_precision.cpp
         src/core/models/entity_routes_handlers.cpp
         src/core/models/entity_schema_routes_handlers.cpp
 

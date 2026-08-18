@@ -519,7 +519,7 @@ namespace mb {
 
             ddl << field.name()
                     << " "
-                    << getFieldType(field.type(), sql, field.precision());
+                    << getFieldType(field.type(), sql, field.intPrecision());
 
             if (field.required()) ddl << " NOT NULL";
             if (field.constraints().contains("default_value") && !field.constraints()["default_value"].is_null())
@@ -599,12 +599,12 @@ namespace mb {
 
         if (v.is_null()) return "NULL";
 
-        if (type == "xml" || type == "string") {
+        if (type == "string") {
             return "'" + v.dump() + "'";
         }
 
         if (type == "double" || type == "int"
-            || type == "date" || type == "json" || type == "blob"
+            || type == "date" || type == "json"
             || type == "file" || type == "files") {
             return v.dump();
         }
@@ -764,14 +764,16 @@ namespace mb {
         });
     }
 
-    std::string EntitySchema::getFieldType(const std::string &type, std::shared_ptr<soci::session> sql, int precision) {
+    std::string EntitySchema::getFieldType(const std::string &type, std::shared_ptr<soci::session> sql,
+                                           const IntPrecision precision) {
         const auto db_type = sql->get_backend()->get_backend_name();
 
         if (db_type == "sqlite3" && type == "date") {
             return "text";
         }
 
-        if (db_type == "postgresql" && type == "int" && precision == 8) {
+        if (db_type == "postgresql" && type == "int"
+            && (precision == IntPrecision::I8 || precision == IntPrecision::U8)) {
             return sql->get_backend()->create_column_type(soci::db_int16, 0, 0);
         }
 

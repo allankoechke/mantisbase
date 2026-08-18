@@ -43,6 +43,7 @@ Set `MB_JWT_SECRET` in production. See the [CLI Reference](https://github.com/al
 
 - Quick Start: https://github.com/allankoechke/mantisbase/blob/master/doc/QuickStart.md
 - Documentation: https://allankoechke.github.io/mantisbase/
+- Discord: https://discord.gg/9437XTKRvN
 - GitHub Discussions: https://github.com/allankoechke/mantisbase/discussions
 - Issues: https://github.com/allankoechke/mantisbase/issues
 

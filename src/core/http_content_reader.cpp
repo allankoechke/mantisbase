@@ -200,7 +200,7 @@ namespace mb {
         const auto content = trim(value);
         if (content.empty()) {
             obj["value"] = nullptr;
-        } else if (type == "xml" || type == "string" || type == "date" || type == "file") {
+        } else if (type == "string" || type == "date" || type == "file") {
             obj["value"] = content;
         } else if (type == "double" || type == "int") {
             obj["value"] = json::parse(content);

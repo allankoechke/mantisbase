@@ -12,6 +12,7 @@
 [![License: MIT](https://img.shields.io/github/license/allankoechke/mantisbase)](LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/allankoech/mantisbase)](https://hub.docker.com/r/allankoech/mantisbase)
 [![Discussions](https://img.shields.io/github/discussions/allankoechke/mantisbase)](https://github.com/allankoechke/mantisbase/discussions)
+[![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/9437XTKRvN)
 
 </p>
 
@@ -142,7 +143,7 @@ Full API docs: [docs.mantisbase.dev](https://allankoechke.github.io/mantisbase/)
 
 ## Community
 
-Questions, ideas, or feedback? Join the conversation on [GitHub Discussions](https://github.com/allankoechke/mantisbase/discussions).
+Questions, ideas, or feedback? Join the conversation on [Discord](https://discord.gg/9437XTKRvN) or [GitHub Discussions](https://github.com/allankoechke/mantisbase/discussions).
 
 Watch the [YouTube playlist](https://youtube.com/playlist?list=PLsG0sKNmNpyQwsZuReuqo_nl_j4SdJoiJ&si=a9jFK4QjFJb06NAw) for tutorials and walkthroughs.
 

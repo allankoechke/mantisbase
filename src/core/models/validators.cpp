@@ -3,6 +3,7 @@
 //
 
 #include "../../../include/mantisbase/core/models/validators.h"
+#include "../../../include/mantisbase/core/models/int_precision.h"
 
 #include <regex>
 
@@ -69,6 +70,19 @@ namespace mb {
         return std::nullopt;
     }
 
+    std::optional<std::string> Validators::intPrecisionValueCheck(const json &field, const json &body) {
+        if (field.at("type").get<std::string>() != "int") {
+            return std::nullopt;
+        }
+
+        const auto &field_name = field.at("name").get<std::string>();
+        if (!body.contains(field_name) || body.at(field_name).is_null()) {
+            return std::nullopt;
+        }
+
+        return validateIntFieldValue(body.at(field_name), intPrecisionFromField(field));
+    }
+
     std::optional<std::string> Validators::minimumConstraintCheck(const json &field, const json &body) {
         if (!field["constraints"]["min_value"].is_null()) {
             const auto &min_value = field["constraints"]["min_value"].get<double>();
@@ -85,6 +99,31 @@ namespace mb {
             }
 
             if (field_type == "double" || field_type == "int") {
+                if (field_type == "int") {
+                    const auto precision = intPrecisionFromField(field);
+                    if (const auto err = validateIntFieldValue(body.at(field_name), precision); err.has_value()) {
+                        return err;
+                    }
+
+                    if (isUnsignedIntPrecision(precision)) {
+                        const auto value = body.at(field_name).is_number_unsigned()
+                                               ? body.at(field_name).get<uint64_t>()
+                                               : static_cast<uint64_t>(body.at(field_name).get<int64_t>());
+                        const auto min_value_u = static_cast<uint64_t>(static_cast<int64_t>(min_value));
+                        if (value < min_value_u) {
+                            return std::format("Minimum Constraint Failed: Value for `{}` should be >= {}",
+                                                field_name, static_cast<int64_t>(min_value));
+                        }
+                        return std::nullopt;
+                    }
+
+                    if (body.at(field_name).get<int64_t>() < static_cast<int64_t>(min_value)) {
+                        return std::format("Minimum Constraint Failed: Value for `{}` should be >= {}",
+                                            field_name, static_cast<int64_t>(min_value));
+                    }
+                    return std::nullopt;
+                }
+
                 if (body.at(field_name) < min_value) {
                     return
                             std::format("Minimum Constraint Failed: Value for `{}` should be >= {}",
@@ -112,6 +151,31 @@ namespace mb {
             }
 
             if (field_type == "double" || field_type == "int") {
+                if (field_type == "int") {
+                    const auto precision = intPrecisionFromField(field);
+                    if (const auto err = validateIntFieldValue(body.at(field_name), precision); err.has_value()) {
+                        return err;
+                    }
+
+                    if (isUnsignedIntPrecision(precision)) {
+                        const auto value = body.at(field_name).is_number_unsigned()
+                                               ? body.at(field_name).get<uint64_t>()
+                                               : static_cast<uint64_t>(body.at(field_name).get<int64_t>());
+                        const auto max_value_u = static_cast<uint64_t>(static_cast<int64_t>(max_value));
+                        if (value > max_value_u) {
+                            return std::format("Maximum Constraint Failed: Value for `{}` should be <= {}",
+                                                field_name, static_cast<int64_t>(max_value));
+                        }
+                        return std::nullopt;
+                    }
+
+                    if (body.at(field_name).get<int64_t>() > static_cast<int64_t>(max_value)) {
+                        return std::format("Maximum Constraint Failed: Value for `{}` should be <= {}",
+                                            field_name, static_cast<int64_t>(max_value));
+                    }
+                    return std::nullopt;
+                }
+
                 if (body.at(field_name) > max_value) {
                     return
                             std::format("Maximum Constraint Failed: Value for `{}` should be <= {}",
@@ -268,6 +332,20 @@ namespace mb {
                     return std::format("Field type `{}` for `{}` is not recognized!",
                                        field["type"].get<std::string>(), field["name"].get<std::string>());
                 }
+
+                if (trim(field["type"].get<std::string>()) == "int") {
+                    if (field.contains("precision") && !field.at("precision").is_null()) {
+                        try {
+                            (void)intPrecisionFromField(field);
+                        } catch (const MantisException &e) {
+                            return std::format("Field `{}`: {}", field["name"].get<std::string>(), e.what());
+                        }
+                    }
+
+                    if (const auto err = validateIntConstraintBounds(field); err.has_value()) {
+                        return std::format("Field `{}`: {}", field["name"].get<std::string>(), *err);
+                    }
+                }
             }
         }
 
@@ -289,6 +367,9 @@ namespace mb {
 
                 // REQUIRED CONSTRAINT CHECK
                 if (const auto err = requiredConstraintCheck(field, body); err.has_value()) return err;
+
+                // INT PRECISION CHECK
+                if (const auto err = intPrecisionValueCheck(field, body); err.has_value()) return err;
 
                 // MINIMUM CONSTRAINT CHECK
                 if (const auto err = minimumConstraintCheck(field, body); err.has_value()) return err;
@@ -330,6 +411,9 @@ namespace mb {
 
                 // REQUIRED CONSTRAINT CHECK
                 if (const auto err = requiredConstraintCheck(field, body); err.has_value()) return err;
+
+                // INT PRECISION CHECK
+                if (const auto err = intPrecisionValueCheck(field, body); err.has_value()) return err;
 
                 // MINIMUM CONSTRAINT CHECK
                 if (const auto err = minimumConstraintCheck(field, body); err.has_value()) return err;

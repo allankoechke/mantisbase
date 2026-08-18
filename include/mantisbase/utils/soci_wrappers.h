@@ -12,6 +12,7 @@
 #include "utils.h"
 #include "../mantisbase.h"
 #include "mantisbase/core/models/entity_schema_field.h"
+#include "mantisbase/core/models/int_precision.h"
 #include "soci/values.h"
 
 namespace mb {
@@ -50,7 +51,7 @@ namespace mb {
 
             // For non-null values, set the value accordingly
             const auto field_type = field.at("type").get<std::string>();
-            if (field_type == "xml" || field_type == "string" || field_type == "file") {
+            if (field_type == "string" || field_type == "file") {
                 vals.set(field_name, entity.value(field_name, ""));
             } else if (field_type == "double") {
                 vals.set(field_name, entity.value(field_name, 0.0));
@@ -66,16 +67,7 @@ namespace mb {
                     vals.set(field_name, tm);
                 }
             } else if (field_type == "int") {
-                const int prec = field.value("precision", 32);
-                switch (prec) {
-                    case 8: vals.set(field_name, static_cast<int8_t>(entity.value(field_name, 0))); break;
-                    case 16: vals.set(field_name, static_cast<int16_t>(entity.value(field_name, 0))); break;
-                    case 64: vals.set(field_name, static_cast<int64_t>(entity.value(field_name, 0))); break;
-                    default: vals.set(field_name, static_cast<int32_t>(entity.value(field_name, 0))); break;
-                }
-            } else if (field_type == "blob") {
-                // TODO implement BLOB type
-                // vals.set(field_name, entity.value(field_name, sql->empty_blob()));
+                bindIntFieldValue(vals, field_name, entity.at(field_name), intPrecisionFromField(field));
             } else if (field_type == "json") {
                 vals.set(field_name, entity.value(field_name, json::object()));
             } else if (field_type == "bool") {
@@ -88,12 +80,13 @@ namespace mb {
         return vals;
     }
 
-    inline int getColumnPrecision(const std::string &column_name, const std::vector<json> &fields) {
+    inline IntPrecision getColumnIntPrecision(const std::string &column_name, const std::vector<json> &fields) {
         for (const auto &field: fields) {
-            if (field.value("name", "") == column_name)
-                return field.value("precision", 32);
+            if (field.value("name", "") == column_name) {
+                return intPrecisionFromField(field);
+            }
         }
-        return 32;
+        return defaultIntPrecision();
     }
 
     inline std::string getColumnType(const std::string &column_name, const std::vector<json> &fields) {
@@ -133,23 +126,14 @@ namespace mb {
             }
 
             // Handle type conversions
-            if (colType == "xml" || colType == "string") {
+            if (colType == "string") {
                 res_json[colName] = row.get<std::string>(i, "");
             } else if (colType == "double") {
                 res_json[colName] = row.get<double>(i);
             } else if (colType == "date") {
                 res_json[colName] = mb::dbDateToString(db_type, row, i);
             } else if (colType == "int") {
-                const int prec = getColumnPrecision(colName, entity_fields);
-                switch (prec) {
-                    case 8: res_json[colName] = row.get<int8_t>(i); break;
-                    case 16: res_json[colName] = row.get<int16_t>(i); break;
-                    case 64: res_json[colName] = row.get<int64_t>(i); break;
-                    default: res_json[colName] = row.get<int32_t>(i); break;
-                }
-            } else if (colType == "blob") {
-                // TODO ? How do we handle BLOB?
-                // j[colName] = row.get<std::string>(i);
+                res_json[colName] = readIntFieldValue(row, i, getColumnIntPrecision(colName, entity_fields));
             } else if (colType == "json" || colType == "list") {
                 res_json[colName] = row.get<json>(i);
             } else if (colType == "bool") {

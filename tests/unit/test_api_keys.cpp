@@ -98,6 +98,38 @@ TEST_F(ApiKeyTestFixture, RevokeNonExistentKey) {
     EXPECT_FALSE(revoked);
 }
 
+TEST_F(ApiKeyTestFixture, RevokeByIdAllowsAdminToRevokeAnyKey) {
+    const auto &keys = mantis().auth().apiKey();
+    auto created = keys.create("mb_admins", "owner_user", "Owner Key");
+    const auto key_id = created["id"].get<std::string>();
+
+    EXPECT_FALSE(keys.revoke(key_id, "mb_admins", "other_user"));
+    EXPECT_TRUE(keys.revokeById(key_id));
+
+    const auto key_hash = mb::ApiKeyManager::hashApiKey(created["key"].get<std::string>());
+    EXPECT_FALSE(keys.lookupByHash(key_hash).has_value());
+}
+
+TEST_F(ApiKeyTestFixture, RevokeWithoutUserIdSkipsOwnerCheck) {
+    const auto &keys = mantis().auth().apiKey();
+    auto created = keys.create("mb_admins", "owner_user", "Scoped Key");
+    const auto key_id = created["id"].get<std::string>();
+
+    EXPECT_TRUE(keys.revoke(key_id, "mb_admins", ""));
+
+    const auto key_hash = mb::ApiKeyManager::hashApiKey(created["key"].get<std::string>());
+    EXPECT_FALSE(keys.lookupByHash(key_hash).has_value());
+}
+
+TEST_F(ApiKeyTestFixture, RevokeAdminUsesGlobalId) {
+    const auto &keys = mantis().auth().apiKey();
+    auto created = keys.createAdmin("some_admin", "Admin Key");
+    const auto key_id = created["id"].get<std::string>();
+
+    EXPECT_TRUE(keys.revokeAdmin(key_id));
+    EXPECT_FALSE(keys.revokeAdmin("missing_id"));
+}
+
 TEST_F(ApiKeyTestFixture, ShownOnceVerification) {
     const auto &keys = mantis().auth().apiKey();
     auto result = keys.create("mb_admins", "shown_once_user", "Shown Once Key");

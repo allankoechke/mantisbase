@@ -1,4 +1,5 @@
 #include "../../../include/mantisbase/core/models/entity_schema_field.h"
+#include "../../../include/mantisbase/core/models/int_precision.h"
 #include "../../../include/mantisbase/utils/utils.h"
 #include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/soci_wrappers.h"
@@ -62,10 +63,14 @@ namespace mb {
         }
 
         if (field_schema.contains("precision")) {
-            if (!field_schema["precision"].is_number_integer())
-                throw MantisException(400, "Expected an integer for field property `precision`.");
-
-            setPrecision(field_schema["precision"].get<int>());
+            if (field_schema["precision"].is_string()) {
+                setPrecision(field_schema["precision"].get<std::string>());
+            } else if (field_schema["precision"].is_number_integer()) {
+                setIntPrecision(intPrecisionFromField(field_schema));
+            } else {
+                throw MantisException(400,
+                                      "Expected a string precision token (i8, u32, ...) or legacy integer bit width.");
+            }
         }
 
         if (field_schema.contains("required")) {
@@ -169,15 +174,17 @@ namespace mb {
         return *this;
     }
 
-    int EntitySchemaField::precision() const {
-        return m_precision;
+    IntPrecision EntitySchemaField::intPrecision() const {
+        return m_intPrecision;
     }
 
-    EntitySchemaField &EntitySchemaField::setPrecision(int precision) {
-        static const std::vector<int> validPrecisions = {8, 16, 32, 64};
-        if (std::ranges::find(validPrecisions, precision) == validPrecisions.end())
-            throw MantisException(400, "Invalid precision `" + std::to_string(precision) + "`. Must be 8, 16, 32, or 64.");
-        m_precision = precision;
+    EntitySchemaField &EntitySchemaField::setIntPrecision(const IntPrecision precision) {
+        m_intPrecision = precision;
+        return *this;
+    }
+
+    EntitySchemaField &EntitySchemaField::setPrecision(const std::string &precision) {
+        m_intPrecision = intPrecisionFromString(precision);
         return *this;
     }
 
@@ -338,7 +345,7 @@ namespace mb {
         };
 
         if (m_type == "int") {
-            json_obj["precision"] = m_precision;
+            json_obj["precision"] = intPrecisionToString(m_intPrecision);
         }
 
         if (isForeignKey()) {
@@ -349,33 +356,23 @@ namespace mb {
     }
 
     soci::db_type EntitySchemaField::toSociType() const {
-        return EntitySchemaField::toSociType(m_type, m_precision);
+        return EntitySchemaField::toSociType(m_type, m_intPrecision);
     }
 
     soci::db_type EntitySchemaField::toSociType(const std::string &type) {
-        return toSociType(type, 32);
+        return toSociType(type, defaultIntPrecision());
     }
 
-    soci::db_type EntitySchemaField::toSociType(const std::string &type, int precision) {
+    soci::db_type EntitySchemaField::toSociType(const std::string &type, const IntPrecision precision) {
         if (trim(type).empty())
             throw MantisException(400, "Field type is required, none provided!");
 
-        if (type == "xml")
-            return soci::db_xml;
         if (type == "double")
             return soci::db_double;
         if (type == "date")
             return soci::db_date;
-        if (type == "int") {
-            switch (precision) {
-                case 8: return soci::db_int8;
-                case 16: return soci::db_int16;
-                case 64: return soci::db_int64;
-                default: return soci::db_int32;
-            }
-        }
-        if (type == "blob")
-            return soci::db_blob;
+        if (type == "int")
+            return intPrecisionToSociType(precision);
         if (type == "bool")
             return soci::db_uint16;
         if (type == "json" || type == "string" || type == "file" || type == "files")
@@ -387,6 +384,13 @@ namespace mb {
     std::optional<std::string> EntitySchemaField::validate() const {
         if (m_name.empty()) return "Entity field name is empty";
         if (m_type.empty()) return "Entity field type is empty";
+
+        if (m_type == "int") {
+            if (const auto err = validateIntConstraintBounds(toJSON()); err.has_value()) {
+                return err;
+            }
+        }
+
         return std::nullopt;
     }
 

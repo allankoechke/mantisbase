@@ -69,10 +69,16 @@ namespace mb {
                 }
 
                 const auto user_id = auth["id"].get<std::string>();
+                const auto auth_entity = auth["entity"].get<std::string>();
                 const auto entity_name = trim(req.getPathParamValue("entity_name"));
                 auto key_id = trim(req.getPathParamValue("id"));
 
-                if (req.mbApp().auth().apiKey().revoke(key_id, entity_name, user_id)) {
+                const auto &api_keys = req.mbApp().auth().apiKey();
+                const bool revoked = auth_entity == "mb_admins"
+                                         ? api_keys.revoke(key_id, entity_name, "")
+                                         : api_keys.revoke(key_id, entity_name, user_id);
+
+                if (revoked) {
                     res.sendJSON(200, {{"status", 200}, {"data", {{"deleted", true}}}, {"error", ""}});
                 } else {
                     res.sendJSON(404, {{"status", 404}, {"data", json::object()}, {"error", "API key not found"}});
@@ -118,11 +124,9 @@ namespace mb {
 
         Delete("/api/v1/sys/api-keys/:id", [](MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                const auto user_id = auth["id"].get<std::string>();
                 auto key_id = trim(req.getPathParamValue("id"));
 
-                if (req.mbApp().auth().apiKey().revokeAdmin(key_id, user_id)) {
+                if (req.mbApp().auth().apiKey().revokeById(key_id)) {
                     res.sendJSON(200, {{"status", 200}, {"data", {{"deleted", true}}}, {"error", ""}});
                 } else {
                     res.sendJSON(404, {{"status", 404}, {"data", json::object()}, {"error", "API key not found"}});
