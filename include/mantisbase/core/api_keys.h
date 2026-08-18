@@ -64,8 +64,12 @@ namespace mb {
         /** List key metadata for a user/entity (never includes raw secrets). */
         [[nodiscard]] json list(const std::string &entity_name, const std::string &user_id) const;
 
+        /** Revoke a key owned by `user_id` within an entity. Pass empty `user_id` to skip owner check. */
         [[nodiscard]] bool revoke(const std::string &key_id, const std::string &entity_name,
                           const std::string &user_id) const;
+
+        /** Revoke any key by id (admin use). */
+        [[nodiscard]] bool revokeById(const std::string &key_id) const;
 
         /** Resolve a stored key by hash; used by auth middleware. */
         [[nodiscard]] std::optional<json> lookupByHash(const std::string &key_hash) const;
@@ -76,7 +80,8 @@ namespace mb {
                                const json &permissions = json::array(),
                                const std::string &expires_at = "") const;
 
-        [[nodiscard]] bool revokeAdmin(const std::string &key_id, const std::string &user_id) const;
+        /** Revoke any admin API key by id (any admin may revoke any admin key). */
+        [[nodiscard]] bool revokeAdmin(const std::string &key_id) const;
     };
 } // mb
 

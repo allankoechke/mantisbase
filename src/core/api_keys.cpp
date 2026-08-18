@@ -86,8 +86,22 @@ namespace mb {
     bool ApiKeyManager::revoke(const std::string &key_id, const std::string &entity_name,
                                const std::string &user_id) const {
         const auto &sql = mbApp().db().session();
-        *sql << "DELETE FROM mb_api_keys WHERE id = :id AND entity_name = :entity AND user_id = :uid",
-                soci::use(key_id), soci::use(entity_name), soci::use(user_id);
+        if (user_id.empty()) {
+            *sql << "DELETE FROM mb_api_keys WHERE id = :id AND entity_name = :entity",
+                    soci::use(key_id), soci::use(entity_name);
+        } else {
+            *sql << "DELETE FROM mb_api_keys WHERE id = :id AND entity_name = :entity AND user_id = :uid",
+                    soci::use(key_id), soci::use(entity_name), soci::use(user_id);
+        }
+
+        int affected = 0;
+        *sql << "SELECT changes()", soci::into(affected);
+        return affected > 0;
+    }
+
+    bool ApiKeyManager::revokeById(const std::string &key_id) const {
+        const auto &sql = mbApp().db().session();
+        *sql << "DELETE FROM mb_api_keys WHERE id = :id", soci::use(key_id);
 
         int affected = 0;
         *sql << "SELECT changes()", soci::into(affected);
@@ -139,7 +153,7 @@ namespace mb {
         return create("mb_admins", user_id, label, permissions, expires_at);
     }
 
-    bool ApiKeyManager::revokeAdmin(const std::string &key_id, const std::string &user_id) const {
-        return revoke(key_id, "mb_admins", user_id);
+    bool ApiKeyManager::revokeAdmin(const std::string &key_id) const {
+        return revokeById(key_id);
     }
 } // mb

@@ -240,6 +240,46 @@ TEST_F(IntegrationAuthExtendedTest, SysApiKeyWithAdminToken) {
     EXPECT_TRUE(body["data"]["key"].get<std::string>().starts_with("mb_sk_"));
 }
 
+TEST_F(IntegrationAuthExtendedTest, AdminRevokesUserApiKeyViaSysRoute) {
+    TestHttp::Headers userHeaders = {{"Authorization", "Bearer " + userToken}};
+    auto createRes = client->Post("/api/v1/auth/test_users/api-keys", userHeaders,
+                                    R"({"label":"user key for admin revoke"})", "application/json");
+    ASSERT_TRUE(createRes != nullptr);
+    ASSERT_EQ(createRes->status, 201);
+    auto created = parseBody(*createRes);
+    const auto keyId = created["data"]["id"].get<std::string>();
+    const auto apiKey = created["data"]["key"].get<std::string>();
+
+    TestHttp::Headers keyHeaders = {{"Authorization", "Bearer " + apiKey}};
+    auto verifyRes = client->Get("/api/v1/auth/verify", keyHeaders);
+    ASSERT_TRUE(verifyRes != nullptr);
+    EXPECT_EQ(verifyRes->status, 200);
+
+    TestHttp::Headers adminHeaders = {{"Authorization", "Bearer " + adminToken}};
+    auto revokeRes = client->Delete("/api/v1/sys/api-keys/" + keyId, adminHeaders);
+    ASSERT_TRUE(revokeRes != nullptr);
+    EXPECT_EQ(revokeRes->status, 200);
+
+    auto verifyAfter = client->Get("/api/v1/auth/verify", keyHeaders);
+    ASSERT_TRUE(verifyAfter != nullptr);
+    EXPECT_EQ(verifyAfter->status, 401);
+}
+
+TEST_F(IntegrationAuthExtendedTest, AdminRevokesUserApiKeyViaEntityRoute) {
+    TestHttp::Headers userHeaders = {{"Authorization", "Bearer " + userToken}};
+    auto createRes = client->Post("/api/v1/auth/test_users/api-keys", userHeaders,
+                                    R"({"label":"user key for entity admin revoke"})", "application/json");
+    ASSERT_TRUE(createRes != nullptr);
+    ASSERT_EQ(createRes->status, 201);
+    auto created = parseBody(*createRes);
+    const auto keyId = created["data"]["id"].get<std::string>();
+
+    TestHttp::Headers adminHeaders = {{"Authorization", "Bearer " + adminToken}};
+    auto revokeRes = client->Delete("/api/v1/auth/test_users/api-keys/" + keyId, adminHeaders);
+    ASSERT_TRUE(revokeRes != nullptr);
+    EXPECT_EQ(revokeRes->status, 200);
+}
+
 // --- 403 permission tests ---
 
 TEST_F(IntegrationAuthExtendedTest, UserTokenOnAdminRouteReturns403) {
