@@ -3,6 +3,7 @@
 #include "../../include/mantisbase/core/http.h"
 #include "../../include/mantisbase/core/auth.h"
 #include "../../include/mantisbase/core/models/validators.h"
+#include "../../include/mantisbase/utils/utils.h"
 #include "drogon/drogon_callbacks.h"
 
 namespace mb {
@@ -18,7 +19,7 @@ namespace mb {
     }
 
     std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)>
-    Router::loggerPostHandlingAdvice() const {
+    Router::loggerPreSendingAdvice() const {
         return [this](const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp) {
             const auto start = req->creationDate();
             const auto end = trantor::Date::now();
@@ -42,22 +43,86 @@ namespace mb {
         };
     }
 
+    void Router::reloadCorsOrigins() {
+        auto origins = std::make_shared<std::set<std::string>>();
+
+        const auto &cfg = mbApp().settings().configs();
+        if (cfg.contains("corsAllowedOrigins") && cfg["corsAllowedOrigins"].is_array()) {
+            for (const auto &item : cfg["corsAllowedOrigins"]) {
+                if (item.is_string()) {
+                    const auto value = trim(item.get<std::string>());
+                    if (!value.empty()) {
+                        origins->insert(value);
+                    }
+                }
+            }
+        }
+
+        if (const auto raw = getEnvOrDefault("MB_CORS_ORIGINS", ""); !raw.empty()) {
+            for (const auto &part : splitString(raw, ",")) {
+                const auto value = trim(part);
+                if (!value.empty()) {
+                    origins->insert(value);
+                }
+            }
+        }
+
+        m_corsAllowedOrigins.store(origins);
+
+        logger().info("CORS", fmt::format("Loaded {} allowed origin(s)", origins->size()));
+    }
+
+    bool Router::isOriginAllowed(const std::string &origin) const {
+        const auto allowed = m_corsAllowedOrigins.load();
+        return allowed && allowed->count(origin) > 0;
+    }
+
+    void Router::applyCorsHeaders(const drogon::HttpRequestPtr &req,
+                                  const drogon::HttpResponsePtr &resp) const {
+        const auto &origin = req->getHeader("Origin");
+        if (origin.empty() || !isOriginAllowed(origin)) {
+            return;
+        }
+
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        resp->addHeader("Access-Control-Allow-Credentials", "true");
+    }
+
     std::function<void(const drogon::HttpRequestPtr &,
                        drogon::AdviceCallback &&,
                        drogon::AdviceChainCallback &&
     )>
     Router::corsPreRoutingAdvice() {
-        return [](const drogon::HttpRequestPtr &req,
-                  drogon::AdviceCallback &&callback,
-                  drogon::AdviceChainCallback &&chainCallback) {
-            // Handle OPTIONS preflight
+        return [this](const drogon::HttpRequestPtr &req,
+                      drogon::AdviceCallback &&callback,
+                      drogon::AdviceChainCallback &&chainCallback) {
             if (req->method() == drogon::Options) {
                 const auto resp = drogon::HttpResponse::newHttpResponse();
                 resp->setStatusCode(drogon::k204NoContent);
-                resp->addHeader("Access-Control-Allow-Origin", "*");
-                resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-                resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-                resp->addHeader("Access-Control-Max-Age", "86400");
+
+                applyCorsHeaders(req, resp);
+
+                const auto &origin = req->getHeader("Origin");
+                if (!origin.empty() && isOriginAllowed(origin)) {
+                    const auto &requestMethod = req->getHeader("Access-Control-Request-Method");
+                    if (!requestMethod.empty()) {
+                        resp->addHeader("Access-Control-Allow-Methods", requestMethod);
+                    } else {
+                        resp->addHeader("Access-Control-Allow-Methods",
+                                        "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+                    }
+
+                    const auto &requestHeaders = req->getHeader("Access-Control-Request-Headers");
+                    if (!requestHeaders.empty()) {
+                        resp->addHeader("Access-Control-Allow-Headers", requestHeaders);
+                    } else {
+                        resp->addHeader("Access-Control-Allow-Headers",
+                                        "Content-Type, Authorization, X-Requested-With");
+                    }
+
+                    resp->addHeader("Access-Control-Max-Age", "86400");
+                }
+
                 callback(resp);
                 return;
             }
@@ -67,12 +132,10 @@ namespace mb {
 
     std::function<void(const drogon::HttpRequestPtr &,
                        const drogon::HttpResponsePtr &resp)>
-    Router::corsPostHandlingAdvice() {
-        return [](const drogon::HttpRequestPtr &,
-                  const drogon::HttpResponsePtr &resp) {
-            resp->addHeader("Access-Control-Allow-Origin", "*");
-            resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-            resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    Router::corsPreSendingAdvice() {
+        return [this](const drogon::HttpRequestPtr &req,
+                      const drogon::HttpResponsePtr &resp) {
+            applyCorsHeaders(req, resp);
         };
     }
 
@@ -82,6 +145,56 @@ namespace mb {
         notFoundResp->setContentTypeString("application/json");
         notFoundResp->setBody(R"({"status":404,"error":"Not Found","data":{}})");
         return notFoundResp;
+    }
+
+    std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthVerify() {
+        return [](MantisRequest &req, const MantisResponse &res) {
+            try {
+                // Require admin authentication
+                const auto &verification = req.getOr<json>("verification", json::object());
+
+                if (verification.empty()) {
+                    // Send auth error
+                    res.sendJSON(401, {
+                                     {"data", json::object()},
+                                     {"status", 401},
+                                     {"error", "Missing or invalid auth token"}
+                                 });
+                    return;
+                }
+
+                const bool ok = verification.contains("verified") &&
+                                verification["verified"].is_boolean() &&
+                                verification["verified"].get<bool>();
+                if (ok) {
+                    // Send verify success
+                    res.sendJSON(200, {
+                                     {"data", {{"status", "OK"}}},
+                                     {"status", 200},
+                                     {"error", ""}
+                                 });
+                    return;
+                }
+
+                // Send auth error
+                const auto err_str = verification["error"].empty() ? "Token Verification Error" : verification["error"];
+                res.sendJSON(401, {
+                                 {"data", json::object()},
+                                 {"status", 401},
+                                 {"error", err_str}
+                             });
+            } catch (std::exception &e) {
+                req.mbApp().logger().critical("Auth",
+                                              "Auth verification error",
+                                              e.what());
+                // Send verify error
+                res.sendJSON(500, {
+                                 {"data", json::object()},
+                                 {"status", 500},
+                                 {"error", e.what()}
+                             });
+            }
+        };
     }
 
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthLogin() {
@@ -155,6 +268,7 @@ namespace mb {
                 auto token = req.mbApp().auth().createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
                 user.erase("password");
+                res.setAuthTokenCookie(token, req.mbApp().auth().sessionTimeoutSeconds(entity.name()));
                 res.sendJSON(200, {
                                  {"status", 200},
                                  {"data", {{"token", token}, {"user", user}}},
@@ -237,6 +351,7 @@ namespace mb {
                 auto token = req.mbApp().auth().createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
                 user.erase("password");
+                res.setAuthTokenCookie(token, req.mbApp().auth().sessionTimeoutSeconds(entity.name()));
                 res.sendJSON(200, {
                                  {"status", 200},
                                  {"data", {{"token", token}, {"user", user}}},
@@ -265,8 +380,8 @@ namespace mb {
                 auto verification = req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
-                    res.sendJSON(403, {
-                                     {"status", 403},
+                    res.sendJSON(401, {
+                                     {"status", 401},
                                      {"data", json::object()},
                                      {"error", "Valid token required to refresh"}
                                  });
@@ -295,9 +410,11 @@ namespace mb {
                 json user = user_opt.has_value() ? user_opt.value() : json::object();
                 user.erase("password");
 
+                const auto new_token = result["token"].get<std::string>();
+                res.setAuthTokenCookie(new_token, req.mbApp().auth().sessionTimeoutSeconds(entity_name));
                 res.sendJSON(200, {
                                  {"status", 200},
-                                 {"data", {{"token", result["token"]}, {"user", user}}},
+                                 {"data", {{"token", new_token}, {"user", user}}},
                                  {"error", ""}
                              });
             } catch (const MantisException &e) {
@@ -322,8 +439,8 @@ namespace mb {
                 auto verification = req.getOr<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
-                    res.sendJSON(403, {
-                                     {"status", 403},
+                    res.sendJSON(401, {
+                                     {"status", 401},
                                      {"data", json::object()},
                                      {"error", "Valid token required to logout"}
                                  });
@@ -333,20 +450,22 @@ namespace mb {
                 auto claims = verification["claims"];
                 auto session_id = claims.value("session_id", "");
 
-                if (!session_id.empty()) {
+                if (session_id.empty()) {
                     res.sendJSON(500, {
                                      {"status", 500},
                                      {"data", nullptr},
                                      {"error", "Missing session id"}
                                  });
+                    return;
                 }
-                if (req.mbApp().auth().deleteSession(session_id))
+                if (req.mbApp().auth().deleteSession(session_id)) {
+                    res.clearAuthTokenCookie();
                     res.sendJSON(200, {
                                      {"status", 200},
                                      {"data", {{"logged_out", true}}},
                                      {"error", ""}
                                  });
-                else
+                } else
                     res.sendJSON(500, {
                                      {"status", 500},
                                      {"data", nullptr},
@@ -376,9 +495,9 @@ namespace mb {
 
                 auto verification = req.getOr<json>("verification", json::object());
                 if (verification.empty()) {
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", "Auth required to access this resource!"}
                                  });
                     return;
@@ -389,9 +508,9 @@ namespace mb {
                                       verification["verified"].get<bool>();
 
                 if (!verified) {
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", verification["error"]}
                                  });
                     return;

@@ -349,6 +349,7 @@ curl -H "Authorization: Bearer mb_sk_..." \
 - MantisBase APIs respect all access rules and authentication even in embedded mode
 - The `run()` method is blocking - use a separate thread if you need non-blocking behavior
 - All entity endpoints follow the pattern `/api/v1/entities/<entity_name>`
+- Token verification: `GET /api/v1/auth/verify` (JWT or API key)
 - Authentication endpoints are at `/api/v1/auth/<entity>/` (auth-type entities only)
 - API keys and OAuth routes live under `/api/v1/auth/<entity>/api-keys` and `/api/v1/auth/<entity>/oauth/`
 - Schema management endpoints are at `/api/v1/schemas/*` (admin only)

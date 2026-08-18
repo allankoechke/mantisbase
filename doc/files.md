@@ -133,7 +133,7 @@ MantisBase uses multi-layered path traversal prevention on all file operations. 
 
 ### Limitations
 
-- **File size**: A `maxFileSize` setting (default 10 MB) exists in the application config but is not currently enforced at upload time. Clients are not rejected for exceeding it.
+- **File size**: A `maxFileSize` setting (default 10485760 bytes / 10 MiB) exists in the application config but is not currently enforced at upload time. Clients are not rejected for exceeding it.
 - **File types**: No MIME type or file extension validation is performed. All file types are accepted.
 - **Files per record**: No limit on the number of files per record.
 

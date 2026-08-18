@@ -124,9 +124,13 @@ curl -X POST http://localhost:7070/api/v1/auth/users/login \
 # Use the returned token
 curl -H "Authorization: Bearer <token>" \
   http://localhost:7070/api/v1/entities/posts
+
+# Verify the token is still valid
+curl http://localhost:7070/api/v1/auth/verify \
+  -H "Authorization: Bearer <token>"
 ```
 
-See [Authentication API](auth.md) for refresh, logout, API keys, and OAuth.
+See [Authentication API](auth.md) for verify, refresh, logout, API keys, and OAuth.
 
 ---
 

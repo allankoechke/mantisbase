@@ -87,6 +87,9 @@ namespace mb {
 
         bool hasKey(const std::string &key) const;
         std::string getBearerTokenAuth() const;
+        std::string getCookieValue(const std::string &key) const;
+        /** Bearer token if present, otherwise the auth cookie value. */
+        std::string resolveAuthToken() const;
         std::pair<nlohmann::json, std::string> getBodyAsJson() const;
 
         const drogon::HttpRequestPtr& drogonRequest() const;
@@ -149,6 +152,9 @@ namespace mb {
         [[nodiscard]] size_t getHeaderValueCount(const std::string &key) const;
 
         void setHeader(const std::string &key, const std::string &val) const;
+
+        void setAuthTokenCookie(const std::string &token, int max_age_seconds) const;
+        void clearAuthTokenCookie() const;
 
         void setRedirect(const std::string &url, int status = 302) const;
 

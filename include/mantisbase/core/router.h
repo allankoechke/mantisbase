@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <set>
 #include <atomic>
 #include <shared_mutex>
 #include <nlohmann/json.hpp>
@@ -48,6 +49,13 @@ namespace mb {
 
         bool isRunning() const;
 
+        /** Reload allowed CORS origins from settings and MB_CORS_ORIGINS. */
+        void reloadCorsOrigins();
+
+        /** Add CORS headers when the request Origin is in the allowlist. */
+        void applyCorsHeaders(const drogon::HttpRequestPtr &req,
+                              const drogon::HttpResponsePtr &resp) const;
+
         const std::vector<MiddlewareFn> &preRoutingMiddlewares() const { return m_preRoutingMiddlewares; }
 
     private:
@@ -75,21 +83,25 @@ namespace mb {
         ///> Sync Advice to return handler that generates unique IDs per request
         const std::function<drogon::HttpResponsePtr(const drogon::HttpRequestPtr &)> reqIdSyncAdvice();
 
-        ///> Returns handler logger func for all requests before they return
-        std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)> loggerPostHandlingAdvice() const;
+        ///> Returns handler logger func for all requests before they are sent
+        std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)> loggerPreSendingAdvice() const;
+
+        bool isOriginAllowed(const std::string &origin) const;
 
         ///> Register CORS pre-routing advice
-        static std::function<void(const drogon::HttpRequestPtr &,
-                                  drogon::AdviceCallback &&,
-                                  drogon::AdviceChainCallback &&
+        std::function<void(const drogon::HttpRequestPtr &,
+                           drogon::AdviceCallback &&,
+                           drogon::AdviceChainCallback &&
         )> corsPreRoutingAdvice();
 
-        ///> Register post-routing advice for CORS headers on all responses
-        static std::function<void(const drogon::HttpRequestPtr &,
-                                  const drogon::HttpResponsePtr &resp)> corsPostHandlingAdvice();
+        ///> Register pre-sending advice for CORS headers on all responses
+        std::function<void(const drogon::HttpRequestPtr &,
+                           const drogon::HttpResponsePtr &resp)> corsPreSendingAdvice();
 
         ///> Get default 404 handler
         static drogon::HttpResponsePtr default404Response();
+
+        std::function<void(MantisRequest &, MantisResponse &)> handleAuthVerify();
 
         std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogin();
         static std::function<void(MantisRequest &, MantisResponse &)> handleAdminLogin();
@@ -112,6 +124,8 @@ namespace mb {
         mutable std::shared_mutex m_entityMapMutex;
 
         Snowflake<1534832906275L> m_sfId;
+
+        std::atomic<std::shared_ptr<const std::set<std::string>>> m_corsAllowedOrigins;
     };
 } // mb
 

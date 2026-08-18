@@ -36,7 +36,8 @@ CMRC_DECLARE(mantis);
 namespace mb {
     Router::Router(const MantisBase &app)
         : IMantisBase(app),
-          m_sseMgr(std::make_unique<SSEMgr>(app)) {
+          m_sseMgr(std::make_unique<SSEMgr>(app)),
+          m_corsAllowedOrigins(std::make_shared<const std::set<std::string>>()) {
         // Add global middlewares to work across all routes
         m_preRoutingMiddlewares.push_back(getAuthToken());
         m_preRoutingMiddlewares.push_back(hydrateContextData());
@@ -49,13 +50,14 @@ namespace mb {
             close();
     }
 
-    bool Router::init() { {
+    bool Router::init() {
+        {
             // Runs before the server starts listening (single-threaded), but we
             // take the exclusive lock anyway to keep all m_entityMap access
             // uniformly synchronized and future-proof.
             std::unique_lock lock(m_entityMapMutex);
 
-            const auto& sql = mbApp().db().session();
+            const auto &sql = mbApp().db().session();
             const soci::rowset rows = (sql->prepare << "SELECT schema FROM mb_tables");
 
             for (const auto &row: rows) {
@@ -112,14 +114,16 @@ namespace mb {
             // Register hook to generate request IDs
             drogon::app().registerSyncAdvice(reqIdSyncAdvice());
 
-            // Register logger func for all requests
-            drogon::app().registerPostHandlingAdvice(loggerPostHandlingAdvice());
+            // Register logger func for all responses (including 404/static)
+            drogon::app().registerPreSendingAdvice(loggerPreSendingAdvice());
+
+            reloadCorsOrigins();
 
             // Register CORS pre-routing advice
             drogon::app().registerPreRoutingAdvice(corsPreRoutingAdvice());
 
-            // Register post-routing advice for CORS headers on all responses
-            drogon::app().registerPostHandlingAdvice(corsPostHandlingAdvice());
+            // Register pre-sending advice for CORS headers on all responses
+            drogon::app().registerPreSendingAdvice(corsPreSendingAdvice());
 
             // Register default 404 handler
             drogon::app().setCustom404Page(default404Response());
@@ -258,6 +262,8 @@ namespace mb {
         const Middlewares authEntityMiddleware = {resolveAuthEntity()};
         const Middlewares authLoginMiddleware = {resolveAuthEntity(), rateLimit(5, 60, false)};
 
+        // Verify that the logged in user is valid or still
+        Get("/api/v1/auth/verify", handleAuthVerify(), {rateLimit(5, 60, false)});
         Post("/api/v1/auth/:entity_name/login", handleAuthLogin(), authLoginMiddleware);
         Post("/api/v1/auth/:entity_name/refresh", handleAuthRefresh(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/logout", handleAuthLogout(), authEntityMiddleware);
@@ -265,13 +271,22 @@ namespace mb {
 
     void Router::registerSchemaRoutes() {
         const Middlewares adminAuth = {requireAdminAuth()};
-        const Middlewares schemaItemMiddleware = {requireAdminAuth(), resolveSchema()};
+        const Middlewares schemaMutateMiddleware = {
+            requireAdminAuth(),
+            settingsFeatureGate("disableSchemaMutations")
+        };
+        const Middlewares schemaItemMutateMiddleware = {
+            requireAdminAuth(),
+            resolveSchema(),
+            settingsFeatureGate("disableSchemaMutations")
+        };
+        const Middlewares schemaItemReadMiddleware = {requireAdminAuth(), resolveSchema()};
 
         Get("/api/v1/schemas", schemaGetManyHandler(), adminAuth);
-        Post("/api/v1/schemas", schemaPostHandler(), adminAuth);
-        Get("/api/v1/schemas/:schema_name_or_id", schemaGetOneHandler(), schemaItemMiddleware);
-        Patch("/api/v1/schemas/:schema_name_or_id", schemaPatchHandler(), schemaItemMiddleware);
-        Delete("/api/v1/schemas/:schema_name_or_id", schemaDeleteHandler(), schemaItemMiddleware);
+        Post("/api/v1/schemas", schemaPostHandler(), schemaMutateMiddleware);
+        Get("/api/v1/schemas/:schema_name_or_id", schemaGetOneHandler(), schemaItemReadMiddleware);
+        Patch("/api/v1/schemas/:schema_name_or_id", schemaPatchHandler(), schemaItemMutateMiddleware);
+        Delete("/api/v1/schemas/:schema_name_or_id", schemaDeleteHandler(), schemaItemMutateMiddleware);
     }
 
     void Router::registerEntityRoutes() {
@@ -308,7 +323,8 @@ namespace mb {
         router.Post("/api/v1/sys/admins/login", handleAdminLogin(), {rateLimit(5, 60, false)});
         router.Post("/api/v1/sys/admins/refresh", handleAuthRefresh());
         router.Post("/api/v1/sys/admins/logout", handleAuthLogout());
-        router.Post("/api/v1/sys/admins/setup", handleSetupAdmin(), {rateLimit(3, 3600, false)});
+        router.Post("/api/v1/sys/admins/setup", handleSetupAdmin(),
+                    {settingsFeatureGate("disableAdminRegistration"), rateLimit(3, 3600, false)});
 
         // /api/v1/auth/<entity>/*
         registerAuthRoutes();
@@ -316,18 +332,9 @@ namespace mb {
         // /api/v1/files/*
         router.Get("/api/v1/files/:entity/:file", fileServingHandler());
 
-        router.Get("/api/v1/sys/settings/config", [](const MantisRequest &, const MantisResponse &res) {
-            res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
-        });
-
-        router.Post("/api/v1/sys/settings/config", [](const MantisRequest &, const MantisResponse &res) {
-            res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
-        });
-
-        router.Patch("/api/v1/sys/settings/config", [](const MantisRequest &, const MantisResponse &res) {
-            res.sendJSON(200, {{"data", {}}, {"status", 200}, {"error", nullptr}});
-        });
-
+        if (!mbApp().settings().setupRoutes()) {
+            throw std::runtime_error("Failed to initialize settings routes");
+        }
 
         m_sseMgr->createRoutes();
 
@@ -382,13 +389,13 @@ namespace mb {
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(404);
                     req.mbApp().logger().critical("Admin Response Error",
-                                        fmt::format("Error processing /admin response: {}", e.what()));
+                                                  fmt::format("Error processing /admin response: {}", e.what()));
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
                 res.setReason(e.what());
                 req.mbApp().logger().critical("Admin Request Error",
-                                    fmt::format("Error processing /admin request: {}", e.what()));
+                                              fmt::format("Error processing /admin request: {}", e.what()));
             }
         };
     }
@@ -473,8 +480,6 @@ namespace mb {
                 std::string search_filter;
                 std::string start_date;
                 std::string end_date;
-                std::string sort_by = "timestamp";
-                std::string sort_order = "desc";
 
                 if (req.hasQueryParam("after")) {
                     after = req.getQueryParamValue("after");
@@ -521,27 +526,12 @@ namespace mb {
                     end_date = req.getQueryParamValue("end_date");
                 }
 
-                if (req.hasQueryParam("sort_by")) {
-                    std::string sort_param = req.getQueryParamValue("sort_by");
-                    if (sort_param == "level" || sort_param == "origin" || sort_param == "message" ||
-                        sort_param == "timestamp" || sort_param == "created_at") {
-                        sort_by = sort_param;
-                    }
-                }
-
-                if (req.hasQueryParam("sort_order")) {
-                    if (std::string order = req.getQueryParamValue("sort_order"); order == "asc" || order == "desc") {
-                        sort_order = order;
-                    }
-                }
-
                 if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
 
                 // Get log database instance
                 auto &logsDb = req.mbApp().logs().logsDb();
                 json result = logsDb.getLogs(after, limit, level_filter,
-                                             search_filter, start_date, end_date,
-                                             sort_by, sort_order);
+                                             search_filter, start_date, end_date);
 
                 json response;
                 response["error"] = "";

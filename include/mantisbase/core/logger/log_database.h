@@ -29,7 +29,7 @@ namespace mb {
      * @brief Manages SQLite database for application logs.
      *
      * Provides methods to store logs in a separate SQLite database,
-     * with automatic cleanup of logs older than 5 days.
+     * with automatic cleanup of logs older than the configured retention period.
      */
     class LogDatabase {
     public:
@@ -62,24 +62,20 @@ namespace mb {
                        const std::string& details, const json& data = json::object());
 
         /**
-         * @brief Get logs with cursor-based pagination, filtering, and sorting.
+         * @brief Get logs with cursor-based pagination and filtering (ordered by `id` ASC).
          * @param after Cursor ID to fetch records after (empty = start from beginning)
          * @param limit Maximum number of records to return (default 50, max 1000)
          * @param level_filter Optional level filter (empty = all levels)
          * @param search_filter Optional message search filter (empty = no filter)
          * @param start_date Optional start date filter (ISO 8601 format, empty = no filter)
          * @param end_date Optional end date filter (ISO 8601 format, empty = no filter)
-         * @param sort_by Sort field (default: "timestamp")
-         * @param sort_order Sort order ("asc" or "desc", default: "desc")
-         * @return JSON object with logs and cursor info
+         * @return JSON object with logs, cursor, and has_more
          */
         json getLogs(const std::string& after = "", int limit = 50,
                      const std::string& level_filter = "",
                      const std::string& search_filter = "",
                      const std::string& start_date = "",
-                     const std::string& end_date = "",
-                     const std::string& sort_by = "timestamp",
-                     const std::string& sort_order = "desc");
+                     const std::string& end_date = "");
     private:
         /**
          * @brief Shutdown and clean up log database.
@@ -98,9 +94,11 @@ namespace mb {
 
         /**
          * @brief Delete logs older than specified days.
-         * @param days Number of days to keep (default: 5)
+         * @param days Number of days to keep
          */
-        void deleteOldLogs(int days = 5);
+        void deleteOldLogs(int days);
+
+        [[nodiscard]] int configuredLogRetentionDays() const;
 
         static std::string buildMinLogWhereCondition(const std::string& level);
 

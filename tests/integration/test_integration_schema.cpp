@@ -76,7 +76,7 @@ TEST_F(IntegrationSchemaTest, CreateSchemaRequiresAdmin) {
                             schema.dump(), "application/json");
 
     ASSERT_TRUE(res != nullptr);
-    EXPECT_EQ(res->status, 403);
+    EXPECT_EQ(res->status, 401);
 }
 
 TEST_F(IntegrationSchemaTest, GetSchema) {

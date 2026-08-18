@@ -26,7 +26,7 @@ All REST endpoints live under `/api/v1/` and are grouped by namespace:
 
 | Prefix | Description |
 |--------|-------------|
-| `/api/v1/auth/<entity>/` | Entity user authentication (login, refresh, logout, API keys, OAuth) for auth-type entities |
+| `/api/v1/auth/` | Entity user authentication: token verify (`/verify`), plus per-entity login, refresh, logout, API keys, and OAuth |
 | `/api/v1/entities/` | Entity record CRUD |
 | `/api/v1/schemas/` | Schema management (admin only) |
 | `/api/v1/files/` | Uploaded file serving |
@@ -91,6 +91,14 @@ Authorization: Bearer <token>
 
 For authentication endpoints, see [Authentication API](auth.md).
 
+### HTTP status codes
+
+| Code | Meaning |
+|------|---------|
+| `401 Unauthorized` | Missing, invalid, or expired credentials (no valid JWT or API key) |
+| `403 Forbidden` | Valid credentials, but the authenticated user is not permitted to access the resource (access rules, admin-only routes, custom expressions) |
+| `503 Service Unavailable` | The route is temporarily disabled (for example, by an environment gate such as `MB_DISABLE_ADMIN_MUTATIONS`) |
+
 ---
 
 ## Middlewares
@@ -117,11 +125,32 @@ You can use these middlewares when creating custom endpoints:
 | `hydrateContextData()` | Validate token and load user data | Applied globally to all routes |
 | `hasAccess(entity_name)` | Check entity access rules | Applied automatically to entity endpoints |
 | `requireAdminAuth()` | Require admin authentication | Blocks non-admin users |
-| `requireEntityAuth(entity_name)` | Require authentication from specific entity | Only allows users from specified entity table |
-| `requireAdminOrEntityAuth(entity_name)` | Require admin OR entity auth | Allows admins or users from specified entity |
+| `requireExprEval(expr)` | Custom expression gate on a route | Evaluates `auth` / `req` context; **403** `"Access denied!"` when the expression is false (no upfront auth requirement) |
+| `requireEntityAuth(entity_name)` | Require auth from a specific entity | **401** without valid credentials; **403** when authenticated as another entity |
+| `requireAdminOrEntityAuth(entity_name)` | Require admin or entity auth | **401** without valid credentials; **403** when authenticated as neither admin nor the given entity |
 | `requireGuestOnly()` | Require no authentication | Blocks authenticated users, only allows guests |
-| `requireExprEval(expr)` | Evaluate custom expression | Custom expression-based access control |
 | `rateLimit(max_requests, window_seconds, use_user_id)` | Rate limiting middleware | Limits requests per time window by IP or user ID |
+| `envGateMiddleware(env_var, block_when_truthy)` | Environment gate | Blocks with **503** when the env var is truthy (`true`, `1`, `on`, `yes`); otherwise the request continues |
+
+#### `envGateMiddleware`
+
+Blocks route execution when an environment variable matches a configured truthy value. The env var is read on each request (not cached at startup).
+
+```cpp
+// Block admin account mutations when MB_DISABLE_ADMIN_MUTATIONS is set to true/1/on/yes
+router.Post("/api/v1/sys/admins", handler, {
+    requireAdminAuth(),
+    envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)
+});
+```
+
+| Env value | Behavior |
+|-----------|----------|
+| Unset | Normal operation |
+| `false`, `0`, or any other non-truthy string | Normal operation (ignored) |
+| `true`, `1`, `on`, `yes`, `t` | **503** — `{"status":503,"error":"Resource action temporarily disabled","data":{}}` |
+
+See [Docker environment variables](docker.md#environment-variables) for production flags.
 
 ### Using Middlewares
 
@@ -326,22 +355,25 @@ curl -X PATCH http://localhost:7070/api/v1/schemas/posts \
 
 ## Query Parameters
 
-Entity list endpoints support cursor-based pagination and sorting:
+Entity list endpoints use cursor-based pagination ordered by record `id` (ascending):
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `limit` | `50` | Number of records to return (1–500) |
-| `after` | — | Cursor from the previous response — returns records after this value |
-| `sort` | `id` ASC | Field name to sort by. Prefix with `-` for descending (e.g., `-created`) |
+| `after` | — | Cursor (`id` of the last item from the previous page) |
+| `filter` | — | URL-encoded JSON object of field equality filters, e.g. `{"status":"active"}` |
 
 **Example:**
 
 ```bash
 # First page
-curl "http://localhost:7070/api/v1/entities/posts?limit=20&sort=-created"
+curl "http://localhost:7070/api/v1/entities/posts?limit=20"
 
 # Next page (using cursor from previous response)
-curl "http://localhost:7070/api/v1/entities/posts?limit=20&sort=-created&after=<cursor>"
+curl "http://localhost:7070/api/v1/entities/posts?limit=20&after=<cursor>"
+
+# Filtered list
+curl "http://localhost:7070/api/v1/entities/posts?filter=%7B%22status%22%3A%22active%22%7D"
 ```
 
 **Response:**
@@ -352,12 +384,15 @@ curl "http://localhost:7070/api/v1/entities/posts?limit=20&sort=-created&after=<
   "data": {
     "items_count": 20,
     "limit": 20,
+    "has_more": true,
     "cursor": "019c1b81-364b-7000-8120-b5416b2c42c2",
     "items": [...]
   },
   "error": ""
 }
 ```
+
+When `has_more` is `false`, you have reached the last page.
 
 ---
 
@@ -492,7 +527,6 @@ To remove a foreign key constraint, set `foreign_key` to `null`:
 
 ```json
 PATCH /api/v1/schemas/comments
-
 {
   "fields": [
     {
@@ -525,26 +559,66 @@ See [Healthcheck](healthcheck.md) for details.
 
 ### Settings
 
+Requires **admin authentication** for all settings endpoints.
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/v1/sys/settings/config` | Get application settings |
 | PATCH | `/api/v1/sys/settings/config` | Update application settings |
 
+PATCH returns **503** when `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value. A successful PATCH reloads the CORS allowlist immediately (no server restart required).
+
 The settings object contains the following fields:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `appName` | string | `"ACME Project"` | Application display name |
-| `baseUrl` | string | `"https://acme.example.com"` | Base URL for the application |
-| `maintenanceMode` | boolean | `false` | Put the application in maintenance mode |
-| `maxFileSize` | integer | `10` | Max file upload size in MB (stored but not currently enforced) |
-| `allowRegistration` | boolean | `true` | Allow new user registration |
+| `orgName` | string | `"ACME Corp"` | Organization display name |
+| `siteDomain` | string | `"https://acme.example.com"` | Public site URL (OAuth callbacks, JWT audience) |
+| `corsAllowedOrigins` | array of strings | `["http://localhost:3000", "http://127.0.0.1:3000"]` | Browser origins allowed for cross-origin requests with credentials |
+| `maxFileSize` | integer | `10485760` | Max file upload size in bytes (10 MiB; not currently enforced) |
+| `logRetentionDays` | integer | `5` | Delete application logs older than this many days (hourly cleanup job) |
+| `disableAdminRegistration` | boolean | `false` | When **true**, blocks creating new admin accounts via the API (`POST /api/v1/sys/admins`, `POST /api/v1/sys/admins/setup`) with **503**. When false or unset, admin API registration is allowed. Does not affect `mantisbase admins --add`. |
+| `disableSchemaMutations` | boolean | `false` | When **true**, blocks schema mutations via the API (`POST`, `PATCH`, `DELETE` on `/api/v1/schemas/*`) with **503**. `GET` remains available. Does not affect `mantisbase schema` CLI commands. |
 | `emailVerificationRequired` | boolean | `false` | Require email verification on registration |
 | `sessionTimeout` | integer | `86400` | User session timeout in seconds (24 h) |
 | `adminSessionTimeout` | integer | `3600` | Admin session timeout in seconds (1 h) |
-| `mode` | string | `"PROD"` | Application mode: `PROD` or `TEST` |
+| `jwtEnableSetIssuer` | boolean | `false` | Set JWT issuer from `orgName` |
+| `jwtEnableSetAudience` | boolean | `false` | Set JWT audience from `siteDomain` |
+| `smtp` | object | see below | Outbound mail configuration |
+
+SMTP object fields: `host`, `port` (default 587), `user`, `password`, `from`, `tls`. On GET, a non-empty password is returned as `"********"`. On PATCH, send `"********"` for `smtp.password` to keep the existing value.
 
 The GET response also includes `mantisVersion` (the running server version).
+
+#### Cross-Origin Resource Sharing (CORS)
+
+MantisBase enables credentialed cross-origin browser access when the request `Origin` header matches an entry in the allowlist. Allowed origins are loaded from:
+
+1. **`corsAllowedOrigins`** in application settings (GET/PATCH `/api/v1/sys/settings/config`)
+2. **`MB_CORS_ORIGINS`** environment variable — comma-separated list, merged with settings at server startup and after each settings PATCH
+
+Example environment variable:
+
+```bash
+export MB_CORS_ORIGINS="http://localhost:3000,https://app.example.com"
+```
+
+Example settings PATCH (admin auth required):
+
+```json
+{
+  "corsAllowedOrigins": [
+    "http://localhost:3000",
+    "https://app.example.com"
+  ]
+}
+```
+
+For credentialed requests (`fetch(..., { credentials: "include" })`), responses echo the exact matching origin and set `Access-Control-Allow-Credentials: true`. Wildcard `Access-Control-Allow-Origin: *` is not used.
+
+`http://localhost:3000` and `http://127.0.0.1:3000` are different origins; list each host your frontend uses. Preflight `OPTIONS` requests are handled automatically for allowed origins.
+
+See also [Docker configuration](docker.md) for `MB_CORS_ORIGINS` in container deployments.
 
 ### Admin Accounts
 
@@ -564,7 +638,7 @@ Admin account CRUD and authentication live under `/api/v1/sys/admins/`.
 
 ### Logs Endpoint
 
-The logs endpoint provides access to system logs with filtering, pagination, and sorting capabilities. **Requires admin authentication.**
+The logs endpoint provides access to system logs with filtering and cursor pagination. **Requires admin authentication.** Results are ordered by log `id` (ascending).
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -575,14 +649,12 @@ The logs endpoint provides access to system logs with filtering, pagination, and
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `limit` | integer | `50` | Number of records per page (max 1000) |
-| `after` | string | — | Cursor from previous response for pagination |
+| `after` | string | — | Cursor (`id` of last item from previous page) |
 | `level` | string | — | Filter by exact log level: `trace`, `debug`, `info`, `warn`, `critical` |
 | `min_level` | string | — | Filter by minimum log level (includes that level and above) |
 | `search` | string | — | Search in log messages |
 | `start_date` | string | — | Start date filter (ISO 8601 format) |
 | `end_date` | string | — | End date filter (ISO 8601 format) |
-| `sort_by` | string | `"timestamp"` | Sort field: `level`, `origin`, `message`, `timestamp`, `created_at` |
-| `sort_order` | string | `"desc"` | Sort order: `asc` or `desc` |
 
 #### Example Requests
 
@@ -613,7 +685,7 @@ curl -H "Authorization: Bearer <admin_token>" \
 
 # Combined filters
 curl -H "Authorization: Bearer <admin_token>" \
-  "http://localhost:7070/api/v1/sys/logs?min_level=warn&search=error&limit=20&sort_by=timestamp&sort_order=desc"
+  "http://localhost:7070/api/v1/sys/logs?min_level=warn&search=error&limit=20"
 ```
 
 #### Response Format
@@ -623,6 +695,7 @@ curl -H "Authorization: Bearer <admin_token>" \
   "data": {
     "items_count": 50,
     "limit": 50,
+    "has_more": true,
     "cursor": "log_id_abc123",
     "items": [
       {
@@ -639,7 +712,7 @@ curl -H "Authorization: Bearer <admin_token>" \
 }
 ```
 
-Pass the returned `cursor` value as the `after` parameter in subsequent requests to page through results.
+Pass the returned `cursor` value as the `after` parameter in subsequent requests to page through results. When `has_more` is `false`, you have reached the last page.
 
 #### Log Levels
 
@@ -816,7 +889,7 @@ Realtime endpoints use the same access rules as entity `list` and `get`:
 - Subscribing to an entity (e.g. `posts`) requires **list** access on that entity.
 - Subscribing to a specific row (e.g. `posts:&lt;id&gt;`) requires **get** access.
 
-Invalid or unauthorized topics result in `400` or `403` responses.
+Invalid or unauthorized topics result in `400`, `401`, or `403` responses depending on whether the request is malformed, unauthenticated, or forbidden by access rules.
 
 ### Backend support
 

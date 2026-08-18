@@ -57,10 +57,15 @@ namespace mb {
 
     json ApiKeyManager::list(const std::string &entity_name, const std::string &user_id) const {
         const auto &sql = mbApp().db().session();
-        const soci::rowset<soci::row> rows = (sql->prepare <<
-                                              "SELECT id, entity_name, user_id, label, permissions, last_used, created, expires_at "
-                                              "FROM mb_api_keys WHERE entity_name = :entity AND user_id = :uid",
-                                              soci::use(entity_name), soci::use(user_id));
+        const soci::rowset<soci::row> rows = user_id.empty()
+                                                 ? (sql->prepare <<
+                                                    "SELECT id, entity_name, user_id, label, permissions, last_used, created, expires_at "
+                                                    "FROM mb_api_keys WHERE entity_name = :entity",
+                                                    soci::use(entity_name))
+                                                 : (sql->prepare <<
+                                                    "SELECT id, entity_name, user_id, label, permissions, last_used, created, expires_at "
+                                                    "FROM mb_api_keys WHERE entity_name = :entity AND user_id = :uid",
+                                                    soci::use(entity_name), soci::use(user_id));
 
         json result = json::array();
         for (const auto &row: rows) {

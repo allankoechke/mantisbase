@@ -23,6 +23,12 @@ namespace mb {
     using Record = nlohmann::json;  ///< Single database record as JSON object
     using Records = std::vector<Record>;  ///< Collection of database records
 
+    /** Result of a paginated entity list query. */
+    struct EntityListPage {
+        Records items;
+        bool has_more = false;
+    };
+
     /// Upper bound on the number of records returned by a single list() page.
     /// Requests larger than this are clamped so one request cannot force an
     /// unbounded query or response allocation.
@@ -178,8 +184,21 @@ namespace mb {
         [[nodiscard]] Record create(const json &record, const json &opts = json::object()) const;
 
         /**
-         * @brief List all records in the entity table.
-         * @param opts Optional parameters (currently unused)
+         * @brief List entity records with cursor pagination (always ordered by `id` ASC).
+         *
+         * Supported @p opts keys:
+         * - `pagination.limit` — page size (1–500, default 50)
+         * - `pagination.after` — cursor (`id` of last item from previous page)
+         * - `filter` — JSON object or JSON string of `{field: value}` equality filters
+         *
+         * @param opts Optional list parameters
+         * @return Page of records and whether more rows exist
+         */
+        [[nodiscard]] EntityListPage listPage(const json &opts = json::object()) const;
+
+        /**
+         * @brief List records (items only; see @ref listPage for pagination metadata).
+         * @param opts Optional parameters passed to @ref listPage
          * @return Vector of record JSON objects
          */
         [[nodiscard]] Records list(const json &opts = json::object()) const;
@@ -215,10 +234,11 @@ namespace mb {
         [[nodiscard]] const json &schema() const;
 
         /**
-         * @brief Count total records in the entity table.
-         * @return Number of records
+         * @brief Count records in the entity table, optionally matching a filter.
+         * @param filter JSON object of `{field: value}` equality filters (same shape as list `filter`)
+         * @return Number of matching records
          */
-        [[nodiscard]] int countRecords() const;
+        [[nodiscard]] int countRecords(const json &filter = json::object()) const;
 
         /**
          * @brief Check if entity table is empty.

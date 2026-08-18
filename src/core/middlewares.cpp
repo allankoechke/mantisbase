@@ -3,11 +3,13 @@
 #include "../include/mantisbase/core/models/entity.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
 #include "../include/mantisbase/core/api_keys.h"
+#include "../include/mantisbase/core/expr_evaluator.h"
 #include "../include/mantisbase/utils/crypto_utils.h"
 #include <unordered_map>
 #include <deque>
 #include <chrono>
 #include <mutex>
+#include <optional>
 
 namespace mb {
     namespace {
@@ -17,6 +19,79 @@ namespace mb {
                 {"error", std::format("{} {} Route Not Found", method, path)},
                 {"data", json::object()}
             };
+        }
+
+        json buildMiddlewareExprVars(MantisRequest &req, const json &auth) {
+            json vars = json::object();
+            vars["auth"] = auth;
+
+            json req_obj;
+            req_obj["remoteAddr"] = req.getRemoteAddr();
+            req_obj["remotePort"] = req.getRemotePort();
+            req_obj["localAddr"] = req.getLocalAddr();
+            req_obj["localPort"] = req.getLocalPort();
+            req_obj["body"] = json::object();
+
+            try {
+                if (req.getMethod() == "POST" && !req.getBody().empty()) {
+                    const auto &[body, err] = req.getBodyAsJson();
+                    if (err.empty()) {
+                        req_obj["body"] = body;
+                    }
+                }
+            } catch (...) {
+            }
+
+            vars["req"] = req_obj;
+            return vars;
+        }
+
+        HandlerResponse sendAccessDenied(MantisResponse &res) {
+            res.sendJSON(403, {
+                             {"status", 403},
+                             {"data", json::object()},
+                             {"error", "Access denied!"}
+                         });
+            return HandlerResponse::Handled;
+        }
+
+        std::optional<json> requireAuthenticatedUser(MantisRequest &req, MantisResponse &res) {
+            const auto &verification = req.getOr<json>("verification", json::object());
+
+            if (verification.empty()) {
+                res.sendJSON(401, {
+                                 {"data", json::object()},
+                                 {"status", 401},
+                                 {"error", "Auth required to access this resource!"}
+                             });
+                return std::nullopt;
+            }
+
+            if (!verification.contains("verified") ||
+                !verification["verified"].is_boolean() ||
+                !verification["verified"].get<bool>()) {
+                const auto err_str = verification["error"].empty()
+                                         ? "Token Verification Error"
+                                         : verification["error"].get<std::string>();
+                res.sendJSON(401, {
+                                 {"data", json::object()},
+                                 {"status", 401},
+                                 {"error", err_str}
+                             });
+                return std::nullopt;
+            }
+
+            auto auth = req.getOr<json>("auth", json::object());
+            if (auth["user"].is_null() || !auth["user"].is_object()) {
+                res.sendJSON(401, {
+                                 {"data", json::object()},
+                                 {"status", 401},
+                                 {"error", "Auth user not found!"}
+                             });
+                return std::nullopt;
+            }
+
+            return auth;
         }
 
         HandlerResponse checkEntityAccess(MantisRequest &req, MantisResponse &res, const std::string &entity_name,
@@ -31,10 +106,10 @@ namespace mb {
                       || method == "PATCH"
                       || method == "DELETE")) {
                     res.sendJSON(400, {
-                        {"status", 400},
-                        {"data", json::object()},
-                        {"error", "Unsupported method `" + method + "`"}
-                    });
+                                     {"status", 400},
+                                     {"data", json::object()},
+                                     {"error", "Unsupported method `" + method + "`"}
+                                 });
                     return HandlerResponse::Handled;
                 }
 
@@ -54,14 +129,15 @@ namespace mb {
                 }
 
                 if (rule.mode().empty()) {
-                    req.mbApp().logger().trace("Auth", "Admin Access Required", "Restricted access, admin auth required!");
+                    req.mbApp().logger().trace("Auth", "Admin Access Required",
+                                               "Restricted access, admin auth required!");
                     const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
-                        res.sendJSON(403, {
-                            {"data", json::object()},
-                            {"status", 403},
-                            {"error", "Admin auth required to access this resource!"}
-                        });
+                        res.sendJSON(401, {
+                                         {"data", json::object()},
+                                         {"status", 401},
+                                         {"error", "Admin auth required to access this resource!"}
+                                     });
                         return HandlerResponse::Handled;
                     }
 
@@ -69,34 +145,36 @@ namespace mb {
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
                         if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(403, {
-                                {"data", json::object()},
-                                {"status", 403},
-                                {"error", "Auth user not found!"}
-                            });
+                            res.sendJSON(401, {
+                                             {"data", json::object()},
+                                             {"status", 401},
+                                             {"error", "Auth user not found!"}
+                                         });
                             return HandlerResponse::Handled;
                         }
 
                         return HandlerResponse::Unhandled;
                     }
 
-                    res.sendJSON(403, {
-                        {"data", json::object()},
-                        {"status", 403},
-                        {"error", verification["error"]}
-                    });
+                    res.sendJSON(401, {
+                                     {"data", json::object()},
+                                     {"status", 401},
+                                     {"error", verification["error"]}
+                                 });
                     return HandlerResponse::Handled;
                 }
 
-                if (rule.mode() == "auth" || (auth["entity"].is_string() && auth["entity"].get<std::string>() == "mb_admins")) {
-                    req.mbApp().logger().trace("Auth", "User/Admin Access Required", "Restricted access, admin/user auth required!");
+                if (rule.mode() == "auth" || (auth["entity"].is_string() && auth["entity"].get<std::string>() ==
+                                              "mb_admins")) {
+                    req.mbApp().logger().trace("Auth", "User/Admin Access Required",
+                                               "Restricted access, admin/user auth required!");
                     const auto &verification = req.getOr<json>("verification", json::object());
                     if (verification.empty()) {
-                        res.sendJSON(403, {
-                            {"data", json::object()},
-                            {"status", 403},
-                            {"error", "Auth required to access this resource!"}
-                        });
+                        res.sendJSON(401, {
+                                         {"data", json::object()},
+                                         {"status", 401},
+                                         {"error", "Auth required to access this resource!"}
+                                     });
                         return HandlerResponse::Handled;
                     }
 
@@ -104,70 +182,49 @@ namespace mb {
                         verification["verified"].is_boolean() &&
                         verification["verified"].get<bool>()) {
                         if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(403, {
-                                {"data", json::object()},
-                                {"status", 403},
-                                {"error", "Auth user not found!"}
-                            });
+                            res.sendJSON(401, {
+                                             {"data", json::object()},
+                                             {"status", 401},
+                                             {"error", "Auth user not found!"}
+                                         });
                             return HandlerResponse::Handled;
                         }
 
                         return HandlerResponse::Unhandled;
                     }
 
-                    res.sendJSON(403, {
-                        {"data", json::object()},
-                        {"status", 403},
-                        {"error", verification["error"]}
-                    });
+                    res.sendJSON(401, {
+                                     {"data", json::object()},
+                                     {"status", 401},
+                                     {"error", verification["error"]}
+                                 });
                     return HandlerResponse::Handled;
                 }
 
                 if (rule.mode() == "custom") {
-                    req.mbApp().logger().trace("Auth", "Custom Expression Access", fmt::format("Restricted access, custom expression `{}` to be evaluated", rule.expr()));
-                    const std::string expr = rule.expr();
-                    json vars = json::object();
-                    vars["auth"] = auth;
+                    req.mbApp().logger().trace("Auth", "Custom Expression Access",
+                                               fmt::format("Restricted access, custom expression `{}` to be evaluated",
+                                                           rule.expr()));
+                    const auto vars = buildMiddlewareExprVars(req, auth);
 
-                    json req_obj;
-                    req_obj["remoteAddr"] = req.getRemoteAddr();
-                    req_obj["remotePort"] = req.getRemotePort();
-                    req_obj["localAddr"] = req.getLocalAddr();
-                    req_obj["localPort"] = req.getLocalPort();
-                    req_obj["body"] = json::object();
-
-                    try {
-                        if (req.getMethod() == "POST" && !req.getBody().empty()) {
-                            req_obj["body"] = req.getBodyAsJson();
-                        }
-                    } catch (...) {
-                    }
-
-                    vars["req"] = req_obj;
-
-                    if (Expr::eval(expr, vars))
+                    if (Expr::eval(rule.expr(), vars))
                         return HandlerResponse::Unhandled;
 
-                    res.sendJSON(403, {
-                        {"status", 403},
-                        {"data", json::object()},
-                        {"error", "Access denied!"}
-                    });
-                    return HandlerResponse::Handled;
+                    return sendAccessDenied(res);
                 }
 
                 res.sendJSON(403, {
-                    {"status", 403},
-                    {"data", json::object()},
-                    {"error", "Access denied, entity access rule unknown."}
-                });
+                                 {"status", 403},
+                                 {"data", json::object()},
+                                 {"error", "Access denied, entity access rule unknown."}
+                             });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {
                 res.sendJSON(500, {
-                    {"status", 500},
-                    {"data", json::object()},
-                    {"error", e.what()}
-                });
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             });
                 return HandlerResponse::Handled;
             }
         }
@@ -184,9 +241,9 @@ namespace mb {
                 auth["user"] = nullptr;
                 auth["auth_method"] = nullptr;
 
-                if (req.hasHeader("Authorization")) {
-                    const auto token = trim(req.getBearerTokenAuth());
+                const auto token = trim(req.resolveAuthToken());
 
+                if (!token.empty()) {
                     if (token.starts_with("mb_sk_")) {
                         // API key authentication
                         const auto key_hash = ApiKeyManager::hashApiKey(token);
@@ -209,7 +266,8 @@ namespace mb {
                                     u.erase("password");
                                     auth["user"] = u;
                                 }
-                            } catch (...) {}
+                            } catch (...) {
+                            }
 
                             req.set("auth", auth);
 
@@ -230,7 +288,7 @@ namespace mb {
                 req.set("auth", auth);
                 req.set("verification", json::object());
                 return HandlerResponse::Unhandled;
-            } catch (const std::exception& e) {
+            } catch (const std::exception &e) {
                 std::cout << "Failed to get access token: " << e.what() << std::endl;
                 throw MantisException(500, e.what());
             }
@@ -313,10 +371,10 @@ namespace mb {
                 }
 
                 res.sendJSON(e.code(), {
-                    {"status", e.code()},
-                    {"data", json::object()},
-                    {"error", e.what()}
-                });
+                                 {"status", e.code()},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             });
                 return HandlerResponse::Handled;
             }
         };
@@ -374,10 +432,14 @@ namespace mb {
             const auto entity = req.mbApp().entity(entity_name);
             if (entity.type() == "view") {
                 res.sendJSON(405, {
-                    {"status", 405},
-                    {"data", json::object()},
-                    {"error", std::format("Method `{}` is not allowed for view entity `{}`", req.getMethod(), entity_name)}
-                });
+                                 {"status", 405},
+                                 {"data", json::object()},
+                                 {
+                                     "error",
+                                     std::format("Method `{}` is not allowed for view entity `{}`", req.getMethod(),
+                                                 entity_name)
+                                 }
+                             });
                 return HandlerResponse::Handled;
             }
 
@@ -401,9 +463,15 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr) {
-        std::string msg = MB_FUNC();
-        return [expr, msg](MantisRequest &req, MantisResponse &res) {
-            return REQUEST_PENDING;
+        return [expr](MantisRequest &req, MantisResponse &res) {
+            const auto &auth = req.getOr<json>("auth", json::object());
+            const auto vars = buildMiddlewareExprVars(req, auth);
+
+            if (Expr::eval(expr, vars)) {
+                return HandlerResponse::Unhandled;
+            }
+
+            return sendAccessDenied(res);
         };
     }
 
@@ -427,13 +495,12 @@ namespace mb {
             try {
                 // Require admin authentication
                 const auto &verification = req.getOr<json>("verification", json::object());
-                // logEntry::trace("Verification: {}", verification.dump());
 
                 if (verification.empty()) {
                     // Send auth error
-                    res.sendJSON(403, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
+                                     {"status", 401},
                                      {"error", "Auth required to access this resource!"}
                                  });
                     return HandlerResponse::Handled;
@@ -448,11 +515,11 @@ namespace mb {
 
                     // Check if verified user object is valid, if not throw auth error
                     if (auth["user"].is_null() || !auth["user"].is_object()) {
-                        res.sendJSON(403, {
-                                 {"data", json::object()},
-                                 {"status", 403},
-                                 {"error", "Auth user not found!"}
-                             });
+                        res.sendJSON(401, {
+                                         {"data", json::object()},
+                                         {"status", 401},
+                                         {"error", "Auth user not found!"}
+                                     });
                         return HandlerResponse::Handled;
                     }
 
@@ -473,14 +540,15 @@ namespace mb {
 
                 // Send auth error
                 const auto err_str = verification["error"].empty() ? "Token Verification Error" : verification["error"];
-                res.sendJSON(403, {
+                res.sendJSON(401, {
                                  {"data", json::object()},
-                                 {"status", 403},
+                                 {"status", 401},
                                  {"error", err_str}
                              });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Admin Authentication Error", fmt::format("Error authenticating as admin: {}", e.what()));
+                req.mbApp().logger().critical("Auth", "Admin Authentication Error",
+                                              fmt::format("Error authenticating as admin: {}", e.what()));
                 // Send auth error
                 res.sendJSON(500, {
                                  {"data", json::object()},
@@ -492,17 +560,85 @@ namespace mb {
         };
     }
 
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> envGateMiddleware(
+        const std::string &env_var, const bool block_when_truthy) {
+        return [env_var, block_when_truthy](MantisRequest &req, const MantisResponse &res) {
+            if (strToBool(getEnvOrDefault(env_var, "")) == block_when_truthy) {
+                // Let the user know resource action is temporarily disabled
+                res.sendJSON(503, {
+                                 {"data", json::object()},
+                                 {"status", 503},
+                                 {"error", "Resource action temporarily disabled"}
+                             }
+                );
+                return REQUEST_HANDLED;
+            }
+
+            return REQUEST_PENDING;
+        };
+    }
+
+    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> settingsFeatureGate(
+        const std::string &setting_key) {
+        return [setting_key](const MantisRequest &req, const MantisResponse &res) {
+            if (!req.mbApp().settings().configs().value(setting_key, false)) {
+                return HandlerResponse::Unhandled;
+            }
+
+            res.sendJSON(503, {
+                             {"data", json::object()},
+                             {"status", 503},
+                             {"error", "This feature has been disabled."}
+                         });
+            return HandlerResponse::Handled;
+        };
+    }
+
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
         const std::string &entity_name) {
         return [entity_name](MantisRequest &req, MantisResponse &res) {
-            return REQUEST_PENDING;
+            const auto auth = requireAuthenticatedUser(req, res);
+            if (!auth.has_value()) {
+                return HandlerResponse::Handled;
+            }
+
+            if (!auth->contains("entity") || !(*auth)["entity"].is_string()) {
+                return sendAccessDenied(res);
+            }
+
+            const auto user_entity = auth->at("entity").get<std::string>();
+            if (user_entity == "mb_admins" || user_entity == entity_name) {
+                return HandlerResponse::Unhandled;
+            }
+
+            res.sendJSON(403, {
+                             {"status", 403},
+                             {"data", json::object()},
+                             {"error", std::format("Admin or `{}` auth required to access this resource.", entity_name)}
+                         });
+            return HandlerResponse::Handled;
         };
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)>
     requireEntityAuth(const std::string &entity_name) {
         return [entity_name](MantisRequest &req, MantisResponse &res) {
-            return REQUEST_PENDING;
+            const auto auth = requireAuthenticatedUser(req, res);
+            if (!auth.has_value()) {
+                return HandlerResponse::Handled;
+            }
+
+            if (!auth->contains("entity") || !(*auth)["entity"].is_string() ||
+                auth->at("entity").get<std::string>() != entity_name) {
+                res.sendJSON(403, {
+                                 {"status", 403},
+                                 {"data", json::object()},
+                                 {"error", std::format("Auth required from entity `{}`.", entity_name)}
+                             });
+                return HandlerResponse::Handled;
+            }
+
+            return HandlerResponse::Unhandled;
         };
     }
 
@@ -533,24 +669,23 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rateLimit(
-        int max_requests, 
-        int window_seconds, 
+        int max_requests,
+        int window_seconds,
         bool use_user_id) {
         std::string msg = MB_FUNC();
-        
+
         return [max_requests, window_seconds, use_user_id](
             MantisRequest &req, MantisResponse &res) {
-            
             // Skip rate limiting in test mode if disabled
-            if (const char* test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");
+            if (const char *test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");
                 test_disable && std::string(test_disable) == "1") {
                 return HandlerResponse::Unhandled;
             }
-            
+
             try {
                 // Determine the identifier for rate limiting
                 std::string identifier;
-                
+
                 if (use_user_id) {
                     // Try to get user ID from auth context
                     const auto &auth = req.getOr<json>("auth", json::object());
@@ -564,18 +699,19 @@ namespace mb {
                     // Use IP address
                     identifier = req.getRemoteAddr();
                 }
-                
+
                 if (identifier.empty()) {
                     // If we can't identify the client, allow the request
                     // (could also deny, but allowing is safer for legitimate users)
-                    req.mbApp().logger().warn("Rate Limit Client Unknown", "Rate limit: Unable to identify client, allowing request");
+                    req.mbApp().logger().warn("Rate Limit Client Unknown",
+                                              "Rate limit: Unable to identify client, allowing request");
                     return HandlerResponse::Unhandled;
                 }
-                
+
                 const auto now = std::chrono::steady_clock::now();
                 const auto window_duration = std::chrono::seconds(window_seconds);
                 const auto cutoff_time = now - window_duration;
-                
+
                 // Lock for thread-safe access
                 std::lock_guard<std::mutex> lock(rate_limit_mutex);
 
@@ -587,7 +723,7 @@ namespace mb {
                 if (now - last_global_sweep > CLEANUP_INTERVAL) {
                     last_global_sweep = now;
                     for (auto it = rate_limit_store.begin(); it != rate_limit_store.end();) {
-                        const auto& reqs = it->second.requests;
+                        const auto &reqs = it->second.requests;
                         if (reqs.empty() || now - reqs.back() > STALE_ENTRY_TTL) {
                             it = rate_limit_store.erase(it);
                         } else {
@@ -597,7 +733,7 @@ namespace mb {
                 }
 
                 // Get or create entry for this identifier
-                auto& entry = rate_limit_store[identifier];
+                auto &entry = rate_limit_store[identifier];
 
                 // Cleanup old requests outside the window
                 while (!entry.requests.empty() && entry.requests.front() < cutoff_time) {
@@ -609,38 +745,41 @@ namespace mb {
                     // Calculate retry-after seconds (time until oldest request expires)
                     const auto oldest_request = entry.requests.front();
                     const auto retry_after = std::chrono::duration_cast<std::chrono::seconds>(
-                        window_duration - (now - oldest_request)
-                    ).count() + 1; // Add 1 second buffer
-                    
+                                                 window_duration - (now - oldest_request)
+                                             ).count() + 1; // Add 1 second buffer
+
                     // Set rate limit headers
                     res.setHeader("X-RateLimit-Limit", std::to_string(max_requests));
                     res.setHeader("X-RateLimit-Remaining", "0");
                     // Calculate reset time (Unix timestamp when the window expires)
                     const auto reset_time = std::chrono::duration_cast<std::chrono::seconds>(
-                        std::chrono::system_clock::now().time_since_epoch()
-                    ).count() + retry_after;
+                                                std::chrono::system_clock::now().time_since_epoch()
+                                            ).count() + retry_after;
                     res.setHeader("X-RateLimit-Reset", std::to_string(reset_time));
                     res.setHeader("Retry-After", std::to_string(retry_after));
-                    
+
                     // Send 429 Too Many Requests response
                     res.sendJSON(429, {
-                        {"status", 429},
-                        {"data", json::object()},
-                        {"error", std::format(
-                            "Rate limit exceeded. Maximum {} requests per {} seconds. Retry after {} seconds.",
-                            max_requests, window_seconds, retry_after
-                        )}
-                    });
-                    
-                    req.mbApp().logger().warn("Rate Limit Exceeded", fmt::format("Rate limit exceeded for identifier: {} ({} requests in {}s window)",
-                                identifier, entry.requests.size(), window_seconds));
-                    
+                                     {"status", 429},
+                                     {"data", json::object()},
+                                     {
+                                         "error", std::format(
+                                             "Rate limit exceeded. Maximum {} requests per {} seconds. Retry after {} seconds.",
+                                             max_requests, window_seconds, retry_after
+                                         )
+                                     }
+                                 });
+
+                    req.mbApp().logger().warn("Rate Limit Exceeded", fmt::format(
+                                                  "Rate limit exceeded for identifier: {} ({} requests in {}s window)",
+                                                  identifier, entry.requests.size(), window_seconds));
+
                     return HandlerResponse::Handled;
                 }
-                
+
                 // Add current request timestamp
                 entry.requests.push_back(now);
-                
+
                 // Set rate limit headers for successful requests
                 const auto remaining = max_requests - static_cast<int>(entry.requests.size());
                 res.setHeader("X-RateLimit-Limit", std::to_string(max_requests));
@@ -651,20 +790,20 @@ namespace mb {
                         window_duration - (now - entry.requests.front())
                     ).count();
                     const auto reset_time = std::chrono::duration_cast<std::chrono::seconds>(
-                        std::chrono::system_clock::now().time_since_epoch()
-                    ).count() + time_until_reset;
+                                                std::chrono::system_clock::now().time_since_epoch()
+                                            ).count() + time_until_reset;
                     res.setHeader("X-RateLimit-Reset", std::to_string(reset_time));
                 } else {
                     const auto reset_time = std::chrono::duration_cast<std::chrono::seconds>(
-                        std::chrono::system_clock::now().time_since_epoch()
-                    ).count() + window_seconds;
+                                                std::chrono::system_clock::now().time_since_epoch()
+                                            ).count() + window_seconds;
                     res.setHeader("X-RateLimit-Reset", std::to_string(reset_time));
                 }
-                
+
                 return HandlerResponse::Unhandled;
-                
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Rate Limit Middleware Error", fmt::format("Rate limit middleware error: {}", e.what()));
+                req.mbApp().logger().critical("Rate Limit Middleware Error",
+                                              fmt::format("Rate limit middleware error: {}", e.what()));
                 // On error, allow the request to proceed (fail open)
                 return HandlerResponse::Unhandled;
             }

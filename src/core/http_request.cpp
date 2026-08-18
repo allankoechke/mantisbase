@@ -2,6 +2,7 @@
 
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/core/http.h"
+#include "../../include/mantisbase/core/auth.h"
 #include "../../include/mantisbase/core/types.h"
 
 namespace mb {
@@ -133,6 +134,21 @@ namespace mb {
             return auth.size() > bearer_prefix_len ? auth.substr(bearer_prefix_len) : "";
         }
         return "";
+    }
+
+    std::string MantisRequest::getCookieValue(const std::string &key) const {
+        return m_req->getCookie(key);
+    }
+
+    std::string MantisRequest::resolveAuthToken() const {
+        if (hasHeader("Authorization")) {
+            const auto bearer = trim(getBearerTokenAuth());
+            if (!bearer.empty()) {
+                return bearer;
+            }
+        }
+
+        return trim(getCookieValue(kAuthTokenCookieName));
     }
 
     std::pair<nlohmann::json, std::string> MantisRequest::getBodyAsJson() const {

@@ -77,7 +77,7 @@ That's it — you have a full backend with auth, realtime, and file uploads in u
 ## Features
 
 - **Auto-generated REST APIs** — create a table, get CRUD endpoints instantly → [API Reference](doc/api.md)
-- **Built-in authentication** — JWT-based auth with login, refresh, logout → [Auth API](doc/auth.md)
+- **Built-in authentication** — JWT-based auth with login, refresh, logout, and token verify → [Auth API](doc/auth.md)
 - **Access control rules** — public, auth, or custom expression-based permissions → [Access Rules](doc/rules.md)
 - **Realtime updates** — SSE streams for live database changes (SQLite & PostgreSQL) → [API Reference](doc/api.md)
 - **Admin dashboard** — web UI for managing schemas, records, users, and files → [Quick Start](doc/QuickStart.md)

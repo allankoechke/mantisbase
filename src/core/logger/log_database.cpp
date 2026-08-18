@@ -143,9 +143,7 @@ namespace mb {
                               const std::string &level_filter,
                               const std::string &search_filter,
                               const std::string &start_date,
-                              const std::string &end_date,
-                              const std::string &sort_by,
-                              const std::string &sort_order) {
+                              const std::string &end_date) {
         if (!m_session) {
             std::cerr << "LogDatabase::getLogs: Fetch error, session is NULL" << std::endl;
             return json::object();
@@ -154,29 +152,17 @@ namespace mb {
         if (limit < 1) limit = 1;
         if (limit > 1000) limit = 1000;
 
+        const int fetch_limit = limit + 1;
         json result = json::object();
         json logs_array = json::array();
 
         try {
-            // Validate sort_by to prevent SQL injection
-            std::string valid_sort_by = "timestamp";
-            if (sort_by == "level" || sort_by == "origin" || sort_by == "message" || sort_by == "details" || sort_by ==
-                "timestamp" || sort_by == "created_at") {
-                valid_sort_by = sort_by;
-            }
-
-            // Validate sort_order
-            std::string valid_sort_order = (sort_order == "asc") ? "ASC" : "DESC";
-
             std::string query = "SELECT id, timestamp, level, origin, message, details, data, created_at FROM mb_logs";
 
             std::vector<std::string> conditions;
 
             if (!after.empty()) {
-                if (valid_sort_order == "ASC")
-                    conditions.push_back(valid_sort_by + " > '" + after + "'");
-                else
-                    conditions.push_back(valid_sort_by + " < '" + after + "'");
+                conditions.emplace_back("id < :after");
             }
 
             if (!level_filter.empty()) {
@@ -223,12 +209,15 @@ namespace mb {
                 }
             }
 
-            query += " ORDER BY " + valid_sort_by + " " + valid_sort_order;
-            query += " LIMIT " + std::to_string(limit);
+            query += " ORDER BY id DESC LIMIT :limit";
 
             std::lock_guard lock(m_dbMutexLock);
 
-            for (const soci::rowset rs = (m_session->prepare << query); const auto &r: rs) {
+            const soci::rowset rs = after.empty()
+                                        ? (m_session->prepare << query, soci::use(fetch_limit))
+                                        : (m_session->prepare << query, soci::use(after), soci::use(fetch_limit));
+
+            for (const auto &r: rs) {
                 json log_entry = json::object();
                 log_entry["id"] = r.get<std::string>(0);
                 log_entry["timestamp"] = r.get<std::string>(1);
@@ -250,6 +239,12 @@ namespace mb {
                 logs_array.push_back(log_entry);
             }
 
+            bool has_more = false;
+            if (static_cast<int>(logs_array.size()) > limit) {
+                has_more = true;
+                logs_array.erase(logs_array.begin() + limit, logs_array.end());
+            }
+
             std::string cursor;
             if (!logs_array.empty()) {
                 const auto &last = logs_array.back();
@@ -259,6 +254,7 @@ namespace mb {
 
             result["data"] = json::object();
             result["data"]["limit"] = limit;
+            result["data"]["has_more"] = has_more;
             result["data"]["cursor"] = cursor;
             result["data"]["items"] = logs_array;
             result["data"]["items_count"] = logs_array.size();
@@ -279,8 +275,25 @@ namespace mb {
                 m_cv.wait_for(lock, std::chrono::milliseconds(cleanup_interval));
             }
 
-            deleteOldLogs(5);
+            deleteOldLogs(configuredLogRetentionDays());
         }
+    }
+
+    int LogDatabase::configuredLogRetentionDays() const {
+        constexpr int kDefaultLogRetentionDays = 5;
+
+        try {
+            const auto &cfg = mApp.settings().configs();
+            if (cfg.contains("logRetentionDays") && cfg["logRetentionDays"].is_number_integer()) {
+                const int days = cfg["logRetentionDays"].get<int>();
+                if (days > 0) {
+                    return days;
+                }
+            }
+        } catch (...) {
+        }
+
+        return kDefaultLogRetentionDays;
     }
 
     void LogDatabase::deleteOldLogs(const int days) {
@@ -292,7 +305,7 @@ namespace mb {
 
             std::lock_guard lock(m_dbMutexLock);
 
-            // Calculate cutoff timestamp (5 days ago)
+            // Calculate cutoff timestamp
             const auto cutoff = std::chrono::system_clock::now() - std::chrono::hours(24 * days);
             auto cutoff_seconds = std::chrono::duration_cast<std::chrono::seconds>(
                 cutoff.time_since_epoch()).count();

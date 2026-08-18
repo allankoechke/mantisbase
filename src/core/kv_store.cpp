@@ -2,7 +2,7 @@
 #include "../../include/mantisbase/core/route_registry.h"
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/core/database.h"
-#include "../../include/mantisbase/core/auth.h"
+#include "../../include/mantisbase/core/exceptions.h"
 #include "../../include/mantisbase/utils/utils.h"
 #include "../../include/mantisbase/core/types.h"
 #include "../../include/mantisbase/core/middlewares.h"
@@ -10,9 +10,53 @@
 
 #include <soci/soci.h>
 
-
 namespace mb
 {
+    namespace
+    {
+        constexpr int kDefaultMaxFileSize = 10 * 1024 * 1024;
+        constexpr int kDefaultLogRetentionDays = 5;
+
+        std::string configRowId()
+        {
+            return std::to_string(std::hash<std::string>{}("configs"));
+        }
+
+        json defaultSmtp()
+        {
+            return {
+                {"host", ""},
+                {"port", 587},
+                {"user", ""},
+                {"password", ""},
+                {"from", ""},
+                {"tls", true}
+            };
+        }
+
+        json defaultSettings()
+        {
+            return {
+                {"orgName", "ACME Corp"},
+                {"siteDomain", "https://acme.example.com"},
+                {"corsAllowedOrigins", json::array({
+                    "http://localhost:3000",
+                    "http://127.0.0.1:3000"
+                })},
+                {"maxFileSize", kDefaultMaxFileSize},
+                {"logRetentionDays", kDefaultLogRetentionDays},
+                {"disableAdminRegistration", false},
+                {"disableSchemaMutations", false},
+                {"emailVerificationRequired", false},
+                {"sessionTimeout", 24 * 60 * 60},
+                {"adminSessionTimeout", 1 * 60 * 60},
+                {"jwtEnableSetIssuer", false},
+                {"jwtEnableSetAudience", false},
+                {"smtp", defaultSmtp()}
+            };
+        }
+    }
+
     KeyValStore::KeyValStore(MantisBase &app) : mApp(app) {}
 
     bool KeyValStore::setupRoutes()
@@ -21,172 +65,57 @@ namespace mb
         {
             setupConfigRoutes();
         }
-        catch (const std::exception& e)
+        catch (const std::exception &e)
         {
-            mApp.logger().critical("Route Setup Error", fmt::format("Error setting up settings routes: {}", e.what()));
+            mApp.logger().critical("Route Setup Error",
+                                   fmt::format("Error setting up settings routes: {}", e.what()));
             return false;
         }
-
 
         return true;
     }
 
     void KeyValStore::migrate()
     {
-        const auto& sql = mApp.db().session();
+        const auto sql = mApp.db().session();
+        const auto id = configRowId();
 
-        // Check if we have settings data already, if not so, add base settings
         json settings;
-        auto id = std::to_string(std::hash<std::string>{}("configs"));
-        *sql << "SELECT value FROM __settings WHERE id = :id LIMIT 1", soci::use(id), soci::into(settings);
+        *sql << "SELECT value FROM mb_store WHERE id = :id LIMIT 1", soci::use(id), soci::into(settings);
         if (sql->got_data())
         {
-            // TODO redact any sensitive values ...
             m_configs = settings;
-            mApp.logger().trace("Config Loaded", fmt::format("Config Values: {}", m_configs.dump()));
+            mApp.logger().trace("Config Loaded", "Application settings loaded from database.");
+            return;
         }
-        // Create base data to config settings
-        else
-        {
-            // Create default time values
-            const std::time_t current_t = time(nullptr);
-            std::tm created_tm = toUtcTime(current_t);
 
-            // Create data since it's missing
-            settings.clear();
-            settings["appName"] = "ACME Project";
-            settings["baseUrl"] = "https://acme.example.com";
-            settings["maintenanceMode"] = false;
-            settings["maxFileSize"] = 10; // in MB
-            settings["allowRegistration"] = true;
-            settings["emailVerificationRequired"] = false;
-            settings["sessionTimeout"] = 24 * 60 * 60; // 24 hours
-            settings["adminSessionTimeout"] = 1 * 60 * 60; // 1 hour
-            settings["mode"] = "PROD";
+        const std::time_t current_t = time(nullptr);
+        const std::tm created_tm = toUtcTime(current_t);
+        settings = defaultSettings();
 
-            *sql <<
-                "INSERT INTO __settings (id, value, created, updated) VALUES (:id, :value, :created, :updated)"
-                ,
-                soci::use(id), soci::use(settings),
-                soci::use(created_tm), soci::use(created_tm);
-        }
+        *sql << "INSERT INTO mb_store (id, value, created, updated) VALUES (:id, :value, :created, :updated)",
+            soci::use(id), soci::use(settings), soci::use(created_tm), soci::use(created_tm);
+
+        m_configs = settings;
+        mApp.logger().info("Config Initialized", "Created default application settings.");
     }
 
-    HandlerResponse KeyValStore::hasAccess(MantisRequest& req, MantisResponse& res) const
-    {
-        // Get the auth var from the context, resort to empty object if it's not set.
-        const auto& auth = req.getOr<json>("auth", json::object());
-
-        // Ensure auth object is present in the request's context
-        if (auth.empty())
-        {
-            json response;
-            response["status"] = 403;
-            response["data"] = json::object();
-            response["error"] = "Auth token missing";
-
-            res.sendJSON(403, response);
-            return REQUEST_HANDLED;
-        }
-
-        // Ensure token  is passed in
-        if (auth.contains("token") && (auth["token"].is_null() || auth["token"].empty()))
-        {
-            json response;
-            response["status"] = 403;
-            response["data"] = json::object();
-            response["error"] = "Auth token missing";
-
-            res.sendJSON(403, response);
-            return REQUEST_HANDLED;
-        }
-
-        // fetch auth token
-        const auto& token = auth.at("token").get<std::string>();
-
-        // Expand logged user if token is present
-        const auto resp = req.mbApp().auth().verifyToken(token);
-        if (!resp.value("verified", false) || !resp.value("error", "").empty())
-        {
-            json response;
-            response["status"] = 403;
-            response["data"] = json::object();
-            response["error"] = resp.value("error", "");
-
-            res.sendJSON(403, response);
-            return REQUEST_HANDLED;
-        }
-
-        // Extract and verify that the id and table data is provided, else,
-        // return an error
-        const auto _id = resp.value("id", "");
-        const auto _table = resp.value("table", "");
-
-        if (_id.empty() || _table.empty())
-        {
-            json response;
-            response["status"] = 403;
-            response["data"] = json::object();
-            response["error"] = "Auth token missing user id or table name";
-
-            res.sendJSON(403, response);
-            return REQUEST_HANDLED;
-        }
-
-        // Query for user with given ID, this info will be populated to the
-        // expression evaluator args as well as available through
-        // the session context, queried by:
-        //  ` ctx.get<json>("auth").value("id", ""); // returns the user ID
-        //  ` ctx.get<json>("auth").value("name", ""); // returns the user's name
-        auto sql = mApp.db().session();
-        soci::row r;
-        std::string query = "SELECT * FROM mb_admins WHERE id = :id LIMIT 1";
-        *sql << query, soci::use(_id), soci::into(r);
-
-        // Return 404 if user was not found
-        if (!sql->got_data())
-        {
-            json response;
-            response["status"] = 404;
-            response["data"] = json::object();
-            response["error"] = "Auth id was not found.";
-
-            res.sendJSON(404, response);
-            return REQUEST_HANDLED;
-        }
-
-        // Check if user is logged in as Admin
-        if (_table == "mb_admins")
-        {
-            // If logged in as admin, grant access
-            // Admins get unconditional data access
-            return REQUEST_PENDING;
-        }
-
-        // User was not an admin, lets return access denied error
-        json response;
-        response["status"] = 403;
-        response["data"] = json::object();
-        response["error"] = "Admin auth required to access this resource.";
-
-        res.sendJSON(403, response);
-        return REQUEST_HANDLED;
-    }
-
-    json& KeyValStore::configs()
+    json &KeyValStore::configs()
     {
         return m_configs;
     }
 
-    json KeyValStore::initSettingsConfig()
+    json KeyValStore::loadFromDb()
     {
-        // Get app session
-        const auto sql = mApp.db().session();
+        if (!m_configs.empty())
+        {
+            return m_configs;
+        }
 
-        // Fetch settings
+        const auto sql = mApp.db().session();
+        const auto id = configRowId();
         json settings;
-        auto id = std::to_string(std::hash<std::string>{}("configs"));
-        *sql << "SELECT value FROM _settings WHERE id = :id LIMIT 1", soci::use(id), soci::into(settings);
+        *sql << "SELECT value FROM mb_store WHERE id = :id LIMIT 1", soci::use(id), soci::into(settings);
         if (sql->got_data())
         {
             m_configs = settings;
@@ -196,146 +125,205 @@ namespace mb
         return json::object();
     }
 
+    json KeyValStore::redactForResponse(const json &configs) const
+    {
+        auto data = configs;
+        if (data.contains("smtp") && data["smtp"].is_object())
+        {
+            auto &smtp = data["smtp"];
+            if (smtp.contains("password") && smtp["password"].is_string()
+                && !smtp["password"].get<std::string>().empty())
+            {
+                smtp["password"] = "********";
+            }
+        }
+        return data;
+    }
+
+    void KeyValStore::applyPatch(const json &body)
+    {
+        if (m_configs.empty())
+        {
+            migrate();
+        }
+
+        const auto merge_scalar = [&]<typename T>(const char *key, T default_val) {
+            if (body.contains(key))
+            {
+                m_configs[key] = body.value(key, default_val);
+            }
+        };
+
+        merge_scalar("orgName", std::string{});
+        merge_scalar("siteDomain", std::string{});
+        merge_scalar("disableAdminRegistration", false);
+        merge_scalar("disableSchemaMutations", false);
+        merge_scalar("emailVerificationRequired", false);
+        merge_scalar("sessionTimeout", 24 * 60 * 60);
+        merge_scalar("adminSessionTimeout", 1 * 60 * 60);
+        merge_scalar("jwtEnableSetIssuer", false);
+        merge_scalar("jwtEnableSetAudience", false);
+
+        if (body.contains("maxFileSize"))
+        {
+            const auto size = body.value("maxFileSize", kDefaultMaxFileSize);
+            if (!body["maxFileSize"].is_number_integer() || size <= 0)
+            {
+                throw MantisException(400, "maxFileSize must be a positive integer (bytes).");
+            }
+            m_configs["maxFileSize"] = size;
+        }
+
+        if (body.contains("logRetentionDays"))
+        {
+            const auto days = body.value("logRetentionDays", kDefaultLogRetentionDays);
+            if (!body["logRetentionDays"].is_number_integer() || days <= 0)
+            {
+                throw MantisException(400, "logRetentionDays must be a positive integer (days).");
+            }
+            m_configs["logRetentionDays"] = days;
+        }
+
+        if (body.contains("smtp") && body["smtp"].is_object())
+        {
+            if (!m_configs.contains("smtp") || !m_configs["smtp"].is_object())
+            {
+                m_configs["smtp"] = defaultSmtp();
+            }
+
+            const auto &patch_smtp = body["smtp"];
+            auto &smtp = m_configs["smtp"];
+
+            for (const auto &[key, value]: patch_smtp.items())
+            {
+                if (key == "password")
+                {
+                    if (value.is_string() && value.get<std::string>() == "********")
+                    {
+                        continue;
+                    }
+                }
+                smtp[key] = value;
+            }
+        }
+
+        if (body.contains("corsAllowedOrigins"))
+        {
+            if (!body["corsAllowedOrigins"].is_array())
+            {
+                throw MantisException(400, "corsAllowedOrigins must be an array of origin strings.");
+            }
+
+            json validated = json::array();
+            for (const auto &item : body["corsAllowedOrigins"])
+            {
+                if (!item.is_string())
+                {
+                    throw MantisException(400, "corsAllowedOrigins must contain only strings.");
+                }
+
+                const auto value = trim(item.get<std::string>());
+                if (value.empty())
+                {
+                    throw MantisException(400, "corsAllowedOrigins entries must be non-empty strings.");
+                }
+
+                validated.push_back(value);
+            }
+
+            m_configs["corsAllowedOrigins"] = validated;
+        }
+    }
+
     void KeyValStore::setupConfigRoutes()
     {
-        // TRACE_CLASS_METHOD()
+        const Middlewares adminAuth = {requireAdminAuth()};
+        const Middlewares patchMiddleware = {
+            requireAdminAuth(),
+            envGateMiddleware("MB_DISABLE_CONFIG_MUTATIONS", true)
+        };
 
-        // Set up settings get & update endpoints
         mApp.router().Get(
             "/api/v1/sys/settings/config",
-            [this](MantisRequest& req, MantisResponse& res)
+            [this](MantisRequest &req, MantisResponse &res)
             {
-                // If we have a cached config object ...
-                if (!m_configs.empty())
+                const auto settings = loadFromDb();
+                if (settings.empty())
                 {
-                    // Return cached config object
-                    json response;
-                    response["status"] = 200;
-                    response["error"] = "";
-                    response["data"] = m_configs;
-                    response["data"]["mantisVersion"] = MantisBase::appVersion();
-
-                    res.sendJSON(200, response);
+                    res.sendJSON(404, {
+                                     {"status", 404},
+                                     {"error", "Settings object not found!"},
+                                     {"data", json::object()}
+                                 });
                     return;
                 }
 
-                // Get app session
-                const auto sql = mApp.db().session();
-                json response; // Response object
+                auto data = redactForResponse(settings);
+                data["mantisVersion"] = MantisBase::appVersion();
 
-                // Fetch settings
-                json settings;
-                auto settings_id = std::to_string(std::hash<std::string>{}("settings"));
-                *sql << "SELECT value FROM __settings WHERE id = :id LIMIT 1", soci::use(
-                    settings_id), soci::into(settings);
-                if (sql->got_data())
-                {
-                    // Update local cache
-                    m_configs = settings;
+                res.sendJSON(200, {
+                                 {"status", 200},
+                                 {"error", ""},
+                                 {"data", data}
+                             });
+            },
+            adminAuth);
 
-                    // Create response object
-                    response["status"] = 200;
-                    response["error"] = "";
-                    response["data"] = settings;
-                    response["data"]["mantisVersion"] = MantisBase::appVersion();
-
-                    res.sendJSON(200, response);
-                    return;
-                }
-
-                // We didn't find any data, something is wrong!
-                response["status"] = 404;
-                response["error"] = "Settings object not found!";
-                response["data"] = json::object();
-
-                res.sendJSON(404, response);
-            }, { });
-
-        // Update settings config
         mApp.router().Patch(
             "/api/v1/sys/settings/config",
-            [this](MantisRequest& req, MantisResponse& res)
+            [this](MantisRequest &req, MantisResponse &res)
             {
-                // Parse request body
-                json body = json::object();
-                try
+                const auto &[body, err] = req.getBodyAsJson();
+                if (!err.empty())
                 {
-                    body = json::parse(req.getBody());
-                }
-                catch (const std::exception& e)
-                {
-                    json response;
-                    response["status"] = 400;
-                    response["error"] = "Could not parse request body, expected JSON!";
-                    response["data"] = json::object();
-
-                    res.sendJSON(400, response);
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"error", err},
+                                     {"data", json::object()}
+                                 });
                     return;
                 }
 
-                // Get app session
-                const auto sql = mApp.db().session();
+                try
+                {
+                    applyPatch(body);
 
-                // Create base data before we update.
-                if (m_configs.empty()) migrate();
+                    const auto& sql = mApp.db().session();
+                    const std::time_t updated_t = time(nullptr);
+                    const std::tm updated_tm = toUtcTime(updated_t);
+                    const auto id = configRowId();
 
-                m_configs["appName"] = body.contains("appName")
-                                           ? body["appName"]
-                                           : m_configs["appName"];
-                m_configs["baseUrl"] = body.contains("baseUrl")
-                                           ? body["baseUrl"]
-                                           : m_configs["baseUrl"];
-                m_configs["jwtEnableSetIssuer"] = body.contains("jwtEnableSetIssuer")
-                                                      ? body["jwtEnableSetIssuer"]
-                                                      : m_configs["jwtEnableSetIssuer"];
-                m_configs["jwtEnableSetAudience"] = body.contains("jwtEnableSetAudience")
-                                                        ? body["jwtEnableSetAudience"]
-                                                        : m_configs["jwtEnableSetAudience"];
-                m_configs["maintenanceMode"] = body.contains("maintenanceMode")
-                                                   ? body.value("maintenanceMode", false)
-                                                   : m_configs.value("maintenanceMode", false);
-                m_configs["maxFileSize"] = body.contains("maxFileSize")
-                                               ? body.value("maxFileSize", 10)
-                                               : m_configs.value("maxFileSize", 10);
-                m_configs["allowRegistration"] = body.contains("allowRegistration")
-                                                     ? body.value("allowRegistration", false)
-                                                     : m_configs.value("allowRegistration", false);
-                m_configs["emailVerificationRequired"] = body.contains("emailVerificationRequired")
-                                                             ? body.value("emailVerificationRequired", false)
-                                                             : m_configs.value("emailVerificationRequired", false);
-                m_configs["sessionTimeout"] = body.contains("sessionTimeout")
-                                                  ? body.value("sessionTimeout", 24 * 60 * 60)
-                                                  : m_configs.value("sessionTimeout", 24 * 60 * 60);
-                m_configs["adminSessionTimeout"] = body.contains("adminSessionTimeout")
-                                                       ? body.value("adminSessionTimeout", 1 * 60 * 60)
-                                                       : m_configs.value("adminSessionTimeout", 1 * 60 * 60);
-                ///> TODO [Deprecated], drop it in v0.3.0
-                auto mode = body.contains("mode")
-                                ? body.value("mode", "PROD")
-                                : m_configs.value("mode", "PROD");
+                    *sql << "UPDATE mb_store SET value = :value, updated = :updated WHERE id = :id",
+                        soci::use(m_configs), soci::use(updated_tm), soci::use(id);
 
-                toUpperCase(mode); // Ensure mode is in upper case
-                m_configs["mode"] = mode == "TEST" ? "TEST" : "PROD"; // Limit update modes to prod/test only
+                    mApp.router().reloadCorsOrigins();
 
-                // Create default time values
-                const std::time_t updated_t = time(nullptr);
-                std::tm updated_tm = toUtcTime(updated_t);
+                    auto data = redactForResponse(m_configs);
+                    data["mantisVersion"] = MantisBase::appVersion();
 
-                // Create config admin
-                auto id = std::to_string(std::hash<std::string>{}("configs"));
-
-                // Update config values
-                *sql << "UPDATE __settings SET value = :value, updated = :updated WHERE id = :id",
-                    soci::use(m_configs), soci::use(updated_tm);
-
-                json response;
-                response["status"] = 200;
-                response["error"] = "";
-                response["data"] = m_configs;
-                response["data"]["mantisVersion"] = MantisBase::appVersion();
-
-                res.sendJSON(200, response);
-            }, {
-            });
+                    res.sendJSON(200, {
+                                     {"status", 200},
+                                     {"error", ""},
+                                     {"data", data}
+                                 });
+                }
+                catch (const MantisException &e)
+                {
+                    res.sendJSON(e.code(), {
+                                     {"status", e.code()},
+                                     {"error", e.what()},
+                                     {"data", json::object()}
+                                 });
+                }
+                catch (const std::exception &e)
+                {
+                    res.sendJSON(500, {
+                                     {"status", 500},
+                                     {"error", e.what()},
+                                     {"data", json::object()}
+                                 });
+                }
+            },
+            patchMiddleware);
     }
-} // mantis
+} // mb

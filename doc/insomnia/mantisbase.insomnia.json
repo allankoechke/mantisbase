@@ -1,0 +1,1001 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-08-17T14:46:22.000Z",
+  "__export_source": "mantisbase:generate_insomnia.py",
+  "resources": [
+    {
+      "_type": "workspace",
+      "_id": "wrk_f02b0df0b7ad",
+      "name": "MantisBase API",
+      "description": "MantisBase REST API (`/api/v1/`). Import env vars, run Admin Login, copy token to admin_token.",
+      "scope": "collection"
+    },
+    {
+      "_type": "environment",
+      "_id": "env_cd666040baac",
+      "parentId": "wrk_f02b0df0b7ad",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:7070/api/v1",
+        "admin_email": "admin@example.com",
+        "admin_password": "changeme123",
+        "admin_token": "",
+        "user_token": "",
+        "entity_name": "users",
+        "schema_name": "posts",
+        "record_id": "",
+        "cursor": "",
+        "filter": "{\"status\":\"active\"}",
+        "limit": "50",
+        "file_name": "upload.jpg",
+        "oauth_provider": "google",
+        "oauth_provider_id": "",
+        "sse_client_id": "",
+        "api_key_id": ""
+      }
+    },
+    {
+      "_type": "api_spec",
+      "_id": "spec_dfc97d31be94",
+      "parentId": "wrk_f02b0df0b7ad",
+      "fileName": "openapi.yaml",
+      "contentType": "yaml",
+      "contents": "openapi: 3.1.0\ninfo:\n  title: MantisBase REST API\n  version: 1.0.0\n  description: |\n    OpenAPI specification for the MantisBase REST API (`/api/v1/`).\n\n    MantisBase auto-generates CRUD endpoints for registered entities. Authorization on entity\n    and realtime routes is evaluated per-entity via access rules (`public`, `auth`, `custom`, or\n    admin-only empty mode) \u2014 not every route requires a Bearer token.\n\n    **Credentials:** send JWTs or API keys (`mb_sk_...`) in the standard header:\n    `Authorization: Bearer <token>`.\n\n    **CORS:** credentialed cross-origin browser access is allowed only for origins listed in\n    `corsAllowedOrigins` (settings) and/or the `MB_CORS_ORIGINS` environment variable\n    (comma-separated, merged at runtime). See `AppSettings.corsAllowedOrigins` and\n    [doc/api.md](api.md#cross-origin-resource-sharing-cors).\n\n    **Response envelope:** most JSON endpoints return `{ \"status\", \"data\", \"error\" }`.\n    The health check is an exception (`{ \"status\": \"OK\" }`).\n\n    Generated from route registrations in `src/core/` and `doc/api.md` / `doc/auth.md`.\n  license:\n    name: MIT\n    url: https://github.com/allankoechke/mantisbase/blob/main/LICENSE\n\nservers:\n  - url: http://localhost:7070/api/v1\n    description: Local development (default `mantisbase serve`)\n  - url: http://localhost:7070/api/v1\n    description: Docker default (`docker run -p 7070:80 ...`)\n\ntags:\n  - name: Health\n  - name: Auth\n    description: Entity user authentication, token verify, API keys, and OAuth\n  - name: Entities\n    description: Auto-generated CRUD for registered entities\n  - name: Schemas\n    description: Entity schema management (admin only)\n  - name: Files\n  - name: Realtime\n    description: Server-Sent Events and WebSocket change notifications\n  - name: System\n    description: Admin accounts, logs, settings, system API keys, OAuth provider registry\n\nsecurity:\n  - bearerAuth: []\n\npaths:\n  /health:\n    get:\n      tags: [Health]\n      summary: Health check\n      description: Lightweight liveness probe. Does not use the standard response envelope.\n      security: []\n      responses:\n        \"200\":\n          description: Server is healthy\n          content:\n            application/json:\n              schema:\n                type: object\n                properties:\n                  status:\n                    type: string\n                    example: OK\n                required: [status]\n\n  /auth/verify:\n    get:\n      tags: [Auth]\n      summary: Verify current credentials\n      description: |\n        Checks whether the current JWT or API key is valid. Rate-limited to 5 requests/minute per IP.\n      responses:\n        \"200\":\n          description: Token is valid\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: object\n                        properties:\n                          status:\n                            type: string\n                            example: OK\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /auth/{entity_name}/login:\n    post:\n      tags: [Auth]\n      summary: Entity user login\n      description: |\n        Authenticate against an auth-type entity and receive a JWT. Rate-limited to 5 attempts/minute per IP.\n        The entity must be type `auth`, API-enabled, and not a system entity.\n      security: []\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/LoginRequest\"\n      responses:\n        \"200\":\n          description: Login successful\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/AuthTokenResponse\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"429\":\n          $ref: \"#/components/responses/TooManyRequests\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /auth/{entity_name}/refresh:\n    post:\n      tags: [Auth]\n      summary: Refresh entity user token\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n      responses:\n        \"200\":\n          description: Token refreshed\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/AuthTokenResponse\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /auth/{entity_name}/logout:\n    post:\n      tags: [Auth]\n      summary: Logout entity user\n      description: Invalidates the current session when the JWT contains a `session_id` claim.\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n      responses:\n        \"200\":\n          description: Logged out\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: object\n                        properties:\n                          logged_out:\n                            type: boolean\n                            example: true\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /auth/{entity_name}/api-keys:\n    get:\n      tags: [Auth]\n      summary: List entity user API keys\n      description: Returns metadata only; raw secrets are never included in list responses.\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n      responses:\n        \"200\":\n          description: API key list\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: array\n                        items:\n                          $ref: \"#/components/schemas/ApiKeyMetadata\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    post:\n      tags: [Auth]\n      summary: Create entity user API key\n      description: Returns the raw `mb_sk_...` secret once at creation time.\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n      requestBody:\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/ApiKeyCreateRequest\"\n      responses:\n        \"201\":\n          description: API key created\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/ApiKeyCreated\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /auth/{entity_name}/api-keys/{id}:\n    delete:\n      tags: [Auth]\n      summary: Revoke entity user API key\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n        - $ref: \"#/components/parameters/ResourceId\"\n      responses:\n        \"200\":\n          description: Key revoked\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: object\n                        properties:\n                          deleted:\n                            type: boolean\n                            example: true\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /auth/{entity_name}/oauth/authorize/{provider}:\n    get:\n      tags: [Auth]\n      summary: Start OAuth login (redirect)\n      description: Redirects the browser to the OAuth provider authorization URL (PKCE).\n      security: []\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n        - $ref: \"#/components/parameters/OAuthProvider\"\n        - name: redirect_uri\n          in: query\n          description: Callback URL. Defaults to the server callback route when omitted.\n          schema:\n            type: string\n            format: uri\n      responses:\n        \"302\":\n          description: Redirect to provider\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n\n  /auth/{entity_name}/oauth/callback/{provider}:\n    get:\n      tags: [Auth]\n      summary: OAuth callback\n      security: []\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n        - $ref: \"#/components/parameters/OAuthProvider\"\n        - name: code\n          in: query\n          schema:\n            type: string\n        - name: state\n          in: query\n          schema:\n            type: string\n        - name: error\n          in: query\n          schema:\n            type: string\n      responses:\n        \"200\":\n          description: OAuth login succeeded\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        description: OAuth result (typically includes JWT token and user record)\n                        type: object\n                        additionalProperties: true\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n\n  /auth/{entity_name}/oauth/link/{provider}:\n    post:\n      tags: [Auth]\n      summary: Link OAuth provider to current user\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n        - $ref: \"#/components/parameters/OAuthProvider\"\n      requestBody:\n        content:\n          application/json:\n            schema:\n              type: object\n              properties:\n                code:\n                  type: string\n                state:\n                  type: string\n      responses:\n        \"200\":\n          description: Provider linked\n          content:\n            application/json:\n              schema:\n                $ref: \"#/components/schemas/ApiEnvelope\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n    delete:\n      tags: [Auth]\n      summary: Unlink OAuth provider from current user\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n        - $ref: \"#/components/parameters/OAuthProvider\"\n      responses:\n        \"200\":\n          description: Provider unlinked\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: object\n                        properties:\n                          unlinked:\n                            type: boolean\n                            example: true\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /auth/{entity_name}/oauth/accounts:\n    get:\n      tags: [Auth]\n      summary: List linked OAuth accounts\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n      responses:\n        \"200\":\n          description: Linked accounts\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: array\n                        items:\n                          type: object\n                          additionalProperties: true\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /auth/{entity_name}/oauth/providers:\n    get:\n      tags: [Auth]\n      summary: List OAuth providers enabled for entity\n      security: []\n      parameters:\n        - $ref: \"#/components/parameters/EntityName\"\n      responses:\n        \"200\":\n          description: Enabled providers\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: array\n                        items:\n                          type: object\n                          additionalProperties: true\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /entities/{entity_name}:\n    get:\n      tags: [Entities]\n      summary: List entity records\n      description: Authorization depends on the entity `list` access rule. Results are ordered by record `id` ascending.\n      security: []\n      parameters:\n        - $ref: \"#/components/parameters/DynamicEntityName\"\n        - $ref: \"#/components/parameters/Limit\"\n        - $ref: \"#/components/parameters/AfterCursor\"\n        - $ref: \"#/components/parameters/Filter\"\n      responses:\n        \"200\":\n          description: Paginated record list\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntityListPage\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    post:\n      tags: [Entities]\n      summary: Create entity record\n      description: Authorization depends on the entity `add` access rule. Supports JSON and multipart file uploads.\n      security: []\n      parameters:\n        - $ref: \"#/components/parameters/DynamicEntityName\"\n      requestBody:\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/EntityRecord\"\n          multipart/form-data:\n            schema:\n              type: object\n              additionalProperties: true\n      responses:\n        \"201\":\n          description: Record created\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntityRecord\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /entities/{entity_name}/{id}:\n    get:\n      tags: [Entities]\n      summary: Get entity record\n      description: Authorization depends on the entity `get` access rule.\n      security: []\n      parameters:\n        - $ref: \"#/components/parameters/DynamicEntityName\"\n        - $ref: \"#/components/parameters/ResourceId\"\n      responses:\n        \"200\":\n          description: Record found\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntityRecord\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    patch:\n      tags: [Entities]\n      summary: Update entity record\n      description: Authorization depends on the entity `update` access rule. View entities reject mutations.\n      security: []\n      parameters:\n        - $ref: \"#/components/parameters/DynamicEntityName\"\n        - $ref: \"#/components/parameters/ResourceId\"\n      requestBody:\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/EntityRecord\"\n          multipart/form-data:\n            schema:\n              type: object\n              additionalProperties: true\n      responses:\n        \"200\":\n          description: Record updated\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntityRecord\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    delete:\n      tags: [Entities]\n      summary: Delete entity record\n      description: Authorization depends on the entity `delete` access rule.\n      security: []\n      parameters:\n        - $ref: \"#/components/parameters/DynamicEntityName\"\n        - $ref: \"#/components/parameters/ResourceId\"\n      responses:\n        \"200\":\n          description: Record deleted\n          content:\n            application/json:\n              schema:\n                $ref: \"#/components/schemas/ApiEnvelope\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /schemas:\n    get:\n      tags: [Schemas]\n      summary: List all schemas\n      security:\n        - bearerAuth: []\n      responses:\n        \"200\":\n          description: Schema list\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: array\n                        items:\n                          $ref: \"#/components/schemas/EntitySchema\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    post:\n      tags: [Schemas]\n      summary: Create schema\n      security:\n        - bearerAuth: []\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/EntitySchemaCreate\"\n      responses:\n        \"201\":\n          description: Schema created\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntitySchema\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /schemas/{schema_name_or_id}:\n    get:\n      tags: [Schemas]\n      summary: Get schema\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/SchemaNameOrId\"\n      responses:\n        \"200\":\n          description: Schema details\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntitySchema\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    patch:\n      tags: [Schemas]\n      summary: Update schema\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/SchemaNameOrId\"\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/EntitySchemaPatch\"\n      responses:\n        \"200\":\n          description: Schema updated\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntitySchema\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    delete:\n      tags: [Schemas]\n      summary: Delete schema\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/SchemaNameOrId\"\n      responses:\n        \"200\":\n          description: Schema deleted\n          content:\n            application/json:\n              schema:\n                $ref: \"#/components/schemas/ApiEnvelope\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /files/{entity}/{file}:\n    get:\n      tags: [Files]\n      summary: Serve uploaded file\n      description: Returns the stored file for a given entity upload field.\n      security: []\n      parameters:\n        - name: entity\n          in: path\n          required: true\n          schema:\n            type: string\n        - name: file\n          in: path\n          required: true\n          schema:\n            type: string\n      responses:\n        \"200\":\n          description: File content\n          content:\n            application/octet-stream:\n              schema:\n                type: string\n                format: binary\n        \"404\":\n          description: File not found\n\n  /realtime:\n    get:\n      tags: [Realtime]\n      summary: Open SSE connection\n      description: |\n        Establishes a long-lived Server-Sent Events stream. Disabled when `MB_REALTIME_SSE=false`.\n\n        Subscribing to `entity` requires list access; subscribing to `entity:row_id` requires get access.\n      security: []\n      parameters:\n        - name: topics\n          in: query\n          required: true\n          description: Comma-separated topics (`posts`, `users`, `posts:019c...`).\n          schema:\n            type: string\n            example: posts,users,posts:019c1b81-364b-7000-8120-b5416b2c42c2\n      responses:\n        \"200\":\n          description: SSE stream\n          content:\n            text/event-stream:\n              schema:\n                type: string\n                description: |\n                  SSE events: `connected`, `ping`, and `change`.\n                  Each `data:` line contains JSON matching `RealtimeChangeEvent` or connection metadata.\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"503\":\n          description: SSE disabled\n          content:\n            application/json:\n              schema:\n                $ref: \"#/components/schemas/ApiEnvelope\"\n    post:\n      tags: [Realtime]\n      summary: Update SSE session topics\n      security: []\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/RealtimeSessionUpdate\"\n      responses:\n        \"200\":\n          description: Topics updated\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: object\n                        properties:\n                          client_id:\n                            type: string\n                          topics:\n                            type: array\n                            items:\n                              type: string\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n\n  /realtime/ws:\n    get:\n      tags: [Realtime]\n      summary: WebSocket realtime connection\n      description: |\n        WebSocket endpoint at `WS /api/v1/realtime/ws`.\n\n        After connecting, send JSON messages such as `{ \"topics\": [\"posts\", \"users\"] }`.\n        Change events use the same payload shape as SSE `change` events.\n        Disabled when `MB_REALTIME_WS=false`.\n      security: []\n      responses:\n        \"101\":\n          description: Switching Protocols (WebSocket upgrade)\n\n  /sys/admins/login:\n    post:\n      tags: [System]\n      summary: Admin login\n      description: Rate-limited to 5 attempts/minute per IP.\n      security: []\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/LoginRequest\"\n      responses:\n        \"200\":\n          description: Admin login successful\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/AuthTokenResponse\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"429\":\n          $ref: \"#/components/responses/TooManyRequests\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/admins/refresh:\n    post:\n      tags: [System]\n      summary: Refresh admin token\n      responses:\n        \"200\":\n          description: Token refreshed\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/AuthTokenResponse\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/admins/logout:\n    post:\n      tags: [System]\n      summary: Admin logout\n      responses:\n        \"200\":\n          description: Logged out\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: object\n                        properties:\n                          logged_out:\n                            type: boolean\n                            example: true\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/admins/setup:\n    post:\n      tags: [System]\n      summary: Create initial admin account\n      description: |\n        First-boot setup. Requires a valid service-account token (`mb_service_acc` entity).\n        Rate-limited to 3 requests/hour per IP.\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/EntityRecord\"\n      responses:\n        \"201\":\n          description: Admin account created\n          content:\n            application/json:\n              schema:\n                $ref: \"#/components/schemas/EntityRecord\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"429\":\n          $ref: \"#/components/responses/TooManyRequests\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/admins:\n    get:\n      tags: [System]\n      summary: List admin accounts\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/Limit\"\n        - $ref: \"#/components/parameters/AfterCursor\"\n        - $ref: \"#/components/parameters/Filter\"\n      responses:\n        \"200\":\n          description: Admin list\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntityListPage\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    post:\n      tags: [System]\n      summary: Create admin account\n      description: Blocked with 503 when `MB_DISABLE_ADMIN_MUTATIONS` is truthy.\n      security:\n        - bearerAuth: []\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/EntityRecord\"\n      responses:\n        \"201\":\n          description: Admin created\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntityRecord\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"503\":\n          $ref: \"#/components/responses/ServiceUnavailable\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/admins/{id}:\n    get:\n      tags: [System]\n      summary: Get admin account\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/ResourceId\"\n      responses:\n        \"200\":\n          description: Admin record\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntityRecord\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    patch:\n      tags: [System]\n      summary: Update admin account\n      description: Blocked with 503 when `MB_DISABLE_ADMIN_MUTATIONS` is truthy.\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/ResourceId\"\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/EntityRecord\"\n      responses:\n        \"200\":\n          description: Admin updated\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/EntityRecord\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"503\":\n          $ref: \"#/components/responses/ServiceUnavailable\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    delete:\n      tags: [System]\n      summary: Delete admin account\n      description: Blocked with 503 when `MB_DISABLE_ADMIN_MUTATIONS` is truthy.\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/ResourceId\"\n      responses:\n        \"200\":\n          description: Admin deleted\n          content:\n            application/json:\n              schema:\n                $ref: \"#/components/schemas/ApiEnvelope\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"503\":\n          $ref: \"#/components/responses/ServiceUnavailable\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/logs:\n    get:\n      tags: [System]\n      summary: Query system logs\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/Limit\"\n        - name: after\n          in: query\n          schema:\n            type: string\n          description: Cursor from a previous response\n        - name: level\n          in: query\n          schema:\n            type: string\n            enum: [trace, debug, info, warn, critical]\n        - name: min_level\n          in: query\n          schema:\n            type: string\n            enum: [trace, debug, info, warn, critical]\n        - name: search\n          in: query\n          schema:\n            type: string\n        - name: start_date\n          in: query\n          schema:\n            type: string\n            format: date-time\n        - name: end_date\n          in: query\n          schema:\n            type: string\n            format: date-time\n      responses:\n        \"200\":\n          description: Log page\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/LogListPage\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"503\":\n          description: Log database not initialized\n          content:\n            application/json:\n              schema:\n                $ref: \"#/components/schemas/ApiEnvelope\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/settings/config:\n    get:\n      tags: [System]\n      summary: Get application settings\n      security:\n        - bearerAuth: []\n      responses:\n        \"200\":\n          description: Settings object\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/AppSettings\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n    patch:\n      tags: [System]\n      summary: Update application settings\n      description: |\n        Blocked with HTTP 503 when environment variable `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value.\n\n        Updating `corsAllowedOrigins` reloads the CORS allowlist immediately (no server restart).\n        Origins from `MB_CORS_ORIGINS` remain merged after reload.\n      security:\n        - bearerAuth: []\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/AppSettingsPatch\"\n      responses:\n        \"200\":\n          description: Settings updated\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/AppSettings\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"503\":\n          description: Config mutations disabled via MB_DISABLE_CONFIG_MUTATIONS\n          content:\n            application/json:\n              schema:\n                $ref: \"#/components/schemas/ApiEnvelope\"\n\n  /sys/api-keys:\n    get:\n      tags: [System]\n      summary: List admin API keys\n      security:\n        - bearerAuth: []\n      responses:\n        \"200\":\n          description: Admin API key list\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: array\n                        items:\n                          $ref: \"#/components/schemas/ApiKeyMetadata\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    post:\n      tags: [System]\n      summary: Create admin API key\n      security:\n        - bearerAuth: []\n      requestBody:\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/ApiKeyCreateRequest\"\n      responses:\n        \"201\":\n          description: Admin API key created\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/ApiKeyCreated\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/api-keys/{id}:\n    delete:\n      tags: [System]\n      summary: Revoke admin API key\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/ResourceId\"\n      responses:\n        \"200\":\n          description: Key revoked\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: object\n                        properties:\n                          deleted:\n                            type: boolean\n                            example: true\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/oauth/providers:\n    get:\n      tags: [System]\n      summary: List OAuth providers\n      security:\n        - bearerAuth: []\n      responses:\n        \"200\":\n          description: Provider list\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: array\n                        items:\n                          $ref: \"#/components/schemas/OAuthProvider\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    post:\n      tags: [System]\n      summary: Add OAuth provider\n      security:\n        - bearerAuth: []\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/OAuthProviderCreate\"\n      responses:\n        \"201\":\n          description: Provider created\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/OAuthProvider\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n\n  /sys/oauth/providers/{id}:\n    patch:\n      tags: [System]\n      summary: Update OAuth provider\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/ResourceId\"\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              type: object\n              additionalProperties: true\n      responses:\n        \"200\":\n          description: Provider updated\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        $ref: \"#/components/schemas/OAuthProvider\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"500\":\n          $ref: \"#/components/responses/InternalError\"\n    delete:\n      tags: [System]\n      summary: Remove OAuth provider\n      security:\n        - bearerAuth: []\n      parameters:\n        - $ref: \"#/components/parameters/ResourceId\"\n      responses:\n        \"200\":\n          description: Provider removed\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: object\n                        properties:\n                          deleted:\n                            type: boolean\n                            example: true\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n\n  /sys/oauth/entity-config:\n    post:\n      tags: [System]\n      summary: Enable OAuth provider for entity\n      security:\n        - bearerAuth: []\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/OAuthEntityConfig\"\n      responses:\n        \"200\":\n          description: Provider enabled for entity\n          content:\n            application/json:\n              schema:\n                $ref: \"#/components/schemas/ApiEnvelope\"\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n    delete:\n      tags: [System]\n      summary: Disable OAuth provider for entity\n      security:\n        - bearerAuth: []\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/OAuthEntityConfig\"\n      responses:\n        \"200\":\n          description: Provider disabled\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: \"#/components/schemas/ApiEnvelope\"\n                  - type: object\n                    properties:\n                      data:\n                        type: object\n                        properties:\n                          disabled:\n                            type: boolean\n                            example: true\n        \"400\":\n          $ref: \"#/components/responses/BadRequest\"\n        \"401\":\n          $ref: \"#/components/responses/Unauthorized\"\n        \"403\":\n          $ref: \"#/components/responses/Forbidden\"\n        \"404\":\n          $ref: \"#/components/responses/NotFound\"\n\ncomponents:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT or mb_sk_ API key\n      description: |\n        JWT from login/refresh, or a long-lived API key prefixed with `mb_sk_`.\n        Both use `Authorization: Bearer <token>`.\n\n  parameters:\n    EntityName:\n      name: entity_name\n      in: path\n      required: true\n      description: Auth-type entity name (not a system entity).\n      schema:\n        type: string\n        pattern: \"^[A-Za-z0-9_]{1,64}$\"\n        example: users\n    DynamicEntityName:\n      name: entity_name\n      in: path\n      required: true\n      description: Registered entity name.\n      schema:\n        type: string\n        pattern: \"^[A-Za-z0-9_]{1,64}$\"\n        example: posts\n    SchemaNameOrId:\n      name: schema_name_or_id\n      in: path\n      required: true\n      schema:\n        type: string\n    ResourceId:\n      name: id\n      in: path\n      required: true\n      schema:\n        type: string\n    OAuthProvider:\n      name: provider\n      in: path\n      required: true\n      schema:\n        type: string\n        example: google\n    Limit:\n      name: limit\n      in: query\n      schema:\n        type: integer\n        minimum: 1\n        maximum: 500\n        default: 50\n    AfterCursor:\n      name: after\n      in: query\n      schema:\n        type: string\n      description: Cursor (`id` of the last item from the previous page).\n    Filter:\n      name: filter\n      in: query\n      schema:\n        type: string\n      description: \"URL-encoded JSON object of `{field: value}` equality filters.\"\n\n  responses:\n    BadRequest:\n      description: Invalid request\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/ApiEnvelope\"\n    Unauthorized:\n      description: Missing, invalid, or expired credentials\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/ApiEnvelope\"\n    Forbidden:\n      description: Authenticated but not permitted\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/ApiEnvelope\"\n    NotFound:\n      description: Resource not found\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/ApiEnvelope\"\n    InternalError:\n      description: Server error\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/ApiEnvelope\"\n    TooManyRequests:\n      description: Rate limit exceeded\n      headers:\n        Retry-After:\n          schema:\n            type: integer\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/ApiEnvelope\"\n    ServiceUnavailable:\n      description: Route temporarily disabled (e.g. env gate)\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/ApiEnvelope\"\n\n  schemas:\n    ApiEnvelope:\n      type: object\n      properties:\n        status:\n          type: integer\n        data:\n          description: Payload; shape varies by endpoint.\n        error:\n          oneOf:\n            - type: string\n            - type: \"null\"\n      required: [status, data, error]\n\n    LoginRequest:\n      type: object\n      required: [identity, password]\n      properties:\n        identity:\n          type: string\n          description: Email address or user ID\n          example: user@example.com\n        password:\n          type: string\n          format: password\n\n    AuthTokenResponse:\n      type: object\n      properties:\n        token:\n          type: string\n          description: JWT access token\n        user:\n          $ref: \"#/components/schemas/EntityRecord\"\n      required: [token, user]\n\n    EntityRecord:\n      type: object\n      description: Dynamic record shape defined by entity schema.\n      additionalProperties: true\n\n    EntityListPage:\n      type: object\n      properties:\n        items_count:\n          type: integer\n        limit:\n          type: integer\n        has_more:\n          type: boolean\n        cursor:\n          type: string\n          nullable: true\n        items:\n          type: array\n          items:\n            $ref: \"#/components/schemas/EntityRecord\"\n\n    LogEntry:\n      type: object\n      properties:\n        id:\n          type: string\n        timestamp:\n          type: string\n          format: date-time\n        level:\n          type: string\n          enum: [trace, debug, info, warn, critical]\n        origin:\n          type: string\n        message:\n          type: string\n        details:\n          type: string\n        created_at:\n          type: string\n          format: date-time\n\n    LogListPage:\n      type: object\n      properties:\n        items_count:\n          type: integer\n        limit:\n          type: integer\n        has_more:\n          type: boolean\n        cursor:\n          type: string\n          nullable: true\n        items:\n          type: array\n          items:\n            $ref: \"#/components/schemas/LogEntry\"\n\n    ApiKeyCreateRequest:\n      type: object\n      properties:\n        label:\n          type: string\n          default: API Key\n          example: Mobile app\n        permissions:\n          type: array\n          description: Stored metadata only; not enforced by middleware today.\n          items: {}\n          default: []\n        expires_at:\n          type: string\n          description: Optional UTC expiration timestamp. Empty or omitted means no expiration.\n          default: \"\"\n\n    ApiKeyCreated:\n      allOf:\n        - $ref: \"#/components/schemas/ApiKeyMetadata\"\n        - type: object\n          properties:\n            key:\n              type: string\n              description: Raw secret shown once (`mb_sk_...`).\n              example: mb_sk_a1b2c3d4...\n\n    ApiKeyMetadata:\n      type: object\n      properties:\n        id:\n          type: string\n        entity_name:\n          type: string\n        user_id:\n          type: string\n        label:\n          type: string\n        permissions:\n          type: array\n          items: {}\n        last_used:\n          type: string\n          nullable: true\n        created:\n          type: string\n        expires_at:\n          type: string\n          nullable: true\n\n    AccessRule:\n      type: object\n      properties:\n        mode:\n          type: string\n          enum: [\"\", public, auth, custom]\n        expr:\n          type: string\n\n    EntitySchema:\n      type: object\n      properties:\n        id:\n          type: string\n        name:\n          type: string\n        type:\n          type: string\n          enum: [base, auth, view]\n        fields:\n          type: array\n          items:\n            type: object\n            additionalProperties: true\n        rules:\n          type: object\n          properties:\n            list:\n              $ref: \"#/components/schemas/AccessRule\"\n            get:\n              $ref: \"#/components/schemas/AccessRule\"\n            add:\n              $ref: \"#/components/schemas/AccessRule\"\n            update:\n              $ref: \"#/components/schemas/AccessRule\"\n            delete:\n              $ref: \"#/components/schemas/AccessRule\"\n        view_query:\n          type: string\n          description: Required for `view` entities.\n      additionalProperties: true\n\n    EntitySchemaCreate:\n      type: object\n      required: [name, type]\n      properties:\n        name:\n          type: string\n          pattern: \"^[A-Za-z0-9_]{1,64}$\"\n        type:\n          type: string\n          enum: [base, auth, view]\n        fields:\n          type: array\n          items:\n            type: object\n            additionalProperties: true\n        rules:\n          type: object\n          additionalProperties:\n            $ref: \"#/components/schemas/AccessRule\"\n        view_query:\n          type: string\n\n    EntitySchemaPatch:\n      type: object\n      properties:\n        fields:\n          type: array\n          items:\n            type: object\n            additionalProperties: true\n            description: 'Add by name, update by id, delete with op \"delete\".'\n        rules:\n          type: object\n          additionalProperties:\n            $ref: \"#/components/schemas/AccessRule\"\n        view_query:\n          type: string\n\n    AppSettings:\n      type: object\n      properties:\n        orgName:\n          type: string\n          example: ACME Corp\n        siteDomain:\n          type: string\n          format: uri\n          description: Public site URL (OAuth callbacks, links, JWT audience)\n        corsAllowedOrigins:\n          type: array\n          description: >-\n            Browser origins allowed for cross-origin requests with credentials.\n            Merged at runtime with comma-separated values in the MB_CORS_ORIGINS\n            environment variable.\n          items:\n            type: string\n            format: uri\n          example:\n            - http://localhost:3000\n            - http://127.0.0.1:3000\n        maxFileSize:\n          type: integer\n          description: Maximum upload size in bytes\n          example: 10485760\n        allowRegistration:\n          type: boolean\n        emailVerificationRequired:\n          type: boolean\n        sessionTimeout:\n          type: integer\n          description: Entity user session timeout in seconds\n        adminSessionTimeout:\n          type: integer\n          description: Admin session timeout in seconds\n        jwtEnableSetIssuer:\n          type: boolean\n        jwtEnableSetAudience:\n          type: boolean\n        smtp:\n          $ref: \"#/components/schemas/SmtpConfig\"\n        mantisVersion:\n          type: string\n          readOnly: true\n\n    AppSettingsPatch:\n      type: object\n      description: Partial update; omitted fields retain current values.\n      properties:\n        orgName:\n          type: string\n        siteDomain:\n          type: string\n        corsAllowedOrigins:\n          type: array\n          items:\n            type: string\n            format: uri\n        maxFileSize:\n          type: integer\n          description: Maximum upload size in bytes\n        allowRegistration:\n          type: boolean\n        emailVerificationRequired:\n          type: boolean\n        sessionTimeout:\n          type: integer\n        adminSessionTimeout:\n          type: integer\n        jwtEnableSetIssuer:\n          type: boolean\n        jwtEnableSetAudience:\n          type: boolean\n        smtp:\n          $ref: \"#/components/schemas/SmtpConfigPatch\"\n\n    SmtpConfig:\n      type: object\n      properties:\n        host:\n          type: string\n        port:\n          type: integer\n          example: 587\n        user:\n          type: string\n        password:\n          type: string\n          writeOnly: true\n        from:\n          type: string\n        tls:\n          type: boolean\n\n    SmtpConfigPatch:\n      type: object\n      description: Partial SMTP update. Send `\"********\"` for password to keep the existing value.\n      properties:\n        host:\n          type: string\n        port:\n          type: integer\n        user:\n          type: string\n        password:\n          type: string\n        from:\n          type: string\n        tls:\n          type: boolean\n\n    OAuthProvider:\n      type: object\n      additionalProperties: true\n\n    OAuthProviderCreate:\n      type: object\n      required: [name, client_id, client_secret]\n      properties:\n        name:\n          type: string\n          example: google\n        client_id:\n          type: string\n        client_secret:\n          type: string\n          format: password\n\n    OAuthEntityConfig:\n      type: object\n      required: [entity_name, provider_id]\n      properties:\n        entity_name:\n          type: string\n        provider_id:\n          type: string\n\n    RealtimeSessionUpdate:\n      type: object\n      required: [client_id, topics]\n      properties:\n        client_id:\n          type: string\n          description: Session ID from the SSE `connected` event\n        topics:\n          type: array\n          items:\n            type: string\n          description: Entity names or `entity:row_id` strings. Empty array clears subscriptions.\n\n    RealtimeChangeEvent:\n      type: object\n      properties:\n        action:\n          type: string\n          enum: [insert, update, delete]\n        entity:\n          type: string\n        row_id:\n          type: string\n        topic:\n          type: string\n        timestamp:\n          type: integer\n        data:\n          oneOf:\n            - $ref: \"#/components/schemas/EntityRecord\"\n            - type: \"null\"\n"
+    },
+    {
+      "_type": "request_group",
+      "_id": "fld_7675f4ef577f",
+      "parentId": "wrk_f02b0df0b7ad",
+      "name": "Health",
+      "description": "",
+      "metaSortKey": 0
+    },
+    {
+      "_type": "request_group",
+      "_id": "fld_ef46630fc46b",
+      "parentId": "wrk_f02b0df0b7ad",
+      "name": "Auth",
+      "description": "",
+      "metaSortKey": 1
+    },
+    {
+      "_type": "request_group",
+      "_id": "fld_b6bdf3361a81",
+      "parentId": "wrk_f02b0df0b7ad",
+      "name": "Entities",
+      "description": "",
+      "metaSortKey": 2
+    },
+    {
+      "_type": "request_group",
+      "_id": "fld_587ecf878615",
+      "parentId": "wrk_f02b0df0b7ad",
+      "name": "Schemas",
+      "description": "",
+      "metaSortKey": 3
+    },
+    {
+      "_type": "request_group",
+      "_id": "fld_38d6363a2836",
+      "parentId": "wrk_f02b0df0b7ad",
+      "name": "Files",
+      "description": "",
+      "metaSortKey": 4
+    },
+    {
+      "_type": "request_group",
+      "_id": "fld_9073955f9840",
+      "parentId": "wrk_f02b0df0b7ad",
+      "name": "Realtime",
+      "description": "",
+      "metaSortKey": 5
+    },
+    {
+      "_type": "request_group",
+      "_id": "fld_e30caaa5c2dc",
+      "parentId": "wrk_f02b0df0b7ad",
+      "name": "System",
+      "description": "",
+      "metaSortKey": 6
+    },
+    {
+      "_type": "request",
+      "_id": "req_f66c39ef2834",
+      "parentId": "fld_ef46630fc46b",
+      "name": "GET Verify current credentials",
+      "description": "Checks whether the current JWT or API key is valid. Rate-limited to 5 requests/minute per IP.\n",
+      "method": "GET",
+      "url": "{{ _.base_url }}/auth/verify",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.user_token }}"
+      },
+      "metaSortKey": 0
+    },
+    {
+      "_type": "request",
+      "_id": "req_e5feb97b4172",
+      "parentId": "fld_ef46630fc46b",
+      "name": "GET List entity user API keys",
+      "description": "Returns metadata only; raw secrets are never included in list responses.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/api-keys",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.user_token }}"
+      },
+      "metaSortKey": 1
+    },
+    {
+      "_type": "request",
+      "_id": "req_43070bcc82ad",
+      "parentId": "fld_ef46630fc46b",
+      "name": "POST Create entity user API key",
+      "description": "Returns the raw `mb_sk_...` secret once at creation time.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/api-keys",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"label\": \"Insomnia test key\",\n  \"permissions\": []\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.user_token }}"
+      },
+      "metaSortKey": 2
+    },
+    {
+      "_type": "request",
+      "_id": "req_b06a715109d6",
+      "parentId": "fld_ef46630fc46b",
+      "name": "DELETE Revoke entity user API key",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/api-keys/{{ _.record_id }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.user_token }}"
+      },
+      "metaSortKey": 3
+    },
+    {
+      "_type": "request",
+      "_id": "req_4bc6f339dfe4",
+      "parentId": "fld_ef46630fc46b",
+      "name": "POST Entity user login",
+      "description": "Authenticate against an auth-type entity and receive a JWT. Rate-limited to 5 attempts/minute per IP.\nThe entity must be type `auth`, API-enabled, and not a system entity.\n",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/login",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"identity\": \"{{ _.admin_email }}\",\n  \"password\": \"{{ _.admin_password }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 4
+    },
+    {
+      "_type": "request",
+      "_id": "req_db5401ea40a7",
+      "parentId": "fld_ef46630fc46b",
+      "name": "POST Logout entity user",
+      "description": "Invalidates the current session when the JWT contains a `session_id` claim.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/logout",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.user_token }}"
+      },
+      "metaSortKey": 5
+    },
+    {
+      "_type": "request",
+      "_id": "req_615c24e0d05b",
+      "parentId": "fld_ef46630fc46b",
+      "name": "GET List linked OAuth accounts",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/oauth/accounts",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.user_token }}"
+      },
+      "metaSortKey": 6
+    },
+    {
+      "_type": "request",
+      "_id": "req_2a65ccc20e5b",
+      "parentId": "fld_ef46630fc46b",
+      "name": "GET Start OAuth login (redirect)",
+      "description": "Redirects the browser to the OAuth provider authorization URL (PKCE).",
+      "method": "GET",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/oauth/authorize/{{ _.oauth_provider }}",
+      "body": {},
+      "parameters": [
+        {
+          "name": "redirect_uri",
+          "value": "",
+          "disabled": true
+        }
+      ],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 7
+    },
+    {
+      "_type": "request",
+      "_id": "req_cab1703b7fed",
+      "parentId": "fld_ef46630fc46b",
+      "name": "GET OAuth callback",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/oauth/callback/{{ _.oauth_provider }}",
+      "body": {},
+      "parameters": [
+        {
+          "name": "code",
+          "value": "",
+          "disabled": true
+        },
+        {
+          "name": "state",
+          "value": "",
+          "disabled": true
+        },
+        {
+          "name": "error",
+          "value": "",
+          "disabled": true
+        }
+      ],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 8
+    },
+    {
+      "_type": "request",
+      "_id": "req_c22dd9492d45",
+      "parentId": "fld_ef46630fc46b",
+      "name": "POST Link OAuth provider to current user",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/oauth/link/{{ _.oauth_provider }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"oauth-authorization-code\",\n  \"state\": \"oauth-state\"\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.user_token }}"
+      },
+      "metaSortKey": 9
+    },
+    {
+      "_type": "request",
+      "_id": "req_5a8542d59861",
+      "parentId": "fld_ef46630fc46b",
+      "name": "DELETE Unlink OAuth provider from current user",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/oauth/link/{{ _.oauth_provider }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.user_token }}"
+      },
+      "metaSortKey": 10
+    },
+    {
+      "_type": "request",
+      "_id": "req_59a67fdd9c90",
+      "parentId": "fld_ef46630fc46b",
+      "name": "GET List OAuth providers enabled for entity",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/oauth/providers",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 11
+    },
+    {
+      "_type": "request",
+      "_id": "req_9da5b00331ff",
+      "parentId": "fld_ef46630fc46b",
+      "name": "POST Refresh entity user token",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/{{ _.entity_name }}/refresh",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.user_token }}"
+      },
+      "metaSortKey": 12
+    },
+    {
+      "_type": "request",
+      "_id": "req_dd78b6990059",
+      "parentId": "fld_b6bdf3361a81",
+      "name": "GET List entity records",
+      "description": "Authorization depends on the entity `list` access rule. Results are ordered by record `id` ascending.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/entities/{{ _.entity_name }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 13
+    },
+    {
+      "_type": "request",
+      "_id": "req_278cf2adb2c3",
+      "parentId": "fld_b6bdf3361a81",
+      "name": "POST Create entity record",
+      "description": "Authorization depends on the entity `add` access rule. Supports JSON and multipart file uploads.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/entities/{{ _.entity_name }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Hello World\",\n  \"body\": \"Sample post content\"\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 14
+    },
+    {
+      "_type": "request",
+      "_id": "req_58c75d2c80db",
+      "parentId": "fld_b6bdf3361a81",
+      "name": "GET Get entity record",
+      "description": "Authorization depends on the entity `get` access rule.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/entities/{{ _.entity_name }}/{{ _.record_id }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 15
+    },
+    {
+      "_type": "request",
+      "_id": "req_5faf232a4805",
+      "parentId": "fld_b6bdf3361a81",
+      "name": "PATCH Update entity record",
+      "description": "Authorization depends on the entity `update` access rule. View entities reject mutations.",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/entities/{{ _.entity_name }}/{{ _.record_id }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 16
+    },
+    {
+      "_type": "request",
+      "_id": "req_b083dee49b05",
+      "parentId": "fld_b6bdf3361a81",
+      "name": "DELETE Delete entity record",
+      "description": "Authorization depends on the entity `delete` access rule.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/entities/{{ _.entity_name }}/{{ _.record_id }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 17
+    },
+    {
+      "_type": "request",
+      "_id": "req_5a12935218c9",
+      "parentId": "fld_38d6363a2836",
+      "name": "GET Serve uploaded file",
+      "description": "Returns the stored file for a given entity upload field.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/files/{{ _.entity_name }}/{{ _.file_name }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 18
+    },
+    {
+      "_type": "request",
+      "_id": "req_42479171aec9",
+      "parentId": "fld_7675f4ef577f",
+      "name": "GET Health check",
+      "description": "Lightweight liveness probe. Does not use the standard response envelope.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/health",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 19
+    },
+    {
+      "_type": "request",
+      "_id": "req_82c4954cfc3f",
+      "parentId": "fld_9073955f9840",
+      "name": "GET Open SSE connection",
+      "description": "Establishes a long-lived Server-Sent Events stream. Disabled when `MB_REALTIME_SSE=false`.\n\nSubscribing to `entity` requires list access; subscribing to `entity:row_id` requires get access.\n",
+      "method": "GET",
+      "url": "{{ _.base_url }}/realtime",
+      "body": {},
+      "parameters": [
+        {
+          "name": "topics",
+          "value": "{{ _.entity_name }}",
+          "disabled": false
+        }
+      ],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 20
+    },
+    {
+      "_type": "request",
+      "_id": "req_3d7c7d984158",
+      "parentId": "fld_9073955f9840",
+      "name": "POST Update SSE session topics",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/realtime",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"client_id\": \"{{ _.sse_client_id }}\",\n  \"topics\": [\n    \"{{ _.entity_name }}\"\n  ]\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 21
+    },
+    {
+      "_type": "request",
+      "_id": "req_f4c5385381a7",
+      "parentId": "fld_9073955f9840",
+      "name": "GET WebSocket realtime connection",
+      "description": "WebSocket endpoint at `WS /api/v1/realtime/ws`.\n\nAfter connecting, send JSON messages such as `{ \"topics\": [\"posts\", \"users\"] }`.\nChange events use the same payload shape as SSE `change` events.\nDisabled when `MB_REALTIME_WS=false`.\n",
+      "method": "GET",
+      "url": "{{ _.base_url }}/realtime/ws",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 22
+    },
+    {
+      "_type": "request",
+      "_id": "req_8cd4b0512a6b",
+      "parentId": "fld_587ecf878615",
+      "name": "GET List all schemas",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/schemas",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 23
+    },
+    {
+      "_type": "request",
+      "_id": "req_68fb1e96ee8a",
+      "parentId": "fld_587ecf878615",
+      "name": "POST Create schema",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/schemas",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"posts\",\n  \"type\": \"base\",\n  \"list\": {\n    \"mode\": \"public\",\n    \"expr\": \"\"\n  },\n  \"get\": {\n    \"mode\": \"public\",\n    \"expr\": \"\"\n  },\n  \"add\": {\n    \"mode\": \"auth\",\n    \"expr\": \"\"\n  },\n  \"update\": {\n    \"mode\": \"auth\",\n    \"expr\": \"\"\n  },\n  \"delete\": {\n    \"mode\": \"\",\n    \"expr\": \"\"\n  },\n  \"fields\": [\n    {\n      \"name\": \"title\",\n      \"type\": \"string\",\n      \"required\": true\n    },\n    {\n      \"name\": \"body\",\n      \"type\": \"string\"\n    }\n  ]\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 24
+    },
+    {
+      "_type": "request",
+      "_id": "req_80596032dd05",
+      "parentId": "fld_587ecf878615",
+      "name": "GET Get schema",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/schemas/{{ _.schema_name }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 25
+    },
+    {
+      "_type": "request",
+      "_id": "req_7c25ca56909f",
+      "parentId": "fld_587ecf878615",
+      "name": "PATCH Update schema",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/schemas/{{ _.schema_name }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"fields\": [\n    {\n      \"name\": \"summary\",\n      \"type\": \"string\",\n      \"required\": false\n    }\n  ]\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 26
+    },
+    {
+      "_type": "request",
+      "_id": "req_9304d942ecf6",
+      "parentId": "fld_587ecf878615",
+      "name": "DELETE Delete schema",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/schemas/{{ _.schema_name }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 27
+    },
+    {
+      "_type": "request",
+      "_id": "req_f8118a84ca62",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "GET List admin accounts",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/sys/admins",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 28
+    },
+    {
+      "_type": "request",
+      "_id": "req_535bc71e0400",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "POST Create admin account",
+      "description": "Blocked with 503 when `MB_DISABLE_ADMIN_MUTATIONS` is truthy.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/sys/admins",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"changeme123\"\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 29
+    },
+    {
+      "_type": "request",
+      "_id": "req_0fd3efee55db",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "POST Admin login",
+      "description": "Rate-limited to 5 attempts/minute per IP.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/sys/admins/login",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"identity\": \"{{ _.admin_email }}\",\n  \"password\": \"{{ _.admin_password }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 30
+    },
+    {
+      "_type": "request",
+      "_id": "req_42b2502197fc",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "POST Admin logout",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/sys/admins/logout",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 31
+    },
+    {
+      "_type": "request",
+      "_id": "req_615c0b15867f",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "POST Refresh admin token",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/sys/admins/refresh",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 32
+    },
+    {
+      "_type": "request",
+      "_id": "req_64938ba81a9f",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "POST Create initial admin account",
+      "description": "First-boot setup. Requires a valid service-account token (`mb_service_acc` entity).\nRate-limited to 3 requests/hour per IP.\n",
+      "method": "POST",
+      "url": "{{ _.base_url }}/sys/admins/setup",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"changeme123\"\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 33
+    },
+    {
+      "_type": "request",
+      "_id": "req_71ab5a71f5b0",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "GET Get admin account",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/sys/admins/{{ _.record_id }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 34
+    },
+    {
+      "_type": "request",
+      "_id": "req_6c958e7b1f8a",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "PATCH Update admin account",
+      "description": "Blocked with 503 when `MB_DISABLE_ADMIN_MUTATIONS` is truthy.",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/sys/admins/{{ _.record_id }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 35
+    },
+    {
+      "_type": "request",
+      "_id": "req_57bd397a84c5",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "DELETE Delete admin account",
+      "description": "Blocked with 503 when `MB_DISABLE_ADMIN_MUTATIONS` is truthy.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/sys/admins/{{ _.record_id }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 36
+    },
+    {
+      "_type": "request",
+      "_id": "req_5f86316cb36e",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "GET List admin API keys",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/sys/api-keys",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 37
+    },
+    {
+      "_type": "request",
+      "_id": "req_5cb134932279",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "POST Create admin API key",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/sys/api-keys",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"label\": \"Insomnia test key\",\n  \"permissions\": []\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 38
+    },
+    {
+      "_type": "request",
+      "_id": "req_887193f2f321",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "DELETE Revoke admin API key",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/sys/api-keys/{{ _.record_id }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 39
+    },
+    {
+      "_type": "request",
+      "_id": "req_0436310249a3",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "GET Query system logs",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/sys/logs",
+      "body": {},
+      "parameters": [
+        {
+          "name": "after",
+          "value": "{{ _.cursor }}",
+          "disabled": false
+        },
+        {
+          "name": "level",
+          "value": "warn",
+          "disabled": false
+        },
+        {
+          "name": "min_level",
+          "value": "warn",
+          "disabled": false
+        },
+        {
+          "name": "search",
+          "value": "database",
+          "disabled": false
+        },
+        {
+          "name": "start_date",
+          "value": "",
+          "disabled": true
+        },
+        {
+          "name": "end_date",
+          "value": "",
+          "disabled": true
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 40
+    },
+    {
+      "_type": "request",
+      "_id": "req_d5c9ded15027",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "POST Enable OAuth provider for entity",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/sys/oauth/entity-config",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"entity_name\": \"{{ _.entity_name }}\",\n  \"provider_id\": \"{{ _.oauth_provider_id }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 41
+    },
+    {
+      "_type": "request",
+      "_id": "req_6604d4a0817c",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "DELETE Disable OAuth provider for entity",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/sys/oauth/entity-config",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"entity_name\": \"{{ _.entity_name }}\",\n  \"provider_id\": \"{{ _.oauth_provider_id }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 42
+    },
+    {
+      "_type": "request",
+      "_id": "req_3fef04da9aff",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "GET List OAuth providers",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/sys/oauth/providers",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 43
+    },
+    {
+      "_type": "request",
+      "_id": "req_49dd9c5f4e43",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "POST Add OAuth provider",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/sys/oauth/providers",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"google\",\n  \"client_id\": \"your-client-id\",\n  \"client_secret\": \"your-client-secret\"\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 44
+    },
+    {
+      "_type": "request",
+      "_id": "req_eb8cd449cde6",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "PATCH Update OAuth provider",
+      "description": "",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/sys/oauth/providers/{{ _.record_id }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 45
+    },
+    {
+      "_type": "request",
+      "_id": "req_3503c90d1045",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "DELETE Remove OAuth provider",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/sys/oauth/providers/{{ _.record_id }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 46
+    },
+    {
+      "_type": "request",
+      "_id": "req_6c865752fa50",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "GET Get application settings",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/sys/settings/config",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 47
+    },
+    {
+      "_type": "request",
+      "_id": "req_cf8e999ea512",
+      "parentId": "fld_e30caaa5c2dc",
+      "name": "PATCH Update application settings",
+      "description": "Blocked with HTTP 503 when environment variable `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value.\n\nUpdating `corsAllowedOrigins` reloads the CORS allowlist immediately (no server restart).\nOrigins from `MB_CORS_ORIGINS` remain merged after reload.\n",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/sys/settings/config",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"orgName\": \"ACME Corp\",\n  \"siteDomain\": \"https://acme.example.com\",\n  \"maxFileSize\": 10485760\n}"
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.admin_token }}"
+      },
+      "metaSortKey": 48
+    }
+  ]
+}

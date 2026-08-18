@@ -1,13 +1,118 @@
 #include "../../../include/mantisbase/core/models/entity.h"
 #include "../../../include/mantisbase/core/models/entity_schema.h"
 #include "../../../include/mantisbase/core/models/entity_schema_field.h"
+#include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/utils.h"
 #include "../../../include/mantisbase/utils/uuidv7.h"
 #include "mantisbase/utils/soci_wrappers.h"
 #include "mantisbase/core/realtime.h"
 
+#include <sstream>
 
 namespace mb {
+    namespace {
+        json parseFilterOpt(const json &opts) {
+            if (!opts.contains("filter")) {
+                return json::object();
+            }
+
+            const auto &filter = opts["filter"];
+            if (filter.is_null()) {
+                return json::object();
+            }
+            if (filter.is_object()) {
+                return filter;
+            }
+            if (filter.is_string()) {
+                const auto trimmed = trim(filter.get<std::string>());
+                if (trimmed.empty()) {
+                    return json::object();
+                }
+                try {
+                    const auto parsed = json::parse(trimmed);
+                    if (!parsed.is_object()) {
+                        throw MantisException(400, "Filter must be a JSON object.");
+                    }
+                    return parsed;
+                } catch (const json::parse_error &) {
+                    throw MantisException(400, "Invalid filter JSON.");
+                }
+            }
+
+            throw MantisException(400, "Invalid filter parameter.");
+        }
+
+        void bindFilterValue(soci::values &vals, const std::string &field, const json &value,
+                             const json &field_def) {
+            const auto field_type = field_def.at("type").get<std::string>();
+
+            if (field_type == "xml" || field_type == "string" || field_type == "file") {
+                vals.set(field, value.get<std::string>());
+            } else if (field_type == "double") {
+                vals.set(field, value.get<double>());
+            } else if (field_type == "date") {
+                const auto dt_str = value.get<std::string>();
+                std::tm tm{};
+                std::istringstream ss{dt_str};
+                ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
+                vals.set(field, tm);
+            } else if (field_type == "int") {
+                const int prec = field_def.value("precision", 32);
+                switch (prec) {
+                    case 8: vals.set(field, static_cast<int8_t>(value.get<int>())); break;
+                    case 16: vals.set(field, static_cast<int16_t>(value.get<int>())); break;
+                    case 64: vals.set(field, static_cast<int64_t>(value.get<int>())); break;
+                    default: vals.set(field, static_cast<int32_t>(value.get<int>())); break;
+                }
+            } else if (field_type == "bool") {
+                vals.set(field, value.get<bool>());
+            } else if (field_type == "json") {
+                vals.set(field, value);
+            } else {
+                throw MantisException(400,
+                                      std::format("Filtering by `{}` (type `{}`) is not supported.", field,
+                                                    field_type));
+            }
+        }
+
+        std::string buildFilterWhere(const Entity &entity, const json &filter_obj, const std::string &after,
+                                     soci::values &binds) {
+            std::vector<std::string> conditions;
+
+            if (!after.empty()) {
+                conditions.push_back(sqlIdentifier("id") + " > :after");
+                binds.set("after", after);
+            }
+
+            for (const auto &[field, value]: filter_obj.items()) {
+                const auto field_def = entity.field(field);
+                if (!field_def.has_value()) {
+                    throw MantisException(400, std::format("Unknown filter field `{}`.", field));
+                }
+
+                if (value.is_null()) {
+                    conditions.push_back(sqlIdentifier(field) + " IS NULL");
+                    continue;
+                }
+
+                conditions.push_back(sqlIdentifier(field) + " = :" + field);
+                bindFilterValue(binds, field, value, *field_def);
+            }
+
+            if (conditions.empty()) {
+                return {};
+            }
+
+            std::string where = " WHERE ";
+            for (size_t i = 0; i < conditions.size(); ++i) {
+                if (i > 0) {
+                    where += " AND ";
+                }
+                where += conditions[i];
+            }
+            return where;
+        }
+    }
     // --------------------------------------------------------------------------- //
     // CRUD OPS                                                                    //
     // --------------------------------------------------------------------------- //
@@ -93,69 +198,55 @@ namespace mb {
         }
     }
 
-    Records Entity::list(const json &opts) const {
+    EntityListPage Entity::listPage(const json &opts) const {
         const auto &sql = mbApp().db().session();
         int limit = 50;
         std::string after;
-        std::string sort_field = "id";
-        std::string sort_dir = "ASC";
 
         if (opts.contains("pagination") && opts["pagination"].is_object()) {
-            auto &pagination = opts["pagination"];
+            const auto &pagination = opts["pagination"];
 
             if (pagination.contains("limit") && pagination["limit"].is_number()) {
                 limit = pagination["limit"].get<int>();
                 if (limit < 1) limit = 1;
-                if (limit > 500) limit = 500;
+                if (limit > MAX_LIST_PAGE_SIZE) limit = MAX_LIST_PAGE_SIZE;
             }
-            if (pagination.contains("after") && pagination["after"].is_string())
+            if (pagination.contains("after") && pagination["after"].is_string()) {
                 after = pagination["after"].get<std::string>();
-            if (pagination.contains("sort") && pagination["sort"].is_string()) {
-                auto sort_str = pagination["sort"].get<std::string>();
-                if (!sort_str.empty() && sort_str[0] == '-') {
-                    sort_dir = "DESC";
-                    sort_field = sort_str.substr(1);
-                } else {
-                    sort_field = sort_str;
-                }
-                bool valid = false;
-                for (const auto &f: fields()) {
-                    if (f.contains("name") && f["name"].get<std::string>() == sort_field) {
-                        valid = true;
-                        break;
-                    }
-                }
-                if (!valid) {
-                    sort_field = "id";
-                    sort_dir = "ASC";
-                }
             }
         }
 
-        std::string query = "SELECT * FROM " + name();
-        if (!after.empty()) {
-            if (sort_dir == "ASC")
-                query += " WHERE " + sort_field + " > :after";
-            else
-                query += " WHERE " + sort_field + " < :after";
-        }
-        query += " ORDER BY " + sort_field + " " + sort_dir + " LIMIT :limit";
+        const auto filter_obj = parseFilterOpt(opts);
+        const int fetch_limit = limit + 1;
 
-        const soci::rowset<soci::row> rs = after.empty()
-                                               ? (sql->prepare << query, soci::use(limit))
-                                               : (sql->prepare << query, soci::use(after), soci::use(limit));
+        soci::values binds;
+        const auto where_clause = buildFilterWhere(*this, filter_obj, after, binds);
 
-        nlohmann::json record_list = nlohmann::json::array();
+        std::string query = "SELECT * FROM " + sqlIdentifier(name()) + where_clause
+                            + " ORDER BY " + sqlIdentifier("id") + " ASC LIMIT :limit";
+        binds.set("limit", fetch_limit);
 
+        const soci::rowset<soci::row> rs = (sql->prepare << query, soci::use(binds));
+
+        EntityListPage page;
         for (const auto &row: rs) {
             auto row_json = sociRow2Json(mbApp().dbType(), row, fields());
             if (type() == "auth") {
                 row_json.erase("password");
             }
-            record_list.push_back(row_json);
+            page.items.push_back(std::move(row_json));
         }
 
-        return record_list;
+        if (static_cast<int>(page.items.size()) > limit) {
+            page.has_more = true;
+            page.items.resize(static_cast<size_t>(limit));
+        }
+
+        return page;
+    }
+
+    Records Entity::list(const json &opts) const {
+        return listPage(opts).items;
     }
 
     std::optional<Record> Entity::read(const std::string &id, const json &opts) const {
@@ -385,13 +476,21 @@ namespace mb {
     // UTILS OPS                                                                   //
     // --------------------------------------------------------------------------- //
 
-    int Entity::countRecords() const {
-        // TODO add record filtering ...
+    int Entity::countRecords(const json &filter) const {
         try {
             const auto sql = mbApp().db().session();
+            const json opts = filter.empty() ? json::object() : json{{"filter", filter}};
+            const auto filter_obj = parseFilterOpt(opts);
+
+            soci::values binds;
+            const auto where_clause = buildFilterWhere(*this, filter_obj, "", binds);
+
             int count = 0;
-            *sql << std::format("SELECT COUNT(id) FROM {}", sqlIdentifier(name())), soci::into(count);
+            *sql << std::format("SELECT COUNT(*) FROM {}{}", sqlIdentifier(name()), where_clause),
+                soci::use(binds), soci::into(count);
             return count;
+        } catch (const MantisException &) {
+            throw;
         } catch (std::exception &e) {
             throw MantisException(500, e.what());
         }

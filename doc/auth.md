@@ -1,8 +1,15 @@
 ﻿@page auth_api Authentication API
 
-MantisBase provides authentication endpoints scoped to auth-type entities. Each auth entity exposes login, refresh, and logout under `/api/v1/auth/<entity>/`.
+MantisBase provides authentication endpoints scoped to auth-type entities. Each auth entity exposes login, refresh, and logout under `/api/v1/auth/<entity>/`. A global token verification endpoint is available at `/api/v1/auth/verify`.
 
 Admin authentication uses `/api/v1/sys/admins/` instead.
+
+### HTTP status codes
+
+| Code | Meaning |
+|------|---------|
+| `401 Unauthorized` | Missing, invalid, or expired credentials |
+| `403 Forbidden` | Authenticated, but not allowed to perform the action (for example, a regular user token on an admin-only route) |
 
 ---
 
@@ -26,6 +33,7 @@ If the entity is missing or does not meet these requirements, the route returns 
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| GET | `/api/v1/auth/verify` | Check whether the current JWT or API key is still valid |
 | POST | `/api/v1/auth/<entity>/login` | Authenticate user and get token |
 | POST | `/api/v1/auth/<entity>/refresh` | Refresh an existing token |
 | POST | `/api/v1/auth/<entity>/logout` | Logout (invalidate token) |
@@ -184,6 +192,68 @@ curl -X POST http://localhost:7070/api/v1/auth/users/logout \
 
 ---
 
+## Verify Token
+
+Check whether the current JWT or API key is still valid without performing a refresh or logout. Useful for client-side session checks and keeping UI auth state in sync.
+
+> ⚠️ **Rate Limiting**: Verify is rate-limited to **5 requests per minute per IP address**. If you exceed this limit, you'll receive a `429 Too Many Requests` response.
+
+**Endpoint:** `GET /api/v1/auth/verify`
+
+This route is not entity-scoped. It accepts any valid entity user JWT or `mb_sk_...` API key via the standard `Authorization` header.
+
+**Request Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (Success - 200):**
+```json
+{
+  "status": 200,
+  "data": {
+    "status": "OK"
+  },
+  "error": ""
+}
+```
+
+**Response (Missing token - 401):**
+```json
+{
+  "status": 401,
+  "data": {},
+  "error": "Missing or invalid auth token"
+}
+```
+
+**Response (Invalid or expired token - 401):**
+```json
+{
+  "status": 401,
+  "data": {},
+  "error": "Token Verification Error"
+}
+```
+
+The `error` field may contain a more specific message when token verification fails (for example, an expired JWT).
+
+**Examples:**
+
+Verify a JWT:
+```bash
+curl http://localhost:7070/api/v1/auth/verify \
+  -H "Authorization: Bearer <token>"
+```
+
+Verify an API key:
+```bash
+curl http://localhost:7070/api/v1/auth/verify \
+  -H "Authorization: Bearer mb_sk_..."
+```
+
+---
+
 ## Admin Setup and Authentication
 
 Admin account setup and admin-only authentication use the `/api/v1/sys/admins/` namespace. See [System Endpoints – Admin Accounts](api.md#admin-accounts) in the API reference.
@@ -338,4 +408,4 @@ By default, tokens expire after 1 hour. Use the refresh endpoint to extend token
 
 ## Summary
 
-The authentication API provides JWT login, long-lived API keys (`mb_sk_...`), and OAuth for auth-type entities. All credential types use `Authorization: Bearer ...` and are validated before entity access rules run. Admin-only routes under `/api/v1/sys/` manage providers and system API keys.
+The authentication API provides JWT login, token verification (`GET /api/v1/auth/verify`), long-lived API keys (`mb_sk_...`), and OAuth for auth-type entities. All credential types use `Authorization: Bearer ...` and are validated before entity access rules run. Admin-only routes under `/api/v1/sys/` manage providers and system API keys.

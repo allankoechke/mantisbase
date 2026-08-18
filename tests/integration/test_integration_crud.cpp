@@ -350,3 +350,54 @@ TEST_F(IntegrationValidationTest, RejectsForeignKeyToMissingEntity) {
     ASSERT_TRUE(res);
     EXPECT_EQ(res->status, 400);
 }
+
+TEST_F(IntegrationCRUDTest, ListPaginationHasMoreAndCursor) {
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+
+    for (int i = 0; i < 3; ++i) {
+        nlohmann::json product = {
+            {"name", "Product " + std::to_string(i)},
+            {"price", 1.0 + i},
+            {"description", "pagination test"}
+        };
+        auto createRes = client->Post("/api/v1/entities/test_products", headers,
+                                      product.dump(), "application/json");
+        ASSERT_TRUE(createRes != nullptr);
+        ASSERT_EQ(createRes->status, 201);
+    }
+
+    auto page1 = client->Get("/api/v1/entities/test_products?limit=2", headers);
+    ASSERT_TRUE(page1 != nullptr);
+    EXPECT_EQ(page1->status, 200);
+
+    auto body1 = nlohmann::json::parse(page1->body);
+    EXPECT_TRUE(body1["data"]["has_more"].get<bool>());
+    EXPECT_EQ(body1["data"]["items_count"].get<int>(), 2);
+    EXPECT_FALSE(body1["data"]["cursor"].get<std::string>().empty());
+
+    const auto cursor = body1["data"]["cursor"].get<std::string>();
+    auto page2 = client->Get("/api/v1/entities/test_products?limit=2&after=" + cursor, headers);
+    ASSERT_TRUE(page2 != nullptr);
+    EXPECT_EQ(page2->status, 200);
+
+    auto body2 = nlohmann::json::parse(page2->body);
+    EXPECT_FALSE(body2["data"]["has_more"].get<bool>());
+    EXPECT_GE(body2["data"]["items_count"].get<int>(), 1);
+}
+
+TEST_F(IntegrationCRUDTest, ListFilterByField) {
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+
+    client->Post("/api/v1/entities/test_products", headers,
+                 nlohmann::json({{"name", "Alpha"}, {"price", 1.0}}).dump(), "application/json");
+    client->Post("/api/v1/entities/test_products", headers,
+                 nlohmann::json({{"name", "Beta"}, {"price", 2.0}}).dump(), "application/json");
+
+    auto res = client->Get(R"(/api/v1/entities/test_products?filter={"name":"Alpha"})", headers);
+    ASSERT_TRUE(res != nullptr);
+    EXPECT_EQ(res->status, 200);
+
+    auto body = nlohmann::json::parse(res->body);
+    EXPECT_EQ(body["data"]["items_count"].get<int>(), 1);
+    EXPECT_EQ(body["data"]["items"][0]["name"].get<std::string>(), "Alpha");
+}
