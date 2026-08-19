@@ -50,7 +50,7 @@ file(GLOB TEST_FILES
 
 add_executable(mantisbase_tests ${TEST_FILES})
 
-if (MB_ENABLE_ASAN)
+if (MB_ENABLE_ASAN AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
     message("Enabling Address Sanitizer")
     include(../cmake/asan.cmake)
     set(ENABLE_ASAN ON)
