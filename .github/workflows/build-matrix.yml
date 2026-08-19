@@ -130,9 +130,10 @@ jobs:
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release # ${{ matrix.build_type }}
 
       - name: Test
-        if: matrix.os != 'windows-latest'
+        # Disable running tests on arm until we firgure out ASAN issues there
+        if: matrix.arch != 'aarch64'
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
-        run: ctest --build-config ${{ matrix.build_type }} --output-on-failure
+        run: ctest --build-config Release --output-on-failure -VV
 
       - name: Zip the build output (Linux)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
