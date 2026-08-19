@@ -5,6 +5,7 @@ var hierarchy =
     [ "mb::Auth", "classmb_1_1Auth.html", null ],
     [ "mb::ContextStore", "classmb_1_1ContextStore.html", null ],
     [ "mb::Database", "classmb_1_1Database.html", null ],
+    [ "mb::EntityListPage", "structmb_1_1EntityListPage.html", null ],
     [ "mb::EntitySchemaField", "classmb_1_1EntitySchemaField.html", null ],
     [ "std::exception", null, [
       [ "mb::MantisException", "classmb_1_1MantisException.html", null ]

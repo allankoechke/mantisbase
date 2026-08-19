@@ -95,12 +95,12 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>MantisBase has a comprehensive CLI built on <code>argparse</code> for server management, admin accounts, migrations, and schema operations.</p>
-<h1><a class="anchor" id="autotoc_md102"></a>
+<h1><a class="anchor" id="autotoc_md108"></a>
 mantisbase CLI Reference</h1>
 <div class="fragment"><div class="line">mantisbase [global options] &lt;subcommand&gt; [subcommand options]</div>
 </div><!-- fragment --><p>Only <b>one subcommand</b> may be used per invocation: <code>serve</code>, <code>admins</code>, <code>migrations</code>, or <code>schema</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md104"></a>
+<h2><a class="anchor" id="autotoc_md110"></a>
 Global Options</h2>
 <p>These options can appear before the subcommand:</p>
 <table class="markdownTable">
@@ -123,7 +123,7 @@ Global Options</h2>
 </table>
 <p>When an environment variable is set, it overrides the matching CLI option. For logging, <code>MB_LOG_LEVEL</code> (<code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>critical</code>) overrides <code>--dev</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md106"></a>
+<h2><a class="anchor" id="autotoc_md112"></a>
 serve</h2>
 <p>Start the HTTP server.</p>
 <div class="fragment"><div class="line">mantisbase serve [--host=&lt;host&gt;] [--port=&lt;port&gt;] [--pool-size=&lt;int&gt;] [--skip-admin-setup]</div>
@@ -140,11 +140,18 @@ serve</h2>
 <td class="markdownTableBodyNone"><code>--skip-admin-setup</code>   </td><td class="markdownTableBodyNone">Skip first-boot admin browser setup   </td><td class="markdownTableBodyNone">off   </td></tr>
 </table>
 <p><code>MB_SKIP_ADMIN_SETUP=1</code> also skips admin setup (even without the flag).</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Env variable   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>MB_CORS_ORIGINS</code>   </td><td class="markdownTableBodyNone">Comma-separated browser origins allowed for cross-origin API requests with credentials. Merged with <code>corsAllowedOrigins</code> from app settings. Requires a server restart to pick up changes (unlike PATCH settings). Example: <code><a href="http://localhost:3000,https://app.example.com">http://localhost:3000,https://app.example.com</a></code>   </td></tr>
+</table>
+<p>See <a href="api.md#cross-origin-resource-sharing-cors">REST API Reference — CORS</a> for runtime updates via settings PATCH.</p>
 <p><b>Example:</b></p>
 <div class="fragment"><div class="line">mantisbase serve --host=127.0.0.1 --port=7070</div>
 <div class="line">mantisbase --dev serve --port=8000</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md108"></a>
+<h2><a class="anchor" id="autotoc_md114"></a>
 admins</h2>
 <p>Manage admin accounts. Exactly <b>one</b> of <code>--add</code>, <code>--ls</code>, or <code>--rm</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase admins --add &lt;email&gt; &lt;password&gt;</div>
@@ -166,7 +173,7 @@ admins</h2>
 <div class="line">mantisbase admins --ls</div>
 <div class="line">mantisbase admins --rm admin@example.com</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md110"></a>
+<h2><a class="anchor" id="autotoc_md116"></a>
 schema</h2>
 <p>Manage entity schemas locally (without the HTTP API). Exactly <b>one</b> of <code>--ls</code>, <code>--rm</code>, <code>--add</code>, or <code>--update</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase schema --ls</div>
@@ -191,12 +198,12 @@ schema</h2>
 <div class="line">mantisbase schema --update posts ./schemas/posts-v2.json</div>
 <div class="line">mantisbase schema --rm posts</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md112"></a>
+<h2><a class="anchor" id="autotoc_md118"></a>
 migrate</h2>
 <p>Exactly <b>one</b> of <code>apply</code> or <code>schema</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase apply [options]</div>
 <div class="line">mantisbase schema [options]</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md113"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md119"></a>
 apply</h3>
 <p>Apply or rollback migrations from the migrations directory. Exactly <b>one</b> of <code>--up</code> or <code>--down</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase migrate apply --up</div>
@@ -211,7 +218,7 @@ apply</h3>
 </table>
 <p><b>Example:</b></p>
 <div class="fragment"><div class="line">mantisbase --migrations-dir=./db/migrations migrate apply --up</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md114"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md120"></a>
 schema</h3>
 <p>Create or load schema dump from a given .json file. Exactly <b>one</b> of <code>--to</code> or <code>--from</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase migrate schema --to &lt;file.json&gt;</div>
@@ -232,7 +239,7 @@ schema</h3>
 <div class="fragment"><div class="line">mantisbase migrate schema --to 123.json</div>
 <div class="line">mantisbase migrate schema --from /path/to/123.json</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md116"></a>
+<h2><a class="anchor" id="autotoc_md122"></a>
 See Also</h2>
 <ul>
 <li><a class="el" href="QuickStart_8md.html">Quick Start</a></li>

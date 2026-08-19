@@ -4,7 +4,7 @@ var searchData=
   ['handleconnectionclosed_1',['handleConnectionClosed',['../classmb_1_1RealtimeWSController.html#a8ee6d206bc4c88256b8346a1a709295f',1,'mb::RealtimeWSController']]],
   ['handlenewconnection_2',['handleNewConnection',['../classmb_1_1RealtimeWSController.html#a9cdc7e95d5e4f4702dce0fe59a5f2298',1,'mb::RealtimeWSController']]],
   ['handlenewmessage_3',['handleNewMessage',['../classmb_1_1RealtimeWSController.html#a2a090249b668f78dedb7c43e618f3a27',1,'mb::RealtimeWSController']]],
-  ['hasaccess_4',['hasaccess',['../classmb_1_1KeyValStore.html#aeee2629219031a10b973e16c35af2bd6',1,'mb::KeyValStore::hasAccess()'],['../namespacemb.html#afced397878d63d057f3c8eb3bbd5567f',1,'mb::hasAccess()']]],
+  ['hasaccess_4',['hasAccess',['../namespacemb.html#afced397878d63d057f3c8eb3bbd5567f',1,'mb']]],
   ['hasapi_5',['hasapi',['../classmb_1_1Entity.html#a0d6355bed97e006569f541a0f8261c86',1,'mb::Entity::hasApi()'],['../classmb_1_1EntitySchema.html#a763baac11af69b50884b71672ce0127b',1,'mb::EntitySchema::hasApi()']]],
   ['hasentity_6',['hasEntity',['../classmb_1_1MantisBase.html#a1ee293d71f01befec02f0673df35ff7c',1,'mb::MantisBase']]],
   ['hasentityaccess_7',['hasEntityAccess',['../namespacemb.html#aa397a9181d1f4f136b4e8027eb4f9d44',1,'mb']]],

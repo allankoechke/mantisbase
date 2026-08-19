@@ -29,16 +29,16 @@ var NAVTREE =
     [ "REST API Reference Guide", "rest_api.html", null ],
     [ "Authentication API", "auth_api.html", null ],
     [ "Command Line Usage", "cli.html", [
-      [ "mantisbase CLI Reference", "cli.html#autotoc_md102", [
-        [ "Global Options", "cli.html#autotoc_md104", null ],
-        [ "serve", "cli.html#autotoc_md106", null ],
-        [ "admins", "cli.html#autotoc_md108", null ],
-        [ "schema", "cli.html#autotoc_md110", null ],
-        [ "migrate", "cli.html#autotoc_md112", [
-          [ "apply", "cli.html#autotoc_md113", null ],
-          [ "schema", "cli.html#autotoc_md114", null ]
+      [ "mantisbase CLI Reference", "cli.html#autotoc_md108", [
+        [ "Global Options", "cli.html#autotoc_md110", null ],
+        [ "serve", "cli.html#autotoc_md112", null ],
+        [ "admins", "cli.html#autotoc_md114", null ],
+        [ "schema", "cli.html#autotoc_md116", null ],
+        [ "migrate", "cli.html#autotoc_md118", [
+          [ "apply", "cli.html#autotoc_md119", null ],
+          [ "schema", "cli.html#autotoc_md120", null ]
         ] ],
-        [ "See Also", "cli.html#autotoc_md116", null ]
+        [ "See Also", "cli.html#autotoc_md122", null ]
       ] ]
     ] ],
     [ "Running in Docker", "docker.html", null ],
@@ -82,11 +82,11 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "access__rules_8cpp.html",
-"classmb_1_1EntitySchema.html#af95be0e184750e335d4854940eca25cb",
-"classmb_1_1MantisContentReader.html#afb3582a2e2f5ad6903ae34a6462d8805",
-"classmb_1_1Router.html#adf04e0afecc80260f66a59dd15110db2",
-"functions_j.html",
-"structmb_1_1ApiKeyResult.html#a9989fa2ad2943a1793fa9af9ae8df39b"
+"classmb_1_1EntitySchema.html#af0bdf8938edd9de1c040c576b91fc527",
+"classmb_1_1MantisContentReader.html#a5c04034d6f78d360bdcc606b0b98b1c2",
+"classmb_1_1Router.html#aabc888e18b82c1a551d7bdbb1b9b3f8f",
+"functions_func_i.html",
+"namespacemb.html#ae160f2b0075e55c0f7c0988279983f78"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

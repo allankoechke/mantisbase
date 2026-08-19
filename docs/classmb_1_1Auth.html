@@ -117,6 +117,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a791dc6c01a67f540d6f1953c012e4af8" id="r_a791dc6c01a67f540d6f1953c012e4af8"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#a791dc6c01a67f540d6f1953c012e4af8">createToken</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;claims_params, int timeout=-1) const</td></tr>
 <tr class="memdesc:a791dc6c01a67f540d6f1953c012e4af8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create JWT token with custom claims.  <br /></td></tr>
 <tr class="separator:a791dc6c01a67f540d6f1953c012e4af8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17e5e1ddfc507eb0048ba96710ab7bd0" id="r_a17e5e1ddfc507eb0048ba96710ab7bd0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#a17e5e1ddfc507eb0048ba96710ab7bd0">sessionTimeoutSeconds</a> (const std::string &amp;entity_name, int timeout=-1) const</td></tr>
+<tr class="separator:a17e5e1ddfc507eb0048ba96710ab7bd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbda2e1689cce183f65525f331c8011a" id="r_afbda2e1689cce183f65525f331c8011a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#afbda2e1689cce183f65525f331c8011a">verifyToken</a> (const std::string &amp;token) const</td></tr>
 <tr class="separator:afbda2e1689cce183f65525f331c8011a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35154ad1dd27785bea12e1a610342485" id="r_a35154ad1dd27785bea12e1a610342485"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Auth.html#a35154ad1dd27785bea12e1a610342485">deleteSession</a> (const std::string &amp;session_id) const</td></tr>
@@ -300,6 +302,35 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a17e5e1ddfc507eb0048ba96710ab7bd0" name="a17e5e1ddfc507eb0048ba96710ab7bd0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17e5e1ddfc507eb0048ba96710ab7bd0">&#9670;&#160;</a></span>sessionTimeoutSeconds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int mb::Auth::sessionTimeoutSeconds </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>timeout</em> = <code>-1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Default session lifetime in seconds for an entity (or <code>timeout</code> when positive). </p>
 
 </div>
 </div>

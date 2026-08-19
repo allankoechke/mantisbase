@@ -114,9 +114,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aebaf937e9b5190be0661868008c66c62" id="r_aebaf937e9b5190be0661868008c66c62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#aebaf937e9b5190be0661868008c66c62">migrate</a> ()</td></tr>
 <tr class="memdesc:aebaf937e9b5190be0661868008c66c62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize migration, create base data for setting fields.  <br /></td></tr>
 <tr class="separator:aebaf937e9b5190be0661868008c66c62"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeee2629219031a10b973e16c35af2bd6" id="r_aeee2629219031a10b973e16c35af2bd6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#aeee2629219031a10b973e16c35af2bd6">hasAccess</a> (<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;req, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;res) const</td></tr>
-<tr class="memdesc:aeee2629219031a10b973e16c35af2bd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate if request is authenticated and has permission to access this route.  <br /></td></tr>
-<tr class="separator:aeee2629219031a10b973e16c35af2bd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ac258e348fb581c2e6e0df5f5d67e6a" id="r_a5ac258e348fb581c2e6e0df5f5d67e6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a5ac258e348fb581c2e6e0df5f5d67e6a">configs</a> ()</td></tr>
 <tr class="memdesc:a5ac258e348fb581c2e6e0df5f5d67e6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current config data instance.  <br /></td></tr>
 <tr class="separator:a5ac258e348fb581c2e6e0df5f5d67e6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -176,46 +173,6 @@ Public Member Functions</h2></td></tr>
 
 <p>Get the current config data instance. </p>
 <dl class="section return"><dt>Returns</dt><dd>Config data as a JSON object </dd></dl>
-
-</div>
-</div>
-<a id="aeee2629219031a10b973e16c35af2bd6" name="aeee2629219031a10b973e16c35af2bd6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeee2629219031a10b973e16c35af2bd6">&#9670;&#160;</a></span>hasAccess()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a> mb::KeyValStore::hasAccess </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;&#160;</td>
-          <td class="paramname"><em>req</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;&#160;</td>
-          <td class="paramname"><em>res</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Evaluate if request is authenticated and has permission to access this route. </p>
-<p>This route is exclusive to admin login only!</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">req</td><td>HTTP request </td></tr>
-    <tr><td class="paramname">res</td><td>HTTP response </td></tr>
-    <tr><td class="paramname">ctx</td><td>HTTP context </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><code>true</code> if access is granted, else, <code>false</code> </dd></dl>
 
 </div>
 </div>

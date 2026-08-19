@@ -164,6 +164,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ac2172250e1e2426896ed28eae3555556"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad60deda93033f65a89260bae85115dc4" id="r_ad60deda93033f65a89260bae85115dc4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ad60deda93033f65a89260bae85115dc4">isRunning</a> () const</td></tr>
 <tr class="separator:ad60deda93033f65a89260bae85115dc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3014ac8da0ec6844af0239e2b7025612" id="r_a3014ac8da0ec6844af0239e2b7025612"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a3014ac8da0ec6844af0239e2b7025612">reloadCorsOrigins</a> ()</td></tr>
+<tr class="separator:a3014ac8da0ec6844af0239e2b7025612"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabc888e18b82c1a551d7bdbb1b9b3f8f" id="r_aabc888e18b82c1a551d7bdbb1b9b3f8f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aabc888e18b82c1a551d7bdbb1b9b3f8f">applyCorsHeaders</a> (const drogon::HttpRequestPtr &amp;req, const drogon::HttpResponsePtr &amp;resp) const</td></tr>
+<tr class="separator:aabc888e18b82c1a551d7bdbb1b9b3f8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aec5a7d651d1806d6c5ebf27e9af28511" id="r_aec5a7d651d1806d6c5ebf27e9af28511"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">MiddlewareFn</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aec5a7d651d1806d6c5ebf27e9af28511">preRoutingMiddlewares</a> () const</td></tr>
 <tr class="separator:aec5a7d651d1806d6c5ebf27e9af28511"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classmb_1_1IMantisBase"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmb_1_1IMantisBase')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmb_1_1IMantisBase.html">mb::IMantisBase</a></td></tr>
@@ -254,6 +258,35 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="aabc888e18b82c1a551d7bdbb1b9b3f8f" name="aabc888e18b82c1a551d7bdbb1b9b3f8f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabc888e18b82c1a551d7bdbb1b9b3f8f">&#9670;&#160;</a></span>applyCorsHeaders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::Router::applyCorsHeaders </td>
+          <td>(</td>
+          <td class="paramtype">const drogon::HttpRequestPtr &amp;&#160;</td>
+          <td class="paramname"><em>req</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const drogon::HttpResponsePtr &amp;&#160;</td>
+          <td class="paramname"><em>resp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Add CORS headers when the request Origin is in the allowlist. </p>
 
 </div>
 </div>
@@ -569,6 +602,24 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3014ac8da0ec6844af0239e2b7025612" name="a3014ac8da0ec6844af0239e2b7025612"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3014ac8da0ec6844af0239e2b7025612">&#9670;&#160;</a></span>reloadCorsOrigins()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::Router::reloadCorsOrigins </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Reload allowed CORS origins from settings and MB_CORS_ORIGINS. </p>
 
 </div>
 </div>

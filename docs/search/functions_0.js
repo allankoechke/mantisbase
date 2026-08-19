@@ -8,16 +8,17 @@ var searchData=
   ['addfield_5',['addField',['../classmb_1_1EntitySchema.html#a06cfea1fd240a85ab83fc4c366254b62',1,'mb::EntitySchema']]],
   ['addindex_6',['addIndex',['../classmb_1_1EntitySchema.html#aab70b54d6ca8e1a8ecc82458393d8ed1',1,'mb::EntitySchema']]],
   ['addprovider_7',['addProvider',['../classmb_1_1OAuthManager.html#a7b4bbfab72bfd52afbb7a9df2286391d',1,'mb::OAuthManager']]],
-  ['addrule_8',['addrule',['../classmb_1_1EntitySchema.html#a18db8efb3737c70915d77c6252300bcc',1,'mb::EntitySchema::addRule()'],['../classmb_1_1Entity.html#a682c09f27b0c1e8d6de5def9d7e291f7',1,'mb::Entity::addRule()']]],
+  ['addrule_8',['addrule',['../classmb_1_1Entity.html#a682c09f27b0c1e8d6de5def9d7e291f7',1,'mb::Entity::addRule()'],['../classmb_1_1EntitySchema.html#a18db8efb3737c70915d77c6252300bcc',1,'mb::EntitySchema::addRule()']]],
   ['addschemacache_9',['addSchemaCache',['../classmb_1_1Router.html#a63ce782cb30a1037f549db5565b0513b',1,'mb::Router']]],
   ['addschemacachelocked_10',['addSchemaCacheLocked',['../classmb_1_1Router.html#aa86ab8304440c3b7658dc540d3dcbc95',1,'mb::Router']]],
   ['aes256gcmdecrypt_11',['aes256GcmDecrypt',['../namespacemb.html#a5893dfa8f60709096677fda285e9f5e5',1,'mb']]],
   ['aes256gcmencrypt_12',['aes256GcmEncrypt',['../namespacemb.html#a8ff4d923f532d85cfd0c6a95d96527b7',1,'mb']]],
   ['apikey_13',['apiKey',['../classmb_1_1Auth.html#acec21bcb87677ecb937f02c13d807558',1,'mb::Auth']]],
   ['apikeymanager_14',['ApiKeyManager',['../classmb_1_1ApiKeyManager.html#a3fc4eee458769ecad61f4b70ef847b8b',1,'mb::ApiKeyManager']]],
-  ['appmajorversion_15',['appMajorVersion',['../classmb_1_1MantisBase.html#a1419c75276144a9c4e82d0578a83bc55',1,'mb::MantisBase']]],
-  ['appminorversion_16',['appMinorVersion',['../classmb_1_1MantisBase.html#a1719b93f9d70a6544afabd2c916c8211',1,'mb::MantisBase']]],
-  ['apppatchversion_17',['appPatchVersion',['../classmb_1_1MantisBase.html#a7f953ae796264550051b90945f8ad251',1,'mb::MantisBase']]],
-  ['appversion_18',['appVersion',['../classmb_1_1MantisBase.html#acff8b41afb6071721e34a0fcce975e8c',1,'mb::MantisBase']]],
-  ['auth_19',['auth',['../classmb_1_1Auth.html#ae123c20659ab981185facd80fe6d29f4',1,'mb::Auth::Auth()'],['../classmb_1_1MantisBase.html#a2416771f6717000a219a462f1f673fc9',1,'mb::MantisBase::auth()']]]
+  ['applycorsheaders_15',['applyCorsHeaders',['../classmb_1_1Router.html#aabc888e18b82c1a551d7bdbb1b9b3f8f',1,'mb::Router']]],
+  ['appmajorversion_16',['appMajorVersion',['../classmb_1_1MantisBase.html#a1419c75276144a9c4e82d0578a83bc55',1,'mb::MantisBase']]],
+  ['appminorversion_17',['appMinorVersion',['../classmb_1_1MantisBase.html#a1719b93f9d70a6544afabd2c916c8211',1,'mb::MantisBase']]],
+  ['apppatchversion_18',['appPatchVersion',['../classmb_1_1MantisBase.html#a7f953ae796264550051b90945f8ad251',1,'mb::MantisBase']]],
+  ['appversion_19',['appVersion',['../classmb_1_1MantisBase.html#acff8b41afb6071721e34a0fcce975e8c',1,'mb::MantisBase']]],
+  ['auth_20',['auth',['../classmb_1_1Auth.html#ae123c20659ab981185facd80fe6d29f4',1,'mb::Auth::Auth()'],['../classmb_1_1MantisBase.html#a2416771f6717000a219a462f1f673fc9',1,'mb::MantisBase::auth()']]]
 ];

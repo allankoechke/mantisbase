@@ -96,13 +96,13 @@ $(document).ready(function(){initNavTree('docker.html',''); initResizable(); });
 <div class="contents">
 <div class="textblock"><p>MantisBase provides Docker support for easy deployment and containerization. This guide covers building and running MantisBase in Docker containers.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md119"></a>
+<h2><a class="anchor" id="autotoc_md125"></a>
 Limitations</h2>
 <p>Docker builds are currently available for <code>linux-amd64</code> platform only. For ARM builds, you will need to build the project from source.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md121"></a>
+<h2><a class="anchor" id="autotoc_md127"></a>
 Building and Running</h2>
-<h3><a class="anchor" id="autotoc_md122"></a>
+<h3><a class="anchor" id="autotoc_md128"></a>
 Using Dockerfile</h3>
 <p>The repository includes a <code>Dockerfile</code> in the <code>/docker</code> directory. To build and run:</p>
 <div class="fragment"><div class="line"># Build (optionally set MB_VERSION for a specific release)</div>
@@ -115,7 +115,7 @@ Using Dockerfile</h3>
 <div class="line">  -v $(pwd)/public:/mb/public \</div>
 <div class="line">  -v $(pwd)/scripts:/mb/scripts \</div>
 <div class="line">  --rm mantisbase</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md123"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md129"></a>
 Persistent Data</h3>
 <p>By default, container restarts will clear all data. To persist data, mount volumes to the following directories:</p>
 <ul>
@@ -130,7 +130,7 @@ Persistent Data</h3>
 <div class="line">  -v $(pwd)/scripts:/mb/scripts \</div>
 <div class="line">  --rm mantisbase</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md125"></a>
+<h2><a class="anchor" id="autotoc_md131"></a>
 Docker Compose</h2>
 <p>A <code>docker-compose.yaml</code> file is provided for easier management:</p>
 <div class="fragment"><div class="line">cd docker</div>
@@ -138,7 +138,7 @@ Docker Compose</h2>
 <div class="line">docker compose -f docker-compose.yaml up --build</div>
 </div><!-- fragment --><p>This builds the image (using <code>MB_VERSION</code> build arg, default <code>0.3.4</code>) and starts the container with volume mounts configured. Set <code>MB_JWT_SECRET</code> and other <code>MB_*</code> variables in a <code>.env</code> file in the same directory or pass them when running <code>docker compose</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md127"></a>
+<h2><a class="anchor" id="autotoc_md133"></a>
 Configuration</h2>
 <p>You can configure MantisBase using environment variables or by mounting a configuration file. The container respects the same configuration options as the CLI. All environment variables use the **<code>MB_*</code>** prefix:</p>
 <table class="markdownTable">
@@ -171,11 +171,17 @@ Configuration</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>MB_REALTIME_SSE</code>   </td><td class="markdownTableBodyNone">Set to <code>"false"</code> to disable the SSE realtime endpoint (returns 503)   </td><td class="markdownTableBodyNone">enabled    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>MB_REALTIME_WS</code>   </td><td class="markdownTableBodyNone">Set to <code>"false"</code> to disable the WebSocket realtime endpoint   </td><td class="markdownTableBodyNone">enabled   </td></tr>
+<td class="markdownTableBodyNone"><code>MB_REALTIME_WS</code>   </td><td class="markdownTableBodyNone">Set to <code>"false"</code> to disable the WebSocket realtime endpoint   </td><td class="markdownTableBodyNone">enabled    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>MB_CORS_ORIGINS</code>   </td><td class="markdownTableBodyNone">Comma-separated browser origins allowed for cross-origin API requests with credentials (merged with <code>corsAllowedOrigins</code> from app settings). Example: <code><a href="http://localhost:3000,https://app.example.com">http://localhost:3000,https://app.example.com</a></code>   </td><td class="markdownTableBodyNone">—    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>MB_DISABLE_ADMIN_MUTATIONS</code>   </td><td class="markdownTableBodyNone">Set to <code>true</code>, <code>1</code>, <code>on</code>, or <code>yes</code> to block admin account create/update/delete via the API (returns <b>503</b>). Unset or any other value: edits allowed.   </td><td class="markdownTableBodyNone">unset (edits allowed)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>MB_DISABLE_CONFIG_MUTATIONS</code>   </td><td class="markdownTableBodyNone">Set to <code>true</code>, <code>1</code>, <code>on</code>, or <code>yes</code> to block <code>PATCH /api/v1/sys/settings/config</code> (returns <b>503</b>)   </td><td class="markdownTableBodyNone">unset (edits allowed)   </td></tr>
 </table>
 <p>Database connection is configured via command-line arguments or JSON config (e.g. <code>--db postgresql --db_url "..."</code>).</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md129"></a>
+<h2><a class="anchor" id="autotoc_md135"></a>
 Accessing the API</h2>
 <p>Once the container is running, access the API at:</p>
 <ul>
@@ -184,7 +190,7 @@ Accessing the API</h2>
 <li>Health Check: <code><a href="http://localhost:7070/api/v1/health">http://localhost:7070/api/v1/health</a></code></li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md131"></a>
+<h2><a class="anchor" id="autotoc_md137"></a>
 Example: Full Setup with PostgreSQL</h2>
 <div class="fragment"><div class="line">services:</div>
 <div class="line">  mantisbase:</div>

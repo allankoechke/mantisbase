@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['loglevel_0',['LogLevel',['../namespacemb.html#a45b395bbdb082a2a10815855bad98c81',1,'mb']]]
+  ['intprecision_0',['IntPrecision',['../namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df',1,'mb']]]
 ];

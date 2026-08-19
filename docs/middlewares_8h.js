@@ -1,5 +1,6 @@
 var middlewares_8h =
 [
+    [ "envGateMiddleware", "middlewares_8h.html#a6211528509c2dc37621b6e5a6216e00e", null ],
     [ "getAuthToken", "middlewares_8h.html#a9abac4c99bce305c152282e027b9a934", null ],
     [ "hasAccess", "middlewares_8h.html#afced397878d63d057f3c8eb3bbd5567f", null ],
     [ "hasEntityAccess", "middlewares_8h.html#aa397a9181d1f4f136b4e8027eb4f9d44", null ],
@@ -13,5 +14,6 @@ var middlewares_8h =
     [ "requireGuestOnly", "middlewares_8h.html#aa278b4b6ee2546434b11e162893f3bac", null ],
     [ "resolveAuthEntity", "middlewares_8h.html#a49e15856cdaa6172e6cfccaff773e4ab", null ],
     [ "resolveEntity", "middlewares_8h.html#a1ff9a6c7a362273871bdbe0c3b8c9f11", null ],
-    [ "resolveSchema", "middlewares_8h.html#a9e0b82dae4579b3008e8bb6a8497cd22", null ]
+    [ "resolveSchema", "middlewares_8h.html#a9e0b82dae4579b3008e8bb6a8497cd22", null ],
+    [ "settingsFeatureGate", "middlewares_8h.html#aefe74ca7d9aae2f172c505ed73d9beb8", null ]
 ];

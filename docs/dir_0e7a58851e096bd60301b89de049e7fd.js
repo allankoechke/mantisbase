@@ -9,5 +9,6 @@ var dir_0e7a58851e096bd60301b89de049e7fd =
     [ "entity_schema_crud.cpp", "entity__schema__crud_8cpp.html", null ],
     [ "entity_schema_field.cpp", "entity__schema__field_8cpp.html", null ],
     [ "entity_schema_routes_handlers.cpp", "entity__schema__routes__handlers_8cpp.html", "entity__schema__routes__handlers_8cpp" ],
+    [ "int_precision.cpp", "int__precision_8cpp.html", "int__precision_8cpp" ],
     [ "validators.cpp", "validators_8cpp.html", null ]
 ];

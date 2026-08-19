@@ -7,5 +7,6 @@ var classmb_1_1ApiKeyManager =
     [ "listAdmin", "classmb_1_1ApiKeyManager.html#af09299585c006b21e81837ecc41f36ea", null ],
     [ "lookupByHash", "classmb_1_1ApiKeyManager.html#a8bebe76ba573b6b5be1a32568d927bcd", null ],
     [ "revoke", "classmb_1_1ApiKeyManager.html#a8ff0c1e73195e4974d11cc17276fd192", null ],
-    [ "revokeAdmin", "classmb_1_1ApiKeyManager.html#a0308c6398f5c1308219648a38833a0d1", null ]
+    [ "revokeAdmin", "classmb_1_1ApiKeyManager.html#aad583a2921cf59e564f56d9e57479da1", null ],
+    [ "revokeById", "classmb_1_1ApiKeyManager.html#aa6be86ca69ee5226c25547a1760444be", null ]
 ];

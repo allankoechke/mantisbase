@@ -8,6 +8,7 @@ var annotated_dup =
       [ "ContextStore", "classmb_1_1ContextStore.html", "classmb_1_1ContextStore" ],
       [ "Database", "classmb_1_1Database.html", "classmb_1_1Database" ],
       [ "Entity", "classmb_1_1Entity.html", "classmb_1_1Entity" ],
+      [ "EntityListPage", "structmb_1_1EntityListPage.html", "structmb_1_1EntityListPage" ],
       [ "EntitySchema", "classmb_1_1EntitySchema.html", "classmb_1_1EntitySchema" ],
       [ "EntitySchemaField", "classmb_1_1EntitySchemaField.html", "classmb_1_1EntitySchemaField" ],
       [ "Expr", "structmb_1_1Expr.html", null ],

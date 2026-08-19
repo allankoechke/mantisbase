@@ -2,6 +2,7 @@ var classmb_1_1MantisResponse =
 [
     [ "MantisResponse", "classmb_1_1MantisResponse.html#adf592f6d65ba7119ebf02c4a387f6999", null ],
     [ "~MantisResponse", "classmb_1_1MantisResponse.html#a6e9840b0c5c39c32fb5c9bd2040e6c0e", null ],
+    [ "clearAuthTokenCookie", "classmb_1_1MantisResponse.html#aac13cfb6226a915124b7889485eeb756", null ],
     [ "drogonResponse", "classmb_1_1MantisResponse.html#aefac59e17f3703368b8b59b606a27faf", null ],
     [ "getBody", "classmb_1_1MantisResponse.html#a878043bf4ca23e77ec318d47647969a9", null ],
     [ "getHeaderValue", "classmb_1_1MantisResponse.html#a0167e3d9c6c0b1f41d6049b0a0bfa5b8", null ],
@@ -17,6 +18,7 @@ var classmb_1_1MantisResponse =
     [ "sendHtml", "classmb_1_1MantisResponse.html#a57454b1a20dc2dd29318f640e1c9819c", null ],
     [ "sendJSON", "classmb_1_1MantisResponse.html#af104ef1181023634e19eac48c5f1a34f", null ],
     [ "sendText", "classmb_1_1MantisResponse.html#a454b743635cd1f87c68d5d5aa6d947ea", null ],
+    [ "setAuthTokenCookie", "classmb_1_1MantisResponse.html#af5e6f55877ac3d06b173e3676d5e9aa9", null ],
     [ "setBody", "classmb_1_1MantisResponse.html#ae4185079b9d65ff44639d515b8216b43", null ],
     [ "setContent", "classmb_1_1MantisResponse.html#ac76ff5b81641039b115502a7736a82e4", null ],
     [ "setContent", "classmb_1_1MantisResponse.html#a866683d6fb2d1be9f823145f2dac3751", null ],

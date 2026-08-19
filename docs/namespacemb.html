@@ -122,6 +122,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Entity.html">Entity</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a database table/entity with schema and CRUD operations.  <a href="classmb_1_1Entity.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmb_1_1EntityListPage.html">EntityListPage</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1EntitySchema.html">EntitySchema</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builder class for creating and managing database table schemas.  <a href="classmb_1_1EntitySchema.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -232,6 +234,19 @@ Enumerations</h2></td></tr>
 <br />
  }</td></tr>
 <tr class="separator:a45b395bbdb082a2a10815855bad98c81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a780ec702fe75b294d0f0e2e08a9254df" id="r_a780ec702fe75b294d0f0e2e08a9254df"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> { <br />
+&#160;&#160;<a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfa5aef4e3ea379fa0eb2bf42d979443902">I8</a>
+, <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfabcd774f891b5f9df7099f3ea75dadf8d">I16</a>
+, <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfad878ea6016bfe01729548bf442de5a8b">I32</a>
+, <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfae7e62f6928f76df671b5a0379793fab6">I64</a>
+, <br />
+&#160;&#160;<a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfa6669348b484e3008dca2bfa8e85e40b5">U8</a>
+, <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfaef9ef3ebca4d2b64b6ec83808bafa5f2">U16</a>
+, <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfac8bd5bedff8ef192d39a962afc0e19ee">U32</a>
+, <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfa31d65cccd6593e4101db93fb878abcaa">U64</a>
+<br />
+ }</td></tr>
+<tr class="separator:a780ec702fe75b294d0f0e2e08a9254df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd2c06555bb4b0872af4290f6c3596e6" id="r_abd2c06555bb4b0872af4290f6c3596e6"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a> { <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a827211270de454ea3e0df8f57995efed">Handled</a>
 , <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a6fe9e16b804e1ce4ac5868be60615007">Unhandled</a>
  }</td></tr>
@@ -272,6 +287,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ab7c5922d7edd2da97857b5383049101f" id="r_ab7c5922d7edd2da97857b5383049101f"><td class="memItemLeft" align="right" valign="top">std::function&lt; <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">requireAdminAuth</a> ()</td></tr>
 <tr class="memdesc:ab7c5922d7edd2da97857b5383049101f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Require admin authentication.  <br /></td></tr>
 <tr class="separator:ab7c5922d7edd2da97857b5383049101f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6211528509c2dc37621b6e5a6216e00e" id="r_a6211528509c2dc37621b6e5a6216e00e"><td class="memItemLeft" align="right" valign="top">std::function&lt; <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a6211528509c2dc37621b6e5a6216e00e">envGateMiddleware</a> (const std::string &amp;env_var, bool block_when_truthy)</td></tr>
+<tr class="memdesc:a6211528509c2dc37621b6e5a6216e00e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Block the request when an environment variable matches a truthy state.  <br /></td></tr>
+<tr class="separator:a6211528509c2dc37621b6e5a6216e00e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefe74ca7d9aae2f172c505ed73d9beb8" id="r_aefe74ca7d9aae2f172c505ed73d9beb8"><td class="memItemLeft" align="right" valign="top">std::function&lt; <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aefe74ca7d9aae2f172c505ed73d9beb8">settingsFeatureGate</a> (const std::string &amp;setting_key)</td></tr>
+<tr class="memdesc:aefe74ca7d9aae2f172c505ed73d9beb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Block the request when an app-settings flag is truthy.  <br /></td></tr>
+<tr class="separator:aefe74ca7d9aae2f172c505ed73d9beb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87d6b4b4d0f26734624b2802248fa9e7" id="r_a87d6b4b4d0f26734624b2802248fa9e7"><td class="memItemLeft" align="right" valign="top">std::function&lt; <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a87d6b4b4d0f26734624b2802248fa9e7">requireAdminOrEntityAuth</a> (const std::string &amp;entity_name)</td></tr>
 <tr class="memdesc:a87d6b4b4d0f26734624b2802248fa9e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Require admin OR entity authentication.  <br /></td></tr>
 <tr class="separator:a87d6b4b4d0f26734624b2802248fa9e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -303,6 +324,32 @@ Functions</h2></td></tr>
 <tr class="separator:ab9604b4e6fef87e6f3ff0cb7506f0e94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4153f8d976018dccbcb8bfb2a987acf" id="r_ad4153f8d976018dccbcb8bfb2a987acf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ad4153f8d976018dccbcb8bfb2a987acf">schemaDeleteHandler</a> ()</td></tr>
 <tr class="separator:ad4153f8d976018dccbcb8bfb2a987acf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15a831a4d00ce50a14b9cb037704cd0e" id="r_a15a831a4d00ce50a14b9cb037704cd0e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a15a831a4d00ce50a14b9cb037704cd0e">defaultIntPrecision</a> ()</td></tr>
+<tr class="separator:a15a831a4d00ce50a14b9cb037704cd0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7df39760bdcdcba7b253279e7583221b" id="r_a7df39760bdcdcba7b253279e7583221b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a7df39760bdcdcba7b253279e7583221b">isUnsignedIntPrecision</a> (<a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision)</td></tr>
+<tr class="separator:a7df39760bdcdcba7b253279e7583221b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc829d5ff162288fca227926b8091c64" id="r_afc829d5ff162288fca227926b8091c64"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#afc829d5ff162288fca227926b8091c64">intPrecisionToString</a> (<a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision)</td></tr>
+<tr class="separator:afc829d5ff162288fca227926b8091c64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab665c26b26a1b15dd488fe5a73fa2c43" id="r_ab665c26b26a1b15dd488fe5a73fa2c43"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ab665c26b26a1b15dd488fe5a73fa2c43">intPrecisionFromString</a> (const std::string &amp;token)</td></tr>
+<tr class="separator:ab665c26b26a1b15dd488fe5a73fa2c43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad61ed4bd9f153f1689e9a5cee10f0b0d" id="r_ad61ed4bd9f153f1689e9a5cee10f0b0d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ad61ed4bd9f153f1689e9a5cee10f0b0d">intPrecisionFromField</a> (const nlohmann::json &amp;field)</td></tr>
+<tr class="separator:ad61ed4bd9f153f1689e9a5cee10f0b0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c03a06c14eb4d31c0fea3e670bb5125" id="r_a2c03a06c14eb4d31c0fea3e670bb5125"><td class="memItemLeft" align="right" valign="top">soci::db_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a2c03a06c14eb4d31c0fea3e670bb5125">intPrecisionToSociType</a> (<a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision)</td></tr>
+<tr class="separator:a2c03a06c14eb4d31c0fea3e670bb5125"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf8c8247f60c04bf1db95d515a1a3a9b" id="r_adf8c8247f60c04bf1db95d515a1a3a9b"><td class="memItemLeft" align="right" valign="top">std::pair&lt; int64_t, int64_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#adf8c8247f60c04bf1db95d515a1a3a9b">intPrecisionSignedRange</a> (<a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision)</td></tr>
+<tr class="separator:adf8c8247f60c04bf1db95d515a1a3a9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5841b292812d75b898f7efca0b2161aa" id="r_a5841b292812d75b898f7efca0b2161aa"><td class="memItemLeft" align="right" valign="top">std::pair&lt; uint64_t, uint64_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a5841b292812d75b898f7efca0b2161aa">intPrecisionUnsignedRange</a> (<a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision)</td></tr>
+<tr class="separator:a5841b292812d75b898f7efca0b2161aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a396aa186b5e8e30715cfe5342f9b2111" id="r_a396aa186b5e8e30715cfe5342f9b2111"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a396aa186b5e8e30715cfe5342f9b2111">validateIntPrecisionToken</a> (const std::string &amp;token)</td></tr>
+<tr class="separator:a396aa186b5e8e30715cfe5342f9b2111"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca3e22f5ed3a0508a7d703bc5b85354c" id="r_aca3e22f5ed3a0508a7d703bc5b85354c"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aca3e22f5ed3a0508a7d703bc5b85354c">validateIntFieldValue</a> (const nlohmann::json &amp;value, <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision)</td></tr>
+<tr class="separator:aca3e22f5ed3a0508a7d703bc5b85354c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeee48d117ecdb58563be7bc289fc4771" id="r_aeee48d117ecdb58563be7bc289fc4771"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aeee48d117ecdb58563be7bc289fc4771">validateIntConstraintBounds</a> (const nlohmann::json &amp;field)</td></tr>
+<tr class="separator:aeee48d117ecdb58563be7bc289fc4771"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03226e3c1a8b27aed5b5a178a77f2fd4" id="r_a03226e3c1a8b27aed5b5a178a77f2fd4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a03226e3c1a8b27aed5b5a178a77f2fd4">bindIntFieldValue</a> (soci::values &amp;vals, const std::string &amp;field_name, const nlohmann::json &amp;value, <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision)</td></tr>
+<tr class="separator:a03226e3c1a8b27aed5b5a178a77f2fd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a175987cb08d52bac7c71468d0a072522" id="r_a175987cb08d52bac7c71468d0a072522"><td class="memItemLeft" align="right" valign="top">nlohmann::json&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a175987cb08d52bac7c71468d0a072522">readIntFieldValue</a> (const soci::row &amp;row, size_t index, <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision)</td></tr>
+<tr class="separator:a175987cb08d52bac7c71468d0a072522"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab7fd34295b20b3c5ebe1024866cfba86" id="r_ab7fd34295b20b3c5ebe1024866cfba86"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ab7fd34295b20b3c5ebe1024866cfba86">generateSecureRandom</a> (size_t length)</td></tr>
 <tr class="separator:ab7fd34295b20b3c5ebe1024866cfba86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af20911282ea72bd07f37f89e722119cd" id="r_af20911282ea72bd07f37f89e722119cd"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#af20911282ea72bd07f37f89e722119cd">sha256Hex</a> (const std::string &amp;input)</td></tr>
@@ -323,8 +370,8 @@ Functions</h2></td></tr>
 <tr class="separator:a5893dfa8f60709096677fda285e9f5e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af19135d42f1c2efb554a7d759fb8b47d" id="r_af19135d42f1c2efb554a7d759fb8b47d"><td class="memItemLeft" align="right" valign="top">soci::values&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#af19135d42f1c2efb554a7d759fb8b47d">json2SociValue</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;entity, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;fields)</td></tr>
 <tr class="separator:af19135d42f1c2efb554a7d759fb8b47d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a5134bfc4fea4ab2546a91a6c097ee8" id="r_a5a5134bfc4fea4ab2546a91a6c097ee8"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a5a5134bfc4fea4ab2546a91a6c097ee8">getColumnPrecision</a> (const std::string &amp;column_name, const std::vector&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt; &amp;fields)</td></tr>
-<tr class="separator:a5a5134bfc4fea4ab2546a91a6c097ee8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4a832c37c740045e636f9a984c8d6ba" id="r_ac4a832c37c740045e636f9a984c8d6ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ac4a832c37c740045e636f9a984c8d6ba">getColumnIntPrecision</a> (const std::string &amp;column_name, const std::vector&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt; &amp;fields)</td></tr>
+<tr class="separator:ac4a832c37c740045e636f9a984c8d6ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4464b99b33197a7c2b7b572e374f2195" id="r_a4464b99b33197a7c2b7b572e374f2195"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a4464b99b33197a7c2b7b572e374f2195">getColumnType</a> (const std::string &amp;column_name, const std::vector&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt; &amp;fields)</td></tr>
 <tr class="separator:a4464b99b33197a7c2b7b572e374f2195"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa16fd97d02ed01eabf4a2dc660f0f191" id="r_aa16fd97d02ed01eabf4a2dc660f0f191"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#aa16fd97d02ed01eabf4a2dc660f0f191">sociRow2Json</a> (const std::string &amp;db_type, const soci::row &amp;row, const std::vector&lt; <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &gt; &amp;entity_fields)</td></tr>
@@ -433,6 +480,9 @@ Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
+<tr class="memitem:ab140f8eb0c5d2a92724601d3a2db7c28" id="r_ab140f8eb0c5d2a92724601d3a2db7c28"><td class="memItemLeft" align="right" valign="top">constexpr const char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ab140f8eb0c5d2a92724601d3a2db7c28">kAuthTokenCookieName</a> [] = &quot;mb_token&quot;</td></tr>
+<tr class="memdesc:ab140f8eb0c5d2a92724601d3a2db7c28"><td class="mdescLeft">&#160;</td><td class="mdescRight">HttpOnly cookie name used for JWT session tokens on login/refresh responses.  <br /></td></tr>
+<tr class="separator:ab140f8eb0c5d2a92724601d3a2db7c28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a247510f8b7784f89aa126280da755d74" id="r_a247510f8b7784f89aa126280da755d74"><td class="memItemLeft" align="right" valign="top">constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a247510f8b7784f89aa126280da755d74">MAX_LIST_PAGE_SIZE</a> = 500</td></tr>
 <tr class="separator:a247510f8b7784f89aa126280da755d74"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -641,6 +691,38 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="a780ec702fe75b294d0f0e2e08a9254df" name="a780ec702fe75b294d0f0e2e08a9254df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a780ec702fe75b294d0f0e2e08a9254df">&#9670;&#160;</a></span>IntPrecision</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">mb::IntPrecision</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a780ec702fe75b294d0f0e2e08a9254dfa5aef4e3ea379fa0eb2bf42d979443902" name="a780ec702fe75b294d0f0e2e08a9254dfa5aef4e3ea379fa0eb2bf42d979443902"></a>I8&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a780ec702fe75b294d0f0e2e08a9254dfabcd774f891b5f9df7099f3ea75dadf8d" name="a780ec702fe75b294d0f0e2e08a9254dfabcd774f891b5f9df7099f3ea75dadf8d"></a>I16&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a780ec702fe75b294d0f0e2e08a9254dfad878ea6016bfe01729548bf442de5a8b" name="a780ec702fe75b294d0f0e2e08a9254dfad878ea6016bfe01729548bf442de5a8b"></a>I32&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a780ec702fe75b294d0f0e2e08a9254dfae7e62f6928f76df671b5a0379793fab6" name="a780ec702fe75b294d0f0e2e08a9254dfae7e62f6928f76df671b5a0379793fab6"></a>I64&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a780ec702fe75b294d0f0e2e08a9254dfa6669348b484e3008dca2bfa8e85e40b5" name="a780ec702fe75b294d0f0e2e08a9254dfa6669348b484e3008dca2bfa8e85e40b5"></a>U8&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a780ec702fe75b294d0f0e2e08a9254dfaef9ef3ebca4d2b64b6ec83808bafa5f2" name="a780ec702fe75b294d0f0e2e08a9254dfaef9ef3ebca4d2b64b6ec83808bafa5f2"></a>U16&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a780ec702fe75b294d0f0e2e08a9254dfac8bd5bedff8ef192d39a962afc0e19ee" name="a780ec702fe75b294d0f0e2e08a9254dfac8bd5bedff8ef192d39a962afc0e19ee"></a>U32&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a780ec702fe75b294d0f0e2e08a9254dfa31d65cccd6593e4101db93fb878abcaa" name="a780ec702fe75b294d0f0e2e08a9254dfa31d65cccd6593e4101db93fb878abcaa"></a>U64&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
 <a id="a45b395bbdb082a2a10815855bad98c81" name="a45b395bbdb082a2a10815855bad98c81"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a45b395bbdb082a2a10815855bad98c81">&#9670;&#160;</a></span>LogLevel</h2>
 
@@ -797,6 +879,46 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="a03226e3c1a8b27aed5b5a178a77f2fd4" name="a03226e3c1a8b27aed5b5a178a77f2fd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03226e3c1a8b27aed5b5a178a77f2fd4">&#9670;&#160;</a></span>bindIntFieldValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::bindIntFieldValue </td>
+          <td>(</td>
+          <td class="paramtype">soci::values &amp;&#160;</td>
+          <td class="paramname"><em>vals</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>field_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
+          <td class="paramname"><em>precision</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a3ffe08183ace9bad82bb563de7e2b162" name="a3ffe08183ace9bad82bb563de7e2b162"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3ffe08183ace9bad82bb563de7e2b162">&#9670;&#160;</a></span>createDirs()</h2>
 
@@ -867,6 +989,23 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>String representation of the date </dd></dl>
+
+</div>
+</div>
+<a id="a15a831a4d00ce50a14b9cb037704cd0e" name="a15a831a4d00ce50a14b9cb037704cd0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15a831a4d00ce50a14b9cb037704cd0e">&#9670;&#160;</a></span>defaultIntPrecision()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> mb::defaultIntPrecision </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -981,6 +1120,47 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6211528509c2dc37621b6e5a6216e00e" name="a6211528509c2dc37621b6e5a6216e00e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6211528509c2dc37621b6e5a6216e00e">&#9670;&#160;</a></span>envGateMiddleware()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt; <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt; mb::envGateMiddleware </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>env_var</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>block_when_truthy</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Block the request when an environment variable matches a truthy state. </p>
+<p>Reads <code>env_var</code> at request time. If <code>strToBool(getEnvOrDefault(env_var, ""))</code> equals <code>block_when_truthy</code>, responds with HTTP 503 and stops the middleware chain. Otherwise the request continues to the route handler.</p>
+<p>Example: <code>envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)</code> blocks admin account mutations when <code>MB_DISABLE_ADMIN_MUTATIONS</code> is set to <code>true</code>, <code>1</code>, <code>on</code>, or <code>yes</code>.</p>
+<p>Example: <code>envGateMiddleware("MB_DISABLE_CONFIG_MUTATIONS", true)</code> blocks PATCH on <code>/api/v1/sys/settings/config</code> when <code>MB_DISABLE_CONFIG_MUTATIONS</code> is truthy.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">env_var</td><td>Environment variable name </td></tr>
+    <tr><td class="paramname">block_when_truthy</td><td>Truthy env value that triggers the 503 block </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Middleware function </dd></dl>
 
 </div>
 </div>
@@ -1155,12 +1335,12 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Extract JWT or API key from the Authorization header. </p>
-<p>Parses <code>Authorization: Bearer &lt;token&gt;</code>. Tokens starting with <code>mb_sk_</code> are treated as API keys and resolved through <a class="el" href="classmb_1_1ApiKeyManager.html">ApiKeyManager</a>; JWTs are verified on later middleware. Sets <code>auth</code> and <code>verification</code> request attributes consumed by <code><a class="el" href="namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc" title="Require entity-specific authentication.">requireEntityAuth()</a></code> and access-rule checks. </p><dl class="section return"><dt>Returns</dt><dd>Middleware function </dd></dl>
+<p>Parses <code>Authorization: Bearer &lt;token&gt;</code> or the <code>mb_token</code> HttpOnly cookie. Bearer is preferred when both are present. Tokens starting with <code>mb_sk_</code> are treated as API keys and resolved through <a class="el" href="classmb_1_1ApiKeyManager.html">ApiKeyManager</a>; JWTs are verified on later middleware. Sets <code>auth</code> and <code>verification</code> request attributes consumed by <code><a class="el" href="namespacemb.html#ae3903a4fb6e5f572be9884d6768da4fc" title="Require entity-specific authentication.">requireEntityAuth()</a></code> and access-rule checks. </p><dl class="section return"><dt>Returns</dt><dd>Middleware function </dd></dl>
 
 </div>
 </div>
-<a id="a5a5134bfc4fea4ab2546a91a6c097ee8" name="a5a5134bfc4fea4ab2546a91a6c097ee8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5a5134bfc4fea4ab2546a91a6c097ee8">&#9670;&#160;</a></span>getColumnPrecision()</h2>
+<a id="ac4a832c37c740045e636f9a984c8d6ba" name="ac4a832c37c740045e636f9a984c8d6ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4a832c37c740045e636f9a984c8d6ba">&#9670;&#160;</a></span>getColumnIntPrecision()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1169,7 +1349,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int mb::getColumnPrecision </td>
+          <td class="memname"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> mb::getColumnIntPrecision </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>column_name</em>, </td>
@@ -1318,7 +1498,7 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Middleware function that validates access rules <div class="fragment"><div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/posts&quot;</span>, handler, {<a class="code hl_function" href="namespacemb.html#afced397878d63d057f3c8eb3bbd5567f">hasAccess</a>(<span class="stringliteral">&quot;posts&quot;</span>)});</div>
-<div class="ttc" id="anamespacemb_html_afced397878d63d057f3c8eb3bbd5567f"><div class="ttname"><a href="namespacemb.html#afced397878d63d057f3c8eb3bbd5567f">mb::hasAccess</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; hasAccess(const std::string &amp;entity_name)</div><div class="ttdoc">Check if request has access to entity based on access rules.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:396</div></div>
+<div class="ttc" id="anamespacemb_html_afced397878d63d057f3c8eb3bbd5567f"><div class="ttname"><a href="namespacemb.html#afced397878d63d057f3c8eb3bbd5567f">mb::hasAccess</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; hasAccess(const std::string &amp;entity_name)</div><div class="ttdoc">Check if request has access to entity based on access rules.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:458</div></div>
 </div><!-- fragment --> </dd></dl>
 
 </div>
@@ -1390,6 +1570,115 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="ad61ed4bd9f153f1689e9a5cee10f0b0d" name="ad61ed4bd9f153f1689e9a5cee10f0b0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad61ed4bd9f153f1689e9a5cee10f0b0d">&#9670;&#160;</a></span>intPrecisionFromField()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> mb::intPrecisionFromField </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>field</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Parse precision from a field JSON object. Accepts string tokens (i8, u32, ...) or legacy numeric bit widths (8, 16, 32, 64) as signed. </p>
+
+</div>
+</div>
+<a id="ab665c26b26a1b15dd488fe5a73fa2c43" name="ab665c26b26a1b15dd488fe5a73fa2c43"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab665c26b26a1b15dd488fe5a73fa2c43">&#9670;&#160;</a></span>intPrecisionFromString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> mb::intPrecisionFromString </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>token</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adf8c8247f60c04bf1db95d515a1a3a9b" name="adf8c8247f60c04bf1db95d515a1a3a9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf8c8247f60c04bf1db95d515a1a3a9b">&#9670;&#160;</a></span>intPrecisionSignedRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; int64_t, int64_t &gt; mb::intPrecisionSignedRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
+          <td class="paramname"><em>precision</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2c03a06c14eb4d31c0fea3e670bb5125" name="a2c03a06c14eb4d31c0fea3e670bb5125"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c03a06c14eb4d31c0fea3e670bb5125">&#9670;&#160;</a></span>intPrecisionToSociType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">soci::db_type mb::intPrecisionToSociType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
+          <td class="paramname"><em>precision</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afc829d5ff162288fca227926b8091c64" name="afc829d5ff162288fca227926b8091c64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc829d5ff162288fca227926b8091c64">&#9670;&#160;</a></span>intPrecisionToString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::intPrecisionToString </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
+          <td class="paramname"><em>precision</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5841b292812d75b898f7efca0b2161aa" name="a5841b292812d75b898f7efca0b2161aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5841b292812d75b898f7efca0b2161aa">&#9670;&#160;</a></span>intPrecisionUnsignedRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; uint64_t, uint64_t &gt; mb::intPrecisionUnsignedRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
+          <td class="paramname"><em>precision</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="aa98dbdb983996e7b60b25c3e0f8eac98" name="aa98dbdb983996e7b60b25c3e0f8eac98"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa98dbdb983996e7b60b25c3e0f8eac98">&#9670;&#160;</a></span>invalidChar()</h2>
 
@@ -1415,6 +1704,24 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if the character is invalid in a filename, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a7df39760bdcdcba7b253279e7583221b" name="a7df39760bdcdcba7b253279e7583221b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7df39760bdcdcba7b253279e7583221b">&#9670;&#160;</a></span>isUnsignedIntPrecision()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::isUnsignedIntPrecision </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
+          <td class="paramname"><em>precision</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -1661,9 +1968,43 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 <div class="line"> </div>
 <div class="line"><span class="comment">// Login endpoint: 5 attempts per minute per IP (prevents brute force)</span></div>
 <div class="line">router.Post(<span class="stringliteral">&quot;/api/v1/auth/users/login&quot;</span>, loginHandler, {<a class="code hl_function" href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">rateLimit</a>(5, 60, <span class="keyword">false</span>), <a class="code hl_function" href="namespacemb.html#a49e15856cdaa6172e6cfccaff773e4ab">resolveAuthEntity</a>()});</div>
-<div class="ttc" id="anamespacemb_html_a49e15856cdaa6172e6cfccaff773e4ab"><div class="ttname"><a href="namespacemb.html#a49e15856cdaa6172e6cfccaff773e4ab">mb::resolveAuthEntity</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; resolveAuthEntity()</div><div class="ttdoc">Resolve auth entity from :entity_name path param.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:325</div></div>
-<div class="ttc" id="anamespacemb_html_a735b4776576110b750e5446ce05e8d81"><div class="ttname"><a href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">mb::rateLimit</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; rateLimit(int max_requests, int window_seconds, bool use_user_id=false)</div><div class="ttdoc">Rate limiting middleware to prevent abuse.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:535</div></div>
+<div class="ttc" id="anamespacemb_html_a49e15856cdaa6172e6cfccaff773e4ab"><div class="ttname"><a href="namespacemb.html#a49e15856cdaa6172e6cfccaff773e4ab">mb::resolveAuthEntity</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; resolveAuthEntity()</div><div class="ttdoc">Resolve auth entity from :entity_name path param.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:383</div></div>
+<div class="ttc" id="anamespacemb_html_a735b4776576110b750e5446ce05e8d81"><div class="ttname"><a href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">mb::rateLimit</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; rateLimit(int max_requests, int window_seconds, bool use_user_id=false)</div><div class="ttdoc">Rate limiting middleware to prevent abuse.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:671</div></div>
 </div><!-- fragment --> 
+</div>
+</div>
+<a id="a175987cb08d52bac7c71468d0a072522" name="a175987cb08d52bac7c71468d0a072522"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a175987cb08d52bac7c71468d0a072522">&#9670;&#160;</a></span>readIntFieldValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">nlohmann::json mb::readIntFieldValue </td>
+          <td>(</td>
+          <td class="paramtype">const soci::row &amp;&#160;</td>
+          <td class="paramname"><em>row</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
+          <td class="paramname"><em>precision</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
 </div>
 </div>
 <a id="aeed2bf19be2818ab366a847308d819a9" name="aeed2bf19be2818ab366a847308d819a9"></a>
@@ -1758,6 +2099,7 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 </div><div class="memdoc">
 
 <p>Require admin OR entity authentication. </p>
+<p>Requires a valid JWT or API key. Allows <code>mb_admins</code> or users whose <code>auth.entity</code> matches <code>entity_name</code>. Missing/invalid credentials → <b>401</b>; authenticated but wrong entity → <b>403</b>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">entity_name</td><td><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a> name for entity-based auth </td></tr>
@@ -1785,6 +2127,7 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 </div><div class="memdoc">
 
 <p>Require entity-specific authentication. </p>
+<p>Requires a valid JWT or API key for <code>entity_name</code> only. Admins from other entities are rejected. Missing/invalid credentials → <b>401</b>; wrong entity → <b>403</b>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">entity_name</td><td><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a> name to authenticate against </td></tr>
@@ -1812,9 +2155,10 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 </div><div class="memdoc">
 
 <p>Require expression evaluation to pass. </p>
+<p>Evaluates <code>expr</code> with <code>auth</code> and <code>req</code> variables (same context as entity custom access rules). Does not require authentication upfront — the expression decides. Returns <b>403</b> with <code>"Access denied!"</code> when false.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">expr</td><td>Expression string to evaluate </td></tr>
+    <tr><td class="paramname">expr</td><td>Expression string to evaluate (<code>auth.id</code>, <code>@auth.id</code>, <code>req.body</code>, etc.) </td></tr>
   </table>
   </dd>
 </dl>
@@ -2152,6 +2496,28 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="aefe74ca7d9aae2f172c505ed73d9beb8" name="aefe74ca7d9aae2f172c505ed73d9beb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefe74ca7d9aae2f172c505ed73d9beb8">&#9670;&#160;</a></span>settingsFeatureGate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt; <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt; mb::settingsFeatureGate </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>setting_key</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Block the request when an app-settings flag is truthy. </p>
+<p>Reads <code>setting_key</code> from <code>settings().configs()</code> at request time (default <code>false</code>). When the value is truthy per <code>strToBool</code>, responds with HTTP <b>503</b> and stops the chain.</p>
+<p>Used for production safety toggles such as <code>allowRegistration</code> (when true, blocks admin API signup) and <code>disableSchemaMutations</code> (when true, blocks schema POST/PATCH/DELETE). </p>
 
 </div>
 </div>
@@ -2575,6 +2941,70 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 </div><!-- fragment --> 
 </div>
 </div>
+<a id="aeee48d117ecdb58563be7bc289fc4771" name="aeee48d117ecdb58563be7bc289fc4771"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeee48d117ecdb58563be7bc289fc4771">&#9670;&#160;</a></span>validateIntConstraintBounds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; std::string &gt; mb::validateIntConstraintBounds </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>field</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aca3e22f5ed3a0508a7d703bc5b85354c" name="aca3e22f5ed3a0508a7d703bc5b85354c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca3e22f5ed3a0508a7d703bc5b85354c">&#9670;&#160;</a></span>validateIntFieldValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; std::string &gt; mb::validateIntFieldValue </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
+          <td class="paramname"><em>precision</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a396aa186b5e8e30715cfe5342f9b2111" name="a396aa186b5e8e30715cfe5342f9b2111"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a396aa186b5e8e30715cfe5342f9b2111">&#9670;&#160;</a></span>validateIntPrecisionToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; std::string &gt; mb::validateIntPrecisionToken </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>token</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="aa3085c18b75188b1e46d16c21ab2e58b" name="aa3085c18b75188b1e46d16c21ab2e58b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa3085c18b75188b1e46d16c21ab2e58b">&#9670;&#160;</a></span>verifyPassword()</h2>
 
@@ -2615,6 +3045,30 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
+<a id="ab140f8eb0c5d2a92724601d3a2db7c28" name="ab140f8eb0c5d2a92724601d3a2db7c28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab140f8eb0c5d2a92724601d3a2db7c28">&#9670;&#160;</a></span>kAuthTokenCookieName</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr const char mb::kAuthTokenCookieName[] = &quot;mb_token&quot;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>HttpOnly cookie name used for JWT session tokens on login/refresh responses. </p>
+
+</div>
+</div>
 <a id="a247510f8b7784f89aa126280da755d74" name="a247510f8b7784f89aa126280da755d74"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a247510f8b7784f89aa126280da755d74">&#9670;&#160;</a></span>MAX_LIST_PAGE_SIZE</h2>
 

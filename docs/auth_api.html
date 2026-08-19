@@ -94,10 +94,20 @@ $(document).ready(function(){initNavTree('auth_api.html',''); initResizable(); }
   <div class="headertitle"><div class="title">Authentication API</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>MantisBase provides authentication endpoints scoped to auth-type entities. Each auth entity exposes login, refresh, and logout under <code>/api/v1/auth/&lt;entity&gt;/</code>.</p>
+<div class="textblock"><p>MantisBase provides authentication endpoints scoped to auth-type entities. Each auth entity exposes login, refresh, and logout under <code>/api/v1/auth/&lt;entity&gt;/</code>. A global token verification endpoint is available at <code>/api/v1/auth/verify</code>.</p>
 <p>Admin authentication uses <code>/api/v1/sys/admins/</code> instead.</p>
+<h3><a class="anchor" id="autotoc_md76"></a>
+HTTP status codes</h3>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Code   </th><th class="markdownTableHeadNone">Meaning    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>401 Unauthorized</code>   </td><td class="markdownTableBodyNone">Missing, invalid, or expired credentials    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>403 Forbidden</code>   </td><td class="markdownTableBodyNone">Authenticated, but not allowed to perform the action (for example, a regular user token on an admin-only route)   </td></tr>
+</table>
 <hr  />
-<h2><a class="anchor" id="autotoc_md74"></a>
+<h2><a class="anchor" id="autotoc_md78"></a>
 Base URL</h2>
 <div class="fragment"><div class="line">http://localhost:7070/api/v1/auth/&lt;entity&gt;/</div>
 </div><!-- fragment --><p><code>&lt;entity&gt;</code> must be a registered entity that is:</p>
@@ -108,21 +118,23 @@ Base URL</h2>
 </ul>
 <p>If the entity is missing or does not meet these requirements, the route returns <b>404 Route Not Found</b>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md76"></a>
+<h2><a class="anchor" id="autotoc_md80"></a>
 Authentication Endpoints</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Method   </th><th class="markdownTableHeadNone">Endpoint   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/login</code>   </td><td class="markdownTableBodyNone">Authenticate user and get token    </td></tr>
+<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/verify</code>   </td><td class="markdownTableBodyNone">Check whether the current JWT or API key is still valid    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/refresh</code>   </td><td class="markdownTableBodyNone">Refresh an existing token    </td></tr>
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/login</code>   </td><td class="markdownTableBodyNone">Authenticate user and get token    </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/refresh</code>   </td><td class="markdownTableBodyNone">Refresh an existing token    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/logout</code>   </td><td class="markdownTableBodyNone">Logout (invalidate token)   </td></tr>
 </table>
 <p>For admin authentication and initial setup, see <a href="api.md#admin-accounts">System Endpoints – Admin Accounts</a> (<code>/api/v1/sys/admins/</code>).</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md78"></a>
+<h2><a class="anchor" id="autotoc_md82"></a>
 Login</h2>
 <p>Authenticate a user and receive a JWT token.</p>
 <blockquote class="doxtable">
@@ -180,7 +192,7 @@ Login</h2>
 <div class="line">    &quot;password&quot;: &quot;userpassword&quot;</div>
 <div class="line">  }&#39;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md80"></a>
+<h2><a class="anchor" id="autotoc_md84"></a>
 Refresh Token</h2>
 <p>Refresh an existing JWT token to extend its validity.</p>
 <p><b>Endpoint:</b> <code>POST /api/v1/auth/&lt;entity&gt;/refresh</code></p>
@@ -199,7 +211,7 @@ Refresh Token</h2>
 </div><!-- fragment --><p><b>Example:</b> </p><div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/refresh \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;existing_token&gt;&quot;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md82"></a>
+<h2><a class="anchor" id="autotoc_md86"></a>
 Logout</h2>
 <p>Logout and invalidate the current token.</p>
 <p><b>Endpoint:</b> <code>POST /api/v1/auth/&lt;entity&gt;/logout</code></p>
@@ -214,28 +226,61 @@ Logout</h2>
 </div><!-- fragment --><p><b>Example:</b> </p><div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/logout \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md84"></a>
+<h2><a class="anchor" id="autotoc_md88"></a>
+Verify Token</h2>
+<p>Check whether the current JWT or API key is still valid without performing a refresh or logout. Useful for client-side session checks and keeping UI auth state in sync.</p>
+<blockquote class="doxtable">
+<p>&zwj;⚠️ <b>Rate Limiting</b>: Verify is rate-limited to <b>5 requests per minute per IP address</b>. If you exceed this limit, you'll receive a <code>429 Too Many Requests</code> response. </p>
+</blockquote>
+<p><b>Endpoint:</b> <code>GET /api/v1/auth/verify</code></p>
+<p>This route is not entity-scoped. It accepts any valid entity user JWT or <code>mb_sk_...</code> API key via the standard <code>Authorization</code> header.</p>
+<p><b>Request Headers:</b> </p><div class="fragment"><div class="line">Authorization: Bearer &lt;token&gt;</div>
+</div><!-- fragment --><p><b>Response (Success - 200):</b> </p><div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;status&quot;: 200,</div>
+<div class="line">  &quot;data&quot;: {</div>
+<div class="line">    &quot;status&quot;: &quot;OK&quot;</div>
+<div class="line">  },</div>
+<div class="line">  &quot;error&quot;: &quot;&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p><b>Response (Missing token - 401):</b> </p><div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;status&quot;: 401,</div>
+<div class="line">  &quot;data&quot;: {},</div>
+<div class="line">  &quot;error&quot;: &quot;Missing or invalid auth token&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p><b>Response (Invalid or expired token - 401):</b> </p><div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;status&quot;: 401,</div>
+<div class="line">  &quot;data&quot;: {},</div>
+<div class="line">  &quot;error&quot;: &quot;Token Verification Error&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>The <code>error</code> field may contain a more specific message when token verification fails (for example, an expired JWT).</p>
+<p><b>Examples:</b></p>
+<p>Verify a JWT: </p><div class="fragment"><div class="line">curl http://localhost:7070/api/v1/auth/verify \</div>
+<div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot;</div>
+</div><!-- fragment --><p>Verify an API key: </p><div class="fragment"><div class="line">curl http://localhost:7070/api/v1/auth/verify \</div>
+<div class="line">  -H &quot;Authorization: Bearer mb_sk_...&quot;</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md90"></a>
 Admin Setup and Authentication</h2>
 <p>Admin account setup and admin-only authentication use the <code>/api/v1/sys/admins/</code> namespace. See <a href="api.md#admin-accounts">System Endpoints – Admin Accounts</a> in the API reference.</p>
 <p><b>Initial setup:</b> <code>POST /api/v1/sys/admins/setup</code> (only when no admin accounts exist)</p>
 <p><b>Admin login:</b> <code>POST /api/v1/sys/admins/login</code></p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md86"></a>
+<h2><a class="anchor" id="autotoc_md92"></a>
 Using Tokens</h2>
 <p>After receiving a token from the login endpoint, include it in all subsequent API requests:</p>
 <div class="fragment"><div class="line">Authorization: Bearer &lt;token&gt;</div>
 </div><!-- fragment --><p>JWTs and API keys both use the same header. API keys are prefixed with <code>mb_sk_</code> and are validated by the same auth middleware as JWTs.</p>
 <p>The token contains user information (id, entity) and is validated automatically by the <code>getAuthToken()</code> middleware on all endpoints.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md88"></a>
+<h2><a class="anchor" id="autotoc_md94"></a>
 API Keys</h2>
 <p>Long-lived API keys complement short-lived JWTs. Keys are scoped to an auth entity and user, stored hashed server-side, and shown <b>once</b> at creation.</p>
-<h3><a class="anchor" id="autotoc_md89"></a>
+<h3><a class="anchor" id="autotoc_md95"></a>
 Authentication</h3>
 <p>Send the raw key in the standard Authorization header:</p>
 <div class="fragment"><div class="line">Authorization: Bearer mb_sk_&lt;secret&gt;</div>
 </div><!-- fragment --><p>The middleware resolves the key, hydrates the user record, and sets the same <code>auth</code> / <code>verification</code> request attributes as a JWT login.</p>
-<h3><a class="anchor" id="autotoc_md90"></a>
+<h3><a class="anchor" id="autotoc_md96"></a>
 Entity user endpoints</h3>
 <p>Requires an authenticated session for the same auth entity (JWT from login).</p>
 <table class="markdownTable">
@@ -264,7 +309,7 @@ Entity user endpoints</h3>
 <div class="line"># Use the returned mb_sk_... key on API calls</div>
 <div class="line">curl -H &quot;Authorization: Bearer mb_sk_...&quot; \</div>
 <div class="line">  http://localhost:7070/api/v1/entities/posts</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md91"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md97"></a>
 Admin endpoints</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -277,17 +322,17 @@ Admin endpoints</h3>
 <td class="markdownTableBodyNone">DELETE   </td><td class="markdownTableBodyNone"><code>/api/v1/sys/api-keys/:id</code>   </td><td class="markdownTableBodyNone">Revoke admin key   </td></tr>
 </table>
 <p>Admin routes require admin JWT authentication.</p>
-<h3><a class="anchor" id="autotoc_md92"></a>
+<h3><a class="anchor" id="autotoc_md98"></a>
 C++ API</h3>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> app = MantisBase::create();</div>
 <div class="line"><span class="keyword">auto</span>&amp; keys = app-&gt;auth().apiKey();</div>
 <div class="line"><span class="keyword">auto</span> created = keys.create(<span class="stringliteral">&quot;users&quot;</span>, user_id, <span class="stringliteral">&quot;Desktop client&quot;</span>);</div>
 <div class="line"><span class="comment">// created[&quot;key&quot;] — store securely; not returned again on list()</span></div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md94"></a>
+<h2><a class="anchor" id="autotoc_md100"></a>
 OAuth</h2>
 <p>OAuth 2.0 / OIDC login and account linking for auth-type entities. Preset providers (<code>google</code>, <code>github</code>, <code>discord</code>, <code>microsoft</code>) are seeded at startup; admins configure client credentials and enable providers per entity.</p>
-<h3><a class="anchor" id="autotoc_md95"></a>
+<h3><a class="anchor" id="autotoc_md101"></a>
 User-facing routes</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -307,7 +352,7 @@ User-facing routes</h3>
 </table>
 <p><b>Start login (browser redirect):</b></p>
 <div class="fragment"><div class="line">curl -L &quot;http://localhost:7070/api/v1/auth/users/oauth/authorize/google?redirect_uri=http://localhost:3000/callback&quot;</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md96"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md102"></a>
 Admin provider management</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -330,7 +375,7 @@ Admin provider management</h3>
 <div class="line">  -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
 <div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
 <div class="line">  -d &#39;{&quot;entity_name&quot;: &quot;users&quot;, &quot;provider_id&quot;: &quot;&lt;provider_uuid&gt;&quot;}&#39;</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md97"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md103"></a>
 C++ API</h3>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> app = MantisBase::create();</div>
 <div class="line"><span class="keyword">auto</span>&amp; oauth = app-&gt;auth().oauth();</div>
@@ -338,13 +383,13 @@ C++ API</h3>
 <div class="line">oauth.enableProviderForEntity(<span class="stringliteral">&quot;users&quot;</span>, provider_id);</div>
 <div class="line"><span class="keyword">auto</span> url = oauth.buildAuthorizeUrl(<span class="stringliteral">&quot;users&quot;</span>, <span class="stringliteral">&quot;google&quot;</span>, redirect_uri);</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md99"></a>
+<h2><a class="anchor" id="autotoc_md105"></a>
 Token Expiration</h2>
 <p>By default, tokens expire after 1 hour. Use the refresh endpoint to extend token validity without requiring the user to log in again.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md101"></a>
+<h2><a class="anchor" id="autotoc_md107"></a>
 Summary</h2>
-<p>The authentication API provides JWT login, long-lived API keys (<code>mb_sk_...</code>), and OAuth for auth-type entities. All credential types use <code>Authorization: Bearer ...</code> and are validated before entity access rules run. Admin-only routes under <code>/api/v1/sys/</code> manage providers and system API keys. </p>
+<p>The authentication API provides JWT login, token verification (<code>GET /api/v1/auth/verify</code>), long-lived API keys (<code>mb_sk_...</code>), and OAuth for auth-type entities. All credential types use <code>Authorization: Bearer ...</code> and are validated before entity access rules run. Admin-only routes under <code>/api/v1/sys/</code> manage providers and system API keys. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

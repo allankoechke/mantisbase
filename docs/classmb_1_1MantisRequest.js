@@ -5,6 +5,7 @@ var classmb_1_1MantisRequest =
     [ "getBearerTokenAuth", "classmb_1_1MantisRequest.html#acc280227bd815ff0ea5d4d0a9c3162e0", null ],
     [ "getBody", "classmb_1_1MantisRequest.html#a17298ba6d2a1291162860719aee3eb51", null ],
     [ "getBodyAsJson", "classmb_1_1MantisRequest.html#a3ff1c881598fb558d19a40be20835625", null ],
+    [ "getCookieValue", "classmb_1_1MantisRequest.html#afddd68d9aa0c271151718d9b2525c04f", null ],
     [ "getHeaderValue", "classmb_1_1MantisRequest.html#ab9c82cec9994b9385cc160611bd59801", null ],
     [ "getHeaderValueCount", "classmb_1_1MantisRequest.html#adce5b68e6bb8fe2586679e58fe139ce7", null ],
     [ "getHeaderValueU64", "classmb_1_1MantisRequest.html#a01aef215c87d7a7a61d3246c919f6557", null ],
@@ -26,6 +27,7 @@ var classmb_1_1MantisRequest =
     [ "hasPathParams", "classmb_1_1MantisRequest.html#af26dcd0368a79b947bfb6e10aeb7fd2b", null ],
     [ "hasQueryParam", "classmb_1_1MantisRequest.html#a2ebc4df0918e722eddb941fcd56e4acc", null ],
     [ "isMultipartFormData", "classmb_1_1MantisRequest.html#a9e15ab3f408f42ef2e17f93b40f84907", null ],
+    [ "resolveAuthToken", "classmb_1_1MantisRequest.html#a889efc725074a2734d9e7f9a7493a161", null ],
     [ "set", "classmb_1_1MantisRequest.html#a23bb174cf4bb490c7b85cbdc71d39a82", null ],
     [ "setPathParam", "classmb_1_1MantisRequest.html#ab3c165f2f45e5371de729cc9a7c0df4c", null ],
     [ "setPathParams", "classmb_1_1MantisRequest.html#a74e7fd9646b235e1a844de951cc8bc1a", null ]

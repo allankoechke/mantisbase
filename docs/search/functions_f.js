@@ -5,7 +5,6 @@ var searchData=
   ['poolsize_2',['poolSize',['../classmb_1_1MantisBase.html#a42f68fc19ac295725c181f30c8b7a648',1,'mb::MantisBase']]],
   ['port_3',['port',['../classmb_1_1MantisBase.html#a2c7a2835dcafa6caf374cbce4771d67d',1,'mb::MantisBase']]],
   ['post_4',['post',['../classmb_1_1Router.html#ab3e0a75c3b5eed98d1041ed49b233951',1,'mb::Router::Post(const std::string &amp;path, const HandlerWithContentReaderFn &amp;handler, const Middlewares &amp;middlewares={})'],['../classmb_1_1Router.html#ac76b0ecb14b11681c9f3e4e0602bd57c',1,'mb::Router::Post(const std::string &amp;path, const HandlerFn &amp;handler, const Middlewares &amp;middlewares={})']]],
-  ['precision_5',['precision',['../classmb_1_1EntitySchemaField.html#a38b001e1342ef61807931afee5f4bec9',1,'mb::EntitySchemaField']]],
-  ['preroutingmiddlewares_6',['preRoutingMiddlewares',['../classmb_1_1Router.html#aec5a7d651d1806d6c5ebf27e9af28511',1,'mb::Router']]],
-  ['publicdir_7',['publicDir',['../classmb_1_1MantisBase.html#a616493c105acd0717ed9b8f65bfcf074',1,'mb::MantisBase']]]
+  ['preroutingmiddlewares_5',['preRoutingMiddlewares',['../classmb_1_1Router.html#aec5a7d651d1806d6c5ebf27e9af28511',1,'mb::Router']]],
+  ['publicdir_6',['publicDir',['../classmb_1_1MantisBase.html#a616493c105acd0717ed9b8f65bfcf074',1,'mb::MantisBase']]]
 ];
