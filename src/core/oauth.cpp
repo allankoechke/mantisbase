@@ -5,6 +5,8 @@
 #include "mantisbase/core/auth.h"
 
 #include <drogon/HttpClient.h>
+#include <drogon/utils/Utilities.h>
+#include <jwt-cpp/traits/nlohmann-json/defaults.h>
 
 namespace mb {
     OAuthManager::OAuthManager(const MantisBase &app) : IMantisBase(app) {
@@ -13,7 +15,10 @@ namespace mb {
     std::string OAuthManager::getEncryptionKey() const {
         auto key = getEnvOrDefault("MB_OAUTH_ENCRYPTION_KEY", "");
         if (key.empty()) {
-            key = mbApp().jwtSecretKey();
+            throw std::runtime_error(
+                "MB_OAUTH_ENCRYPTION_KEY is not set. OAuth requires a dedicated encryption key "
+                "separate from the JWT secret. Set MB_OAUTH_ENCRYPTION_KEY to a strong, random "
+                "value of at least 32 characters.");
         }
         if (key.size() < 32) {
             key.resize(32, '0');
@@ -82,12 +87,12 @@ namespace mb {
         }
 
         std::string url = authorize_endpoint +
-                          "?client_id=" + client_id +
+                          "?client_id=" + drogon::utils::urlEncodeComponent(client_id) +
                           "&response_type=code" +
-                          "&redirect_uri=" + redirect_uri +
-                          "&scope=" + scopes +
-                          "&state=" + state +
-                          "&code_challenge=" + challenge +
+                          "&redirect_uri=" + drogon::utils::urlEncodeComponent(redirect_uri) +
+                          "&scope=" + drogon::utils::urlEncodeComponent(scopes) +
+                          "&state=" + drogon::utils::urlEncodeComponent(state) +
+                          "&code_challenge=" + drogon::utils::urlEncodeComponent(challenge) +
                           "&code_challenge_method=S256";
 
         return {
@@ -475,11 +480,11 @@ namespace mb {
         req->addHeader("Accept", "application/json");
 
         const std::string body = "grant_type=authorization_code"
-                                 "&code=" + code +
-                                 "&redirect_uri=" + redirect_uri +
-                                 "&client_id=" + client_id +
-                                 "&client_secret=" + client_secret +
-                                 "&code_verifier=" + pkce_verifier;
+                                 "&code=" + drogon::utils::urlEncodeComponent(code) +
+                                 "&redirect_uri=" + drogon::utils::urlEncodeComponent(redirect_uri) +
+                                 "&client_id=" + drogon::utils::urlEncodeComponent(client_id) +
+                                 "&client_secret=" + drogon::utils::urlEncodeComponent(client_secret) +
+                                 "&code_verifier=" + drogon::utils::urlEncodeComponent(pkce_verifier);
 
         req->setBody(body);
 
@@ -496,21 +501,78 @@ namespace mb {
                 "Token exchange error: " + token_data.value("error_description", token_data.value("error", "unknown")));
         }
 
-        // Decode ID token if present to get user info
+        // Decode and verify ID token signature before trusting claims
         if (token_data.contains("id_token")) {
             auto id_token = token_data["id_token"].get<std::string>();
-            // Simple JWT payload extraction (no signature verification for now)
-            auto parts = splitString(id_token, ".");
-            if (parts.size() >= 2) {
-                try {
-                    auto payload = base64UrlDecode(parts[1]);
-                    auto claims = json::parse(std::string(payload.begin(), payload.end()));
-                    if (claims.contains("sub")) token_data["sub"] = claims["sub"];
-                    if (claims.contains("email")) token_data["email"] = claims["email"];
-                    if (claims.contains("name")) token_data["name"] = claims["name"];
-                    if (claims.contains("picture")) token_data["picture"] = claims["picture"];
-                } catch (...) {
+            try {
+                auto decoded = jwt::decode(id_token);
+
+                auto alg = decoded.get_algorithm();
+                if (alg == "HS256") {
+                    auto verifier = jwt::verify()
+                            .allow_algorithm(jwt::algorithm::hs256{client_secret});
+                    verifier.verify(decoded);
+                } else if (alg == "RS256") {
+                    auto header = decoded.get_header_json();
+                    auto kid = header.count("kid") ? header["kid"].get<std::string>() : std::string{};
+
+                    auto jwks_uri = std::string{};
+                    auto parts = splitString(token_endpoint, "/token");
+                    if (!parts.empty()) {
+                        auto base = parts[0];
+                        auto oidc_url = base + "/.well-known/openid-configuration";
+                        try {
+                            auto oidc = discoverOIDC(oidc_url);
+                            jwks_uri = oidc.value("jwks_uri", "");
+                        } catch (...) {}
+                    }
+
+                    if (jwks_uri.empty()) {
+                        throw std::runtime_error("Cannot obtain JWKS URI for RS256 ID token verification");
+                    }
+
+                    auto jwks_client = drogon::HttpClient::newHttpClient(jwks_uri);
+                    auto jwks_req = drogon::HttpRequest::newHttpRequest();
+                    jwks_req->setMethod(drogon::Get);
+                    auto [jwks_result, jwks_resp] = jwks_client->sendRequest(jwks_req, 5.0);
+
+                    if (jwks_result != drogon::ReqResult::Ok || !jwks_resp) {
+                        throw std::runtime_error("Failed to fetch JWKS for ID token verification");
+                    }
+
+                    auto jwks = json::parse(std::string(jwks_resp->body()));
+                    bool key_found = false;
+                    for (const auto &key : jwks["keys"]) {
+                        if (!kid.empty() && key.value("kid", "") != kid) continue;
+                        if (key.value("kty", "") != "RSA") continue;
+
+                        auto n = key["n"].get<std::string>();
+                        auto e = key["e"].get<std::string>();
+                        auto pem = jwt::helper::create_public_key_from_rsa_components(n, e);
+                        auto verifier = jwt::verify()
+                                .allow_algorithm(jwt::algorithm::rs256{pem});
+                        verifier.verify(decoded);
+                        key_found = true;
+                        break;
+                    }
+                    if (!key_found) {
+                        throw std::runtime_error("No matching key found in JWKS for ID token verification");
+                    }
+                } else {
+                    throw std::runtime_error("Unsupported ID token algorithm: " + alg);
                 }
+
+                // Signature verified — extract claims
+                json claims;
+                for (auto &[key, value] : decoded.get_payload_json()) {
+                    claims[key] = value;
+                }
+                if (claims.contains("sub")) token_data["sub"] = claims["sub"];
+                if (claims.contains("email")) token_data["email"] = claims["email"];
+                if (claims.contains("name")) token_data["name"] = claims["name"];
+                if (claims.contains("picture")) token_data["picture"] = claims["picture"];
+            } catch (const std::exception &e) {
+                throw std::runtime_error(std::string("ID token verification failed: ") + e.what());
             }
         }
 
