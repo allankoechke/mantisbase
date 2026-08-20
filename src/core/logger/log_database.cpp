@@ -161,44 +161,39 @@ namespace mb {
 
             std::vector<std::string> conditions;
 
+            std::string search_like;
+
+            soci::statement st(*m_session);
+            soci::row r;
+            st.exchange(soci::into(r));
+
             if (!after.empty()) {
                 conditions.emplace_back("id < :after");
+                st.exchange(soci::use(after, "after"));
             }
 
             if (!level_filter.empty()) {
                 if (level_filter.starts_with('>')) {
                     conditions.push_back(buildMinLogWhereCondition(level_filter.substr(1)));
                 } else {
-                    conditions.push_back(std::string("level = '") + level_filter + "'");
+                    conditions.push_back("level = :level_filter");
+                    st.exchange(soci::use(level_filter, "level_filter"));
                 }
             }
+
             if (!search_filter.empty()) {
-                std::string escaped = search_filter;
-                size_t pos = 0;
-                while ((pos = escaped.find('\'', pos)) != std::string::npos) {
-                    escaped.replace(pos, 1, "''");
-                    pos += 2;
-                }
-                conditions.push_back(std::string("(message LIKE '%") + escaped +
-                                     "%' OR details LIKE '%" + escaped + "%')");
+                search_like = "%" + search_filter + "%";
+                conditions.push_back("(message LIKE :search_filter OR details LIKE :search_filter)");
+                st.exchange(soci::use(search_like, "search_filter"));
             }
+
             if (!start_date.empty()) {
-                std::string escaped = start_date;
-                size_t pos = 0;
-                while ((pos = escaped.find('\'', pos)) != std::string::npos) {
-                    escaped.replace(pos, 1, "''");
-                    pos += 2;
-                }
-                conditions.push_back(std::string("timestamp >= '") + escaped + "'");
+                conditions.push_back("timestamp >= :start_date");
+                st.exchange(soci::use(start_date, "start_date"));
             }
             if (!end_date.empty()) {
-                std::string escaped = end_date;
-                size_t pos = 0;
-                while ((pos = escaped.find('\'', pos)) != std::string::npos) {
-                    escaped.replace(pos, 1, "''");
-                    pos += 2;
-                }
-                conditions.push_back(std::string("timestamp <= '") + escaped + "'");
+                conditions.push_back("timestamp <= :end_date");
+                st.exchange(soci::use(end_date, "end_date"));
             }
 
             if (!conditions.empty()) {
@@ -213,11 +208,13 @@ namespace mb {
 
             std::lock_guard lock(m_dbMutexLock);
 
-            const soci::rowset rs = after.empty()
-                                        ? (m_session->prepare << query, soci::use(fetch_limit))
-                                        : (m_session->prepare << query, soci::use(after), soci::use(fetch_limit));
+            st.exchange(soci::use(fetch_limit, "limit"));
+            st.alloc();
+            st.prepare(query);
+            st.define_and_bind();
+            st.execute();
 
-            for (const auto &r: rs) {
+            while (st.fetch()) {
                 json log_entry = json::object();
                 log_entry["id"] = r.get<std::string>(0);
                 log_entry["timestamp"] = r.get<std::string>(1);

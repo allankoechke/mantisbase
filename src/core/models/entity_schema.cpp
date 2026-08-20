@@ -1,6 +1,9 @@
 #include "../../../include/mantisbase/core/models/entity_schema.h"
 #include "mantisbase/core/exceptions.h"
 
+#include <algorithm>
+#include <cctype>
+
 namespace mb {
     EntitySchema::EntitySchema(const MantisBase &app) : IMantisBase(app) {}
 
@@ -214,8 +217,37 @@ namespace mb {
         return m_viewSqlQuery;
     }
 
+    static bool isValidViewQuery(const std::string &sql) {
+        if (sql.empty()) return false;
+
+        if (sql.find(';') != std::string::npos) return false;
+
+        std::string upper = sql;
+        std::transform(upper.begin(), upper.end(), upper.begin(),
+                       [](unsigned char c) { return std::toupper(c); });
+
+        auto trimmed = upper;
+        while (!trimmed.empty() && std::isspace(static_cast<unsigned char>(trimmed.front())))
+            trimmed.erase(trimmed.begin());
+
+        if (trimmed.substr(0, 6) != "SELECT") return false;
+
+        const std::vector<std::string> forbidden = {
+            "INSERT ", "UPDATE ", "DELETE ", "DROP ", "ALTER ", "CREATE ",
+            "TRUNCATE ", "GRANT ", "REVOKE ", "EXEC ", "EXECUTE ",
+            "INTO ", "REPLACE "
+        };
+        for (const auto &kw : forbidden) {
+            if (upper.find(kw) != std::string::npos) return false;
+        }
+
+        return true;
+    }
+
     EntitySchema &EntitySchema::setViewQuery(const std::string &viewQuery) {
         if (viewQuery.empty()) throw std::invalid_argument("Empty view query statement.");
+        if (!isValidViewQuery(viewQuery))
+            throw MantisException(400, "Invalid view query: must be a SELECT statement with no DDL/DML keywords or semicolons.");
         m_viewSqlQuery = viewQuery;
         return *this;
     }
@@ -599,18 +631,59 @@ namespace mb {
 
         if (v.is_null()) return "NULL";
 
-        if (type == "string") {
-            return "'" + v.dump() + "'";
+        if (type == "string" || type == "file" || type == "files") {
+            if (!v.is_string())
+                throw std::invalid_argument("Expected a string default value for type `" + type + "`.");
+            std::string raw = v.get<std::string>();
+            std::string escaped;
+            escaped.reserve(raw.size() + 2);
+            for (char c : raw) {
+                if (c == '\'') escaped += "''";
+                else escaped += c;
+            }
+            return "'" + escaped + "'";
         }
 
-        if (type == "double" || type == "int"
-            || type == "date" || type == "json"
-            || type == "file" || type == "files") {
-            return v.dump();
+        if (type == "int") {
+            if (!v.is_number_integer())
+                throw std::invalid_argument("Expected an integer default value for type `int`.");
+            return std::to_string(v.get<long long>());
+        }
+
+        if (type == "double") {
+            if (!v.is_number())
+                throw std::invalid_argument("Expected a numeric default value for type `double`.");
+            return std::to_string(v.get<double>());
         }
 
         if (type == "bool") {
+            if (!v.is_boolean())
+                throw std::invalid_argument("Expected a boolean default value for type `bool`.");
             return v.get<bool>() ? "1" : "0";
+        }
+
+        if (type == "date") {
+            if (!v.is_string())
+                throw std::invalid_argument("Expected a string default value for type `date`.");
+            std::string raw = v.get<std::string>();
+            std::string escaped;
+            escaped.reserve(raw.size() + 2);
+            for (char c : raw) {
+                if (c == '\'') escaped += "''";
+                else escaped += c;
+            }
+            return "'" + escaped + "'";
+        }
+
+        if (type == "json") {
+            std::string raw = v.dump();
+            std::string escaped;
+            escaped.reserve(raw.size() + 2);
+            for (char c : raw) {
+                if (c == '\'') escaped += "''";
+                else escaped += c;
+            }
+            return "'" + escaped + "'";
         }
 
         throw std::runtime_error("Unsupported field type `" + type + "`");

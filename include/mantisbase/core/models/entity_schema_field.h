@@ -241,6 +241,8 @@ namespace mb {
          */
         static bool isValidFieldType(const std::string &type);
 
+        static bool isValidFieldName(const std::string &name);
+
         /**
          * @brief Generate unique field ID from name.
          * @param id Field name or identifier
