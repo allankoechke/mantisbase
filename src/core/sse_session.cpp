@@ -7,12 +7,16 @@
 mb::SSESession::SSESession(
     std::string client_id,
     const std::set<std::string> &topics,
-    drogon::ResponseStreamPtr stream)
+    drogon::ResponseStreamPtr stream,
+    std::string owner_entity,
+    std::string owner_id)
     : m_clientID(std::move(client_id)),
       m_topics(topics),
       m_stream(std::move(stream)),
       m_isActive(true),
-      m_lastActivity(std::chrono::steady_clock::now()) {
+      m_lastActivity(std::chrono::steady_clock::now()),
+      m_ownerEntity(std::move(owner_entity)),
+      m_ownerId(std::move(owner_id)) {
 }
 
 bool mb::SSESession::sendEvent(const std::string &eventType, const json &data) {
@@ -67,6 +71,9 @@ mb::json mb::SSESession::formatEvent(const json &change_event) const {
     }
 
     json data = operation=="insert" || operation == "update" ? change_event["new_data"] : nullptr;
+
+    if (data.is_object() && data.contains("password"))
+        data.erase("password");
 
     return {
         {"topic", matched_topic},
