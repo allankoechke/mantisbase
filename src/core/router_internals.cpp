@@ -6,7 +6,31 @@
 #include "../../include/mantisbase/utils/utils.h"
 #include "drogon/drogon_callbacks.h"
 
+#include <sstream>
+
 namespace mb {
+    namespace {
+        std::vector<std::string> parseAllowedOrigins() {
+            std::vector<std::string> origins;
+            auto env_origins = getEnvOrDefault("MB_ALLOWED_ORIGINS", "");
+            if (env_origins.empty()) return origins;
+            std::istringstream stream(env_origins);
+            std::string origin;
+            while (std::getline(stream, origin, ',')) {
+                auto trimmed = trim(origin);
+                if (!trimmed.empty()) origins.push_back(trimmed);
+            }
+            return origins;
+        }
+
+        bool isOriginAllowed(const std::string &origin, const std::vector<std::string> &allowed) {
+            if (allowed.empty()) return false;
+            for (const auto &a : allowed) {
+                if (a == "*" || a == origin) return true;
+            }
+            return false;
+        }
+    }
     const std::function<drogon::HttpResponsePtr(const drogon::HttpRequestPtr &)> Router::reqIdSyncAdvice() {
         return [this](const drogon::HttpRequestPtr &req) {
             // Generate and store request ID in attributes
@@ -136,6 +160,13 @@ namespace mb {
         return [this](const drogon::HttpRequestPtr &req,
                       const drogon::HttpResponsePtr &resp) {
             applyCorsHeaders(req, resp);
+            resp->addHeader("X-Content-Type-Options", "nosniff");
+            resp->addHeader("X-Frame-Options", "SAMEORIGIN");
+            resp->addHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+            resp->addHeader("Content-Security-Policy",
+                            "default-src 'self'; base-uri 'self'; frame-ancestors 'self'; "
+                            "object-src 'none'; img-src 'self' data: blob:; "
+                            "style-src 'self' 'unsafe-inline'; font-src 'self' data:");
         };
     }
 
@@ -229,7 +260,7 @@ namespace mb {
                     res.sendJSON(404, {
                                      {"status", 404},
                                      {"data", json::object()},
-                                     {"error", "No user found for given `identity`, `password` & `entity` combination."}
+                                     {"error", "Invalid identity, password or entity combination."}
                                  });
                     return;
                 }
@@ -255,7 +286,7 @@ namespace mb {
                                      {"data", json::object()},
                                      {
                                          "error",
-                                         "No user found matching given `identity`, `password` and `entity` combination."
+                                         "Invalid identity, password or entity combination."
                                      }
                                  });
                     auto _body = body;
@@ -281,10 +312,11 @@ namespace mb {
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Auth", "Login Error", fmt::format("Login error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
-                                 {"error", e.what()}
+                                 {"error", "An internal error occurred."}
                              });
             }
         };
@@ -325,7 +357,7 @@ namespace mb {
                     res.sendJSON(404, {
                                      {"status", 404},
                                      {"data", json::object()},
-                                     {"error", "No user found for given `identity` and `password` combination."}
+                                     {"error", "Invalid identity, password or entity combination."}
                                  });
                     return;
                 }
@@ -338,7 +370,7 @@ namespace mb {
                                      {"data", json::object()},
                                      {
                                          "error",
-                                         "No user found matching given `identity`, `password` and `entity` combination."
+                                         "Invalid identity, password or entity combination."
                                      }
                                  });
                     auto _body = body;
@@ -364,10 +396,11 @@ namespace mb {
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Auth", "Admin Login Error", fmt::format("Admin login error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
-                                 {"error", e.what()}
+                                 {"error", "An internal error occurred."}
                              });
             }
         };
@@ -424,10 +457,11 @@ namespace mb {
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Auth", "Token Refresh Error", fmt::format("Token refresh error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
-                                 {"error", e.what()}
+                                 {"error", "An internal error occurred."}
                              });
             }
         };
@@ -478,10 +512,11 @@ namespace mb {
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Auth", "Logout Error", fmt::format("Logout error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
-                                 {"error", e.what()}
+                                 {"error", "An internal error occurred."}
                              });
             }
         };
@@ -490,7 +525,7 @@ namespace mb {
     std::function<void(MantisRequest &, MantisResponse &)> Router::handleSetupAdmin() {
         return [](MantisRequest &req, const MantisResponse &res) {
             try {
-                auto auth = req.getOr("auth", json::object());
+                auto auth = req.getOr<json>("auth", json::object());
                 req.mbApp().logger().trace("Auth", "Auth Data", fmt::format("Auth Data: {}", auth.dump()));
 
                 auto verification = req.getOr<json>("verification", json::object());
@@ -571,10 +606,11 @@ namespace mb {
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Auth", "Admin Setup Error", fmt::format("Admin setup error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
-                                 {"error", e.what()}
+                                 {"error", "An internal error occurred."}
                              });
             }
         };
