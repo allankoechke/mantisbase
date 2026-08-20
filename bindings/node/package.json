@@ -1,0 +1,46 @@
+{
+  "name": "mantisbase",
+  "version": "0.1.0",
+  "description": "Node.js bindings for mantisbase — Express-style HTTP server backed by a native C++ engine",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "install": "prebuild-install -r napi || cmake-js build",
+    "build": "cmake-js build",
+    "build:debug": "cmake-js build --debug",
+    "rebuild": "cmake-js rebuild",
+    "clean": "cmake-js clean"
+  },
+  "dependencies": {
+    "node-addon-api": "^7.1.0",
+    "prebuild-install": "^7.1.2"
+  },
+  "devDependencies": {
+    "cmake-js": "^7.3.0"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "index.d.ts",
+    "src/",
+    "CMakeLists.txt",
+    "prebuilds/"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/allankoechke/mantisbase.git",
+    "directory": "bindings/node"
+  },
+  "keywords": [
+    "mantisbase",
+    "http",
+    "server",
+    "native",
+    "napi",
+    "database"
+  ]
+}

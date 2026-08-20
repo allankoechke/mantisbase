@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include "../export.h"
 
 namespace mb {
     class MantisBase;
@@ -57,7 +58,7 @@ namespace mb {
      * });
      * @endcode
      */
-    class IMantisBase {
+    class MANTISBASE_API IMantisBase {
         const MantisBase& m_app;
 
     public:
