@@ -153,6 +153,16 @@ namespace mb {
                             return HandlerResponse::Handled;
                         }
 
+                        if (!auth.contains("entity") || !auth["entity"].is_string() ||
+                            auth["entity"].get<std::string>() != "mb_admins") {
+                            res.sendJSON(403, {
+                                {"data", json::object()},
+                                {"status", 403},
+                                {"error", "Admin auth required to access this resource."}
+                            });
+                            return HandlerResponse::Handled;
+                        }
+
                         return HandlerResponse::Unhandled;
                     }
 
@@ -220,10 +230,11 @@ namespace mb {
                              });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {
+                req.mbApp().logger().critical("Access", "Access Check Error", fmt::format("Access check error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
-                                 {"error", e.what()}
+                                 {"error", "An internal error occurred."}
                              });
                 return HandlerResponse::Handled;
             }
@@ -290,7 +301,7 @@ namespace mb {
                 return HandlerResponse::Unhandled;
             } catch (const std::exception &e) {
                 std::cout << "Failed to get access token: " << e.what() << std::endl;
-                throw MantisException(500, e.what());
+                throw MantisException(500, "An internal error occurred.");
             }
         };
     }
@@ -373,7 +384,7 @@ namespace mb {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
-                                 {"error", e.what()}
+                                 {"error", e.code() >= 500 ? "An internal error occurred." : e.what()}
                              });
                 return HandlerResponse::Handled;
             }
@@ -553,7 +564,7 @@ namespace mb {
                 res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"status", 500},
-                                 {"error", e.what()}
+                                 {"error", "An internal error occurred."}
                              });
                 return HandlerResponse::Handled;
             }
@@ -676,10 +687,13 @@ namespace mb {
 
         return [max_requests, window_seconds, use_user_id](
             MantisRequest &req, MantisResponse &res) {
-            // Skip rate limiting in test mode if disabled
-            if (const char *test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");
-                test_disable && std::string(test_disable) == "1") {
-                return HandlerResponse::Unhandled;
+            // MB_DISABLE_RATE_LIMIT is a test-only escape hatch; honouring it in a
+            // production build would let a misconfigured env disable rate limiting.
+            if (req.mbApp().isDevMode()) {
+                if (const char *test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");
+                    test_disable && std::string(test_disable) == "1") {
+                    return HandlerResponse::Unhandled;
+                }
             }
 
             try {
@@ -804,8 +818,13 @@ namespace mb {
             } catch (const std::exception &e) {
                 req.mbApp().logger().critical("Rate Limit Middleware Error",
                                               fmt::format("Rate limit middleware error: {}", e.what()));
-                // On error, allow the request to proceed (fail open)
-                return HandlerResponse::Unhandled;
+                // Fail closed: a broken limiter must not become a free bypass.
+                res.sendJSON(429, {
+                                 {"status", 429},
+                                 {"data", json::object()},
+                                 {"error", "Rate limiting unavailable. Please try again later."}
+                             });
+                return HandlerResponse::Handled;
             }
         };
     }
