@@ -12,13 +12,14 @@
 #include "models/entity.h"
 #include "../utils/utils.h"
 #include "types.h"
+#include "../export.h"
 #include "drogon/drogon_callbacks.h"
 #include "mantisbase/utils/snowflake.hpp"
 
 namespace mb {
     class SSEMgr;
 
-    class Router: public IMantisBase {
+    class MANTISBASE_API Router: public IMantisBase {
     public:
         explicit Router(const MantisBase& app);
         ~Router();

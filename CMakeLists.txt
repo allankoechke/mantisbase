@@ -9,6 +9,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 option(MB_SCRIPTING_ENABLED "Enable JS Scripting" OFF)
+option(MB_BUILD_BINDINGS "Build language bindings (Node.js, Python)" OFF)
 
 # Flag for building deps as shared/static libs
 option(MB_SHARED_DEPS "Build MantisBase as a shared library" FALSE)
@@ -130,6 +131,18 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         CXX_VISIBILITY_PRESET hidden
         VISIBILITY_INLINES_HIDDEN YES
         WINDOWS_EXPORT_ALL_SYMBOLS ON
+    )
+
+    # Installed so the Node.js / Python binding builds can consume the shared
+    # library and public headers without re-building the whole project.
+    install(TARGETS mantisbase-dll
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+    )
+    install(DIRECTORY include/mantisbase/ DESTINATION include/mantisbase
+        FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+        PATTERN "private-impl" EXCLUDE
     )
 endif()
 
@@ -261,4 +274,12 @@ if(TARGET mantisbase-dll)
             target_compile_definitions(mantisbase-dll PUBLIC ${_mb_defs})
         endif()
     endif()
+endif()
+
+# Language bindings (Node.js N-API, Python nanobind)
+if(MB_BUILD_BINDINGS)
+    if(NOT MB_BUILD_SHARED_LIB AND NOT MB_SHARED_DEPS)
+        message(FATAL_ERROR "MB_BUILD_BINDINGS requires MB_BUILD_SHARED_LIB=ON or MB_SHARED_DEPS=ON")
+    endif()
+    add_subdirectory(bindings)
 endif()
