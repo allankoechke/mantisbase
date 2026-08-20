@@ -77,7 +77,7 @@ namespace mb {
         static std::string getMimeType(const std::string &path);
 
         static std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute();
-        static std::function<void(const MantisRequest &, MantisResponse &)> fileServingHandler();
+        static std::function<void(MantisRequest &, MantisResponse &)> fileServingHandler();
         static std::function<void(const MantisRequest &, MantisResponse &)> healthCheckHandler();
 
         ///> Sync Advice to return handler that generates unique IDs per request

@@ -31,7 +31,8 @@ namespace mb {
                     auto result = req.mbApp().auth().oauth().buildAuthorizeUrl(entity_name, provider, redirect_uri);
                     res.setRedirect(result["authorize_url"].get<std::string>());
                 } catch (const std::exception &e) {
-                    res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", e.what()}});
+                    req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
+                    res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});
                 }
             }, authEntityMiddleware);
 
@@ -56,7 +57,8 @@ namespace mb {
                     auto result = req.mbApp().auth().oauth().handleCallback(entity_name, provider, code, state);
                     res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
                 } catch (const std::exception &e) {
-                    res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", e.what()}});
+                    req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
+                    res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});
                 }
             }, authEntityMiddleware);
 
@@ -89,7 +91,8 @@ namespace mb {
                 auto result = req.mbApp().auth().oauth().linkAccount(entity_name, user_id, provider, code, state);
                 res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
+                res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});
             }
         }, authEntityMiddleware);
 
@@ -120,7 +123,8 @@ namespace mb {
                                         });
                        }
                    } catch (const std::exception &e) {
-                       res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                       req.mbApp().logger().critical("OAuth", "Handler Error", fmt::format("OAuth error: {}", e.what()));
+                       res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
                    }
                }, authEntityMiddleware);
 
@@ -143,7 +147,8 @@ namespace mb {
                 auto accounts = req.mbApp().auth().oauth().getLinkedAccounts(entity_name, user_id);
                 res.sendJSON(200, {{"status", 200}, {"data", accounts}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("OAuth", "Handler Error", fmt::format("OAuth error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, authEntityMiddleware);
 
@@ -154,7 +159,8 @@ namespace mb {
                 auto providers = req.mbApp().auth().oauth().getProviders(entity_name);
                 res.sendJSON(200, {{"status", 200}, {"data", providers}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("OAuth", "Handler Error", fmt::format("OAuth error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, authEntityMiddleware);
 
@@ -183,7 +189,8 @@ namespace mb {
                 auto result = req.mbApp().auth().oauth().addProvider(body);
                 res.sendJSON(201, {{"status", 201}, {"data", result}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("OAuth", "Handler Error", fmt::format("OAuth error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, adminAuth);
 
@@ -193,7 +200,8 @@ namespace mb {
                 auto providers = req.mbApp().auth().oauth().listProviders();
                 res.sendJSON(200, {{"status", 200}, {"data", providers}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("OAuth", "Handler Error", fmt::format("OAuth error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, adminAuth);
 
@@ -210,7 +218,8 @@ namespace mb {
                 auto result = req.mbApp().auth().oauth().updateProvider(provider_id, body);
                 res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("OAuth", "Handler Error", fmt::format("OAuth error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, adminAuth);
 
@@ -224,7 +233,8 @@ namespace mb {
                     res.sendJSON(404, {{"status", 404}, {"data", json::object()}, {"error", "Provider not found"}});
                 }
             } catch (const std::exception &e) {
-                res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
+                res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});
             }
         }, adminAuth);
 
@@ -243,7 +253,8 @@ namespace mb {
                 auto result = req.mbApp().auth().oauth().enableProviderForEntity(entity_name, provider_id);
                 res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
+                res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});
             }
         }, adminAuth);
 
@@ -265,7 +276,8 @@ namespace mb {
                     res.sendJSON(404, {{"status", 404}, {"data", json::object()}, {"error", "Config not found"}});
                 }
             } catch (const std::exception &e) {
-                res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
+                res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});
             }
         }, adminAuth);
     }

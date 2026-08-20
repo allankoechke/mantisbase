@@ -243,6 +243,11 @@ target_link_libraries(mantisbase
         spdlog::spdlog
 )
 
+if(WIN32)
+    # ShellExecuteA() is used to open the admin setup URL on first boot.
+    target_link_libraries(mantisbase PRIVATE shell32)
+endif()
+
 # Mirror compile environment from static target to shared target
 if(TARGET mantisbase-dll)
     get_target_property(_mb_libs mantisbase LINK_LIBRARIES)

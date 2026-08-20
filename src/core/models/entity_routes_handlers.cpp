@@ -34,9 +34,10 @@ namespace mb {
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Entity", "Handler Error", fmt::format("Entity handler error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
-                                 {"error", e.what()},
+                                 {"error", "An internal error occurred."},
                                  {"status", 500}
                              });
             }
@@ -94,9 +95,10 @@ namespace mb {
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Entity", "Handler Error", fmt::format("Entity handler error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
-                                 {"error", e.what()},
+                                 {"error", "An internal error occurred."},
                                  {"status", 500}
                              });
             }
@@ -215,9 +217,10 @@ namespace mb {
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Entity", "Handler Error", fmt::format("Entity handler error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
-                                 {"error", e.what()},
+                                 {"error", "An internal error occurred."},
                                  {"status", 500}
                              });
             }

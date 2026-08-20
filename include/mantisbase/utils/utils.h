@@ -281,6 +281,10 @@ namespace mb {
 
     std::string sanitizeFilename_JSWrapper(const std::string &original);
 
+    bool isAllowedFileExtension(const std::string &extension);
+
+    std::string safeContentType(const std::string &extension);
+
     // ----------------------------------------------------------------- //
     // AUTH UTILS
     // ----------------------------------------------------------------- //

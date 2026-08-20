@@ -6,6 +6,9 @@
 #include "../../../include/mantisbase/core/models/int_precision.h"
 
 #include <regex>
+#include <algorithm>
+
+#include <cctype>
 
 #include "../../../include/mantisbase/mantisbase.h"
 #include "../../../include/mantisbase/core/exceptions.h"
@@ -284,10 +287,31 @@ namespace mb {
             return "View tables require a valid SQL View query!";
         }
 
-        // TODO
-        // const auto& sql = trim(entity.at("sql").get<std::string>());
-        // Check that it contains an `id` field
-        // Check it does not contain malicious things!!
+        const auto &sql = trim(body["view_query"].get<std::string>());
+
+        if (sql.find(';') != std::string::npos)
+            return "View query must not contain semicolons.";
+
+        std::string upper = sql;
+        std::transform(upper.begin(), upper.end(), upper.begin(),
+                       [](unsigned char c) { return std::toupper(c); });
+
+        auto trimmed = upper;
+        while (!trimmed.empty() && std::isspace(static_cast<unsigned char>(trimmed.front())))
+            trimmed.erase(trimmed.begin());
+
+        if (trimmed.substr(0, 6) != "SELECT")
+            return "View query must be a SELECT statement.";
+
+        const std::vector<std::string> forbidden = {
+            "INSERT ", "UPDATE ", "DELETE ", "DROP ", "ALTER ", "CREATE ",
+            "TRUNCATE ", "GRANT ", "REVOKE ", "EXEC ", "EXECUTE ",
+            "INTO ", "REPLACE "
+        };
+        for (const auto &kw : forbidden) {
+            if (upper.find(kw) != std::string::npos)
+                return "View query must not contain DDL/DML keywords (" + kw.substr(0, kw.size()-1) + ").";
+        }
 
         return std::nullopt;
     }

@@ -34,7 +34,8 @@ namespace mb {
                 auto result = req.mbApp().auth().apiKey().create(entity_name, user_id, label, permissions, expires_at);
                 res.sendJSON(201, {{"status", 201}, {"data", result}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("API Keys", "Handler Error", fmt::format("API key error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, authEntityMiddleware);
 
@@ -54,7 +55,8 @@ namespace mb {
                 auto keys = req.mbApp().auth().apiKey().list(entity_name, user_id);
                 res.sendJSON(200, {{"status", 200}, {"data", keys}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("API Keys", "Handler Error", fmt::format("API key error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, authEntityMiddleware);
 
@@ -84,7 +86,8 @@ namespace mb {
                     res.sendJSON(404, {{"status", 404}, {"data", json::object()}, {"error", "API key not found"}});
                 }
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("API Keys", "Handler Error", fmt::format("API key error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, authEntityMiddleware);
 
@@ -109,7 +112,8 @@ namespace mb {
                 auto result = req.mbApp().auth().apiKey().createAdmin(user_id, label, permissions, expires_at);
                 res.sendJSON(201, {{"status", 201}, {"data", result}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("API Keys", "Handler Error", fmt::format("API key error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, adminAuth);
 
@@ -118,7 +122,8 @@ namespace mb {
                 auto keys = req.mbApp().auth().apiKey().listAdmin();
                 res.sendJSON(200, {{"status", 200}, {"data", keys}, {"error", ""}});
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("API Keys", "Handler Error", fmt::format("API key error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, adminAuth);
 
@@ -132,7 +137,8 @@ namespace mb {
                     res.sendJSON(404, {{"status", 404}, {"data", json::object()}, {"error", "API key not found"}});
                 }
             } catch (const std::exception &e) {
-                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", e.what()}});
+                req.mbApp().logger().critical("API Keys", "Handler Error", fmt::format("API key error: {}", e.what()));
+                res.sendJSON(500, {{"status", 500}, {"data", json::object()}, {"error", "An internal error occurred."}});
             }
         }, adminAuth);
     }
