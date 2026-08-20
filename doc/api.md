@@ -575,7 +575,7 @@ The settings object contains the following fields:
 | `orgName` | string | `"ACME Corp"` | Organization display name |
 | `siteDomain` | string | `"https://acme.example.com"` | Public site URL (OAuth callbacks, JWT audience) |
 | `corsAllowedOrigins` | array of strings | `["http://localhost:3000", "http://127.0.0.1:3000"]` | Browser origins allowed for cross-origin requests with credentials |
-| `maxFileSize` | integer | `10485760` | Max file upload size in bytes (10 MiB; not currently enforced) |
+| `maxFileSize` | integer | `10485760` | Max file upload size in bytes (10 MiB). Uploads above this are rejected with **413** |
 | `logRetentionDays` | integer | `5` | Delete application logs older than this many days (hourly cleanup job) |
 | `disableAdminRegistration` | boolean | `false` | When **true**, blocks creating new admin accounts via the API (`POST /api/v1/sys/admins`, `POST /api/v1/sys/admins/setup`) with **503**. When false or unset, admin API registration is allowed. Does not affect `mantisbase admins --add`. |
 | `disableSchemaMutations` | boolean | `false` | When **true**, blocks schema mutations via the API (`POST`, `PATCH`, `DELETE` on `/api/v1/schemas/*`) with **503**. `GET` remains available. Does not affect `mantisbase schema` CLI commands. |
@@ -912,14 +912,16 @@ WS /api/v1/realtime/ws
 
 ### Connection
 
-Connect via any WebSocket client:
+The endpoint **requires authentication**. Supply a JWT or an API key (`mb_sk_...`) either
+as a `token` query parameter or in an `Authorization: Bearer <token>` header. Unauthenticated
+connections are closed immediately with a policy-violation close code.
 
 ```javascript
-const ws = new WebSocket("ws://localhost:7070/api/v1/realtime/ws");
+const ws = new WebSocket("ws://localhost:7070/api/v1/realtime/ws?token=" + token);
 
 ws.onopen = () => {
   // Subscribe to topics after connecting
-  ws.send(JSON.stringify({ topics: ["posts", "users"] }));
+  ws.send(JSON.stringify({ type: "subscribe", topics: ["posts", "users"] }));
 };
 
 ws.onmessage = (event) => {
@@ -941,10 +943,18 @@ On connect, the server sends:
 
 ### Subscribing and unsubscribing
 
-Send a JSON message with a `topics` array to update your subscriptions. Topics follow the same format as the SSE endpoint — entity name or `entity:row_id`. Send an empty array to clear all subscriptions.
+Send a JSON message with `"type": "subscribe"` (or `"unsubscribe"`) and a `topics` array. Topics follow the same format as the SSE endpoint — entity name or `entity:row_id`.
 
 ```json
-{ "topics": ["posts", "comments", "posts:019c1b81-364b-7000-8120-b5416b2c42c2"] }
+{ "type": "subscribe", "topics": ["posts", "comments", "posts:019c1b81-364b-7000-8120-b5416b2c42c2"] }
+```
+
+Each requested topic is checked against the entity's **list** access rule. Topics you are not
+allowed to read are silently dropped, and the `subscribed` acknowledgement echoes back only the
+topics that were actually granted:
+
+```json
+{ "type": "subscribed", "topics": ["posts"] }
 ```
 
 ### Change events

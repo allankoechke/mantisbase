@@ -8,15 +8,32 @@ services:
     image: mantisbase:latest
     restart: unless-stopped
     ports:
-      - "7070:80"
+      - "7070:8080"
+    # The container only needs to write to ./data (and /tmp); everything else
+    # stays immutable so a compromised process cannot rewrite its own code.
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ./data:/mb/data
-      - ./www:/mb/public
-      - ./scripts:/mb/scripts
-      - ./migrations:/mb/migrations
+      - ./www:/mb/public:ro
+      - ./scripts:/mb/scripts:ro
+      - ./migrations:/mb/migrations:ro
     # See doc/docker.md for all MB_* variables. Set via .env or here.
     environment:
-      MB_JWT_SECRET: ${MB_JWT_SECRET:-}
+      # Required: an empty/default secret means anyone can forge admin tokens.
+      MB_JWT_SECRET: ${MB_JWT_SECRET:?MB_JWT_SECRET must be set to a strong random value}
       # MB_DISABLE_FILE_UPLOADS: "0"
       # MB_DISABLE_ADMIN_ON_FIRST_BOOT: "0"
       # MB_DISABLE_RATE_LIMIT: "0"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
