@@ -1,0 +1,12 @@
+# Node.js addon build artefacts
+node_modules/
+prebuilds/
+*.node
+package-lock.json
+
+# Python extension build artefacts
+__pycache__/
+*.egg-info/
+dist/
+wheelhouse/
+_skbuild/
