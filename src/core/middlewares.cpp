@@ -113,7 +113,7 @@ namespace mb {
                     return HandlerResponse::Handled;
                 }
 
-                AccessRule rule = method == "GET"
+                const AccessRule rule = method == "GET"
                                       ? (req.hasPathParam("id")
                                              ? entity.getRule()
                                              : entity.listRule())

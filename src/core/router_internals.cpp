@@ -25,12 +25,13 @@ namespace mb {
 
         bool isOriginAllowed(const std::string &origin, const std::vector<std::string> &allowed) {
             if (allowed.empty()) return false;
-            for (const auto &a : allowed) {
+            for (const auto &a: allowed) {
                 if (a == "*" || a == origin) return true;
             }
             return false;
         }
     }
+
     const std::function<drogon::HttpResponsePtr(const drogon::HttpRequestPtr &)> Router::reqIdSyncAdvice() {
         return [this](const drogon::HttpRequestPtr &req) {
             // Generate and store request ID in attributes
@@ -68,11 +69,11 @@ namespace mb {
     }
 
     void Router::reloadCorsOrigins() {
-        auto origins = std::make_shared<std::set<std::string>>();
+        auto origins = std::make_shared<std::set<std::string> >();
 
         const auto &cfg = mbApp().settings().configs();
         if (cfg.contains("corsAllowedOrigins") && cfg["corsAllowedOrigins"].is_array()) {
-            for (const auto &item : cfg["corsAllowedOrigins"]) {
+            for (const auto &item: cfg["corsAllowedOrigins"]) {
                 if (item.is_string()) {
                     const auto value = trim(item.get<std::string>());
                     if (!value.empty()) {
@@ -83,7 +84,7 @@ namespace mb {
         }
 
         if (const auto raw = getEnvOrDefault("MB_CORS_ORIGINS", ""); !raw.empty()) {
-            for (const auto &part : splitString(raw, ",")) {
+            for (const auto &part: splitString(raw, ",")) {
                 const auto value = trim(part);
                 if (!value.empty()) {
                     origins->insert(value);
@@ -163,12 +164,6 @@ namespace mb {
             resp->addHeader("X-Content-Type-Options", "nosniff");
             resp->addHeader("X-Frame-Options", "SAMEORIGIN");
             resp->addHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-
-            // std::cout << req->path() << std::endl;
-            // resp->addHeader("Content-Security-Policy",
-            //                 "default-src 'self'; base-uri 'self'; frame-ancestors 'self'; "
-            //                 "object-src 'none'; img-src 'self' data: blob:; "
-            //                 "style-src 'self' 'unsafe-inline'; font-src 'self' data:");
         };
     }
 
@@ -398,7 +393,8 @@ namespace mb {
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Admin Login Error", fmt::format("Admin login error: {}", e.what()));
+                req.mbApp().logger().critical("Auth", "Admin Login Error",
+                                              fmt::format("Admin login error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
@@ -459,7 +455,8 @@ namespace mb {
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Token Refresh Error", fmt::format("Token refresh error: {}", e.what()));
+                req.mbApp().logger().critical("Auth", "Token Refresh Error",
+                                              fmt::format("Token refresh error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
@@ -608,7 +605,8 @@ namespace mb {
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Admin Setup Error", fmt::format("Admin setup error: {}", e.what()));
+                req.mbApp().logger().critical("Auth", "Admin Setup Error",
+                                              fmt::format("Admin setup error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},

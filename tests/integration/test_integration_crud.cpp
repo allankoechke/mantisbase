@@ -28,11 +28,15 @@ protected:
         const nlohmann::json schema = {
             {"name", "test_products"},
             {"type", "base"},
-            {"list", {{"mode", "public"}}},
-            {"get", {{"mode", "public"}}},
-            {"add", {{"mode", "auth"}}},
-            {"update", {{"mode", "auth"}}},
-            {"delete", {{"mode", ""}}},
+            {
+                "rules", {
+                    {"list", {{"mode", "public"}}},
+                    {"get", {{"mode", "public"}}},
+                    {"add", {{"mode", "auth"}}},
+                    {"update", {{"mode", "auth"}}},
+                    {"delete", {{"mode", ""}}}
+                }
+            },
             {
                 "fields", nlohmann::json::array({
                     {{"name", "name"}, {"type", "string"}, {"required", true}},
@@ -53,11 +57,15 @@ protected:
         nlohmann::json userSchema = {
             {"name", "test_users"},
             {"type", "auth"},
-            {"list", {{"mode", "auth"}}},
-            {"get", {{"mode", "auth"}}},
-            {"add", {{"mode", "public"}}},
-            {"update", {{"mode", "auth"}}},
-            {"delete", {{"mode", ""}}},
+            {
+                "rules", {
+                    {"list", {{"mode", "auth"}}},
+                    {"get", {{"mode", "auth"}}},
+                    {"add", {{"mode", "public"}}},
+                    {"update", {{"mode", "auth"}}},
+                    {"delete", {{"mode", ""}}}
+                }
+            },
             {
                 "fields", nlohmann::json::array({
                     {{"name", "name"}, {"type", "string"}, {"required", true}},

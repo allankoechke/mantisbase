@@ -200,7 +200,7 @@ include (cmake/add-mbs.cmake)
 target_include_directories(mantisbase
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/argparse/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/argparse/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/spdlog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/jwt-cpp/include
     ${CMAKE_BINARY_DIR}/include

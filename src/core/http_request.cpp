@@ -37,7 +37,7 @@ namespace mb {
     std::string MantisRequest::getBody() const { return std::string(m_req->body()); }
 
     std::string MantisRequest::getRemoteAddr() const {
-        const auto direct_ip = m_req->peerAddr().toIp();
+        auto direct_ip = m_req->peerAddr().toIp();
 
         if (hasHeader("X-Forwarded-For")) {
             auto trusted_proxies_str = getEnvOrDefault("MB_TRUSTED_PROXIES", "");
@@ -71,6 +71,7 @@ namespace mb {
         if (isValidIP(direct_ip)) {
             return direct_ip;
         }
+
         mbApp().logger().warn("IP Detection Failed", "Unable to determine valid client IP address");
         return direct_ip;
     }

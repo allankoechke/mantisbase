@@ -36,11 +36,15 @@ protected:
         nlohmann::json schema = {
             {"name", kEntity},
             {"type", "auth"},
-            {"list", {{"mode", "auth"}}},
-            {"get", {{"mode", "auth"}}},
-            {"add", {{"mode", "public"}}},
-            {"update", {{"mode", "auth"}}},
-            {"delete", {{"mode", ""}}},
+            {
+                "rules", {
+                    {"list", {{"mode", "auth"}}},
+                    {"get", {{"mode", "auth"}}},
+                    {"add", {{"mode", "public"}}},
+                    {"update", {{"mode", "auth"}}},
+                    {"delete", {{"mode", ""}}}
+                }
+            },
             {
                 "fields", nlohmann::json::array({
                     {{"name", "name"}, {"type", "string"}, {"required", true}},

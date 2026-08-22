@@ -174,7 +174,7 @@ namespace mb {
         auto &wsMgr = m_app.router().sseMgr().wsMgr();
         wsMgr.addConnection(conn);
 
-        json welcome = {{"type", "connected"}, {"message", "WebSocket connected"}};
+        const json welcome = {{"type", "connected"}, {"message", "WebSocket connected"}};
         conn->send(welcome.dump());
     }
 

@@ -43,14 +43,9 @@ protected:
         nlohmann::json schema = {
             {"name", "test_users"},
             {"type", "auth"},
+            {"rules", access_rules},
             {"fields", fields}
         };
-
-        schema["list"] = access_rules["list"];
-        schema["get"] = access_rules["get"];
-        schema["add"] = access_rules["add"];
-        schema["update"] = access_rules["update"];
-        schema["delete"] = access_rules["delete"];
 
         client->Post("/api/v1/schemas", headers, schema.dump(), "application/json");
 
