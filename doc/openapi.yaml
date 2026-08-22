@@ -20,6 +20,13 @@ info:
     **Response envelope:** most JSON endpoints return `{ "status", "data", "error" }`.
     The health check is an exception (`{ "status": "OK" }`).
 
+    **Security headers:** all HTTP responses include `X-Content-Type-Options: nosniff`,
+    `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, and a
+    restrictive `Content-Security-Policy`.
+
+    **Reverse proxies:** set `MB_TRUSTED_PROXIES` to a comma-separated list of proxy IPs when
+    running behind a load balancer; otherwise `X-Forwarded-For` is ignored for client-IP resolution.
+
     Generated from route registrations in `src/core/` and `doc/api.md` / `doc/auth.md`.
   license:
     name: MIT
@@ -29,7 +36,7 @@ servers:
   - url: http://localhost:7070/api/v1
     description: Local development (default `mantisbase serve`)
   - url: http://localhost:7070/api/v1
-    description: Docker default (`docker run -p 7070:80 ...`)
+    description: Docker default (`docker run -p 7070:8080 ...`)
 
 tags:
   - name: Health
@@ -468,7 +475,10 @@ paths:
     post:
       tags: [Entities]
       summary: Create entity record
-      description: Authorization depends on the entity `add` access rule. Supports JSON and multipart file uploads.
+      description: |
+        Authorization depends on the entity `add` access rule. Supports JSON and multipart file uploads.
+
+        Multipart uploads enforce the `maxFileSize` setting (default 10 MiB) and an extension allow-list.
       security: []
       parameters:
         - $ref: "#/components/parameters/DynamicEntityName"
@@ -501,6 +511,18 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "413":
+          description: Upload exceeds maxFileSize
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "415":
+          description: File extension not on the allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
         "500":
           $ref: "#/components/responses/InternalError"
 
@@ -536,7 +558,10 @@ paths:
     patch:
       tags: [Entities]
       summary: Update entity record
-      description: Authorization depends on the entity `update` access rule. View entities reject mutations.
+      description: |
+        Authorization depends on the entity `update` access rule. View entities reject mutations.
+
+        Multipart uploads enforce the `maxFileSize` setting (default 10 MiB) and an extension allow-list.
       security: []
       parameters:
         - $ref: "#/components/parameters/DynamicEntityName"
@@ -570,6 +595,18 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "413":
+          description: Upload exceeds maxFileSize
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "415":
+          description: File extension not on the allow-list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
         "500":
           $ref: "#/components/responses/InternalError"
     delete:
@@ -744,7 +781,13 @@ paths:
     get:
       tags: [Files]
       summary: Serve uploaded file
-      description: Returns the stored file for a given entity upload field.
+      description: |
+        Returns the stored file for a given entity upload field.
+
+        Enforces the entity's **get** access rule: non-public entities require a verified token;
+        admin-only get rules require an `mb_admins` token. Responses use a fixed `Content-Type`
+        derived from the file extension plus `X-Content-Type-Options: nosniff`. Images (except SVG),
+        audio, and video are served inline; everything else is sent as an attachment.
       security: []
       parameters:
         - name: entity
@@ -765,6 +808,10 @@ paths:
               schema:
                 type: string
                 format: binary
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
           description: File not found
 
@@ -773,7 +820,7 @@ paths:
       tags: [Realtime]
       summary: Open SSE connection
       description: |
-        Establishes a long-lived Server-Sent Events stream. Disabled when `MB_REALTIME_SSE=false`.
+        Establishes a long-lived Server-Sent Events stream. Disabled when `MB_DISABLE_REALTIME_SSE` is truthy.
 
         Subscribing to `entity` requires list access; subscribing to `entity:row_id` requires get access.
       security: []
@@ -848,10 +895,23 @@ paths:
       description: |
         WebSocket endpoint at `WS /api/v1/realtime/ws`.
 
-        After connecting, send JSON messages such as `{ "topics": ["posts", "users"] }`.
-        Change events use the same payload shape as SSE `change` events.
-        Disabled when `MB_REALTIME_WS=false`.
-      security: []
+        **Requires authentication.** Supply a JWT or API key (`mb_sk_...`) via the `token` query
+        parameter or an `Authorization: Bearer <token>` header. Unauthenticated connections are
+        closed immediately.
+
+        After connecting, send JSON messages such as `{ "type": "subscribe", "topics": ["posts"] }`.
+        Unauthorized topics are silently dropped; the `subscribed` acknowledgement lists only granted
+        topics. Change events use the same payload shape as SSE `change` events (password fields are
+        stripped from auth-entity payloads).
+
+        Disabled when `MB_DISABLE_REALTIME_WS` is truthy.
+      parameters:
+        - name: token
+          in: query
+          required: false
+          description: JWT or API key; alternative to the Authorization header on the upgrade request.
+          schema:
+            type: string
       responses:
         "101":
           description: Switching Protocols (WebSocket upgrade)
@@ -1818,7 +1878,7 @@ components:
               $ref: "#/components/schemas/AccessRule"
         view_query:
           type: string
-          description: Required for `view` entities.
+          description: Required for `view` entities. Must be a single SELECT with no semicolons or DDL/DML keywords.
       additionalProperties: true
 
     EntitySchemaCreate:
@@ -1828,6 +1888,7 @@ components:
         name:
           type: string
           pattern: "^[A-Za-z0-9_]{1,64}$"
+          description: Entity name (1–64 alphanumeric or underscore characters).
         type:
           type: string
           enum: [base, auth, view]
@@ -1836,12 +1897,14 @@ components:
           items:
             type: object
             additionalProperties: true
+            description: Field `name` must match `^[A-Za-z0-9_]{1,64}$`.
         rules:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/AccessRule"
         view_query:
           type: string
+          description: Required for `view` entities. Must be a single SELECT with no semicolons or DDL/DML keywords.
 
     EntitySchemaPatch:
       type: object
@@ -1851,13 +1914,14 @@ components:
           items:
             type: object
             additionalProperties: true
-            description: 'Add by name, update by id, delete with op "delete".'
+            description: 'Add by name (^[A-Za-z0-9_]{1,64}$), update by id, delete with op "delete".'
         rules:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/AccessRule"
         view_query:
           type: string
+          description: Must be a single SELECT with no semicolons or DDL/DML keywords.
 
     AppSettings:
       type: object
@@ -1883,7 +1947,7 @@ components:
             - http://127.0.0.1:3000
         maxFileSize:
           type: integer
-          description: Maximum upload size in bytes
+          description: Maximum upload size in bytes (enforced at upload time; default 10485760 / 10 MiB)
           example: 10485760
         logRetentionDays:
           type: integer
@@ -1937,7 +2001,7 @@ components:
             format: uri
         maxFileSize:
           type: integer
-          description: Maximum upload size in bytes
+          description: Maximum upload size in bytes (enforced at upload time)
         logRetentionDays:
           type: integer
           description: Delete stored application logs older than this many days

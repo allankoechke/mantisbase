@@ -99,8 +99,8 @@ You can configure MantisBase using environment variables or by mounting a config
 | `MB_DEFAULT_ADMIN_PASSWORD` | Admin password for `admins --add` when no positional args given | — |
 | `MB_OAUTH_ENCRYPTION_KEY` | Encryption key for OAuth client secrets. **Required when OAuth is used** (at least 32 chars). No longer falls back to `MB_JWT_SECRET`, so the token-signing key and the secret-at-rest key stay separate | — |
 | `MB_TRUSTED_PROXIES` | Comma-separated list of reverse-proxy IPs whose `X-Forwarded-For` header is trusted for client-IP resolution. **If unset, `X-Forwarded-For` is ignored** and the direct peer address is used, so rate limits cannot be bypassed by spoofing the header. Set this when running behind a proxy or load balancer | — |
-| `MB_REALTIME_SSE` | Set to `"false"` to disable the SSE realtime endpoint (returns 503) | enabled |
-| `MB_REALTIME_WS` | Set to `"false"` to disable the WebSocket realtime endpoint | enabled |
+| `MB_DISABLE_REALTIME_SSE` | Set to `1` or `true` to disable the SSE realtime endpoint (returns 503) | `0` (enabled) |
+| `MB_DISABLE_REALTIME_WS` | Set to `1` or `true` to disable the WebSocket realtime endpoint | `0` (enabled) |
 | `MB_CORS_ORIGINS` | Comma-separated browser origins allowed for cross-origin API requests with credentials (merged with `corsAllowedOrigins` from app settings). Example: `http://localhost:3000,https://app.example.com` | — |
 | `MB_DISABLE_ADMIN_MUTATIONS` | Set to `true`, `1`, `on`, or `yes` to block admin account create/update/delete via the API (returns **503**). Unset or any other value: edits allowed. | unset (edits allowed) |
 | `MB_DISABLE_CONFIG_MUTATIONS` | Set to `true`, `1`, `on`, or `yes` to block `PATCH /api/v1/sys/settings/config` (returns **503**) | unset (edits allowed) |

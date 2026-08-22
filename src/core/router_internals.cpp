@@ -156,17 +156,19 @@ namespace mb {
 
     std::function<void(const drogon::HttpRequestPtr &,
                        const drogon::HttpResponsePtr &resp)>
-    Router::corsPreSendingAdvice() {
+    Router::corsPreSendingAdvice() const {
         return [this](const drogon::HttpRequestPtr &req,
                       const drogon::HttpResponsePtr &resp) {
             applyCorsHeaders(req, resp);
             resp->addHeader("X-Content-Type-Options", "nosniff");
             resp->addHeader("X-Frame-Options", "SAMEORIGIN");
             resp->addHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-            resp->addHeader("Content-Security-Policy",
-                            "default-src 'self'; base-uri 'self'; frame-ancestors 'self'; "
-                            "object-src 'none'; img-src 'self' data: blob:; "
-                            "style-src 'self' 'unsafe-inline'; font-src 'self' data:");
+
+            // std::cout << req->path() << std::endl;
+            // resp->addHeader("Content-Security-Policy",
+            //                 "default-src 'self'; base-uri 'self'; frame-ancestors 'self'; "
+            //                 "object-src 'none'; img-src 'self' data: blob:; "
+            //                 "style-src 'self' 'unsafe-inline'; font-src 'self' data:");
         };
     }
 

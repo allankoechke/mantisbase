@@ -18,6 +18,18 @@ You can configure the port and host using command-line arguments:
 mantisbase serve --port 8000 --host 127.0.0.1
 ```
 
+### Response Security Headers
+
+All HTTP responses include:
+
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: SAMEORIGIN`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+
+### Reverse Proxies and Client IP
+
+When running behind a reverse proxy or load balancer, set `MB_TRUSTED_PROXIES` to a comma-separated list of proxy IP addresses. Only then is `X-Forwarded-For` trusted for client-IP resolution (rate limits, logging). If unset, the direct peer address is used so the header cannot be spoofed. See [Docker Guide](docker.md#environment-variables).
+
 ---
 
 ## API Namespaces
@@ -52,6 +64,8 @@ MantisBase automatically exposes CRUD endpoints for each entity (table or view):
 | POST   | `/api/v1/entities/<entity>`           | Create a new record   |
 | PATCH  | `/api/v1/entities/<entity>/:id`       | Update partial fields |
 | DELETE | `/api/v1/entities/<entity>/:id`       | Delete a record       |
+
+Auth-type entity responses never include the `password` field in list, get, or realtime change payloads.
 
 ### Example Requests
 
@@ -326,6 +340,26 @@ Entity names must follow these rules:
 - **Not empty** - Names must contain at least one character
 
 Invalid names will be rejected with a 400 error.
+
+### Field Name Validation
+
+Field names follow the same rules as entity names:
+
+- **Alphanumeric and underscores only** — letters, numbers, and `_`
+- **Maximum 64 characters**
+- **Not empty**
+
+Invalid field names are rejected with a **400** error when creating or updating schemas.
+
+### View Query Validation
+
+`view` entities require a `view_query` that:
+
+- Starts with `SELECT` (case-insensitive after trimming)
+- Contains **no semicolons**
+- Contains **no DDL/DML keywords** (e.g. `INSERT`, `UPDATE`, `DELETE`, `DROP`)
+
+Invalid view queries are rejected with a **400** error.
 
 ### Updating Schemas
 
@@ -850,7 +884,7 @@ curl -X POST http://localhost:7070/api/v1/realtime \
 | `row_id` | string | ID of the affected row. |
 | `topic` | string | Topic that matched (entity or `entity:row_id`). |
 | `timestamp` | number | Unix timestamp of the change. |
-| `data` | object \| null | For `insert` and `update`, the row payload; for `delete`, `null`. |
+| `data` | object \| null | For `insert` and `update`, the row payload; for `delete`, `null`. Password fields on auth entities are omitted. |
 
 **Example change (insert)**
 
@@ -972,7 +1006,7 @@ Database changes are delivered in the same format as SSE `change` events:
 }
 ```
 
-WebSocket realtime can be disabled by setting the environment variable `MB_REALTIME_WS=false`.
+WebSocket realtime can be disabled by setting the environment variable `MB_DISABLE_REALTIME_WS=1` (or `true`). SSE can be disabled with `MB_DISABLE_REALTIME_SSE=1`.
 
 ---
 

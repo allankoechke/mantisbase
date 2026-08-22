@@ -96,7 +96,7 @@ namespace mb {
 
         ///> Register pre-sending advice for CORS headers on all responses
         std::function<void(const drogon::HttpRequestPtr &,
-                           const drogon::HttpResponsePtr &resp)> corsPreSendingAdvice();
+                           const drogon::HttpResponsePtr &resp)> corsPreSendingAdvice() const;
 
         ///> Get default 404 handler
         static drogon::HttpResponsePtr default404Response();

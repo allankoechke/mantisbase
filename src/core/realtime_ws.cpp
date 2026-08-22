@@ -2,6 +2,7 @@
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/core/api_keys.h"
+#include "../../include/mantisbase/utils/utils.h"
 
 namespace mb {
 
@@ -120,7 +121,7 @@ namespace mb {
         const drogon::WebSocketConnectionPtr &conn) {
 
         // Check env var toggle
-        if (const char *env = std::getenv("MB_REALTIME_WS"); env && std::string(env) == "false") {
+        if (strToBool(getEnvOrDefault("MB_DISABLE_REALTIME_WS", "0"))) {
             conn->shutdown(drogon::CloseCode::kNormalClosure, "WebSocket is disabled");
             return;
         }

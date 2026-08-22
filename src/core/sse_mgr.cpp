@@ -6,6 +6,7 @@
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/core/ws.h"
 #include "../../include/mantisbase/mantisbase.h"
+#include "../../include/mantisbase/utils/utils.h"
 #include "../../include/mantisbase/utils/uuidv7.h"
 
 #include <drogon/drogon.h>
@@ -38,7 +39,7 @@ namespace mb {
             [this, sseGetMiddlewares](const drogon::HttpRequestPtr &req,
                                       std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
                 // Check env var toggle
-                if (const char *env = std::getenv("MB_REALTIME_SSE"); env && std::string(env) == "false") {
+                if (strToBool(getEnvOrDefault("MB_DISABLE_REALTIME_SSE", "0"))) {
                     auto resp = drogon::HttpResponse::newHttpResponse();
                     resp->setStatusCode(drogon::k503ServiceUnavailable);
                     resp->setContentTypeString("application/json");

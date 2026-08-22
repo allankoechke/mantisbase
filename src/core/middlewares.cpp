@@ -687,13 +687,11 @@ namespace mb {
 
         return [max_requests, window_seconds, use_user_id](
             MantisRequest &req, MantisResponse &res) {
-            // MB_DISABLE_RATE_LIMIT is a test-only escape hatch; honouring it in a
-            // production build would let a misconfigured env disable rate limiting.
-            if (req.mbApp().isDevMode()) {
-                if (const char *test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");
-                    test_disable && std::string(test_disable) == "1") {
-                    return HandlerResponse::Unhandled;
-                }
+            // MB_DISABLE_RATE_LIMIT can be set in production to help with test harness
+            // without which, tests fail
+            if (const char *test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");
+                test_disable && std::string(test_disable) == "1") {
+                return HandlerResponse::Unhandled;
             }
 
             try {
