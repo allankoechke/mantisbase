@@ -44,6 +44,69 @@ protected:
     std::unique_ptr<TestHttp::Client> client;
     std::string adminToken;
     int port{0};
+
+    void expectUnauthorizedWsConnection(drogon::WebSocketClientPtr& wsClient,
+                                        const std::string& wsPath) {
+        std::promise<void> donePromise;
+        auto doneFuture = donePromise.get_future();
+        bool welcomeReceived = false;
+        bool closeVerified = false;
+        bool done = false;
+
+        auto req = drogon::HttpRequest::newHttpRequest();
+        req->setPath(wsPath);
+
+        wsClient->connectToServer(
+            req,
+            [&](drogon::ReqResult result,
+                const drogon::HttpResponsePtr&,
+                const drogon::WebSocketClientPtr& wsPtr) {
+                ASSERT_EQ(result, drogon::ReqResult::Ok);
+
+                wsPtr->setConnectionClosedHandler(
+                    [wsPtr, &done, &donePromise](const drogon::WebSocketClientPtr&) {
+                        wsPtr->stop();
+                        if (!done) {
+                            done = true;
+                            donePromise.set_value();
+                        }
+                    });
+
+                wsPtr->setMessageHandler(
+                    [&welcomeReceived, &closeVerified, &done, &donePromise](
+                        const std::string& msg,
+                        const drogon::WebSocketClientPtr& wsPtr,
+                        const drogon::WebSocketMessageType& type) {
+                        if (type == drogon::WebSocketMessageType::Text) {
+                            welcomeReceived = true;
+                            return;
+                        }
+                        if (type != drogon::WebSocketMessageType::Close || done) {
+                            return;
+                        }
+
+                        ASSERT_GE(msg.size(), 2u);
+                        const uint16_t closeCode =
+                            (static_cast<uint8_t>(msg[0]) << 8) |
+                            static_cast<uint8_t>(msg[1]);
+                        EXPECT_EQ(closeCode,
+                                  static_cast<uint16_t>(drogon::CloseCode::kViolation));
+                        if (msg.size() > 2) {
+                            EXPECT_EQ(msg.substr(2), "Unauthorized");
+                        }
+
+                        closeVerified = true;
+                        done = true;
+                        wsPtr->stop();
+                        donePromise.set_value();
+                    });
+            });
+
+        const auto status = doneFuture.wait_for(std::chrono::seconds(5));
+        ASSERT_EQ(status, std::future_status::ready);
+        EXPECT_FALSE(welcomeReceived);
+        EXPECT_TRUE(closeVerified);
+    }
 };
 
 struct ScopedWebSocketClient {
@@ -92,7 +155,7 @@ TEST_F(IntegrationWSTest, WebSocketConnectsAndReceivesWelcome) {
     bool promiseSet = false;
 
     auto req = drogon::HttpRequest::newHttpRequest();
-    req->setPath("/api/v1/realtime/ws");
+    req->setPath(std::format("/api/v1/realtime/ws?token={}", adminToken));
 
     wsClient->connectToServer(
         req,
@@ -138,7 +201,7 @@ TEST_F(IntegrationWSTest, WebSocketPingPong) {
     bool promiseSet = false;
 
     auto req = drogon::HttpRequest::newHttpRequest();
-    req->setPath("/api/v1/realtime/ws");
+    req->setPath(std::format("/api/v1/realtime/ws?token={}", adminToken));
 
     wsClient->connectToServer(
         req,
@@ -192,7 +255,7 @@ TEST_F(IntegrationWSTest, WebSocketSubscribeAck) {
     bool promiseSet = false;
 
     auto req = drogon::HttpRequest::newHttpRequest();
-    req->setPath("/api/v1/realtime/ws");
+    req->setPath(std::format("/api/v1/realtime/ws?token={}", adminToken));
 
     wsClient->connectToServer(
         req,
@@ -238,4 +301,15 @@ TEST_F(IntegrationWSTest, WebSocketSubscribeAck) {
     auto parsed = nlohmann::json::parse(subMsg);
     EXPECT_EQ(parsed["type"], "subscribed");
     EXPECT_TRUE(parsed["topics"].is_array());
+}
+
+TEST_F(IntegrationWSTest, WebSocketRejectsMissingToken) {
+    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
+    expectUnauthorizedWsConnection(ws.client, "/api/v1/realtime/ws");
+}
+
+TEST_F(IntegrationWSTest, WebSocketRejectsInvalidToken) {
+    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
+    expectUnauthorizedWsConnection(ws.client,
+                                   "/api/v1/realtime/ws?token=invalid.token.here");
 }
