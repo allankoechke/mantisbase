@@ -131,10 +131,21 @@ Uploaded filenames are automatically sanitized before storage:
 
 MantisBase uses multi-layered path traversal prevention on all file operations. Any request whose resolved path escapes the entity's storage directory is rejected with a `400 Bad Request` error.
 
-### Limitations
+### Upload Limits
 
-- **File size**: A `maxFileSize` setting (default 10485760 bytes / 10 MiB) exists in the application config but is not currently enforced at upload time. Clients are not rejected for exceeding it.
-- **File types**: No MIME type or file extension validation is performed. All file types are accepted.
+- **File size**: uploads larger than the `maxFileSize` application setting (bytes, default `10485760` / 10 MiB) are rejected with **413 Payload Too Large**.
+- **File types**: uploads are restricted to an allow-list of extensions (images, audio/video, common documents and archives, and plain-text/data formats). Anything else is rejected with **415 Unsupported Media Type**.
+
+**Allowed extensions:**
+
+`.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`, `.webp`, `.ico`, `.tiff`, `.tif`, `.svg`, `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`, `.odt`, `.ods`, `.odp`, `.txt`, `.csv`, `.tsv`, `.rtf`, `.zip`, `.gz`, `.tar`, `.7z`, `.rar`, `.json`, `.xml`, `.yaml`, `.yml`, `.mp3`, `.wav`, `.ogg`, `.flac`, `.mp4`, `.avi`, `.mov`, `.webm`, `.mkv`
+
+### Serving Files
+
+`GET /api/v1/files/:entity/:file` enforces the entity's **get** access rule: files on a non-public entity require a verified token, and entities whose get rule is admin-only require an `mb_admins` token. Responses are sent with a fixed `Content-Type` derived from the file extension plus `X-Content-Type-Options: nosniff`; only images (excluding SVG), audio and video are served `inline`, everything else is sent as an `attachment`.
+
+### Remaining Limitations
+
 - **Files per record**: No limit on the number of files per record.
 
 ---

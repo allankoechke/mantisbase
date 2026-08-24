@@ -37,9 +37,10 @@ namespace mb {
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Schema", "Handler Error", fmt::format("Schema handler error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
-                                 {"error", e.what()},
+                                 {"error", "An internal error occurred."},
                                  {"status", 500}
                              });
             }
@@ -62,9 +63,10 @@ namespace mb {
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Schema", "Handler Error", fmt::format("Schema handler error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
-                                 {"error", e.what()},
+                                 {"error", "An internal error occurred."},
                                  {"status", 500}
                              });
             }
@@ -109,7 +111,7 @@ namespace mb {
                                               fmt::format("Error creating entity schema\n\t— {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
-                                 {"error", e.what()},
+                                 {"error", "An internal error occurred."},
                                  {"status", 500}
                              });
             }
@@ -148,9 +150,10 @@ namespace mb {
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Schema", "Handler Error", fmt::format("Schema handler error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
-                                 {"error", e.what()},
+                                 {"error", "An internal error occurred."},
                                  {"status", 500}
                              });
             }
@@ -174,9 +177,10 @@ namespace mb {
                                  {"data", json::object()}
                              });
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Schema", "Delete Error", fmt::format("Schema delete error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
-                                 {"error", e.what()},
+                                 {"error", "An internal error occurred."},
                                  {"data", json::object()}
                              });
             }

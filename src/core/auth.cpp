@@ -46,7 +46,8 @@ namespace mb {
                 .set_type("JWT")
                 .set_issued_at(time)
                 .set_not_before(time)
-                .set_expires_at(time + std::chrono::seconds(expiry_t));
+                .set_expires_at(time + std::chrono::seconds(expiry_t))
+                .set_issuer("mantisbase");
 
         if (config.value("jwtEnableSetIssuer", false)) {
             token_builder.set_issuer(config.at("orgName").get<std::string>());
@@ -101,7 +102,8 @@ namespace mb {
             const auto secretKey = mApp.jwtSecretKey();
 
             auto verifier = jwt::verify()
-                    .allow_algorithm(jwt::algorithm::hs256{secretKey});
+                    .allow_algorithm(jwt::algorithm::hs256{secretKey})
+                    .with_issuer("mantisbase");
 
             const auto &config = mApp.settings().configs();
             if (config.value("jwtEnableSetIssuer", false)) {
@@ -153,9 +155,9 @@ namespace mb {
             result["claims"] = claims;
             result["verified"] = true;
             return result;
-        } catch (const std::exception &e) {
+        } catch (const std::exception &) {
             result["verified"] = false;
-            result["error"] = e.what();
+            result["error"] = "Token verification failed.";
             return result;
         }
     }

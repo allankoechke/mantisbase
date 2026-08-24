@@ -200,7 +200,7 @@ include (cmake/add-mbs.cmake)
 target_include_directories(mantisbase
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/argparse/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/argparse/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/spdlog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/jwt-cpp/include
     ${CMAKE_BINARY_DIR}/include
@@ -242,6 +242,11 @@ target_link_libraries(mantisbase
         PUBLIC
         spdlog::spdlog
 )
+
+if(WIN32)
+    # ShellExecuteA() is used to open the admin setup URL on first boot.
+    target_link_libraries(mantisbase PRIVATE shell32)
+endif()
 
 # Mirror compile environment from static target to shared target
 if(TARGET mantisbase-dll)

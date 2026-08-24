@@ -42,10 +42,15 @@ namespace mb {
         std::atomic<bool> m_isActive;
         std::chrono::steady_clock::time_point m_lastActivity;
 
+        std::string m_ownerEntity;
+        std::string m_ownerId;
+
     public:
         SSESession(std::string client_id,
                    const std::set<std::string> &topics,
-                   drogon::ResponseStreamPtr stream);
+                   drogon::ResponseStreamPtr stream,
+                   std::string owner_entity = "",
+                   std::string owner_id = "");
 
         /** Send an SSE-formatted event through the async stream. Returns false if stream is closed. */
         bool sendEvent(const std::string &eventType, const json &data);
@@ -72,6 +77,9 @@ namespace mb {
         std::set<std::string> getTopics() const;
 
         void setTopics(const std::set<std::string> &topics);
+
+        [[nodiscard]] const std::string &ownerEntity() const { return m_ownerEntity; }
+        [[nodiscard]] const std::string &ownerId() const { return m_ownerId; }
     };
 
     /** Manages SSE sessions, WebSocket connections, routes realtime change events, and registers GET/POST /api/v1/realtime. */
@@ -91,7 +99,9 @@ namespace mb {
         void createRoutes();
         /** Create a new SSE session with the given topics and stream; returns client_id. */
         std::string createSession(const std::set<std::string> &initial_topics,
-                                  drogon::ResponseStreamPtr stream);
+                                  drogon::ResponseStreamPtr stream,
+                                  const std::string &owner_entity = "",
+                                  const std::string &owner_id = "");
 
         std::shared_ptr<SSESession> fetchSession(const std::string &session_id);
         /** Remove session and close it (disconnect). */

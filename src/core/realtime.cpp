@@ -218,25 +218,35 @@ void mb::RealtimeDB::createNotifyFunction(const MantisBase& app, soci::session &
             RETURNS TRIGGER AS $$
             DECLARE
                 notification json;
+                old_json json;
+                new_json json;
             BEGIN
-                -- Build notification payload
+                -- Build row JSON and strip sensitive fields (password)
                 IF (TG_OP = 'DELETE') THEN
+                    old_json = row_to_json(OLD);
+                    old_json = (SELECT json_object_agg(key, value) FROM json_each(old_json) WHERE key != 'password');
                     notification = json_build_object(
                         'timestamp', EXTRACT(EPOCH FROM NOW())::bigint,
                         'type', TG_OP,
                         'entity', TG_TABLE_NAME,
                         'row_id', OLD.id::text,
-                        'old_data', row_to_json(OLD),
+                        'old_data', old_json,
                         'new_data', NULL
                     );
                 ELSE
+                    new_json = row_to_json(NEW);
+                    new_json = (SELECT json_object_agg(key, value) FROM json_each(new_json) WHERE key != 'password');
+                    IF TG_OP = 'UPDATE' THEN
+                        old_json = row_to_json(OLD);
+                        old_json = (SELECT json_object_agg(key, value) FROM json_each(old_json) WHERE key != 'password');
+                    END IF;
                     notification = json_build_object(
                         'timestamp', EXTRACT(EPOCH FROM NOW())::bigint,
                         'type', TG_OP,
                         'entity', TG_TABLE_NAME,
                         'row_id', NEW.id::text,
-                        'old_data', CASE WHEN TG_OP = 'UPDATE' THEN row_to_json(OLD) ELSE NULL END,
-                        'new_data', row_to_json(NEW)
+                        'old_data', CASE WHEN TG_OP = 'UPDATE' THEN old_json ELSE NULL END,
+                        'new_data', new_json
                     );
                 END IF;
 
@@ -260,16 +270,17 @@ void mb::RealtimeDB::createNotifyFunction(const MantisBase& app, soci::session &
 std::string mb::RealtimeDB::buildTriggerObject(const Entity &entity, const std::string &action) {
     std::stringstream ss;
     ss << "json_object(";
-    int i = 0;
+    bool first = true;
     for (const auto &field: entity.fields()) {
-        // Field name is interpolated into trigger DDL, so validate it.
-        auto name = sqlIdentifier(field["name"].get<std::string>());
-        ss << "'" << name << "', " << action << "." << name;
-        if (i < entity.fields().size() - 1) {
-            ss << ", ";
-        }
+        auto field_name = field["name"].get<std::string>();
+        if (field_name == "password")
+            continue;
 
-        i++;
+        auto name = sqlIdentifier(field_name);
+        if (!first)
+            ss << ", ";
+        ss << "'" << name << "', " << action << "." << name;
+        first = false;
     }
     ss << ")";
 

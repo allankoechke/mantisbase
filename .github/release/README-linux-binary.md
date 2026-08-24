@@ -41,7 +41,7 @@ This binary bundles most dependencies. If you use PostgreSQL, ensure client libr
 
 ## Other install options
 
-- **Docker:** `docker run -p 7070:80 allankoech/mantisbase`
+- **Docker:** `docker run -p 7070:8080 allankoech/mantisbase`
 - **Build from source:** https://github.com/allankoechke/mantisbase/blob/master/doc/installation.md
 
 ## Get help

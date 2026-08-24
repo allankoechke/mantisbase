@@ -8,6 +8,17 @@
 #include <fstream>
 #include <memory>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <shellapi.h>
+#if defined(_MSC_VER)
+#pragma comment(lib, "shell32.lib")
+#endif
+#else
+#include <unistd.h>
+#include <sys/wait.h>
+#endif
+
 namespace mb {
     MantisBase::MantisBase()
         : m_dbType("sqlite3"),
@@ -345,43 +356,62 @@ namespace mb {
 #endif
 
     void MantisBase::openBrowserOnStart() const {
-        // Skip spinning the default browser on first boot
-        // Useful for tests
         if (getEnvOrDefault("MB_DISABLE_ADMIN_ON_FIRST_BOOT", "0") == "1") return;
 
         std::cout << std::endl;
 
         try {
-            // Create service account
             const auto s_acc = entity("mb_service_acc");
             auto record = s_acc.create({});
 
-            // Claims
             nlohmann::json claims;
             claims["id"] = record["id"];
             claims["entity"] = "mb_service_acc";
 
-            // Create token and pass it in
-            const auto token = m_auth->createToken(claims, 30 * 60); // Token valid for 30mins
+            const auto token = m_auth->createToken(claims, 30 * 60);
 
             const std::string url = std::format("http://localhost:{}/mb/setup?token={}", m_port, token);
-            logger().info("Admin Setup", fmt::format(
-                                "Open link below to setup first admin user. Note, token valid for 30mins only.\n\t— {}\n\t— Alternatively use mantisbase admins --add <email> <password>\n",
-                                url));
+            // The setup URL carries a live 30-minute service-account token, so keep it out
+            // of the persisted log store and print it to the console only, where it is still
+            // needed for headless first-boot setup.
+            std::cout << "\tOpen this link to set up the first admin user (valid 30 mins):"
+                      << std::endl << "\t" << url << std::endl;
+            logger().info("Admin Setup",
+                          fmt::format("Admin setup link printed to the console (token redacted from logs). "
+                                      "Token valid for 30mins only.\n\t— http://localhost:{}/mb/setup?token=<redacted>"
+                                      "\n\t— Alternatively use mantisbase admins --add <email> <password>\n",
+                                      m_port));
 
 #ifdef _WIN32
-            const std::string command = "start " + url;
+            auto launch_result = reinterpret_cast<intptr_t>(
+                ShellExecuteA(nullptr, "open", url.c_str(), nullptr, nullptr, SW_SHOWNORMAL));
+            if (launch_result <= 32) {
+                logger().warn("Browser Open Failed",
+                              fmt::format("Could not open browser, ShellExecute result: {}", launch_result));
+            }
 #elif __APPLE__
-            const std::string command = "open " + url;
+            pid_t pid = fork();
+            if (pid == 0) {
+                execlp("open", "open", url.c_str(), nullptr);
+                _exit(127);
+            } else if (pid < 0) {
+                logger().warn("Browser Open Failed", "fork() failed when trying to open browser");
+            } else {
+                waitpid(pid, nullptr, 0);
+            }
 #elif __linux__
-            const std::string command = "xdg-open " + url;
+            pid_t pid = fork();
+            if (pid == 0) {
+                execlp("xdg-open", "xdg-open", url.c_str(), nullptr);
+                _exit(127);
+            } else if (pid < 0) {
+                logger().warn("Browser Open Failed", "fork() failed when trying to open browser");
+            } else {
+                waitpid(pid, nullptr, 0);
+            }
 #else
             logger().critical("Unsupported Platform", "Unsupported platform");
 #endif
-
-            if (int result = std::system(command.c_str()); result != 0) {
-                logger().warn("Browser Open Failed", fmt::format("Could not open browser, result code: {}", result));
-            }
         } catch (const std::exception &e) {
             logger().critical("Admin Dashboard Failed",
                                 fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));

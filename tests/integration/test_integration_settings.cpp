@@ -150,11 +150,15 @@ TEST_F(IntegrationSettingsTest, SchemaMutationsBlockedWhenDisabled)
     nlohmann::json schema = {
         {"name", "schema_gate_test"},
         {"type", "base"},
-        {"list", {{"mode", "public"}}},
-        {"get", {{"mode", "public"}}},
-        {"add", {{"mode", "public"}}},
-        {"update", {{"mode", "public"}}},
-        {"delete", {{"mode", ""}}},
+        {
+            "rules", {
+                {"list", {{"mode", "public"}}},
+                {"get", {{"mode", "public"}}},
+                {"add", {{"mode", "public"}}},
+                {"update", {{"mode", "public"}}},
+                {"delete", {{"mode", ""}}}
+            }
+        },
         {"fields", nlohmann::json::array({{{"name", "title"}, {"type", "string"}}})}
     };
 

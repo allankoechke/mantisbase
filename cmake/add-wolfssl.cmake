@@ -3,6 +3,7 @@ set(JWT_SSL_LIBRARY wolfSSL)
 
 # Enable OpenSSL compatibility layer
 set(WOLFSSL_OPENSSLEXTRA ON CACHE BOOL "" FORCE)
+set(WOLFSSL_KEYGEN ON CACHE BOOL "" FORCE)
 
 # Disable tests and examples
 set(WOLFSSL_EXAMPLES OFF CACHE BOOL "" FORCE)

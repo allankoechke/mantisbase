@@ -18,6 +18,18 @@ You can configure the port and host using command-line arguments:
 mantisbase serve --port 8000 --host 127.0.0.1
 ```
 
+### Response Security Headers
+
+All HTTP responses include:
+
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: SAMEORIGIN`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+
+### Reverse Proxies and Client IP
+
+When running behind a reverse proxy or load balancer, set `MB_TRUSTED_PROXIES` to a comma-separated list of proxy IP addresses. Only then is `X-Forwarded-For` trusted for client-IP resolution (rate limits, logging). If unset, the direct peer address is used so the header cannot be spoofed. See [Docker Guide](docker.md#environment-variables).
+
 ---
 
 ## API Namespaces
@@ -52,6 +64,8 @@ MantisBase automatically exposes CRUD endpoints for each entity (table or view):
 | POST   | `/api/v1/entities/<entity>`           | Create a new record   |
 | PATCH  | `/api/v1/entities/<entity>/:id`       | Update partial fields |
 | DELETE | `/api/v1/entities/<entity>/:id`       | Delete a record       |
+
+Auth-type entity responses never include the `password` field in list, get, or realtime change payloads.
 
 ### Example Requests
 
@@ -327,6 +341,26 @@ Entity names must follow these rules:
 
 Invalid names will be rejected with a 400 error.
 
+### Field Name Validation
+
+Field names follow the same rules as entity names:
+
+- **Alphanumeric and underscores only** — letters, numbers, and `_`
+- **Maximum 64 characters**
+- **Not empty**
+
+Invalid field names are rejected with a **400** error when creating or updating schemas.
+
+### View Query Validation
+
+`view` entities require a `view_query` that:
+
+- Starts with `SELECT` (case-insensitive after trimming)
+- Contains **no semicolons**
+- Contains **no DDL/DML keywords** (e.g. `INSERT`, `UPDATE`, `DELETE`, `DROP`)
+
+Invalid view queries are rejected with a **400** error.
+
 ### Updating Schemas
 
 When updating a schema, you can add, update, or remove fields:
@@ -575,7 +609,7 @@ The settings object contains the following fields:
 | `orgName` | string | `"ACME Corp"` | Organization display name |
 | `siteDomain` | string | `"https://acme.example.com"` | Public site URL (OAuth callbacks, JWT audience) |
 | `corsAllowedOrigins` | array of strings | `["http://localhost:3000", "http://127.0.0.1:3000"]` | Browser origins allowed for cross-origin requests with credentials |
-| `maxFileSize` | integer | `10485760` | Max file upload size in bytes (10 MiB; not currently enforced) |
+| `maxFileSize` | integer | `10485760` | Max file upload size in bytes (10 MiB). Uploads above this are rejected with **413** |
 | `logRetentionDays` | integer | `5` | Delete application logs older than this many days (hourly cleanup job) |
 | `disableAdminRegistration` | boolean | `false` | When **true**, blocks creating new admin accounts via the API (`POST /api/v1/sys/admins`, `POST /api/v1/sys/admins/setup`) with **503**. When false or unset, admin API registration is allowed. Does not affect `mantisbase admins --add`. |
 | `disableSchemaMutations` | boolean | `false` | When **true**, blocks schema mutations via the API (`POST`, `PATCH`, `DELETE` on `/api/v1/schemas/*`) with **503**. `GET` remains available. Does not affect `mantisbase schema` CLI commands. |
@@ -850,7 +884,7 @@ curl -X POST http://localhost:7070/api/v1/realtime \
 | `row_id` | string | ID of the affected row. |
 | `topic` | string | Topic that matched (entity or `entity:row_id`). |
 | `timestamp` | number | Unix timestamp of the change. |
-| `data` | object \| null | For `insert` and `update`, the row payload; for `delete`, `null`. |
+| `data` | object \| null | For `insert` and `update`, the row payload; for `delete`, `null`. Password fields on auth entities are omitted. |
 
 **Example change (insert)**
 
@@ -912,14 +946,16 @@ WS /api/v1/realtime/ws
 
 ### Connection
 
-Connect via any WebSocket client:
+The endpoint **requires authentication**. Supply a JWT or an API key (`mb_sk_...`) either
+as a `token` query parameter or in an `Authorization: Bearer <token>` header. Unauthenticated
+connections are closed immediately with a policy-violation close code.
 
 ```javascript
-const ws = new WebSocket("ws://localhost:7070/api/v1/realtime/ws");
+const ws = new WebSocket("ws://localhost:7070/api/v1/realtime/ws?token=" + token);
 
 ws.onopen = () => {
   // Subscribe to topics after connecting
-  ws.send(JSON.stringify({ topics: ["posts", "users"] }));
+  ws.send(JSON.stringify({ type: "subscribe", topics: ["posts", "users"] }));
 };
 
 ws.onmessage = (event) => {
@@ -941,10 +977,18 @@ On connect, the server sends:
 
 ### Subscribing and unsubscribing
 
-Send a JSON message with a `topics` array to update your subscriptions. Topics follow the same format as the SSE endpoint — entity name or `entity:row_id`. Send an empty array to clear all subscriptions.
+Send a JSON message with `"type": "subscribe"` (or `"unsubscribe"`) and a `topics` array. Topics follow the same format as the SSE endpoint — entity name or `entity:row_id`.
 
 ```json
-{ "topics": ["posts", "comments", "posts:019c1b81-364b-7000-8120-b5416b2c42c2"] }
+{ "type": "subscribe", "topics": ["posts", "comments", "posts:019c1b81-364b-7000-8120-b5416b2c42c2"] }
+```
+
+Each requested topic is checked against the entity's **list** access rule. Topics you are not
+allowed to read are silently dropped, and the `subscribed` acknowledgement echoes back only the
+topics that were actually granted:
+
+```json
+{ "type": "subscribed", "topics": ["posts"] }
 ```
 
 ### Change events
@@ -962,7 +1006,7 @@ Database changes are delivered in the same format as SSE `change` events:
 }
 ```
 
-WebSocket realtime can be disabled by setting the environment variable `MB_REALTIME_WS=false`.
+WebSocket realtime can be disabled by setting the environment variable `MB_DISABLE_REALTIME_WS=1` (or `true`). SSE can be disabled with `MB_DISABLE_REALTIME_SSE=1`.
 
 ---
 

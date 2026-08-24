@@ -4,6 +4,9 @@
 #include "../../../include/mantisbase/core/exceptions.h"
 #include "../../../include/mantisbase/utils/soci_wrappers.h"
 
+#include <algorithm>
+#include <cctype>
+
 namespace mb {
     nlohmann::json IndexDefinition::toJSON() const {
         return {{"name", name}, {"unique", unique}, {"columns", columns}};
@@ -21,7 +24,9 @@ namespace mb {
         : m_name(std::move(field_name)),
           m_type(std::move(field_type)),
           m_constraints(defaultConstraints()) {
-        if (field_name == "password") {
+        if (!isValidFieldName(m_name))
+            throw MantisException(400, "Invalid field name: expected 1-64 alphanumeric or underscore characters.");
+        if (m_name == "password") {
             m_constraints["validator"] = "@password";
             m_constraints["min_value"] = 8;
         } else if (field_name == "email") {
@@ -151,11 +156,19 @@ namespace mb {
         return m_name;
     }
 
-    EntitySchemaField &EntitySchemaField::setName(const std::string &name) {
-        if (trim(name).empty())
-            throw MantisException(400, "Field name is required!");
+    bool EntitySchemaField::isValidFieldName(const std::string &name) {
+        if (name.empty() || name.length() > 64) return false;
+        return std::ranges::all_of(name, [](const unsigned char c) {
+            return std::isalnum(c) || c == '_';
+        });
+    }
 
-        m_name = trim(name);
+    EntitySchemaField &EntitySchemaField::setName(const std::string &name) {
+        auto trimmed = trim(name);
+        if (!isValidFieldName(trimmed))
+            throw MantisException(400, "Invalid field name: expected 1-64 alphanumeric or underscore characters.");
+
+        m_name = trimmed;
         return *this;
     }
 
@@ -255,9 +268,12 @@ namespace mb {
             throw MantisException(400, "Foreign key reference table cannot be empty!");
         }
 
-        // Note: existence of the referenced entity/column is validated at the
-        // schema level (EntitySchema::validate), which has the owning app. A
-        // field is a pure value type and does not reach into app state here.
+        if (!isValidFieldName(table))
+            throw MantisException(400, "Invalid foreign key reference table name: expected alphanumeric + _ only.");
+
+        std::string resolvedColumn = column.empty() ? "id" : column;
+        if (!isValidFieldName(resolvedColumn))
+            throw MantisException(400, "Invalid foreign key reference column name: expected alphanumeric + _ only.");
 
         // Validate update/delete policies
         const std::vector<std::string> validPolicies = {
@@ -281,7 +297,7 @@ namespace mb {
         }
 
         m_foreignKey["entity"] = table;
-        m_foreignKey["field"] = column.empty() ? "id" : column;
+        m_foreignKey["field"] = resolvedColumn;
         m_foreignKey["on_update"] = upperUpdate;
         m_foreignKey["on_delete"] = upperDelete;
 
@@ -383,6 +399,7 @@ namespace mb {
 
     std::optional<std::string> EntitySchemaField::validate() const {
         if (m_name.empty()) return "Entity field name is empty";
+        if (!isValidFieldName(m_name)) return "Invalid field name: expected 1-64 alphanumeric or underscore characters.";
         if (m_type.empty()) return "Entity field type is empty";
 
         if (m_type == "int") {

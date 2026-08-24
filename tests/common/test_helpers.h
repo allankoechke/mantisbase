@@ -164,11 +164,7 @@ namespace TestHelpers {
         };
 
         if (!access_rules.empty()) {
-            if (access_rules.contains("list")) schema["list"] = access_rules["list"];
-            if (access_rules.contains("get")) schema["get"] = access_rules["get"];
-            if (access_rules.contains("add")) schema["add"] = access_rules["add"];
-            if (access_rules.contains("update")) schema["update"] = access_rules["update"];
-            if (access_rules.contains("delete")) schema["delete"] = access_rules["delete"];
+            schema["rules"] = access_rules;
         }
 
         auto res = client.Post("/api/v1/schemas", headers, schema.dump(), "application/json");

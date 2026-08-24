@@ -1,4 +1,5 @@
 #include "../../include/mantisbase/core/http.h"
+#include "../../include/mantisbase/core/kv_store.h"
 #include "../../include/mantisbase/mantisbase.h"
 #include "drogon/MultiPart.h"
 
@@ -64,6 +65,27 @@ namespace mb {
                     );
                 }
 
+                // `maxFileSize` is stored in bytes (see KeyValStore defaults).
+                const auto max_file_size = m_req.mbApp().settings().configs()
+                                                .value("maxFileSize", 10 * 1024 * 1024);
+                if (max_file_size > 0 && form_data.content.size() > static_cast<size_t>(max_file_size)) {
+                    throw MantisException(
+                        413,
+                        std::format("File `{}` exceeds the maximum allowed size of {} bytes.",
+                                    form_data.filename, max_file_size)
+                    );
+                }
+
+                const fs::path upload_path{form_data.filename};
+                const std::string ext = upload_path.has_extension()
+                    ? upload_path.extension().string() : std::string{};
+                if (!ext.empty() && !isAllowedFileExtension(ext)) {
+                    throw MantisException(
+                        415,
+                        std::format("File extension `{}` is not allowed.", ext)
+                    );
+                }
+
                 const auto dir = m_req.mbApp().files().dirPath(entity.name(), true);
                 const auto new_filename = sanitizeFilename(form_data.filename);
                 std::string filepath = (fs::path(dir) / new_filename).string();
@@ -89,7 +111,7 @@ namespace mb {
                     } catch (std::exception &e) {
                         throw MantisException(
                             500,
-                            std::format("Error Parsing Files: {}", e.what())
+                            "Error parsing file upload data."
                         );
                     }
                 }
@@ -123,14 +145,14 @@ namespace mb {
                                 auto v = getValueFromType(type, form_data.content)["value"];
                                 json_body[form_data.name] = v;
                             }
-                        } catch (std::exception &e) {
-                            throw MantisException(500, e.what());
+                        } catch (std::exception &) {
+                            throw MantisException(500, "Error processing form data.");
                         }
                     }
                 } catch (const MantisException &e) {
                     throw;
-                } catch (const std::exception &e) {
-                    throw MantisException(500, e.what());
+                } catch (const std::exception &) {
+                    throw MantisException(500, "Error processing form data.");
                 }
             }
         }
@@ -255,8 +277,8 @@ namespace mb {
         try {
             if (trim(body).empty()) m_json = json::object();
             else m_json = json::parse(body);
-        } catch (const std::exception &e) {
-            throw MantisException(400, e.what());
+        } catch (const std::exception &) {
+            throw MantisException(400, "Invalid JSON in request body.");
         }
     }
 }

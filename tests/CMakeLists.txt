@@ -74,6 +74,10 @@ target_link_libraries(mantisbase_tests PRIVATE
         GTest::gmock_main
 )
 
+target_include_directories(mantisbase_tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../3rdParty/drogon/lib/src
+)
+
 include(GoogleTest)
 add_test(NAME all_mantisbase_tests COMMAND mantisbase_tests)
 set_tests_properties(all_mantisbase_tests PROPERTIES

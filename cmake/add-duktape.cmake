@@ -1,4 +1,4 @@
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/duktape)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/duktape)
 
 target_compile_options(duktape PRIVATE
         $<$<CXX_COMPILER_ID:GNU,Clang>:-w>              # suppress all warnings for GCC/Clang
@@ -13,7 +13,7 @@ target_link_libraries(mantisbase
 # Include directories
 target_include_directories(mantisbase
         PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/duktape
+        ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/duktape
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/dukglue/include
 )
 

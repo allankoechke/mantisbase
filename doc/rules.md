@@ -150,8 +150,10 @@ Make an endpoint accessible to everyone:
 
 ```json
 {
-  "list": {"mode": "public", "expr": ""},
-  "get": {"mode": "public", "expr": ""}
+  "rules": {
+    "list": {"mode": "public", "expr": ""},
+    "get": {"mode": "public", "expr": ""}
+  }
 }
 ```
 
@@ -161,7 +163,9 @@ Restrict access to admins only:
 
 ```json
 {
-  "delete": {"mode": "", "expr": ""}
+  "rules": {
+    "delete": {"mode": "", "expr": ""}
+  }
 }
 ```
 
@@ -171,8 +175,10 @@ Allow any authenticated user:
 
 ```json
 {
-  "add": {"mode": "auth", "expr": ""},
-  "update": {"mode": "auth", "expr": ""}
+  "rules": {
+    "add": {"mode": "auth", "expr": ""},
+    "update": {"mode": "auth", "expr": ""}
+  }
 }
 ```
 
@@ -182,8 +188,10 @@ Allow users to access only their own records:
 
 ```json
 {
-  "get": {"mode": "custom", "expr": "auth.id == req.body.user_id"},
-  "update": {"mode": "custom", "expr": "auth.id == req.body.author_id"}
+  "rules": {
+    "get": {"mode": "custom", "expr": "auth.id == req.body.user_id"},
+    "update": {"mode": "custom", "expr": "auth.id == req.body.author_id"}
+  }
 }
 ```
 
@@ -193,9 +201,11 @@ Check user properties from the database:
 
 ```json
 {
-  "list": {
-    "mode": "custom",
-    "expr": "auth.user.verified == true && auth.user.role == 'premium'"
+  "rules": {
+    "list": {
+      "mode": "custom",
+      "expr": "auth.user.verified == true && auth.user.role == 'premium'"
+    }
   }
 }
 ```
@@ -206,13 +216,15 @@ Combine multiple conditions:
 
 ```json
 {
-  "update": {
-    "mode": "custom",
-    "expr": "auth.entity == 'mb_admins' || (auth.id == req.body.author_id && req.body.status != 'published')"
-  },
-  "delete": {
-    "mode": "custom",
-    "expr": "auth.entity == 'mb_admins'"
+  "rules": {
+    "update": {
+      "mode": "custom",
+      "expr": "auth.entity == 'mb_admins' || (auth.id == req.body.author_id && req.body.status != 'published')"
+    },
+    "delete": {
+      "mode": "custom",
+      "expr": "auth.entity == 'mb_admins'"
+    }
   }
 }
 ```

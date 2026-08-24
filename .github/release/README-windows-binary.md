@@ -36,7 +36,7 @@ Set `MB_JWT_SECRET` in production. See the [CLI Reference](https://github.com/al
 
 ## Other install options
 
-- **Docker:** `docker run -p 7070:80 allankoech/mantisbase`
+- **Docker:** `docker run -p 7070:8080 allankoech/mantisbase`
 - **Build from source:** https://github.com/allankoechke/mantisbase/blob/master/doc/installation.md
 
 ## Get help

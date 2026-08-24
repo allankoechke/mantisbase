@@ -37,22 +37,41 @@ namespace mb {
     std::string MantisRequest::getBody() const { return std::string(m_req->body()); }
 
     std::string MantisRequest::getRemoteAddr() const {
+        auto direct_ip = m_req->peerAddr().toIp();
+
         if (hasHeader("X-Forwarded-For")) {
-            auto forwarded = getHeaderValue("X-Forwarded-For", "", 0);
-            if (const auto first_comma = forwarded.find(',');
-                first_comma != std::string::npos) {
-                forwarded = forwarded.substr(0, first_comma);
+            auto trusted_proxies_str = getEnvOrDefault("MB_TRUSTED_PROXIES", "");
+            if (!trusted_proxies_str.empty()) {
+                auto proxies = splitString(trusted_proxies_str, ",");
+                bool is_trusted = false;
+                for (auto &proxy : proxies) {
+                    proxy = trim(proxy);
+                    if (proxy == direct_ip) {
+                        is_trusted = true;
+                        break;
+                    }
+                }
+
+                if (is_trusted) {
+                    auto forwarded = getHeaderValue("X-Forwarded-For", "", 0);
+                    if (const auto first_comma = forwarded.find(',');
+                        first_comma != std::string::npos) {
+                        forwarded = forwarded.substr(0, first_comma);
+                    }
+                    forwarded = trim(forwarded);
+                    if (isValidIP(forwarded)) {
+                        return forwarded;
+                    }
+                    mbApp().logger().warn("Invalid IP Header",
+                                          fmt::format("Invalid IP address in X-Forwarded-For header: {}", forwarded));
+                }
             }
-            if (isValidIP(forwarded)) {
-                return forwarded;
-            }
-            mbApp().logger().warn("Invalid IP Header",
-                                  fmt::format("Invalid IP address in X-Forwarded-For header: {}", forwarded));
         }
-        const auto direct_ip = m_req->peerAddr().toIp();
+
         if (isValidIP(direct_ip)) {
             return direct_ip;
         }
+
         mbApp().logger().warn("IP Detection Failed", "Unable to determine valid client IP address");
         return direct_ip;
     }

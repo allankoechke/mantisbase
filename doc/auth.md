@@ -351,6 +351,18 @@ auto created = keys.create("users", user_id, "Desktop client");
 
 OAuth 2.0 / OIDC login and account linking for auth-type entities. Preset providers (`google`, `github`, `discord`, `microsoft`) are seeded at startup; admins configure client credentials and enable providers per entity.
 
+### Configuration
+
+OAuth requires a dedicated encryption key for client secrets at rest:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MB_OAUTH_ENCRYPTION_KEY` | **Yes, when OAuth is used** | At least 32 characters. Encrypts provider client secrets in the database. Does **not** fall back to `MB_JWT_SECRET`. |
+
+Set this in your environment or `.env` before enabling OAuth providers. See [Docker Guide](docker.md#environment-variables).
+
+On callback, MantisBase exchanges the authorization code and **verifies the provider ID token signature** via the provider JWKS before trusting claims (`sub`, `email`, etc.).
+
 ### User-facing routes
 
 | Method | Endpoint | Description |

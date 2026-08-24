@@ -84,11 +84,15 @@ static void ensureBenchEntity(const std::string& token) {
     nlohmann::json schema = {
         {"name", "bench_items"},
         {"type", "base"},
-        {"list", {{"mode", "public"}}},
-        {"get", {{"mode", "public"}}},
-        {"add", {{"mode", "public"}}},
-        {"update", {{"mode", "public"}}},
-        {"delete", {{"mode", "public"}}},
+        {
+            "rules", {
+                {"list", {{"mode", "public"}}},
+                {"get", {{"mode", "public"}}},
+                {"add", {{"mode", "public"}}},
+                {"update", {{"mode", "public"}}},
+                {"delete", {{"mode", "public"}}}
+            }
+        },
         {"fields", nlohmann::json::array({
             {{"name", "title"}, {"type", "string"}, {"required", true}},
             {{"name", "value"}, {"type", "int"}}

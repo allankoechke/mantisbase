@@ -6,11 +6,15 @@
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/core/ws.h"
 #include "../../include/mantisbase/mantisbase.h"
+#include "../../include/mantisbase/utils/utils.h"
 #include "../../include/mantisbase/utils/uuidv7.h"
 
 #include <drogon/drogon.h>
 
 namespace mb {
+    static constexpr size_t kMaxSSEConnections = 1024;
+    static constexpr size_t kMaxTopicsPerSession = 50;
+
     SSEMgr::SSEMgr(const MantisBase &app)
         : IMantisBase(app),
           m_wsMgr(std::make_unique<WSMgr>(app)) {
@@ -35,7 +39,7 @@ namespace mb {
             [this, sseGetMiddlewares](const drogon::HttpRequestPtr &req,
                                       std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
                 // Check env var toggle
-                if (const char *env = std::getenv("MB_REALTIME_SSE"); env && std::string(env) == "false") {
+                if (strToBool(getEnvOrDefault("MB_DISABLE_REALTIME_SSE", "0"))) {
                     auto resp = drogon::HttpResponse::newHttpResponse();
                     resp->setStatusCode(drogon::k503ServiceUnavailable);
                     resp->setContentTypeString("application/json");
@@ -76,10 +80,33 @@ namespace mb {
                     topicSet.insert(entity_name);
                 }
 
+                if (topicSet.size() > kMaxTopicsPerSession) {
+                    auto resp = drogon::HttpResponse::newHttpResponse();
+                    resp->setStatusCode(drogon::k400BadRequest);
+                    resp->setContentTypeString("application/json");
+                    resp->setBody(R"({"status":400,"error":"Too many topics requested","data":{}})");
+                    callback(resp);
+                    return;
+                }
+
+                auto auth = ma_req.getOr<json>("auth", json::object());
+                const auto owner_entity = auth["entity"].is_string()
+                                              ? auth["entity"].get<std::string>()
+                                              : std::string{};
+                const auto owner_id = auth["user"].is_object() && auth["user"]["id"].is_string()
+                                          ? auth["user"]["id"].get<std::string>()
+                                          : std::string{};
+
                 // Create async stream response for SSE
                 auto resp = drogon::HttpResponse::newAsyncStreamResponse(
-                    [this, topicSet](drogon::ResponseStreamPtr stream) {
-                        auto clientId = createSession(topicSet, std::move(stream));
+                    [this, topicSet, owner_entity, owner_id](drogon::ResponseStreamPtr stream) {
+                        auto clientId = createSession(topicSet, std::move(stream),
+                                                       owner_entity, owner_id);
+
+                        if (clientId.empty()) {
+                            stream->close();
+                            return;
+                        }
 
                         // Send the initial connected event through the session
                         if (auto session = getSession(clientId); session) {
@@ -115,11 +142,19 @@ namespace mb {
     }
 
     std::string SSEMgr::createSession(const std::set<std::string> &initial_topics,
-                                      drogon::ResponseStreamPtr stream) {
+                                      drogon::ResponseStreamPtr stream,
+                                      const std::string &owner_entity,
+                                      const std::string &owner_id) {
         std::lock_guard lock(m_sessions_mutex);
 
+        if (m_sessions.size() >= kMaxSSEConnections) {
+            logger().warn("SSE Manager", "Maximum SSE connection limit reached");
+            return "";
+        }
+
         std::string client_id = generateClientID();
-        auto session = std::make_shared<SSESession>(client_id, initial_topics, std::move(stream));
+        auto session = std::make_shared<SSESession>(client_id, initial_topics, std::move(stream),
+                                                     owner_entity, owner_id);
         m_sessions[client_id] = session;
 
         logger().info("SSE Manager",
@@ -258,7 +293,33 @@ namespace mb {
                 new_topics.insert(entity_name);
             }
 
+            if (new_topics.size() > kMaxTopicsPerSession) {
+                res.sendJSON(400, {
+                    {"error", "Too many topics requested"},
+                    {"data", json::object()},
+                    {"status", 400}
+                });
+                return;
+            }
+
             if (const auto session = sse_mgr.getSession(client_id); session) {
+                const auto caller_entity = auth["entity"].is_string()
+                                               ? auth["entity"].get<std::string>()
+                                               : std::string{};
+                const auto caller_id = auth["user"].is_object() && auth["user"]["id"].is_string()
+                                           ? auth["user"]["id"].get<std::string>()
+                                           : std::string{};
+
+                if (!session->ownerEntity().empty() &&
+                    (session->ownerEntity() != caller_entity || session->ownerId() != caller_id)) {
+                    res.sendJSON(403, {
+                        {"error", "You are not the owner of this session"},
+                        {"data", json::object()},
+                        {"status", 403}
+                    });
+                    return;
+                }
+
                 session->setTopics(new_topics);
                 res.sendJSON(200, {
                                  {"error", ""},
@@ -399,7 +460,7 @@ namespace mb {
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
-                                 {"error", e.what()}
+                                 {"error", "An internal error occurred."}
                              });
             }
 

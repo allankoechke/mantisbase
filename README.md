@@ -33,7 +33,7 @@ unzip mantisbase_linux-x86_64.zip
 ./mantisbase serve
 
 # Option B: Docker (one-liner)
-docker run -p 7070:80 allankoech/mantisbase
+docker run -p 7070:8080 allankoech/mantisbase
 ```
 
 The server starts on `http://localhost:7070` with the API at `/api/v1/` and admin dashboard at `/mb`.
@@ -114,7 +114,7 @@ Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Referen
 | Method | Details |
 |---|---|
 | **Pre-built binary** | Download from [GitHub Releases](https://github.com/allankoechke/mantisbase/releases), extract, and run `./mantisbase serve` → [Installation Guide](doc/installation.md) |
-| **Docker** | `docker run -p 7070:80 allankoech/mantisbase` → [Docker Guide](doc/docker.md) |
+| **Docker** | `docker run -p 7070:8080 allankoech/mantisbase` → [Docker Guide](doc/docker.md) |
 | **Build from source** | `git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git && cd mantisbase && cmake -B build && cmake --build build` → [Installation Guide](doc/installation.md) |
 | **Embed in C++** | Add as a CMake submodule and `#include <mantisbase/mantisbase.h>` in your app → [Embedding Guide](doc/embedding.md) |
 

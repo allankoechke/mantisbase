@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <regex>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace mb {
     std::string sqlIdentifier(const std::string &ident) {
@@ -160,12 +162,59 @@ namespace mb {
         if (s.empty()) s = "unnamed";
     }
 
+    static const std::unordered_set<std::string> ALLOWED_EXTENSIONS = {
+        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".ico", ".tiff", ".tif",
+        ".svg", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+        ".odt", ".ods", ".odp", ".txt", ".csv", ".tsv", ".rtf",
+        ".zip", ".gz", ".tar", ".7z", ".rar",
+        ".json", ".xml", ".yaml", ".yml",
+        ".mp3", ".wav", ".ogg", ".flac",
+        ".mp4", ".avi", ".mov", ".webm", ".mkv",
+    };
+
+    static const std::unordered_map<std::string, std::string> SAFE_MIME_TYPES = {
+        {".jpg", "image/jpeg"}, {".jpeg", "image/jpeg"},
+        {".png", "image/png"}, {".gif", "image/gif"},
+        {".bmp", "image/bmp"}, {".webp", "image/webp"},
+        {".ico", "image/x-icon"}, {".tiff", "image/tiff"}, {".tif", "image/tiff"},
+        {".svg", "image/svg+xml"},
+        {".pdf", "application/pdf"},
+        {".csv", "text/csv"}, {".tsv", "text/tab-separated-values"},
+        {".txt", "text/plain"}, {".rtf", "application/rtf"},
+        {".json", "application/json"}, {".xml", "application/xml"},
+        {".yaml", "text/yaml"}, {".yml", "text/yaml"},
+        {".mp3", "audio/mpeg"}, {".wav", "audio/wav"},
+        {".ogg", "audio/ogg"}, {".flac", "audio/flac"},
+        {".mp4", "video/mp4"}, {".avi", "video/x-msvideo"},
+        {".mov", "video/quicktime"}, {".webm", "video/webm"}, {".mkv", "video/x-matroska"},
+    };
+
+    bool isAllowedFileExtension(const std::string &extension) {
+        if (extension.empty()) return false;
+        std::string ext_lower = extension;
+        toLowerCase(ext_lower);
+        return ALLOWED_EXTENSIONS.contains(ext_lower);
+    }
+
+    std::string safeContentType(const std::string &extension) {
+        std::string ext_lower = extension;
+        toLowerCase(ext_lower);
+        if (auto it = SAFE_MIME_TYPES.find(ext_lower); it != SAFE_MIME_TYPES.end()) {
+            return it->second;
+        }
+        return "application/octet-stream";
+    }
+
     std::string sanitizeFilename(const std::string_view original,
                                  const std::size_t maxLen, const std::size_t idLen,
                                  const std::string_view idSep) {
         const fs::path p{std::string{original}};
         std::string stem = p.stem().string();
         std::string ext = p.has_extension() ? p.extension().string() : std::string{};
+
+        if (!ext.empty() && !isAllowedFileExtension(ext)) {
+            throw MantisException(415, std::format("File extension `{}` is not allowed.", ext));
+        }
 
         sanitizeInPlace(stem);
         const auto max_size = stem.size() + ext.size() + idLen + idSep.size();

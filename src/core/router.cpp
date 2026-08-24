@@ -7,6 +7,7 @@
 #include "../../include/mantisbase/core/kv_store.h"
 
 #include <cmrc/cmrc.hpp>
+#include <cctype>
 #include <chrono>
 #include <thread>
 #include <drogon/drogon.h>
@@ -400,46 +401,108 @@ namespace mb {
         };
     }
 
-    std::function<void(const MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
-        // mApp.logger().trace("Endpoint Registration", "Registering /api/v1/files/:entity/:file GET endpoint ...");
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    std::function<void(MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
+        return [](MantisRequest &req, MantisResponse &res) {
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");
 
             if (!EntitySchema::isValidEntityName(table_name)) {
-                json response;
-                response["error"] = std::format("Invalid entity name `{}`", table_name);
-                response["status"] = 400;
-                response["data"] = json::object();
-
-                res.sendJSON(400, response);
+                res.sendJSON(400, {
+                    {"error", "Invalid entity name."},
+                    {"status", 400},
+                    {"data", json::object()}
+                });
                 return;
             }
 
             if (table_name.empty() || file_name.empty()) {
-                json response;
-                response["error"] = "Both entity name and file name are required!";
-                response["status"] = 400;
-                response["data"] = json::object();
-
-                res.sendJSON(400, response);
+                res.sendJSON(400, {
+                    {"error", "Both entity name and file name are required!"},
+                    {"status", 400},
+                    {"data", json::object()}
+                });
                 return;
+            }
+
+            if (!req.mbApp().hasEntity(table_name)) {
+                res.sendJSON(404, {
+                    {"error", "Entity not found."},
+                    {"status", 404},
+                    {"data", json::object()}
+                });
+                return;
+            }
+
+            const auto entity = req.mbApp().entity(table_name);
+            const auto &auth = req.getOr<json>("auth", json::object());
+            const auto rule = entity.getRule();
+
+            if (rule.mode() != "public") {
+                const auto &verification = req.getOr<json>("verification", json::object());
+                if (verification.empty() ||
+                    !verification.contains("verified") ||
+                    !verification["verified"].is_boolean() ||
+                    !verification["verified"].get<bool>()) {
+                    res.sendJSON(403, {
+                        {"error", "Authentication required to access this file."},
+                        {"status", 403},
+                        {"data", json::object()}
+                    });
+                    return;
+                }
+
+                if (rule.mode().empty()) {
+                    if (!auth.contains("entity") || !auth["entity"].is_string() ||
+                        auth["entity"].get<std::string>() != "mb_admins") {
+                        res.sendJSON(403, {
+                            {"error", "Admin auth required to access this file."},
+                            {"status", 403},
+                            {"data", json::object()}
+                        });
+                        return;
+                    }
+                }
             }
 
             if (const auto path_opt = req.mbApp().files().getFilePath(table_name, file_name);
                 path_opt.has_value()) {
-                // Return requested file
+                const fs::path served_path{file_name};
+                const std::string ext = served_path.has_extension()
+                    ? served_path.extension().string() : std::string{};
+                const auto content_type = safeContentType(ext);
+
+                // The file name reaches us URL-decoded, so strip anything that could
+                // break out of the Content-Disposition header (quotes, CR/LF, ...).
+                std::string safe_name;
+                safe_name.reserve(file_name.size());
+                for (const unsigned char c: file_name) {
+                    safe_name += (std::isalnum(c) || c == '.' || c == '_' || c == '-')
+                                     ? static_cast<char>(c)
+                                     : '_';
+                }
+                if (safe_name.empty()) safe_name = "download";
+
+                // Only render media inline; anything that a browser could execute in
+                // the origin (svg, pdf, html, ...) is forced to download instead.
+                const bool inline_safe = (content_type.starts_with("image/")
+                                          && content_type != "image/svg+xml")
+                                         || content_type.starts_with("video/")
+                                         || content_type.starts_with("audio/");
+
                 res.setStatus(200);
-                res.setFileContent(path_opt.value());
+                res.setFileContent(path_opt.value(), content_type);
+                res.setHeader("Content-Disposition",
+                              std::format("{}; filename=\"{}\"",
+                                          inline_safe ? "inline" : "attachment", safe_name));
+                res.setHeader("X-Content-Type-Options", "nosniff");
                 return;
             }
 
-            json response;
-            response["error"] = "File not found!";
-            response["status"] = 404;
-            response["data"] = json::object();
-
-            res.sendJSON(404, response);
+            res.sendJSON(404, {
+                {"error", "File not found!"},
+                {"status", 404},
+                {"data", json::object()}
+            });
         };
     }
 
@@ -545,8 +608,9 @@ namespace mb {
                 response["data"] = json::object();
                 res.sendJSON(500, response);
             } catch (const std::exception &e) {
+                req.mbApp().logger().critical("Logs", "Fetch Logs Error", fmt::format("Failed to fetch logs: {}", e.what()));
                 json response;
-                response["error"] = std::string("Failed to fetch logs: ") + e.what();
+                response["error"] = "An internal error occurred.";
                 response["status"] = 500;
                 response["data"] = json::object();
                 res.sendJSON(500, response);

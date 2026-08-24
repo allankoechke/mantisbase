@@ -32,16 +32,20 @@ protected:
         MbServerFixture::TearDown();
     }
 
-    void createUserEntity() {
-        TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
-        nlohmann::json schema = {
+    void createUserEntity() const {
+        const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+        const nlohmann::json schema = {
             {"name", kEntity},
             {"type", "auth"},
-            {"list", {{"mode", "auth"}}},
-            {"get", {{"mode", "auth"}}},
-            {"add", {{"mode", "public"}}},
-            {"update", {{"mode", "auth"}}},
-            {"delete", {{"mode", ""}}},
+            {
+                "rules", {
+                    {"list", {{"mode", "auth"}}},
+                    {"get", {{"mode", "auth"}}},
+                    {"add", {{"mode", "public"}}},
+                    {"update", {{"mode", "auth"}}},
+                    {"delete", {{"mode", ""}}}
+                }
+            },
             {
                 "fields", nlohmann::json::array({
                     {{"name", "name"}, {"type", "string"}, {"required", true}},
@@ -53,7 +57,7 @@ protected:
 
         client->Post("/api/v1/schemas", headers, schema.dump(), "application/json");
 
-        nlohmann::json user = {
+        const nlohmann::json user = {
             {"name", "Test User"},
             {"email", kEmail},
             {"password", TestConfig::getTestPassword()}
@@ -81,9 +85,9 @@ protected:
         MbServerFixture::TearDown();
     }
 
-    std::string firstAdminId() const {
-        TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
-        auto res = client->Get("/api/v1/sys/admins", headers);
+    [[nodiscard]] std::string firstAdminId() const {
+        const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+        const auto res = client->Get("/api/v1/sys/admins", headers);
         EXPECT_TRUE(res != nullptr);
         EXPECT_EQ(res->status, 200);
         auto body = parseBody(*res);
