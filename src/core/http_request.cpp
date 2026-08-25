@@ -182,6 +182,14 @@ namespace mb {
 
     const drogon::HttpRequestPtr & MantisRequest::drogonRequest() const { return m_req; }
 
+    json MantisRequest::jsonBody() const {
+        auto [obj, err] = getBodyAsJson();
+        if (!err.empty()) {
+            return json::object();
+        }
+        return obj;
+    }
+
 #ifdef MB_SCRIPTING_ENABLED
     void MantisRequest::registerDuktapeMethods() {
         // TODO: Re-enable after Drogon migration

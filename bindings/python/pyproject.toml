@@ -1,0 +1,22 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "nanobind>=2.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "mantisbase"
+version = "0.1.0"
+description = "Python bindings for mantisbase – Flask-style HTTP server backed by a C++ engine"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [{ name = "Allan Koech" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
+
+[tool.scikit-build]
+cmake.build-type = "Release"
+wheel.packages = []

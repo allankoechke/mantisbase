@@ -7,6 +7,8 @@
 - **docs.yml** — Build Doxygen docs and publish to `gh-pages`. Triggered by tag push `v*` or manually via **Run workflow** (`workflow_dispatch`).
 - **build-matrix.yml** — Reusable: matrix build (Linux x86-64 on `ubuntu-latest`, Linux aarch64 on `ubuntu-24.04-arm`, Windows x86-64), test, and on tag zip/upload artifacts. Job names show the platform (e.g. `Build (linux-aarch64)`). Library artifacts use `lib/<platform>/<mode>/<architecture>/` (e.g. `lib/linux/shared/x86-64/libmantisbase.so`). Platform binary zips include `README.md` and `LICENSE`.
 - **docker-publish.yml** — Reusable: build image from `docker/`, push to Docker Hub. Stable releases get `{version}` and `latest`; pre-releases get `{version}` and the channel tag (`alpha`, `beta`, or `rc`).
+- **bindings-node.yml** — On tag push `v*` or manual dispatch: build the Node.js N-API addon in `bindings/node` across OS × Node LTS, upload prebuilt `.node` binaries as Release assets, then `npm publish`.
+- **bindings-python.yml** — On tag push `v*` or manual dispatch: build Python wheels for `bindings/python` with `cibuildwheel` (CPython 3.9–3.13, manylinux/musllinux/macOS/Windows) plus an sdist, then publish to PyPI via trusted publishing.
 
 ## Release tag convention
 

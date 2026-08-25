@@ -12,6 +12,7 @@
 #include "context_store.h"
 #include "../utils/utils.h"
 #include "types.h"
+#include "../export.h"
 #include <fstream>
 #include <unordered_map>
 #include <drogon/HttpRequest.h>
@@ -43,7 +44,7 @@ namespace mb {
      * underlying Drogon request via `set()` / `getOr()`, not a global context.
      * Use `mbApp()` (from @ref IMantisBase) to reach application services.
      */
-    class MantisRequest: public IMantisBase {
+    class MANTISBASE_API MantisRequest: public IMantisBase {
         drogon::HttpRequestPtr m_req;
         std::unordered_map<std::string, std::string> m_pathParams;
 
@@ -94,6 +95,14 @@ namespace mb {
 
         const drogon::HttpRequestPtr& drogonRequest() const;
 
+        /**
+         * @brief Parsed JSON body, or an empty object when absent or malformed.
+         *
+         * Convenience wrapper over getBodyAsJson() for callers -- notably the
+         * language bindings -- that want a value rather than a (value, error) pair.
+         */
+        json jsonBody() const;
+
         template<typename T>
         void set(const std::string &key, T value) {
             m_req->attributes()->insert(key, value);
@@ -121,7 +130,7 @@ namespace mb {
      * Constructed by the router for each request; use `sendJSON()`, `send()`,
      * or header helpers to build the outgoing response.
      */
-    class MantisResponse: public IMantisBase {
+    class MANTISBASE_API MantisResponse: public IMantisBase {
         drogon::HttpResponsePtr m_res;
 
     public:

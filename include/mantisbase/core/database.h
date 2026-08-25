@@ -16,6 +16,7 @@
 #endif
 
 #include "../mantisbase.h"
+#include "../export.h"
 #include "../utils/utils.h"
 #include "logger/logger.h"
 
@@ -37,7 +38,7 @@ namespace mb {
      * *session << "SELECT * FROM users", soci::into(rows);
      * @endcode
      */
-    class Database {
+    class MANTISBASE_API Database {
     public:
         /**
          * @brief Construct database instance bound to an application.
