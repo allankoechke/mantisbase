@@ -2,6 +2,7 @@
 #include "../include/mantisbase/mantis.h"
 #include "../include/mantisbase/core/models/entity.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
+#include "../include/mantisbase/core/models/access_rules.h"
 #include "../include/mantisbase/core/api_keys.h"
 #include "../include/mantisbase/core/expr_evaluator.h"
 #include "../include/mantisbase/utils/crypto_utils.h"
@@ -19,31 +20,6 @@ namespace mb {
                 {"error", std::format("{} {} Route Not Found", method, path)},
                 {"data", json::object()}
             };
-        }
-
-        json buildMiddlewareExprVars(MantisRequest &req, const json &auth) {
-            json vars = json::object();
-            vars["auth"] = auth;
-
-            json req_obj;
-            req_obj["remoteAddr"] = req.getRemoteAddr();
-            req_obj["remotePort"] = req.getRemotePort();
-            req_obj["localAddr"] = req.getLocalAddr();
-            req_obj["localPort"] = req.getLocalPort();
-            req_obj["body"] = json::object();
-
-            try {
-                if (req.getMethod() == "POST" && !req.getBody().empty()) {
-                    const auto &[body, err] = req.getBodyAsJson();
-                    if (err.empty()) {
-                        req_obj["body"] = body;
-                    }
-                }
-            } catch (...) {
-            }
-
-            vars["req"] = req_obj;
-            return vars;
         }
 
         HandlerResponse sendAccessDenied(MantisResponse &res) {
@@ -123,111 +99,33 @@ namespace mb {
                                                   ? entity.updateRule()
                                                   : entity.deleteRule();
 
-                if (rule.mode() == "public") {
-                    req.mbApp().logger().trace("Auth", "Public Access", "Public access, no auth required!");
+                if (req.isAdminAuth()) {
                     return HandlerResponse::Unhandled;
                 }
 
-                if (rule.mode().empty()) {
-                    // req.mbApp().logger().trace("Auth", "Admin Access Required",
-                    //                            "Restricted access, admin auth required!");
-                    const auto &verification = req.getOr<json>("verification", json::object());
-                    if (verification.empty()) {
-                        res.sendJSON(401, {
-                                         {"data", json::object()},
-                                         {"status", 401},
-                                         {"error", "Admin auth required to access this resource!"}
-                                     });
-                        return HandlerResponse::Handled;
-                    }
+                const auto &verification = req.getOr<json>("verification", json::object());
+                AccessEvalContext ctx{auth, verification, &req};
+                const auto result = evaluateAccessRule(rule, ctx);
+                if (result == AccessEvalResult::Allow) {
+                    return HandlerResponse::Unhandled;
+                }
 
-                    if (verification.contains("verified") &&
-                        verification["verified"].is_boolean() &&
-                        verification["verified"].get<bool>()) {
-                        if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(401, {
-                                             {"data", json::object()},
-                                             {"status", 401},
-                                             {"error", "Auth user not found!"}
-                                         });
-                            return HandlerResponse::Handled;
-                        }
-
-                        if (!auth.contains("entity") || !auth["entity"].is_string() ||
-                            auth["entity"].get<std::string>() != "mb_admins") {
-                            res.sendJSON(403, {
-                                {"data", json::object()},
-                                {"status", 403},
-                                {"error", "Admin auth required to access this resource."}
-                            });
-                            return HandlerResponse::Handled;
-                        }
-
-                        return HandlerResponse::Unhandled;
-                    }
-
-                    res.sendJSON(401, {
+                const auto [status, error] = accessEvalHttpError(result, rule);
+                if (result == AccessEvalResult::DenyUnauthenticated && !verification.empty() &&
+                    verification.contains("error") && verification["error"].is_string() &&
+                    !verification["error"].get<std::string>().empty()) {
+                    res.sendJSON(status, {
                                      {"data", json::object()},
-                                     {"status", 401},
+                                     {"status", status},
                                      {"error", verification["error"]}
                                  });
-                    return HandlerResponse::Handled;
-                }
-
-                if (rule.mode() == "auth" || (auth["entity"].is_string() && auth["entity"].get<std::string>() ==
-                                              "mb_admins")) {
-                    req.mbApp().logger().trace("Auth", "User/Admin Access Required",
-                                               "Restricted access, admin/user auth required!");
-                    const auto &verification = req.getOr<json>("verification", json::object());
-                    if (verification.empty()) {
-                        res.sendJSON(401, {
-                                         {"data", json::object()},
-                                         {"status", 401},
-                                         {"error", "Auth required to access this resource!"}
-                                     });
-                        return HandlerResponse::Handled;
-                    }
-
-                    if (verification.contains("verified") &&
-                        verification["verified"].is_boolean() &&
-                        verification["verified"].get<bool>()) {
-                        if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(401, {
-                                             {"data", json::object()},
-                                             {"status", 401},
-                                             {"error", "Auth user not found!"}
-                                         });
-                            return HandlerResponse::Handled;
-                        }
-
-                        return HandlerResponse::Unhandled;
-                    }
-
-                    res.sendJSON(401, {
+                } else {
+                    res.sendJSON(status, {
                                      {"data", json::object()},
-                                     {"status", 401},
-                                     {"error", verification["error"]}
+                                     {"status", status},
+                                     {"error", error}
                                  });
-                    return HandlerResponse::Handled;
                 }
-
-                if (rule.mode() == "custom") {
-                    req.mbApp().logger().trace("Auth", "Custom Expression Access",
-                                               fmt::format("Restricted access, custom expression `{}` to be evaluated",
-                                                           rule.expr()));
-                    const auto vars = buildMiddlewareExprVars(req, auth);
-
-                    if (Expr::eval(rule.expr(), vars))
-                        return HandlerResponse::Unhandled;
-
-                    return sendAccessDenied(res);
-                }
-
-                res.sendJSON(403, {
-                                 {"status", 403},
-                                 {"data", json::object()},
-                                 {"error", "Access denied, entity access rule unknown."}
-                             });
                 return HandlerResponse::Handled;
             } catch (std::exception &e) {
                 req.mbApp().logger().critical("Access", "Access Check Error", fmt::format("Access check error: {}", e.what()));
@@ -246,6 +144,7 @@ namespace mb {
             try {
                 json auth;
                 auth["type"] = "guest";
+                auth["mode"] = "none";
                 auth["token"] = nullptr;
                 auth["id"] = nullptr;
                 auth["entity"] = nullptr;
@@ -256,6 +155,9 @@ namespace mb {
 
                 if (!token.empty()) {
                     if (token.starts_with("mb_sk_")) {
+                        // Mark API key requests
+                        auth["mode"] = "api";
+
                         // API key authentication
                         const auto key_hash = ApiKeyManager::hashApiKey(token);
                         auto key_info = req.mbApp().auth().apiKey().lookupByHash(key_hash);
@@ -270,6 +172,7 @@ namespace mb {
                             // Hydrate user record
                             try {
                                 auto entity_name = info["entity_name"].get<std::string>();
+                                auth["type"] = entity_name == "mb_admins" ? "admin" : "user";
                                 auto user_id = info["user_id"].get<std::string>();
                                 const auto user_entity = req.mbApp().entity(entity_name);
                                 if (auto user = user_entity.read(user_id); user.has_value()) {
@@ -335,9 +238,9 @@ namespace mb {
                 auth["entity"] = user_table;
 
                 // Set type to user since token is valid, but user record may be invalid
-                auth["type"] = "user";
-
-                // logEntry::trace("Authenticated on entity {} as user with id {}", user_table, user_id);
+                auth["type"] = user_table == "mb_admins" ? "admin" : "user";
+                auth["mode"] = "jwt";
+                auth["auth_method"] = "jwt";
 
                 try {
                     const auto user_entity = req.mbApp().entity(user_table);
@@ -354,7 +257,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveSchema() {
-        return [](MantisRequest &req, MantisResponse &res) {
+        return [](const MantisRequest &req, MantisResponse &res) {
             const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
             if (schema_id_or_name.empty()) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
@@ -392,7 +295,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveAuthEntity() {
-        return [](MantisRequest &req, MantisResponse &res) {
+        return [](const MantisRequest &req, const MantisResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
@@ -476,7 +379,7 @@ namespace mb {
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr) {
         return [expr](MantisRequest &req, MantisResponse &res) {
             const auto &auth = req.getOr<json>("auth", json::object());
-            const auto vars = buildMiddlewareExprVars(req, auth);
+            const auto vars = buildAccessExprVars(req, auth);
 
             if (Expr::eval(expr, vars)) {
                 return HandlerResponse::Unhandled;
@@ -489,7 +392,7 @@ namespace mb {
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireGuestOnly() {
         return [](MantisRequest &req, MantisResponse &res) {
             const auto &auth = req.getOr<json>("auth", json::object());
-            if (auth["type"] == "guest")
+            if (req.isGuestAuth())
                 return HandlerResponse::Unhandled;
 
             res.sendJSON(403, {

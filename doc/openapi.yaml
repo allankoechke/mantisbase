@@ -1847,6 +1847,12 @@ components:
           enum: ["", public, auth, custom]
         expr:
           type: string
+          description: Expression evaluated when mode is `custom`.
+        entity:
+          type: string
+          description: >
+            Comma-separated auth entity filter for `auth` mode only
+            (e.g. `users`, `users,editors`, `!guests`). Omit for any authenticated user.
 
     EntitySchema:
       type: object

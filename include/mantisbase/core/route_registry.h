@@ -43,8 +43,6 @@ namespace mb
         const RouteHandler* find(const std::string& method, const std::string& path) const;
 
         json remove(const std::string& method, const std::string& path);
-
-        const std::string __class_name__ = "mb::RouteRegistry";
     };
 }
 

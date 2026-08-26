@@ -2,6 +2,7 @@
 
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/core/http.h"
+#include "../../include/mantisbase/core/models/access_rules.h"
 #include "../../include/mantisbase/core/auth.h"
 #include "../../include/mantisbase/core/types.h"
 
@@ -181,6 +182,18 @@ namespace mb {
     }
 
     const drogon::HttpRequestPtr & MantisRequest::drogonRequest() const { return m_req; }
+
+    bool MantisRequest::isGuestAuth() const {
+        return mb::isGuestAuth(getOr<json>("auth", json::object()));
+    }
+
+    bool MantisRequest::isAdminAuth() const {
+        return mb::isAdminAuth(getOr<json>("auth", json::object()));
+    }
+
+    bool MantisRequest::isUserAuth() const {
+        return mb::isUserAuth(getOr<json>("auth", json::object()));
+    }
 
 #ifdef MB_SCRIPTING_ENABLED
     void MantisRequest::registerDuktapeMethods() {

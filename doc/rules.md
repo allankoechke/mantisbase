@@ -22,11 +22,24 @@ Every entity supports five access rule types, one for each CRUD operation:
 | `update`  | PATCH       | `/api/v1/entities/<entity>/:id`       | Controls who can update records |
 | `delete`  | DELETE      | `/api/v1/entities/<entity>/:id`       | Controls who can delete records |
 
-Each rule has two properties:
+Each rule has these properties:
 - **`mode`** - Determines the access control strategy
 - **`expr`** - JavaScript expression (only evaluated when `mode` is `"custom"`)
+- **`entity`** - Optional comma-separated auth entity filter (only when `mode` is `"auth"`)
 
 ---
+
+## Evaluation Order
+
+Access checks run in this order on every protected route (HTTP, SSE, WebSocket, file serving):
+
+1. **Admin short-circuit** — if `auth.type` is `"admin"`, access is granted immediately
+2. **`public` mode** — no authentication required
+3. **Admin-only mode** (`mode: ""`) — requires admin authentication
+4. **`auth` mode** — requires authenticated user; optional `entity` filter restricts which auth entity table the user belongs to
+5. **`custom` mode** — evaluates the `expr` JavaScript expression
+
+The request `auth` object includes `type` (`guest`, `admin`, or `user`) set during token hydration.
 
 ## Access Modes
 
@@ -58,16 +71,45 @@ When `mode` is `"public"`, the endpoint is open to everyone:
 
 ### Auth Mode
 
-When `mode` is `"auth"`, any valid authentication is accepted:
+When `mode` is `"auth"`, any valid authenticated user is accepted. Optionally restrict to specific auth entities with the `entity` field:
 
 ```json
 {
   "mode": "auth",
-  "expr": ""
+  "entity": "users"
 }
 ```
 
-**Behavior:** User must be authenticated (from any entity table), but no additional checks are performed.
+```json
+{
+  "mode": "auth",
+  "entity": "users,editors"
+}
+```
+
+```json
+{
+  "mode": "auth",
+  "entity": "!guests"
+}
+```
+
+**Behavior:**
+- Omit `entity` (or leave it empty) to allow any authenticated user
+- Comma-separated values are OR'd: the user's auth entity must match one of the listed names
+- A leading `!` negates a token: `!guests` allows any authenticated user except those from the `guests` auth entity
+- Admin users (`auth.type == "admin"`) bypass all rules, including entity filters
+
+**Examples:**
+
+| `entity` value | User from `users` | User from `guests` | Admin |
+|----------------|-------------------|--------------------|-------|
+| (empty)        | Allowed           | Allowed            | Allowed |
+| `users`        | Allowed           | Denied             | Allowed |
+| `users,editors`| Allowed           | Denied             | Allowed |
+| `!guests`      | Allowed           | Denied             | Allowed |
+
+Prefer `auth` + `entity` over `custom` expressions when you only need to restrict by auth entity table.
 
 ### Custom Mode
 
@@ -80,13 +122,7 @@ When `mode` is `"custom"`, the `expr` JavaScript expression is evaluated:
 }
 ```
 
-**Behavior:** Expression is evaluated using Duktape (JavaScript engine). If expression returns `true`, access is granted.
-
-If you want to tie authenticated users to specific entity, use expression such as; 
-
-```
-auth.entity == 'your entity name'
-```
+**Behavior:** Expression is evaluated using the custom expression evaluator engine. If expression returns `true`, access is granted. Admin users bypass custom rules via the admin short-circuit.
 
 ---
 
@@ -100,6 +136,7 @@ Contains information about the authenticated user:
 
 ```javascript
 auth.type      // "guest", "user", or "admin"
+auth.mode      // "none", "api", or "jwt"
 auth.id        // User's unique identifier (null for guests)
 auth.entity    // Entity table user authenticated against (e.g., "users", "mb_admins")
 auth.token     // JWT token string (null for guests)
@@ -112,7 +149,7 @@ auth.user      // Full user record from database (null if not found or guest)
 auth.id != ""
 
 // Check if user is admin
-auth.entity == "mb_admins"
+auth.type == "admin"
 
 // Access user fields
 auth.user.email
@@ -294,7 +331,7 @@ Since expressions are evaluated using Duktape (a lightweight JavaScript engine),
 auth.id != "" && auth.id != null
 
 // Check admin
-auth.entity == "mb_admins"
+auth.type == "admin"
 
 // Check user property
 auth.user && auth.user.verified == true

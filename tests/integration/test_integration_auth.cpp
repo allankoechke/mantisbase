@@ -237,3 +237,105 @@ TEST_F(IntegrationAuthTest, UseTokenForAuthenticatedRequest) {
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 200);
 }
+
+TEST_F(IntegrationAuthTest, AuthEntityFilterAllowsMatchingEntity) {
+    if (adminToken.empty()) {
+        GTEST_SKIP() << "Admin token not available";
+    }
+
+    TestHttp::Headers adminHeaders = {{"Authorization", "Bearer " + adminToken}};
+    nlohmann::json schema = {
+        {"name", "filtered_posts"},
+        {"type", "base"},
+        {"fields", nlohmann::json::array({
+            {{"name", "title"}, {"type", "string"}, {"required", true}}
+        })},
+        {"rules", {
+            {"list", {{"mode", "auth"}, {"entity", "test_users"}}},
+            {"get", {{"mode", "auth"}, {"entity", "test_users"}}},
+            {"add", {{"mode", "public"}}},
+            {"update", {{"mode", "auth"}, {"entity", "test_users"}}},
+            {"delete", {{"mode", ""}}}
+        }}
+    };
+
+    auto createRes = client->Post("/api/v1/schemas", adminHeaders, schema.dump(), "application/json");
+    ASSERT_TRUE(createRes != nullptr);
+    ASSERT_EQ(createRes->status, 200);
+
+    nlohmann::json login = {
+        {"identity", "testuser@example.com"},
+        {"password", TestConfig::getTestPassword()}
+    };
+    auto loginRes = client->Post("/api/v1/auth/test_users/login", login.dump(), "application/json");
+    ASSERT_TRUE(loginRes != nullptr);
+    ASSERT_EQ(loginRes->status, 200);
+    const auto token = nlohmann::json::parse(loginRes->body)["data"]["token"].get<std::string>();
+    TestHttp::Headers userHeaders = {{"Authorization", "Bearer " + token}};
+
+    auto listRes = client->Get("/api/v1/entities/filtered_posts", userHeaders);
+    ASSERT_TRUE(listRes != nullptr);
+    EXPECT_EQ(listRes->status, 200);
+
+    auto adminListRes = client->Get("/api/v1/entities/filtered_posts", adminHeaders);
+    ASSERT_TRUE(adminListRes != nullptr);
+    EXPECT_EQ(adminListRes->status, 200);
+
+    client->Delete("/api/v1/schemas/filtered_posts", adminHeaders);
+}
+
+TEST_F(IntegrationAuthTest, AuthEntityFilterDeniesNonMatchingEntity) {
+    if (adminToken.empty()) {
+        GTEST_SKIP() << "Admin token not available";
+    }
+
+    TestHttp::Headers adminHeaders = {{"Authorization", "Bearer " + adminToken}};
+
+    nlohmann::json editorsSchema = {
+        {"name", "editors_only"},
+        {"type", "auth"},
+        {"fields", nlohmann::json::array({
+            {{"name", "email"}, {"type", "string"}, {"required", true}, {"unique", true}},
+            {{"name", "password"}, {"type", "string"}, {"required", true}}
+        })},
+        {"rules", {
+            {"list", {{"mode", "public"}}},
+            {"add", {{"mode", "public"}}}
+        }}
+    };
+    client->Post("/api/v1/schemas", adminHeaders, editorsSchema.dump(), "application/json");
+    client->Post("/api/v1/entities/editors_only", adminHeaders,
+                 nlohmann::json{{"email", "editor@example.com"}, {"password", TestConfig::getTestPassword()}}.dump(),
+                 "application/json");
+
+    nlohmann::json schema = {
+        {"name", "editor_posts"},
+        {"type", "base"},
+        {"fields", nlohmann::json::array({
+            {{"name", "title"}, {"type", "string"}, {"required", true}}
+        })},
+        {"rules", {
+            {"list", {{"mode", "auth"}, {"entity", "editors_only"}}}
+        }}
+    };
+    auto createRes = client->Post("/api/v1/schemas", adminHeaders, schema.dump(), "application/json");
+    ASSERT_TRUE(createRes != nullptr);
+    ASSERT_EQ(createRes->status, 200);
+
+    nlohmann::json login = {
+        {"identity", "testuser@example.com"},
+        {"password", TestConfig::getTestPassword()}
+    };
+    auto loginRes = client->Post("/api/v1/auth/test_users/login", login.dump(), "application/json");
+    ASSERT_TRUE(loginRes != nullptr);
+    ASSERT_EQ(loginRes->status, 200);
+    const auto token = nlohmann::json::parse(loginRes->body)["data"]["token"].get<std::string>();
+    TestHttp::Headers userHeaders = {{"Authorization", "Bearer " + token}};
+
+    auto listRes = client->Get("/api/v1/entities/editor_posts", userHeaders);
+    ASSERT_TRUE(listRes != nullptr);
+    EXPECT_EQ(listRes->status, 403);
+
+    client->Delete("/api/v1/schemas/editor_posts", adminHeaders);
+    client->Delete("/api/v1/schemas/editors_only", adminHeaders);
+}

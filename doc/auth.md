@@ -418,6 +418,22 @@ By default, tokens expire after 1 hour. Use the refresh endpoint to extend token
 
 ---
 
+## Request auth context
+
+After authentication middleware runs, each request carries an `auth` object:
+
+| Field | Values | Description |
+|-------|--------|-------------|
+| `type` | `guest`, `user`, `admin` | Role derived from the auth entity (`mb_admins` → `admin`) |
+| `mode` | `none`, `api`, `jwt` | How the credential was presented |
+| `entity` | string | Auth entity table name |
+| `id` | string | Authenticated user id |
+| `user` | object | Hydrated user record (password omitted) |
+
+Admin users (`type: admin`) short-circuit all entity access rules. See [Access Rules](rules.md) for rule modes and the optional `entity` filter on `auth` mode.
+
+---
+
 ## Summary
 
 The authentication API provides JWT login, token verification (`GET /api/v1/auth/verify`), long-lived API keys (`mb_sk_...`), and OAuth for auth-type entities. All credential types use `Authorization: Bearer ...` and are validated before entity access rules run. Admin-only routes under `/api/v1/sys/` manage providers and system API keys.

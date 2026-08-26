@@ -148,3 +148,21 @@ TEST_F(HttpRequestTest, GetRemoteAddrIgnoresInvalidForwardedHeaderFromTrustedPro
 
     EXPECT_EQ(req.getRemoteAddr(), "10.0.0.1");
 }
+
+TEST_F(HttpRequestTest, AuthTypeHelpers) {
+    auto req = makeRequest();
+    req.set<nlohmann::json>("auth", {{"type", "guest"}});
+    EXPECT_TRUE(req.isGuestAuth());
+    EXPECT_FALSE(req.isAdminAuth());
+    EXPECT_FALSE(req.isUserAuth());
+
+    req.set<nlohmann::json>("auth", {{"type", "admin"}});
+    EXPECT_FALSE(req.isGuestAuth());
+    EXPECT_TRUE(req.isAdminAuth());
+    EXPECT_FALSE(req.isUserAuth());
+
+    req.set<nlohmann::json>("auth", {{"type", "user"}});
+    EXPECT_FALSE(req.isGuestAuth());
+    EXPECT_FALSE(req.isAdminAuth());
+    EXPECT_TRUE(req.isUserAuth());
+}

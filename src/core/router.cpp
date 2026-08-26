@@ -20,6 +20,7 @@
 
 #include "../include/mantisbase/core/exceptions.h"
 #include "../include/mantisbase/core/middlewares.h"
+#include "../include/mantisbase/core/models/access_rules.h"
 #include "../include/mantisbase/core/models/entity_schema.h"
 #include "../include/mantisbase/core/models/entity_routes.h"
 #include "../include/mantisbase/core/models/entity_schema_routes.h"
@@ -435,32 +436,25 @@ namespace mb {
 
             const auto entity = req.mbApp().entity(table_name);
             const auto &auth = req.getOr<json>("auth", json::object());
+            const auto &verification = req.getOr<json>("verification", json::object());
             const auto rule = entity.getRule();
 
-            if (rule.mode() != "public") {
-                const auto &verification = req.getOr<json>("verification", json::object());
-                if (verification.empty() ||
-                    !verification.contains("verified") ||
-                    !verification["verified"].is_boolean() ||
-                    !verification["verified"].get<bool>()) {
-                    res.sendJSON(403, {
-                        {"error", "Authentication required to access this file."},
-                        {"status", 403},
+            if (!req.isAdminAuth()) {
+                AccessEvalContext ctx{auth, verification, const_cast<MantisRequest *>(&req)};
+                const auto result = evaluateAccessRule(rule, ctx);
+                if (result != AccessEvalResult::Allow) {
+                    const auto [status, error] = accessEvalHttpError(result, rule);
+                    const std::string message = result == AccessEvalResult::DenyUnauthenticated
+                                                    ? "Authentication required to access this file."
+                                                    : (rule.mode().empty()
+                                                           ? "Admin auth required to access this file."
+                                                           : error);
+                    res.sendJSON(status, {
+                        {"error", message},
+                        {"status", status},
                         {"data", json::object()}
                     });
                     return;
-                }
-
-                if (rule.mode().empty()) {
-                    if (!auth.contains("entity") || !auth["entity"].is_string() ||
-                        auth["entity"].get<std::string>() != "mb_admins") {
-                        res.sendJSON(403, {
-                            {"error", "Admin auth required to access this file."},
-                            {"status", 403},
-                            {"data", json::object()}
-                        });
-                        return;
-                    }
                 }
             }
 

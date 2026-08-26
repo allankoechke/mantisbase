@@ -141,7 +141,7 @@ Each entity defines per-operation access rules:
 | Mode | Description |
 |------|-------------|
 | `"public"` | Open to everyone |
-| `"auth"` | Any authenticated user |
+| `"auth"` | Any authenticated user; optional `entity` filter restricts auth entity |
 | `""` (empty) | Admin only |
 | `"custom"` | JavaScript expression — e.g. `auth.id == req.body.author_id` |
 

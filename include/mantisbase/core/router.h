@@ -116,7 +116,7 @@ namespace mb {
         std::vector<MiddlewareFn> m_preRoutingMiddlewares;
         std::vector<HandlerFn> m_postRoutingMiddlewares;
 
-        /// Entity schema cache. Read on every request by the httplib worker
+        /// Entity schema cache. Read on every request by the http worker
         /// threads and mutated at runtime by the schema CRUD endpoints, so all
         /// access must be synchronized via m_entityMapMutex.
         mutable std::unordered_map<std::string, Entity> m_entityMap;
