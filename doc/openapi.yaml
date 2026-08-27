@@ -822,16 +822,26 @@ paths:
       description: |
         Establishes a long-lived Server-Sent Events stream. Disabled when `MB_DISABLE_REALTIME_SSE` is truthy.
 
+        Authentication is optional at connect. `?token=` overrides `Authorization`. Invalid tokens are treated as guest.
+        Topics are optional on GET; use POST to subscribe after receiving `client_id` (`rt_sse_...` prefix).
+
         Subscribing to `entity` requires list access; subscribing to `entity:row_id` requires get access.
+        Connect-only sessions with no topics are closed after 60s; idle subscribed sessions after 10 minutes.
       security: []
       parameters:
         - name: topics
           in: query
-          required: true
-          description: Comma-separated topics (`posts`, `users`, `posts:019c...`).
+          required: false
+          description: Comma-separated topics (`posts`, `users`, `posts:019c...`). Filtered by access rules when present.
           schema:
             type: string
             example: posts,users,posts:019c1b81-364b-7000-8120-b5416b2c42c2
+        - name: token
+          in: query
+          required: false
+          description: JWT or API key; overrides Authorization header when both are set.
+          schema:
+            type: string
       responses:
         "200":
           description: SSE stream
@@ -857,6 +867,10 @@ paths:
     post:
       tags: [Realtime]
       summary: Update SSE session topics
+      description: |
+        Sets topics for an existing SSE session (replaces prior subscriptions). Optional `token` or
+        Authorization header upgrades auth from guest. Returns granted topics and a `denied` array.
+        Auth downgrade or user switch returns 403.
       security: []
       requestBody:
         required: true
@@ -883,6 +897,10 @@ paths:
                             type: array
                             items:
                               type: string
+                          denied:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/RealtimeTopicDenied"
         "400":
           $ref: "#/components/responses/BadRequest"
         "404":
@@ -895,14 +913,18 @@ paths:
       description: |
         WebSocket endpoint at `WS /api/v1/realtime/ws`.
 
-        **Requires authentication.** Supply a JWT or API key (`mb_sk_...`) via the `token` query
-        parameter or an `Authorization: Bearer <token>` header. Unauthenticated connections are
-        closed immediately.
+        Authentication is optional at connect. Supply JWT or API key (`mb_sk_...`) via `token` query
+        parameter or `Authorization: Bearer <token>` header (`?token=` wins). Invalid tokens are
+        treated as guest. Welcome message includes `client_id` (`rt_ws_...` prefix) and empty `topics`.
 
-        After connecting, send JSON messages such as `{ "type": "subscribe", "topics": ["posts"] }`.
-        Unauthorized topics are silently dropped; the `subscribed` acknowledgement lists only granted
-        topics. Change events use the same payload shape as SSE `change` events (password fields are
+        Send `{ "type": "subscribe", "topics": ["posts"], "token": "..." }` to subscribe (token optional,
+        for auth upgrade). Topics replace the current set. `{ "type": "auth", "token": "..." }` upgrades
+        auth only. Acknowledgement includes granted `topics` and `denied` failures.
+
+        Change events use the same payload shape as SSE `change` events (password fields are
         stripped from auth-entity payloads).
+
+        Connect-only sessions close after 60s; idle subscribed sessions after 10 minutes; expired auth closes with error.
 
         Disabled when `MB_DISABLE_REALTIME_WS` is truthy.
       parameters:
@@ -2095,12 +2117,25 @@ components:
       properties:
         client_id:
           type: string
-          description: Session ID from the SSE `connected` event
+          description: Session ID from the SSE `connected` event (`rt_sse_...`)
         topics:
           type: array
           items:
             type: string
           description: Entity names or `entity:row_id` strings. Empty array clears subscriptions.
+        token:
+          type: string
+          description: Optional JWT or API key for auth upgrade on subscribe.
+
+    RealtimeTopicDenied:
+      type: object
+      properties:
+        topic:
+          type: string
+        reason:
+          type: string
+        status:
+          type: integer
 
     RealtimeChangeEvent:
       type: object

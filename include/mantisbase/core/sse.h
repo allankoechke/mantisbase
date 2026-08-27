@@ -3,14 +3,12 @@
  * @brief Server-Sent Events (SSE) manager for the realtime API.
  *
  * Exposes GET and POST /api/v1/realtime:
- * - **GET /api/v1/realtime?topics=...** — Opens an SSE connection with a comma-separated
- *   list of topics (entity names or entity:row_id). Returns a session (client_id) and
- *   streams events: connected, ping, change (insert/update/delete).
- * - **POST /api/v1/realtime** — Updates topics for an existing session (JSON body:
- *   client_id, topics). Clearing topics disconnects the SSE session.
+ * - **GET /api/v1/realtime** — Opens an SSE connection (optional `topics` query). Returns
+ *   `client_id` in the `connected` event.
+ * - **POST /api/v1/realtime** — Sets topics for an existing session (JSON body: client_id,
+ *   topics, optional token). Returns granted topics and denied entries.
  *
- * Change events are driven by realtime.h (SQLite/PostgreSQL). Access control uses
- * entity list/get rules for the requested topics.
+ * @see realtime_session.h
  * @see realtime.h
  */
 
@@ -26,6 +24,7 @@
 #include <drogon/HttpResponse.h>
 
 #include "realtime.h"
+#include "realtime_session.h"
 #include "types.h"
 
 namespace mb {
@@ -41,33 +40,26 @@ namespace mb {
 
         std::atomic<bool> m_isActive;
         std::chrono::steady_clock::time_point m_lastActivity;
+        std::chrono::steady_clock::time_point m_connectedAt;
 
-        std::string m_ownerEntity;
-        std::string m_ownerId;
+        RealtimeAuthSnapshot m_auth;
 
     public:
         SSESession(std::string client_id,
                    const std::set<std::string> &topics,
                    drogon::ResponseStreamPtr stream,
-                   std::string owner_entity = "",
-                   std::string owner_id = "");
+                   RealtimeAuthSnapshot auth = makeGuestAuthSnapshot());
 
-        /** Send an SSE-formatted event through the async stream. Returns false if stream is closed. */
         bool sendEvent(const std::string &eventType, const json &data);
-
-        /** True if this session is subscribed to the topic implied by change_event. */
         bool isInterestedIn(const json &change_event) const;
-
-        /** Format a change event for SSE (topic, action, entity, row_id, data, timestamp). */
         json formatEvent(const json &change_event) const;
 
         void updateActivity();
-
         void updateTopics(const std::set<std::string> &topics);
 
         std::chrono::steady_clock::time_point getLastActivity() const;
+        std::chrono::steady_clock::time_point getConnectedAt() const;
 
-        /** Mark session inactive and close the stream. */
         void close();
 
         bool isActive() const;
@@ -75,14 +67,13 @@ namespace mb {
         const std::string &getClientID() const;
 
         std::set<std::string> getTopics() const;
-
         void setTopics(const std::set<std::string> &topics);
 
-        [[nodiscard]] const std::string &ownerEntity() const { return m_ownerEntity; }
-        [[nodiscard]] const std::string &ownerId() const { return m_ownerId; }
+        RealtimeAuthSnapshot &authSnapshot();
+        [[nodiscard]] const RealtimeAuthSnapshot &authSnapshot() const;
+        void setAuthSnapshot(RealtimeAuthSnapshot auth);
     };
 
-    /** Manages SSE sessions, WebSocket connections, routes realtime change events, and registers GET/POST /api/v1/realtime. */
     class SSEMgr : public IMantisBase {
         std::unordered_map<std::string, std::shared_ptr<SSESession>> m_sessions;
         std::mutex m_sessions_mutex;
@@ -95,22 +86,17 @@ namespace mb {
         explicit SSEMgr(const MantisBase& app);
         ~SSEMgr();
 
-        /** Register GET and POST /api/v1/realtime routes. */
         void createRoutes();
-        /** Create a new SSE session with the given topics and stream; returns client_id. */
         std::string createSession(const std::set<std::string> &initial_topics,
                                   drogon::ResponseStreamPtr stream,
-                                  const std::string &owner_entity = "",
-                                  const std::string &owner_id = "");
+                                  RealtimeAuthSnapshot auth = makeGuestAuthSnapshot());
 
         std::shared_ptr<SSESession> fetchSession(const std::string &session_id);
-        /** Remove session and close it (disconnect). */
         void removeSession(const std::string &session_id);
 
         void updateActivity(const std::string &session_id);
         std::shared_ptr<mb::SSESession> getSession(const std::string &sessionId);
 
-        /** Push a change event to all SSE sessions and WS connections interested in its topic. */
         void broadcastChange(const json &change_event);
         size_t getSessionCount();
 
@@ -124,12 +110,6 @@ namespace mb {
         static std::function<void(MantisRequest &, MantisResponse &)> handleSSESessionUpdate();
 
         static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> validateSubTopics(bool is_updating = false);
-
-        static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> validateHasAccess();
-
-        static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> updateAuthTokenForSSE();
-
-        static std::string generateClientID();
 
         void cleanupIdleSessions();
     };

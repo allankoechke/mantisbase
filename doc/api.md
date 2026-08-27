@@ -790,24 +790,38 @@ MantisBase provides **realtime database change notifications** over **Server-Sen
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v1/realtime` | Open an SSE connection. Requires `topics` query parameter. |
-| POST | `/api/v1/realtime` | Update topics for an existing session or clear topics to disconnect. Requires JSON body. |
+| GET | `/api/v1/realtime` | Open an SSE connection (optional initial `topics`). Returns `client_id` in the `connected` event. |
+| POST | `/api/v1/realtime` | Set topics for an existing session. Returns granted topics and a `denied` list. |
+
+### Authentication
+
+Realtime connections accept optional credentials via `?token=` (overrides header) or `Authorization: Bearer <token>`. Invalid or expired tokens at connect time are treated as **guest**. Auth can be upgraded on subscribe (POST or WS `subscribe` message) but cannot be downgraded or switched to another user.
+
+Session IDs use the prefixes `rt_sse_...` and `rt_ws_...`.
+
+Connect-only sessions with no subscribed topics are closed after **60 seconds**. Authenticated sessions expire when the JWT/session is revoked or expires; idle subscribed sessions are closed after **10 minutes**.
 
 ### GET /api/v1/realtime — Open SSE connection
 
-Establishes a long-lived SSE stream. Pass a comma-separated list of **topics** in the query string.
+Establishes a long-lived SSE stream. Topics are optional on connect; use POST to subscribe after receiving `client_id`.
 
 **Query parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `topics` | string | Yes | Comma-separated list of topics. Each topic is an entity name (e.g. `posts`) or `entity:row_id` (e.g. `posts:019c1b81-364b-7000-8120-b5416b2c42c2`) for a specific row. |
+| `topics` | string | No | Comma-separated list of topics. Each topic is an entity name (e.g. `posts`) or `entity:row_id`. Granted topics are filtered by access rules; denied topics appear in the `connected` event when present. |
+| `token` | string | No | JWT or API key. Overrides `Authorization` when both are set. |
 
-**Example**
+**Example (connect only)**
 
 ```bash
-curl -N -H "Authorization: Bearer <token>" \
-  "http://localhost:7070/api/v1/realtime?topics=posts,users,posts:019c1b81-364b-7000-8120-b5416b2c42c2"
+curl -N "http://localhost:7070/api/v1/realtime"
+```
+
+**Example (connect with public topics)**
+
+```bash
+curl -N "http://localhost:7070/api/v1/realtime?topics=posts,users"
 ```
 
 **Response**
@@ -817,36 +831,42 @@ curl -N -H "Authorization: Bearer <token>" \
 
 The stream sends events in SSE format. Each event has an `event` type and a `data` line (JSON).
 
-### POST /api/v1/realtime — Update or disconnect session
+### POST /api/v1/realtime — Subscribe / update session
 
-Updates the list of topics for an existing SSE session, or clears topics to effectively disconnect. Requires the `client_id` (session identifier) returned in the `connected` event from the GET request.
+Sets the topic list for an existing SSE session (replaces prior subscriptions). Pass optional auth to upgrade from guest.
 
 **Request body (JSON)**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `client_id` | string | Yes | Session ID returned when the SSE connection was established. |
-| `topics` | array | Yes | New list of topics. Each topic is an entity name or `entity:row_id`. Pass an empty array to clear subscriptions and disconnect. |
+| `client_id` | string | Yes | Session ID from the `connected` event (`rt_sse_...`). |
+| `topics` | array | Yes | Topics to subscribe to. Empty array clears subscriptions. |
+| `token` | string | No | JWT or API key for auth upgrade (alternative to `Authorization` header). |
 
-**Example: Update topics**
+**Response (200)**
+
+```json
+{
+  "client_id": "rt_sse_1769987962000_0abc1",
+  "topics": ["posts"],
+  "denied": [
+    { "topic": "private_items", "reason": "forbidden", "status": 403 }
+  ]
+}
+```
+
+Auth downgrade or switching to another user returns **403**.
+
+**Example**
 
 ```bash
 curl -X POST http://localhost:7070/api/v1/realtime \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "client_id": "sse_1769987962000_0abc1",
+    "client_id": "rt_sse_1769987962000_0abc1",
     "topics": ["posts", "comments"]
   }'
-```
-
-**Example: Clear topics (disconnect)**
-
-```bash
-curl -X POST http://localhost:7070/api/v1/realtime \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"client_id": "sse_1769987962000_0abc1", "topics": []}'
 ```
 
 ### SSE event types
@@ -854,8 +874,9 @@ curl -X POST http://localhost:7070/api/v1/realtime \
 | Event | Description |
 |-------|-------------|
 | `connected` | Sent once when the SSE connection is established. Contains `client_id`, `topics`, and `timestamp`. |
-| `ping` | Keep-alive sent periodically (e.g. every ~30 s). Contains `timestamp`. |
+| `ping` | Keep-alive sent periodically (every ~30 s). Contains `timestamp`. |
 | `change` | A database change (insert, update, or delete) for a subscribed topic. |
+| `error` | Session error (e.g. `token_expired`). Connection may close afterward. |
 
 ### Event data format
 
@@ -863,7 +884,7 @@ curl -X POST http://localhost:7070/api/v1/realtime \
 
 ```json
 {
-  "client_id": "sse_1769987962000_0abc1",
+  "client_id": "rt_sse_1769987962000_0abc1",
   "topics": ["posts", "users"],
   "timestamp": 1769987962
 }
@@ -946,16 +967,18 @@ WS /api/v1/realtime/ws
 
 ### Connection
 
-The endpoint **requires authentication**. Supply a JWT or an API key (`mb_sk_...`) either
-as a `token` query parameter or in an `Authorization: Bearer <token>` header. Unauthenticated
-connections are closed immediately with a policy-violation close code.
+Authentication is **optional** at connect. Supply a JWT or API key (`mb_sk_...`) via `?token=` (overrides header) or `Authorization: Bearer <token>`. Invalid tokens are treated as guest. You receive a `client_id` immediately and subscribe afterward.
 
 ```javascript
-const ws = new WebSocket("ws://localhost:7070/api/v1/realtime/ws?token=" + token);
+const ws = new WebSocket("ws://localhost:7070/api/v1/realtime/ws");
 
 ws.onopen = () => {
-  // Subscribe to topics after connecting
-  ws.send(JSON.stringify({ type: "subscribe", topics: ["posts", "users"] }));
+  // guest connect; pass token in subscribe to upgrade auth
+  ws.send(JSON.stringify({
+    type: "subscribe",
+    token: token,
+    topics: ["posts", "users"]
+  }));
 };
 
 ws.onmessage = (event) => {
@@ -971,24 +994,29 @@ On connect, the server sends:
 ```json
 {
   "type": "connected",
-  "message": "WebSocket connected"
+  "client_id": "rt_ws_1769987962000_0abc1",
+  "topics": []
 }
 ```
 
-### Subscribing and unsubscribing
+### Subscribing
 
-Send a JSON message with `"type": "subscribe"` (or `"unsubscribe"`) and a `topics` array. Topics follow the same format as the SSE endpoint — entity name or `entity:row_id`.
+Send `{ "type": "subscribe", "topics": [...] }`. Optional `token` upgrades auth (for browsers that cannot set headers after connect). `{ "type": "auth", "token": "..." }` is equivalent to a token-only upgrade.
+
+Topics follow the same format as SSE — entity name or `entity:row_id`. Subscribing **replaces** the current topic set.
 
 ```json
-{ "type": "subscribe", "topics": ["posts", "comments", "posts:019c1b81-364b-7000-8120-b5416b2c42c2"] }
+{ "type": "subscribe", "topics": ["posts", "comments"], "token": "<jwt>" }
 ```
 
-Each requested topic is checked against the entity's **list** access rule. Topics you are not
-allowed to read are silently dropped, and the `subscribed` acknowledgement echoes back only the
-topics that were actually granted:
+The `subscribed` acknowledgement lists granted topics and denied failures:
 
 ```json
-{ "type": "subscribed", "topics": ["posts"] }
+{
+  "type": "subscribed",
+  "topics": ["posts"],
+  "denied": [{ "topic": "private_items", "reason": "forbidden", "status": 403 }]
+}
 ```
 
 ### Change events

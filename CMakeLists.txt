@@ -107,6 +107,7 @@ set( MB_SOURCES
 
         src/core/exceptions.cpp
         src/core/realtime.cpp
+        src/core/realtime_session.cpp
         src/core/sse_session.cpp
         src/core/sse_mgr.cpp
         src/core/http.cpp

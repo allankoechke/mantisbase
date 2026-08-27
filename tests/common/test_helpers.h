@@ -52,7 +52,7 @@ namespace TestHelpers {
                 return true;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
-            delay_ms = std::min(delay_ms * 2, 500);
+            delay_ms = (std::min)(delay_ms * 2, 500);
         }
         return false;
     }
