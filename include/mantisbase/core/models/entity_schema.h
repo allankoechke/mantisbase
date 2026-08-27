@@ -29,7 +29,7 @@ namespace mb {
      * EntitySchema schema(*app, "users", "base");
      * schema.addField(EntitySchemaField("name", "string").setRequired(true));
      * schema.addField(EntitySchemaField("email", "string").setIsUnique(true));
-     * schema.setListRule(AccessRule("custom", "auth.id != \"\""));
+     * schema.setListRule(AccessRule("auth", "", "users"));
      *
      * Entity entity = schema.toEntity();
      * @endcode

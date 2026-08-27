@@ -107,9 +107,8 @@ TEST_F(IntegrationSchemaTest, GetSchema) {
 }
 
 TEST_F(IntegrationSchemaTest, ListSchemas) {
-    TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
-
-    auto res = client->Get("/api/v1/schemas", headers);
+    const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    const auto res = client->Get("/api/v1/schemas", headers);
 
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 200);

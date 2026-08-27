@@ -5,6 +5,7 @@
 
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/core/ws.h"
+#include "../../include/mantisbase/core/models/access_rules.h"
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/utils/utils.h"
 #include "../../include/mantisbase/utils/uuidv7.h"
@@ -479,123 +480,32 @@ namespace mb {
                 auto record_id = topic["id"].get<std::string>();
 
                 auto entity = req.mbApp().entity(entity_name);
-
                 auto rule = record_id.empty() ? entity.listRule() : entity.getRule();
 
-                // For public access, allow access
-                if (rule.mode() == "public") continue;
+                AccessEvalContext ctx{auth, verification, &req};
+                const auto result = evaluateAccessRule(rule, ctx);
+                if (result == AccessEvalResult::Allow) {
+                    continue;
+                }
 
-                // For empty mode (admin only)
+                const auto [status, error] = accessEvalHttpError(result, rule);
+                std::string message = error;
                 if (rule.mode().empty()) {
-                    if (verification.empty()) {
-                        res.sendJSON(401, {
-                                         {"data", json::object()},
-                                         {"status", 401},
-                                         {
-                                             "error",
-                                             std::format("Admin auth required to access record(s) in `{}` entity.",
-                                                         entity_name)
-                                         }
-                                     });
-                        return HandlerResponse::Handled;
-                    }
-
-                    if (verification.contains("verified") &&
-                        verification["verified"].is_boolean() &&
-                        verification["verified"].get<bool>()) {
-                        if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(401, {
-                                             {"data", json::object()},
-                                             {"status", 401},
-                                             {"error", "Auth user not found!"}
-                                         });
-
-                            return HandlerResponse::Handled;
-                        }
-
-                        continue;
-                    }
-
-                    res.sendJSON(401, {
-                                     {"data", json::object()},
-                                     {"status", 401},
-                                     {"error", verification["error"]}
-                                 });
-                    return HandlerResponse::Handled;
+                    message = std::format("Admin auth required to access record(s) in `{}` entity.", entity_name);
+                } else if (result == AccessEvalResult::DenyUnknownRule) {
+                    message = std::format("Access denied, entity `{}` access rule unknown.", entity_name);
                 }
 
-                if (rule.mode() == "auth" || (auth["entity"].is_string()
-                                              && auth["entity"].get<std::string>() == "mb_admins")) {
-                    if (verification.empty()) {
-                        res.sendJSON(401, {
-                                         {"data", json::object()},
-                                         {"status", 401},
-                                         {"error", "Auth required to access this resource!"}
-                                     });
-                        return HandlerResponse::Handled;
-                    }
-
-                    if (verification.contains("verified") &&
-                        verification["verified"].is_boolean() &&
-                        verification["verified"].get<bool>()) {
-                        if (auth["user"].is_null() || !auth["user"].is_object()) {
-                            res.sendJSON(401, {
-                                             {"data", json::object()},
-                                             {"status", 401},
-                                             {"error", "Auth user not found!"}
-                                         });
-                            return HandlerResponse::Handled;
-                        }
-
-                        continue;
-                    }
-
-                    res.sendJSON(401, {
-                                     {"data", json::object()},
-                                     {"status", 401},
-                                     {"error", verification["error"]}
-                                 });
-                    return HandlerResponse::Handled;
+                if (result == AccessEvalResult::DenyUnauthenticated && !verification.empty() &&
+                    verification.contains("error") && verification["error"].is_string() &&
+                    !verification["error"].get<std::string>().empty()) {
+                    message = verification["error"].get<std::string>();
                 }
 
-                if (rule.mode() == "custom") {
-                    const std::string expr = rule.expr();
-
-                    json vars = json::object();
-                    vars["auth"] = auth;
-
-                    json req_obj;
-                    req_obj["remoteAddr"] = req.getRemoteAddr();
-                    req_obj["remotePort"] = req.getRemotePort();
-                    req_obj["localAddr"] = req.getLocalAddr();
-                    req_obj["localPort"] = req.getLocalPort();
-                    req_obj["body"] = json::object();
-
-                    try {
-                        if (req.getMethod() == "POST" && !req.getBody().empty()) {
-                            req_obj["body"] = req.getBodyAsJson();
-                        }
-                    } catch (...) {
-                    }
-
-                    vars["req"] = req_obj;
-
-                    if (Expr::eval(expr, vars))
-                        continue;
-
-                    json response;
-                    response["status"] = 403;
-                    response["data"] = json::object();
-                    response["error"] = "Access denied!";
-                    res.sendJSON(403, response);
-
-                    return HandlerResponse::Handled;
-                }
-
-                res.sendJSON(403, {
-                                 {"status", 403},
+                res.sendJSON(status, {
                                  {"data", json::object()},
-                                 {"error", std::format("Access denied, entity `{}` access rule unknown.", entity_name)}
+                                 {"status", status},
+                                 {"error", message}
                              });
                 return HandlerResponse::Handled;
             }

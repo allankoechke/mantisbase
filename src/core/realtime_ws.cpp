@@ -2,6 +2,7 @@
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/core/api_keys.h"
+#include "../../include/mantisbase/core/models/access_rules.h"
 #include "../../include/mantisbase/utils/utils.h"
 
 namespace mb {
@@ -143,6 +144,7 @@ namespace mb {
         }
 
         json auth_context;
+        json verification_context;
 
         // Check for API key
         if (token.starts_with("mb_sk_")) {
@@ -152,8 +154,18 @@ namespace mb {
                 conn->shutdown(drogon::CloseCode::kViolation, "Unauthorized");
                 return;
             }
-            auth_context["entity"] = key_info.value()["entity_name"];
+            const auto entity_name = key_info.value()["entity_name"].get<std::string>();
+            auth_context["entity"] = entity_name;
             auth_context["id"] = key_info.value()["user_id"];
+            auth_context["type"] = entity_name == "mb_admins" ? "admin" : "user";
+            auth_context["mode"] = "api";
+            auth_context["auth_method"] = "api_key";
+            verification_context["verified"] = true;
+            verification_context["claims"] = {
+                {"id", auth_context["id"]},
+                {"entity", auth_context["entity"]}
+            };
+            verification_context["error"] = "";
         } else {
             // JWT token verification
             auto verification = m_app.auth().verifyToken(token);
@@ -161,9 +173,29 @@ namespace mb {
                 conn->shutdown(drogon::CloseCode::kViolation, "Unauthorized");
                 return;
             }
-            auth_context["entity"] = verification["claims"]["entity"];
+            const auto entity_name = verification["claims"]["entity"].get<std::string>();
+            auth_context["entity"] = entity_name;
             auth_context["id"] = verification["claims"]["id"];
+            auth_context["type"] = entity_name == "mb_admins" ? "admin" : "user";
+            auth_context["mode"] = "jwt";
+            auth_context["auth_method"] = "jwt";
+            verification_context = verification;
         }
+
+        auth_context["user"] = json::object();
+        try {
+            const auto entity_name = auth_context["entity"].get<std::string>();
+            const auto user_id = auth_context["id"].get<std::string>();
+            const auto user_entity = m_app.entity(entity_name);
+            if (auto user = user_entity.read(user_id); user.has_value()) {
+                auto u = user.value();
+                u.erase("password");
+                auth_context["user"] = u;
+            }
+        } catch (...) {
+        }
+
+        auth_context["verification"] = verification_context;
 
         m_app.logger().info("WebSocket", std::format("Authenticated WS connection from {}",
                        conn->peerAddr().toIpPort()));
@@ -194,30 +226,30 @@ namespace mb {
                 auto topics = msg.value("topics", std::vector<std::string>{});
                 if (!topics.empty()) {
                     // Validate each topic against the entity's access rules
-                    auto ctx = conn->getContext<json>();
-                    if (!ctx) {
+                    auto auth_ctx = conn->getContext<json>();
+                    if (!auth_ctx) {
                         json err = {{"type", "error"}, {"message", "Unauthorized"}};
                         conn->send(err.dump());
                         return;
                     }
 
-                    auto user_entity = ctx->value("entity", "");
+                    const json verification = auth_ctx->contains("verification")
+                                                  ? (*auth_ctx)["verification"]
+                                                  : json{{"verified", true}};
                     std::vector<std::string> authorized_topics;
                     for (const auto &topic : topics) {
-                        // Extract entity name from topic (format: "entity_name" or "entity_name:row_id")
                         auto entity_name = topic;
+                        std::string record_id;
                         if (auto pos = topic.find(':'); pos != std::string::npos) {
                             entity_name = topic.substr(0, pos);
+                            record_id = topic.substr(pos + 1);
                         }
 
                         try {
                             auto entity = m_app.entity(entity_name);
-                            auto rule = entity.listRule();
-                            // Admin-only ("") and "custom" rules are only opened up to
-                            // admins; everything else needs at least an authenticated user,
-                            // which the connection handshake already established.
-                            if (rule.mode() == "public" || rule.mode() == "auth" ||
-                                user_entity == "mb_admins") {
+                            auto rule = record_id.empty() ? entity.listRule() : entity.getRule();
+                            AccessEvalContext eval_ctx{*auth_ctx, verification, nullptr};
+                            if (evaluateAccessRule(rule, eval_ctx) == AccessEvalResult::Allow) {
                                 authorized_topics.push_back(topic);
                             }
                         } catch (...) {

@@ -450,7 +450,7 @@ namespace mb {
         if (isDevMode())
             return "mb-insecure-dev-secret-do-not-use-in-production";
 
-        throw MantisException(500, "MB_JWT_SECRET is not configured");
+        throw MantisException(500, "MB_JWT_SECRET env var is not configured");
     }
 
     std::string MantisBase::snowflakeId() const {

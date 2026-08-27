@@ -274,9 +274,9 @@ curl -X POST http://localhost:7070/api/v1/schemas \
     ],
     "rules": {
       "list": {"mode": "public", "expr": "auth.id != \"\""},
-      "get": {"mode": "auth", "expr": ""},
-      "add": {"mode": "auth", "expr": ""},
-      "update": {"mode": "auth", "expr": ""},
+      "get": {"mode": "auth", "entity": "users"},
+      "add": {"mode": "auth"},
+      "update": {"mode": "auth", "entity": "users,students"},
       "delete": {"mode": "custom", "expr": "auth.entity == \"mb_admins\""}
     }
   }'
