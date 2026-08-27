@@ -29,16 +29,16 @@ var NAVTREE =
     [ "REST API Reference Guide", "rest_api.html", null ],
     [ "Authentication API", "auth_api.html", null ],
     [ "Command Line Usage", "cli.html", [
-      [ "mantisbase CLI Reference", "cli.html#autotoc_md108", [
-        [ "Global Options", "cli.html#autotoc_md110", null ],
-        [ "serve", "cli.html#autotoc_md112", null ],
-        [ "admins", "cli.html#autotoc_md114", null ],
-        [ "schema", "cli.html#autotoc_md116", null ],
-        [ "migrate", "cli.html#autotoc_md118", [
-          [ "apply", "cli.html#autotoc_md119", null ],
-          [ "schema", "cli.html#autotoc_md120", null ]
+      [ "mantisbase CLI Reference", "cli.html#autotoc_md115", [
+        [ "Global Options", "cli.html#autotoc_md117", null ],
+        [ "serve", "cli.html#autotoc_md119", null ],
+        [ "admins", "cli.html#autotoc_md121", null ],
+        [ "schema", "cli.html#autotoc_md123", null ],
+        [ "migrate", "cli.html#autotoc_md125", [
+          [ "apply", "cli.html#autotoc_md126", null ],
+          [ "schema", "cli.html#autotoc_md127", null ]
         ] ],
-        [ "See Also", "cli.html#autotoc_md122", null ]
+        [ "See Also", "cli.html#autotoc_md129", null ]
       ] ]
     ] ],
     [ "Running in Docker", "docker.html", null ],
@@ -82,11 +82,11 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "access__rules_8cpp.html",
-"classmb_1_1EntitySchema.html#af0bdf8938edd9de1c040c576b91fc527",
-"classmb_1_1MantisContentReader.html#a5c04034d6f78d360bdcc606b0b98b1c2",
-"classmb_1_1Router.html#aabc888e18b82c1a551d7bdbb1b9b3f8f",
-"functions_func_i.html",
-"namespacemb.html#ae160f2b0075e55c0f7c0988279983f78"
+"classmb_1_1EntitySchema.html#aabbab0616853335c7e7d65d1fd268758",
+"classmb_1_1MantisBase.html#ac17cea059446e81e375a9293656b28a2",
+"classmb_1_1RouteRegistry.html#aa0f1d98d8fec98cc41da8daede8a828f",
+"entity__schema__routes__handlers_8cpp.html#ab9604b4e6fef87e6f3ff0cb7506f0e94",
+"namespacemb.html#a8a3823264846aca9828eab91e2048b27"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

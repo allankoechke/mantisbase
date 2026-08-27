@@ -96,26 +96,26 @@ $(document).ready(function(){initNavTree('docker.html',''); initResizable(); });
 <div class="contents">
 <div class="textblock"><p>MantisBase provides Docker support for easy deployment and containerization. This guide covers building and running MantisBase in Docker containers.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md125"></a>
+<h2><a class="anchor" id="autotoc_md132"></a>
 Limitations</h2>
 <p>Docker builds are currently available for <code>linux-amd64</code> platform only. For ARM builds, you will need to build the project from source.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md127"></a>
+<h2><a class="anchor" id="autotoc_md134"></a>
 Building and Running</h2>
-<h3><a class="anchor" id="autotoc_md128"></a>
+<h3><a class="anchor" id="autotoc_md135"></a>
 Using Dockerfile</h3>
 <p>The repository includes a <code>Dockerfile</code> in the <code>/docker</code> directory. To build and run:</p>
 <div class="fragment"><div class="line"># Build (optionally set MB_VERSION for a specific release)</div>
-<div class="line">docker build -t mantisbase -f docker/Dockerfile --build-arg MB_VERSION=0.3.4 .</div>
-<div class="line">docker run -p 7070:80 --rm mantisbase</div>
-</div><!-- fragment --><p>This builds the image and starts the container, exposing MantisBase on port <code>80</code>. Pass environment variables with <code>-e</code>:</p>
-<div class="fragment"><div class="line">docker run -p 7070:80 \</div>
-<div class="line">  -e MB_JWT_SECRET=your-secret-key-here \</div>
+<div class="line">docker build -t mantisbase -f docker/Dockerfile --build-arg MB_VERSION=0.4.0 .</div>
+<div class="line">docker run -p 7070:8080 --rm mantisbase</div>
+</div><!-- fragment --><p>This builds the image and starts the container, exposing MantisBase on port <code>8080</code>. Pass environment variables with <code>-e</code>:</p>
+<div class="fragment"><div class="line">docker run -p 7070:8080 \</div>
+<div class="line">  -e MB_JWT_SECRET=&quot;$(openssl rand -base64 48)&quot; \</div>
 <div class="line">  -v $(pwd)/data:/mb/data \</div>
 <div class="line">  -v $(pwd)/public:/mb/public \</div>
 <div class="line">  -v $(pwd)/scripts:/mb/scripts \</div>
 <div class="line">  --rm mantisbase</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md129"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md136"></a>
 Persistent Data</h3>
 <p>By default, container restarts will clear all data. To persist data, mount volumes to the following directories:</p>
 <ul>
@@ -124,21 +124,33 @@ Persistent Data</h3>
 <li><code>/mb/scripts</code> - JavaScript extension scripts (entry point: <code>index.mantis.js</code>)</li>
 </ul>
 <p><b>Example with volumes:</b></p>
-<div class="fragment"><div class="line">docker run -p 7070:80 \</div>
+<div class="fragment"><div class="line">docker run -p 7070:8080 \</div>
 <div class="line">  -v $(pwd)/data:/mb/data \</div>
 <div class="line">  -v $(pwd)/public:/mb/public \</div>
 <div class="line">  -v $(pwd)/scripts:/mb/scripts \</div>
 <div class="line">  --rm mantisbase</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md131"></a>
+<h2><a class="anchor" id="autotoc_md138"></a>
 Docker Compose</h2>
 <p>A <code>docker-compose.yaml</code> file is provided for easier management:</p>
 <div class="fragment"><div class="line">cd docker</div>
-<div class="line"># Optional: set MB_JWT_SECRET and MB_VERSION in .env or export before running</div>
+<div class="line"># Required: set MB_JWT_SECRET in .env or export before running</div>
+<div class="line"># Example: echo &quot;MB_JWT_SECRET=$(openssl rand -base64 48)&quot; &gt; .env</div>
 <div class="line">docker compose -f docker-compose.yaml up --build</div>
-</div><!-- fragment --><p>This builds the image (using <code>MB_VERSION</code> build arg, default <code>0.3.4</code>) and starts the container with volume mounts configured. Set <code>MB_JWT_SECRET</code> and other <code>MB_*</code> variables in a <code>.env</code> file in the same directory or pass them when running <code>docker compose</code>.</p>
+</div><!-- fragment --><p>This builds the image (using <code>MB_VERSION</code> build arg, default <code>0.4.0</code>) and starts the container with volume mounts configured. <code>MB_JWT_SECRET</code> <b>must</b> be set outside dev mode - the server refuses to start without it. Set it and any other <code>MB_*</code> variables in a <code>.env</code> file in the same directory, or pass them when running <code>docker compose</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md133"></a>
+<h2><a class="anchor" id="autotoc_md140"></a>
+Container Hardening</h2>
+<p>The shipped image and compose file apply a few defaults worth knowing about:</p>
+<ul>
+<li><b>Non-root</b>: the container runs as the unprivileged <code>mantisbase</code> user, so it listens on <code>8080</code> rather than <code>80</code>. Publish it wherever you like (<code>-p 7070:8080</code>).</li>
+<li><b>Read-only root filesystem</b>: <code>docker-compose.yaml</code> sets <code>read_only: true</code> with a <code>tmpfs</code> for <code>/tmp</code>; only the mounted <code>./data</code> volume is writable. <code>./www</code>, <code>./scripts</code> and <code>./migrations</code> are mounted read-only.</li>
+<li><b>No privilege escalation</b>: <code>security_opt: [no-new-privileges:true]</code>, plus memory/CPU limits and a file-descriptor <code>ulimit</code>.</li>
+<li><b>Optional release pinning</b>: <code>docker build --build-arg MB_SHA256=&lt;sha256 of the release zip&gt;</code> verifies the downloaded archive before it is unpacked.</li>
+<li><b>Upload limits</b>: the <code>maxFileSize</code> app setting (bytes, default <code>10485760</code>) is enforced at upload time, and uploads are restricted to an allow-list of file extensions.</li>
+</ul>
+<hr  />
+<h2><a class="anchor" id="autotoc_md142"></a>
 Configuration</h2>
 <p>You can configure MantisBase using environment variables or by mounting a configuration file. The container respects the same configuration options as the CLI. All environment variables use the **<code>MB_*</code>** prefix:</p>
 <table class="markdownTable">
@@ -147,13 +159,13 @@ Configuration</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>MB_JWT_SECRET</code>   </td><td class="markdownTableBodyNone">JWT secret key for token signing. <b>Required in production</b> (server refuses to start without it when not in dev mode)   </td><td class="markdownTableBodyNone">(dev mode fallback only)    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>MB_VERSION</code>   </td><td class="markdownTableBodyNone">Build-time only: release version to download (Dockerfile <code>ARG</code>)   </td><td class="markdownTableBodyNone"><code>0.3.4</code>    </td></tr>
+<td class="markdownTableBodyNone"><code>MB_VERSION</code>   </td><td class="markdownTableBodyNone">Build-time only: release version to download (Dockerfile <code>ARG</code>)   </td><td class="markdownTableBodyNone"><code>0.4.0</code>    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>MB_DISABLE_FILE_UPLOADS</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> to disable file uploads (returns 403 on upload attempts)   </td><td class="markdownTableBodyNone"><code>0</code>    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>MB_DISABLE_ADMIN_ON_FIRST_BOOT</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> to skip creating admin on first boot   </td><td class="markdownTableBodyNone"><code>0</code>    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>MB_DISABLE_RATE_LIMIT</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> to disable rate limiting   </td><td class="markdownTableBodyNone">(enabled)    </td></tr>
+<td class="markdownTableBodyNone"><code>MB_DISABLE_RATE_LIMIT</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> to disable rate limiting. <b>Only honoured in <code>--dev</code> mode</b>; ignored otherwise   </td><td class="markdownTableBodyNone">(enabled)    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>MB_LOG_LEVEL</code>   </td><td class="markdownTableBodyNone">Logging verbosity: <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>critical</code>   </td><td class="markdownTableBodyNone"><code>info</code>    </td></tr>
 <tr class="markdownTableRowOdd">
@@ -167,21 +179,23 @@ Configuration</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>MB_DEFAULT_ADMIN_PASSWORD</code>   </td><td class="markdownTableBodyNone">Admin password for <code>admins --add</code> when no positional args given   </td><td class="markdownTableBodyNone">—    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>MB_OAUTH_ENCRYPTION_KEY</code>   </td><td class="markdownTableBodyNone">Encryption key for OAuth client secrets (32 chars; falls back to <code>MB_JWT_SECRET</code> padded to 32)   </td><td class="markdownTableBodyNone">—    </td></tr>
+<td class="markdownTableBodyNone"><code>MB_OAUTH_ENCRYPTION_KEY</code>   </td><td class="markdownTableBodyNone">Encryption key for OAuth client secrets. <b>Required when OAuth is used</b> (at least 32 chars). No longer falls back to <code>MB_JWT_SECRET</code>, so the token-signing key and the secret-at-rest key stay separate   </td><td class="markdownTableBodyNone">—    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>MB_REALTIME_SSE</code>   </td><td class="markdownTableBodyNone">Set to <code>"false"</code> to disable the SSE realtime endpoint (returns 503)   </td><td class="markdownTableBodyNone">enabled    </td></tr>
+<td class="markdownTableBodyNone"><code>MB_TRUSTED_PROXIES</code>   </td><td class="markdownTableBodyNone">Comma-separated list of reverse-proxy IPs whose <code>X-Forwarded-For</code> header is trusted for client-IP resolution. <b>If unset, <code>X-Forwarded-For</code> is ignored</b> and the direct peer address is used, so rate limits cannot be bypassed by spoofing the header. Set this when running behind a proxy or load balancer   </td><td class="markdownTableBodyNone">—    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>MB_REALTIME_WS</code>   </td><td class="markdownTableBodyNone">Set to <code>"false"</code> to disable the WebSocket realtime endpoint   </td><td class="markdownTableBodyNone">enabled    </td></tr>
+<td class="markdownTableBodyNone"><code>MB_DISABLE_REALTIME_SSE</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> or <code>true</code> to disable the SSE realtime endpoint (returns 503)   </td><td class="markdownTableBodyNone"><code>0</code> (enabled)    </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>MB_DISABLE_REALTIME_WS</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> or <code>true</code> to disable the WebSocket realtime endpoint   </td><td class="markdownTableBodyNone"><code>0</code> (enabled)    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>MB_CORS_ORIGINS</code>   </td><td class="markdownTableBodyNone">Comma-separated browser origins allowed for cross-origin API requests with credentials (merged with <code>corsAllowedOrigins</code> from app settings). Example: <code><a href="http://localhost:3000,https://app.example.com">http://localhost:3000,https://app.example.com</a></code>   </td><td class="markdownTableBodyNone">—    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>MB_DISABLE_ADMIN_MUTATIONS</code>   </td><td class="markdownTableBodyNone">Set to <code>true</code>, <code>1</code>, <code>on</code>, or <code>yes</code> to block admin account create/update/delete via the API (returns <b>503</b>). Unset or any other value: edits allowed.   </td><td class="markdownTableBodyNone">unset (edits allowed)    </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>MB_DISABLE_ADMIN_MUTATIONS</code>   </td><td class="markdownTableBodyNone">Set to <code>true</code>, <code>1</code>, <code>on</code>, or <code>yes</code> to block admin account create/update/delete via the API (returns <b>503</b>). Unset or any other value: edits allowed.   </td><td class="markdownTableBodyNone">unset (edits allowed)    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>MB_DISABLE_CONFIG_MUTATIONS</code>   </td><td class="markdownTableBodyNone">Set to <code>true</code>, <code>1</code>, <code>on</code>, or <code>yes</code> to block <code>PATCH /api/v1/sys/settings/config</code> (returns <b>503</b>)   </td><td class="markdownTableBodyNone">unset (edits allowed)   </td></tr>
 </table>
 <p>Database connection is configured via command-line arguments or JSON config (e.g. <code>--db postgresql --db_url "..."</code>).</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md135"></a>
+<h2><a class="anchor" id="autotoc_md144"></a>
 Accessing the API</h2>
 <p>Once the container is running, access the API at:</p>
 <ul>
@@ -190,7 +204,7 @@ Accessing the API</h2>
 <li>Health Check: <code><a href="http://localhost:7070/api/v1/health">http://localhost:7070/api/v1/health</a></code></li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md137"></a>
+<h2><a class="anchor" id="autotoc_md146"></a>
 Example: Full Setup with PostgreSQL</h2>
 <div class="fragment"><div class="line">services:</div>
 <div class="line">  mantisbase:</div>
@@ -198,18 +212,18 @@ Example: Full Setup with PostgreSQL</h2>
 <div class="line">      context: .</div>
 <div class="line">      dockerfile: docker/Dockerfile</div>
 <div class="line">      args:</div>
-<div class="line">        MB_VERSION: &quot;0.3.4&quot;</div>
+<div class="line">        MB_VERSION: &quot;0.4.0&quot;</div>
 <div class="line">    image: mantisbase:latest</div>
 <div class="line">    restart: unless-stopped</div>
 <div class="line">    ports:</div>
-<div class="line">      - &quot;7070:80&quot;</div>
+<div class="line">      - &quot;7070:8080&quot;</div>
 <div class="line">    volumes:</div>
 <div class="line">      - ./data:/mb/data</div>
 <div class="line">      - ./public:/mb/public</div>
 <div class="line">      - ./scripts:/mb/scripts</div>
 <div class="line">    environment:</div>
-<div class="line">      MB_JWT_SECRET: &quot;your-secret-key&quot;</div>
-<div class="line">    command: [&quot;--db&quot;, &quot;postgresql&quot;, &quot;--db_url&quot;, &quot;dbname=mantis host=postgres port=5432 user=postgres password=postgres&quot;, &quot;serve&quot;, &quot;--port&quot;, &quot;80&quot;]</div>
+<div class="line">      MB_JWT_SECRET: &quot;${MB_JWT_SECRET:?Set MB_JWT_SECRET via .env or environment}&quot;</div>
+<div class="line">    command: [&quot;--db&quot;, &quot;postgresql&quot;, &quot;--db_url&quot;, &quot;dbname=mantis host=postgres port=5432 user=mb_app password=${POSTGRES_PASSWORD}&quot;, &quot;serve&quot;, &quot;--port&quot;, &quot;8080&quot;]</div>
 <div class="line">    depends_on:</div>
 <div class="line">      - postgres</div>
 <div class="line"> </div>
@@ -217,8 +231,8 @@ Example: Full Setup with PostgreSQL</h2>
 <div class="line">    image: postgres:15</div>
 <div class="line">    environment:</div>
 <div class="line">      POSTGRES_DB: mantis</div>
-<div class="line">      POSTGRES_USER: postgres</div>
-<div class="line">      POSTGRES_PASSWORD: postgres</div>
+<div class="line">      POSTGRES_USER: mb_app</div>
+<div class="line">      POSTGRES_PASSWORD: &quot;${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD via .env or environment}&quot;</div>
 <div class="line">    volumes:</div>
 <div class="line">      - postgres_data:/var/lib/postgresql/data</div>
 <div class="line"> </div>

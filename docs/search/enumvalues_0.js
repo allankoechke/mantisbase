@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['critical_0',['CRITICAL',['../namespacemb.html#a45b395bbdb082a2a10815855bad98c81a99cd1c61610c76a57cb8d10d6df6b870',1,'mb']]]
+  ['allow_0',['Allow',['../namespacemb.html#a935a06f050f59b9c3fb19ee701afd654a45f0fb72a0defdfdb01de4b5a5a6876b',1,'mb']]]
 ];

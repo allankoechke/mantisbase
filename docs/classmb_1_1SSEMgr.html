@@ -128,8 +128,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a9b1d341081d4f2855f06d968b4961e45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7563a8e0ccb2cd568dbcb8c0ab4ca3db" id="r_a7563a8e0ccb2cd568dbcb8c0ab4ca3db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#a7563a8e0ccb2cd568dbcb8c0ab4ca3db">createRoutes</a> ()</td></tr>
 <tr class="separator:a7563a8e0ccb2cd568dbcb8c0ab4ca3db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd14aed74b9ec2059b0bf17129da7fd6" id="r_abd14aed74b9ec2059b0bf17129da7fd6"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#abd14aed74b9ec2059b0bf17129da7fd6">createSession</a> (const std::set&lt; std::string &gt; &amp;initial_topics, drogon::ResponseStreamPtr stream)</td></tr>
-<tr class="separator:abd14aed74b9ec2059b0bf17129da7fd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d904d2fc57e1bf0b0b0f4c297c0a127" id="r_a1d904d2fc57e1bf0b0b0f4c297c0a127"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#a1d904d2fc57e1bf0b0b0f4c297c0a127">createSession</a> (const std::set&lt; std::string &gt; &amp;initial_topics, drogon::ResponseStreamPtr stream, const std::string &amp;owner_entity=&quot;&quot;, const std::string &amp;owner_id=&quot;&quot;)</td></tr>
+<tr class="separator:a1d904d2fc57e1bf0b0b0f4c297c0a127"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1798d028c9e6452955f3567b49ffe876" id="r_a1798d028c9e6452955f3567b49ffe876"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classmb_1_1SSESession.html">SSESession</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#a1798d028c9e6452955f3567b49ffe876">fetchSession</a> (const std::string &amp;session_id)</td></tr>
 <tr class="separator:a1798d028c9e6452955f3567b49ffe876"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76b3375b2b387673decd6c8cda91e246" id="r_a76b3375b2b387673decd6c8cda91e246"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#a76b3375b2b387673decd6c8cda91e246">removeSession</a> (const std::string &amp;session_id)</td></tr>
@@ -244,8 +244,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="abd14aed74b9ec2059b0bf17129da7fd6" name="abd14aed74b9ec2059b0bf17129da7fd6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abd14aed74b9ec2059b0bf17129da7fd6">&#9670;&#160;</a></span>createSession()</h2>
+<a id="a1d904d2fc57e1bf0b0b0f4c297c0a127" name="a1d904d2fc57e1bf0b0b0f4c297c0a127"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d904d2fc57e1bf0b0b0f4c297c0a127">&#9670;&#160;</a></span>createSession()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -260,7 +260,19 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">drogon::ResponseStreamPtr&#160;</td>
-          <td class="paramname"><em>stream</em>&#160;</td>
+          <td class="paramname"><em>stream</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>owner_entity</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>owner_id</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>

@@ -102,8 +102,8 @@ $(document).ready(function(){initNavTree('classmb_1_1SSESession.html',''); initR
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab3896834d9bb2483cdda9568903a94bb" id="r_ab3896834d9bb2483cdda9568903a94bb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#ab3896834d9bb2483cdda9568903a94bb">SSESession</a> (std::string client_id, const std::set&lt; std::string &gt; &amp;topics, drogon::ResponseStreamPtr stream)</td></tr>
-<tr class="separator:ab3896834d9bb2483cdda9568903a94bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89da8b0907c6069ba7c912d612ef7103" id="r_a89da8b0907c6069ba7c912d612ef7103"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a89da8b0907c6069ba7c912d612ef7103">SSESession</a> (std::string client_id, const std::set&lt; std::string &gt; &amp;topics, drogon::ResponseStreamPtr stream, std::string owner_entity=&quot;&quot;, std::string owner_id=&quot;&quot;)</td></tr>
+<tr class="separator:a89da8b0907c6069ba7c912d612ef7103"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52a686a6402eb395377fbeef21f0956b" id="r_a52a686a6402eb395377fbeef21f0956b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a52a686a6402eb395377fbeef21f0956b">sendEvent</a> (const std::string &amp;eventType, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data)</td></tr>
 <tr class="separator:a52a686a6402eb395377fbeef21f0956b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a687c22179696b7d60a8d9277a1ed1484" id="r_a687c22179696b7d60a8d9277a1ed1484"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a687c22179696b7d60a8d9277a1ed1484">isInterestedIn</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;change_event) const</td></tr>
@@ -126,12 +126,16 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a7789a94be201224477a2dd7b191f5324"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92236779d461a3474fcf511f6354a6c2" id="r_a92236779d461a3474fcf511f6354a6c2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a92236779d461a3474fcf511f6354a6c2">setTopics</a> (const std::set&lt; std::string &gt; &amp;topics)</td></tr>
 <tr class="separator:a92236779d461a3474fcf511f6354a6c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fbdd769aa3d5e0752a2e7f036a9dbd8" id="r_a4fbdd769aa3d5e0752a2e7f036a9dbd8"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a4fbdd769aa3d5e0752a2e7f036a9dbd8">ownerEntity</a> () const</td></tr>
+<tr class="separator:a4fbdd769aa3d5e0752a2e7f036a9dbd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11dfec4e842b25cd4e74af0e35a4d660" id="r_a11dfec4e842b25cd4e74af0e35a4d660"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a11dfec4e842b25cd4e74af0e35a4d660">ownerId</a> () const</td></tr>
+<tr class="separator:a11dfec4e842b25cd4e74af0e35a4d660"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Per-client SSE session: holds subscribed topics and a Drogon async stream for zero-thread event delivery. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ab3896834d9bb2483cdda9568903a94bb" name="ab3896834d9bb2483cdda9568903a94bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3896834d9bb2483cdda9568903a94bb">&#9670;&#160;</a></span>SSESession()</h2>
+<a id="a89da8b0907c6069ba7c912d612ef7103" name="a89da8b0907c6069ba7c912d612ef7103"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89da8b0907c6069ba7c912d612ef7103">&#9670;&#160;</a></span>SSESession()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -152,7 +156,19 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">drogon::ResponseStreamPtr&#160;</td>
-          <td class="paramname"><em>stream</em>&#160;</td>
+          <td class="paramname"><em>stream</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>owner_entity</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>owner_id</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -286,6 +302,56 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>True if this session is subscribed to the topic implied by change_event. </p>
+
+</div>
+</div>
+<a id="a4fbdd769aa3d5e0752a2e7f036a9dbd8" name="a4fbdd769aa3d5e0752a2e7f036a9dbd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fbdd769aa3d5e0752a2e7f036a9dbd8">&#9670;&#160;</a></span>ownerEntity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::string &amp; mb::SSESession::ownerEntity </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a11dfec4e842b25cd4e74af0e35a4d660" name="a11dfec4e842b25cd4e74af0e35a4d660"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11dfec4e842b25cd4e74af0e35a4d660">&#9670;&#160;</a></span>ownerId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::string &amp; mb::SSESession::ownerId </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

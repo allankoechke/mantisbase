@@ -4,7 +4,7 @@ var classmb_1_1SSEMgr =
     [ "~SSEMgr", "classmb_1_1SSEMgr.html#a9b1d341081d4f2855f06d968b4961e45", null ],
     [ "broadcastChange", "classmb_1_1SSEMgr.html#a9f0234eaaac3b1aa712fc4ac0203839a", null ],
     [ "createRoutes", "classmb_1_1SSEMgr.html#a7563a8e0ccb2cd568dbcb8c0ab4ca3db", null ],
-    [ "createSession", "classmb_1_1SSEMgr.html#abd14aed74b9ec2059b0bf17129da7fd6", null ],
+    [ "createSession", "classmb_1_1SSEMgr.html#a1d904d2fc57e1bf0b0b0f4c297c0a127", null ],
     [ "fetchSession", "classmb_1_1SSEMgr.html#a1798d028c9e6452955f3567b49ffe876", null ],
     [ "getSession", "classmb_1_1SSEMgr.html#a4b813736d7742b2ac2601d8d379cba1d", null ],
     [ "getSessionCount", "classmb_1_1SSEMgr.html#a61d223e639b54bf4ec088d6c905df9f3", null ],

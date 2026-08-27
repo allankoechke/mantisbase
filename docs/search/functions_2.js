@@ -19,7 +19,7 @@ var searchData=
   ['createdir_16',['createDir',['../classmb_1_1FilesMgr.html#aaeb0b05bd730ed88e811982a006dfb45',1,'mb::FilesMgr']]],
   ['createdirs_17',['createDirs',['../namespacemb.html#a3ffe08183ace9bad82bb563de7e2b162',1,'mb']]],
   ['createroutes_18',['createRoutes',['../classmb_1_1SSEMgr.html#a7563a8e0ccb2cd568dbcb8c0ab4ca3db',1,'mb::SSEMgr']]],
-  ['createsession_19',['createSession',['../classmb_1_1SSEMgr.html#abd14aed74b9ec2059b0bf17129da7fd6',1,'mb::SSEMgr']]],
+  ['createsession_19',['createSession',['../classmb_1_1SSEMgr.html#a1d904d2fc57e1bf0b0b0f4c297c0a127',1,'mb::SSEMgr']]],
   ['createsystables_20',['createSysTables',['../classmb_1_1Database.html#a8a4763d92a9fe78ed3493f6cb04e9297',1,'mb::Database']]],
   ['createtable_21',['createTable',['../classmb_1_1EntitySchema.html#a8b097bcabfa0bceda36cb9e130749886',1,'mb::EntitySchema']]],
   ['createtoken_22',['createToken',['../classmb_1_1Auth.html#a791dc6c01a67f540d6f1953c012e4af8',1,'mb::Auth']]],

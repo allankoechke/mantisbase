@@ -1,5 +1,6 @@
 var hierarchy =
 [
+    [ "mb::AccessEvalContext", "structmb_1_1AccessEvalContext.html", null ],
     [ "mb::AccessRule", "classmb_1_1AccessRule.html", null ],
     [ "mb::ApiKeyResult", "structmb_1_1ApiKeyResult.html", null ],
     [ "mb::Auth", "classmb_1_1Auth.html", null ],

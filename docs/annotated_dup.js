@@ -1,6 +1,7 @@
 var annotated_dup =
 [
     [ "mb", "namespacemb.html", [
+      [ "AccessEvalContext", "structmb_1_1AccessEvalContext.html", "structmb_1_1AccessEvalContext" ],
       [ "AccessRule", "classmb_1_1AccessRule.html", "classmb_1_1AccessRule" ],
       [ "ApiKeyManager", "classmb_1_1ApiKeyManager.html", "classmb_1_1ApiKeyManager" ],
       [ "ApiKeyResult", "structmb_1_1ApiKeyResult.html", "structmb_1_1ApiKeyResult" ],

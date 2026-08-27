@@ -1,5 +1,6 @@
 var namespacemb =
 [
+    [ "AccessEvalContext", "structmb_1_1AccessEvalContext.html", "structmb_1_1AccessEvalContext" ],
     [ "AccessRule", "classmb_1_1AccessRule.html", "classmb_1_1AccessRule" ],
     [ "ApiKeyManager", "classmb_1_1ApiKeyManager.html", "classmb_1_1ApiKeyManager" ],
     [ "ApiKeyResult", "structmb_1_1ApiKeyResult.html", "structmb_1_1ApiKeyResult" ],
@@ -48,6 +49,12 @@ var namespacemb =
     [ "Records", "namespacemb.html#a1617ef3fcc5a5fcfef00c1be2096e87d", null ],
     [ "RouteKey", "namespacemb.html#a418920a172df52fe09c0c81787230888", null ],
     [ "RtCallback", "namespacemb.html#a28e20403eb1d552d6415d942ff44f48d", null ],
+    [ "AccessEvalResult", "namespacemb.html#a935a06f050f59b9c3fb19ee701afd654", [
+      [ "Allow", "namespacemb.html#a935a06f050f59b9c3fb19ee701afd654a45f0fb72a0defdfdb01de4b5a5a6876b", null ],
+      [ "DenyUnauthenticated", "namespacemb.html#a935a06f050f59b9c3fb19ee701afd654a3c671173b9ad170b837c90420aaeafa0", null ],
+      [ "DenyForbidden", "namespacemb.html#a935a06f050f59b9c3fb19ee701afd654a6aa1ca7ca8f15f8d327d74f9db988fc6", null ],
+      [ "DenyUnknownRule", "namespacemb.html#a935a06f050f59b9c3fb19ee701afd654a47461e1022dc732e5fec47837aa34c60", null ]
+    ] ],
     [ "HandlerResponse", "namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6", [
       [ "Handled", "namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a827211270de454ea3e0df8f57995efed", null ],
       [ "Unhandled", "namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a6fe9e16b804e1ce4ac5868be60615007", null ]
@@ -69,12 +76,15 @@ var namespacemb =
       [ "WARN", "namespacemb.html#a45b395bbdb082a2a10815855bad98c81a32bd8a1db2275458673903bdb84cb277", null ],
       [ "CRITICAL", "namespacemb.html#a45b395bbdb082a2a10815855bad98c81a99cd1c61610c76a57cb8d10d6df6b870", null ]
     ] ],
+    [ "accessEvalHttpError", "namespacemb.html#a1306623f5aebfe023cbc8a7439353b78", null ],
     [ "aes256GcmDecrypt", "namespacemb.html#a5893dfa8f60709096677fda285e9f5e5", null ],
     [ "aes256GcmEncrypt", "namespacemb.html#a8ff4d923f532d85cfd0c6a95d96527b7", null ],
     [ "base64UrlDecode", "namespacemb.html#a5d223c9d1a85f51f1948f6aaaf047155", null ],
     [ "base64UrlEncode", "namespacemb.html#a5443da3c047f328e76cd9d07136fa233", null ],
     [ "base64UrlEncode", "namespacemb.html#a9c74b18eee6bb0699b7f3976e5daa239", null ],
     [ "bindIntFieldValue", "namespacemb.html#a03226e3c1a8b27aed5b5a178a77f2fd4", null ],
+    [ "buildAccessExprVars", "namespacemb.html#abf21ba1339ea77eaf96f1ce402c3c8d8", null ],
+    [ "buildAccessExprVars", "namespacemb.html#a6c2dcb3f695dd5a949294cd3c4f15153", null ],
     [ "createDirs", "namespacemb.html#a3ffe08183ace9bad82bb563de7e2b162", null ],
     [ "dbDateToString", "namespacemb.html#a6e069285d347076bd5b3c2e17b9b3de4", null ],
     [ "defaultIntPrecision", "namespacemb.html#a15a831a4d00ce50a14b9cb037704cd0e", null ],
@@ -85,6 +95,7 @@ var namespacemb =
     [ "entityPatchHandler", "namespacemb.html#a7111a9214aeeeae76c474e21821a7804", null ],
     [ "entityPostHandler", "namespacemb.html#a6c1a6e1c09810f515bd51ddc3cd5257d", null ],
     [ "envGateMiddleware", "namespacemb.html#a6211528509c2dc37621b6e5a6216e00e", null ],
+    [ "evaluateAccessRule", "namespacemb.html#a78ff3e05ae0db1f9cb44d04e60476dca", null ],
     [ "generate_uuidv7", "namespacemb.html#ad67ff06c25bb2ccdd5f52404e51405f9", null ],
     [ "generatePKCEChallenge", "namespacemb.html#ab1732e537d2f880aebd13253dad4bd21", null ],
     [ "generatePKCEVerifier", "namespacemb.html#ac5b5233790c2e722a8af39b5cb7e65c6", null ],
@@ -108,7 +119,11 @@ var namespacemb =
     [ "intPrecisionToString", "namespacemb.html#afc829d5ff162288fca227926b8091c64", null ],
     [ "intPrecisionUnsignedRange", "namespacemb.html#a5841b292812d75b898f7efca0b2161aa", null ],
     [ "invalidChar", "namespacemb.html#aa98dbdb983996e7b60b25c3e0f8eac98", null ],
+    [ "isAdminAuth", "namespacemb.html#a89c9a4043ad8ff8dd18dd3f13a782a7c", null ],
+    [ "isAllowedFileExtension", "namespacemb.html#a4a65dae5b45d1128da28f229b0561b42", null ],
+    [ "isGuestAuth", "namespacemb.html#a60bac1ca414c3efdc014dc205550fb4e", null ],
     [ "isUnsignedIntPrecision", "namespacemb.html#a7df39760bdcdcba7b253279e7583221b", null ],
+    [ "isUserAuth", "namespacemb.html#a38c5ed23527c1c39c1f15aed27d0649c", null ],
     [ "isValidIP", "namespacemb.html#a65eb364a52f818ded81fe4256c9b74fa", null ],
     [ "isValidIPv4", "namespacemb.html#ae82806bf179419d9e5dc249e39c200e1", null ],
     [ "isValidIPv6", "namespacemb.html#a00f860404d17bfa8ba311ed9b227dad8", null ],
@@ -130,6 +145,7 @@ var namespacemb =
     [ "resolvePath", "namespacemb.html#a3fd9558152f1d09d1bef041445bfa53f", null ],
     [ "resolveSchema", "namespacemb.html#a9e0b82dae4579b3008e8bb6a8497cd22", null ],
     [ "safe_stoi", "namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d", null ],
+    [ "safeContentType", "namespacemb.html#ab47e01f6ec344e91a38f9a02b607e415", null ],
     [ "sanitizeFilename", "namespacemb.html#aae7a705435d7624d4530a2ab3f8df9fe", null ],
     [ "sanitizeFilename_JSWrapper", "namespacemb.html#ac3176a96dbbc7784fb6638cad25c6030", null ],
     [ "sanitizeInPlace", "namespacemb.html#a8a3823264846aca9828eab91e2048b27", null ],

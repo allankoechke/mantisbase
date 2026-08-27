@@ -1,0 +1,7 @@
+<map id="mb::AccessEvalContext" name="mb::AccessEvalContext">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,168,180,193"/>
+<area shape="rect" id="Node000002" href="$classmb_1_1MantisRequest.html" title="HTTP request wrapper bound to a MantisBase instance." alt="" coords="19,80,167,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,119,95,167,90,167,90,119"/>
+<area shape="rect" id="Node000003" href="$classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="27,5,158,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="95,45,95,80,90,80,90,45"/>
+</map>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_5f_5fclass_5fname_5f_5f_0',['__class_name__',['../classmb_1_1RouteRegistry.html#ab46a6818c728ff91477a979599e16d88',1,'mb::RouteRegistry']]]
+  ['auth_0',['auth',['../structmb_1_1AccessEvalContext.html#a49d23848b8288fcfe15058a9fbe6c3f2',1,'mb::AccessEvalContext']]]
 ];

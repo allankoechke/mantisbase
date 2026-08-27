@@ -95,12 +95,12 @@ $(document).ready(function(){initNavTree('cli.html',''); initResizable(); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>MantisBase has a comprehensive CLI built on <code>argparse</code> for server management, admin accounts, migrations, and schema operations.</p>
-<h1><a class="anchor" id="autotoc_md108"></a>
+<h1><a class="anchor" id="autotoc_md115"></a>
 mantisbase CLI Reference</h1>
 <div class="fragment"><div class="line">mantisbase [global options] &lt;subcommand&gt; [subcommand options]</div>
 </div><!-- fragment --><p>Only <b>one subcommand</b> may be used per invocation: <code>serve</code>, <code>admins</code>, <code>migrations</code>, or <code>schema</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md110"></a>
+<h2><a class="anchor" id="autotoc_md117"></a>
 Global Options</h2>
 <p>These options can appear before the subcommand:</p>
 <table class="markdownTable">
@@ -123,7 +123,7 @@ Global Options</h2>
 </table>
 <p>When an environment variable is set, it overrides the matching CLI option. For logging, <code>MB_LOG_LEVEL</code> (<code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>critical</code>) overrides <code>--dev</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md112"></a>
+<h2><a class="anchor" id="autotoc_md119"></a>
 serve</h2>
 <p>Start the HTTP server.</p>
 <div class="fragment"><div class="line">mantisbase serve [--host=&lt;host&gt;] [--port=&lt;port&gt;] [--pool-size=&lt;int&gt;] [--skip-admin-setup]</div>
@@ -151,7 +151,7 @@ serve</h2>
 <div class="fragment"><div class="line">mantisbase serve --host=127.0.0.1 --port=7070</div>
 <div class="line">mantisbase --dev serve --port=8000</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md114"></a>
+<h2><a class="anchor" id="autotoc_md121"></a>
 admins</h2>
 <p>Manage admin accounts. Exactly <b>one</b> of <code>--add</code>, <code>--ls</code>, or <code>--rm</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase admins --add &lt;email&gt; &lt;password&gt;</div>
@@ -173,7 +173,7 @@ admins</h2>
 <div class="line">mantisbase admins --ls</div>
 <div class="line">mantisbase admins --rm admin@example.com</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md116"></a>
+<h2><a class="anchor" id="autotoc_md123"></a>
 schema</h2>
 <p>Manage entity schemas locally (without the HTTP API). Exactly <b>one</b> of <code>--ls</code>, <code>--rm</code>, <code>--add</code>, or <code>--update</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase schema --ls</div>
@@ -198,12 +198,12 @@ schema</h2>
 <div class="line">mantisbase schema --update posts ./schemas/posts-v2.json</div>
 <div class="line">mantisbase schema --rm posts</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md118"></a>
+<h2><a class="anchor" id="autotoc_md125"></a>
 migrate</h2>
 <p>Exactly <b>one</b> of <code>apply</code> or <code>schema</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase apply [options]</div>
 <div class="line">mantisbase schema [options]</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md119"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md126"></a>
 apply</h3>
 <p>Apply or rollback migrations from the migrations directory. Exactly <b>one</b> of <code>--up</code> or <code>--down</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase migrate apply --up</div>
@@ -218,7 +218,7 @@ apply</h3>
 </table>
 <p><b>Example:</b></p>
 <div class="fragment"><div class="line">mantisbase --migrations-dir=./db/migrations migrate apply --up</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md120"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md127"></a>
 schema</h3>
 <p>Create or load schema dump from a given .json file. Exactly <b>one</b> of <code>--to</code> or <code>--from</code> is required.</p>
 <div class="fragment"><div class="line">mantisbase migrate schema --to &lt;file.json&gt;</div>
@@ -239,7 +239,7 @@ schema</h3>
 <div class="fragment"><div class="line">mantisbase migrate schema --to 123.json</div>
 <div class="line">mantisbase migrate schema --from /path/to/123.json</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md122"></a>
+<h2><a class="anchor" id="autotoc_md129"></a>
 See Also</h2>
 <ul>
 <li><a class="el" href="QuickStart_8md.html">Quick Start</a></li>

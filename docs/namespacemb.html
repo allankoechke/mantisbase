@@ -103,6 +103,8 @@ $(document).ready(function(){initNavTree('namespacemb.html',''); initResizable()
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmb_1_1AccessEvalContext.html">AccessEvalContext</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1AccessRule.html">AccessRule</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access control rule for entity permissions.  <a href="classmb_1_1AccessRule.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -234,6 +236,12 @@ Enumerations</h2></td></tr>
 <br />
  }</td></tr>
 <tr class="separator:a45b395bbdb082a2a10815855bad98c81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a935a06f050f59b9c3fb19ee701afd654" id="r_a935a06f050f59b9c3fb19ee701afd654"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">AccessEvalResult</a> { <a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654a45f0fb72a0defdfdb01de4b5a5a6876b">Allow</a>
+, <a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654a3c671173b9ad170b837c90420aaeafa0">DenyUnauthenticated</a>
+, <a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654a6aa1ca7ca8f15f8d327d74f9db988fc6">DenyForbidden</a>
+, <a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654a47461e1022dc732e5fec47837aa34c60">DenyUnknownRule</a>
+ }</td></tr>
+<tr class="separator:a935a06f050f59b9c3fb19ee701afd654"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a780ec702fe75b294d0f0e2e08a9254df" id="r_a780ec702fe75b294d0f0e2e08a9254df"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> { <br />
 &#160;&#160;<a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfa5aef4e3ea379fa0eb2bf42d979443902">I8</a>
 , <a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254dfabcd774f891b5f9df7099f3ea75dadf8d">I16</a>
@@ -302,6 +310,21 @@ Functions</h2></td></tr>
 <tr class="memitem:a735b4776576110b750e5446ce05e8d81" id="r_a735b4776576110b750e5446ce05e8d81"><td class="memItemLeft" align="right" valign="top">std::function&lt; <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">rateLimit</a> (int max_requests, int window_seconds, bool use_user_id=false)</td></tr>
 <tr class="memdesc:a735b4776576110b750e5446ce05e8d81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rate limiting middleware to prevent abuse.  <br /></td></tr>
 <tr class="separator:a735b4776576110b750e5446ce05e8d81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60bac1ca414c3efdc014dc205550fb4e" id="r_a60bac1ca414c3efdc014dc205550fb4e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a60bac1ca414c3efdc014dc205550fb4e">isGuestAuth</a> (const nlohmann::json &amp;auth)</td></tr>
+<tr class="memdesc:a60bac1ca414c3efdc014dc205550fb4e"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmb_1_1Auth.html" title="JWT token creation and verification utilities.">Auth</a> type helpers (work on request auth json; used by HTTP, SSE, WS).  <br /></td></tr>
+<tr class="separator:a60bac1ca414c3efdc014dc205550fb4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89c9a4043ad8ff8dd18dd3f13a782a7c" id="r_a89c9a4043ad8ff8dd18dd3f13a782a7c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a89c9a4043ad8ff8dd18dd3f13a782a7c">isAdminAuth</a> (const nlohmann::json &amp;auth)</td></tr>
+<tr class="separator:a89c9a4043ad8ff8dd18dd3f13a782a7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38c5ed23527c1c39c1f15aed27d0649c" id="r_a38c5ed23527c1c39c1f15aed27d0649c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a38c5ed23527c1c39c1f15aed27d0649c">isUserAuth</a> (const nlohmann::json &amp;auth)</td></tr>
+<tr class="separator:a38c5ed23527c1c39c1f15aed27d0649c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78ff3e05ae0db1f9cb44d04e60476dca" id="r_a78ff3e05ae0db1f9cb44d04e60476dca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">AccessEvalResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a78ff3e05ae0db1f9cb44d04e60476dca">evaluateAccessRule</a> (const <a class="el" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;rule, const <a class="el" href="structmb_1_1AccessEvalContext.html">AccessEvalContext</a> &amp;ctx)</td></tr>
+<tr class="separator:a78ff3e05ae0db1f9cb44d04e60476dca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf21ba1339ea77eaf96f1ce402c3c8d8" id="r_abf21ba1339ea77eaf96f1ce402c3c8d8"><td class="memItemLeft" align="right" valign="top">nlohmann::json&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#abf21ba1339ea77eaf96f1ce402c3c8d8">buildAccessExprVars</a> (const <a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;req, const nlohmann::json &amp;auth)</td></tr>
+<tr class="separator:abf21ba1339ea77eaf96f1ce402c3c8d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c2dcb3f695dd5a949294cd3c4f15153" id="r_a6c2dcb3f695dd5a949294cd3c4f15153"><td class="memItemLeft" align="right" valign="top">nlohmann::json&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a6c2dcb3f695dd5a949294cd3c4f15153">buildAccessExprVars</a> (const nlohmann::json &amp;auth, const std::string &amp;remote_addr, int remote_port, const std::string &amp;local_addr, int local_port, const nlohmann::json &amp;body=nlohmann::json::object())</td></tr>
+<tr class="separator:a6c2dcb3f695dd5a949294cd3c4f15153"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1306623f5aebfe023cbc8a7439353b78" id="r_a1306623f5aebfe023cbc8a7439353b78"><td class="memItemLeft" align="right" valign="top">std::pair&lt; int, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a1306623f5aebfe023cbc8a7439353b78">accessEvalHttpError</a> (<a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">AccessEvalResult</a> result, const <a class="el" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;rule=<a class="el" href="classmb_1_1AccessRule.html">AccessRule</a>{})</td></tr>
+<tr class="separator:a1306623f5aebfe023cbc8a7439353b78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cf4388bb9256c10dcb15654be24eb39" id="r_a3cf4388bb9256c10dcb15654be24eb39"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a3cf4388bb9256c10dcb15654be24eb39">entityGetManyHandler</a> ()</td></tr>
 <tr class="separator:a3cf4388bb9256c10dcb15654be24eb39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a019ef33d8a453c97ac9b9ae3b66bcfc7" id="r_a019ef33d8a453c97ac9b9ae3b66bcfc7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a019ef33d8a453c97ac9b9ae3b66bcfc7">entityGetOneHandler</a> ()</td></tr>
@@ -434,6 +457,10 @@ Functions</h2></td></tr>
 <tr class="separator:aae7a705435d7624d4530a2ab3f8df9fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3176a96dbbc7784fb6638cad25c6030" id="r_ac3176a96dbbc7784fb6638cad25c6030"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ac3176a96dbbc7784fb6638cad25c6030">sanitizeFilename_JSWrapper</a> (const std::string &amp;original)</td></tr>
 <tr class="separator:ac3176a96dbbc7784fb6638cad25c6030"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a65dae5b45d1128da28f229b0561b42" id="r_a4a65dae5b45d1128da28f229b0561b42"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a4a65dae5b45d1128da28f229b0561b42">isAllowedFileExtension</a> (const std::string &amp;extension)</td></tr>
+<tr class="separator:a4a65dae5b45d1128da28f229b0561b42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab47e01f6ec344e91a38f9a02b607e415" id="r_ab47e01f6ec344e91a38f9a02b607e415"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ab47e01f6ec344e91a38f9a02b607e415">safeContentType</a> (const std::string &amp;extension)</td></tr>
+<tr class="separator:ab47e01f6ec344e91a38f9a02b607e415"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab16eec531440dbc19ec0880549d0638e" id="r_ab16eec531440dbc19ec0880549d0638e"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ab16eec531440dbc19ec0880549d0638e">hashPassword</a> (const std::string &amp;password)</td></tr>
 <tr class="memdesc:ab16eec531440dbc19ec0880549d0638e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Digests user password + a generated salt to yield a hashed password.  <br /></td></tr>
 <tr class="separator:ab16eec531440dbc19ec0880549d0638e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -665,6 +692,34 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="a935a06f050f59b9c3fb19ee701afd654" name="a935a06f050f59b9c3fb19ee701afd654"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a935a06f050f59b9c3fb19ee701afd654">&#9670;&#160;</a></span>AccessEvalResult</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">mb::AccessEvalResult</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a935a06f050f59b9c3fb19ee701afd654a45f0fb72a0defdfdb01de4b5a5a6876b" name="a935a06f050f59b9c3fb19ee701afd654a45f0fb72a0defdfdb01de4b5a5a6876b"></a>Allow&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a935a06f050f59b9c3fb19ee701afd654a3c671173b9ad170b837c90420aaeafa0" name="a935a06f050f59b9c3fb19ee701afd654a3c671173b9ad170b837c90420aaeafa0"></a>DenyUnauthenticated&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a935a06f050f59b9c3fb19ee701afd654a6aa1ca7ca8f15f8d327d74f9db988fc6" name="a935a06f050f59b9c3fb19ee701afd654a6aa1ca7ca8f15f8d327d74f9db988fc6"></a>DenyForbidden&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a935a06f050f59b9c3fb19ee701afd654a47461e1022dc732e5fec47837aa34c60" name="a935a06f050f59b9c3fb19ee701afd654a47461e1022dc732e5fec47837aa34c60"></a>DenyUnknownRule&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
 <a id="abd2c06555bb4b0872af4290f6c3596e6" name="abd2c06555bb4b0872af4290f6c3596e6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abd2c06555bb4b0872af4290f6c3596e6">&#9670;&#160;</a></span>HandlerResponse</h2>
 
@@ -769,6 +824,35 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="a1306623f5aebfe023cbc8a7439353b78" name="a1306623f5aebfe023cbc8a7439353b78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1306623f5aebfe023cbc8a7439353b78">&#9670;&#160;</a></span>accessEvalHttpError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; int, std::string &gt; mb::accessEvalHttpError </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">AccessEvalResult</a>&#160;</td>
+          <td class="paramname"><em>result</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;&#160;</td>
+          <td class="paramname"><em>rule</em> = <code><a class="el" href="classmb_1_1AccessRule.html">AccessRule</a>{}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>{status, error}</code> for HTTP error responses. </dd></dl>
+
+</div>
+</div>
 <a id="a5893dfa8f60709096677fda285e9f5e5" name="a5893dfa8f60709096677fda285e9f5e5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5893dfa8f60709096677fda285e9f5e5">&#9670;&#160;</a></span>aes256GcmDecrypt()</h2>
 
@@ -908,6 +992,86 @@ Variables</h2></td></tr>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
           <td class="paramname"><em>precision</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abf21ba1339ea77eaf96f1ce402c3c8d8" name="abf21ba1339ea77eaf96f1ce402c3c8d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf21ba1339ea77eaf96f1ce402c3c8d8">&#9670;&#160;</a></span>buildAccessExprVars() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">nlohmann::json mb::buildAccessExprVars </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;&#160;</td>
+          <td class="paramname"><em>req</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>auth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6c2dcb3f695dd5a949294cd3c4f15153" name="a6c2dcb3f695dd5a949294cd3c4f15153"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c2dcb3f695dd5a949294cd3c4f15153">&#9670;&#160;</a></span>buildAccessExprVars() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">nlohmann::json mb::buildAccessExprVars </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>auth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>remote_addr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>remote_port</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>local_addr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>local_port</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>body</em> = <code>nlohmann::json::object()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1161,6 +1325,34 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Middleware function </dd></dl>
+
+</div>
+</div>
+<a id="a78ff3e05ae0db1f9cb44d04e60476dca" name="a78ff3e05ae0db1f9cb44d04e60476dca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78ff3e05ae0db1f9cb44d04e60476dca">&#9670;&#160;</a></span>evaluateAccessRule()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">AccessEvalResult</a> mb::evaluateAccessRule </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;&#160;</td>
+          <td class="paramname"><em>rule</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmb_1_1AccessEvalContext.html">AccessEvalContext</a> &amp;&#160;</td>
+          <td class="paramname"><em>ctx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -1498,7 +1690,7 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Middleware function that validates access rules <div class="fragment"><div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/posts&quot;</span>, handler, {<a class="code hl_function" href="namespacemb.html#afced397878d63d057f3c8eb3bbd5567f">hasAccess</a>(<span class="stringliteral">&quot;posts&quot;</span>)});</div>
-<div class="ttc" id="anamespacemb_html_afced397878d63d057f3c8eb3bbd5567f"><div class="ttname"><a href="namespacemb.html#afced397878d63d057f3c8eb3bbd5567f">mb::hasAccess</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; hasAccess(const std::string &amp;entity_name)</div><div class="ttdoc">Check if request has access to entity based on access rules.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:458</div></div>
+<div class="ttc" id="anamespacemb_html_afced397878d63d057f3c8eb3bbd5567f"><div class="ttname"><a href="namespacemb.html#afced397878d63d057f3c8eb3bbd5567f">mb::hasAccess</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; hasAccess(const std::string &amp;entity_name)</div><div class="ttdoc">Check if request has access to entity based on access rules.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:372</div></div>
 </div><!-- fragment --> </dd></dl>
 
 </div>
@@ -1707,6 +1899,62 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="a89c9a4043ad8ff8dd18dd3f13a782a7c" name="a89c9a4043ad8ff8dd18dd3f13a782a7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89c9a4043ad8ff8dd18dd3f13a782a7c">&#9670;&#160;</a></span>isAdminAuth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::isAdminAuth </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>auth</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4a65dae5b45d1128da28f229b0561b42" name="a4a65dae5b45d1128da28f229b0561b42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a65dae5b45d1128da28f229b0561b42">&#9670;&#160;</a></span>isAllowedFileExtension()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::isAllowedFileExtension </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>extension</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a60bac1ca414c3efdc014dc205550fb4e" name="a60bac1ca414c3efdc014dc205550fb4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60bac1ca414c3efdc014dc205550fb4e">&#9670;&#160;</a></span>isGuestAuth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::isGuestAuth </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>auth</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classmb_1_1Auth.html" title="JWT token creation and verification utilities.">Auth</a> type helpers (work on request auth json; used by HTTP, SSE, WS). </p>
+
+</div>
+</div>
 <a id="a7df39760bdcdcba7b253279e7583221b" name="a7df39760bdcdcba7b253279e7583221b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7df39760bdcdcba7b253279e7583221b">&#9670;&#160;</a></span>isUnsignedIntPrecision()</h2>
 
@@ -1718,6 +1966,24 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype"><a class="el" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>&#160;</td>
           <td class="paramname"><em>precision</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a38c5ed23527c1c39c1f15aed27d0649c" name="a38c5ed23527c1c39c1f15aed27d0649c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38c5ed23527c1c39c1f15aed27d0649c">&#9670;&#160;</a></span>isUserAuth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::isUserAuth </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>auth</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -1780,7 +2046,7 @@ Variables</h2></td></tr>
 <div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="namespacemb.html#ae82806bf179419d9e5dc249e39c200e1">isValidIPv4</a>(<span class="stringliteral">&quot;192.168.1.1&quot;</span>)) {</div>
 <div class="line">    <span class="comment">// Valid IPv4 format</span></div>
 <div class="line">}</div>
-<div class="ttc" id="anamespacemb_html_ae82806bf179419d9e5dc249e39c200e1"><div class="ttname"><a href="namespacemb.html#ae82806bf179419d9e5dc249e39c200e1">mb::isValidIPv4</a></div><div class="ttdeci">bool isValidIPv4(const std::string &amp;ip)</div><div class="ttdoc">Validates if a string is a valid IPv4 address.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:208</div></div>
+<div class="ttc" id="anamespacemb_html_ae82806bf179419d9e5dc249e39c200e1"><div class="ttname"><a href="namespacemb.html#ae82806bf179419d9e5dc249e39c200e1">mb::isValidIPv4</a></div><div class="ttdeci">bool isValidIPv4(const std::string &amp;ip)</div><div class="ttdoc">Validates if a string is a valid IPv4 address.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:257</div></div>
 </div><!-- fragment --> 
 </div>
 </div>
@@ -1968,8 +2234,8 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 <div class="line"> </div>
 <div class="line"><span class="comment">// Login endpoint: 5 attempts per minute per IP (prevents brute force)</span></div>
 <div class="line">router.Post(<span class="stringliteral">&quot;/api/v1/auth/users/login&quot;</span>, loginHandler, {<a class="code hl_function" href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">rateLimit</a>(5, 60, <span class="keyword">false</span>), <a class="code hl_function" href="namespacemb.html#a49e15856cdaa6172e6cfccaff773e4ab">resolveAuthEntity</a>()});</div>
-<div class="ttc" id="anamespacemb_html_a49e15856cdaa6172e6cfccaff773e4ab"><div class="ttname"><a href="namespacemb.html#a49e15856cdaa6172e6cfccaff773e4ab">mb::resolveAuthEntity</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; resolveAuthEntity()</div><div class="ttdoc">Resolve auth entity from :entity_name path param.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:383</div></div>
-<div class="ttc" id="anamespacemb_html_a735b4776576110b750e5446ce05e8d81"><div class="ttname"><a href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">mb::rateLimit</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; rateLimit(int max_requests, int window_seconds, bool use_user_id=false)</div><div class="ttdoc">Rate limiting middleware to prevent abuse.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:671</div></div>
+<div class="ttc" id="anamespacemb_html_a49e15856cdaa6172e6cfccaff773e4ab"><div class="ttname"><a href="namespacemb.html#a49e15856cdaa6172e6cfccaff773e4ab">mb::resolveAuthEntity</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; resolveAuthEntity()</div><div class="ttdoc">Resolve auth entity from :entity_name path param.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:297</div></div>
+<div class="ttc" id="anamespacemb_html_a735b4776576110b750e5446ce05e8d81"><div class="ttname"><a href="namespacemb.html#a735b4776576110b750e5446ce05e8d81">mb::rateLimit</a></div><div class="ttdeci">std::function&lt; HandlerResponse(MantisRequest &amp;, MantisResponse &amp;)&gt; rateLimit(int max_requests, int window_seconds, bool use_user_id=false)</div><div class="ttdoc">Rate limiting middleware to prevent abuse.</div><div class="ttdef"><b>Definition</b> middlewares.cpp:585</div></div>
 </div><!-- fragment --> 
 </div>
 </div>
@@ -2311,8 +2577,26 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 <dl class="section return"><dt>Returns</dt><dd>Converted integer or default value</dd></dl>
 <div class="fragment"><div class="line"><span class="keywordtype">int</span> page = <a class="code hl_function" href="namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d">safe_stoi</a>(req.getQueryParam(<span class="stringliteral">&quot;page&quot;</span>), 1);  <span class="comment">// Defaults to 1 if invalid</span></div>
 <div class="line"><span class="keywordtype">int</span> limit = <a class="code hl_function" href="namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d">safe_stoi</a>(req.getQueryParam(<span class="stringliteral">&quot;limit&quot;</span>), 100);  <span class="comment">// Defaults to 100 if invalid</span></div>
-<div class="ttc" id="anamespacemb_html_a3a428d170b1c8c2100c9ba7fda3b6f0d"><div class="ttname"><a href="namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d">mb::safe_stoi</a></div><div class="ttdeci">int safe_stoi(const std::string &amp;s, const int default_val)</div><div class="ttdoc">Safely convert string to integer with default fallback.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:200</div></div>
+<div class="ttc" id="anamespacemb_html_a3a428d170b1c8c2100c9ba7fda3b6f0d"><div class="ttname"><a href="namespacemb.html#a3a428d170b1c8c2100c9ba7fda3b6f0d">mb::safe_stoi</a></div><div class="ttdeci">int safe_stoi(const std::string &amp;s, const int default_val)</div><div class="ttdoc">Safely convert string to integer with default fallback.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:249</div></div>
 </div><!-- fragment --> 
+</div>
+</div>
+<a id="ab47e01f6ec344e91a38f9a02b607e415" name="ab47e01f6ec344e91a38f9a02b607e415"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab47e01f6ec344e91a38f9a02b607e415">&#9670;&#160;</a></span>safeContentType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::safeContentType </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>extension</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
 </div>
 </div>
 <a id="aae7a705435d7624d4530a2ab3f8df9fe" name="aae7a705435d7624d4530a2ab3f8df9fe"></a>
@@ -2619,7 +2903,7 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 <div class="fragment"><div class="line"><span class="keyword">auto</span> parts = <a class="code hl_function" href="namespacemb.html#a2496b58c49de9a3a1758c8fc6fee2996">splitString</a>(<span class="stringliteral">&quot;Hello, John!&quot;</span>, <span class="stringliteral">&quot;,&quot;</span>);</div>
 <div class="line">std::cout &lt;&lt; parts.size() &lt;&lt; std::endl;</div>
 <div class="line"><span class="comment">// &gt; Should be a vector of two strings `Hello` and ` World`</span></div>
-<div class="ttc" id="anamespacemb_html_a2496b58c49de9a3a1758c8fc6fee2996"><div class="ttname"><a href="namespacemb.html#a2496b58c49de9a3a1758c8fc6fee2996">mb::splitString</a></div><div class="ttdeci">std::vector&lt; std::string &gt; splitString(const std::string &amp;input, const std::string &amp;delimiter)</div><div class="ttdoc">Split given string based on given delimiter.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:102</div></div>
+<div class="ttc" id="anamespacemb_html_a2496b58c49de9a3a1758c8fc6fee2996"><div class="ttname"><a href="namespacemb.html#a2496b58c49de9a3a1758c8fc6fee2996">mb::splitString</a></div><div class="ttdeci">std::vector&lt; std::string &gt; splitString(const std::string &amp;input, const std::string &amp;delimiter)</div><div class="ttdoc">Split given string based on given delimiter.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:104</div></div>
 </div><!-- fragment --> 
 </div>
 </div>
@@ -2937,7 +3221,7 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 <div class="line"><span class="keywordflow">if</span>(!err.empty()) {</div>
 <div class="line">     <span class="comment">// Do something ...</span></div>
 <div class="line">}</div>
-<div class="ttc" id="anamespacemb_html_a407f3d861f56cbc663381da99b2cc4ed"><div class="ttname"><a href="namespacemb.html#a407f3d861f56cbc663381da99b2cc4ed">mb::tryParseJsonStr</a></div><div class="ttdeci">std::pair&lt; json, std::string &gt; tryParseJsonStr(const std::string &amp;json_str)</div><div class="ttdoc">Try parsing a string to a JSON object and return the object and any error if parsing failed.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:18</div></div>
+<div class="ttc" id="anamespacemb_html_a407f3d861f56cbc663381da99b2cc4ed"><div class="ttname"><a href="namespacemb.html#a407f3d861f56cbc663381da99b2cc4ed">mb::tryParseJsonStr</a></div><div class="ttdeci">std::pair&lt; json, std::string &gt; tryParseJsonStr(const std::string &amp;json_str)</div><div class="ttdoc">Try parsing a string to a JSON object and return the object and any error if parsing failed.</div><div class="ttdef"><b>Definition</b> string_utils.cpp:20</div></div>
 </div><!-- fragment --> 
 </div>
 </div>
