@@ -183,15 +183,15 @@ namespace mb {
 
     const drogon::HttpRequestPtr & MantisRequest::drogonRequest() const { return m_req; }
 
-    bool MantisRequest::isGuestAuth() const {
+    bool MantisRequest::isGuestAuth() {
         return mb::isGuestAuth(getOr<json>("auth", json::object()));
     }
 
-    bool MantisRequest::isAdminAuth() const {
+    bool MantisRequest::isAdminAuth() {
         return mb::isAdminAuth(getOr<json>("auth", json::object()));
     }
 
-    bool MantisRequest::isUserAuth() const {
+    bool MantisRequest::isUserAuth() {
         return mb::isUserAuth(getOr<json>("auth", json::object()));
     }
 

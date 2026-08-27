@@ -261,7 +261,7 @@ TEST_F(IntegrationAuthTest, AuthEntityFilterAllowsMatchingEntity) {
 
     auto createRes = client->Post("/api/v1/schemas", adminHeaders, schema.dump(), "application/json");
     ASSERT_TRUE(createRes != nullptr);
-    ASSERT_EQ(createRes->status, 200);
+    ASSERT_EQ(createRes->status, 201);
 
     nlohmann::json login = {
         {"identity", "testuser@example.com"},
@@ -320,7 +320,7 @@ TEST_F(IntegrationAuthTest, AuthEntityFilterDeniesNonMatchingEntity) {
     };
     auto createRes = client->Post("/api/v1/schemas", adminHeaders, schema.dump(), "application/json");
     ASSERT_TRUE(createRes != nullptr);
-    ASSERT_EQ(createRes->status, 200);
+    ASSERT_EQ(createRes->status, 201);
 
     nlohmann::json login = {
         {"identity", "testuser@example.com"},

@@ -95,13 +95,13 @@ namespace mb {
         const drogon::HttpRequestPtr& drogonRequest() const;
 
         // Check if auth block of guest type
-        bool isGuestAuth() const;
+        bool isGuestAuth();
 
         // Check if auth block of admin type
-        bool isAdminAuth() const;
+        bool isAdminAuth();
 
         // Check if auth block of user type
-        bool isUserAuth() const;
+        bool isUserAuth();
 
         template<typename T>
         void set(const std::string &key, T value) {
