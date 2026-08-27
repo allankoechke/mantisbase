@@ -279,10 +279,13 @@ namespace mb {
                                  std::size_t idLen = 12,
                                  std::string_view idSep = "_");
 
+    /** Duktape/JS wrapper around @ref sanitizeFilename (string arguments). */
     std::string sanitizeFilename_JSWrapper(const std::string &original);
 
+    /** @return `true` if @p extension is on the upload allow-list. */
     bool isAllowedFileExtension(const std::string &extension);
 
+    /** Map a file extension to a safe MIME type for `Content-Type` headers. */
     std::string safeContentType(const std::string &extension);
 
     // ----------------------------------------------------------------- //
@@ -342,6 +345,7 @@ namespace mb {
      */
     std::tm toLocalTime(std::time_t t);
 
+    /** @return Current UTC timestamp as `YYYY-MM-DD HH:MM:SS`. */
     inline std::string getCurrentTimestampUTC() {
         const std::time_t now = std::time(nullptr);
         const std::tm utc = toUtcTime(now);
@@ -433,6 +437,7 @@ namespace mb {
     bool isValidIP(const std::string &ip);
 
 #ifdef MB_SCRIPTING_ENABLED
+    /** Register utility functions (paths, strings, auth, time) on the Duktape global. */
     void registerUtilsToDuktapeEngine();
 #endif
 }

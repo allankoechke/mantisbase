@@ -17,13 +17,16 @@
 #include "mantisbase/core/models/int_precision.h"
 
 namespace mb {
+    /** Secondary index definition attached to an entity schema. */
     struct IndexDefinition {
         std::string name;
         bool unique = false;
         std::vector<std::string> columns;
 
+        /** Serialize index definition to schema JSON. */
         [[nodiscard]] nlohmann::json toJSON() const;
 
+        /** Parse index definition from schema JSON. */
         static IndexDefinition fromJSON(const nlohmann::json &j);
     };
 
@@ -42,10 +45,13 @@ namespace mb {
 
         // ----------------- STATIC GLOBAL METHODS ---------------------- //
 
+        /** @return Default base entity field names (`id`, `created`, `updated`). */
         static const std::vector<std::string> &defaultBaseFields();
 
+        /** @return Default auth entity field names (includes password/email fields). */
         static const std::vector<std::string> &defaultAuthFields();
 
+        /** @return Supported entity field type strings. */
         static const std::vector<std::string> &defaultEntityFieldTypes();
 
         // ----------------- SCHEMA FIELD METHODS ---------------------- //
@@ -75,12 +81,15 @@ namespace mb {
          */
         [[nodiscard]] std::string type() const;
 
+        /** Set field type (fluent). @return Reference to self. */
         EntitySchemaField &setType(const std::string &type);
 
+        /** @return Int storage precision for `int`-typed fields. */
         [[nodiscard]] IntPrecision intPrecision() const;
 
         EntitySchemaField &setIntPrecision(IntPrecision precision);
 
+        /** Set precision from string token (`i32`, `u64`, …). */
         EntitySchemaField &setPrecision(const std::string &precision);
 
         /**
@@ -224,8 +233,10 @@ namespace mb {
          */
         [[nodiscard]] soci::db_type toSociType() const;
 
+        /** Map a type string to SOCI db_type (non-int types). */
         [[nodiscard]] static soci::db_type toSociType(const std::string &type);
 
+        /** Map int type + precision to SOCI db_type. */
         [[nodiscard]] static soci::db_type toSociType(const std::string &type, IntPrecision precision);
 
         /**
@@ -241,6 +252,7 @@ namespace mb {
          */
         static bool isValidFieldType(const std::string &type);
 
+        /** @return `true` if `name` is a valid SQL-safe field identifier. */
         static bool isValidFieldName(const std::string &name);
 
         /**

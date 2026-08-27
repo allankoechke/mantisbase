@@ -153,22 +153,27 @@ namespace mb {
          */
         EntitySchema &setSystem(const bool &isSystem);
 
+        /** @return List (collection) access rule for this schema. */
         [[nodiscard]] AccessRule listRule() const;
 
         EntitySchema &setListRule(const AccessRule &listRule);
 
+        /** @return Get (single-record) access rule. */
         [[nodiscard]] AccessRule getRule() const;
 
         EntitySchema &setGetRule(const AccessRule &getRule);
 
+        /** @return Create access rule. */
         [[nodiscard]] AccessRule addRule() const;
 
         EntitySchema &setAddRule(const AccessRule &addRule);
 
+        /** @return Update access rule. */
         [[nodiscard]] AccessRule updateRule() const;
 
         EntitySchema &setUpdateRule(const AccessRule &updateRule);
 
+        /** @return Delete access rule. */
         [[nodiscard]] AccessRule deleteRule() const;
 
         EntitySchema &setDeleteRule(const AccessRule &deleteRule);
@@ -223,10 +228,12 @@ namespace mb {
          */
         [[nodiscard]] bool hasFieldById(const std::string &field_id) const;
 
+        /** @return SQL SELECT for view-type entities. */
         [[nodiscard]] std::string viewQuery() const;
 
         EntitySchema &setViewQuery(const std::string &viewQuery);
 
+        /** @return Index definitions declared on this schema. */
         [[nodiscard]] const std::vector<IndexDefinition> &indexes() const;
 
         EntitySchema &addIndex(const IndexDefinition &index);
@@ -252,6 +259,7 @@ namespace mb {
          */
         [[nodiscard]] std::string toDDL() const;
 
+        /** @return `CREATE INDEX` statements for declared secondary indexes. */
         [[nodiscard]] std::vector<std::string> indexDDL() const;
 
         /**
@@ -357,7 +365,10 @@ namespace mb {
          */
         static bool isValidEntityType(const std::string& type);
 
+        /** @return Default field objects injected into `base` entity schemas. */
         static const std::vector<EntitySchemaField> &defaultBaseFieldsSchema();
+
+        /** @return Default field objects injected into `auth` entity schemas. */
         static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
 
     private:

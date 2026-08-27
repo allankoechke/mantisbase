@@ -1,6 +1,10 @@
 /**
- * @file database_mgr.h
- * @brief Database Unit file for managing base database functionality: connecton, pooling, logging, etc.
+ * @file database.h
+ * @brief Database connection, pooling, and system table migration.
+ *
+ * Handles database connections, connection pooling, and provides
+ * session management for executing queries. Supports SQLite (default)
+ * and PostgreSQL.
  */
 
 #ifndef DATABASE_H
@@ -60,6 +64,8 @@ namespace mb {
          * @return true if connection successful, false otherwise
          */
         bool connect(const std::string &conn_str);
+
+        /** @return Active connection string passed to @ref connect. */
         const std::string& connectionStr() const;
 
 

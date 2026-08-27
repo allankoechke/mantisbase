@@ -16,6 +16,12 @@
 #include "soci/values.h"
 
 namespace mb {
+    /**
+     * @brief Bind a JSON entity payload to SOCI values using field metadata.
+     * @param entity Record JSON keyed by field name.
+     * @param fields Schema field array (`name`, `type`, constraints, …).
+     * @throws std::invalid_argument if `fields` is not an array.
+     */
     inline soci::values json2SociValue(const json &entity, const json &fields) {
         if (!fields.is_array()) throw std::invalid_argument("Fields must be an array");
 
@@ -80,6 +86,7 @@ namespace mb {
         return vals;
     }
 
+    /** Resolve int precision for a column by matching field name in schema metadata. */
     inline IntPrecision getColumnIntPrecision(const std::string &column_name, const std::vector<json> &fields) {
         for (const auto &field: fields) {
             if (field.value("name", "") == column_name) {
@@ -89,6 +96,7 @@ namespace mb {
         return defaultIntPrecision();
     }
 
+    /** Look up declared field `type` string for a column name. @throws on unknown column. */
     inline std::string getColumnType(const std::string &column_name, const std::vector<json> &fields) {
         if (column_name.empty()) throw std::invalid_argument("Column name can't be empty!");
 
@@ -100,6 +108,12 @@ namespace mb {
         throw std::runtime_error("No field type found matching column `" + column_name + "'");
     }
 
+    /**
+     * @brief Convert a SOCI result row to JSON using entity field metadata.
+     * @param db_type Active database type string (affects date formatting).
+     * @param row SOCI row from a SELECT.
+     * @param entity_fields Schema fields array for type lookup.
+     */
     inline json sociRow2Json(const std::string& db_type, const soci::row &row, const std::vector<json> &entity_fields) {
         // Guard against empty reference schema fields
         if (entity_fields.empty())

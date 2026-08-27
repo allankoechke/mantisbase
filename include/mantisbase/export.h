@@ -1,3 +1,11 @@
+/**
+ * @file export.h
+ * @brief DLL/shared-library symbol visibility macros for MantisBase.
+ *
+ * Defines @ref MANTISBASE_API for marking public symbols when building or consuming
+ * MantisBase as a shared library. Empty when `MANTISBASE_STATIC` is defined.
+ */
+
 #ifndef MANTISBASE_EXPORT_H
 #define MANTISBASE_EXPORT_H
 

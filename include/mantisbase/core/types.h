@@ -1,3 +1,12 @@
+/**
+ * @file types.h
+ * @brief Core type aliases, handler signatures, and the @ref IMantisBase DI mixin.
+ *
+ * Defines the function types used throughout routing (@ref HandlerFn, @ref MiddlewareFn)
+ * and the non-owning @ref MantisBase reference mixin inherited by request/response wrappers
+ * and service classes.
+ */
+
 #ifndef MANTISBASE_TYPES_H
 #define MANTISBASE_TYPES_H
 
@@ -29,18 +38,24 @@ namespace mb {
 
     using json = nlohmann::json;
 
+    /** Middleware short-circuit result: stop or continue the chain. */
     enum class HandlerResponse {
-        Handled,
-        Unhandled
+        Handled,   /**< Response already sent; skip remaining middleware/handler. */
+        Unhandled  /**< Continue to the next middleware or route handler. */
     };
 
+    /** Standard route handler `(request, response)`. */
     using HandlerFn = std::function<void(MantisRequest&, MantisResponse&)>;
+
+    /** Route handler with multipart/content reader `(request, response, reader)`. */
     using HandlerWithContentReaderFn = std::function<void(MantisRequest&, MantisResponse&,
                                                                  MantisContentReader&)>;
     using MiddlewareFn = std::function<HandlerResponse(MantisRequest&, MantisResponse&)>;
     using Middlewares = std::vector<MiddlewareFn>;
     using Method = std::string;
     using Path = std::string;
+
+    /** Route lookup key: HTTP method + path pattern. */
     using RouteKey = std::pair<Method, Path>;
 
     /**
@@ -66,7 +81,7 @@ namespace mb {
         /** @brief Application that owns this service or request context. */
         [[nodiscard]] const MantisBase &mbApp() const;
 
-        /// Get the logger instance
+        /** @return Application logger via @ref MantisBase::logger. */
         [[nodiscard]] const Logger& logger() const;
     };
 

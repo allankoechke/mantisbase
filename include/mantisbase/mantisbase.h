@@ -221,10 +221,9 @@ namespace mb
          */
         void setMigrationsDir(const std::string& dir);
 
-        /**
-         * @brief Whether first-boot admin setup (browser) should be skipped on serve.
-         */
+        /** Whether first-boot admin setup (browser) should be skipped on serve. */
         [[nodiscard]] bool skipAdminSetup() const;
+        /** Enable or disable first-boot admin setup on serve. */
         void setSkipAdminSetup(bool skip);
 
         /**
@@ -234,8 +233,8 @@ namespace mb
         [[nodiscard]] std::string dbType() const;
 
         /**
-         * Update the active database type for Mantis.
-         * @param dbType New database type enum value.
+         * @brief Update the active database type for Mantis.
+         * @param dbType New database type (`sqlite3` or `postgresql`).
          */
         void setDbType(const std::string& dbType);
         /**
@@ -244,7 +243,7 @@ namespace mb
          */
         [[nodiscard]] std::string jwtSecretKey() const;
 
-        /// Generate snowflake ID
+        /** @return Next Snowflake ID string for records and sessions. */
         std::string snowflakeId() const;
 
         /**
@@ -252,30 +251,38 @@ namespace mb
          * @return Application version
          */
         static std::string appVersion();
-        /// Fetch the major version
-        static int appMinorVersion();
-        /// Fetch the minor version
+        /** @return Major version component from @ref appVersion(). */
         static int appMajorVersion();
-        /// Fetch the patch version
+        /** @return Minor version component from @ref appVersion(). */
+        static int appMinorVersion();
+        /** @return Patch version component from @ref appVersion(). */
         static int appPatchVersion();
 
         /// Get the database unit object
         [[nodiscard]] Database& db() const;
-        /// Get the commandline parser object
+
+        /** @return Command-line argument parser populated during @ref create. */
         [[nodiscard]] argparse::ArgumentParser& cmd() const;
-        /// Get the router object instance.
+
+        /** @return HTTP router (route registration, schema cache, SSE manager). */
         [[nodiscard]] Router& router() const;
-        /// Get the KeyValue unit object
+
+        /** @return Application settings key-value store (`/api/v1/sys/settings`). */
         [[nodiscard]] KeyValStore& settings() const;
-        /// Get the logs unit object
+
+        /** @return Logger (alias of @ref logger). */
         [[nodiscard]] Logger& logs() const;
-        /// Get the realtime unit (SQLite/PostgreSQL change detection for SSE /api/v1/realtime).
+
+        /** @return Realtime change-detection worker (SQLite/PostgreSQL → SSE/WS). */
         [[nodiscard]] RealtimeDB& rt() const;
-        /// Get the FilesMgr instance
+
+        /** @return File asset manager for entity upload fields. */
         [[nodiscard]] FilesMgr& files() const;
-        /// Get Logger instance
+
+        /** @return Structured application logger. */
         [[nodiscard]] Logger& logger() const;
-        /// Get Auth instance
+
+        /** @return JWT, API key, and OAuth services. */
         [[nodiscard]] Auth& auth() const;
 
         /**
@@ -298,6 +305,7 @@ namespace mb
 
         /// Get the duktape context
 #ifdef MB_SCRIPTING_ENABLED
+        /** @return Duktape VM context for server-side JavaScript extensions. */
         [[nodiscard]] duk_context* ctx() const;
 #endif
 
@@ -317,6 +325,7 @@ namespace mb
          */
         [[nodiscard]] std::chrono::time_point<std::chrono::steady_clock> startTime() const;
 
+        /** @return `true` when the app was started with dev-mode flags enabled. */
         [[nodiscard]] bool isDevMode() const;
 
     private:

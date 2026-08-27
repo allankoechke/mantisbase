@@ -1,6 +1,11 @@
-//
-// Created by allan on 18/10/2025.
-//
+/**
+ * @file context_store.h
+ * @brief Generic key-value context store for scripting and internal utilities.
+ *
+ * HTTP handlers should prefer @ref MantisRequest::set and @ref MantisRequest::getOr for
+ * per-request attributes (`auth`, `verification`, etc.). This store is used where a
+ * standalone typed bag is needed outside the request lifecycle.
+ */
 
 #ifndef MANTISAPP_CONTEXTSTORE_H
 #define MANTISAPP_CONTEXTSTORE_H

@@ -1,3 +1,12 @@
+/**
+ * @file router.h
+ * @brief HTTP router: route registration, schema cache, CORS, and built-in API endpoints.
+ *
+ * Bridges MantisBase handler/middleware chains (@ref RouteRegistry) to Drogon's HTTP server.
+ * Also owns @ref SSEMgr (SSE + WebSocket realtime) and the entity schema cache used on
+ * every CRUD request.
+ */
+
 #ifndef MB_ROUTER_H
 #define MB_ROUTER_H
 
@@ -18,15 +27,24 @@
 namespace mb {
     class SSEMgr;
 
+    /**
+     * @brief Central HTTP router and schema cache for a @ref MantisBase instance.
+     */
     class Router: public IMantisBase {
     public:
         explicit Router(const MantisBase& app);
         ~Router();
 
+        /** Initialize Drogon, register routes, and prepare the schema cache. */
         bool init();
+
+        /** Start listening on the configured host/port. */
         bool listen();
+
+        /** Stop the HTTP server and realtime subsystems. */
         void close();
 
+        /** @return SSE/WebSocket realtime manager. */
         SSEMgr& sseMgr() const;
 
         void Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
@@ -36,18 +54,25 @@ namespace mb {
         void Patch(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
         void Delete(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
+        /** @return Cached entity schema JSON for `table_name`. */
         const json &schemaCache(const std::string &table_name) const;
-        bool hasSchemaCache(const std::string &table_name) const;
+
+        [[nodiscard]] bool hasSchemaCache(const std::string &table_name) const;
+
+        /** @return Cached @ref Entity built from the schema cache entry. */
         Entity schemaCacheEntity(const std::string &table_name) const;
+
         void addSchemaCache(const nlohmann::json &entity_schema) const;
         void updateSchemaCache(const std::string &old_entity_name, const json &new_schema) const;
         void removeSchemaCache(const std::string &entity_name) const;
 
+        /** Like @ref addSchemaCache but assumes the caller already holds the schema mutex. */
         void addSchemaCacheLocked(const nlohmann::json &entity_schema) const;
 
+        /** Like @ref removeSchemaCache but assumes the caller already holds the schema mutex. */
         void removeSchemaCacheLocked(const std::string &entity_name) const;
 
-        bool isRunning() const;
+        [[nodiscard]] bool isRunning() const;
 
         /** Reload allowed CORS origins from settings and MB_CORS_ORIGINS. */
         void reloadCorsOrigins();
