@@ -74,8 +74,10 @@ namespace mb {
         /** Resolve a stored key by hash; used by auth middleware. */
         [[nodiscard]] std::optional<json> lookupByHash(const std::string &key_hash) const;
 
+        /** Admin: list all system API keys (metadata only). */
         [[nodiscard]] json listAdmin() const;
 
+        /** Admin: create a system API key for an admin user. Returns one-time `key`. */
         [[nodiscard]] json createAdmin(const std::string &user_id, const std::string &label,
                                const json &permissions = json::array(),
                                const std::string &expires_at = "") const;

@@ -1,47 +1,63 @@
 #include "../../include/mantisbase/core/ws.h"
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/core/sse.h"
-#include "../../include/mantisbase/core/api_keys.h"
-#include "../../include/mantisbase/core/models/access_rules.h"
+#include "../../include/mantisbase/core/realtime_session.h"
 #include "../../include/mantisbase/utils/utils.h"
 
 namespace mb {
 
     static constexpr size_t kMaxWSConnections = 1024;
 
-    // --- WSMgr ---
     WSMgr::WSMgr(const MantisBase& app) : m_app(app) {}
 
-    void WSMgr::addConnection(const drogon::WebSocketConnectionPtr &conn) {
+    void WSMgr::addConnection(const drogon::WebSocketConnectionPtr &conn,
+                                RealtimeWsSession session) {
         std::lock_guard lock(m_mutex);
-        if (m_connTopics.size() >= kMaxWSConnections) {
+        if (m_sessions.size() >= kMaxWSConnections) {
             conn->shutdown(drogon::CloseCode::kViolation, "Connection limit reached");
             return;
         }
+
+        m_sessions[conn] = std::move(session);
         m_connTopics[conn] = {};
     }
 
     void WSMgr::removeConnection(const drogon::WebSocketConnectionPtr &conn) {
         std::lock_guard lock(m_mutex);
         if (auto it = m_connTopics.find(conn); it != m_connTopics.end()) {
-            for (const auto &topic : it->second) {
-                if (auto tit = m_topicConns.find(topic); tit != m_topicConns.end()) {
-                    tit->second.erase(conn);
-                    if (tit->second.empty())
-                        m_topicConns.erase(tit);
+            removeTopicsFromIndexes(conn, it->second);
+            m_connTopics.erase(it);
+        }
+        m_sessions.erase(conn);
+    }
+
+    void WSMgr::removeTopicsFromIndexes(const drogon::WebSocketConnectionPtr &conn,
+                                        const std::set<std::string> &topics) {
+        for (const auto &topic : topics) {
+            if (auto tit = m_topicConns.find(topic); tit != m_topicConns.end()) {
+                tit->second.erase(conn);
+                if (tit->second.empty()) {
+                    m_topicConns.erase(tit);
                 }
             }
-            m_connTopics.erase(it);
         }
     }
 
-    void WSMgr::subscribe(const drogon::WebSocketConnectionPtr &conn,
-                           const std::vector<std::string> &topics) {
+    void WSMgr::setTopics(const drogon::WebSocketConnectionPtr &conn,
+                          const std::vector<std::string> &topics) {
         std::lock_guard lock(m_mutex);
         auto &connTopics = m_connTopics[conn];
+        removeTopicsFromIndexes(conn, connTopics);
+        connTopics.clear();
+
         for (const auto &topic : topics) {
             connTopics.insert(topic);
             m_topicConns[topic].insert(conn);
+        }
+
+        if (auto it = m_sessions.find(conn); it != m_sessions.end()) {
+            it->second.topics = connTopics;
+            touchWsSession(it->second);
         }
     }
 
@@ -53,9 +69,15 @@ namespace mb {
                 it->second.erase(topic);
                 if (auto tit = m_topicConns.find(topic); tit != m_topicConns.end()) {
                     tit->second.erase(conn);
-                    if (tit->second.empty())
+                    if (tit->second.empty()) {
                         m_topicConns.erase(tit);
+                    }
                 }
+            }
+
+            if (auto sit = m_sessions.find(conn); sit != m_sessions.end()) {
+                sit->second.topics = it->second;
+                touchWsSession(sit->second);
             }
         }
     }
@@ -74,7 +96,61 @@ namespace mb {
 
     size_t WSMgr::connectionCount() {
         std::lock_guard lock(m_mutex);
-        return m_connTopics.size();
+        return m_sessions.size();
+    }
+
+    RealtimeWsSession *WSMgr::getSession(const drogon::WebSocketConnectionPtr &conn) {
+        std::lock_guard lock(m_mutex);
+        if (auto it = m_sessions.find(conn); it != m_sessions.end()) {
+            return &it->second;
+        }
+        return nullptr;
+    }
+
+    void WSMgr::cleanupStaleConnections(const MantisBase &app,
+                                        const std::chrono::steady_clock::time_point now) {
+        struct StaleConn {
+            drogon::WebSocketConnectionPtr conn;
+            bool token_expired{false};
+        };
+        std::vector<StaleConn> stale;
+
+        {
+            std::lock_guard lock(m_mutex);
+            for (auto &[conn, session] : m_sessions) {
+                if (isAuthExpired(session.auth, app)) {
+                    stale.push_back({conn, true});
+                    continue;
+                }
+
+                const auto connected_seconds = std::chrono::duration_cast<std::chrono::seconds>(
+                    now - session.connected_at).count();
+                const auto idle_minutes = std::chrono::duration_cast<std::chrono::minutes>(
+                    now - session.last_activity).count();
+
+                if (session.topics.empty()) {
+                    if (connected_seconds > kRealtimeNoTopicGraceSeconds) {
+                        stale.push_back({conn, false});
+                    }
+                    continue;
+                }
+
+                if (idle_minutes > kRealtimeIdleTimeoutMinutes) {
+                    stale.push_back({conn, false});
+                }
+            }
+        }
+
+        for (const auto &entry : stale) {
+            if (entry.token_expired) {
+                json err = {{"type", "error"}, {"message", "token_expired"}};
+                entry.conn->send(err.dump());
+                entry.conn->shutdown(drogon::CloseCode::kViolation, "token_expired");
+            } else {
+                entry.conn->shutdown(drogon::CloseCode::kNormalClosure, "idle_timeout");
+            }
+            removeConnection(entry.conn);
+        }
     }
 
     bool WSMgr::isInterestedIn(const std::set<std::string> &topics,
@@ -115,98 +191,112 @@ namespace mb {
         };
     }
 
-    // --- RealtimeWSController ---
+    namespace {
+
+        RealtimeWsSession *wsSessionFromConn(const drogon::WebSocketConnectionPtr &conn) {
+            if (auto ctx = conn->getContext<RealtimeWsSession>(); ctx) {
+                return ctx.get();
+            }
+            return nullptr;
+        }
+
+        void syncConnContext(const drogon::WebSocketConnectionPtr &conn, const RealtimeWsSession &session) {
+            conn->setContext(std::make_shared<RealtimeWsSession>(session));
+        }
+
+        RealtimeAuthSnapshot resolveWsMessageAuth(const MantisBase &app, const json &msg,
+                                                    RealtimeWsSession *session) {
+            if (msg.contains("token") && msg["token"].is_string()) {
+                const auto token = trim(msg["token"].get<std::string>());
+                if (!token.empty()) {
+                    return resolveRealtimeAuth(app, token);
+                }
+            }
+            return session ? session->auth : makeGuestAuthSnapshot();
+        }
+
+        void handleSubscribe(const MantisBase &app,
+                             const drogon::WebSocketConnectionPtr &conn,
+                             const json &msg) {
+            auto session_ctx = conn->getContext<RealtimeWsSession>();
+            if (!session_ctx) {
+                json err = {{"type", "error"}, {"message", "Session not initialized"}};
+                conn->send(err.dump());
+                return;
+            }
+
+            RealtimeWsSession session = *session_ctx;
+            touchWsSession(session);
+
+            const auto incoming_auth = resolveWsMessageAuth(app, msg, &session);
+            auto session_auth = session.auth;
+            const auto upgrade = tryUpgradeAuth(session_auth, incoming_auth);
+
+            if (upgrade == AuthUpgradeResult::DeniedDowngrade ||
+                upgrade == AuthUpgradeResult::DeniedSwitch) {
+                json err = {{"type", "error"}, {"message", "Auth upgrade denied"}};
+                conn->send(err.dump());
+                return;
+            }
+
+            if (upgrade == AuthUpgradeResult::Applied) {
+                session.auth = session_auth;
+            }
+
+            auto topics = msg.value("topics", std::vector<std::string>{});
+            const auto access = filterAuthorizedTopics(app, topics, session.auth);
+
+            auto &wsMgr = app.router().sseMgr().wsMgr();
+            wsMgr.setTopics(conn, access.granted);
+
+            if (auto *mgr_session = wsMgr.getSession(conn); mgr_session) {
+                session.auth = mgr_session->auth;
+                session.topics = mgr_session->topics;
+                session.client_id = mgr_session->client_id;
+                session.connected_at = mgr_session->connected_at;
+                session.last_activity = mgr_session->last_activity;
+                mgr_session->auth = session.auth;
+            }
+
+            syncConnContext(conn, session);
+
+            json ack = {
+                {"type", "subscribed"},
+                {"topics", access.granted},
+                {"denied", access.denied}
+            };
+            conn->send(ack.dump());
+        }
+    }
 
     void RealtimeWSController::handleNewConnection(
         const drogon::HttpRequestPtr &req,
         const drogon::WebSocketConnectionPtr &conn) {
 
-        // Check env var toggle
         if (strToBool(getEnvOrDefault("MB_DISABLE_REALTIME_WS", "0"))) {
             conn->shutdown(drogon::CloseCode::kNormalClosure, "WebSocket is disabled");
             return;
         }
 
-        // Authenticate: extract token from query param or Authorization header
-        std::string token;
-        if (req->getParameter("token").length() > 0) {
-            token = req->getParameter("token");
-        } else if (req->getHeader("Authorization").length() > 0) {
-            auto auth_header = req->getHeader("Authorization");
-            if (auth_header.starts_with("Bearer ")) {
-                token = auth_header.substr(7);
-            }
-        }
+        RealtimeWsSession session;
+        session.client_id = generateRealtimeClientId("rt_ws");
+        session.auth = resolveRealtimeAuth(m_app, resolveRealtimeToken(req));
+        session.connected_at = std::chrono::steady_clock::now();
+        session.last_activity = session.connected_at;
 
-        if (token.empty()) {
-            conn->shutdown(drogon::CloseCode::kViolation, "Unauthorized");
-            return;
-        }
+        m_app.logger().info("WebSocket", std::format("WS connection {} from {}",
+                       session.client_id, conn->peerAddr().toIpPort()));
 
-        json auth_context;
-        json verification_context;
-
-        // Check for API key
-        if (token.starts_with("mb_sk_")) {
-            auto key_hash = ApiKeyManager::hashApiKey(token);
-            auto key_info = m_app.auth().apiKey().lookupByHash(key_hash);
-            if (!key_info.has_value()) {
-                conn->shutdown(drogon::CloseCode::kViolation, "Unauthorized");
-                return;
-            }
-            const auto entity_name = key_info.value()["entity_name"].get<std::string>();
-            auth_context["entity"] = entity_name;
-            auth_context["id"] = key_info.value()["user_id"];
-            auth_context["type"] = entity_name == "mb_admins" ? "admin" : "user";
-            auth_context["mode"] = "api";
-            auth_context["auth_method"] = "api_key";
-            verification_context["verified"] = true;
-            verification_context["claims"] = {
-                {"id", auth_context["id"]},
-                {"entity", auth_context["entity"]}
-            };
-            verification_context["error"] = "";
-        } else {
-            // JWT token verification
-            auto verification = m_app.auth().verifyToken(token);
-            if (!verification.at("verified").get<bool>()) {
-                conn->shutdown(drogon::CloseCode::kViolation, "Unauthorized");
-                return;
-            }
-            const auto entity_name = verification["claims"]["entity"].get<std::string>();
-            auth_context["entity"] = entity_name;
-            auth_context["id"] = verification["claims"]["id"];
-            auth_context["type"] = entity_name == "mb_admins" ? "admin" : "user";
-            auth_context["mode"] = "jwt";
-            auth_context["auth_method"] = "jwt";
-            verification_context = verification;
-        }
-
-        auth_context["user"] = json::object();
-        try {
-            const auto entity_name = auth_context["entity"].get<std::string>();
-            const auto user_id = auth_context["id"].get<std::string>();
-            const auto user_entity = m_app.entity(entity_name);
-            if (auto user = user_entity.read(user_id); user.has_value()) {
-                auto u = user.value();
-                u.erase("password");
-                auth_context["user"] = u;
-            }
-        } catch (...) {
-        }
-
-        auth_context["verification"] = verification_context;
-
-        m_app.logger().info("WebSocket", std::format("Authenticated WS connection from {}",
-                       conn->peerAddr().toIpPort()));
-
-        // Store auth context on the connection for topic authorization
-        conn->setContext(std::make_shared<json>(auth_context));
+        conn->setContext(std::make_shared<RealtimeWsSession>(session));
 
         auto &wsMgr = m_app.router().sseMgr().wsMgr();
-        wsMgr.addConnection(conn);
+        wsMgr.addConnection(conn, session);
 
-        const json welcome = {{"type", "connected"}, {"message", "WebSocket connected"}};
+        json welcome = {
+            {"type", "connected"},
+            {"client_id", session.client_id},
+            {"topics", json::array()}
+        };
         conn->send(welcome.dump());
     }
 
@@ -222,49 +312,12 @@ namespace mb {
             auto msg = json::parse(message);
             auto msgType = msg.value("type", "");
 
-            if (msgType == "subscribe") {
-                auto topics = msg.value("topics", std::vector<std::string>{});
-                if (!topics.empty()) {
-                    // Validate each topic against the entity's access rules
-                    auto auth_ctx = conn->getContext<json>();
-                    if (!auth_ctx) {
-                        json err = {{"type", "error"}, {"message", "Unauthorized"}};
-                        conn->send(err.dump());
-                        return;
-                    }
+            if (auto *session = wsSessionFromConn(conn); session) {
+                touchWsSession(*session);
+            }
 
-                    const json verification = auth_ctx->contains("verification")
-                                                  ? (*auth_ctx)["verification"]
-                                                  : json{{"verified", true}};
-                    std::vector<std::string> authorized_topics;
-                    for (const auto &topic : topics) {
-                        auto entity_name = topic;
-                        std::string record_id;
-                        if (auto pos = topic.find(':'); pos != std::string::npos) {
-                            entity_name = topic.substr(0, pos);
-                            record_id = topic.substr(pos + 1);
-                        }
-
-                        try {
-                            auto entity = m_app.entity(entity_name);
-                            auto rule = record_id.empty() ? entity.listRule() : entity.getRule();
-                            AccessEvalContext eval_ctx{*auth_ctx, verification, nullptr};
-                            if (evaluateAccessRule(rule, eval_ctx) == AccessEvalResult::Allow) {
-                                authorized_topics.push_back(topic);
-                            }
-                        } catch (...) {
-                            // Entity does not exist — skip topic
-                        }
-                    }
-
-                    if (!authorized_topics.empty()) {
-                        auto &wsMgr = m_app.router().sseMgr().wsMgr();
-                        wsMgr.subscribe(conn, authorized_topics);
-                    }
-
-                    json ack = {{"type", "subscribed"}, {"topics", authorized_topics}};
-                    conn->send(ack.dump());
-                }
+            if (msgType == "subscribe" || msgType == "auth") {
+                handleSubscribe(m_app, conn, msg);
             } else if (msgType == "unsubscribe") {
                 auto topics = msg.value("topics", std::vector<std::string>{});
                 if (!topics.empty()) {
@@ -278,7 +331,7 @@ namespace mb {
                 json pong = {{"type", "pong"}};
                 conn->send(pong.dump());
             }
-        } catch (const std::exception &e) {
+        } catch (const std::exception &) {
             json err = {{"type", "error"}, {"message", "Invalid message format"}};
             conn->send(err.dump());
         }

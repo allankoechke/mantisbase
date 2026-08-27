@@ -67,29 +67,39 @@ namespace mb {
                                        const std::string &code,
                                        const std::string &state) const;
 
+        /** Unlink an OAuth provider from a user account. */
         [[nodiscard]] bool unlinkAccount(const std::string &entity_name,
                                          const std::string &user_id,
                                          const std::string &provider_name) const;
 
+        /** List OAuth identities linked to @p user_id within @p entity_name. */
         [[nodiscard]] json getLinkedAccounts(const std::string &entity_name,
                                              const std::string &user_id) const;
 
+        /** List OAuth providers enabled for an entity (user-facing metadata). */
         json getProviders(const std::string &entity_name);
 
+        /** Admin: create a provider configuration row. */
         [[nodiscard]] json addProvider(const json &provider_data) const;
 
+        /** Admin: patch provider settings (client id/secret, endpoints, etc.). */
         [[nodiscard]] json updateProvider(const std::string &provider_id, const json &updates) const;
 
+        /** Admin: delete a provider by id. */
         [[nodiscard]] bool removeProvider(const std::string &provider_id) const;
 
+        /** Admin: list all configured providers. */
         [[nodiscard]] json listProviders() const;
 
+        /** Admin: attach a provider to an entity's allowed login methods. */
         json enableProviderForEntity(const std::string &entity_name,
                                      const std::string &provider_id) const;
 
+        /** Admin: detach a provider from an entity. */
         bool disableProviderForEntity(const std::string &entity_name,
                                       const std::string &provider_id) const;
 
+        /** @return AES key material used to encrypt stored OAuth client secrets. */
         std::string getEncryptionKey() const;
 
     private:

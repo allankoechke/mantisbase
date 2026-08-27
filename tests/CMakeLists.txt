@@ -37,6 +37,7 @@ file(GLOB TEST_FILES
         unit/test_api_keys.cpp
         unit/test_validators.cpp
         unit/test_http_request.cpp
+        unit/test_realtime_session.cpp
         integration/test_integration_crud.cpp
         integration/test_integration_schema.cpp
         integration/test_integration_auth.cpp

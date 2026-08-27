@@ -31,6 +31,10 @@
 #include "core/router.h"
 #include "core/kv_store.h"
 #include "core/types.h"
+#include "core/realtime.h"
+#include "core/realtime_session.h"
+#include "core/sse.h"
+#include "core/ws.h"
 
 // Models and data structures
 #include "core/models/validators.h"

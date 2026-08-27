@@ -5,16 +5,55 @@
 
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/core/ws.h"
-#include "../../include/mantisbase/core/models/access_rules.h"
+#include "../../include/mantisbase/core/realtime_session.h"
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/utils/utils.h"
-#include "../../include/mantisbase/utils/uuidv7.h"
 
 #include <drogon/drogon.h>
 
 namespace mb {
     static constexpr size_t kMaxSSEConnections = 1024;
     static constexpr size_t kMaxTopicsPerSession = 50;
+
+    namespace {
+
+        std::vector<std::string> topicsJsonToStrings(const json &topics) {
+            std::vector<std::string> result;
+            for (const auto &topic : topics) {
+                auto entity_name = topic["entity"].get<std::string>();
+                auto record_id = topic["id"].get<std::string>();
+                if (!record_id.empty()) {
+                    entity_name = std::format("{}:{}", entity_name, record_id);
+                }
+                result.push_back(entity_name);
+            }
+            return result;
+        }
+
+        std::set<std::string> vectorToTopicSet(const std::vector<std::string> &topics) {
+            return {topics.begin(), topics.end()};
+        }
+
+        json topicSetToJsonArray(const std::set<std::string> &topics) {
+            json arr = json::array();
+            for (const auto &topic : topics) {
+                arr.push_back(topic);
+            }
+            return arr;
+        }
+
+        std::string resolveSubscribeToken(MantisRequest &req) {
+            const auto &[body, err] = req.getBodyAsJson();
+            if (err.empty() && body.contains("token") && body["token"].is_string()) {
+                const auto token = trim(body["token"].get<std::string>());
+                if (!token.empty()) {
+                    return token;
+                }
+            }
+
+            return resolveRealtimeToken(req.drogonRequest());
+        }
+    } // namespace
 
     SSEMgr::SSEMgr(const MantisBase &app)
         : IMantisBase(app),
@@ -26,20 +65,13 @@ namespace mb {
     void SSEMgr::createRoutes() {
         auto &router = mbApp().router();
 
-        // SSE GET endpoint — registers directly with Drogon for async streaming
-        auto getMiddlewares = std::vector<MiddlewareFn>{
-            validateSubTopics(false),
-            validateHasAccess(),
-            updateAuthTokenForSSE()
-        };
-
-        auto sseGetMiddlewares = std::make_shared<std::vector<MiddlewareFn> >(std::move(getMiddlewares));
+        auto sseGetMiddlewares = std::make_shared<std::vector<MiddlewareFn>>(
+            std::vector<MiddlewareFn>{validateSubTopics(false)});
 
         drogon::app().registerHandler(
             "/api/v1/realtime",
             [this, sseGetMiddlewares](const drogon::HttpRequestPtr &req,
                                       std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-                // Check env var toggle
                 if (strToBool(getEnvOrDefault("MB_DISABLE_REALTIME_SSE", "0"))) {
                     auto resp = drogon::HttpResponse::newHttpResponse();
                     resp->setStatusCode(drogon::k503ServiceUnavailable);
@@ -49,39 +81,26 @@ namespace mb {
                     return;
                 }
 
-
                 MantisRequest ma_req{mbApp(), req};
                 MantisResponse ma_res{mbApp()};
 
-                // Run global pre-routing middlewares
                 auto &preMiddlewares = mbApp().router().preRoutingMiddlewares();
-                for (const auto &mw: preMiddlewares) {
+                for (const auto &mw : preMiddlewares) {
                     if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
                         callback(ma_res.drogonResponse());
                         return;
                     }
                 }
 
-                // Run SSE-specific middlewares
-                for (const auto &mw: *sseGetMiddlewares) {
+                for (const auto &mw : *sseGetMiddlewares) {
                     if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
                         callback(ma_res.drogonResponse());
                         return;
                     }
                 }
 
-                // Parse topics from middleware context
-                auto topics = ma_req.getOr<json>("topics", json::array());
-                std::set<std::string> topicSet;
-                for (const auto &topic: topics) {
-                    auto entity_name = topic["entity"].get<std::string>();
-                    auto record_id = topic["id"].get<std::string>();
-                    if (!record_id.empty())
-                        entity_name = std::format("{}:{}", entity_name, record_id);
-                    topicSet.insert(entity_name);
-                }
-
-                if (topicSet.size() > kMaxTopicsPerSession) {
+                const auto requested_topics = topicsJsonToStrings(ma_req.getOr<json>("topics", json::array()));
+                if (requested_topics.size() > kMaxTopicsPerSession) {
                     auto resp = drogon::HttpResponse::newHttpResponse();
                     resp->setStatusCode(drogon::k400BadRequest);
                     resp->setContentTypeString("application/json");
@@ -90,31 +109,28 @@ namespace mb {
                     return;
                 }
 
-                auto auth = ma_req.getOr<json>("auth", json::object());
-                const auto owner_entity = auth["entity"].is_string()
-                                              ? auth["entity"].get<std::string>()
-                                              : std::string{};
-                const auto owner_id = auth["user"].is_object() && auth["user"]["id"].is_string()
-                                          ? auth["user"]["id"].get<std::string>()
-                                          : std::string{};
+                const auto auth_snap = resolveRealtimeAuth(mbApp(), resolveRealtimeToken(req));
+                const auto access = filterAuthorizedTopics(mbApp(), requested_topics, auth_snap);
+                const auto granted_topics = vectorToTopicSet(access.granted);
 
-                // Create async stream response for SSE
                 auto resp = drogon::HttpResponse::newAsyncStreamResponse(
-                    [this, topicSet, owner_entity, owner_id](drogon::ResponseStreamPtr stream) {
-                        auto clientId = createSession(topicSet, std::move(stream),
-                                                       owner_entity, owner_id);
+                    [this, granted_topics, auth_snap, denied = access.denied](drogon::ResponseStreamPtr stream) {
+                        const auto client_id = createSession(granted_topics, std::move(stream), auth_snap);
 
-                        if (clientId.empty()) {
+                        if (client_id.empty()) {
                             stream->close();
                             return;
                         }
 
-                        // Send the initial connected event through the session
-                        if (auto session = getSession(clientId); session) {
+                        if (auto session = getSession(client_id); session) {
                             json connected = {
-                                {"client_id", clientId},
-                                {"topics", topicSet}
+                                {"client_id", client_id},
+                                {"topics", topicSetToJsonArray(granted_topics)},
+                                {"timestamp", std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())}
                             };
+                            if (!denied.empty()) {
+                                connected["denied"] = denied;
+                            }
                             session->sendEvent("connected", connected);
                         }
                     });
@@ -128,15 +144,9 @@ namespace mb {
             },
             {drogon::Get});
 
-        // POST /api/v1/realtime — update topics for existing session
         router.Post("/api/v1/realtime",
                     handleSSESessionUpdate(),
-                    {
-                        validateSubTopics(true),
-                        validateHasAccess(),
-                        updateAuthTokenForSSE()
-                    }
-        );
+                    {validateSubTopics(true)});
 
         RealtimeWSController::initPathRouting();
         drogon::app().registerController(std::make_shared<RealtimeWSController>(mbApp()));
@@ -144,8 +154,7 @@ namespace mb {
 
     std::string SSEMgr::createSession(const std::set<std::string> &initial_topics,
                                       drogon::ResponseStreamPtr stream,
-                                      const std::string &owner_entity,
-                                      const std::string &owner_id) {
+                                      RealtimeAuthSnapshot auth) {
         std::lock_guard lock(m_sessions_mutex);
 
         if (m_sessions.size() >= kMaxSSEConnections) {
@@ -153,9 +162,8 @@ namespace mb {
             return "";
         }
 
-        std::string client_id = generateClientID();
-        auto session = std::make_shared<SSESession>(client_id, initial_topics, std::move(stream),
-                                                     owner_entity, owner_id);
+        const std::string client_id = generateRealtimeClientId("rt_sse");
+        auto session = std::make_shared<SSESession>(client_id, initial_topics, std::move(stream), std::move(auth));
         m_sessions[client_id] = session;
 
         logger().info("SSE Manager",
@@ -203,12 +211,11 @@ namespace mb {
 
     void SSEMgr::broadcastChange(const json &change_event) {
         try {
-            // Broadcast to SSE sessions
             {
                 std::lock_guard lock(m_sessions_mutex);
                 std::vector<std::string> deadSessions;
 
-                for (const auto &[clientId, session]: m_sessions) {
+                for (const auto &[clientId, session] : m_sessions) {
                     if (!session->isActive()) {
                         deadSessions.push_back(clientId);
                         continue;
@@ -221,7 +228,7 @@ namespace mb {
                     }
                 }
 
-                for (const auto &id: deadSessions) {
+                for (const auto &id : deadSessions) {
                     if (auto it = m_sessions.find(id); it != m_sessions.end()) {
                         it->second->close();
                         m_sessions.erase(it);
@@ -229,7 +236,6 @@ namespace mb {
                 }
             }
 
-            // Broadcast to WebSocket connections
             if (m_wsMgr) {
                 m_wsMgr->broadcastChange(change_event);
             }
@@ -249,15 +255,14 @@ namespace mb {
 
     void SSEMgr::start() {
         mbApp().rt().runWorker([this](const json &items) {
-            for (const auto &data_item: items) broadcastChange(data_item);
+            for (const auto &data_item : items) broadcastChange(data_item);
         });
 
-        // Start cleanup thread for idle connections
         m_cleanup_thread = std::thread([this] {
             while (m_running.load()) {
                 {
                     std::unique_lock lock(m_sessions_mutex);
-                    m_cv.wait_for(lock, std::chrono::minutes(1));
+                    m_cv.wait_for(lock, std::chrono::seconds(kRealtimeCleanupIntervalSeconds));
                 }
                 cleanupIdleSessions();
             }
@@ -278,23 +283,14 @@ namespace mb {
     bool SSEMgr::isRunning() const { return m_running.load(); }
 
     std::function<void(MantisRequest &, MantisResponse &)> SSEMgr::handleSSESessionUpdate() {
-        return [](mb::MantisRequest &req, mb::MantisResponse &res) {
-            auto topics = req.getOr<json>("topics", json::array());
-            auto client_id = req.getOr<std::string>("client_id", std::string{});
-            auto auth = req.getOr<json>("auth", json::object());
-            auto verification = req.getOr<json>("verification", json::object());
+        return [](MantisRequest &req, MantisResponse &res) {
+            const auto topics = req.getOr<json>("topics", json::array());
+            const auto client_id = req.getOr<std::string>("client_id", std::string{});
 
             auto &sse_mgr = req.mbApp().router().sseMgr();
 
-            std::set<std::string> new_topics;
-            for (const auto &topic: topics) {
-                auto entity_name = topic["entity"].get<std::string>();
-                auto record_id = topic["id"].get<std::string>();
-                if (!record_id.empty()) entity_name = std::format("{}:{}", entity_name, record_id);
-                new_topics.insert(entity_name);
-            }
-
-            if (new_topics.size() > kMaxTopicsPerSession) {
+            const auto requested_topics = topicsJsonToStrings(topics);
+            if (requested_topics.size() > kMaxTopicsPerSession) {
                 res.sendJSON(400, {
                     {"error", "Too many topics requested"},
                     {"data", json::object()},
@@ -303,210 +299,163 @@ namespace mb {
                 return;
             }
 
-            if (const auto session = sse_mgr.getSession(client_id); session) {
-                const auto caller_entity = auth["entity"].is_string()
-                                               ? auth["entity"].get<std::string>()
-                                               : std::string{};
-                const auto caller_id = auth["user"].is_object() && auth["user"]["id"].is_string()
-                                           ? auth["user"]["id"].get<std::string>()
-                                           : std::string{};
-
-                if (!session->ownerEntity().empty() &&
-                    (session->ownerEntity() != caller_entity || session->ownerId() != caller_id)) {
-                    res.sendJSON(403, {
-                        {"error", "You are not the owner of this session"},
-                        {"data", json::object()},
-                        {"status", 403}
-                    });
-                    return;
-                }
-
-                session->setTopics(new_topics);
-                res.sendJSON(200, {
-                                 {"error", ""},
-                                 {
-                                     "data", {
-                                         {"client_id", client_id},
-                                         {"topics", new_topics}
-                                     }
-                                 },
-                                 {"status", 200}
-                             }
-                );
+            const auto session = sse_mgr.getSession(client_id);
+            if (!session) {
+                res.sendJSON(404, {
+                    {"error", "Client session not found"},
+                    {"data", json::object()},
+                    {"status", 404}
+                });
                 return;
             }
 
-            res.sendJSON(404, {
-                             {"error", "Client session not found"},
-                             {"data", json::object()},
-                             {"status", 404}
-                         });
+            const auto incoming_auth = resolveRealtimeAuth(req.mbApp(), resolveSubscribeToken(req));
+            auto session_auth = session->authSnapshot();
+            const auto upgrade = tryUpgradeAuth(session_auth, incoming_auth);
+
+            if (upgrade == AuthUpgradeResult::DeniedDowngrade) {
+                res.sendJSON(403, {
+                    {"error", "Cannot downgrade authenticated realtime session to guest"},
+                    {"data", json::object()},
+                    {"status", 403}
+                });
+                return;
+            }
+
+            if (upgrade == AuthUpgradeResult::DeniedSwitch) {
+                res.sendJSON(403, {
+                    {"error", "Cannot switch authenticated user on an existing realtime session"},
+                    {"data", json::object()},
+                    {"status", 403}
+                });
+                return;
+            }
+
+            if (upgrade == AuthUpgradeResult::Applied) {
+                session->setAuthSnapshot(session_auth);
+            }
+
+            const auto access = filterAuthorizedTopics(req.mbApp(), requested_topics, session->authSnapshot());
+            const auto granted_topics = vectorToTopicSet(access.granted);
+            session->setTopics(granted_topics);
+
+            res.sendJSON(200, {
+                {"error", ""},
+                {"status", 200},
+                {"data", {
+                    {"client_id", client_id},
+                    {"topics", topicSetToJsonArray(granted_topics)},
+                    {"denied", access.denied}
+                }}
+            });
         };
     }
 
-    std::function<mb::HandlerResponse(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::validateSubTopics(
+    std::function<mb::HandlerResponse(MantisRequest &, MantisResponse &)> SSEMgr::validateSubTopics(
         bool is_updating) {
         return [is_updating](MantisRequest &req, const MantisResponse &res) {
             try {
                 std::set<std::string> topics;
-                // Parse JSON body when updating the sub topics
                 if (is_updating) {
-                    // Try to parse as JSON first
                     const auto &[body, err] = req.getBodyAsJson();
 
                     if (!err.empty()) {
                         res.sendJSON(400, {
-                                         {"error", err},
-                                         {"data", json::object()},
-                                         {"status", 400}
-                                     });
+                            {"error", err},
+                            {"data", json::object()},
+                            {"status", 400}
+                        });
                         return HandlerResponse::Handled;
                     }
 
                     if (!body.contains("client_id")) {
                         res.sendJSON(400, {
-                                         {"error", "Missing client_id in request body."},
-                                         {"data", json::object()},
-                                         {"status", 400}
-                                     });
+                            {"error", "Missing client_id in request body."},
+                            {"data", json::object()},
+                            {"status", 400}
+                        });
                         return HandlerResponse::Handled;
                     }
 
-                    std::string client_id = body["client_id"];
-
+                    const std::string client_id = body["client_id"];
                     if (client_id.empty()) {
                         res.sendJSON(400, {
-                                         {"error", "Invalid client_id provided"},
-                                         {"data", json::object()},
-                                         {"status", 400}
-                                     });
+                            {"error", "Invalid client_id provided"},
+                            {"data", json::object()},
+                            {"status", 400}
+                        });
                         return HandlerResponse::Handled;
                     }
 
                     if (!body.contains("topics")) {
                         res.sendJSON(400, {
-                                         {"error", "Missing topics array in request body."},
-                                         {"data", json::object()},
-                                         {"status", 400}
-                                     });
+                            {"error", "Missing topics array in request body."},
+                            {"data", json::object()},
+                            {"status", 400}
+                        });
                         return HandlerResponse::Handled;
                     }
 
                     if (!body["topics"].is_array()) {
                         res.sendJSON(400, {
-                                         {
-                                             "error", std::format(
-                                                 "Expected topics array in request body but found `{}`.",
-                                                 body["topics"].dump())
-                                         },
-                                         {"data", json::object()},
-                                         {"status", 400}
-                                     });
+                            {"error", std::format(
+                                "Expected topics array in request body but found `{}`.",
+                                body["topics"].dump())},
+                            {"data", json::object()},
+                            {"status", 400}
+                        });
                         return HandlerResponse::Handled;
                     }
 
-                    for (const auto &sub: body["topics"]) {
-                        if (auto topic = trim(sub.get<std::string>()); !topic.empty())
+                    for (const auto &sub : body["topics"]) {
+                        if (auto topic = trim(sub.get<std::string>()); !topic.empty()) {
                             topics.insert(topic);
+                        }
                     }
 
                     req.set("client_id", client_id);
-                }
-                // Parse URL Query params otherwise
-                else {
-                    if (req.hasQueryParam("topics")) {
-                        const std::string topics_param = req.getQueryParamValue("topics");
+                } else if (req.hasQueryParam("topics")) {
+                    const std::string topics_param = req.getQueryParamValue("topics");
+                    std::istringstream ss(topics_param);
+                    std::string topic;
 
-                        // Split by comma
-                        std::istringstream ss(topics_param);
-                        std::string topic;
-
-                        while (std::getline(ss, topic, ',')) {
-                            // Trim whitespace
-                            topic = trim(topic);
-
-                            if (!topic.empty()) {
-                                topics.insert(topic);
-                            }
+                    while (std::getline(ss, topic, ',')) {
+                        topic = trim(topic);
+                        if (!topic.empty()) {
+                            topics.insert(topic);
                         }
                     }
                 }
 
-                json _topics = json::array();
-
-                for (const auto &topic: topics) {
-                    auto array = splitString(topic, ":");
-                    auto entity_name = array.at(0);
-                    auto record_id = array.size() > 1 && array.at(1) != "*" ? array.at(1) : "";
+                json parsed_topics = json::array();
+                for (const auto &topic : topics) {
+                    const auto array = splitString(topic, ":");
+                    const auto entity_name = array.at(0);
+                    const auto record_id = array.size() > 1 && array.at(1) != "*" ? array.at(1) : "";
 
                     if (!req.mbApp().hasEntity(entity_name)) {
                         res.sendJSON(400, {
-                                         {"error", "Invalid topic name, expected valid entity name."},
-                                         {"data", json::object()},
-                                         {"status", 400}
-                                     });
+                            {"error", "Invalid topic name, expected valid entity name."},
+                            {"data", json::object()},
+                            {"status", 400}
+                        });
                         return HandlerResponse::Handled;
                     }
 
-                    _topics.push_back({
+                    parsed_topics.push_back({
                         {"entity", entity_name},
                         {"id", record_id}
                     });
                 }
 
-                // Store decoded topics on context ...
-                req.set("topics", _topics);
+                req.set("topics", parsed_topics);
             } catch (std::exception &e) {
                 std::cerr << e.what() << std::endl;
                 res.sendJSON(500, {
-                                 {"status", 500},
-                                 {"data", json::object()},
-                                 {"error", "An internal error occurred."}
-                             });
-            }
-
-            return HandlerResponse::Unhandled;
-        };
-    }
-
-    std::function<mb::HandlerResponse(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::validateHasAccess() {
-        return [](MantisRequest &req, const MantisResponse &res) -> HandlerResponse {
-            auto topics = req.getOr<json>("topics", json::array());
-            auto auth = req.getOr<json>("auth", json::object());
-            auto verification = req.getOr<json>("verification", json::object());
-
-            for (const auto &topic: topics) {
-                auto entity_name = topic["entity"].get<std::string>();
-                auto record_id = topic["id"].get<std::string>();
-
-                auto entity = req.mbApp().entity(entity_name);
-                auto rule = record_id.empty() ? entity.listRule() : entity.getRule();
-
-                AccessEvalContext ctx{auth, verification, &req};
-                const auto result = evaluateAccessRule(rule, ctx);
-                if (result == AccessEvalResult::Allow) {
-                    continue;
-                }
-
-                const auto [status, error] = accessEvalHttpError(result, rule);
-                std::string message = error;
-                if (rule.mode().empty()) {
-                    message = std::format("Admin auth required to access record(s) in `{}` entity.", entity_name);
-                } else if (result == AccessEvalResult::DenyUnknownRule) {
-                    message = std::format("Access denied, entity `{}` access rule unknown.", entity_name);
-                }
-
-                if (result == AccessEvalResult::DenyUnauthenticated && !verification.empty() &&
-                    verification.contains("error") && verification["error"].is_string() &&
-                    !verification["error"].get<std::string>().empty()) {
-                    message = verification["error"].get<std::string>();
-                }
-
-                res.sendJSON(status, {
-                                 {"data", json::object()},
-                                 {"status", status},
-                                 {"error", message}
-                             });
+                    {"status", 500},
+                    {"data", json::object()},
+                    {"error", "An internal error occurred."}
+                });
                 return HandlerResponse::Handled;
             }
 
@@ -514,58 +463,62 @@ namespace mb {
         };
     }
 
-    std::function<mb::HandlerResponse(mb::MantisRequest &, mb::MantisResponse &)> mb::SSEMgr::updateAuthTokenForSSE() {
-        return [](MantisRequest &req, const MantisResponse &res) {
-            // TODO update session token here ...
-            return HandlerResponse::Unhandled;
-        };
-    }
-
-    std::string mb::SSEMgr::generateClientID() {
-        static std::atomic<uint64_t> counter{0};
-        auto now = std::chrono::system_clock::now().time_since_epoch().count();
-        return std::format("sse_{}_{}{}", now, counter++, generateShortId(5));
-    }
-
-    void mb::SSEMgr::cleanupIdleSessions() {
-        std::lock_guard lock(m_sessions_mutex);
-
+    void SSEMgr::cleanupIdleSessions() {
         const auto now = std::chrono::steady_clock::now();
         std::vector<std::string> stale_sessions;
 
-        for (auto &[sessionId, session]: m_sessions) {
-            if (!session->isActive()) {
-                stale_sessions.push_back(sessionId);
-                continue;
+        {
+            std::lock_guard lock(m_sessions_mutex);
+
+            for (auto &[sessionId, session] : m_sessions) {
+                if (!session->isActive()) {
+                    stale_sessions.push_back(sessionId);
+                    continue;
+                }
+
+                if (isAuthExpired(session->authSnapshot(), mbApp())) {
+                    session->sendEvent("error", {{"reason", "token_expired"}});
+                    stale_sessions.push_back(sessionId);
+                    continue;
+                }
+
+                const auto connected_seconds = std::chrono::duration_cast<std::chrono::seconds>(
+                    now - session->getConnectedAt()).count();
+                const auto idle_minutes = std::chrono::duration_cast<std::chrono::minutes>(
+                    now - session->getLastActivity()).count();
+
+                if (session->getTopics().empty()) {
+                    if (connected_seconds > kRealtimeNoTopicGraceSeconds) {
+                        stale_sessions.push_back(sessionId);
+                    }
+                    continue;
+                }
+
+                if (idle_minutes > kRealtimeIdleTimeoutMinutes) {
+                    stale_sessions.push_back(sessionId);
+                    continue;
+                }
+
+                session->sendEvent("ping", {{"type", "keepalive"}});
             }
 
-            auto idle_time = std::chrono::duration_cast<std::chrono::minutes>(
-                now - session->getLastActivity()
-            ).count();
+            for (const auto &sessionId : stale_sessions) {
+                logger().warn("SSE Manager", std::format("Removing stale session: {}", sessionId));
+                if (auto it = m_sessions.find(sessionId); it != m_sessions.end()) {
+                    it->second->close();
+                    m_sessions.erase(it);
+                }
+            }
 
-            if (idle_time > 10 || session->getTopics().empty()) {
-                stale_sessions.push_back(sessionId);
-            } else {
-                // Send keepalive ping to active sessions
-                json ping = {{"type", "keepalive"}};
-                session->sendEvent("ping", ping);
+            if (!stale_sessions.empty()) {
+                logger().info("SSE Manager",
+                              std::format("Cleaned up {} stale sessions (Active: {})",
+                                          stale_sessions.size(), m_sessions.size()));
             }
         }
 
-        for (const auto &sessionId: stale_sessions) {
-            logger().warn("SSE Manager",
-                          std::format("Removing stale session: {}", sessionId));
-
-            if (auto it = m_sessions.find(sessionId); it != m_sessions.end()) {
-                it->second->close();
-                m_sessions.erase(it);
-            }
-        }
-
-        if (!stale_sessions.empty()) {
-            logger().info("SSE Manager",
-                          std::format("Cleaned up {} stale sessions (Active: {})",
-                                      stale_sessions.size(), m_sessions.size()));
+        if (m_wsMgr) {
+            m_wsMgr->cleanupStaleConnections(mbApp(), now);
         }
     }
 }

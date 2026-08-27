@@ -1,6 +1,6 @@
 /**
- * @file logging.h
- * @brief Wrapper around spdlog's functionality.
+ * @file logger.h
+ * @brief Structured logging wrapper around spdlog with optional SQLite persistence.
  *
  * Created by allan on 12/05/2025.
  */
@@ -25,14 +25,14 @@ namespace mb {
     class LogDatabase;
 
     /**
-     * Enum for the different logging levels.
+     * @brief Log severity levels mirrored in spdlog and the log database.
      */
     typedef enum class LogLevel : uint8_t {
-        TRACE = 0, ///> Trace logging level
-        DEBUG, ///> Debug Logging Level
-        INFO, ///> Info Logging Level
-        WARN, ///> Warning Logging Level
-        CRITICAL ///> Critical Logging Level
+        TRACE = 0,
+        DEBUG,
+        INFO,
+        WARN,
+        CRITICAL
     } LogLevel;
 
     /**

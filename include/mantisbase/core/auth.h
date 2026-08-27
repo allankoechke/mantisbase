@@ -1,6 +1,6 @@
 /**
- * @file jwt.h
- * @brief Handles JSON Web Token (JWT) creation and verification.
+ * @file auth.h
+ * @brief JWT session management and entry point for API keys and OAuth.
  *
  * Created by allan on 07/06/2025.
  */
@@ -50,13 +50,13 @@ namespace mb
         std::unique_ptr<ApiKeyManager> m_apiKeyManager;
 
     public:
-        /// Create Auth instance given a `const MantisBase&`
+        /** Construct auth services bound to @p app (OAuth + API keys). */
         explicit Auth(const MantisBase& app);
 
-        /// Return a ref to OAuthManger instance
+        /** @return OAuth manager for provider configuration and login flows. */
         [[nodiscard]] OAuthManager& oauth() const;
 
-        /// Return a ref to ApiKeyManager instance
+        /** @return API key manager for programmatic credentials. */
         [[nodiscard]] ApiKeyManager& apiKey() const;
 
         /**
@@ -74,10 +74,19 @@ namespace mb
         /** Default session lifetime in seconds for an entity (or @p timeout when positive). */
         [[nodiscard]] int sessionTimeoutSeconds(const std::string &entity_name, int timeout = -1) const;
 
+        /**
+         * @brief Verify a JWT and return claims plus verification metadata.
+         * @return JSON with `verified`, `error`, and claim fields on success/failure.
+         */
         json verifyToken(const std::string& token) const;
 
+        /** Invalidate a refresh/session row by id. */
         bool deleteSession(const std::string& session_id) const;
 
+        /**
+         * @brief Rotate a session: invalidate `old_session_id` and issue a new JWT.
+         * @return JSON with new `token` on success.
+         */
         json refreshSession(const std::string& old_session_id, const std::string& entity_name,
                                    const std::string& user_id);
     };

@@ -15,10 +15,12 @@ protected:
         port = getPort();
         adminToken = TestHelpers::createTestAdminToken(*client, mantis());
         createTestEntity();
+        createAuthOnlyEntity();
     }
 
     void TearDown() override {
         TestHelpers::cleanupTestEntity(*client, "ws_test_items", adminToken);
+        TestHelpers::cleanupTestEntity(*client, "ws_auth_items", adminToken);
         MbServerFixture::TearDown();
     }
 
@@ -41,72 +43,35 @@ protected:
         client->Post("/api/v1/schemas", headers, schema.dump(), "application/json");
     }
 
+    void createAuthOnlyEntity() {
+        if (adminToken.empty()) return;
+
+        const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+        const nlohmann::json rules = {
+            {"list", {{"mode", "auth"}}},
+            {"get", {{"mode", "auth"}}},
+            {"add", {{"mode", "auth"}}},
+            {"update", {{"mode", "auth"}}},
+            {"delete", {{"mode", "auth"}}}
+        };
+
+        const nlohmann::json schema = {
+            {"name", "ws_auth_items"},
+            {"type", "base"},
+            {"rules", rules},
+            {
+                "fields", nlohmann::json::array({
+                    {{"name", "title"}, {"type", "string"}, {"required", true}}
+                })
+            }
+        };
+
+        client->Post("/api/v1/schemas", headers, schema.dump(), "application/json");
+    }
+
     std::unique_ptr<TestHttp::Client> client;
     std::string adminToken;
     int port{0};
-
-    void expectUnauthorizedWsConnection(drogon::WebSocketClientPtr& wsClient,
-                                        const std::string& wsPath) {
-        std::promise<void> donePromise;
-        auto doneFuture = donePromise.get_future();
-        bool welcomeReceived = false;
-        bool closeVerified = false;
-        bool done = false;
-
-        auto req = drogon::HttpRequest::newHttpRequest();
-        req->setPath(wsPath);
-
-        wsClient->connectToServer(
-            req,
-            [&](drogon::ReqResult result,
-                const drogon::HttpResponsePtr&,
-                const drogon::WebSocketClientPtr& wsPtr) {
-                ASSERT_EQ(result, drogon::ReqResult::Ok);
-
-                wsPtr->setConnectionClosedHandler(
-                    [wsPtr, &done, &donePromise](const drogon::WebSocketClientPtr&) {
-                        wsPtr->stop();
-                        if (!done) {
-                            done = true;
-                            donePromise.set_value();
-                        }
-                    });
-
-                wsPtr->setMessageHandler(
-                    [&welcomeReceived, &closeVerified, &done, &donePromise](
-                        const std::string& msg,
-                        const drogon::WebSocketClientPtr& wsPtr,
-                        const drogon::WebSocketMessageType& type) {
-                        if (type == drogon::WebSocketMessageType::Text) {
-                            welcomeReceived = true;
-                            return;
-                        }
-                        if (type != drogon::WebSocketMessageType::Close || done) {
-                            return;
-                        }
-
-                        ASSERT_GE(msg.size(), 2u);
-                        const uint16_t closeCode =
-                            (static_cast<uint8_t>(msg[0]) << 8) |
-                            static_cast<uint8_t>(msg[1]);
-                        EXPECT_EQ(closeCode,
-                                  static_cast<uint16_t>(drogon::CloseCode::kViolation));
-                        if (msg.size() > 2) {
-                            EXPECT_EQ(msg.substr(2), "Unauthorized");
-                        }
-
-                        closeVerified = true;
-                        done = true;
-                        wsPtr->stop();
-                        donePromise.set_value();
-                    });
-            });
-
-        const auto status = doneFuture.wait_for(std::chrono::seconds(5));
-        ASSERT_EQ(status, std::future_status::ready);
-        EXPECT_FALSE(welcomeReceived);
-        EXPECT_TRUE(closeVerified);
-    }
 };
 
 struct ScopedWebSocketClient {
@@ -146,6 +111,174 @@ struct ScopedWebSocketClient {
     ~ScopedWebSocketClient() { shutdown(); }
 };
 
+TEST_F(IntegrationWSTest, WebSocketGuestConnectReceivesClientId) {
+    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
+    auto& wsClient = ws.client;
+
+    std::promise<std::string> welcomePromise;
+    auto welcomeFuture = welcomePromise.get_future();
+    bool promiseSet = false;
+
+    auto req = drogon::HttpRequest::newHttpRequest();
+    req->setPath("/api/v1/realtime/ws");
+
+    wsClient->connectToServer(
+        req,
+        [&welcomePromise, &promiseSet](drogon::ReqResult result,
+                              const drogon::HttpResponsePtr &,
+                              const drogon::WebSocketClientPtr &wsPtr) {
+            ASSERT_EQ(result, drogon::ReqResult::Ok);
+
+            wsPtr->setMessageHandler(
+                [&welcomePromise, &promiseSet](const std::string &msg,
+                                     const drogon::WebSocketClientPtr &,
+                                     const drogon::WebSocketMessageType &type) {
+                    if (type == drogon::WebSocketMessageType::Text && !promiseSet) {
+                        promiseSet = true;
+                        welcomePromise.set_value(msg);
+                    }
+                });
+        });
+
+    ASSERT_EQ(welcomeFuture.wait_for(std::chrono::seconds(5)), std::future_status::ready);
+
+    const auto parsed = nlohmann::json::parse(welcomeFuture.get());
+    EXPECT_EQ(parsed["type"], "connected");
+    EXPECT_TRUE(parsed["client_id"].get<std::string>().starts_with("rt_ws_"));
+    EXPECT_TRUE(parsed["topics"].is_array());
+}
+
+TEST_F(IntegrationWSTest, WebSocketInvalidTokenConnectsAsGuest) {
+    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
+    auto& wsClient = ws.client;
+
+    std::promise<std::string> welcomePromise;
+    auto welcomeFuture = welcomePromise.get_future();
+    bool promiseSet = false;
+
+    auto req = drogon::HttpRequest::newHttpRequest();
+    req->setPath("/api/v1/realtime/ws?token=invalid.token.here");
+
+    wsClient->connectToServer(
+        req,
+        [&welcomePromise, &promiseSet](drogon::ReqResult result,
+                              const drogon::HttpResponsePtr &,
+                              const drogon::WebSocketClientPtr &wsPtr) {
+            ASSERT_EQ(result, drogon::ReqResult::Ok);
+            wsPtr->setMessageHandler(
+                [&welcomePromise, &promiseSet](const std::string &msg,
+                                     const drogon::WebSocketClientPtr &,
+                                     const drogon::WebSocketMessageType &type) {
+                    if (type == drogon::WebSocketMessageType::Text && !promiseSet) {
+                        promiseSet = true;
+                        welcomePromise.set_value(msg);
+                    }
+                });
+        });
+
+    ASSERT_EQ(welcomeFuture.wait_for(std::chrono::seconds(5)), std::future_status::ready);
+    const auto parsed = nlohmann::json::parse(welcomeFuture.get());
+    EXPECT_EQ(parsed["type"], "connected");
+}
+
+TEST_F(IntegrationWSTest, WebSocketGuestSubscribePublicTopic) {
+    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
+    auto& wsClient = ws.client;
+
+    std::promise<std::string> subPromise;
+    auto subFuture = subPromise.get_future();
+    bool promiseSet = false;
+
+    auto req = drogon::HttpRequest::newHttpRequest();
+    req->setPath("/api/v1/realtime/ws");
+
+    wsClient->setMessageHandler(
+        [&subPromise, &promiseSet, wsClient](
+            const std::string &msg,
+            const drogon::WebSocketClientPtr &,
+            const drogon::WebSocketMessageType &type) {
+            if (type != drogon::WebSocketMessageType::Text)
+                return;
+
+            auto parsed = nlohmann::json::parse(msg);
+            if (parsed["type"] == "connected") {
+                nlohmann::json sub = {
+                    {"type", "subscribe"},
+                    {"topics", {"ws_test_items"}}
+                };
+                wsClient->getConnection()->send(sub.dump());
+            } else if (parsed["type"] == "subscribed" && !promiseSet) {
+                promiseSet = true;
+                subPromise.set_value(msg);
+            }
+        });
+
+    wsClient->connectToServer(
+        req,
+        [](drogon::ReqResult result,
+           const drogon::HttpResponsePtr &,
+           const drogon::WebSocketClientPtr &) {
+            ASSERT_EQ(result, drogon::ReqResult::Ok);
+        });
+
+    ASSERT_EQ(subFuture.wait_for(std::chrono::seconds(5)), std::future_status::ready);
+
+    const auto parsed = nlohmann::json::parse(subFuture.get());
+    EXPECT_EQ(parsed["type"], "subscribed");
+    ASSERT_TRUE(parsed["topics"].is_array());
+    EXPECT_EQ(parsed["topics"].size(), 1u);
+    EXPECT_TRUE(parsed["denied"].is_array());
+}
+
+TEST_F(IntegrationWSTest, WebSocketGuestSubscribeAuthTopicDenied) {
+    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
+    auto& wsClient = ws.client;
+
+    std::promise<std::string> subPromise;
+    auto subFuture = subPromise.get_future();
+    bool promiseSet = false;
+
+    auto req = drogon::HttpRequest::newHttpRequest();
+    req->setPath("/api/v1/realtime/ws");
+
+    wsClient->setMessageHandler(
+        [&subPromise, &promiseSet, wsClient](
+            const std::string &msg,
+            const drogon::WebSocketClientPtr &,
+            const drogon::WebSocketMessageType &type) {
+            if (type != drogon::WebSocketMessageType::Text)
+                return;
+
+            auto parsed = nlohmann::json::parse(msg);
+            if (parsed["type"] == "connected") {
+                nlohmann::json sub = {
+                    {"type", "subscribe"},
+                    {"topics", {"ws_auth_items"}}
+                };
+                wsClient->getConnection()->send(sub.dump());
+            } else if (parsed["type"] == "subscribed" && !promiseSet) {
+                promiseSet = true;
+                subPromise.set_value(msg);
+            }
+        });
+
+    wsClient->connectToServer(
+        req,
+        [](drogon::ReqResult result,
+           const drogon::HttpResponsePtr &,
+           const drogon::WebSocketClientPtr &) {
+            ASSERT_EQ(result, drogon::ReqResult::Ok);
+        });
+
+    ASSERT_EQ(subFuture.wait_for(std::chrono::seconds(5)), std::future_status::ready);
+
+    const auto parsed = nlohmann::json::parse(subFuture.get());
+    EXPECT_EQ(parsed["type"], "subscribed");
+    EXPECT_TRUE(parsed["topics"].empty());
+    ASSERT_TRUE(parsed["denied"].is_array());
+    EXPECT_EQ(parsed["denied"].size(), 1u);
+}
+
 TEST_F(IntegrationWSTest, WebSocketConnectsAndReceivesWelcome) {
     ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
     auto& wsClient = ws.client;
@@ -160,7 +293,7 @@ TEST_F(IntegrationWSTest, WebSocketConnectsAndReceivesWelcome) {
     wsClient->connectToServer(
         req,
         [&welcomePromise, &promiseSet](drogon::ReqResult result,
-                              const drogon::HttpResponsePtr &resp,
+                              const drogon::HttpResponsePtr &,
                               const drogon::WebSocketClientPtr &wsPtr) {
             if (result != drogon::ReqResult::Ok) {
                 if (!promiseSet) {
@@ -181,14 +314,14 @@ TEST_F(IntegrationWSTest, WebSocketConnectsAndReceivesWelcome) {
                 });
         });
 
-    auto status = welcomeFuture.wait_for(std::chrono::seconds(5));
-    ASSERT_EQ(status, std::future_status::ready);
+    ASSERT_EQ(welcomeFuture.wait_for(std::chrono::seconds(5)), std::future_status::ready);
 
-    auto welcomeMsg = welcomeFuture.get();
+    const auto welcomeMsg = welcomeFuture.get();
     ASSERT_FALSE(welcomeMsg.empty());
 
-    auto parsed = nlohmann::json::parse(welcomeMsg);
+    const auto parsed = nlohmann::json::parse(welcomeMsg);
     EXPECT_EQ(parsed["type"], "connected");
+    EXPECT_TRUE(parsed.contains("client_id"));
 }
 
 TEST_F(IntegrationWSTest, WebSocketPingPong) {
@@ -197,7 +330,6 @@ TEST_F(IntegrationWSTest, WebSocketPingPong) {
 
     std::promise<std::string> pongPromise;
     auto pongFuture = pongPromise.get_future();
-    bool welcomeReceived = false;
     bool promiseSet = false;
 
     auto req = drogon::HttpRequest::newHttpRequest();
@@ -205,7 +337,7 @@ TEST_F(IntegrationWSTest, WebSocketPingPong) {
 
     wsClient->connectToServer(
         req,
-        [&pongPromise, &welcomeReceived, &promiseSet](drogon::ReqResult result,
+        [&pongPromise, &promiseSet](drogon::ReqResult result,
                               const drogon::HttpResponsePtr &,
                               const drogon::WebSocketClientPtr &wsPtr) {
             if (result != drogon::ReqResult::Ok) {
@@ -217,7 +349,7 @@ TEST_F(IntegrationWSTest, WebSocketPingPong) {
             }
 
             wsPtr->setMessageHandler(
-                [&pongPromise, &welcomeReceived, &promiseSet, wsPtr](
+                [&pongPromise, &promiseSet, wsPtr](
                     const std::string &msg,
                     const drogon::WebSocketClientPtr &,
                     const drogon::WebSocketMessageType &type) {
@@ -226,7 +358,6 @@ TEST_F(IntegrationWSTest, WebSocketPingPong) {
 
                     auto parsed = nlohmann::json::parse(msg);
                     if (parsed["type"] == "connected") {
-                        welcomeReceived = true;
                         nlohmann::json ping = {{"type", "ping"}};
                         wsPtr->getConnection()->send(ping.dump());
                     } else if (parsed["type"] == "pong" && !promiseSet) {
@@ -236,14 +367,8 @@ TEST_F(IntegrationWSTest, WebSocketPingPong) {
                 });
         });
 
-    auto status = pongFuture.wait_for(std::chrono::seconds(5));
-    ASSERT_EQ(status, std::future_status::ready);
-
-    auto pongMsg = pongFuture.get();
-    ASSERT_FALSE(pongMsg.empty());
-
-    auto parsed = nlohmann::json::parse(pongMsg);
-    EXPECT_EQ(parsed["type"], "pong");
+    ASSERT_EQ(pongFuture.wait_for(std::chrono::seconds(5)), std::future_status::ready);
+    ASSERT_FALSE(pongFuture.get().empty());
 }
 
 TEST_F(IntegrationWSTest, WebSocketSubscribeAck) {
@@ -292,24 +417,9 @@ TEST_F(IntegrationWSTest, WebSocketSubscribeAck) {
                 });
         });
 
-    auto status = subFuture.wait_for(std::chrono::seconds(5));
-    ASSERT_EQ(status, std::future_status::ready);
+    ASSERT_EQ(subFuture.wait_for(std::chrono::seconds(5)), std::future_status::ready);
 
-    auto subMsg = subFuture.get();
-    ASSERT_FALSE(subMsg.empty());
-
-    auto parsed = nlohmann::json::parse(subMsg);
+    const auto parsed = nlohmann::json::parse(subFuture.get());
     EXPECT_EQ(parsed["type"], "subscribed");
     EXPECT_TRUE(parsed["topics"].is_array());
-}
-
-TEST_F(IntegrationWSTest, WebSocketRejectsMissingToken) {
-    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
-    expectUnauthorizedWsConnection(ws.client, "/api/v1/realtime/ws");
-}
-
-TEST_F(IntegrationWSTest, WebSocketRejectsInvalidToken) {
-    ScopedWebSocketClient ws(std::format("ws://127.0.0.1:{}", port));
-    expectUnauthorizedWsConnection(ws.client,
-                                   "/api/v1/realtime/ws?token=invalid.token.here");
 }

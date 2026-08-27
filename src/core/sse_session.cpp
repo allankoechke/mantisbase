@@ -3,20 +3,20 @@
 #include "../../include/mantisbase/core/sse.h"
 #include "../../include/mantisbase/mantisbase.h"
 #include "../../include/mantisbase/utils/uuidv7.h"
+#include "../../include/mantisbase/utils/utils.h"
 
 mb::SSESession::SSESession(
     std::string client_id,
     const std::set<std::string> &topics,
     drogon::ResponseStreamPtr stream,
-    std::string owner_entity,
-    std::string owner_id)
+    RealtimeAuthSnapshot auth)
     : m_clientID(std::move(client_id)),
       m_topics(topics),
       m_stream(std::move(stream)),
       m_isActive(true),
       m_lastActivity(std::chrono::steady_clock::now()),
-      m_ownerEntity(std::move(owner_entity)),
-      m_ownerId(std::move(owner_id)) {
+      m_connectedAt(m_lastActivity),
+      m_auth(std::move(auth)) {
 }
 
 bool mb::SSESession::sendEvent(const std::string &eventType, const json &data) {
@@ -96,6 +96,8 @@ void mb::SSESession::updateTopics(const std::set<std::string> &topics) {
 
 std::chrono::steady_clock::time_point mb::SSESession::getLastActivity() const { return m_lastActivity; }
 
+std::chrono::steady_clock::time_point mb::SSESession::getConnectedAt() const { return m_connectedAt; }
+
 void mb::SSESession::close() {
     m_isActive = false;
     if (m_stream) {
@@ -116,4 +118,13 @@ std::set<std::string> mb::SSESession::getTopics() const {
 void mb::SSESession::setTopics(const std::set<std::string> &topics) {
     std::lock_guard<std::mutex> lock(m_topicsMutex);
     m_topics = topics;
+    updateActivity();
+}
+
+mb::RealtimeAuthSnapshot &mb::SSESession::authSnapshot() { return m_auth; }
+
+const mb::RealtimeAuthSnapshot &mb::SSESession::authSnapshot() const { return m_auth; }
+
+void mb::SSESession::setAuthSnapshot(mb::RealtimeAuthSnapshot auth) {
+    m_auth = std::move(auth);
 }
