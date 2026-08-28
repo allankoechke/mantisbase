@@ -1,10 +1,24 @@
 @page scripting Scripting
 
-On server run execution, MantisBase searches for a script file named `index.mantis.js` as an entry point into loading scripts into context. Once the file is executed, any actions are evaluated and methods stored for subsequent invocation by the C++ engine as needed. This is important for tasks like requests that require signature registration — when a new request comes in, it is routed to the JavaScript handler and/or middlewares.
+On server startup, MantisBase loads JavaScript from your configured scripts directory. The primary entry file is **`main.mb.js`**. If that file is missing, MantisBase falls back to **`index.mantis.js`** and logs a deprecation warning.
 
-The file `index.mantis.js` is expected to be in the global apps scripts directory which is set either by:
-- By default, relative to the `mantisbase` binary in a directory called `scripts`
-- We can override this directory by setting the desired directory using the cmd arg `--scriptsDir /some/path`. See CMD options in the docs for more information.
+Scripts run once at startup. Custom routes registered via `app.router().addRoute()` are stored in the Duktape heap and invoked by the C++ HTTP layer when matching requests arrive.
+
+The scripts directory is resolved as follows:
+- By default: a `scripts` folder next to the `mantisbase` binary
+- Override with `--scriptsDir /some/path` (see [Command-line options](@ref cmd))
+
+### Build and runtime switches
+
+| Switch | Effect |
+|---|---|
+| `MB_SCRIPTING_ENABLED=ON` (CMake) | Compile Duktape bindings into the binary |
+| `--disable-scripting` / `--no-scripting` | Skip VM init and script load at runtime |
+| `MB_SCRIPTING_DISABLED=1` | Same as `--disable-scripting` |
+
+### Thread safety
+
+All JavaScript execution uses a **single Duktape context** guarded by a mutex. Custom route handlers and middleware run under this lock on Drogon worker threads. Keep handlers fast; delegate heavy or blocking work to C++ APIs or async patterns outside the script lock.
 
 ## Application
 Mantis exposes a global object `app` that provides access to the following properties. Despite them being both `READ` and `WRITE`, note that some of these properties are evaluated only once when initializing, as such, update to the values will not have any impact.
@@ -23,6 +37,12 @@ Additionally, some methods are exposed on the `app` object:
 - `app.quit(exitCode, reason)`: Close the application gracefully with a _exitCode_ and a _reason_.
 - `app.db()`: Get the database unit instance.
 - `app.router()`: Get the router unit instance.
+- `app.settings()`: Key/value app configuration (`get`, `set`, `configs`, `reload`).
+- `app.auth()`: JWT and session helpers (`createToken`, `verifyToken`, `deleteSession`, `refreshSession`, `sessionTimeoutSeconds`).
+- `app.files()`: File path helpers for entity uploads (`dirPath`, `filePath`, `getFilePath`, `removeFile`).
+- `app.logs()`: Structured logging (`info`, `warn`, `error`, `debug`, `trace`).
+- `app.rt()`: Realtime change notifications (`notifyChange`).
+- `app.loadScript(path)`: Load an additional script relative to `scriptsDir`.
 
 ## Database
 The `DatabaseUnit` object returned from the `app.db()` method exposes the following methods and properties:
@@ -145,9 +165,6 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 - `req.getHeader("Authorization", "", 0)`: Return Authorization value or default
 - `req.getHeaderCount("key")`: Count for header values given the header key 
 - `req.setHeader("Cow", "Cow Value")`
-- `req.hasTrailer`
-- `req.getTrailer`
-- `req.getTrailerCount`
 - `req.hasQueryParam("key")`: return true/false
 - `req.getQueryParam("key")`: Return header value given the key
 - `req.getQueryParamCount("key")`: Return parameter value count
@@ -176,9 +193,6 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 ```
 - `res.getHeaderCount("key")` -> Count for header values given the header key
 - `res.setHeader("Cow", "Cow Value")`
-- `res.hasTrailer`
-- `res.getTrailer`
-- `res.getTrailerCount`
 - `res.redirect("http://some-url.com", 302)`
 - `res.setContent(content, content_type)`: i.e. `res.setContent("<html>...</html>", "text/html")`
 - `res.setFileContent("/foo/file_path")`
@@ -193,6 +207,25 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 - `res.version` (get or set version value)
 - `res.location` (get or set redirect location value)
 - `res.reason` (get or set reason value)
+
+## Middlewares (C++ factories)
+
+The global `middlewares` object exposes C++ middleware factories. Each factory returns a JS function with signature `(req, res) => bool` that runs under the script mutex:
+
+- `middlewares.getAuthToken()`
+- `middlewares.hydrateContextData()`
+- `middlewares.resolveSchema()`, `resolveAuthEntity()`, `resolveEntity()`
+- `middlewares.hasAccess(entity)`, `requireEntityAuth(entity)`, `requireAdminOrEntityAuth(entity)`
+- `middlewares.requireAdminAuth()`, `requireGuestOnly()`, `hasEntityAccess()`
+- `middlewares.requireExprEval(expr)`, `settingsFeatureGate(key)`
+- `middlewares.rejectViewMutations()`
+
+```js
+app.router().addRoute("GET", "/api/v1/custom/protected", handler,
+    middlewares.getAuthToken(),
+    middlewares.hydrateContextData()
+);
+```
 
 ## Utils (utility functions)
 Mantis exposes an object `utils` which has the following utility functions.

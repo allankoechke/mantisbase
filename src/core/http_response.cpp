@@ -1,6 +1,9 @@
 #include "../../include/mantisbase/core/http.h"
 #include "../../include/mantisbase/core/auth.h"
 #include "../../include/mantisbase/mantisbase.h"
+#ifdef MB_SCRIPTING_ENABLED
+#include "../../include/mantisbase/scripting/scripting_engine.h"
+#endif
 #include <drogon/Cookie.h>
 #include <fstream>
 
@@ -157,11 +160,20 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
     void MantisResponse::sendJson(const int statusCode, const DukValue &data) const {
-        // TODO: Re-enable after Drogon migration
+        auto *engine = ScriptingEngine::active();
+        if (!engine || !engine->ctx()) {
+            send(statusCode, "{}", "application/json");
+            return;
+        }
+        auto *ctx = engine->ctx();
+        data.push();
+        const char *json_str = duk_json_encode(ctx, -1);
+        const std::string body = json_str ? json_str : "{}";
+        duk_pop(ctx);
+        send(statusCode, body, "application/json");
     }
 
     void MantisResponse::registerDuktapeMethods() {
-        // TODO: Re-enable after Drogon migration
     }
 #else
     void MantisResponse::registerDuktapeMethods() {

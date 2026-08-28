@@ -33,6 +33,16 @@ cd build && ctest --output-on-failure
 
 CI runs the same test suite on Linux for every pull request.
 
+With scripting enabled:
+
+```bash
+cmake -B build -DMB_BUILD_TESTS=ON -DMB_SCRIPTING_ENABLED=ON
+cmake --build build
+cd build && ctest --output-on-failure -R Scripting
+```
+
+Place test routes in `tests/scripting/main.mb.js` (loaded automatically via `scriptsDir` in the test fixture).
+
 ### Useful CMake options
 
 | Option | Default | Description |

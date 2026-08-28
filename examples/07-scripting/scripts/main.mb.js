@@ -1,5 +1,5 @@
 // Custom routes loaded at server startup (requires MB_SCRIPTING_ENABLED).
-// Deprecated: use scripts/main.mb.js instead.
+// Place as scripts/main.mb.js (or set --scriptsDir).
 
 app.router().addRoute("GET", "/api/v1/custom/health", function (req, res) {
     res.json(200, JSON.stringify({ status: "ok", source: "script" }));
@@ -12,4 +12,4 @@ app.router().addRoute("GET", "/api/v1/custom/settings-count", function (req, res
     res.json(200, JSON.stringify({ settings_count: count }));
 });
 
-console.log("MantisBase scripting: custom routes registered (index.mantis.js — prefer main.mb.js)");
+console.log("MantisBase scripting: custom routes registered");

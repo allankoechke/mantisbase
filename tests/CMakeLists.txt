@@ -47,6 +47,7 @@ file(GLOB TEST_FILES
         integration/test_integration_ws.cpp
         integration/test_integration_multi_instance.cpp
         integration/test_integration_settings.cpp
+        integration/test_integration_scripting.cpp
 )
 
 add_executable(mantisbase_tests ${TEST_FILES})
@@ -61,6 +62,10 @@ endif ()
 target_compile_definitions(mantisbase_tests PRIVATE
         TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
 )
+
+if(MB_SCRIPTING_ENABLED)
+    target_compile_definitions(mantisbase_tests PRIVATE MB_SCRIPTING_ENABLED=1)
+endif()
 
 if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(mantisbase_tests PRIVATE

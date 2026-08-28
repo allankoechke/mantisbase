@@ -361,34 +361,51 @@ namespace mb {
         }
     }
 
+
 #ifdef MB_SCRIPTING_ENABLED
-    void Database::registerDuktapeMethods() {
-        const auto ctx = MantisBase::instance().ctx();
+    namespace {
+        json rowToJson(const std::string &db_type, const soci::row &row) {
+            json obj = json::object();
+            for (std::size_t i = 0; i < row.size(); ++i) {
+                const auto name = row.get_properties(i).get_name();
+                if (row.get_indicator(i) == soci::i_null) {
+                    obj[name] = nullptr;
+                    continue;
+                }
 
-        // Database methods
-        dukglue_register_property(ctx, &Database::isConnected, nullptr, "connected");
-        dukglue_register_method(ctx, &Database::session, "session");
-        dukglue_register_method_varargs(ctx, &Database::query, "query");
-
-        // soci::session methods
-        dukglue_register_method(ctx, &soci::session::close, "close");
-        dukglue_register_method(ctx, &soci::session::reconnect, "reconnect");
-        dukglue_register_property(ctx, &soci::session::is_connected, nullptr, "connected");
-        dukglue_register_method(ctx, &soci::session::begin, "begin");
-        dukglue_register_method(ctx, &soci::session::commit, "commit");
-        dukglue_register_method(ctx, &soci::session::rollback, "rollback");
-        dukglue_register_method(ctx, &soci::session::get_query, "getQuery");
-        dukglue_register_method(ctx, &soci::session::get_last_query, "getLastQuery");
-        dukglue_register_method(ctx, &soci::session::get_last_query_context, "getLastQueryContext");
-        dukglue_register_method(ctx, &soci::session::got_data, "gotData");
-        // dukglue_register_method(ctx, &soci::session::get_last_insert_id, "getLastInsertId");
-        dukglue_register_method(ctx, &soci::session::get_backend_name, "getBackendName");
-        dukglue_register_method(ctx, &soci::session::empty_blob, "emptyBlob");
+                const auto data_type = row.get_properties(i).get_data_type();
+                switch (data_type) {
+                case soci::dt_string:
+                    obj[name] = row.get<std::string>(i);
+                    break;
+                case soci::dt_integer:
+                    obj[name] = row.get<int>(i);
+                    break;
+                case soci::dt_long_long:
+                    obj[name] = row.get<long long>(i);
+                    break;
+                case soci::dt_unsigned_long_long:
+                    obj[name] = row.get<unsigned long long>(i);
+                    break;
+                case soci::dt_double:
+                    obj[name] = row.get<double>(i);
+                    break;
+                case soci::dt_date:
+                    obj[name] = mb::dbDateToString(db_type, row, static_cast<int>(i));
+                    break;
+                default:
+                    try {
+                        obj[name] = row.get<std::string>(i);
+                    } catch (...) {
+                        obj[name] = nullptr;
+                    }
+                    break;
+                }
+            }
+            return obj;
+        }
     }
-#endif
 
-
-#ifdef MB_SCRIPTING_ENABLED
     duk_ret_t Database::query(duk_context *ctx) {
         // TRACE_CLASS_METHOD();
 
@@ -490,7 +507,7 @@ namespace mb {
 
         json results = json::array();
         while (st.fetch()) {
-            nlohmann::json obj = rowToJson(data_row);
+            nlohmann::json obj = rowToJson(mbApp.dbType(), data_row);
             results.push_back(obj);
         }
 

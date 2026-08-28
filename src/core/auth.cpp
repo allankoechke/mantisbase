@@ -198,4 +198,20 @@ namespace mb {
             {"token", token}
         };
     }
+
+#ifdef MB_SCRIPTING_ENABLED
+    std::string Auth::createTokenJson(const std::string &claims_json, const int timeout) const {
+        return createToken(json::parse(claims_json), timeout);
+    }
+
+    std::string Auth::verifyTokenJson(const std::string &token) const {
+        return verifyToken(token).dump();
+    }
+
+    std::string Auth::refreshSessionJson(const std::string &old_session_id,
+                                         const std::string &entity_name,
+                                         const std::string &user_id) {
+        return refreshSession(old_session_id, entity_name, user_id).dump();
+    }
+#endif
 };

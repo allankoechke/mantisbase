@@ -135,6 +135,12 @@ namespace mb {
             m_req->attributes()->insert(key, value);
         }
 
+#ifdef MB_SCRIPTING_ENABLED
+        DukValue get_duk(const std::string &key);
+        DukValue getOr_duk(const std::string &key, const DukValue &default_value);
+        void set_duk(const std::string &key, const DukValue &value);
+#endif
+
         /** Get a per-request attribute, inserting `default_value` if missing. */
         template<typename T>
         const T &getOr(const std::string &key, T default_value) {
@@ -145,11 +151,6 @@ namespace mb {
         }
 
     private:
-#ifdef MB_SCRIPTING_ENABLED
-        DukValue get_duk(const std::string &key);
-        DukValue getOr_duk(const std::string &key, const DukValue &default_value);
-        void set_duk(const std::string &key, const DukValue &value);
-#endif
     };
 
     /**

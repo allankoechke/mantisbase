@@ -79,6 +79,15 @@ namespace mb {
         return std::nullopt;
     }
 
+#ifdef MB_SCRIPTING_ENABLED
+    std::string FilesMgr::getFilePathString(const std::string &entity_name, const std::string &filename) {
+        if (const auto path = getFilePath(entity_name, filename)) {
+            return *path;
+        }
+        return {};
+    }
+#endif
+
     std::string FilesMgr::dirPath(const std::string &entity_name, const bool create_if_missing) const {
         // Create entity file directory
         const auto path = filesBaseDir() / entity_name;

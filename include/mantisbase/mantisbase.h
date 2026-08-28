@@ -22,6 +22,7 @@
 #include "utils/snowflake.hpp"
 #ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
+namespace mb { class ScriptingEngine; }
 #endif
 
 #include "core/types.h"
@@ -163,6 +164,7 @@ namespace mb
          * @return SOCI's database pool size.
          */
         [[nodiscard]] int poolSize() const;
+        void setPoolSize(const int& pool_size);
 
         /**
          * @brief Retrieve HTTP Server host address. For instance, a host of `127.0.0.1`, `0.0.0.0`, etc.
@@ -328,6 +330,29 @@ namespace mb
         /** @return `true` when the app was started with dev-mode flags enabled. */
         [[nodiscard]] bool isDevMode() const;
 
+        /** @return `true` when scripting was disabled via CLI or environment. */
+        [[nodiscard]] bool isScriptingDisabled() const;
+
+#ifdef MB_SCRIPTING_ENABLED
+        void notifyScriptRecordCreated(const std::string &entity, const std::string &recordId) const;
+        void notifyScriptRecordUpdated(const std::string &entity, const std::string &recordId) const;
+
+        /** Load a script file relative to scriptsDir (JavaScript API). */
+        void loadScriptJs(const std::string &relativePath) const;
+
+        std::string version_JSWrapper() const { return appVersion(); }
+        std::string jwtSecretKey_JSWrapper() const { return jwtSecretKey(); }
+        void quit_JSWrapper(int code, const std::string &msg);
+
+        [[nodiscard]] Database *duk_db() const;
+        [[nodiscard]] Router *duk_router() const;
+        [[nodiscard]] KeyValStore *duk_settings() const;
+        [[nodiscard]] Auth *duk_auth() const;
+        [[nodiscard]] FilesMgr *duk_files() const;
+        [[nodiscard]] Logger *duk_logs() const;
+        [[nodiscard]] RealtimeDB *duk_rt() const;
+#endif
+
     private:
         // Factory-only construction via create().
         MantisBase();
@@ -336,13 +361,6 @@ namespace mb
          * @brief Run initialization actions for Mantis, ensuring all objects are initialized properly before use.
          */
         void init(int argc = 0, char* argv[] = {});
-
-        /**
-         * @brief Set the database pool size value.
-         * @param pool_size New pool size value.
-         */
-        void setPoolSize(const int& pool_size);
-
 
         // Private members
         void parseArgs(); ///> Parse command-line arguments
@@ -378,19 +396,6 @@ namespace mb
          * @param relativePath Relative file path to be loaded.
          */
         void loadScript(const std::string& relativePath) const;
-
-        std::string version_JSWrapper() const { return appVersion(); }
-        std::string jwtSecretKey_JSWrapper() const { return jwtSecretKey(); }
-        void quit_JSWrapper(int code, const std::string& msg);
-
-        /**
-         * @brief Wrapper method to return `DatabaseUnit*` instead of
-         * `DatabaseUnit&` returned by @see db() method.
-         *
-         * @return DatabaseUnit instance pointer
-         */
-        [[nodiscard]] Database* duk_db() const;
-        [[nodiscard]] Router* duk_router() const;
 #endif
 
         // Store commandline args passed in, to be used in the init phase.
@@ -421,6 +426,7 @@ namespace mb
         bool m_launchAdminPanel = false;
         bool m_isDevMode = false;
         bool m_skipAdminSetup = false;
+        bool m_scriptingDisabled = false;
 
         std::unique_ptr<Logger> m_logger;
         std::unique_ptr<Database> m_database;
@@ -432,7 +438,7 @@ namespace mb
         std::unique_ptr<argparse::ArgumentParser> m_opts;
         mutable Snowflake<1534832906275L> m_snowflakeId{};
 #ifdef MB_SCRIPTING_ENABLED
-        duk_context* m_dukCtx = nullptr;
+        std::unique_ptr<ScriptingEngine> m_scripting;
 #endif
     };
 }

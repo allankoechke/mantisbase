@@ -49,6 +49,22 @@ namespace mb
          */
         json& configs();
 
+        /** Read a top-level config key (scripting). Returns null json when missing. */
+        [[nodiscard]] json getScriptingValue(const std::string &key) const;
+
+        /** Patch a top-level config key and persist (scripting). */
+        void setScriptingValue(const std::string &key, const json &value);
+
+        /** Return a copy of current configs (scripting). */
+        [[nodiscard]] json getScriptingConfigsCopy() const;
+
+        /** Reload configs from the database. */
+        void reloadScriptingConfigs();
+
+        [[nodiscard]] std::string getScriptingJson(const std::string &key) const;
+        void setScriptingJson(const std::string &key, const std::string &json_value);
+        [[nodiscard]] std::string configsScriptingJson() const;
+
     private:
         void setupConfigRoutes();
 
