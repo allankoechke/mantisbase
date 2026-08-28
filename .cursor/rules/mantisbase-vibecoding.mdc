@@ -1,0 +1,15 @@
+---
+description: Conventions for MantisBase example schemas, HTTP scripts, and migrations
+globs: examples/**/*
+alwaysApply: false
+---
+
+# MantisBase examples conventions
+
+- Schema JSON must match API format: `name`, `type`, `fields`, `rules` (five CRUD rules).
+- Use placeholders in scripts: `BASE_URL`, `ADMIN_TOKEN`, `USER_TOKEN` — never real secrets.
+- HTTP scripts are bash; document expected status codes in README.
+- Migration files: numbered `NNN_name.json`, sorted lexicographically; same schema format as API POST body.
+- Link to `doc/` for details; keep README steps copy-pasteable.
+- Foreign keys: create referenced entity schema first.
+- Auth entities require `type: "auth"` with `email` and `password` fields for login.

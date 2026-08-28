@@ -52,6 +52,8 @@ mantisbase/
 ├── src/                  # Core implementation
 ├── tests/                # Unit and integration tests
 ├── doc/                  # User and API documentation
+├── examples/             # Copy-paste schemas, migrations, HTTP scripts
+├── .cursor/skills/       # Cursor skills for vibecoding on MantisBase
 ├── cmake/                # Dependency and build modules
 ├── 3rdParty/             # Git submodules (Drogon, SOCI, etc.)
 ├── libs/                 # Additional bundled libraries
@@ -85,7 +87,7 @@ test: cover expired JWT refresh flow
 3. Ensure the project builds and tests pass (`-DMB_BUILD_TESTS=ON`).
 4. Open a pull request with a short summary and links to related issues.
 
-When changing the HTTP API, update `doc/openapi.yaml` and the relevant guides under `doc/`.
+When changing the HTTP API, update `doc/openapi.yaml` and the relevant guides under `doc/`. Update matching files under `examples/` when schema or endpoint patterns change.
 
 ## Reporting issues
 
