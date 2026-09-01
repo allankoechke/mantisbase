@@ -22,6 +22,7 @@ These options can appear before the subcommand:
 | `--data-dir <path>` | `--dataDir` | Data storage directory | `./data` | — |
 | `--public-dir <path>` | `--publicDir` | Static file directory | `./public` | — |
 | `--scripts-dir <path>` | `--scriptsDir` | JavaScript extensions directory | `./scripts` | — |
+| `--disable-scripting` | `--no-scripting` | Skip JavaScript VM init and script load at runtime | off | `MB_SCRIPTING_DISABLED=1` |
 | `--dev` | | Enable verbose development logging | off | `MB_LOG_LEVEL` |
 | `--db <type>` | | Database type (`sqlite3`, `postgresql`, `mysql`) | `sqlite3` | `MB_DATABASE_TYPE` |
 | `--db_url <url>` | | Database connection string | *(empty)* | `MB_DATABASE_URL` |

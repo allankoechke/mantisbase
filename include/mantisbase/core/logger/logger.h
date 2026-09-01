@@ -89,6 +89,13 @@ namespace mb {
                       const std::string &details = "",
                       const json &data = json::object()) const;
 
+#ifdef MB_SCRIPTING_ENABLED
+        void jsInfo(const std::string &origin, const std::string &message) const;
+        void jsWarn(const std::string &origin, const std::string &message) const;
+        void jsError(const std::string &origin, const std::string &message) const;
+        void jsDebug(const std::string &origin, const std::string &message) const;
+        void jsTrace(const std::string &origin, const std::string &message) const;
+#endif
 
         inline static std::atomic<bool> isDbInitialized = false;
 

@@ -102,10 +102,6 @@ set( MB_SOURCES
         src/core/http_content_reader.cpp
         src/core/models/access_rules.cpp
 
-        src/utils/dukglue_utils_bindings.cpp
-        src/core/private-impl/duktape_wrapper.cpp
-
-        src/core/exceptions.cpp
         src/core/realtime.cpp
         src/core/realtime_session.cpp
         src/core/sse_session.cpp
@@ -115,6 +111,26 @@ set( MB_SOURCES
 
         include/mantisbase/utils/snowflake.hpp
 )
+
+if(MB_SCRIPTING_ENABLED)
+    list(APPEND MB_SOURCES
+        src/scripting/scripting_engine.cpp
+        src/scripting/hooks.cpp
+        src/scripting/router_scripting.cpp
+        src/scripting/bindings/app_bindings.cpp
+        src/scripting/bindings/utils_bindings.cpp
+        src/scripting/bindings/database_bindings.cpp
+        src/scripting/bindings/request_bindings.cpp
+        src/scripting/bindings/response_bindings.cpp
+        src/scripting/bindings/router_bindings.cpp
+        src/scripting/bindings/settings_bindings.cpp
+        src/scripting/bindings/auth_bindings.cpp
+        src/scripting/bindings/middleware_bindings.cpp
+        src/scripting/bindings/files_bindings.cpp
+        src/scripting/bindings/logs_bindings.cpp
+        src/scripting/bindings/realtime_bindings.cpp
+    )
+endif()
 
 # Add library
 add_library(mantisbase ${MB_LIB_TYPE} ${MB_SOURCES})

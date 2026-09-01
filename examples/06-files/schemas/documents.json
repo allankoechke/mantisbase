@@ -1,0 +1,15 @@
+{
+  "name": "documents",
+  "type": "base",
+  "fields": [
+    {"name": "title", "type": "string", "required": true},
+    {"name": "attachment", "type": "file"}
+  ],
+  "rules": {
+    "list": {"mode": "public", "expr": ""},
+    "get": {"mode": "public", "expr": ""},
+    "add": {"mode": "auth", "expr": ""},
+    "update": {"mode": "auth", "expr": ""},
+    "delete": {"mode": "auth", "expr": ""}
+  }
+}

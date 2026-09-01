@@ -292,6 +292,11 @@ namespace mb {
         program.add_argument("--dev")
                 .flag()
                 .help("Enable verbose development logging (overridden by MB_LOG_LEVEL)");
+#ifdef MB_SCRIPTING_ENABLED
+        program.add_argument("--disable-scripting", "--no-scripting")
+                .flag()
+                .help("Disable JavaScript scripting at runtime (also MB_SCRIPTING_DISABLED=1)");
+#endif
         program.add_argument("--db")
                 .nargs(1)
                 .metavar("TYPE")
@@ -406,6 +411,9 @@ namespace mb {
         const auto _scriptsDir = program.present<std::string>("--scripts-dir").value_or("scripts");
         const auto _migrationsDir = program.present<std::string>("--migrations-dir").value_or("migrations");
         const auto dev_flag = program.get<bool>("--dev");
+#ifdef MB_SCRIPTING_ENABLED
+        m_scriptingDisabled = program.get<bool>("--disable-scripting");
+#endif
 
         const auto env_level = getEnvOrDefault("MB_LOG_LEVEL", "");
         if (!env_level.empty()) {

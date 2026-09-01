@@ -435,11 +435,6 @@ namespace mb {
      * @return true if valid IPv4 or IPv6, false otherwise
      */
     bool isValidIP(const std::string &ip);
-
-#ifdef MB_SCRIPTING_ENABLED
-    /** Register utility functions (paths, strings, auth, time) on the Duktape global. */
-    void registerUtilsToDuktapeEngine();
-#endif
 }
 
 #endif // MB_UTILS_H

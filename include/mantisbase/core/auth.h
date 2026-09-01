@@ -89,6 +89,14 @@ namespace mb
          */
         json refreshSession(const std::string& old_session_id, const std::string& entity_name,
                                    const std::string& user_id);
+
+#ifdef MB_SCRIPTING_ENABLED
+        std::string createTokenJson(const std::string &claims_json, int timeout = -1) const;
+        std::string verifyTokenJson(const std::string &token) const;
+        std::string refreshSessionJson(const std::string &old_session_id,
+                                       const std::string &entity_name,
+                                       const std::string &user_id);
+#endif
     };
 } // mb
 

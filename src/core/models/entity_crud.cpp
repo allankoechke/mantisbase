@@ -185,6 +185,9 @@ namespace mb {
 
             // Remove user password from the response
             if (type() == "auth") added_row.erase("password");
+#ifdef MB_SCRIPTING_ENABLED
+            mbApp().notifyScriptRecordCreated(name(), added_row.value("id", std::string{}));
+#endif
             return added_row;
         } catch (...) {
             // Handles anything else
@@ -410,6 +413,9 @@ namespace mb {
 
             // Redact passwords
             if (type() == "auth") new_record.erase("password");
+#ifdef MB_SCRIPTING_ENABLED
+            mbApp().notifyScriptRecordUpdated(name(), new_record.value("id", std::string{}));
+#endif
             return new_record;
         } catch (const MantisException &) {
             throw;

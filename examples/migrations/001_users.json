@@ -1,0 +1,16 @@
+{
+  "name": "users",
+  "type": "auth",
+  "fields": [
+    {"name": "name", "type": "string", "required": true},
+    {"name": "email", "type": "string", "required": true, "unique": true},
+    {"name": "password", "type": "string", "required": true}
+  ],
+  "rules": {
+    "list": {"mode": "auth", "expr": ""},
+    "get": {"mode": "auth", "expr": ""},
+    "add": {"mode": "public", "expr": ""},
+    "update": {"mode": "auth", "expr": ""},
+    "delete": {"mode": "", "expr": ""}
+  }
+}

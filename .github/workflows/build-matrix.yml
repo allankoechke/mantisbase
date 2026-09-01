@@ -214,3 +214,34 @@ jobs:
         with:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-lib
           path: lib-staging\
+
+  scripting:
+    name: Build with scripting (linux-x86_64)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpq-dev uuid-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -B build-scripting \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMB_BUILD_TESTS=ON \
+            -DMB_SCRIPTING_ENABLED=ON \
+            -DMB_BUILD_DOCS=OFF \
+            -S ${{ github.workspace }}
+
+      - name: Build
+        run: cmake --build build-scripting --config Release
+
+      - name: Test scripting integration
+        working-directory: build-scripting
+        run: ctest --build-config Release --output-on-failure -R Scripting -VV

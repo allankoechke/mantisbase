@@ -24,6 +24,12 @@
 #include "drogon/drogon_callbacks.h"
 #include "mantisbase/utils/snowflake.hpp"
 
+#ifdef MB_SCRIPTING_ENABLED
+#include <dukglue/dukvalue.h>
+struct duk_hthread;
+typedef struct duk_hthread duk_context;
+#endif
+
 namespace mb {
     class SSEMgr;
 
@@ -82,6 +88,21 @@ namespace mb {
                               const drogon::HttpResponsePtr &resp) const;
 
         const std::vector<MiddlewareFn> &preRoutingMiddlewares() const { return m_preRoutingMiddlewares; }
+
+#ifdef MB_SCRIPTING_ENABLED
+        /** Register a custom route from JavaScript (`app.router().addRoute(...)`). */
+        duk_ret_t bindRoute(duk_context *ctx);
+
+        /** Push a change event to all realtime subscribers. */
+        void broadcastChange(const nlohmann::json &change_event) const;
+
+        void broadcastChangeJson(const std::string &event_json) const;
+
+        void executeJsRoute(const DukValue &handler,
+                            const std::vector<DukValue> &middlewares,
+                            MantisRequest &req,
+                            MantisResponse &res) const;
+#endif
 
     private:
         void registerDrogonHandler(const std::string &method, const std::string &path) const;

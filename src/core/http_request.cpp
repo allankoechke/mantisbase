@@ -6,6 +6,11 @@
 #include "../../include/mantisbase/core/auth.h"
 #include "../../include/mantisbase/core/types.h"
 
+#ifdef MB_SCRIPTING_ENABLED
+#include "../../include/mantisbase/scripting/scripting_engine.h"
+#include <dukglue/dukglue.h>
+#endif
+
 namespace mb {
     MantisRequest::MantisRequest(const MantisBase &app, drogon::HttpRequestPtr _req)
         : IMantisBase(app),
@@ -196,21 +201,110 @@ namespace mb {
     }
 
 #ifdef MB_SCRIPTING_ENABLED
+    namespace {
+        duk_context *scriptingCtx() {
+            if (auto *engine = ScriptingEngine::active()) {
+                return engine->ctx();
+            }
+            return nullptr;
+        }
+
+        template<typename T>
+        bool tryPushAttribute(duk_context *ctx,
+                              const drogon::HttpRequestPtr &req,
+                              const std::string &key) {
+            try {
+                const T &val = req->attributes()->get<T>(key);
+                dukglue_push(ctx, val);
+                return true;
+            } catch (...) {
+                return false;
+            }
+        }
+    }
+
     void MantisRequest::registerDuktapeMethods() {
-        // TODO: Re-enable after Drogon migration
     }
 
     DukValue MantisRequest::get_duk(const std::string &key) {
-        return m_store.get_duk(key);
+        if (!hasKey(key)) {
+            return {};
+        }
+
+        auto *ctx = scriptingCtx();
+        if (!ctx) {
+            return {};
+        }
+
+        try {
+            const auto &j = m_req->attributes()->get<json>(key);
+            duk_push_string(ctx, j.dump().c_str());
+            duk_json_decode(ctx, -1);
+            return DukValue::take_from_stack(ctx);
+        } catch (...) {
+        }
+
+        if (tryPushAttribute<std::string>(ctx, m_req, key)) {
+            return DukValue::take_from_stack(ctx);
+        }
+        if (tryPushAttribute<int>(ctx, m_req, key)) {
+            return DukValue::take_from_stack(ctx);
+        }
+        if (tryPushAttribute<double>(ctx, m_req, key)) {
+            return DukValue::take_from_stack(ctx);
+        }
+        if (tryPushAttribute<bool>(ctx, m_req, key)) {
+            return DukValue::take_from_stack(ctx);
+        }
+        if (tryPushAttribute<float>(ctx, m_req, key)) {
+            return DukValue::take_from_stack(ctx);
+        }
+
+        duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported type stored for key '%s'", key.c_str());
+        return {};
     }
 
-    DukValue MantisRequest::getOr_duk(const std::string &key,
-                                      const DukValue &default_value) {
-        return m_store.getOr_duk(key, default_value);
+    DukValue MantisRequest::getOr_duk(const std::string &key, const DukValue &default_value) {
+        if (!hasKey(key)) {
+            return default_value;
+        }
+        auto val = get_duk(key);
+        if (val == DukValue{}) {
+            return default_value;
+        }
+        return val;
     }
 
     void MantisRequest::set_duk(const std::string &key, const DukValue &value) {
-        m_store.set_duk(key, value);
+        auto *ctx = scriptingCtx();
+        if (!ctx) {
+            return;
+        }
+
+        switch (value.type()) {
+        case DukValue::NUMBER:
+            set(key, value.as_double());
+            break;
+        case DukValue::STRING:
+            set(key, value.as_string());
+            break;
+        case DukValue::BOOLEAN:
+            set(key, value.as_bool());
+            break;
+        case DukValue::NULLREF:
+        case DukValue::UNDEFINED:
+            break;
+        case DukValue::OBJECT: {
+            value.push();
+            const char *json_str = duk_json_encode(ctx, -1);
+            json json_obj = json::parse(json_str ? json_str : "{}");
+            duk_pop(ctx);
+            set(key, json_obj);
+            break;
+        }
+        default:
+            duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported type stored for key '%s'", key.c_str());
+        }
     }
 #else
     void MantisRequest::registerDuktapeMethods() {
