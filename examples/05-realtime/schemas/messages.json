@@ -1,0 +1,15 @@
+{
+  "name": "messages",
+  "type": "base",
+  "fields": [
+    {"name": "title", "type": "string", "required": true},
+    {"name": "body", "type": "string"}
+  ],
+  "rules": {
+    "list": {"mode": "public", "expr": ""},
+    "get": {"mode": "public", "expr": ""},
+    "add": {"mode": "public", "expr": ""},
+    "update": {"mode": "public", "expr": ""},
+    "delete": {"mode": "public", "expr": ""}
+  }
+}

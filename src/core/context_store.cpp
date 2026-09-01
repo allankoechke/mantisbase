@@ -3,7 +3,8 @@
 #include "../../include/mantisbase/core/logger/logger.h"
 
 #ifdef MB_SCRIPTING_ENABLED
-    #include <dukglue/dukglue.h>
+#include "../../include/mantisbase/scripting/scripting_engine.h"
+#include <dukglue/dukglue.h>
 #endif
 
 namespace mb
@@ -65,7 +66,10 @@ namespace mb
         // Convert std::any to DukValue based on stored type
         const std::any& value = it->second;
 
-        const auto ctx = MantisBase::instance().ctx();
+        const auto ctx = ScriptingEngine::active() ? ScriptingEngine::active()->ctx() : nullptr;
+        if (!ctx) {
+            return {};
+        }
 
         if (value.type() == typeid(int))
         {
@@ -116,7 +120,10 @@ namespace mb
 
     void ContextStore::set_duk(const std::string& key, const DukValue& value)
     {
-        const auto ctx = MantisBase::instance().ctx();
+        const auto ctx = ScriptingEngine::active() ? ScriptingEngine::active()->ctx() : nullptr;
+        if (!ctx) {
+            return;
+        }
 
         // Convert DukValue to std::any based on JavaScript type
         switch (value.type())

@@ -1,0 +1,16 @@
+{
+  "name": "editors",
+  "type": "auth",
+  "fields": [
+    {"name": "name", "type": "string", "required": true},
+    {"name": "email", "type": "string", "required": true, "unique": true},
+    {"name": "password", "type": "string", "required": true}
+  ],
+  "rules": {
+    "list": {"mode": "auth", "entity": "editors", "expr": ""},
+    "get": {"mode": "auth", "entity": "editors", "expr": ""},
+    "add": {"mode": "public", "expr": ""},
+    "update": {"mode": "auth", "entity": "editors", "expr": ""},
+    "delete": {"mode": "", "expr": ""}
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "users",
+  "type": "auth",
+  "fields": [
+    {"name": "name", "type": "string", "required": true},
+    {"name": "email", "type": "string", "required": true, "unique": true,
+      "constraints": {"validator": "@email"}},
+    {"name": "password", "type": "string", "required": true,
+      "constraints": {"validator": "@password"}}
+  ],
+  "rules": {
+    "list": {"mode": "public", "expr": ""},
+    "get": {"mode": "public", "expr": ""},
+    "add": {"mode": "public", "expr": ""},
+    "update": {"mode": "auth", "expr": ""},
+    "delete": {"mode": "", "expr": ""}
+  }
+}

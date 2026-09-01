@@ -4,6 +4,10 @@
 #include "../include/mantisbase/core/kv_store.h"
 #include "../include/mantisbase/core/realtime.h"
 
+#ifdef MB_SCRIPTING_ENABLED
+#include "../include/mantisbase/scripting/scripting_engine.h"
+#endif
+
 #include <cmrc/cmrc.hpp>
 #include <fstream>
 #include <memory>
@@ -30,10 +34,7 @@ namespace mb {
 
     MantisBase::~MantisBase() {
 #ifdef MB_SCRIPTING_ENABLED
-        if (m_dukCtx) {
-            duk_destroy_heap(m_dukCtx);
-            m_dukCtx = nullptr;
-        }
+        m_scripting.reset();
 #endif
     }
 
@@ -267,7 +268,10 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
         // Load start script for Mantis
-        loadStartScript();
+        if (m_scripting) {
+            m_scripting->loadStartScript();
+            m_scripting->fireOnServerStart();
+        }
 #endif
 
         // If server command is explicitly passed in, start listening,
@@ -351,7 +355,25 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
     duk_context *MantisBase::ctx() const {
-        return m_dukCtx;
+        return m_scripting ? m_scripting->ctx() : nullptr;
+    }
+
+    bool MantisBase::isScriptingDisabled() const {
+        return m_scriptingDisabled;
+    }
+
+    void MantisBase::notifyScriptRecordCreated(const std::string &entity,
+                                               const std::string &recordId) const {
+        if (m_scripting) {
+            m_scripting->fireOnRecordCreated(entity, recordId);
+        }
+    }
+
+    void MantisBase::notifyScriptRecordUpdated(const std::string &entity,
+                                               const std::string &recordId) const {
+        if (m_scripting) {
+            m_scripting->fireOnRecordUpdated(entity, recordId);
+        }
     }
 #endif
 
@@ -586,94 +608,26 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
     void MantisBase::initJSEngine() {
-        m_dukCtx = duk_create_heap_default();
-        if (!m_dukCtx) {
-            logger().critical("Scripting", "Failed to create Duktape heap");
-            return;
-        }
-
-        dukglue_register_global(m_dukCtx, this, "app");
-
-        // Properties
-        dukglue_register_property(m_dukCtx, &MantisBase::host, &MantisBase::setHost, "host");
-        dukglue_register_property(m_dukCtx, &MantisBase::port, &MantisBase::setPort, "port");
-        dukglue_register_property(m_dukCtx, &MantisBase::poolSize, &MantisBase::setPoolSize, "poolSize");
-        dukglue_register_property(m_dukCtx, &MantisBase::publicDir, &MantisBase::setPublicDir, "publicDir");
-        dukglue_register_property(m_dukCtx, &MantisBase::dataDir, &MantisBase::setDataDir, "dataDir");
-        dukglue_register_property(m_dukCtx, &MantisBase::isDevMode, nullptr, "devMode");
-        dukglue_register_property(m_dukCtx, &MantisBase::dbType, nullptr, "dbType");
-        dukglue_register_property(m_dukCtx, &MantisBase::jwtSecretKey_JSWrapper, nullptr, "secretKey");
-        dukglue_register_property(m_dukCtx, &MantisBase::version_JSWrapper, nullptr, "version");
-
-        // `app.close()`
-        dukglue_register_method(m_dukCtx, &MantisBase::close, "close");
-        // `app.quit(1, "Just crashed?")`
-        dukglue_register_method(m_dukCtx, &MantisBase::quit_JSWrapper, "quit");
-        // `app.db()`
-        dukglue_register_method(m_dukCtx, &MantisBase::duk_db, "db");
-        // `app.router()`
-        dukglue_register_method(m_dukCtx, &MantisBase::duk_router, "router");
-
-        MantisRequest::registerDuktapeMethods();
-        MantisResponse::registerDuktapeMethods();
-
-        // ---------------------------------------------- //
-        // Register `console` object
-        // ---------------------------------------------- //
-        // Create console object and register methods
-        duk_push_object(m_dukCtx);
-
-        duk_push_c_function(m_dukCtx, &DuktapeImpl::nativeConsoleInfo, DUK_VARARGS);
-        duk_put_prop_string(m_dukCtx, -2, "info");
-
-        duk_push_c_function(m_dukCtx, &DuktapeImpl::nativeConsoleTrace, DUK_VARARGS);
-        duk_put_prop_string(m_dukCtx, -2, "trace");
-
-        duk_push_c_function(m_dukCtx, &DuktapeImpl::nativeConsoleInfo, DUK_VARARGS);
-        duk_put_prop_string(m_dukCtx, -2, "log");
-
-        duk_put_global_string(m_dukCtx, "console");
-
-        // UTILS methods
-        registerUtilsToDuktapeEngine();
-
-        // DATABASE methods
-        Database::registerDuktapeMethods();
-
-        // TODO: Router::registerDuktapeMethods() — not yet ported to Drogon
+        m_scripting = std::make_unique<ScriptingEngine>(*this);
+        m_scripting->init();
     }
 
     void MantisBase::loadStartScript() const {
-        // Look for index.js as the entry point
-        const auto entryPoint = (fs::path(m_scriptsDir) / "index.mantis.js").string();
-        loadAndExecuteScript(entryPoint);
+        if (m_scripting) {
+            m_scripting->loadStartScript();
+        }
     }
 
     void MantisBase::loadAndExecuteScript(const std::string &filePath) const {
-        if (!fs::exists(fs::path(filePath))) {
-            logger().trace("File Execution",
-                             fmt::format("Executing a file that does not exist, path `{}`", filePath));
-            return;
-        }
-
-        // If the file exists, lets load the contents and then execute
-        std::ifstream file(filePath);
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        std::string scriptContent = buffer.str();
-
-        try {
-            dukglue_peval<void>(m_dukCtx, scriptContent.c_str());
-        } catch (const DukErrorException &e) {
-            logger().critical("File Load Error",
-                                fmt::format("Error loading file at {} \n\tError: {}", filePath, e.what()));
+        if (m_scripting) {
+            m_scripting->loadScript(filePath);
         }
     }
 
     void MantisBase::loadScript(const std::string &relativePath) const {
-        // Construct full path relative to scripts directory
-        const auto fullPath = fs::path(m_scriptsDir) / relativePath;
-        loadAndExecuteScript(fullPath.string());
+        if (m_scripting) {
+            m_scripting->loadScript(relativePath);
+        }
     }
 
     void MantisBase::quit_JSWrapper(const int code, const std::string &msg) {
@@ -686,6 +640,32 @@ namespace mb {
 
     Router *MantisBase::duk_router() const {
         return m_router.get();
+    }
+
+    KeyValStore *MantisBase::duk_settings() const {
+        return m_kvStore.get();
+    }
+
+    Auth *MantisBase::duk_auth() const {
+        return m_auth.get();
+    }
+
+    FilesMgr *MantisBase::duk_files() const {
+        return m_files.get();
+    }
+
+    Logger *MantisBase::duk_logs() const {
+        return m_logger.get();
+    }
+
+    RealtimeDB *MantisBase::duk_rt() const {
+        return m_realtime.get();
+    }
+
+    void MantisBase::loadScriptJs(const std::string &relativePath) const {
+        if (m_scripting) {
+            m_scripting->loadScript(relativePath);
+        }
     }
 #endif
 }

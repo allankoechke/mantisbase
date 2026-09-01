@@ -1,0 +1,15 @@
+{
+  "name": "products",
+  "type": "base",
+  "fields": [
+    {"name": "name", "type": "string", "required": true},
+    {"name": "price", "type": "double", "required": true}
+  ],
+  "rules": {
+    "list": {"mode": "public", "expr": ""},
+    "get": {"mode": "public", "expr": ""},
+    "add": {"mode": "", "expr": ""},
+    "update": {"mode": "", "expr": ""},
+    "delete": {"mode": "", "expr": ""}
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "orders",
+  "type": "base",
+  "fields": [
+    {"name": "label", "type": "string", "required": true},
+    {"name": "product_id", "type": "string",
+      "foreign_key": {"entity": "products", "field": "id", "on_delete": "RESTRICT"}},
+    {"name": "user_id", "type": "string",
+      "foreign_key": {"entity": "users", "field": "id", "on_delete": "CASCADE"}}
+  ],
+  "rules": {
+    "list": {"mode": "auth", "expr": ""},
+    "get": {"mode": "auth", "expr": ""},
+    "add": {"mode": "auth", "expr": ""},
+    "update": {"mode": "auth", "expr": ""},
+    "delete": {"mode": "auth", "expr": ""}
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "posts",
+  "type": "base",
+  "fields": [
+    {"name": "title", "type": "string", "required": true},
+    {"name": "content", "type": "string"},
+    {"name": "author_id", "type": "string"}
+  ],
+  "rules": {
+    "list": {"mode": "public", "expr": ""},
+    "get": {"mode": "public", "expr": ""},
+    "add": {"mode": "auth", "expr": ""},
+    "update": {"mode": "auth", "expr": ""},
+    "delete": {"mode": "auth", "expr": ""}
+  }
+}

@@ -126,6 +126,7 @@ Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Referen
 
 | Doc | Description |
 |---|---|
+| [Examples](examples/README.md) | Copy-paste schemas, migrations, and HTTP scripts |
 | [Quick Start](doc/QuickStart.md) | Get running in under 2 minutes |
 | [Installation](doc/installation.md) | Binary, source, and embedding setup |
 | [CLI Reference](doc/cmd.md) | Command-line options and flags |
@@ -150,6 +151,8 @@ Watch the [YouTube playlist](https://youtube.com/playlist?list=PLsG0sKNmNpyQwsZu
 ## Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
+
+For AI-assisted app building on MantisBase, see [AGENTS.md](AGENTS.md) and [examples/](examples/README.md).
 
 ## License
 

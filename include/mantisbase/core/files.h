@@ -119,6 +119,11 @@ namespace mb {
          */
         std::optional<std::string> getFilePath(const std::string &entity_name, const std::string &filename);
 
+#ifdef MB_SCRIPTING_ENABLED
+        [[nodiscard]] std::string getFilePathString(const std::string &entity_name,
+                                                    const std::string &filename);
+#endif
+
         /**
          * @brief Remove a file from an entity's directory.
          *

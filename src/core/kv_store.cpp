@@ -105,6 +105,44 @@ namespace mb
         return m_configs;
     }
 
+    json KeyValStore::getScriptingValue(const std::string &key) const
+    {
+        if (m_configs.contains(key)) {
+            return m_configs.at(key);
+        }
+        return json();
+    }
+
+    void KeyValStore::setScriptingValue(const std::string &key, const json &value)
+    {
+        applyPatch(json{{key, value}});
+    }
+
+    json KeyValStore::getScriptingConfigsCopy() const
+    {
+        return m_configs;
+    }
+
+    void KeyValStore::reloadScriptingConfigs()
+    {
+        m_configs = loadFromDb();
+    }
+
+    std::string KeyValStore::getScriptingJson(const std::string &key) const
+    {
+        return getScriptingValue(key).dump();
+    }
+
+    void KeyValStore::setScriptingJson(const std::string &key, const std::string &json_value)
+    {
+        setScriptingValue(key, json::parse(json_value));
+    }
+
+    std::string KeyValStore::configsScriptingJson() const
+    {
+        return getScriptingConfigsCopy().dump();
+    }
+
     json KeyValStore::loadFromDb()
     {
         if (!m_configs.empty())
