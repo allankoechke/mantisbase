@@ -105,17 +105,25 @@ TEST_F(MultiInstanceTest, ConcurrentRequestsToSameInstance) {
 
     std::vector<std::thread> threads;
     std::atomic<int> success_count{0};
-    const int num_requests = 20;
+    constexpr int num_requests = 20;
 
     for (int i = 0; i < num_requests; ++i) {
         threads.emplace_back([this, i, &success_count]() {
             TestHttp::Client thread_client("127.0.0.1", port);
-            nlohmann::json record = {{"label", "concurrent_" + std::to_string(i)}};
-            auto res = thread_client.Post("/api/v1/entities/multi_inst_a",
+            const nlohmann::json record = {{"label", "concurrent_" + std::to_string(i)}};
+            const auto res = thread_client.Post("/api/v1/entities/multi_inst_a",
                                           record.dump(), "application/json");
+
+
+            const auto& app = MbServerFixture::mantis();
+
             if (res && res->status == 201) {
                 success_count.fetch_add(1);
+                app.logger().debug("TEST MINS", "Request Added");
             }
+            else {
+                 app.logger().debug("TEST MINS", std::format("Request Failed: {}\n{}", res->status, res->body));
+             }
         });
     }
 
