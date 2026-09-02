@@ -35,7 +35,6 @@ TEST_F(IntegrationScriptingTest, PingRouteReturnsJson) {
 }
 
 TEST_F(IntegrationScriptingTest, DbQuerySingleRowShape) {
-
     const auto res = client->Get("/api/v1/test/scripting/settings-count");
     ASSERT_TRUE(res);
     ASSERT_EQ(res->status, 200);
