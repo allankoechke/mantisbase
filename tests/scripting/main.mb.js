@@ -11,11 +11,12 @@ app.router().addRoute("GET", "/api/v1/test/scripting/settings-count", function (
 app.router().addRoute("GET", "/api/v1/test/scripting/mw-abort", function (req, res) {
     res.json(200, { reached: true });
 }, function (req, res) {
+    res.json(403, { error: "Access denied", data: undefined, status: 403 });
     return false;
 });
 
 app.router().addRoute("GET", "/api/v1/test/scripting/protected", function (req, res) {
     res.json(200, { protected: true });
-}, middlewares.getAuthToken());
+}, middlewares.requireEntityAuth("test_users"));
 
 console.log("MantisBase test scripting routes registered");

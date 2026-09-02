@@ -176,9 +176,10 @@ namespace mb {
 
         // Stop router and clear out objects
         if (m_running.load()) {
-            drogon::app().quit();
-            m_running.store(false);
-            m_entityMap.clear();
+            drogon::app().quit(); // Stop running drogon app
+            m_running.store(false); // Reset running flag
+            m_entityMap.clear(); // Clear entity map
+            m_routeRegistry.clear(); // Clear all routes registered
             logger().info("Server", "HTTP Server Stopped.");
         }
     }
@@ -241,7 +242,7 @@ namespace mb {
     }
 
     void Router::addSchemaCacheLocked(const nlohmann::json &entity_schema) const {
-        auto entity_name = entity_schema.at("name").get<std::string>();
+        const auto entity_name = entity_schema.at("name").get<std::string>();
         if (m_entityMap.contains(entity_name)) {
             throw MantisException(500, "An entity exists with given entity_name");
         }

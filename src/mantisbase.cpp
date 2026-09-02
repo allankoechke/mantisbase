@@ -33,6 +33,7 @@ namespace mb {
     }
 
     MantisBase::~MantisBase() {
+        close(); // Confirm all units were closed/cleared before we exit
 #ifdef MB_SCRIPTING_ENABLED
         m_scripting.reset();
 #endif
@@ -86,36 +87,36 @@ namespace mb {
         if (config.contains("connection") || config.contains("db_url")) {
             app->m_cmdArgs.emplace_back("--db_url");
             app->m_cmdArgs.push_back(config.contains("db_url")
-                                        ? config.at("db_url").get<std::string>()
-                                        : config.at("connection").get<std::string>());
+                                         ? config.at("db_url").get<std::string>()
+                                         : config.at("connection").get<std::string>());
         }
 
         if (config.contains("dataDir") || config.contains("data-dir")) {
             app->m_cmdArgs.emplace_back("--data-dir");
             app->m_cmdArgs.push_back(config.contains("data-dir")
-                                        ? config.at("data-dir").get<std::string>()
-                                        : config.at("dataDir").get<std::string>());
+                                         ? config.at("data-dir").get<std::string>()
+                                         : config.at("dataDir").get<std::string>());
         }
 
         if (config.contains("publicDir") || config.contains("public-dir")) {
             app->m_cmdArgs.emplace_back("--public-dir");
             app->m_cmdArgs.push_back(config.contains("public-dir")
-                                        ? config.at("public-dir").get<std::string>()
-                                        : config.at("publicDir").get<std::string>());
+                                         ? config.at("public-dir").get<std::string>()
+                                         : config.at("publicDir").get<std::string>());
         }
 
         if (config.contains("scriptsDir") || config.contains("scripts-dir")) {
             app->m_cmdArgs.emplace_back("--scripts-dir");
             app->m_cmdArgs.push_back(config.contains("scripts-dir")
-                                        ? config.at("scripts-dir").get<std::string>()
-                                        : config.at("scriptsDir").get<std::string>());
+                                         ? config.at("scripts-dir").get<std::string>()
+                                         : config.at("scriptsDir").get<std::string>());
         }
 
         if (config.contains("migrationsDir") || config.contains("migrations-dir")) {
             app->m_cmdArgs.emplace_back("--migrations-dir");
             app->m_cmdArgs.push_back(config.contains("migrations-dir")
-                                        ? config.at("migrations-dir").get<std::string>()
-                                        : config.at("migrationsDir").get<std::string>());
+                                         ? config.at("migrations-dir").get<std::string>()
+                                         : config.at("migrationsDir").get<std::string>());
         }
 
         if (config.contains("dev")) {
@@ -144,8 +145,8 @@ namespace mb {
                 if (serve.contains("pool-size") || serve.contains("poolSize")) {
                     app->m_cmdArgs.emplace_back("--pool-size");
                     app->m_cmdArgs.push_back(std::to_string(serve.contains("pool-size")
-                                                                 ? serve.at("pool-size").get<int>()
-                                                                 : serve.at("poolSize").get<int>()));
+                                                                ? serve.at("pool-size").get<int>()
+                                                                : serve.at("poolSize").get<int>()));
                 }
             }
         }
@@ -323,19 +324,20 @@ namespace mb {
     Logger &MantisBase::logs() const {
         return *m_logger;
     }
-    RealtimeDB & MantisBase::rt() const {
+
+    RealtimeDB &MantisBase::rt() const {
         return *m_realtime;
     }
 
-    FilesMgr & MantisBase::files() const {
+    FilesMgr &MantisBase::files() const {
         return *m_files;
     }
 
-    Logger & MantisBase::logger() const {
+    Logger &MantisBase::logger() const {
         return *m_logger;
     }
 
-    Auth & MantisBase::auth() const {
+    Auth &MantisBase::auth() const {
         return *m_auth;
     }
 
@@ -397,7 +399,7 @@ namespace mb {
             // of the persisted log store and print it to the console only, where it is still
             // needed for headless first-boot setup.
             std::cout << "\tOpen this link to set up the first admin user (valid 30 mins):"
-                      << std::endl << "\t" << url << std::endl;
+                    << std::endl << "\t" << url << std::endl;
             logger().info("Admin Setup",
                           fmt::format("Admin setup link printed to the console (token redacted from logs). "
                                       "Token valid for 30mins only.\n\t— http://localhost:{}/mb/setup?token=<redacted>"
@@ -436,7 +438,7 @@ namespace mb {
 #endif
         } catch (const std::exception &e) {
             logger().critical("Admin Dashboard Failed",
-                                fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));
+                              fmt::format("Failed to spin admin dashboard\n\t— {}", e.what()));
         }
 
         std::cout << std::endl;

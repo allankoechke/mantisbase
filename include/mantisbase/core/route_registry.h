@@ -65,6 +65,13 @@ namespace mb
          * @return JSON status payload describing the removal result.
          */
         json remove(const std::string& method, const std::string& path);
+
+        /**
+         * Clear all registered routes
+         */
+        void clear() {
+            routes.clear();
+        }
     };
 }
 

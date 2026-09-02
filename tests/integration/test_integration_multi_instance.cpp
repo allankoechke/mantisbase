@@ -131,7 +131,7 @@ TEST_F(MultiInstanceTest, ConcurrentRequestsToSameInstance) {
         t.join();
     }
 
-    EXPECT_EQ(success_count.load(), num_requests);
+    EXPECT_EQ(success_count.load(), threads.size());
 
     auto list_res = client->Get("/api/v1/entities/multi_inst_a");
     ASSERT_TRUE(list_res);
