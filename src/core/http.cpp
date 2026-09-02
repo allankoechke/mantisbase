@@ -146,8 +146,8 @@ namespace mb {
             // Drogon stores them as positional params in the matched pattern
             if (!param_names.empty()) {
                 // Parse path params by comparing actual path with pattern
-                auto actual_parts = splitString(std::string(req->path()), "/");
-                auto pattern_parts = splitString(_path, "/");
+                const auto actual_parts = splitString(std::string(req->path()), "/");
+                const auto pattern_parts = splitString(_path, "/");
 
                 for (size_t i = 0; i < pattern_parts.size() && i < actual_parts.size(); ++i) {
                     if (!pattern_parts[i].empty() && pattern_parts[i][0] == ':') {
