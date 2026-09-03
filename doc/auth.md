@@ -1,4 +1,4 @@
-﻿@page auth_api Authentication API
+﻿@page docs_auth_api Authentication API
 
 MantisBase provides authentication endpoints scoped to auth-type entities. Each auth entity exposes login, refresh, and logout under `/api/v1/auth/<entity>/`. A global token verification endpoint is available at `/api/v1/auth/verify`.
 

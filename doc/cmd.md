@@ -1,4 +1,4 @@
-﻿@page cli Command Line Usage
+﻿@page docs_cli Command Line Usage
 
 MantisBase has a comprehensive CLI built on `argparse` for server management, admin accounts, migrations, and schema operations.
 

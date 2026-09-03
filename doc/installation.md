@@ -1,4 +1,4 @@
-﻿@page setup Setting Up MantisBase
+﻿@page docs_setup Setting Up MantisBase
 
 Getting started with **MantisBase** is simple. You can use the prebuilt binaries for a quick start, or embed the source code directly into your own C++ project.
 

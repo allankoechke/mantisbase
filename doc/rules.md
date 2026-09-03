@@ -1,4 +1,4 @@
-@page rest_api_rules API Access Rules
+@page docs_rest_api_rules API Access Rules
 
 MantisBase uses a mode-based access control system with optional JavaScript expression evaluation for fine-grained permissions. Each entity schema defines five access rules that control who can perform CRUD operations.
 

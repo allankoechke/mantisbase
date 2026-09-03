@@ -1,4 +1,4 @@
-@page embedding Embedding MantisBase
+@page docs_embedding Embedding MantisBase
 
 MantisBase is designed as a lightweight C++ library that can be embedded directly into your desktop, mobile, or embedded application. This guide explains how to integrate MantisBase into your project and configure it.
 
