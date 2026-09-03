@@ -12,9 +12,10 @@
 
 namespace fs = std::filesystem;
 
-static std::atomic<bool> server_ready{false};
+std::atomic<bool> server_ready{false};
+int bench_port = 0;
+
 static std::thread server_thread;
-static int bench_port = 0;
 static fs::path bench_dir;
 static std::unique_ptr<mb::MantisBase> bench_app;
 

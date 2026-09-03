@@ -1,4 +1,4 @@
-﻿@page rest_api REST API Reference Guide
+﻿@page docs_rest_api REST API Reference Guide
 
 MantisBase provides auto-generated RESTful APIs for interacting with database entities. This document covers the entity endpoints, schema management, realtime (SSE) API for live database change notifications (SQLite and PostgreSQL), and request handling.
 

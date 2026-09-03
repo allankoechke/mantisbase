@@ -1,4 +1,4 @@
-@page healthcheck Health Check
+@page docs_healthcheck Health Check
 
 The health check endpoint provides a simple way to verify that the MantisBase server is running and responsive. It is useful for monitoring tools, load balancers, and deployment scripts.
 

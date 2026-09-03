@@ -1,4 +1,4 @@
-@page scripting Scripting
+@page docs_scripting Scripting
 
 On server startup, MantisBase loads JavaScript from your configured scripts directory. The primary entry file is **`main.mb.js`**. If that file is missing, MantisBase falls back to **`index.mantis.js`** and logs a deprecation warning.
 

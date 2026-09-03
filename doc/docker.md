@@ -1,4 +1,4 @@
-@page docker Running in Docker
+@page docs_docker Running in Docker
 
 MantisBase provides Docker support for easy deployment and containerization. This guide covers building and running MantisBase in Docker containers.
 

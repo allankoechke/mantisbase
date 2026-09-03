@@ -137,7 +137,7 @@ static void BM_MixedCRUD(benchmark::State& state) {
                 TestHttp::Client cli("127.0.0.1", bench_port);
 
                 if (i % 3 == 0) {
-                    nlohmann::json record = {
+                    const nlohmann::json record = {
                         {"title", "mixed_" + std::to_string(i)},
                         {"value", i}
                     };
