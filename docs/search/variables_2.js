@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['filename_0',['filename',['../structmb_1_1FormDataItem.html#a21419c6dc6b7269eaf48798bbca29c33',1,'mb::FormDataItem']]]
+  ['denied_0',['denied',['../structmb_1_1TopicAccessResult.html#a808fea14ce61aabd8f253877d8e48d05',1,'mb::TopicAccessResult']]]
 ];

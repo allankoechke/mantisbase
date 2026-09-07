@@ -1,5 +1,5 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/types.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/types.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="201,5,434,60"/>
+<area shape="rect" id="Node000001" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="201,5,434,60"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,108,152,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,63,124,106,123,101,244,58"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="177,108,263,133"/>

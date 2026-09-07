@@ -170,7 +170,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
 <tr class="separator:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase" id="r_aeb65d721822a05d100c547f8a32a8dcf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a> () const</td></tr>
-<tr class="memdesc:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the logger instance.  <br /></td></tr>
 <tr class="separator:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -242,7 +241,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Create a directory for the given entity. </p>
-<p>Validates the entity name and creates the directory if it doesn't exist. Throws <a class="el" href="classmb_1_1MantisException.html">MantisException</a> if entity name is invalid.</p>
+<p>Validates the entity name and creates the directory if it doesn't exist. Throws <a class="el" href="classmb_1_1MantisException.html" title="Application exception carrying an HTTP status code and messages.">MantisException</a> if entity name is invalid.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">entity_name</td><td>Entity/table name (must be valid alphanumeric + underscore) </td></tr>
@@ -251,7 +250,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html">MantisException</a></td><td>if entity name is invalid </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html" title="Application exception carrying an HTTP status code and messages.">MantisException</a></td><td>if entity name is invalid </td></tr>
   </table>
   </dd>
 </dl>
@@ -322,7 +321,7 @@ Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Absolute path string to the entity's file directory </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html">MantisException</a></td><td>if entity name is invalid or path traversal is detected </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html" title="Application exception carrying an HTTP status code and messages.">MantisException</a></td><td>if entity name is invalid or path traversal is detected </td></tr>
   </table>
   </dd>
 </dl>
@@ -405,7 +404,7 @@ Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Absolute canonical path string to the file </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html">MantisException</a></td><td>if entity name is invalid, filename is empty, or path traversal is detected </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html" title="Application exception carrying an HTTP status code and messages.">MantisException</a></td><td>if entity name is invalid, filename is empty, or path traversal is detected </td></tr>
   </table>
   </dd>
 </dl>
@@ -460,7 +459,7 @@ Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Canonical path if valid </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html">MantisException</a></td><td>if path traversal is detected (400 status) </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html" title="Application exception carrying an HTTP status code and messages.">MantisException</a></td><td>if path traversal is detected (400 status) </td></tr>
   </table>
   </dd>
 </dl>
@@ -505,7 +504,7 @@ Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Absolute file path if file exists, std::nullopt otherwise </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html">MantisException</a></td><td>if entity name is invalid </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html" title="Application exception carrying an HTTP status code and messages.">MantisException</a></td><td>if entity name is invalid </td></tr>
   </table>
   </dd>
 </dl>
@@ -652,7 +651,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html">MantisException</a></td><td>if either entity name is invalid </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MantisException.html" title="Application exception carrying an HTTP status code and messages.">MantisException</a></td><td>if either entity name is invalid </td></tr>
   </table>
   </dd>
 </dl>

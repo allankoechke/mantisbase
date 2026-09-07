@@ -98,13 +98,16 @@ $(document).ready(function(){initNavTree('classmb_1_1SSEMgr.html',''); initResiz
 </div><!--header-->
 <div class="contents">
 
+<p>Manages SSE routes, sessions, broadcast, and shared WebSocket cleanup.  
+ <a href="classmb_1_1SSEMgr.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="sse_8h_source.html">sse.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for mb::SSEMgr:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmb_1_1SSEMgr__inherit__graph.png" border="0" usemap="#amb_1_1SSEMgr_inherit__map" alt="Inheritance graph"/></div>
 <map name="amb_1_1SSEMgr_inherit__map" id="amb_1_1SSEMgr_inherit__map">
-<area shape="rect" title=" " alt="" coords="21,79,121,104"/>
+<area shape="rect" title="Manages SSE routes, sessions, broadcast, and shared WebSocket cleanup." alt="" coords="21,79,121,104"/>
 <area shape="rect" href="classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="5,5,136,31"/>
 <area shape="poly" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
 </map>
@@ -114,7 +117,7 @@ Collaboration diagram for mb::SSEMgr:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmb_1_1SSEMgr__coll__graph.png" border="0" usemap="#amb_1_1SSEMgr_coll__map" alt="Collaboration graph"/></div>
 <map name="amb_1_1SSEMgr_coll__map" id="amb_1_1SSEMgr_coll__map">
-<area shape="rect" title=" " alt="" coords="21,79,121,104"/>
+<area shape="rect" title="Manages SSE routes, sessions, broadcast, and shared WebSocket cleanup." alt="" coords="21,79,121,104"/>
 <area shape="rect" href="classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="5,5,136,31"/>
 <area shape="poly" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
 </map>
@@ -128,8 +131,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a9b1d341081d4f2855f06d968b4961e45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7563a8e0ccb2cd568dbcb8c0ab4ca3db" id="r_a7563a8e0ccb2cd568dbcb8c0ab4ca3db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#a7563a8e0ccb2cd568dbcb8c0ab4ca3db">createRoutes</a> ()</td></tr>
 <tr class="separator:a7563a8e0ccb2cd568dbcb8c0ab4ca3db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d904d2fc57e1bf0b0b0f4c297c0a127" id="r_a1d904d2fc57e1bf0b0b0f4c297c0a127"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#a1d904d2fc57e1bf0b0b0f4c297c0a127">createSession</a> (const std::set&lt; std::string &gt; &amp;initial_topics, drogon::ResponseStreamPtr stream, const std::string &amp;owner_entity=&quot;&quot;, const std::string &amp;owner_id=&quot;&quot;)</td></tr>
-<tr class="separator:a1d904d2fc57e1bf0b0b0f4c297c0a127"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a396cb8f2d3103c683cb1ddb65ba65338" id="r_a396cb8f2d3103c683cb1ddb65ba65338"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#a396cb8f2d3103c683cb1ddb65ba65338">createSession</a> (const std::set&lt; std::string &gt; &amp;initial_topics, drogon::ResponseStreamPtr stream, <a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">RealtimeAuthSnapshot</a> auth=<a class="el" href="namespacemb.html#ab48fc5777e1fcac4c16253aebedc0a66">makeGuestAuthSnapshot</a>())</td></tr>
+<tr class="memdesc:a396cb8f2d3103c683cb1ddb65ba65338"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a session and attach it to an async response stream.  <br /></td></tr>
+<tr class="separator:a396cb8f2d3103c683cb1ddb65ba65338"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1798d028c9e6452955f3567b49ffe876" id="r_a1798d028c9e6452955f3567b49ffe876"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classmb_1_1SSESession.html">SSESession</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#a1798d028c9e6452955f3567b49ffe876">fetchSession</a> (const std::string &amp;session_id)</td></tr>
 <tr class="separator:a1798d028c9e6452955f3567b49ffe876"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76b3375b2b387673decd6c8cda91e246" id="r_a76b3375b2b387673decd6c8cda91e246"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSEMgr.html#a76b3375b2b387673decd6c8cda91e246">removeSession</a> (const std::string &amp;session_id)</td></tr>
@@ -157,11 +161,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
 <tr class="separator:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase" id="r_aeb65d721822a05d100c547f8a32a8dcf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a> () const</td></tr>
-<tr class="memdesc:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the logger instance.  <br /></td></tr>
 <tr class="separator:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Manages SSE sessions, WebSocket connections, routes realtime change events, and registers GET/POST /api/v1/realtime. </p>
+<div class="textblock"><p>Manages SSE routes, sessions, broadcast, and shared WebSocket cleanup. </p>
+<p>Owns a <a class="el" href="classmb_1_1WSMgr.html">WSMgr</a> instance and runs a background thread that closes expired, idle, and connect-only sessions for both SSE and WebSocket. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a2950426465dd262150e32a748828a50b" name="a2950426465dd262150e32a748828a50b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2950426465dd262150e32a748828a50b">&#9670;&#160;</a></span>SSEMgr()</h2>
@@ -222,7 +226,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Push a change event to all SSE sessions and WS connections interested in its topic. </p>
+<p>Push a change event to all SSE sessions subscribed to the matching topic. </p>
 
 </div>
 </div>
@@ -240,12 +244,12 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Register GET and POST /api/v1/realtime routes. </p>
+<p>Register GET/POST <code>/api/v1/realtime</code> and the WebSocket controller. </p>
 
 </div>
 </div>
-<a id="a1d904d2fc57e1bf0b0b0f4c297c0a127" name="a1d904d2fc57e1bf0b0b0f4c297c0a127"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d904d2fc57e1bf0b0b0f4c297c0a127">&#9670;&#160;</a></span>createSession()</h2>
+<a id="a396cb8f2d3103c683cb1ddb65ba65338" name="a396cb8f2d3103c683cb1ddb65ba65338"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a396cb8f2d3103c683cb1ddb65ba65338">&#9670;&#160;</a></span>createSession()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -265,14 +269,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>owner_entity</em> = <code>&quot;&quot;</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>owner_id</em> = <code>&quot;&quot;</code>&#160;</td>
+          <td class="paramtype"><a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">RealtimeAuthSnapshot</a>&#160;</td>
+          <td class="paramname"><em>auth</em> = <code><a class="el" href="namespacemb.html#ab48fc5777e1fcac4c16253aebedc0a66">makeGuestAuthSnapshot</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -281,7 +279,9 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Create a new SSE session with the given topics and stream; returns client_id. </p>
+
+<p>Create a session and attach it to an async response stream. </p>
+<dl class="section return"><dt>Returns</dt><dd>Client ID (<code>rt_sse_...</code>), or empty on failure. </dd></dl>
 
 </div>
 </div>
@@ -300,6 +300,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Look up a session by ID without updating activity. </p>
 
 </div>
 </div>
@@ -318,6 +319,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Look up a session by client ID (used by POST subscribe handler). </p>
 
 </div>
 </div>
@@ -335,6 +337,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Number of active SSE sessions. </dd></dl>
 
 </div>
 </div>
@@ -370,7 +373,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Remove session and close it (disconnect). </p>
+<p>Remove and close a session by client ID. </p>
 
 </div>
 </div>
@@ -388,6 +391,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Start the cleanup background thread. </p>
 
 </div>
 </div>
@@ -405,6 +409,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Stop cleanup and the realtime worker. </p>
 
 </div>
 </div>
@@ -423,6 +428,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Bump last-activity for an existing session. </p>
 
 </div>
 </div>
@@ -440,6 +446,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>WebSocket manager (shared cleanup loop). </dd></dl>
 
 </div>
 </div>

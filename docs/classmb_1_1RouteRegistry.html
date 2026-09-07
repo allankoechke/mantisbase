@@ -98,6 +98,9 @@ $(document).ready(function(){initNavTree('classmb_1_1RouteRegistry.html',''); in
 </div><!--header-->
 <div class="contents">
 
+<p>Thread-local route registry backing the <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> router.  
+ <a href="classmb_1_1RouteRegistry.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="route__registry_8h_source.html">route_registry.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -109,9 +112,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8af23c11906981ab71df27f6ee4902db" id="r_a8af23c11906981ab71df27f6ee4902db"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structmb_1_1RouteHandler.html">RouteHandler</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#a8af23c11906981ab71df27f6ee4902db">find</a> (const std::string &amp;method, const std::string &amp;path) const</td></tr>
 <tr class="separator:a8af23c11906981ab71df27f6ee4902db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0f1d98d8fec98cc41da8daede8a828f" id="r_aa0f1d98d8fec98cc41da8daede8a828f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#aa0f1d98d8fec98cc41da8daede8a828f">remove</a> (const std::string &amp;method, const std::string &amp;path)</td></tr>
+<tr class="memdesc:aa0f1d98d8fec98cc41da8daede8a828f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a route from the registry.  <br /></td></tr>
 <tr class="separator:aa0f1d98d8fec98cc41da8daede8a828f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9feb322462e2f7f4a1babb368269efdb" id="r_a9feb322462e2f7f4a1babb368269efdb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#a9feb322462e2f7f4a1babb368269efdb">clear</a> ()</td></tr>
+<tr class="separator:a9feb322462e2f7f4a1babb368269efdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Thread-local route registry backing the <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> router. </p>
+<p>Supports both plain and content-reader handler variants (multipart uploads). </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="af1c8a76ae6a18b5f29347598a42baf0b" name="af1c8a76ae6a18b5f29347598a42baf0b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af1c8a76ae6a18b5f29347598a42baf0b">&#9670;&#160;</a></span>add() <span class="overload">[1/2]</span></h2>
 
@@ -149,6 +158,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Register a standard handler for <code>method</code> + <code>path</code>. </p>
 
 </div>
 </div>
@@ -189,6 +199,33 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Register a handler that receives a <a class="el" href="classmb_1_1MantisContentReader.html">MantisContentReader</a>. </p>
+
+</div>
+</div>
+<a id="a9feb322462e2f7f4a1babb368269efdb" name="a9feb322462e2f7f4a1babb368269efdb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9feb322462e2f7f4a1babb368269efdb">&#9670;&#160;</a></span>clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::RouteRegistry::clear </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Clear all registered routes </p>
 
 </div>
 </div>
@@ -217,6 +254,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Route handler metadata, or <code>nullptr</code> if not registered. </dd></dl>
 
 </div>
 </div>
@@ -245,6 +283,9 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Remove a route from the registry. </p>
+<dl class="section return"><dt>Returns</dt><dd>JSON status payload describing the removal result. </dd></dl>
 
 </div>
 </div>

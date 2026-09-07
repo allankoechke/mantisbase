@@ -1,5 +1,5 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/route_registry.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/route_registry.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="245,5,479,60"/>
+<area shape="rect" id="Node000001" title="In&#45;memory HTTP route table keyed by method and path." alt="" coords="245,5,479,60"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,108,129,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="273,63,120,107,119,102,271,58"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="160,357,247,383"/>
@@ -14,9 +14,9 @@
 <area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="479,31,789,39,981,51,1179,71,1370,100,1458,119,1539,142,1611,167,1672,197,1721,230,1756,268,1765,290,1763,301,1756,311,1735,322,1699,332,1591,348,1463,359,1347,367,1346,362,1463,354,1590,343,1698,327,1733,317,1752,307,1758,299,1760,290,1752,271,1718,234,1670,201,1609,172,1537,147,1457,125,1369,106,1179,76,980,56,789,44,479,36"/>
 <area shape="rect" id="Node000008" href="$utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="911,108,1018,133"/>
 <area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="479,48,898,107,897,112,479,53"/>
-<area shape="rect" id="Node000015" href="$logger_8h.html" title=" " alt="" coords="1355,189,1518,214"/>
+<area shape="rect" id="Node000015" href="$logger_8h.html" title="Structured logging wrapper around spdlog with optional SQLite persistence." alt="" coords="1355,189,1518,214"/>
 <area shape="poly" id="edge40_Node000001_Node000015" title=" " alt="" coords="479,40,733,65,882,83,1030,105,1224,144,1381,183,1380,188,1223,150,1030,111,881,88,732,70,479,46"/>
-<area shape="rect" id="Node000025" href="$types_8h.html" title=" " alt="" coords="700,277,827,302"/>
+<area shape="rect" id="Node000025" href="$types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="700,277,827,302"/>
 <area shape="poly" id="edge39_Node000001_Node000025" title=" " alt="" coords="375,59,392,96,418,139,451,183,492,219,538,245,589,263,639,274,686,281,685,287,638,280,587,268,536,250,488,224,447,186,413,142,388,98,370,61"/>
 <area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="912,127,667,146,551,163,512,173,492,183,481,203,479,225,485,247,498,270,534,313,572,347,568,351,530,317,493,273,480,249,474,225,475,202,488,179,510,168,550,158,666,141,911,122"/>
 <area shape="poly" id="edge15_Node000008_Node000007" title=" " alt="" coords="1017,131,1098,153,1134,166,1158,179,1195,218,1222,263,1242,307,1255,343,1250,345,1237,309,1218,265,1190,221,1155,183,1132,170,1096,158,1016,136"/>

@@ -181,6 +181,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a889efc725074a2734d9e7f9a7493a161" id="r_a889efc725074a2734d9e7f9a7493a161"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisRequest.html#a889efc725074a2734d9e7f9a7493a161">resolveAuthToken</a> () <a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7b85cbdc71d39a82">const</a></td></tr>
 <tr class="separator:a889efc725074a2734d9e7f9a7493a161"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ff1c881598fb558d19a40be20835625" id="r_a3ff1c881598fb558d19a40be20835625"><td class="memItemLeft" align="right" valign="top">std::pair&lt; nlohmann::json, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisRequest.html#a3ff1c881598fb558d19a40be20835625">getBodyAsJson</a> () <a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7b85cbdc71d39a82">const</a></td></tr>
+<tr class="memdesc:a3ff1c881598fb558d19a40be20835625"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse and cache the JSON request body.  <br /></td></tr>
 <tr class="separator:a3ff1c881598fb558d19a40be20835625"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2fd0f0ba018ae2ce7b73d10ccd70903c" id="r_a2fd0f0ba018ae2ce7b73d10ccd70903c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7b85cbdc71d39a82">const</a> drogon::HttpRequestPtr &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisRequest.html#a2fd0f0ba018ae2ce7b73d10ccd70903c">drogonRequest</a> () <a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7b85cbdc71d39a82">const</a></td></tr>
 <tr class="separator:a2fd0f0ba018ae2ce7b73d10ccd70903c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -203,7 +204,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
 <tr class="separator:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase" id="r_aeb65d721822a05d100c547f8a32a8dcf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a> () const</td></tr>
-<tr class="memdesc:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the logger instance.  <br /></td></tr>
 <tr class="separator:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
@@ -266,6 +266,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Underlying Drogon request pointer. </dd></dl>
 
 </div>
 </div>
@@ -283,6 +284,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Bearer token from the Authorization header, or empty. </dd></dl>
 
 </div>
 </div>
@@ -317,6 +319,9 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Parse and cache the JSON request body. </p>
+<dl class="section return"><dt>Returns</dt><dd><code>{body, error}</code> — error non-empty on parse failure. </dd></dl>
 
 </div>
 </div>
@@ -510,6 +515,7 @@ template&lt;<a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Get a per-request attribute, inserting <code>default_value</code> if missing. </p>
 
 </div>
 </div>
@@ -697,6 +703,7 @@ template&lt;<a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if a per-request attribute exists on the Drogon request. </dd></dl>
 
 </div>
 </div>
@@ -767,6 +774,7 @@ template&lt;<a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> when the request auth block is an admin session. </dd></dl>
 
 </div>
 </div>
@@ -784,6 +792,7 @@ template&lt;<a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> when the request auth block is guest/unauthenticated. </dd></dl>
 
 </div>
 </div>
@@ -801,6 +810,7 @@ template&lt;<a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> when <code>Content-Type</code> is <code>multipart/form-data</code>. </dd></dl>
 
 </div>
 </div>
@@ -818,6 +828,7 @@ template&lt;<a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> when the request auth block is a regular user session. </dd></dl>
 
 </div>
 </div>
@@ -843,6 +854,7 @@ template&lt;<a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Register request accessor methods on the Duktape <code>req</code> object. </p>
 
 </div>
 </div>
@@ -899,6 +911,7 @@ template&lt;typename T &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Store a per-request attribute on the underlying Drogon request. </p>
 
 </div>
 </div>
@@ -927,6 +940,7 @@ template&lt;typename T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Set a single route path parameter (e.g. <code>:id</code>). </p>
 
 </div>
 </div>
@@ -945,6 +959,7 @@ template&lt;typename T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Replace all route path parameters. </p>
 
 </div>
 </div>

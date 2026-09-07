@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['validators_0',['Validators',['../classmb_1_1Validators.html',1,'mb']]]
+  ['topicaccessresult_0',['TopicAccessResult',['../structmb_1_1TopicAccessResult.html',1,'mb']]]
 ];

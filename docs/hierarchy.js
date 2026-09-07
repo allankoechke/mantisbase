@@ -34,11 +34,14 @@ var hierarchy =
     ] ],
     [ "mb::MantisBase", "classmb_1_1MantisBase.html", null ],
     [ "mb::MantisContentReader", "classmb_1_1MantisContentReader.html", null ],
+    [ "mb::RealtimeAuthSnapshot", "structmb_1_1RealtimeAuthSnapshot.html", null ],
+    [ "mb::RealtimeWsSession", "structmb_1_1RealtimeWsSession.html", null ],
     [ "mb::RouteHandler", "structmb_1_1RouteHandler.html", null ],
     [ "mb::RouteKeyHash", "structmb_1_1RouteKeyHash.html", null ],
     [ "mb::RouteRegistry", "classmb_1_1RouteRegistry.html", null ],
     [ "mb::RtDbWorker", "classmb_1_1RtDbWorker.html", null ],
     [ "mb::SSESession", "classmb_1_1SSESession.html", null ],
+    [ "mb::TopicAccessResult", "structmb_1_1TopicAccessResult.html", null ],
     [ "mb::Validators", "classmb_1_1Validators.html", null ],
     [ "drogon::WebSocketController", null, [
       [ "mb::RealtimeWSController", "classmb_1_1RealtimeWSController.html", null ]

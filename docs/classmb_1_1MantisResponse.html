@@ -195,7 +195,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
 <tr class="separator:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase" id="r_aeb65d721822a05d100c547f8a32a8dcf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a> () const</td></tr>
-<tr class="memdesc:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the logger instance.  <br /></td></tr>
 <tr class="separator:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
@@ -273,6 +272,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Clear the HttpOnly auth cookie. </p>
 
 </div>
 </div>
@@ -290,6 +290,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Underlying Drogon response pointer. </dd></dl>
 
 </div>
 </div>
@@ -504,6 +505,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Register response helper methods on the Duktape <code>res</code> object. </p>
 
 </div>
 </div>
@@ -538,6 +540,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Send response with status, body, and content type. </p>
 
 </div>
 </div>
@@ -556,6 +559,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Send empty body (default 204 No Content). </p>
 
 </div>
 </div>
@@ -584,6 +588,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Send HTML body. </p>
 
 </div>
 </div>
@@ -612,6 +617,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Send the standard <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> JSON envelope <code>{ status, error, data }</code>. </p>
 
 </div>
 </div>
@@ -640,6 +646,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Send plain-text body. </p>
 
 </div>
 </div>
@@ -668,6 +675,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Set the HttpOnly auth cookie used by login/refresh handlers. </p>
 
 </div>
 </div>
@@ -720,6 +728,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Set response body with explicit content type. </p>
 
 </div>
 </div>
@@ -822,6 +831,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Stream a file from disk as the response body. </p>
 
 </div>
 </div>
@@ -914,6 +924,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Set <code>Location</code> header and status for redirects. </p>
 
 </div>
 </div>
@@ -932,6 +943,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Set HTTP status code. </p>
 
 </div>
 </div>

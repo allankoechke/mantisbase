@@ -98,6 +98,9 @@ $(document).ready(function(){initNavTree('classmb_1_1WSMgr.html',''); initResiza
 </div><!--header-->
 <div class="contents">
 
+<p>Tracks WebSocket connections, topic indexes, and broadcasts change events.  
+ <a href="classmb_1_1WSMgr.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="ws_8h_source.html">ws.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -106,20 +109,28 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a0df2cd464fa11e1cc5cb055cdbb1c1cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abeaf31f28844b89e8817d70e7421a4fa" id="r_abeaf31f28844b89e8817d70e7421a4fa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#abeaf31f28844b89e8817d70e7421a4fa">~WSMgr</a> ()=default</td></tr>
 <tr class="separator:abeaf31f28844b89e8817d70e7421a4fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa26a85af998b0391405021b7786e84ee" id="r_aa26a85af998b0391405021b7786e84ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#aa26a85af998b0391405021b7786e84ee">addConnection</a> (const drogon::WebSocketConnectionPtr &amp;conn)</td></tr>
-<tr class="separator:aa26a85af998b0391405021b7786e84ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af220c95038a3a2834e6f08e718f36877" id="r_af220c95038a3a2834e6f08e718f36877"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#af220c95038a3a2834e6f08e718f36877">addConnection</a> (const drogon::WebSocketConnectionPtr &amp;conn, <a class="el" href="structmb_1_1RealtimeWsSession.html">RealtimeWsSession</a> session)</td></tr>
+<tr class="separator:af220c95038a3a2834e6f08e718f36877"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab5b368da6ac2d9316a9810ed31f933a" id="r_aab5b368da6ac2d9316a9810ed31f933a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#aab5b368da6ac2d9316a9810ed31f933a">removeConnection</a> (const drogon::WebSocketConnectionPtr &amp;conn)</td></tr>
 <tr class="separator:aab5b368da6ac2d9316a9810ed31f933a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab00864a4cfcf95170e7f700f183e5abe" id="r_ab00864a4cfcf95170e7f700f183e5abe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#ab00864a4cfcf95170e7f700f183e5abe">subscribe</a> (const drogon::WebSocketConnectionPtr &amp;conn, const std::vector&lt; std::string &gt; &amp;topics)</td></tr>
-<tr class="separator:ab00864a4cfcf95170e7f700f183e5abe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae92ad0b75b77e1f9c5fe74ccf4d28a3f" id="r_ae92ad0b75b77e1f9c5fe74ccf4d28a3f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#ae92ad0b75b77e1f9c5fe74ccf4d28a3f">setTopics</a> (const drogon::WebSocketConnectionPtr &amp;conn, const std::vector&lt; std::string &gt; &amp;topics)</td></tr>
+<tr class="separator:ae92ad0b75b77e1f9c5fe74ccf4d28a3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a97b2566950ad51a3b2484fdc2f189794" id="r_a97b2566950ad51a3b2484fdc2f189794"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#a97b2566950ad51a3b2484fdc2f189794">unsubscribe</a> (const drogon::WebSocketConnectionPtr &amp;conn, const std::vector&lt; std::string &gt; &amp;topics)</td></tr>
 <tr class="separator:a97b2566950ad51a3b2484fdc2f189794"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab89f10a68b46847a914a702eb554ae33" id="r_ab89f10a68b46847a914a702eb554ae33"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#ab89f10a68b46847a914a702eb554ae33">broadcastChange</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;change_event)</td></tr>
 <tr class="separator:ab89f10a68b46847a914a702eb554ae33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada717caa0bfd0767d08d2806cc476ef1" id="r_ada717caa0bfd0767d08d2806cc476ef1"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#ada717caa0bfd0767d08d2806cc476ef1">connectionCount</a> ()</td></tr>
 <tr class="separator:ada717caa0bfd0767d08d2806cc476ef1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd7415b915548cd4ab3f73ac7d5e4fb3" id="r_abd7415b915548cd4ab3f73ac7d5e4fb3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#abd7415b915548cd4ab3f73ac7d5e4fb3">cleanupStaleConnections</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, std::chrono::steady_clock::time_point now)</td></tr>
+<tr class="memdesc:abd7415b915548cd4ab3f73ac7d5e4fb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close expired, idle, or connect-only sessions.  <br /></td></tr>
+<tr class="separator:abd7415b915548cd4ab3f73ac7d5e4fb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a599fde008a15c1c8504e6aca74bc94f1" id="r_a599fde008a15c1c8504e6aca74bc94f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmb_1_1RealtimeWsSession.html">RealtimeWsSession</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1WSMgr.html#a599fde008a15c1c8504e6aca74bc94f1">getSession</a> (const drogon::WebSocketConnectionPtr &amp;conn)</td></tr>
+<tr class="separator:a599fde008a15c1c8504e6aca74bc94f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Tracks WebSocket connections, topic indexes, and broadcasts change events. </p>
+<p>Thread-safe. One instance is owned by <a class="el" href="classmb_1_1SSEMgr.html">SSEMgr</a> and shares the SSE cleanup loop via <a class="el" href="classmb_1_1WSMgr.html#abd7415b915548cd4ab3f73ac7d5e4fb3">cleanupStaleConnections</a>. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a0df2cd464fa11e1cc5cb055cdbb1c1cc" name="a0df2cd464fa11e1cc5cb055cdbb1c1cc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0df2cd464fa11e1cc5cb055cdbb1c1cc">&#9670;&#160;</a></span>WSMgr()</h2>
 
@@ -172,8 +183,8 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="aa26a85af998b0391405021b7786e84ee" name="aa26a85af998b0391405021b7786e84ee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa26a85af998b0391405021b7786e84ee">&#9670;&#160;</a></span>addConnection()</h2>
+<a id="af220c95038a3a2834e6f08e718f36877" name="af220c95038a3a2834e6f08e718f36877"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af220c95038a3a2834e6f08e718f36877">&#9670;&#160;</a></span>addConnection()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -182,11 +193,22 @@ Public Member Functions</h2></td></tr>
           <td class="memname">void mb::WSMgr::addConnection </td>
           <td>(</td>
           <td class="paramtype">const drogon::WebSocketConnectionPtr &amp;&#160;</td>
-          <td class="paramname"><em>conn</em></td><td>)</td>
+          <td class="paramname"><em>conn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="structmb_1_1RealtimeWsSession.html">RealtimeWsSession</a>&#160;</td>
+          <td class="paramname"><em>session</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Register a new connection and its session snapshot. Closes with 1008 if at capacity. </p>
 
 </div>
 </div>
@@ -205,6 +227,44 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Deliver a formatted change event to all connections subscribed to the matching topic. </p>
+
+</div>
+</div>
+<a id="abd7415b915548cd4ab3f73ac7d5e4fb3" name="abd7415b915548cd4ab3f73ac7d5e4fb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd7415b915548cd4ab3f73ac7d5e4fb3">&#9670;&#160;</a></span>cleanupStaleConnections()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::WSMgr::cleanupStaleConnections </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td>
+          <td class="paramname"><em>app</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::chrono::steady_clock::time_point&#160;</td>
+          <td class="paramname"><em>now</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Close expired, idle, or connect-only sessions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">app</td><td>Application instance (auth expiry checks). </td></tr>
+    <tr><td class="paramname">now</td><td>Current steady clock time (shared with SSE cleanup). </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -222,6 +282,26 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Number of active WebSocket sessions. </dd></dl>
+
+</div>
+</div>
+<a id="a599fde008a15c1c8504e6aca74bc94f1" name="a599fde008a15c1c8504e6aca74bc94f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a599fde008a15c1c8504e6aca74bc94f1">&#9670;&#160;</a></span>getSession()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmb_1_1RealtimeWsSession.html">RealtimeWsSession</a> * mb::WSMgr::getSession </td>
+          <td>(</td>
+          <td class="paramtype">const drogon::WebSocketConnectionPtr &amp;&#160;</td>
+          <td class="paramname"><em>conn</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Mutable session for a connection, or <code>nullptr</code> if unknown. </dd></dl>
 
 </div>
 </div>
@@ -240,17 +320,18 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Remove connection from topic indexes and session map. </p>
 
 </div>
 </div>
-<a id="ab00864a4cfcf95170e7f700f183e5abe" name="ab00864a4cfcf95170e7f700f183e5abe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab00864a4cfcf95170e7f700f183e5abe">&#9670;&#160;</a></span>subscribe()</h2>
+<a id="ae92ad0b75b77e1f9c5fe74ccf4d28a3f" name="ae92ad0b75b77e1f9c5fe74ccf4d28a3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae92ad0b75b77e1f9c5fe74ccf4d28a3f">&#9670;&#160;</a></span>setTopics()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void mb::WSMgr::subscribe </td>
+          <td class="memname">void mb::WSMgr::setTopics </td>
           <td>(</td>
           <td class="paramtype">const drogon::WebSocketConnectionPtr &amp;&#160;</td>
           <td class="paramname"><em>conn</em>, </td>
@@ -268,6 +349,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Replace the connection's topic set (subscribe replaces, does not merge). </p>
 
 </div>
 </div>
@@ -296,6 +378,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Remove specific topics from a connection without affecting others. </p>
 
 </div>
 </div>

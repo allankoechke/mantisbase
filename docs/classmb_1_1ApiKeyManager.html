@@ -151,7 +151,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
 <tr class="separator:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase" id="r_aeb65d721822a05d100c547f8a32a8dcf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a> () const</td></tr>
-<tr class="memdesc:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the logger instance.  <br /></td></tr>
 <tr class="separator:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
@@ -163,7 +162,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Create, list, revoke, and resolve API keys for entity users and admins. </p>
-<p>REST routes (see <a class="el" href="auth_api.html">Authentication API</a> documentation):</p><ul>
+<p>REST routes (see auth_api documentation):</p><ul>
 <li><code>POST|GET /api/v1/auth/&lt;entity&gt;/api-keys</code></li>
 <li><code>DELETE /api/v1/auth/&lt;entity&gt;/api-keys/:id</code></li>
 <li><code>POST|GET /api/v1/sys/api-keys</code> (admin)</li>
@@ -281,6 +280,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Admin: create a system API key for an admin user. Returns one-time <code>key</code>. </p>
 
 </div>
 </div>
@@ -379,6 +379,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Admin: list all system API keys (metadata only). </p>
 
 </div>
 </div>

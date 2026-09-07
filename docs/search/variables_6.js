@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['max_5flist_5fpage_5fsize_0',['MAX_LIST_PAGE_SIZE',['../namespacemb.html#a247510f8b7784f89aa126280da755d74',1,'mb']]],
-  ['middlewares_1',['middlewares',['../structmb_1_1RouteHandler.html#ac45649482810180ded7480c24a830756',1,'mb::RouteHandler']]]
+  ['handler_0',['handler',['../structmb_1_1RouteHandler.html#ae2cf8a1b915fc5446a7741cff41dd4c7',1,'mb::RouteHandler']]],
+  ['has_5fmore_1',['has_more',['../structmb_1_1EntityListPage.html#aa367a146631c39c490215960ed426e6d',1,'mb::EntityListPage']]]
 ];

@@ -1,12 +1,12 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/auth.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/auth.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="93,5,326,60"/>
+<area shape="rect" id="Node000001" title="JWT session management and entry point for API keys and OAuth." alt="" coords="93,5,326,60"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="100,255,159,280"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,56,51,77,32,92,17,109,9,128,9,147,16,165,29,184,63,218,100,245,97,249,60,222,25,187,12,168,4,148,4,127,13,107,29,88,48,73,91,51"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="27,108,150,133"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,62,118,102,115,98,171,58"/>
 <area shape="rect" id="Node000004" href="$api__keys_8h.html" title="Programmatic and REST&#45;backed API key management." alt="" coords="270,108,360,133"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="243,58,292,97,288,101,240,62"/>
-<area shape="rect" id="Node000007" href="$types_8h.html" title=" " alt="" coords="362,181,545,207"/>
+<area shape="rect" id="Node000007" href="$types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="362,181,545,207"/>
 <area shape="poly" id="edge18_Node000001_Node000007" title=" " alt="" coords="283,58,329,79,374,106,410,137,438,169,434,172,406,141,371,110,327,84,281,62"/>
 <area shape="rect" id="Node000011" href="$oauth_8h.html" title="OAuth 2.0 / OIDC provider configuration and user login flows." alt="" coords="174,108,245,133"/>
 <area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="212,60,212,94,207,94,207,60"/>

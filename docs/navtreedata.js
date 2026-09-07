@@ -26,28 +26,28 @@ var NAVTREE =
 [
   [ "MantisBase", "index.html", [
     [ "Quick Start Guide", "index.html", null ],
-    [ "REST API Reference Guide", "rest_api.html", null ],
-    [ "Authentication API", "auth_api.html", null ],
-    [ "Command Line Usage", "cli.html", [
-      [ "mantisbase CLI Reference", "cli.html#autotoc_md115", [
-        [ "Global Options", "cli.html#autotoc_md117", null ],
-        [ "serve", "cli.html#autotoc_md119", null ],
-        [ "admins", "cli.html#autotoc_md121", null ],
-        [ "schema", "cli.html#autotoc_md123", null ],
-        [ "migrate", "cli.html#autotoc_md125", [
-          [ "apply", "cli.html#autotoc_md126", null ],
-          [ "schema", "cli.html#autotoc_md127", null ]
+    [ "REST API Reference Guide", "docs_rest_api.html", null ],
+    [ "Authentication API", "docs_auth_api.html", null ],
+    [ "Command Line Usage", "docs_cli.html", [
+      [ "mantisbase CLI Reference", "docs_cli.html#autotoc_md116", [
+        [ "Global Options", "docs_cli.html#autotoc_md118", null ],
+        [ "serve", "docs_cli.html#autotoc_md120", null ],
+        [ "admins", "docs_cli.html#autotoc_md122", null ],
+        [ "schema", "docs_cli.html#autotoc_md124", null ],
+        [ "migrate", "docs_cli.html#autotoc_md126", [
+          [ "apply", "docs_cli.html#autotoc_md127", null ],
+          [ "schema", "docs_cli.html#autotoc_md128", null ]
         ] ],
-        [ "See Also", "cli.html#autotoc_md129", null ]
+        [ "See Also", "docs_cli.html#autotoc_md130", null ]
       ] ]
     ] ],
-    [ "Running in Docker", "docker.html", null ],
-    [ "Embedding MantisBase", "embedding.html", null ],
-    [ "Handling Files in MantisBase", "files.html", null ],
-    [ "Health Check", "healthcheck.html", null ],
-    [ "Setting Up MantisBase", "setup.html", null ],
-    [ "API Access Rules", "rest_api_rules.html", null ],
-    [ "Scripting", "scripting.html", null ],
+    [ "Running in Docker", "docs_docker.html", null ],
+    [ "Embedding MantisBase", "docs_embedding.html", null ],
+    [ "Handling Files in MantisBase", "docs_file.html", null ],
+    [ "Health Check", "docs_healthcheck.html", null ],
+    [ "Setting Up MantisBase", "docs_setup.html", null ],
+    [ "API Access Rules", "docs_rest_api_rules.html", null ],
+    [ "Scripting", "docs_scripting.html", null ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
@@ -82,11 +82,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "access__rules_8cpp.html",
-"classmb_1_1EntitySchema.html#aabbab0616853335c7e7d65d1fd268758",
-"classmb_1_1MantisBase.html#ac17cea059446e81e375a9293656b28a2",
-"classmb_1_1RouteRegistry.html#aa0f1d98d8fec98cc41da8daede8a828f",
-"entity__schema__routes__handlers_8cpp.html#ab9604b4e6fef87e6f3ff0cb7506f0e94",
-"namespacemb.html#a8a3823264846aca9828eab91e2048b27"
+"classmb_1_1EntitySchema.html#aa8066e7d302e42a6a687049dc15f3cef",
+"classmb_1_1MantisBase.html#a797bcb2d6d6d3593f6b7315559162a1f",
+"classmb_1_1RealtimeDB.html#aa07509b35ba3cb4aeef4d36c16c81e18",
+"entity_8h.html#a247510f8b7784f89aa126280da755d74",
+"namespacemb.html#a4464b99b33197a7c2b7b572e374f2195",
+"structmb_1_1FormDataItem.html#a21419c6dc6b7269eaf48798bbca29c33"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

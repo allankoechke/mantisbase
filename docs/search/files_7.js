@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['kv_5fstore_2ecpp_0',['kv_store.cpp',['../kv__store_8cpp.html',1,'']]],
-  ['kv_5fstore_2eh_1',['kv_store.h',['../kv__store_8h.html',1,'']]]
+  ['installation_2emd_0',['installation.md',['../installation_8md.html',1,'']]],
+  ['int_5fprecision_2ecpp_1',['int_precision.cpp',['../int__precision_8cpp.html',1,'']]],
+  ['int_5fprecision_2eh_2',['int_precision.h',['../int__precision_8h.html',1,'']]]
 ];

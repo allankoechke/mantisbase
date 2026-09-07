@@ -98,6 +98,9 @@ $(document).ready(function(){initNavTree('classmb_1_1Validators.html',''); initR
 </div><!--header-->
 <div class="contents">
 
+<p>Static validators for schema definitions and CRUD request bodies.  
+ <a href="classmb_1_1Validators.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="validators_8h_source.html">validators.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
@@ -128,7 +131,10 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a5b066c9b4ba1ca56401d13b443c89d6a" id="r_a5b066c9b4ba1ca56401d13b443c89d6a"><td class="memItemLeft" align="right" valign="top">static std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Validators.html#a5b066c9b4ba1ca56401d13b443c89d6a">validateUpdateRequestBody</a> (const <a class="el" href="classmb_1_1Entity.html">Entity</a> &amp;entity, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;body)</td></tr>
 <tr class="separator:a5b066c9b4ba1ca56401d13b443c89d6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Static validators for schema definitions and CRUD request bodies. </p>
+<p>Each check returns <code>std::nullopt</code> on success or an error message string. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a90dc7338139f73c97368d441738b86ec" name="a90dc7338139f73c97368d441738b86ec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a90dc7338139f73c97368d441738b86ec">&#9670;&#160;</a></span>findPreset()</h2>
 
@@ -152,6 +158,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Look up a built-in validator preset definition by key. </p>
 
 </div>
 </div>
@@ -233,6 +240,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Enforce int precision and range for int-typed fields. </p>
 
 </div>
 </div>
@@ -269,6 +277,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Enforce optional <code>max</code> constraint on numeric/string fields. </p>
 
 </div>
 </div>
@@ -305,6 +314,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Enforce optional <code>min</code> constraint on numeric/string fields. </p>
 
 </div>
 </div>
@@ -341,6 +351,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Enforce <code>required</code> when the field is marked required in the schema. </p>
 
 </div>
 </div>
@@ -377,6 +388,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Validate a value against a named preset (email, url, etc.). </p>
 
 </div>
 </div>
@@ -413,6 +425,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Validate a create (POST) body against an entity schema. </p>
 
 </div>
 </div>
@@ -439,6 +452,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Validate a full entity schema JSON before create/update. </p>
 
 </div>
 </div>
@@ -475,6 +489,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Validate a partial update (PATCH) body against an entity schema. </p>
 
 </div>
 </div>
@@ -511,6 +526,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Run custom validator preset named in the field constraints. </p>
 
 </div>
 </div>
@@ -537,6 +553,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Validate <code>viewQuery</code> SQL for view-type entity schemas. </p>
 
 </div>
 </div>

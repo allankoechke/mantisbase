@@ -16,8 +16,8 @@
 <area shape="poly" id="edge8_Node000000_Node000007" title=" " alt="" coords="113,256,185,286,221,299,220,304,183,291,111,261"/>
 <area shape="rect" id="Node000008" href="$classmb_1_1RealtimeDB.html" title=" " alt="" coords="199,351,328,376"/>
 <area shape="poly" id="edge9_Node000000_Node000008" title=" " alt="" coords="95,262,135,299,185,336,214,348,211,353,183,340,131,304,91,266"/>
-<area shape="rect" id="Node000009" href="$classmb_1_1Router.html" title=" " alt="" coords="216,400,311,425"/>
+<area shape="rect" id="Node000009" href="$classmb_1_1Router.html" title="Central HTTP router and schema cache for a MantisBase instance." alt="" coords="216,400,311,425"/>
 <area shape="poly" id="edge10_Node000000_Node000009" title=" " alt="" coords="87,264,126,325,153,357,185,385,217,400,215,405,183,390,150,361,122,328,82,267"/>
-<area shape="rect" id="Node000010" href="$classmb_1_1SSEMgr.html" title=" " alt="" coords="213,449,313,475"/>
+<area shape="rect" id="Node000010" href="$classmb_1_1SSEMgr.html" title="Manages SSE routes, sessions, broadcast, and shared WebSocket cleanup." alt="" coords="213,449,313,475"/>
 <area shape="poly" id="edge11_Node000000_Node000010" title=" " alt="" coords="83,266,97,304,119,349,148,395,186,435,214,450,212,455,182,439,144,398,114,352,92,306,78,268"/>
 </map>

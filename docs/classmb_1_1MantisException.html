@@ -98,13 +98,16 @@ $(document).ready(function(){initNavTree('classmb_1_1MantisException.html',''); 
 </div><!--header-->
 <div class="contents">
 
+<p>Application exception carrying an HTTP status code and messages.  
+ <a href="classmb_1_1MantisException.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="exceptions_8h_source.html">exceptions.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for mb::MantisException:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmb_1_1MantisException__inherit__graph.png" border="0" usemap="#amb_1_1MantisException_inherit__map" alt="Inheritance graph"/></div>
 <map name="amb_1_1MantisException_inherit__map" id="amb_1_1MantisException_inherit__map">
-<area shape="rect" title=" " alt="" coords="5,79,164,104"/>
+<area shape="rect" title="Application exception carrying an HTTP status code and messages." alt="" coords="5,79,164,104"/>
 <area shape="rect" title=" " alt="" coords="27,5,142,31"/>
 <area shape="poly" title=" " alt="" coords="87,44,87,79,82,79,82,44"/>
 </map>
@@ -114,7 +117,7 @@ Collaboration diagram for mb::MantisException:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmb_1_1MantisException__coll__graph.png" border="0" usemap="#amb_1_1MantisException_coll__map" alt="Collaboration graph"/></div>
 <map name="amb_1_1MantisException_coll__map" id="amb_1_1MantisException_coll__map">
-<area shape="rect" title=" " alt="" coords="5,79,164,104"/>
+<area shape="rect" title="Application exception carrying an HTTP status code and messages." alt="" coords="5,79,164,104"/>
 <area shape="rect" title=" " alt="" coords="27,5,142,31"/>
 <area shape="poly" title=" " alt="" coords="87,44,87,79,82,79,82,44"/>
 </map>
@@ -133,7 +136,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aad37e70c42d78c1d52141740e59c0dcf" id="r_aad37e70c42d78c1d52141740e59c0dcf"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisException.html#aad37e70c42d78c1d52141740e59c0dcf">code</a> () const noexcept</td></tr>
 <tr class="separator:aad37e70c42d78c1d52141740e59c0dcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Application exception carrying an HTTP status code and messages. </p>
+<p>Thrown by entity, file, and validation layers; caught by route handlers and converted into JSON error responses. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ac278199165f131cb27b327c31f736a38" name="ac278199165f131cb27b327c31f736a38"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac278199165f131cb27b327c31f736a38">&#9670;&#160;</a></span>MantisException() <span class="overload">[1/2]</span></h2>
 
@@ -159,6 +165,12 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_code</td><td>HTTP-style status code (e.g. 400, 404). </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -193,6 +205,12 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_desc</td><td>Optional longer description for logs or API <code>error</code> detail. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -219,6 +237,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>HTTP-style status code associated with this error. </p>
 
 </div>
 </div>
@@ -244,6 +263,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Extended description; empty string when not provided. </p>
 
 </div>
 </div>

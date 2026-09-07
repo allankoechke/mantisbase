@@ -98,13 +98,16 @@ $(document).ready(function(){initNavTree('classmb_1_1RealtimeWSController.html',
 </div><!--header-->
 <div class="contents">
 
+<p>Drogon WebSocket controller for the realtime endpoint.  
+ <a href="classmb_1_1RealtimeWSController.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="ws_8h_source.html">ws.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for mb::RealtimeWSController:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmb_1_1RealtimeWSController__inherit__graph.png" border="0" usemap="#amb_1_1RealtimeWSController_inherit__map" alt="Inheritance graph"/></div>
 <map name="amb_1_1RealtimeWSController_inherit__map" id="amb_1_1RealtimeWSController_inherit__map">
-<area shape="rect" title=" " alt="" coords="13,108,208,133"/>
+<area shape="rect" title="Drogon WebSocket controller for the realtime endpoint." alt="" coords="13,108,208,133"/>
 <area shape="rect" title=" " alt="" coords="5,5,216,60"/>
 <area shape="poly" title=" " alt="" coords="113,74,113,108,108,108,108,74"/>
 </map>
@@ -114,7 +117,7 @@ Collaboration diagram for mb::RealtimeWSController:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmb_1_1RealtimeWSController__coll__graph.png" border="0" usemap="#amb_1_1RealtimeWSController_coll__map" alt="Collaboration graph"/></div>
 <map name="amb_1_1RealtimeWSController_coll__map" id="amb_1_1RealtimeWSController_coll__map">
-<area shape="rect" title=" " alt="" coords="13,108,208,133"/>
+<area shape="rect" title="Drogon WebSocket controller for the realtime endpoint." alt="" coords="13,108,208,133"/>
 <area shape="rect" title=" " alt="" coords="5,5,216,60"/>
 <area shape="poly" title=" " alt="" coords="113,74,113,108,108,108,108,74"/>
 </map>
@@ -133,7 +136,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3e7a845fe22d2f2cc911a441c04ddc0b" id="r_a3e7a845fe22d2f2cc911a441c04ddc0b"><td class="memItemLeft" align="right" valign="top">WS_PATH_LIST_BEGIN&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RealtimeWSController.html#a3e7a845fe22d2f2cc911a441c04ddc0b">WS_PATH_ADD</a> (&quot;/api/v1/realtime/ws&quot;)</td></tr>
 <tr class="separator:a3e7a845fe22d2f2cc911a441c04ddc0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Drogon WebSocket controller for the realtime endpoint. </p>
+<p>Registered at <code>WS /api/v1/realtime/ws</code>. Disabled when <code>MB_DISABLE_REALTIME_WS</code> is truthy. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6d5e5c89707d98a874f4a4e35d447540" name="a6d5e5c89707d98a874f4a4e35d447540"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6d5e5c89707d98a874f4a4e35d447540">&#9670;&#160;</a></span>RealtimeWSController()</h2>
 
@@ -184,6 +190,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Tear down session state when the client disconnects. </p>
 
 </div>
 </div>
@@ -220,6 +227,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Optional auth at connect; sends welcome with <code>client_id</code> and empty <code>topics</code>. </p>
 
 </div>
 </div>
@@ -262,6 +270,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Handle subscribe, unsubscribe, ping, and auth-upgrade messages. </p>
 
 </div>
 </div>

@@ -98,13 +98,16 @@ $(document).ready(function(){initNavTree('classmb_1_1Router.html',''); initResiz
 </div><!--header-->
 <div class="contents">
 
+<p>Central HTTP router and schema cache for a <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> instance.  
+ <a href="classmb_1_1Router.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="router_8h_source.html">router.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for mb::Router:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmb_1_1Router__inherit__graph.png" border="0" usemap="#amb_1_1Router_inherit__map" alt="Inheritance graph"/></div>
 <map name="amb_1_1Router_inherit__map" id="amb_1_1Router_inherit__map">
-<area shape="rect" title=" " alt="" coords="23,79,118,104"/>
+<area shape="rect" title="Central HTTP router and schema cache for a MantisBase instance." alt="" coords="23,79,118,104"/>
 <area shape="rect" href="classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="5,5,136,31"/>
 <area shape="poly" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
 </map>
@@ -114,7 +117,7 @@ Collaboration diagram for mb::Router:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmb_1_1Router__coll__graph.png" border="0" usemap="#amb_1_1Router_coll__map" alt="Collaboration graph"/></div>
 <map name="amb_1_1Router_coll__map" id="amb_1_1Router_coll__map">
-<area shape="rect" title=" " alt="" coords="23,79,118,104"/>
+<area shape="rect" title="Central HTTP router and schema cache for a MantisBase instance." alt="" coords="23,79,118,104"/>
 <area shape="rect" href="classmb_1_1IMantisBase.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="5,5,136,31"/>
 <area shape="poly" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
 </map>
@@ -177,10 +180,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
 <tr class="separator:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase" id="r_aeb65d721822a05d100c547f8a32a8dcf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a> () const</td></tr>
-<tr class="memdesc:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the logger instance.  <br /></td></tr>
 <tr class="separator:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Central HTTP router and schema cache for a <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> instance. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a50d8e904d31e641417685b63a8656c6a" name="a50d8e904d31e641417685b63a8656c6a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a50d8e904d31e641417685b63a8656c6a">&#9670;&#160;</a></span>Router()</h2>
 
@@ -258,6 +262,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Like <a class="el" href="classmb_1_1Router.html#a63ce782cb30a1037f549db5565b0513b">addSchemaCache</a> but assumes the caller already holds the schema mutex. </p>
 
 </div>
 </div>
@@ -304,6 +309,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Stop the HTTP server and realtime subsystems. </p>
 
 </div>
 </div>
@@ -407,6 +413,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Initialize Drogon, register routes, and prepare the schema cache. </p>
 
 </div>
 </div>
@@ -441,6 +448,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Start listening on the configured host/port. </p>
 
 </div>
 </div>
@@ -656,6 +664,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Like <a class="el" href="classmb_1_1Router.html#ad39b4035ae72eb9c23c95337b650087b">removeSchemaCache</a> but assumes the caller already holds the schema mutex. </p>
 
 </div>
 </div>
@@ -674,6 +683,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Cached entity schema JSON for <code>table_name</code>. </dd></dl>
 
 </div>
 </div>
@@ -692,6 +702,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Cached <a class="el" href="classmb_1_1Entity.html">Entity</a> built from the schema cache entry. </dd></dl>
 
 </div>
 </div>
@@ -709,6 +720,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>SSE/WebSocket realtime manager. </dd></dl>
 
 </div>
 </div>

@@ -98,12 +98,15 @@ $(document).ready(function(){initNavTree('classmb_1_1SSESession.html',''); initR
 </div><!--header-->
 <div class="contents">
 
+<p>Per-client SSE session state and async stream writer.  
+ <a href="classmb_1_1SSESession.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="sse_8h_source.html">sse.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a89da8b0907c6069ba7c912d612ef7103" id="r_a89da8b0907c6069ba7c912d612ef7103"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a89da8b0907c6069ba7c912d612ef7103">SSESession</a> (std::string client_id, const std::set&lt; std::string &gt; &amp;topics, drogon::ResponseStreamPtr stream, std::string owner_entity=&quot;&quot;, std::string owner_id=&quot;&quot;)</td></tr>
-<tr class="separator:a89da8b0907c6069ba7c912d612ef7103"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a869ab0fe99b13c7d46af85416084f247" id="r_a869ab0fe99b13c7d46af85416084f247"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a869ab0fe99b13c7d46af85416084f247">SSESession</a> (std::string client_id, const std::set&lt; std::string &gt; &amp;topics, drogon::ResponseStreamPtr stream, <a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">RealtimeAuthSnapshot</a> auth=<a class="el" href="namespacemb.html#ab48fc5777e1fcac4c16253aebedc0a66">makeGuestAuthSnapshot</a>())</td></tr>
+<tr class="separator:a869ab0fe99b13c7d46af85416084f247"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52a686a6402eb395377fbeef21f0956b" id="r_a52a686a6402eb395377fbeef21f0956b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a52a686a6402eb395377fbeef21f0956b">sendEvent</a> (const std::string &amp;eventType, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data)</td></tr>
 <tr class="separator:a52a686a6402eb395377fbeef21f0956b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a687c22179696b7d60a8d9277a1ed1484" id="r_a687c22179696b7d60a8d9277a1ed1484"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a687c22179696b7d60a8d9277a1ed1484">isInterestedIn</a> (const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;change_event) const</td></tr>
@@ -116,6 +119,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a61f6e4a16233c4ea0969000adc7782c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4bf0434339aeedda2f714c45e6e03b8" id="r_ab4bf0434339aeedda2f714c45e6e03b8"><td class="memItemLeft" align="right" valign="top">std::chrono::steady_clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#ab4bf0434339aeedda2f714c45e6e03b8">getLastActivity</a> () const</td></tr>
 <tr class="separator:ab4bf0434339aeedda2f714c45e6e03b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72ca8fa321ae033ce5847cb949f9ca25" id="r_a72ca8fa321ae033ce5847cb949f9ca25"><td class="memItemLeft" align="right" valign="top">std::chrono::steady_clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a72ca8fa321ae033ce5847cb949f9ca25">getConnectedAt</a> () const</td></tr>
+<tr class="separator:a72ca8fa321ae033ce5847cb949f9ca25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afd2722a3c1c12ef1e17209c4a310ef2d" id="r_afd2722a3c1c12ef1e17209c4a310ef2d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#afd2722a3c1c12ef1e17209c4a310ef2d">close</a> ()</td></tr>
 <tr class="separator:afd2722a3c1c12ef1e17209c4a310ef2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1f7cf3911a26c416130702747fae003" id="r_ae1f7cf3911a26c416130702747fae003"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#ae1f7cf3911a26c416130702747fae003">isActive</a> () const</td></tr>
@@ -126,16 +131,19 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a7789a94be201224477a2dd7b191f5324"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92236779d461a3474fcf511f6354a6c2" id="r_a92236779d461a3474fcf511f6354a6c2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a92236779d461a3474fcf511f6354a6c2">setTopics</a> (const std::set&lt; std::string &gt; &amp;topics)</td></tr>
 <tr class="separator:a92236779d461a3474fcf511f6354a6c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fbdd769aa3d5e0752a2e7f036a9dbd8" id="r_a4fbdd769aa3d5e0752a2e7f036a9dbd8"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a4fbdd769aa3d5e0752a2e7f036a9dbd8">ownerEntity</a> () const</td></tr>
-<tr class="separator:a4fbdd769aa3d5e0752a2e7f036a9dbd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a11dfec4e842b25cd4e74af0e35a4d660" id="r_a11dfec4e842b25cd4e74af0e35a4d660"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a11dfec4e842b25cd4e74af0e35a4d660">ownerId</a> () const</td></tr>
-<tr class="separator:a11dfec4e842b25cd4e74af0e35a4d660"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9a71f9d053518c0d0f6c1aad79ba9f1" id="r_aa9a71f9d053518c0d0f6c1aad79ba9f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">RealtimeAuthSnapshot</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#aa9a71f9d053518c0d0f6c1aad79ba9f1">authSnapshot</a> ()</td></tr>
+<tr class="separator:aa9a71f9d053518c0d0f6c1aad79ba9f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54145dc4c1ee60836c46f9fcddc8c8d0" id="r_a54145dc4c1ee60836c46f9fcddc8c8d0"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">RealtimeAuthSnapshot</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a54145dc4c1ee60836c46f9fcddc8c8d0">authSnapshot</a> () const</td></tr>
+<tr class="separator:a54145dc4c1ee60836c46f9fcddc8c8d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f8dbf748b8377c82c18435c0dc1bf0a" id="r_a4f8dbf748b8377c82c18435c0dc1bf0a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1SSESession.html#a4f8dbf748b8377c82c18435c0dc1bf0a">setAuthSnapshot</a> (<a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">RealtimeAuthSnapshot</a> auth)</td></tr>
+<tr class="separator:a4f8dbf748b8377c82c18435c0dc1bf0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Per-client SSE session: holds subscribed topics and a Drogon async stream for zero-thread event delivery. </p>
+<div class="textblock"><p>Per-client SSE session state and async stream writer. </p>
+<p>Holds subscribed topics, auth snapshot, activity timestamps, and a Drogon drogon::ResponseStreamPtr for zero-thread event delivery. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a89da8b0907c6069ba7c912d612ef7103" name="a89da8b0907c6069ba7c912d612ef7103"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a89da8b0907c6069ba7c912d612ef7103">&#9670;&#160;</a></span>SSESession()</h2>
+<a id="a869ab0fe99b13c7d46af85416084f247" name="a869ab0fe99b13c7d46af85416084f247"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a869ab0fe99b13c7d46af85416084f247">&#9670;&#160;</a></span>SSESession()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -161,14 +169,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::string&#160;</td>
-          <td class="paramname"><em>owner_entity</em> = <code>&quot;&quot;</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::string&#160;</td>
-          <td class="paramname"><em>owner_id</em> = <code>&quot;&quot;</code>&#160;</td>
+          <td class="paramtype"><a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">RealtimeAuthSnapshot</a>&#160;</td>
+          <td class="paramname"><em>auth</em> = <code><a class="el" href="namespacemb.html#ab48fc5777e1fcac4c16253aebedc0a66">makeGuestAuthSnapshot</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -181,6 +183,40 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa9a71f9d053518c0d0f6c1aad79ba9f1" name="aa9a71f9d053518c0d0f6c1aad79ba9f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9a71f9d053518c0d0f6c1aad79ba9f1">&#9670;&#160;</a></span>authSnapshot() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">mb::RealtimeAuthSnapshot</a> &amp; mb::SSESession::authSnapshot </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a54145dc4c1ee60836c46f9fcddc8c8d0" name="a54145dc4c1ee60836c46f9fcddc8c8d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54145dc4c1ee60836c46f9fcddc8c8d0">&#9670;&#160;</a></span>authSnapshot() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">mb::RealtimeAuthSnapshot</a> &amp; mb::SSESession::authSnapshot </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="afd2722a3c1c12ef1e17209c4a310ef2d" name="afd2722a3c1c12ef1e17209c4a310ef2d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afd2722a3c1c12ef1e17209c4a310ef2d">&#9670;&#160;</a></span>close()</h2>
 
@@ -195,7 +231,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Mark session inactive and close the stream. </p>
+<p>Close the stream and mark the session inactive. </p>
 
 </div>
 </div>
@@ -214,7 +250,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Format a change event for SSE (topic, action, entity, row_id, data, timestamp). </p>
+<p>Format a raw DB change row into the public SSE <code>change</code> event shape. </p>
 
 </div>
 </div>
@@ -226,6 +262,23 @@ Public Member Functions</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">const std::string &amp; mb::SSESession::getClientID </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a72ca8fa321ae033ce5847cb949f9ca25" name="a72ca8fa321ae033ce5847cb949f9ca25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72ca8fa321ae033ce5847cb949f9ca25">&#9670;&#160;</a></span>getConnectedAt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::chrono::steady_clock::time_point mb::SSESession::getConnectedAt </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -301,57 +354,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>True if this session is subscribed to the topic implied by change_event. </p>
-
-</div>
-</div>
-<a id="a4fbdd769aa3d5e0752a2e7f036a9dbd8" name="a4fbdd769aa3d5e0752a2e7f036a9dbd8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4fbdd769aa3d5e0752a2e7f036a9dbd8">&#9670;&#160;</a></span>ownerEntity()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const std::string &amp; mb::SSESession::ownerEntity </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a11dfec4e842b25cd4e74af0e35a4d660" name="a11dfec4e842b25cd4e74af0e35a4d660"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a11dfec4e842b25cd4e74af0e35a4d660">&#9670;&#160;</a></span>ownerId()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const std::string &amp; mb::SSESession::ownerId </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if this session should receive the given change event. </dd></dl>
 
 </div>
 </div>
@@ -380,7 +383,26 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Send an SSE-formatted event through the async stream. Returns false if stream is closed. </p>
+<p>Send an SSE frame (<code>event:</code> + <code>data:</code>). Returns false if the stream is closed. </p>
+
+</div>
+</div>
+<a id="a4f8dbf748b8377c82c18435c0dc1bf0a" name="a4f8dbf748b8377c82c18435c0dc1bf0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f8dbf748b8377c82c18435c0dc1bf0a">&#9670;&#160;</a></span>setAuthSnapshot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::SSESession::setAuthSnapshot </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">mb::RealtimeAuthSnapshot</a>&#160;</td>
+          <td class="paramname"><em>auth</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Update auth after a successful subscribe-time upgrade. </p>
 
 </div>
 </div>
@@ -399,6 +421,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Replace the full topic set (subscribe replaces prior subscriptions). </p>
 
 </div>
 </div>
@@ -416,6 +439,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Bump last-activity timestamp (keepalive and idle tracking). </p>
 
 </div>
 </div>
@@ -434,6 +458,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Replace topics (legacy alias; prefer <a class="el" href="classmb_1_1SSESession.html#a92236779d461a3474fcf511f6354a6c2">setTopics</a>). </p>
 
 </div>
 </div>

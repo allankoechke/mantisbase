@@ -99,6 +99,9 @@ $(document).ready(function(){initNavTree('classmb_1_1MantisContentReader.html','
 </div><!--header-->
 <div class="contents">
 
+<p>Lazy multipart/JSON body parser for content-reader route handlers.  
+ <a href="classmb_1_1MantisContentReader.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="http_8h_source.html">http.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -125,7 +128,10 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:adf874c837f6d9f486e2034d7e4c25fcf" id="r_adf874c837f6d9f486e2034d7e4c25fcf"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisContentReader.html#adf874c837f6d9f486e2034d7e4c25fcf">hashMultipartMetadata</a> (const <a class="el" href="structmb_1_1FormDataItem.html">FormDataItem</a> &amp;data)</td></tr>
 <tr class="separator:adf874c837f6d9f486e2034d7e4c25fcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Lazy multipart/JSON body parser for content-reader route handlers. </p>
+<p>Parses once, then exposes form fields, file metadata, and typed entity binding. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a86f76ba23a746bcc0c9a3ccb080f81b2" name="a86f76ba23a746bcc0c9a3ccb080f81b2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a86f76ba23a746bcc0c9a3ccb080f81b2">&#9670;&#160;</a></span>MantisContentReader()</h2>
 
@@ -167,6 +173,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>File field metadata keyed by form field name. </p>
 
 </div>
 </div>
@@ -184,6 +191,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Parsed form fields (text and file parts). </p>
 
 </div>
 </div>
@@ -210,6 +218,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Stable hash of multipart metadata for deduplication checks. </p>
 
 </div>
 </div>
@@ -227,6 +236,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> when the request body is multipart form data. </dd></dl>
 
 </div>
 </div>
@@ -244,6 +254,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Parsed JSON body (empty object when not JSON). </p>
 
 </div>
 </div>
@@ -262,6 +273,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Map parsed form/JSON fields onto an entity for create/update. </p>
 
 </div>
 </div>
@@ -280,6 +292,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Remove files written by <a class="el" href="classmb_1_1MantisContentReader.html#a541f9a8c336f4e02878306bcb8bb236e">writeFiles</a> on validation failure. </p>
 
 </div>
 </div>
@@ -298,6 +311,7 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Persist uploaded files for <code>entity_name</code> using stored metadata. </p>
 
 </div>
 </div>

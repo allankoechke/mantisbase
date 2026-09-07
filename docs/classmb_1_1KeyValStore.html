@@ -117,6 +117,20 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5ac258e348fb581c2e6e0df5f5d67e6a" id="r_a5ac258e348fb581c2e6e0df5f5d67e6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a5ac258e348fb581c2e6e0df5f5d67e6a">configs</a> ()</td></tr>
 <tr class="memdesc:a5ac258e348fb581c2e6e0df5f5d67e6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current config data instance.  <br /></td></tr>
 <tr class="separator:a5ac258e348fb581c2e6e0df5f5d67e6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9fc4870ffdc107eaf863254bd82a809" id="r_ae9fc4870ffdc107eaf863254bd82a809"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#ae9fc4870ffdc107eaf863254bd82a809">getScriptingValue</a> (const std::string &amp;key) const</td></tr>
+<tr class="separator:ae9fc4870ffdc107eaf863254bd82a809"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a845963d1dbb9b86bab1fd145f921d242" id="r_a845963d1dbb9b86bab1fd145f921d242"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a845963d1dbb9b86bab1fd145f921d242">setScriptingValue</a> (const std::string &amp;key, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;value)</td></tr>
+<tr class="separator:a845963d1dbb9b86bab1fd145f921d242"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73f6fd383882599b7c012a21602cb661" id="r_a73f6fd383882599b7c012a21602cb661"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a73f6fd383882599b7c012a21602cb661">getScriptingConfigsCopy</a> () const</td></tr>
+<tr class="separator:a73f6fd383882599b7c012a21602cb661"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7da9dd5506d53ec31e8fa7f6909bbb51" id="r_a7da9dd5506d53ec31e8fa7f6909bbb51"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a7da9dd5506d53ec31e8fa7f6909bbb51">reloadScriptingConfigs</a> ()</td></tr>
+<tr class="separator:a7da9dd5506d53ec31e8fa7f6909bbb51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a183de957d35a4d934c5911fff82d13cc" id="r_a183de957d35a4d934c5911fff82d13cc"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a183de957d35a4d934c5911fff82d13cc">getScriptingJson</a> (const std::string &amp;key) const</td></tr>
+<tr class="separator:a183de957d35a4d934c5911fff82d13cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39604fe2be1d8d5653b81ce6bcb1c157" id="r_a39604fe2be1d8d5653b81ce6bcb1c157"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#a39604fe2be1d8d5653b81ce6bcb1c157">setScriptingJson</a> (const std::string &amp;key, const std::string &amp;json_value)</td></tr>
+<tr class="separator:a39604fe2be1d8d5653b81ce6bcb1c157"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0d8827e359a860a6c612d9b460ccda9" id="r_ae0d8827e359a860a6c612d9b460ccda9"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1KeyValStore.html#ae0d8827e359a860a6c612d9b460ccda9">configsScriptingJson</a> () const</td></tr>
+<tr class="separator:ae0d8827e359a860a6c612d9b460ccda9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Manages application settings. </p>
@@ -176,6 +190,78 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ae0d8827e359a860a6c612d9b460ccda9" name="ae0d8827e359a860a6c612d9b460ccda9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0d8827e359a860a6c612d9b460ccda9">&#9670;&#160;</a></span>configsScriptingJson()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::KeyValStore::configsScriptingJson </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a73f6fd383882599b7c012a21602cb661" name="a73f6fd383882599b7c012a21602cb661"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73f6fd383882599b7c012a21602cb661">&#9670;&#160;</a></span>getScriptingConfigsCopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::KeyValStore::getScriptingConfigsCopy </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Return a copy of current configs (scripting). </p>
+
+</div>
+</div>
+<a id="a183de957d35a4d934c5911fff82d13cc" name="a183de957d35a4d934c5911fff82d13cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a183de957d35a4d934c5911fff82d13cc">&#9670;&#160;</a></span>getScriptingJson()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::KeyValStore::getScriptingJson </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae9fc4870ffdc107eaf863254bd82a809" name="ae9fc4870ffdc107eaf863254bd82a809"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9fc4870ffdc107eaf863254bd82a809">&#9670;&#160;</a></span>getScriptingValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::KeyValStore::getScriptingValue </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Read a top-level config key (scripting). Returns null json when missing. </p>
+
+</div>
+</div>
 <a id="aebaf937e9b5190be0661868008c66c62" name="aebaf937e9b5190be0661868008c66c62"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aebaf937e9b5190be0661868008c66c62">&#9670;&#160;</a></span>migrate()</h2>
 
@@ -192,6 +278,81 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Initialize migration, create base data for setting fields. </p>
+
+</div>
+</div>
+<a id="a7da9dd5506d53ec31e8fa7f6909bbb51" name="a7da9dd5506d53ec31e8fa7f6909bbb51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7da9dd5506d53ec31e8fa7f6909bbb51">&#9670;&#160;</a></span>reloadScriptingConfigs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::KeyValStore::reloadScriptingConfigs </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Reload configs from the database. </p>
+
+</div>
+</div>
+<a id="a39604fe2be1d8d5653b81ce6bcb1c157" name="a39604fe2be1d8d5653b81ce6bcb1c157"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39604fe2be1d8d5653b81ce6bcb1c157">&#9670;&#160;</a></span>setScriptingJson()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::KeyValStore::setScriptingJson </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>json_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a845963d1dbb9b86bab1fd145f921d242" name="a845963d1dbb9b86bab1fd145f921d242"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a845963d1dbb9b86bab1fd145f921d242">&#9670;&#160;</a></span>setScriptingValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::KeyValStore::setScriptingValue </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Patch a top-level config key and persist (scripting). </p>
 
 </div>
 </div>

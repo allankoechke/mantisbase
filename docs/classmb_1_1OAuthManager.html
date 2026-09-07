@@ -160,12 +160,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
 <tr class="separator:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase" id="r_aeb65d721822a05d100c547f8a32a8dcf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf">logger</a> () const</td></tr>
-<tr class="memdesc:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the logger instance.  <br /></td></tr>
 <tr class="separator:aeb65d721822a05d100c547f8a32a8dcf inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>OAuth provider registry, entity enablement, and login/link flows. </p>
-<p>REST routes (see <a class="el" href="auth_api.html">Authentication API</a> documentation):</p><ul>
+<p>REST routes (see auth_api documentation):</p><ul>
 <li><code>GET /api/v1/auth/&lt;entity&gt;/oauth/authorize/:provider</code></li>
 <li><code>GET /api/v1/auth/&lt;entity&gt;/oauth/callback/:provider</code></li>
 <li><code>POST|DELETE /api/v1/auth/&lt;entity&gt;/oauth/link/:provider</code></li>
@@ -217,6 +216,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Admin: create a provider configuration row. </p>
 
 </div>
 </div>
@@ -280,6 +280,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Admin: detach a provider from an entity. </p>
 
 </div>
 </div>
@@ -308,6 +309,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Admin: attach a provider to an entity's allowed login methods. </p>
 
 </div>
 </div>
@@ -325,6 +327,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>AES key material used to encrypt stored OAuth client secrets. </dd></dl>
 
 </div>
 </div>
@@ -353,6 +356,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>List OAuth identities linked to <code>user_id</code> within <code>entity_name</code>. </p>
 
 </div>
 </div>
@@ -371,6 +375,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>List OAuth providers enabled for an entity (user-facing metadata). </p>
 
 </div>
 </div>
@@ -476,6 +481,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Admin: list all configured providers. </p>
 
 </div>
 </div>
@@ -494,6 +500,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Admin: delete a provider by id. </p>
 
 </div>
 </div>
@@ -528,6 +535,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Unlink an OAuth provider from a user account. </p>
 
 </div>
 </div>
@@ -556,6 +564,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Admin: patch provider settings (client id/secret, endpoints, etc.). </p>
 
 </div>
 </div>

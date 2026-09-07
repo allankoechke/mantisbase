@@ -2,7 +2,6 @@ var dir_aebb8dcc11953d78e620bbef0b9e2183 =
 [
     [ "logger", "dir_ffd15e349ea497166a76d5042b2f5c37.html", "dir_ffd15e349ea497166a76d5042b2f5c37" ],
     [ "models", "dir_0e7a58851e096bd60301b89de049e7fd.html", "dir_0e7a58851e096bd60301b89de049e7fd" ],
-    [ "private-impl", "dir_2558a52f543d87c98b276f788396ad70.html", "dir_2558a52f543d87c98b276f788396ad70" ],
     [ "api_keys.cpp", "api__keys_8cpp.html", null ],
     [ "auth.cpp", "auth_8cpp.html", null ],
     [ "context_store.cpp", "context__store_8cpp.html", null ],
@@ -18,6 +17,7 @@ var dir_aebb8dcc11953d78e620bbef0b9e2183 =
     [ "middlewares.cpp", "middlewares_8cpp.html", "middlewares_8cpp" ],
     [ "oauth.cpp", "oauth_8cpp.html", null ],
     [ "realtime.cpp", "realtime_8cpp.html", null ],
+    [ "realtime_session.cpp", "realtime__session_8cpp.html", "realtime__session_8cpp" ],
     [ "realtime_ws.cpp", "realtime__ws_8cpp.html", null ],
     [ "route_registry.cpp", "route__registry_8cpp.html", null ],
     [ "router.cpp", "router_8cpp.html", "router_8cpp" ],

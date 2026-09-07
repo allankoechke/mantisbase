@@ -1,6 +1,7 @@
 var dir_f12416a0fca21990dcfd6e2a4a1d87bc =
 [
     [ "core", "dir_c0de5ed7d1b1c858ab368f9650e8062e.html", "dir_c0de5ed7d1b1c858ab368f9650e8062e" ],
+    [ "scripting", "dir_aba0b3875b004f3b6f7f0a7a036cddef.html", "dir_aba0b3875b004f3b6f7f0a7a036cddef" ],
     [ "utils", "dir_7c3bf8ead889a415e2298eb24273b3b7.html", "dir_7c3bf8ead889a415e2298eb24273b3b7" ],
     [ "export.h", "export_8h.html", "export_8h" ],
     [ "mantis.h", "mantis_8h.html", null ],

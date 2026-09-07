@@ -10,10 +10,12 @@ var searchData=
   ['tolocaltime_7',['toLocalTime',['../namespacemb.html#a2d71c0500dcfed8ef033eb8fbeb13e65',1,'mb']]],
   ['tolowercase_8',['toLowerCase',['../namespacemb.html#a610ae91c5e525b5899cf9445107360e9',1,'mb']]],
   ['tosocitype_9',['tosocitype',['../classmb_1_1EntitySchemaField.html#ae46b8ec1b2fb571932579cbafd49be17',1,'mb::EntitySchemaField::toSociType(const std::string &amp;type, IntPrecision precision)'],['../classmb_1_1EntitySchemaField.html#a3c551f4b233f737b9185c6973ddcfb0b',1,'mb::EntitySchemaField::toSociType(const std::string &amp;type)'],['../classmb_1_1EntitySchemaField.html#ae6c5bb64dba8d05147f2858e62613da6',1,'mb::EntitySchemaField::toSociType() const']]],
-  ['touppercase_10',['toUpperCase',['../namespacemb.html#abe6b794953335d0601b9fe55af49027f',1,'mb']]],
-  ['toutctime_11',['toUtcTime',['../namespacemb.html#ae4d3d9830d695badbaa82fec75d2be94',1,'mb']]],
-  ['trace_12',['trace',['../classmb_1_1Logger.html#a527c23ded09fa2c747beaeb97d2420c6',1,'mb::Logger']]],
-  ['trim_13',['trim',['../namespacemb.html#a409c1fc8483d2c71f13abd04598f4db2',1,'mb']]],
-  ['tryparsejsonstr_14',['tryParseJsonStr',['../namespacemb.html#a407f3d861f56cbc663381da99b2cc4ed',1,'mb']]],
-  ['type_15',['type',['../classmb_1_1EntitySchemaField.html#a638b6d84ac73fc4c75492b902a43923a',1,'mb::EntitySchemaField::type()'],['../classmb_1_1EntitySchema.html#ab34abb1145d1b45e9ee261d055722b8b',1,'mb::EntitySchema::type()'],['../classmb_1_1Entity.html#a3d1fc7eab6f53ba13ab62a35310f452b',1,'mb::Entity::type()']]]
+  ['touchwssession_10',['touchWsSession',['../namespacemb.html#a80e7b76a5023b74babc342a83d288284',1,'mb']]],
+  ['touppercase_11',['toUpperCase',['../namespacemb.html#abe6b794953335d0601b9fe55af49027f',1,'mb']]],
+  ['toutctime_12',['toUtcTime',['../namespacemb.html#ae4d3d9830d695badbaa82fec75d2be94',1,'mb']]],
+  ['trace_13',['trace',['../classmb_1_1Logger.html#a527c23ded09fa2c747beaeb97d2420c6',1,'mb::Logger']]],
+  ['trim_14',['trim',['../namespacemb.html#a409c1fc8483d2c71f13abd04598f4db2',1,'mb']]],
+  ['tryparsejsonstr_15',['tryParseJsonStr',['../namespacemb.html#a407f3d861f56cbc663381da99b2cc4ed',1,'mb']]],
+  ['tryupgradeauth_16',['tryUpgradeAuth',['../namespacemb.html#a76825a4666535adab4efbe5bfb7ac454',1,'mb']]],
+  ['type_17',['type',['../classmb_1_1EntitySchemaField.html#a638b6d84ac73fc4c75492b902a43923a',1,'mb::EntitySchemaField::type()'],['../classmb_1_1EntitySchema.html#ab34abb1145d1b45e9ee261d055722b8b',1,'mb::EntitySchema::type()'],['../classmb_1_1Entity.html#a3d1fc7eab6f53ba13ab62a35310f452b',1,'mb::Entity::type()']]]
 ];

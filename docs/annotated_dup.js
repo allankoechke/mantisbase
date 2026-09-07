@@ -27,8 +27,10 @@ var annotated_dup =
       [ "MantisRequest", "classmb_1_1MantisRequest.html", "classmb_1_1MantisRequest" ],
       [ "MantisResponse", "classmb_1_1MantisResponse.html", "classmb_1_1MantisResponse" ],
       [ "OAuthManager", "classmb_1_1OAuthManager.html", "classmb_1_1OAuthManager" ],
+      [ "RealtimeAuthSnapshot", "structmb_1_1RealtimeAuthSnapshot.html", "structmb_1_1RealtimeAuthSnapshot" ],
       [ "RealtimeDB", "classmb_1_1RealtimeDB.html", "classmb_1_1RealtimeDB" ],
       [ "RealtimeWSController", "classmb_1_1RealtimeWSController.html", "classmb_1_1RealtimeWSController" ],
+      [ "RealtimeWsSession", "structmb_1_1RealtimeWsSession.html", "structmb_1_1RealtimeWsSession" ],
       [ "RouteHandler", "structmb_1_1RouteHandler.html", "structmb_1_1RouteHandler" ],
       [ "RouteKeyHash", "structmb_1_1RouteKeyHash.html", "structmb_1_1RouteKeyHash" ],
       [ "Router", "classmb_1_1Router.html", "classmb_1_1Router" ],
@@ -36,6 +38,7 @@ var annotated_dup =
       [ "RtDbWorker", "classmb_1_1RtDbWorker.html", "classmb_1_1RtDbWorker" ],
       [ "SSEMgr", "classmb_1_1SSEMgr.html", "classmb_1_1SSEMgr" ],
       [ "SSESession", "classmb_1_1SSESession.html", "classmb_1_1SSESession" ],
+      [ "TopicAccessResult", "structmb_1_1TopicAccessResult.html", "structmb_1_1TopicAccessResult" ],
       [ "Validators", "classmb_1_1Validators.html", null ],
       [ "WSMgr", "classmb_1_1WSMgr.html", "classmb_1_1WSMgr" ]
     ] ]

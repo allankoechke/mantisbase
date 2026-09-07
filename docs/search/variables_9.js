@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['unique_0',['unique',['../structmb_1_1IndexDefinition.html#a4e22f6ac94f50832187613244328d832',1,'mb::IndexDefinition']]]
+  ['last_5factivity_0',['last_activity',['../structmb_1_1RealtimeWsSession.html#aee6a5b929046575278dd7b3e1c93008a',1,'mb::RealtimeWsSession']]]
 ];

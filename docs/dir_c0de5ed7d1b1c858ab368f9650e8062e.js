@@ -14,6 +14,7 @@ var dir_c0de5ed7d1b1c858ab368f9650e8062e =
     [ "middlewares.h", "middlewares_8h.html", "middlewares_8h" ],
     [ "oauth.h", "oauth_8h.html", "oauth_8h" ],
     [ "realtime.h", "realtime_8h.html", "realtime_8h" ],
+    [ "realtime_session.h", "realtime__session_8h.html", "realtime__session_8h" ],
     [ "route_registry.h", "route__registry_8h.html", "route__registry_8h" ],
     [ "router.h", "router_8h.html", "router_8h" ],
     [ "sse.h", "sse_8h.html", "sse_8h" ],
