@@ -85,10 +85,10 @@ namespace mb
          *     "migrations-dir": "<path to dir>",
          *     "dev": true,
          *     "serve": {
-         *         "port": <int>,
+         *         "port": <int value>,
          *         "host": "<host IP/addr>",
-         *         "pool-size": <int>,
-         *         "skip-admin-setup": <bool>
+         *         "pool-size": <int value>,
+         *         "skip-admin-setup": <boolean true/false>
          *     },
          *     "admins": {
          *         "add": ["<email>", "<password>"],

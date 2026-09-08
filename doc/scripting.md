@@ -6,7 +6,7 @@ Scripts run once at startup. Custom routes registered via `app.router().addRoute
 
 The scripts directory is resolved as follows:
 - By default: a `scripts` folder next to the `mantisbase` binary
-- Override with `--scriptsDir /some/path` (see [Command-line options](@ref cmd))
+- Override with `--scriptsDir /some/path` (see [Command-line options](@ref docs_cmd))
 
 ### Build and runtime switches
 
@@ -220,11 +220,11 @@ The global `middlewares` object exposes C++ middleware factories. Each factory r
 - `middlewares.requireExprEval(expr)`, `settingsFeatureGate(key)`
 - `middlewares.rejectViewMutations()`
 
-```js
+```js  
 app.router().addRoute("GET", "/api/v1/custom/protected", handler,
     middlewares.getAuthToken(),
     middlewares.hydrateContextData()
-);
+);  
 ```
 
 ## Utils (utility functions)

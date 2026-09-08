@@ -1,6 +1,6 @@
 /**
  * @file types.h
- * @brief Core type aliases, handler signatures, and the @ref IMantisBase DI mixin.
+ * @brief Core type aliases, handler signatures, and the IMantisBase DI mixin.
  *
  * Defines the function types used throughout routing (@ref HandlerFn, @ref MiddlewareFn)
  * and the non-owning @ref MantisBase reference mixin inherited by request/response wrappers
@@ -38,16 +38,22 @@ namespace mb {
 
     using json = nlohmann::json;
 
-    /** Middleware short-circuit result: stop or continue the chain. */
+    /**
+     * @brief Middleware short-circuit result: stop or continue the chain.
+     */
     enum class HandlerResponse {
         Handled,   /**< Response already sent; skip remaining middleware/handler. */
         Unhandled  /**< Continue to the next middleware or route handler. */
     };
 
-    /** Standard route handler `(request, response)`. */
+    /**
+     * @brief Standard route handler `(request, response)`.
+     */
     using HandlerFn = std::function<void(MantisRequest&, MantisResponse&)>;
 
-    /** Route handler with multipart/content reader `(request, response, reader)`. */
+    /**
+     * @brief Route handler with multipart/content reader `(request, response, reader)`.
+     */
     using HandlerWithContentReaderFn = std::function<void(MantisRequest&, MantisResponse&,
                                                                  MantisContentReader&)>;
     using MiddlewareFn = std::function<HandlerResponse(MantisRequest&, MantisResponse&)>;
@@ -55,7 +61,9 @@ namespace mb {
     using Method = std::string;
     using Path = std::string;
 
-    /** Route lookup key: HTTP method + path pattern. */
+    /**
+     * @brief Route lookup key: HTTP method + path pattern.
+     */
     using RouteKey = std::pair<Method, Path>;
 
     /**
@@ -73,15 +81,16 @@ namespace mb {
      * @endcode
      */
     class IMantisBase {
-        const MantisBase& m_app;
+        const MantisBase& m_app; ///< Const ref to the parent MantisBase instance //
 
     public:
+        //! Constrictor for instantiating this interface
         explicit IMantisBase(const MantisBase& app);
 
-        /** @brief Application that owns this service or request context. */
+        //! Application that owns this service or request context.
         [[nodiscard]] const MantisBase &mbApp() const;
 
-        /** @return Application logger via @ref MantisBase::logger. */
+        //! @return Application logger via @ref MantisBase::logger
         [[nodiscard]] const Logger& logger() const;
     };
 
