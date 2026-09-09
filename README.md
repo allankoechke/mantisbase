@@ -13,6 +13,7 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/allankoech/mantisbase)](https://hub.docker.com/r/allankoech/mantisbase)
 [![Discussions](https://img.shields.io/github/discussions/allankoechke/mantisbase)](https://github.com/allankoechke/mantisbase/discussions)
 [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/9437XTKRvN)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/allankoechke/mantisbase)
 
 </p>
 
