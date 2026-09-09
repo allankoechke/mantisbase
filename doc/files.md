@@ -1,4 +1,4 @@
-@page docs_file Handling Files in MantisBase
+@page docs_file Handling Files
 
 MantisBase supports file uploads and management for database records. Files can be associated with records through `file` or `files` field types and are stored on disk with references in the database.
 
@@ -121,7 +121,7 @@ For example, if `dataDir` is `./data` and entity is `posts`, a file `image.jpg` 
 Uploaded filenames are automatically sanitized before storage:
 
 - A random 8-character prefix is prepended (e.g., `a3b7c2d1_image.jpg`) to prevent collisions
-- Invalid characters (control characters, `<>:"/\|?*+`, spaces, tabs, `%`, `=`) are replaced with underscores
+- Invalid characters (control characters, `><:"/\|?*+`, spaces, tabs, `%`, `=`) are replaced with underscores
 - Consecutive underscores are collapsed
 - Leading and trailing spaces or dots are trimmed
 - Filenames longer than 255 characters are truncated with `...` in the middle

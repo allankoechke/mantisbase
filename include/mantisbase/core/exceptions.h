@@ -21,10 +21,18 @@ namespace mb {
      */
     class MantisException final : public std::exception {
     public:
-        /** @param _code HTTP-style status code (e.g. 400, 404). */
+        /**
+         * @param _code HTTP-style status code (e.g. 400, 404).
+         * @param _msg The exception description message to show
+         */
         MantisException(int _code, std::string _msg);
 
-        /** @param _desc Optional longer description for logs or API `error` detail. */
+        /**
+         * @param _code HTTP-style status code (e.g. 400, 404).
+         * @param _msg The exception description message to show
+         * @param _desc Optional longer description for logs or API `error` detail.
+         *
+         */
         MantisException(int _code, std::string _msg, std::string _desc);
 
         [[nodiscard]] const char* what() const noexcept override;

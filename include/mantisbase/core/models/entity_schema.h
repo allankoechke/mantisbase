@@ -82,7 +82,7 @@ namespace mb {
 
         /**
          * @brief Create schema from existing Entity, bound to an application.
-         * @param app Owning application (db access for DDL/validation).
+         * @param app A const ref to MantisBase running instance
          * @param entity Entity to convert from
          * @return EntitySchema instance
          */
@@ -279,6 +279,7 @@ namespace mb {
         // ----------- SCHEMA CRUD ----------- //
         /**
          * @brief List all tables from database.
+         * @param app A const ref to MantisBase running instance
          * @param opts Optional parameters (pagination, etc.)
          * @return JSON array of table schemas
          */
@@ -301,6 +302,7 @@ namespace mb {
 
         /**
          * @brief Update existing table schema in database.
+         * @param app A const ref to MantisBase running instance
          * @param table_id Table identifier
          * @param new_schema Updated schema JSON
          * @return JSON object with updated table data
@@ -315,12 +317,14 @@ namespace mb {
 
         /**
          * @brief Drop table by ID from database.
+         * @param app A const ref to MantisBase running instance
          * @param table_id Table identifier to drop
          */
         static void dropTable(const MantisBase &app, const std::string &table_id);
 
         /**
          * @brief Check if table exists by name.
+         * @param app A const ref to MantisBase running instance
          * @param table_name Table name to check
          * @return true if table exists
          */
