@@ -1,6 +1,6 @@
 FROM debian:stable-slim
 
-ARG MB_VERSION=0.4.0
+ARG MB_VERSION=0.4.2
 ARG TARGETARCH
 # Optional: pin the release archive checksum so a tampered or substituted
 # artifact cannot be silently baked into the image.
