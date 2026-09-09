@@ -21,14 +21,16 @@ option(MB_SHARED_DEPS "Build MantisBase as a shared library" FALSE)
 option(MB_BUILD_SHARED_LIB "Build MantisBase as a shared library" OFF) # Override static build to also have shared lib built
 option(MB_ENABLE_ASAN "Enable ASAN for mantisbase build" OFF)
 
+# Enforce PIC in all binaries
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# If we are building shared deps (dynamic linking)
 if(MB_SHARED_DEPS)
     set(BUILD_SHARED_LIBS TRUE)
     set(MB_LIB_TYPE SHARED)
     set(USE_STATIC_LIBS_ONLY OFF)
     message("-- Building MantisBase dynamic libs")
-else()
+else() # We are linking statically
     set(BUILD_SHARED_LIBS FALSE)
     set(MB_LIB_TYPE STATIC)
     set(USE_STATIC_LIBS_ONLY ON)
@@ -173,17 +175,8 @@ endif (MB_SCRIPTING_ENABLED)
 # ZLIB Build
 include(cmake/add-zlib.cmake)
 
-find_path(UUID_INCLUDE_DIR
-        NAMES uuid.h
-        PATH_SUFFIXES uuid
-)
-
-find_library(UUID_LIBRARY
-        NAMES uuid
-)
-
-set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}" CACHE PATH "" FORCE)
-set(UUID_LIBRARIES "${UUID_LIBRARY}" CACHE FILEPATH "" FORCE)
+# Add UUID dep for drogon
+include(cmake/add-uuid.cmake)
 
 # Add Drogon HTTP framework
 include(cmake/add-drogon.cmake)
@@ -211,12 +204,16 @@ add_subdirectory(3rdParty/mb-admin)
 
 # Include address sanitizer for Linux debug/releaseWithDebug builds
 option(MB_BUILD_WITH_ASAN "Enable ASAN build for UNIX" ON)
+
+# Add Address Sanitizer
 include(cmake/add-asan.cmake)
 
 # Include duktape for ECMASCRIPT scripting in Mantis
 if(MB_SCRIPTING_ENABLED)
     include(cmake/add-duktape.cmake)
 endif()
+
+# Add custom script evaluator for auth expr evaluation
 include (cmake/add-mbs.cmake)
 
 # Include directories

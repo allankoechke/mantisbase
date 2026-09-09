@@ -1,0 +1,11 @@
+find_path(UUID_INCLUDE_DIR
+        NAMES uuid.h
+        PATH_SUFFIXES uuid
+)
+
+find_library(UUID_LIBRARY
+        NAMES uuid
+)
+
+set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}" CACHE PATH "" FORCE)
+set(UUID_LIBRARIES "${UUID_LIBRARY}" CACHE FILEPATH "" FORCE)
