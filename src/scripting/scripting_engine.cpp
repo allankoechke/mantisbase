@@ -62,7 +62,7 @@ namespace mb {
         registerBindings();
     }
 
-    void ScriptingEngine::registerBindings() {
+    void ScriptingEngine::registerBindings() const {
         registerAppBindings(m_ctx, &m_app);
         registerRequestBindings(m_ctx);
         registerResponseBindings(m_ctx);

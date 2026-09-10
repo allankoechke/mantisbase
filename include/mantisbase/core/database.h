@@ -66,7 +66,7 @@ namespace mb {
         bool connect(const std::string &conn_str);
 
         /** @return Active connection string passed to @ref connect. */
-        const std::string& connectionStr() const;
+        [[nodiscard]] const std::string& connectionStr() const;
 
 
         /**
@@ -78,7 +78,7 @@ namespace mb {
          * @brief Create system tables (mb_tables, mb_admins, etc.).
          * @return true if migration successful, false otherwise
          */
-        bool createSysTables() const;
+        [[nodiscard]] bool createSysTables() const;
 
         /**
          * @brief Get a database session from the connection pool.
@@ -103,7 +103,7 @@ namespace mb {
         [[nodiscard]] bool isConnected() const;
 
 #ifdef MB_SCRIPTING_ENABLED
-        duk_ret_t query(duk_context *ctx);
+        duk_ret_t query(duk_context *ctx) const;
 #endif
 
     private:

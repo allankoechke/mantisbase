@@ -156,7 +156,7 @@ public:
             serverThread_ = std::thread([this]() {
                 serverRunning_.store(true);
                 try {
-                    app_->run();
+                    [[maybe_unused]] auto rt = app_->run();
                 } catch (const std::exception &) {
                 }
                 serverRunning_.store(false);
@@ -179,8 +179,11 @@ public:
         std::lock_guard lock(self.mutex_);
         self.shutdownServerLocked();
         if (self.app_) {
+            std::cout << "Closing App instance and subsequent units ..." << std::endl;
             self.app_->close();
+            std::cout << "App closed, resetting instance ..." << std::endl;
             self.app_.reset();
+            std::cout << "Reset completed ..." << std::endl;
         }
         removeTestDir(self.baseDir_);
         self.refCount_ = 0;
@@ -196,7 +199,8 @@ private:
             if (app_->router().isRunning()) {
                 app_->router().close();
             }
-        } catch (const std::exception &) {
+        } catch (const std::exception &e) {
+            std::cerr << "Failure Shutting down test server: " << e.what() << std::endl;
         }
 
         if (serverThread_.joinable()) {
