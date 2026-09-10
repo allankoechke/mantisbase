@@ -18,7 +18,7 @@ The repository includes a `Dockerfile` in the `/docker` directory. To build and 
 
 ```bash
 # Build (optionally set MB_VERSION for a specific release)
-docker build -t mantisbase -f docker/Dockerfile --build-arg MB_VERSION=0.4.2 .
+docker build -t mantisbase -f docker/Dockerfile --build-arg MB_VERSION=0.4.3 .
 docker run -p 7070:8080 --rm mantisbase
 ```
 
@@ -64,7 +64,7 @@ cd docker
 docker compose -f docker-compose.yaml up --build
 ```
 
-This builds the image (using `MB_VERSION` build arg, default `0.4.1`) and starts the container with volume mounts configured. `MB_JWT_SECRET` **must** be set outside dev mode - the server refuses to start without it. Set it and any other `MB_*` variables in a `.env` file in the same directory, or pass them when running `docker compose`.
+This builds the image (using `MB_VERSION` build arg, default `0.4.3`) and starts the container with volume mounts configured. `MB_JWT_SECRET` **must** be set outside dev mode - the server refuses to start without it. Set it and any other `MB_*` variables in a `.env` file in the same directory, or pass them when running `docker compose`.
 
 ---
 
