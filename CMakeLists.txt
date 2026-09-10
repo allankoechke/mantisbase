@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 # doc/docker.md
 # docker/Dockerfile
 # docker/docker-compose.yaml
-project(MantisBase VERSION 0.4.2)
+project(MantisBase VERSION 0.4.3)
 
 # Set output directories to match SOCI's
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
