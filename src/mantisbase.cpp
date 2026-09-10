@@ -242,15 +242,38 @@ namespace mb {
 
         logger().trace("Core", "Closing Units");
         try {
-            if (m_router && m_router->isRunning()) {
+            // Reset Auth object
+            if (m_auth) m_auth.reset();
+
+            // Reset files manager
+            if (m_files) m_files.reset();
+
+            // Reset argument parser
+            if (m_opts) m_opts.reset();
+
+            // Reset KV Store
+            if (m_kvStore) m_kvStore.reset();
+
+            // Reset router object
+            if (m_router) {
                 m_router->close();
+                m_router.reset();
                 logger().trace("Router", "Router stopped");
             }
 
-            if (m_database && m_database->isConnected()) {
-                m_database->disconnect();
-                logger().trace("DB", "Shutdown Completed!");
+            // Reset realtime db & worker
+            if (m_realtime) {
+                m_realtime->stopWorker();
+                m_realtime.reset();
             }
+
+            // Reset database object
+            if (m_database) {
+                m_database->disconnect();
+                m_database.reset();
+            }
+
+            logger().trace("Close", "MantisBase Units Reset Completed!");
         } catch (const std::exception &e) {
             std::cerr << "Error during reset: " << e.what() << std::endl;
         }
@@ -306,6 +329,10 @@ namespace mb {
     }
 
     Database &MantisBase::db() const {
+        if (!isCreated()) {
+            throw MantisException(500, "DB is not created!");
+        }
+
         return *m_database;
     }
 
@@ -314,10 +341,18 @@ namespace mb {
     }
 
     Router &MantisBase::router() const {
+        if (!isCreated()) {
+            throw MantisException(500, "Router is not created!");
+        }
+
         return *m_router;
     }
 
     KeyValStore &MantisBase::settings() const {
+        if (!isCreated()) {
+            throw MantisException(500, "KV Store is not created!");
+        }
+
         return *m_kvStore;
     }
 
@@ -326,10 +361,18 @@ namespace mb {
     }
 
     RealtimeDB &MantisBase::rt() const {
+        if (!isCreated()) {
+            throw MantisException(500, "Rt Db is not created!");
+        }
+
         return *m_realtime;
     }
 
     FilesMgr &MantisBase::files() const {
+        if (!isCreated()) {
+            throw MantisException(500, "File Mgr is not created!");
+        }
+
         return *m_files;
     }
 
@@ -338,6 +381,10 @@ namespace mb {
     }
 
     Auth &MantisBase::auth() const {
+        if (!isCreated()) {
+            throw MantisException(500, "Auth Mgr is not created!");
+        }
+
         return *m_auth;
     }
 

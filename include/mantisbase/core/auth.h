@@ -69,7 +69,7 @@ namespace mb
          *     {{"id", "user123"}, {"table", "users"}}, 3600);
          * @endcode
          */
-        std::string createToken(const json& claims_params, int timeout = -1) const;
+        [[nodiscard]] std::string createToken(const json& claims_params, int timeout = -1) const;
 
         /** Default session lifetime in seconds for an entity (or @p timeout when positive). */
         [[nodiscard]] int sessionTimeoutSeconds(const std::string &entity_name, int timeout = -1) const;
@@ -78,10 +78,10 @@ namespace mb
          * @brief Verify a JWT and return claims plus verification metadata.
          * @return JSON with `verified`, `error`, and claim fields on success/failure.
          */
-        json verifyToken(const std::string& token) const;
+        [[nodiscard]] json verifyToken(const std::string& token) const;
 
         /** Invalidate a refresh/session row by id. */
-        bool deleteSession(const std::string& session_id) const;
+        [[nodiscard]] bool deleteSession(const std::string& session_id) const;
 
         /**
          * @brief Rotate a session: invalidate `old_session_id` and issue a new JWT.
@@ -91,8 +91,8 @@ namespace mb
                                    const std::string& user_id);
 
 #ifdef MB_SCRIPTING_ENABLED
-        std::string createTokenJson(const std::string &claims_json, int timeout = -1) const;
-        std::string verifyTokenJson(const std::string &token) const;
+        [[nodiscard]] std::string createTokenJson(const std::string &claims_json, int timeout = -1) const;
+        [[nodiscard]] std::string verifyTokenJson(const std::string &token) const;
         std::string refreshSessionJson(const std::string &old_session_id,
                                        const std::string &entity_name,
                                        const std::string &user_id);

@@ -64,7 +64,7 @@ namespace mb {
         void pcallVoid(const DukValue &fn, MantisRequest &req, MantisResponse &res);
 
     private:
-        void registerBindings();
+        void registerBindings() const;
         void evalFile(const std::string &filePath);
         void evalString(const std::string &content, const std::string &label);
         [[nodiscard]] bool isRuntimeDisabled() const;

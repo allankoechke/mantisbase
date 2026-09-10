@@ -299,10 +299,26 @@ namespace mb {
         };
 
         const std::vector<Preset> presets = {
-            {"google", "https://accounts.google.com/.well-known/openid-configuration", "openid email profile"},
-            {"github", "", "read:user user:email"},
-            {"discord", "", "identify email"},
-            {"microsoft", "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration", "openid email profile"}
+            {
+                .name = "google",
+                .discovery_url = "https://accounts.google.com/.well-known/openid-configuration",
+                .scopes = "openid email profile"
+            },
+            {
+                .name = "github",
+                .discovery_url = "",
+                .scopes = "read:user user:email"
+            },
+            {
+                .name = "discord",
+                .discovery_url = "",
+                .scopes = "identify email"
+            },
+            {
+                .name = "microsoft",
+                .discovery_url = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
+                .scopes = "openid email profile"
+            }
         };
 
         for (const auto &[name, discovery_url, scopes] : presets) {
@@ -373,8 +389,7 @@ namespace mb {
                     continue;
                 }
 
-                const auto data_type = row.get_properties(i).get_data_type();
-                switch (data_type) {
+                switch (row.get_properties(i).get_data_type()) {
                 case soci::dt_string:
                     obj[name] = row.get<std::string>(i);
                     break;
@@ -406,9 +421,7 @@ namespace mb {
         }
     }
 
-    duk_ret_t Database::query(duk_context *ctx) {
-        // TRACE_CLASS_METHOD();
-
+    duk_ret_t Database::query(duk_context *ctx) const {
         // Get number of arguments
         const int nargs = duk_get_top(ctx);
 
@@ -420,7 +433,6 @@ namespace mb {
 
         // First argument is the SQL query
         const char *query = duk_require_string(ctx, 0);
-        // logEntry::trace("[JS] SQL Query: `{}`", query);
 
         // Collect remaining arguments (bind parameters)
         soci::values vals;

@@ -92,15 +92,15 @@ namespace mb {
         [[nodiscard]] json listProviders() const;
 
         /** Admin: attach a provider to an entity's allowed login methods. */
-        json enableProviderForEntity(const std::string &entity_name,
+        [[nodiscard]] json enableProviderForEntity(const std::string &entity_name,
                                      const std::string &provider_id) const;
 
         /** Admin: detach a provider from an entity. */
-        bool disableProviderForEntity(const std::string &entity_name,
+        [[nodiscard]] bool disableProviderForEntity(const std::string &entity_name,
                                       const std::string &provider_id) const;
 
         /** @return AES key material used to encrypt stored OAuth client secrets. */
-        std::string getEncryptionKey() const;
+        [[nodiscard]] std::string getEncryptionKey() const;
 
     private:
         static json discoverOIDC(const std::string &discovery_url);
