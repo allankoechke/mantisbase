@@ -18,7 +18,7 @@ The repository includes a `Dockerfile` in the `/docker` directory. To build and 
 
 ```bash
 # Build (optionally set MB_VERSION for a specific release)
-docker build -t mantisbase -f docker/Dockerfile --build-arg MB_VERSION=0.4.0 .
+docker build -t mantisbase -f docker/Dockerfile --build-arg MB_VERSION=0.4.2 .
 docker run -p 7070:8080 --rm mantisbase
 ```
 
@@ -64,7 +64,7 @@ cd docker
 docker compose -f docker-compose.yaml up --build
 ```
 
-This builds the image (using `MB_VERSION` build arg, default `0.4.0`) and starts the container with volume mounts configured. `MB_JWT_SECRET` **must** be set outside dev mode - the server refuses to start without it. Set it and any other `MB_*` variables in a `.env` file in the same directory, or pass them when running `docker compose`.
+This builds the image (using `MB_VERSION` build arg, default `0.4.1`) and starts the container with volume mounts configured. `MB_JWT_SECRET` **must** be set outside dev mode - the server refuses to start without it. Set it and any other `MB_*` variables in a `.env` file in the same directory, or pass them when running `docker compose`.
 
 ---
 
@@ -87,7 +87,7 @@ You can configure MantisBase using environment variables or by mounting a config
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `MB_JWT_SECRET` | JWT secret key for token signing. **Required in production** (server refuses to start without it when not in dev mode) | (dev mode fallback only) |
-| `MB_VERSION` | Build-time only: release version to download (Dockerfile `ARG`) | `0.4.0` |
+| `MB_VERSION` | Build-time only: release version to download (Dockerfile `ARG`) | `0.4.1` |
 | `MB_DISABLE_FILE_UPLOADS` | Set to `1` to disable file uploads (returns 403 on upload attempts) | `0` |
 | `MB_DISABLE_ADMIN_ON_FIRST_BOOT` | Set to `1` to skip creating admin on first boot | `0` |
 | `MB_DISABLE_RATE_LIMIT` | Set to `1` to disable rate limiting. **Only honoured in `--dev` mode**; ignored otherwise | (enabled) |
@@ -128,7 +128,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       args:
-        MB_VERSION: "0.4.0"
+        MB_VERSION: "0.4.2"
     image: mantisbase:latest
     restart: unless-stopped
     ports:
