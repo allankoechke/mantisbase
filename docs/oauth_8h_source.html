@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.2</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.3</span>
    </div>
   </td>
  </tr>
@@ -150,13 +150,13 @@ $(document).ready(function(){initNavTree('oauth_8h_source.html',''); initResizab
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> <a class="code hl_function" href="classmb_1_1OAuthManager.html#a8b7e26722fb4721a9dcfe1069c230a39">listProviders</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> <a class="code hl_function" href="classmb_1_1OAuthManager.html#a6e7da4bf007e4a577c73af5e760a202d">enableProviderForEntity</a>(<span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> <a class="code hl_function" href="classmb_1_1OAuthManager.html#a6e7da4bf007e4a577c73af5e760a202d">enableProviderForEntity</a>(<span class="keyword">const</span> std::string &amp;entity_name,</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                                     <span class="keyword">const</span> std::string &amp;provider_id) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1OAuthManager.html#a92d3f64231d91b4d9f07e998ecd2a07b">disableProviderForEntity</a>(<span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1OAuthManager.html#a92d3f64231d91b4d9f07e998ecd2a07b">disableProviderForEntity</a>(<span class="keyword">const</span> std::string &amp;entity_name,</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>                                      <span class="keyword">const</span> std::string &amp;provider_id) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        std::string <a class="code hl_function" href="classmb_1_1OAuthManager.html#ad0517dd9fad7f6cb34ad92339ee15002">getEncryptionKey</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        [[nodiscard]] std::string <a class="code hl_function" href="classmb_1_1OAuthManager.html#ad0517dd9fad7f6cb34ad92339ee15002">getEncryptionKey</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keyword">private</span>:</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        <span class="keyword">static</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> discoverOIDC(<span class="keyword">const</span> std::string &amp;discovery_url);</div>
