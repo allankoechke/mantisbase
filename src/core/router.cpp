@@ -113,12 +113,19 @@ namespace mb {
                     .addListener(host, port)
                     .setThreadNum(4);
 
+            // Disable max body size to avoid the dropping of requestions
+            // containing files due to size limitation
+            Json::Value config;
+            config["app"]["client_max_body_size"] = ""; // no body limit
+            drogon::app().loadConfigJson(config);
+
             // Register hook to generate request IDs
             drogon::app().registerSyncAdvice(reqIdSyncAdvice());
 
             // Register logger func for all responses (including 404/static)
             drogon::app().registerPreSendingAdvice(loggerPreSendingAdvice());
 
+            // Reload CORS allowed origins
             reloadCorsOrigins();
 
             // Register CORS pre-routing advice

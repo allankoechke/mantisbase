@@ -22,7 +22,7 @@ namespace mb {
             };
         }
 
-        HandlerResponse sendAccessDenied(MantisResponse &res) {
+        HandlerResponse sendAccessDenied(const MantisResponse &res) {
             res.sendJSON(403, {
                              {"status", 403},
                              {"data", json::object()},
@@ -31,7 +31,7 @@ namespace mb {
             return HandlerResponse::Handled;
         }
 
-        std::optional<json> requireAuthenticatedUser(MantisRequest &req, MantisResponse &res) {
+        std::optional<json> requireAuthenticatedUser(MantisRequest &req, const MantisResponse &res) {
             const auto &verification = req.getOr<json>("verification", json::object());
 
             if (verification.empty()) {
@@ -70,12 +70,12 @@ namespace mb {
             return auth;
         }
 
-        HandlerResponse checkEntityAccess(MantisRequest &req, MantisResponse &res, const std::string &entity_name,
+        HandlerResponse checkEntityAccess(MantisRequest &req, const MantisResponse &res, const std::string &entity_name,
                                           const std::string &trace_msg) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
                 const auto &auth = req.getOr<json>("auth", json::object());
-                auto method = req.getMethod();
+                const auto method = req.getMethod();
 
                 if (!(method == "GET"
                       || method == "POST"
@@ -104,7 +104,7 @@ namespace mb {
                 }
 
                 const auto &verification = req.getOr<json>("verification", json::object());
-                AccessEvalContext ctx{auth, verification, &req};
+                const AccessEvalContext ctx{.auth = auth, .verification = verification, .req = &req};
                 const auto result = evaluateAccessRule(rule, ctx);
                 if (result == AccessEvalResult::Allow) {
                     return HandlerResponse::Unhandled;
@@ -210,7 +210,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hydrateContextData() {
-        return [](MantisRequest &req, MantisResponse &res) {
+        return [](MantisRequest &req, MantisResponse &) {
             // Get the auth var from the context, resort to empty object if it's not set.
             auto auth = req.getOr<json>("auth", json::object());
 
@@ -257,7 +257,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveSchema() {
-        return [](const MantisRequest &req, MantisResponse &res) {
+        return [](const MantisRequest &req, const MantisResponse &res) {
             const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
             if (schema_id_or_name.empty()) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
@@ -318,7 +318,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveEntity() {
-        return [](MantisRequest &req, MantisResponse &res) {
+        return [](const MantisRequest &req, const MantisResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));

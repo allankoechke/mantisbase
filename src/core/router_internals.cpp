@@ -525,8 +525,6 @@ namespace mb {
         return [](MantisRequest &req, const MantisResponse &res) {
             try {
                 auto auth = req.getOr<json>("auth", json::object());
-                req.mbApp().logger().trace("Auth", "Auth Data", fmt::format("Auth Data: {}", auth.dump()));
-
                 auto verification = req.getOr<json>("verification", json::object());
                 if (verification.empty()) {
                     res.sendJSON(401, {
@@ -560,10 +558,10 @@ namespace mb {
                 }
 
                 if (auth["user"].is_null()) {
-                    res.sendJSON(404, {
+                    res.sendJSON(401, {
                                      {"data", json::object()},
-                                     {"status", 403},
-                                     {"error", "Auth service account does not exist!"}
+                                     {"status", 401},
+                                     {"error", "Invalid service account passed in!"}
                                  });
                     return;
                 }
