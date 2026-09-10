@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MantisBase: Handling Files in MantisBase</title>
+<title>MantisBase: Handling Files</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,8 +26,9 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.2</span>
    </div>
   </td>
  </tr>
@@ -91,7 +92,7 @@ $(document).ready(function(){initNavTree('docs_file.html',''); initResizable(); 
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Handling Files in MantisBase</div></div>
+  <div class="headertitle"><div class="title">Handling Files</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>MantisBase supports file uploads and management for database records. Files can be associated with records through <code>file</code> or <code>files</code> field types and are stored on disk with references in the database.</p>
@@ -170,7 +171,7 @@ Filename Sanitization</h3>
 <p>Uploaded filenames are automatically sanitized before storage:</p>
 <ul>
 <li>A random 8-character prefix is prepended (e.g., <code>a3b7c2d1_image.jpg</code>) to prevent collisions</li>
-<li>Invalid characters (control characters, <code>&lt;&gt;:"/\|?*+&lt;/tt&gt;, spaces, tabs, &lt;tt&gt;%&lt;/tt&gt;, &lt;tt&gt;=&lt;/tt&gt;) are replaced with underscores
+<li>Invalid characters (control characters, <code>&gt;&lt;:"/\|?*+&lt;/tt&gt;, spaces, tabs, &lt;tt&gt;%&lt;/tt&gt;, &lt;tt&gt;=&lt;/tt&gt;) are replaced with underscores
 - Consecutive underscores are collapsed
 - Leading and trailing spaces or dots are trimmed
 - Filenames longer than 255 characters are truncated with &lt;tt&gt;...&lt;/tt&gt; in the middle

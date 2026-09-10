@@ -26,8 +26,9 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.2</span>
    </div>
   </td>
  </tr>
@@ -245,6 +246,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a37d0ab101f2ebe332b24bae36788b6c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classmb_1_1IMantisBase"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmb_1_1IMantisBase')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmb_1_1IMantisBase.html">mb::IMantisBase</a></td></tr>
 <tr class="memitem:a2694758bb4c4f5705a5f26731f2f96d5 inherit pub_methods_classmb_1_1IMantisBase" id="r_a2694758bb4c4f5705a5f26731f2f96d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#a2694758bb4c4f5705a5f26731f2f96d5">IMantisBase</a> (const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app)</td></tr>
+<tr class="memdesc:a2694758bb4c4f5705a5f26731f2f96d5 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constrictor for instantiating this interface.  <br /></td></tr>
 <tr class="separator:a2694758bb4c4f5705a5f26731f2f96d5 inherit pub_methods_classmb_1_1IMantisBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase" id="r_a94d6b28bd66767f7df7d7eb63c606801"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1IMantisBase.html#a94d6b28bd66767f7df7d7eb63c606801">mbApp</a> () const</td></tr>
 <tr class="memdesc:a94d6b28bd66767f7df7d7eb63c606801 inherit pub_methods_classmb_1_1IMantisBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application that owns this service or request context.  <br /></td></tr>
@@ -716,6 +718,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Drop table by ID from database. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">app</td><td>A const ref to <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> running instance </td></tr>
     <tr><td class="paramname">table_id</td><td>Table identifier to drop </td></tr>
   </table>
   </dd>
@@ -866,7 +869,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Create schema from existing <a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a>, bound to an application. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">app</td><td>Owning application (db access for DDL/validation). </td></tr>
+    <tr><td class="paramname">app</td><td>A const ref to <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> running instance </td></tr>
     <tr><td class="paramname">entity</td><td><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a> to convert from </td></tr>
   </table>
   </dd>
@@ -1283,6 +1286,7 @@ Static Public Member Functions</h2></td></tr>
 <p>List all tables from database. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">app</td><td>A const ref to <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> running instance </td></tr>
     <tr><td class="paramname">opts</td><td>Optional parameters (pagination, etc.) </td></tr>
   </table>
   </dd>
@@ -1715,6 +1719,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Check if table exists by name. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">app</td><td>A const ref to <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> running instance </td></tr>
     <tr><td class="paramname">table_name</td><td>Table name to check </td></tr>
   </table>
   </dd>
@@ -1910,6 +1915,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Update existing table schema in database. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">app</td><td>A const ref to <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> running instance </td></tr>
     <tr><td class="paramname">table_id</td><td>Table identifier </td></tr>
     <tr><td class="paramname">new_schema</td><td>Updated schema JSON </td></tr>
   </table>

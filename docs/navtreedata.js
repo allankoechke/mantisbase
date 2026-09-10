@@ -43,7 +43,7 @@ var NAVTREE =
     ] ],
     [ "Running in Docker", "docs_docker.html", null ],
     [ "Embedding MantisBase", "docs_embedding.html", null ],
-    [ "Handling Files in MantisBase", "docs_file.html", null ],
+    [ "Handling Files", "docs_file.html", null ],
     [ "Health Check", "docs_healthcheck.html", null ],
     [ "Setting Up MantisBase", "docs_setup.html", null ],
     [ "API Access Rules", "docs_rest_api_rules.html", null ],

@@ -26,8 +26,9 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.2</span>
    </div>
   </td>
  </tr>
@@ -509,7 +510,7 @@ RouterMgr for more details.</dd></dl>
 </div><div class="memdoc">
 
 <p>Convenience function to allow creating class instance given the values needed to set up the app without any need for passing in cmd args. </p>
-<p>The expected values are: { "db": "&lt;db type&gt;", "db_url": "&lt;connection string&gt;", "data-dir": "&lt;path to dir&gt;", "public-dir": "&lt;path to dir&gt;", "scripts-dir": "&lt;path to dir&gt;", "migrations-dir": "&lt;path to dir&gt;", "dev": true, "serve": { "port": &lt;int&gt;, "host": "&lt;host IP/addr&gt;", "pool-size": &lt;int&gt;, "skip-admin-setup": &lt;bool&gt; }, "admins": { "add": ["&lt;email&gt;", "&lt;password&gt;"], "ls": true, "rm": "&lt;email or id&gt;" }, "migrations": { "up": true, "down": false }, "schema": { "ls": true, "rm": "&lt;entity&gt;", "add": "&lt;json&gt;", "update": { "entity": "&lt;name&gt;", "body": "&lt;json&gt;" } } }</p>
+<p>The expected values are: { "db": "&lt;db type&gt;", "db_url": "&lt;connection string&gt;", "data-dir": "&lt;path to dir&gt;", "public-dir": "&lt;path to dir&gt;", "scripts-dir": "&lt;path to dir&gt;", "migrations-dir": "&lt;path to dir&gt;", "dev": true, "serve": { "port": &lt;int value&gt;, "host": "&lt;host IP/addr&gt;", "pool-size": &lt;int value&gt;, "skip-admin-setup": &lt;boolean true/false&gt; }, "admins": { "add": ["&lt;email&gt;", "&lt;password&gt;"], "ls": true, "rm": "&lt;email or id&gt;" }, "migrations": { "up": true, "down": false }, "schema": { "ls": true, "rm": "&lt;entity&gt;", "add": "&lt;json&gt;", "update": { "entity": "&lt;name&gt;", "body": "&lt;json&gt;" } } }</p>
 <dl class="section note"><dt>Note</dt><dd>All primary options above are optional, you can omit to use default values. </dd>
 <dd>
 <code>admins</code> subcommand expects a subcommand with either the <code>add</code> or <code>rm</code>. </dd>

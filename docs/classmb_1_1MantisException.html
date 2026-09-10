@@ -26,8 +26,9 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.2</span>
    </div>
   </td>
  </tr>
@@ -168,6 +169,7 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">_code</td><td>HTTP-style status code (e.g. 400, 404). </td></tr>
+    <tr><td class="paramname">_msg</td><td>The exception description message to show </td></tr>
   </table>
   </dd>
 </dl>
@@ -207,6 +209,8 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">_code</td><td>HTTP-style status code (e.g. 400, 404). </td></tr>
+    <tr><td class="paramname">_msg</td><td>The exception description message to show </td></tr>
     <tr><td class="paramname">_desc</td><td>Optional longer description for logs or API <code>error</code> detail. </td></tr>
   </table>
   </dd>

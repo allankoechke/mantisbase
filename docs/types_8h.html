@@ -26,8 +26,9 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.2</span>
    </div>
   </td>
  </tr>
@@ -437,8 +438,10 @@ Macros</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:ae160f2b0075e55c0f7c0988279983f78" id="r_ae160f2b0075e55c0f7c0988279983f78"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">mb::HandlerFn</a> = std::function&lt; void(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt;</td></tr>
+<tr class="memdesc:ae160f2b0075e55c0f7c0988279983f78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Standard route handler <code>(request, response)</code>.  <br /></td></tr>
 <tr class="separator:ae160f2b0075e55c0f7c0988279983f78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac74c76fe24192fde8f728c74c624f668" id="r_ac74c76fe24192fde8f728c74c624f668"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">mb::HandlerWithContentReaderFn</a> = std::function&lt; void(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;, <a class="el" href="classmb_1_1MantisContentReader.html">MantisContentReader</a> &amp;)&gt;</td></tr>
+<tr class="memdesc:ac74c76fe24192fde8f728c74c624f668"><td class="mdescLeft">&#160;</td><td class="mdescRight">Route handler with multipart/content reader <code>(request, response, reader)</code>.  <br /></td></tr>
 <tr class="separator:ac74c76fe24192fde8f728c74c624f668"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a833cdb89d0fc9038892f8ba3556c6d12" id="r_a833cdb89d0fc9038892f8ba3556c6d12"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a833cdb89d0fc9038892f8ba3556c6d12">mb::MiddlewareFn</a> = std::function&lt; <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">HandlerResponse</a>(<a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;, <a class="el" href="classmb_1_1MantisResponse.html">MantisResponse</a> &amp;)&gt;</td></tr>
 <tr class="separator:a833cdb89d0fc9038892f8ba3556c6d12"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -449,6 +452,7 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a61ada53e0ce0b4de0072032d07840925" id="r_a61ada53e0ce0b4de0072032d07840925"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a61ada53e0ce0b4de0072032d07840925">mb::Path</a> = std::string</td></tr>
 <tr class="separator:a61ada53e0ce0b4de0072032d07840925"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a418920a172df52fe09c0c81787230888" id="r_a418920a172df52fe09c0c81787230888"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a418920a172df52fe09c0c81787230888">mb::RouteKey</a> = std::pair&lt; <a class="el" href="namespacemb.html#ae79700c1a37575b76080e98b09dfa1cc">Method</a>, <a class="el" href="namespacemb.html#a61ada53e0ce0b4de0072032d07840925">Path</a> &gt;</td></tr>
+<tr class="memdesc:a418920a172df52fe09c0c81787230888"><td class="mdescLeft">&#160;</td><td class="mdescRight">Route lookup key: HTTP method + path pattern.  <br /></td></tr>
 <tr class="separator:a418920a172df52fe09c0c81787230888"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
@@ -456,6 +460,7 @@ Enumerations</h2></td></tr>
 <tr class="memitem:abd2c06555bb4b0872af4290f6c3596e6" id="r_abd2c06555bb4b0872af4290f6c3596e6"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">mb::HandlerResponse</a> { <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a827211270de454ea3e0df8f57995efed">mb::Handled</a>
 , <a class="el" href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6a6fe9e16b804e1ce4ac5868be60615007">mb::Unhandled</a>
  }</td></tr>
+<tr class="memdesc:abd2c06555bb4b0872af4290f6c3596e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Middleware short-circuit result: stop or continue the chain.  <a href="namespacemb.html#abd2c06555bb4b0872af4290f6c3596e6">More...</a><br /></td></tr>
 <tr class="separator:abd2c06555bb4b0872af4290f6c3596e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>

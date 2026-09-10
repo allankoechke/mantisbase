@@ -26,8 +26,9 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.2</span>
    </div>
   </td>
  </tr>
@@ -303,7 +304,7 @@ Middlewares (C++ factories)</h2>
 <div class="fragment"><div class="line">app.router().addRoute(&quot;GET&quot;, &quot;/api/v1/custom/protected&quot;, handler,</div>
 <div class="line">    middlewares.getAuthToken(),</div>
 <div class="line">    middlewares.hydrateContextData()</div>
-<div class="line">);</div>
+<div class="line">);  </div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md303"></a>
 Utils (utility functions)</h2>
 <p>Mantis exposes an object <code>utils</code> which has the following utility functions.</p><ul>

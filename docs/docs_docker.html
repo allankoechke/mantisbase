@@ -26,8 +26,9 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.0</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.2</span>
    </div>
   </td>
  </tr>
@@ -106,7 +107,7 @@ Building and Running</h2>
 Using Dockerfile</h3>
 <p>The repository includes a <code>Dockerfile</code> in the <code>/docker</code> directory. To build and run:</p>
 <div class="fragment"><div class="line"># Build (optionally set MB_VERSION for a specific release)</div>
-<div class="line">docker build -t mantisbase -f docker/Dockerfile --build-arg MB_VERSION=0.4.0 .</div>
+<div class="line">docker build -t mantisbase -f docker/Dockerfile --build-arg MB_VERSION=0.4.2 .</div>
 <div class="line">docker run -p 7070:8080 --rm mantisbase</div>
 </div><!-- fragment --><p>This builds the image and starts the container, exposing MantisBase on port <code>8080</code>. Pass environment variables with <code>-e</code>:</p>
 <div class="fragment"><div class="line">docker run -p 7070:8080 \</div>
@@ -137,7 +138,7 @@ Docker Compose</h2>
 <div class="line"># Required: set MB_JWT_SECRET in .env or export before running</div>
 <div class="line"># Example: echo &quot;MB_JWT_SECRET=$(openssl rand -base64 48)&quot; &gt; .env</div>
 <div class="line">docker compose -f docker-compose.yaml up --build</div>
-</div><!-- fragment --><p>This builds the image (using <code>MB_VERSION</code> build arg, default <code>0.4.0</code>) and starts the container with volume mounts configured. <code>MB_JWT_SECRET</code> <b>must</b> be set outside dev mode - the server refuses to start without it. Set it and any other <code>MB_*</code> variables in a <code>.env</code> file in the same directory, or pass them when running <code>docker compose</code>.</p>
+</div><!-- fragment --><p>This builds the image (using <code>MB_VERSION</code> build arg, default <code>0.4.1</code>) and starts the container with volume mounts configured. <code>MB_JWT_SECRET</code> <b>must</b> be set outside dev mode - the server refuses to start without it. Set it and any other <code>MB_*</code> variables in a <code>.env</code> file in the same directory, or pass them when running <code>docker compose</code>.</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md141"></a>
 Container Hardening</h2>
@@ -159,7 +160,7 @@ Configuration</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>MB_JWT_SECRET</code>   </td><td class="markdownTableBodyNone">JWT secret key for token signing. <b>Required in production</b> (server refuses to start without it when not in dev mode)   </td><td class="markdownTableBodyNone">(dev mode fallback only)    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>MB_VERSION</code>   </td><td class="markdownTableBodyNone">Build-time only: release version to download (Dockerfile <code>ARG</code>)   </td><td class="markdownTableBodyNone"><code>0.4.0</code>    </td></tr>
+<td class="markdownTableBodyNone"><code>MB_VERSION</code>   </td><td class="markdownTableBodyNone">Build-time only: release version to download (Dockerfile <code>ARG</code>)   </td><td class="markdownTableBodyNone"><code>0.4.1</code>    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>MB_DISABLE_FILE_UPLOADS</code>   </td><td class="markdownTableBodyNone">Set to <code>1</code> to disable file uploads (returns 403 on upload attempts)   </td><td class="markdownTableBodyNone"><code>0</code>    </td></tr>
 <tr class="markdownTableRowEven">
@@ -212,7 +213,7 @@ Example: Full Setup with PostgreSQL</h2>
 <div class="line">      context: .</div>
 <div class="line">      dockerfile: docker/Dockerfile</div>
 <div class="line">      args:</div>
-<div class="line">        MB_VERSION: &quot;0.4.0&quot;</div>
+<div class="line">        MB_VERSION: &quot;0.4.2&quot;</div>
 <div class="line">    image: mantisbase:latest</div>
 <div class="line">    restart: unless-stopped</div>
 <div class="line">    ports:</div>

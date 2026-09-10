@@ -11,7 +11,7 @@ var searchData=
   ['handlers_8',['Accessing User Data in Handlers',['../docs_rest_api.html#autotoc_md18',1,'']]],
   ['handlerwithcontentreaderfn_9',['HandlerWithContentReaderFn',['../namespacemb.html#ac74c76fe24192fde8f728c74c624f668',1,'mb']]],
   ['handling_10',['handling',['../docs_healthcheck.html#autotoc_md210',1,'Error Handling'],['../docs_rest_api.html#autotoc_md32',1,'File Handling']]],
-  ['handling_20files_20in_20mantisbase_11',['Handling Files in MantisBase',['../docs_file.html',1,'']]],
+  ['handling_20files_11',['Handling Files',['../docs_file.html',1,'']]],
   ['hardening_12',['Container Hardening',['../docs_docker.html#autotoc_md141',1,'']]],
   ['has_5fmore_13',['has_more',['../structmb_1_1EntityListPage.html#aa367a146631c39c490215960ed426e6d',1,'mb::EntityListPage']]],
   ['hasaccess_14',['hasAccess',['../namespacemb.html#afced397878d63d057f3c8eb3bbd5567f',1,'mb']]],
