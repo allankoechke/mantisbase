@@ -49,6 +49,9 @@ docker/www/
 *.pid
 *.seed
 
+# Benchmark run output (bench/scripts/run_bench.sh)
+bench-results/
+
 docs/
 
 

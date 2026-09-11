@@ -5,18 +5,30 @@
 #include <vector>
 
 #include "mantisbase/mantis.h"
-#include "../common/test_http_client.h"
+#include "bench_fixture.h"
+#include "bench_http_client.h"
 
-extern std::atomic<bool> server_ready;
-extern int bench_port;
+namespace {
+
+inline int benchPort() {
+    return BenchFixture::BenchServer::instance().port();
+}
+
+inline bool ensureServerOrSkip(benchmark::State &state) {
+    auto &server = BenchFixture::BenchServer::instance();
+    if (!server.isReady() && !server.ensureStarted()) {
+        state.SkipWithError("Bench server failed to start");
+        return false;
+    }
+    return true;
+}
+
+} // namespace
 
 static void BM_SequentialInserts(benchmark::State& state) {
-    if (!server_ready.load()) {
-        state.SkipWithError("Server not ready");
-        return;
-    }
+    if (!ensureServerOrSkip(state)) return;
 
-    TestHttp::Client cli("127.0.0.1", bench_port);
+    TestHttp::Client cli("127.0.0.1", benchPort());
     int counter = 0;
 
     for (auto _ : state) {
@@ -35,12 +47,9 @@ static void BM_SequentialInserts(benchmark::State& state) {
 BENCHMARK(BM_SequentialInserts)->Iterations(200);
 
 static void BM_SequentialReads(benchmark::State& state) {
-    if (!server_ready.load()) {
-        state.SkipWithError("Server not ready");
-        return;
-    }
+    if (!ensureServerOrSkip(state)) return;
 
-    TestHttp::Client cli("127.0.0.1", bench_port);
+    TestHttp::Client cli("127.0.0.1", benchPort());
 
     for (auto _ : state) {
         auto res = cli.Get("/api/v1/entities/bench_items?limit=50");
@@ -50,12 +59,10 @@ static void BM_SequentialReads(benchmark::State& state) {
 BENCHMARK(BM_SequentialReads)->Iterations(200);
 
 static void BM_ConcurrentInserts(benchmark::State& state) {
-    if (!server_ready.load()) {
-        state.SkipWithError("Server not ready");
-        return;
-    }
+    if (!ensureServerOrSkip(state)) return;
 
-    const int concurrency = state.range(0);
+    const auto concurrency = state.range(0);
+    const int port = benchPort();
 
     for (auto _ : state) {
         std::vector<std::thread> threads;
@@ -63,14 +70,14 @@ static void BM_ConcurrentInserts(benchmark::State& state) {
         std::atomic<int> counter{0};
 
         for (int i = 0; i < concurrency; ++i) {
-            threads.emplace_back([&success_count, &counter]() {
-                TestHttp::Client cli("127.0.0.1", bench_port);
+            threads.emplace_back([&success_count, &counter, port]() {
+                TestHttp::Client cli("127.0.0.1", port);
                 int id = counter.fetch_add(1);
-                nlohmann::json record = {
+                const nlohmann::json record = {
                     {"title", "concurrent_" + std::to_string(id)},
                     {"value", id}
                 };
-                auto res = cli.Post("/api/v1/entities/bench_items",
+                const auto res = cli.Post("/api/v1/entities/bench_items",
                                     record.dump(), "application/json");
                 if (res && res->status == 201) {
                     success_count.fetch_add(1);
@@ -89,20 +96,18 @@ static void BM_ConcurrentInserts(benchmark::State& state) {
 BENCHMARK(BM_ConcurrentInserts)->Arg(5)->Arg(10)->Arg(25)->Arg(50);
 
 static void BM_ConcurrentReads(benchmark::State& state) {
-    if (!server_ready.load()) {
-        state.SkipWithError("Server not ready");
-        return;
-    }
+    if (!ensureServerOrSkip(state)) return;
 
     const int concurrency = state.range(0);
+    const int port = benchPort();
 
     for (auto _ : state) {
         std::vector<std::thread> threads;
         std::atomic<int> success_count{0};
 
         for (int i = 0; i < concurrency; ++i) {
-            threads.emplace_back([&success_count]() {
-                TestHttp::Client cli("127.0.0.1", bench_port);
+            threads.emplace_back([&success_count, port]() {
+                TestHttp::Client cli("127.0.0.1", port);
                 auto res = cli.Get("/api/v1/entities/bench_items?limit=10");
                 if (res && res->status == 200) {
                     success_count.fetch_add(1);
@@ -121,20 +126,18 @@ static void BM_ConcurrentReads(benchmark::State& state) {
 BENCHMARK(BM_ConcurrentReads)->Arg(5)->Arg(10)->Arg(25)->Arg(50);
 
 static void BM_MixedCRUD(benchmark::State& state) {
-    if (!server_ready.load()) {
-        state.SkipWithError("Server not ready");
-        return;
-    }
+    if (!ensureServerOrSkip(state)) return;
 
     const int concurrency = state.range(0);
+    const int port = benchPort();
 
     for (auto _ : state) {
         std::vector<std::thread> threads;
         std::atomic<int> ops{0};
 
         for (int i = 0; i < concurrency; ++i) {
-            threads.emplace_back([i, &ops]() {
-                TestHttp::Client cli("127.0.0.1", bench_port);
+            threads.emplace_back([i, &ops, port]() {
+                TestHttp::Client cli("127.0.0.1", port);
 
                 if (i % 3 == 0) {
                     const nlohmann::json record = {
