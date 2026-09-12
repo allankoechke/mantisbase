@@ -89,18 +89,7 @@ mkdir -p "${OUT_DIR}"
 # The bench runs an in-process drogon server plus up to ~100 concurrent
 # client loops; each holds several fds, so the 1024 default dies fast with
 # EMFILE (errno=24, trantor LOG_FATAL). Raise the soft limit when we can.
-MIN_FD=16384
-fd_soft="$(ulimit -Sn)"
-if [[ "${fd_soft}" != "unlimited" && "${fd_soft}" -lt "${MIN_FD}" ]]; then
-    fd_hard="$(ulimit -Hn)"
-    if ! ulimit -Sn "${MIN_FD}" 2>/dev/null; then
-        ulimit -Sn "${fd_hard}" 2>/dev/null || true
-    fi
-    echo "fd limit: ${fd_soft} -> $(ulimit -Sn) (hard ${fd_hard})"
-    if [[ "$(ulimit -Sn)" != "unlimited" && "$(ulimit -Sn)" -lt "${MIN_FD}" ]]; then
-        echo "warning: fd limit below ${MIN_FD}; high-concurrency cases may hit EMFILE (errno=24)" >&2
-    fi
-fi
+ulimit -Sn unlimited
 
 TS="$(date +%Y%m%d_%H%M%S)"
 
