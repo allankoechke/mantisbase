@@ -87,7 +87,7 @@ That's it — you have a full backend with auth, realtime, and file uploads in u
 - **Embeddable** — use as a C++ library in your own application → [Embedding Guide](doc/embedding.md)
 - **JavaScript extensions** — extend with custom routes and logic → [Scripting Guide](doc/scripting.md)
 
-![MantisBase Admin Dashboard](doc/mantisbase-admin.png)
+![MantisBase Admin Dashboard](assets/mantisbase-admin.png)
 
 ---
 

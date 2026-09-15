@@ -247,6 +247,13 @@ if (MB_BUILD_TESTS)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif ()
 
+# Add Benchmarks (independent of tests, off by default)
+option(MB_BUILD_BENCHMARKS "Build MantisBase Benchmarks" OFF)
+if (MB_BUILD_BENCHMARKS)
+    message("-- Enabling benchmarks for MantisBase")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bench)
+endif ()
+
 configure_file(
         include/mantisbase/config.hpp.in
         ${CMAKE_CURRENT_SOURCE_DIR}/include/mantisbase/config.hpp
