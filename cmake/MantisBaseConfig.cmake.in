@@ -1,0 +1,135 @@
+# MantisBaseConfig.cmake — find_package(MantisBase) entry point.
+#
+# Shipped inside the mantisbase *-dev.zip at:
+#   <prefix>/lib/cmake/MantisBase/MantisBaseConfig.cmake
+#
+# Layout of the dev package it describes:
+#   <prefix>/include/                  shared headers (mantisbase + portable 3rd-party)
+#   <prefix>/include-linux/            Linux-only generated headers (soci-config.h, wolfssl options.h)
+#   <prefix>/include-windows/          Windows-only generated headers (same set)
+#   <prefix>/lib/<os>/static/<arch>/  libmantisbase.a
+#   <prefix>/lib/<os>/shared/<arch>/  libmantisbase.so (.dll + import lib on Windows)
+#
+# Usage:
+#   find_package(MantisBase REQUIRED)
+#   target_link_libraries(your_app PRIVATE mantisbase::static)  # or mantisbase::shared
+#
+# This file is staged by cmake/package-dev.cmake via configure_file(); @MB_VERSION@
+# is substituted at packaging time.
+
+# Guard against double inclusion.
+if(TARGET mantisbase::static)
+    return()
+endif()
+
+# --- Version ----------------------------------------------------------------
+set(MantisBase_VERSION "@MB_VERSION@")
+
+# --- Locate the dev-package prefix ------------------------------------------
+# This file lives at <prefix>/lib/cmake/MantisBase/MantisBaseConfig.cmake.
+get_filename_component(_MB_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
+
+# --- Detect platform / architecture -----------------------------------------
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(_MB_OS "linux")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(_MB_OS "windows")
+else()
+    message(FATAL_ERROR "MantisBase dev package does not support '${CMAKE_SYSTEM_NAME}'. "
+        "Supported systems: Linux, Windows.")
+endif()
+
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$")
+    set(_MB_ARCH "x86-64")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|ARM64|arm64)$")
+    set(_MB_ARCH "aarch64")
+else()
+    message(FATAL_ERROR "MantisBase dev package does not support architecture "
+        "'${CMAKE_SYSTEM_PROCESSOR}'. Supported: x86-64, aarch64.")
+endif()
+
+# --- Include directories -----------------------------------------------------
+set(_MB_INC "${_MB_PREFIX}/include")
+set(_MB_INC_OS "${_MB_PREFIX}/include-${_MB_OS}")
+if(NOT EXISTS "${_MB_INC}/mantisbase/mantisbase.h")
+    message(FATAL_ERROR "MantisBase headers not found under '${_MB_INC}'. "
+        "Is the dev package extracted intact?")
+endif()
+if(NOT EXISTS "${_MB_INC_OS}/soci/soci-config.h")
+    message(FATAL_ERROR "MantisBase platform headers not found under '${_MB_INC_OS}'. "
+        "Is the dev package extracted intact?")
+endif()
+set(MantisBase_INCLUDE_DIRS "${_MB_INC}" "${_MB_INC_OS}")
+
+# --- System dependencies -----------------------------------------------------
+# libmantisbase.a is a static archive: its own dependencies are not recorded,
+# so consumers must link these explicitly.
+find_package(Threads REQUIRED)
+set(_MB_SYSTEM_LIBS Threads::Threads)
+if(_MB_OS STREQUAL "linux")
+    # PostgreSQL client (soci_postgresql) and uuid (drogon) come from the
+    # system package manager:  sudo apt-get install -y libpq-dev uuid-dev
+    find_library(_MB_PQ_LIB pq)
+    if(NOT _MB_PQ_LIB)
+        message(FATAL_ERROR "MantisBase requires libpq (PostgreSQL client). "
+            "Install it with: sudo apt-get install -y libpq-dev")
+    endif()
+    find_library(_MB_UUID_LIB uuid)
+    if(NOT _MB_UUID_LIB)
+        message(FATAL_ERROR "MantisBase requires libuuid. "
+            "Install it with: sudo apt-get install -y uuid-dev")
+    endif()
+    list(APPEND _MB_SYSTEM_LIBS ${_MB_PQ_LIB} ${_MB_UUID_LIB} ${CMAKE_DL_LIBS})
+elseif(_MB_OS STREQUAL "windows")
+    # MinGW system libraries used by MantisBase (sockets, RPC/UUID, IP helper, crypto).
+    list(APPEND _MB_SYSTEM_LIBS ws2_32 rpcrt4 iphlpapi crypt32)
+endif()
+
+# --- Imported targets ---------------------------------------------------------
+set(_MB_STATIC_LIB "${_MB_PREFIX}/lib/${_MB_OS}/static/${_MB_ARCH}/libmantisbase.a")
+if(NOT EXISTS "${_MB_STATIC_LIB}")
+    message(FATAL_ERROR "MantisBase static library not found: '${_MB_STATIC_LIB}'. "
+        "This release may not ship binaries for ${_MB_OS}/${_MB_ARCH}.")
+endif()
+add_library(mantisbase::static STATIC IMPORTED)
+set_target_properties(mantisbase::static PROPERTIES
+    IMPORTED_LOCATION "${_MB_STATIC_LIB}"
+    INTERFACE_INCLUDE_DIRECTORIES "${MantisBase_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "${_MB_SYSTEM_LIBS}"
+)
+
+if(_MB_OS STREQUAL "linux")
+    set(_MB_SHARED_LIB "${_MB_PREFIX}/lib/${_MB_OS}/shared/${_MB_ARCH}/libmantisbase.so")
+else()
+    set(_MB_SHARED_LIB "${_MB_PREFIX}/lib/${_MB_OS}/shared/${_MB_ARCH}/libmantisbase.dll")
+    set(_MB_SHARED_IMPLIB "${_MB_PREFIX}/lib/${_MB_OS}/shared/${_MB_ARCH}/libmantisbase.dll.a")
+endif()
+if(EXISTS "${_MB_SHARED_LIB}")
+    add_library(mantisbase::shared SHARED IMPORTED)
+    set_target_properties(mantisbase::shared PROPERTIES
+        IMPORTED_LOCATION "${_MB_SHARED_LIB}"
+        INTERFACE_INCLUDE_DIRECTORIES "${MantisBase_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${_MB_SYSTEM_LIBS}"
+    )
+    if(_MB_OS STREQUAL "windows" AND EXISTS "${_MB_SHARED_IMPLIB}")
+        set_target_properties(mantisbase::shared PROPERTIES
+            IMPORTED_IMPLIB "${_MB_SHARED_IMPLIB}"
+        )
+    endif()
+endif()
+
+# --- Legacy variables (for non-target-based consumers) -------------------------
+set(MantisBase_LIBRARIES mantisbase::static)
+set(MantisBase_FOUND TRUE)
+
+unset(_MB_PREFIX)
+unset(_MB_OS)
+unset(_MB_ARCH)
+unset(_MB_INC)
+unset(_MB_INC_OS)
+unset(_MB_SYSTEM_LIBS)
+unset(_MB_STATIC_LIB)
+unset(_MB_SHARED_LIB)
+unset(_MB_SHARED_IMPLIB)
+unset(_MB_PQ_LIB)
+unset(_MB_UUID_LIB)

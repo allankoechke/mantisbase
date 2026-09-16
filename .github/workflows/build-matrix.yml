@@ -186,6 +186,19 @@ jobs:
             mkdir -p lib-staging/generated-include/mantisbase
             cp "${{ steps.strings.outputs.build-output-dir }}/include/mantisbase/config.hpp" \
               lib-staging/generated-include/mantisbase/config.hpp
+            # Generated 3rd-party headers for the dev package (consumed by
+            # cmake/package-dev.cmake). Gated to one arch per platform so the
+            # merged artifact has a single deterministic copy.
+            GEN="lib-staging/generated/${{ matrix.lib_platform }}"
+            mkdir -p "$GEN/drogon" "$GEN/trantor" "$GEN/soci" "$GEN/wolfssl"
+            cp "${{ steps.strings.outputs.build-output-dir }}/3rdParty/drogon/exports/drogon/exports.h" \
+              "$GEN/drogon/exports.h"
+            cp "${{ steps.strings.outputs.build-output-dir }}/3rdParty/drogon/trantor/exports/trantor/exports.h" \
+              "$GEN/trantor/exports.h"
+            cp "${{ steps.strings.outputs.build-output-dir }}/include/soci/soci-config.h" \
+              "$GEN/soci/soci-config.h"
+            cp "${{ steps.strings.outputs.build-output-dir }}/3rdParty/wolfssl/wolfssl/options.h" \
+              "$GEN/wolfssl/options.h"
           fi
 
       - name: Upload library artifact (Linux)
@@ -207,6 +220,14 @@ jobs:
           Copy-Item "build\lib\libmantisbase.dll.a" -Destination "$Staging\shared\${{ matrix.arch_label }}\"
           New-Item -ItemType Directory -Force -Path "lib-staging\generated-include\mantisbase" | Out-Null
           Copy-Item "build\include\mantisbase\config.hpp" -Destination "lib-staging\generated-include\mantisbase\"
+          # Generated 3rd-party headers for the dev package (consumed by
+          # cmake/package-dev.cmake). See the Linux stage step for details.
+          $Gen = "lib-staging\generated\${{ matrix.lib_platform }}"
+          New-Item -ItemType Directory -Force -Path "$Gen\drogon", "$Gen\trantor", "$Gen\soci", "$Gen\wolfssl" | Out-Null
+          Copy-Item "build\3rdParty\drogon\exports\drogon\exports.h" -Destination "$Gen\drogon\"
+          Copy-Item "build\3rdParty\drogon\trantor\exports\trantor\exports.h" -Destination "$Gen\trantor\"
+          Copy-Item "build\include\soci\soci-config.h" -Destination "$Gen\soci\"
+          Copy-Item "build\3rdParty\wolfssl\wolfssl\options.h" -Destination "$Gen\wolfssl\"
 
       - name: Upload library artifact (Windows)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
