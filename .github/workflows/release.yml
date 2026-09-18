@@ -19,6 +19,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # package-dev.cmake copies 3rd-party headers straight from the source tree.
+          submodules: recursive
+          fetch-depth: 1
 
       - name: Download library artifacts
         uses: actions/download-artifact@v4
@@ -27,19 +31,26 @@ jobs:
           path: ./dev-staging/
           merge-multiple: true
 
-      - name: Assemble include directory
+      - name: Download headers artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: mantisbase_${{ github.ref_name }}_*-headers
+          path: ./dev-headers/
+
+      - name: Assemble dev package
         run: |
-          mkdir -p dev-staging/include
-          cp -r include/mantisbase dev-staging/include/mantisbase
-          cp dev-staging/generated-include/mantisbase/config.hpp dev-staging/include/mantisbase/config.hpp
-          rm -rf dev-staging/generated-include
-          rm dev-staging/include/mantisbase/config.hpp.in
-          echo ${{ github.ref_name }} > dev-staging/VERSION
-          cp .github/release/README-dev-libs.md dev-staging/README.md
+          cmake \
+            -DMB_SOURCE_DIR=${{ github.workspace }} \
+            -DMB_VERSION_TAG=${{ github.ref_name }} \
+            -DMB_LIB_STAGING_DIR=${{ github.workspace }}/dev-staging \
+            -DMB_LINUX_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_linux-x86_64-headers/include \
+            -DMB_WINDOWS_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_windows-x86_64-headers/include \
+            -DMB_OUTPUT_DIR=${{ github.workspace }}/dev-package \
+            -P cmake/package-dev.cmake
 
       - name: Create dev zip
         run: |
-          cd dev-staging && zip -r ../mantisbase_${{ github.ref_name }}-dev.zip lib/ include/ VERSION README.md
+          cd dev-package && zip -r ../mantisbase_${{ github.ref_name }}-dev.zip lib/ include-linux/ include-windows/ VERSION README.md
 
       - name: Upload dev zip artifact
         uses: actions/upload-artifact@v4

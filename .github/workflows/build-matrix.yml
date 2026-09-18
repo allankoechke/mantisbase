@@ -129,6 +129,36 @@ jobs:
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release # ${{ matrix.build_type }}
 
+      - name: Check dev headers (Linux)
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          # Coalesce the dev-package header tree, then prove every public
+          # header compiles against it. Fails the build (incl. PRs) if a
+          # public header reaches a third-party header that is not bundled.
+          CHECK_DIR="${{ steps.strings.outputs.build-output-dir }}/dev-headers-check"
+          cmake --install ${{ steps.strings.outputs.build-output-dir }} \
+            --component mb-dev-headers --prefix "$CHECK_DIR"
+          pushd ${{ github.workspace }} > /dev/null
+          { for f in $(find include/mantisbase \( -name '*.h' -o -name '*.hpp' \)); do
+              echo "#include <${f#include/}>"
+            done
+            echo '#include <mantisbase/config.hpp>'
+            echo 'int main() { return 0; }'
+          } | sort -u > "$CHECK_DIR/smoke.cpp"
+          popd > /dev/null
+          g++ -std=c++20 -fsyntax-only "$CHECK_DIR/smoke.cpp" -I"$CHECK_DIR/include"
+
+      - name: Check dev headers (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          # Validate the coalescing rules on Windows (compile check runs on Linux).
+          cmake --install "${{ steps.strings.outputs.build-output-dir }}" --component mb-dev-headers --prefix "${{ steps.strings.outputs.build-output-dir }}/dev-headers-check"
+          if (-not (Test-Path "${{ steps.strings.outputs.build-output-dir }}/dev-headers-check/include/mantisbase/mantisbase.h")) { throw "coalesced tree missing mantisbase headers" }
+          if (-not (Test-Path "${{ steps.strings.outputs.build-output-dir }}/dev-headers-check/include/soci/soci-config.h")) { throw "coalesced tree missing soci-config.h" }
+          if (-not (Test-Path "${{ steps.strings.outputs.build-output-dir }}/dev-headers-check/include/wolfssl/options.h")) { throw "coalesced tree missing wolfssl options.h" }
+
       - name: Test
         # Disable running tests on arm until we firgure out ASAN issues there
         if: matrix.arch != 'aarch64'
@@ -195,6 +225,22 @@ jobs:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-lib
           path: lib-staging/
 
+      - name: Stage dev headers (Linux)
+        # One coalesced tree per OS (gated to x86_64); consumed by
+        # cmake/package-dev.cmake in the release workflow.
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest' && matrix.arch == 'x86_64'
+        shell: bash
+        run: |
+          cmake --install ${{ steps.strings.outputs.build-output-dir }} \
+            --component mb-dev-headers --prefix headers-staging
+
+      - name: Upload headers artifact (Linux)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest' && matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-headers
+          path: headers-staging/
+
       - name: Stage library files (Windows)
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
         shell: pwsh
@@ -214,6 +260,19 @@ jobs:
         with:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-lib
           path: lib-staging\
+
+      - name: Stage dev headers (Windows)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          cmake --install "${{ steps.strings.outputs.build-output-dir }}" --component mb-dev-headers --prefix headers-staging
+
+      - name: Upload headers artifact (Windows)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-headers
+          path: headers-staging\
 
   scripting:
     name: Build with scripting (linux-x86_64)

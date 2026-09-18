@@ -1,6 +1,6 @@
 # MantisBase Developer Library Package
 
-This archive contains prebuilt MantisBase static and shared libraries, headers, and the generated `config.hpp` for embedding MantisBase in your C++ application.
+This archive contains prebuilt MantisBase static and shared libraries, public headers, bundled third-party headers, and a CMake package config for embedding MantisBase in your C++ application.
 
 ## Layout
 
@@ -11,27 +11,89 @@ lib/
     shared/<architecture>/libmantisbase.so
   windows/
     static/<architecture>/libmantisbase.a
-    shared/<architecture>/libmantisbase.dll
-    shared/<architecture>/libmantisbase.dll.a
-include/mantisbase/   # Public headers
-VERSION                 # Release tag (e.g. v0.4.0)
+    shared/<architecture>/libmantisbase.dll (+ import lib libmantisbase.dll.a)
+  cmake/MantisBase/
+    MantisBaseConfig.cmake          # find_package(MantisBase) entry point
+    MantisBaseConfigVersion.cmake   # version matching
+include-linux/           # Full header tree for Linux: public mantisbase
+                         # headers + bundled 3rd-party headers (argparse,
+                         # drogon, trantor, nlohmann/json, jsoncpp, soci,
+                         # spdlog, fmt, dukglue, duktape, wolfssl, ...) +
+                         # Linux-generated headers
+include-windows/         # Same, with Windows-generated headers
+VERSION                  # Release tag (e.g. v0.4.0)
 ```
 
 Architectures included in this release depend on the build matrix (typically `x86-64` and `aarch64` for Linux, `x86-64` for Windows).
 
-## Quick integration (CMake)
+Each `include-<os>/` tree is complete for its OS, so add only the one matching
+your platform to the header search path. The per-OS split exists because a few
+headers are generated from build options and differ per OS (`soci-config.h`,
+wolfssl `options.h`).
 
-Link against the static library for a single-binary deployment, or the shared library if you prefer dynamic linking:
+## System prerequisites (Linux)
 
-```cmake
-# Example: Linux x86-64 static
-target_include_directories(your_app PRIVATE path/to/include)
-target_link_libraries(your_app PRIVATE
-  path/to/lib/linux/static/x86-64/libmantisbase.a
-)
+The static library does not bundle system dependencies. Install them with:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y libpq-dev uuid-dev
 ```
 
-On Windows with MinGW, also link system libraries used by MantisBase: `ws2_32`, `rpcrt4`, `iphlpapi`, `crypt32`.
+Runtime shared libraries on Debian/Ubuntu are `libpq5` and `libuuid1` (see `docker/Dockerfile` in the source repo).
+
+## Quick integration (CMake, recommended)
+
+Point CMake at the extracted package and use the imported targets. The config
+selects the right `lib/<os>/…/<arch>/` binary for your toolchain and appends
+the required system libraries automatically (on Windows: `ws2_32`, `rpcrt4`,
+`iphlpapi`, `crypt32`):
+
+```cmake
+cmake_minimum_required(VERSION 3.22)
+project(my_app)
+
+# Tell CMake where the dev package lives:
+#   cmake -B build -DCMAKE_PREFIX_PATH=/path/to/mantisbase-dev
+find_package(MantisBase REQUIRED)
+
+add_executable(my_app main.cpp)
+# Static is typical for a single-binary deployment. Or mantisbase::shared.
+target_link_libraries(my_app PRIVATE mantisbase::static)
+```
+
+`main.cpp`:
+
+```cpp
+#include <mantisbase/mantisbase.h>
+
+int main(int argc, char* argv[])
+{
+    auto app = mb::MantisBase::create(argc, argv);
+    return app->run();
+}
+```
+
+`find_package` accepts a version: `find_package(MantisBase 0.4 REQUIRED)`.
+Available targets: `mantisbase::static`, `mantisbase::shared`
+(plus legacy variables `MantisBase_INCLUDE_DIRS`, `MantisBase_LIBRARIES`).
+
+## Manual integration (without CMake)
+
+Add both include roots and link the matching prebuilt library plus its system
+dependencies:
+
+```bash
+# Example: Linux x86-64, static
+g++ -std=c++20 main.cpp \
+  -I path/to/include-linux \
+  path/to/lib/linux/static/x86-64/libmantisbase.a \
+  -lpq -luuid -ldl -lpthread \
+  -o my_app
+```
+
+On Windows with MinGW, use `include-windows` and append
+`-lws2_32 -lrpcrt4 -liphlpapi -lcrypt32`.
 
 See the [Embedding Guide](https://github.com/allankoechke/mantisbase/blob/master/doc/embedding.md) for full integration steps, lifecycle (`MantisBase::create()`), and PostgreSQL runtime notes on Linux.
 
