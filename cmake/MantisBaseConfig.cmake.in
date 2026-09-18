@@ -4,9 +4,8 @@
 #   <prefix>/lib/cmake/MantisBase/MantisBaseConfig.cmake
 #
 # Layout of the dev package it describes:
-#   <prefix>/include/                  shared headers (mantisbase + portable 3rd-party)
-#   <prefix>/include-linux/            Linux-only generated headers (soci-config.h, wolfssl options.h)
-#   <prefix>/include-windows/          Windows-only generated headers (same set)
+#   <prefix>/include-<os>/            full header tree for this OS (mantisbase
+#     headers + bundled 3rd-party headers + that platform's generated headers)
 #   <prefix>/lib/<os>/static/<arch>/  libmantisbase.a
 #   <prefix>/lib/<os>/shared/<arch>/  libmantisbase.so (.dll + import lib on Windows)
 #
@@ -49,17 +48,18 @@ else()
 endif()
 
 # --- Include directories -----------------------------------------------------
-set(_MB_INC "${_MB_PREFIX}/include")
-set(_MB_INC_OS "${_MB_PREFIX}/include-${_MB_OS}")
-if(NOT EXISTS "${_MB_INC}/mantisbase/mantisbase.h")
-    message(FATAL_ERROR "MantisBase headers not found under '${_MB_INC}'. "
+# One complete tree per OS (coalesced at build time by
+# cmake/coalesce-headers.cmake), so platform-generated headers such as
+# soci-config.h and wolfssl/options.h always match the shipped binaries.
+set(MantisBase_INCLUDE_DIRS "${_MB_PREFIX}/include-${_MB_OS}")
+if(NOT EXISTS "${MantisBase_INCLUDE_DIRS}/mantisbase/mantisbase.h")
+    message(FATAL_ERROR "MantisBase headers not found under '${MantisBase_INCLUDE_DIRS}'. "
         "Is the dev package extracted intact?")
 endif()
-if(NOT EXISTS "${_MB_INC_OS}/soci/soci-config.h")
-    message(FATAL_ERROR "MantisBase platform headers not found under '${_MB_INC_OS}'. "
+if(NOT EXISTS "${MantisBase_INCLUDE_DIRS}/soci/soci-config.h")
+    message(FATAL_ERROR "MantisBase platform headers not found under '${MantisBase_INCLUDE_DIRS}'. "
         "Is the dev package extracted intact?")
 endif()
-set(MantisBase_INCLUDE_DIRS "${_MB_INC}" "${_MB_INC_OS}")
 
 # --- System dependencies -----------------------------------------------------
 # libmantisbase.a is a static archive: its own dependencies are not recorded,
@@ -85,6 +85,17 @@ elseif(_MB_OS STREQUAL "windows")
     list(APPEND _MB_SYSTEM_LIBS ws2_32 rpcrt4 iphlpapi crypt32)
 endif()
 
+# --- Compile definitions -------------------------------------------------------
+# These mirror the PUBLIC definitions of the in-tree mantisbase target, which
+# affect public headers and therefore every consumer translation unit:
+# - MANTISBASE_STATIC empties MANTISBASE_API in export.h (static target only;
+#   the shared target must NOT define it, so Windows consumers get dllimport).
+# - EXTERNAL_OPTS_OPENVPN makes wolfssl/wolfcrypt/settings.h pull in the
+#   matching wolfssl/options.h from the include-<os>/ tree instead of
+#   falling back to unconfigured defaults (ABI match with the prebuilt lib).
+set(_MB_STATIC_DEFS MANTISBASE_STATIC EXTERNAL_OPTS_OPENVPN)
+set(_MB_SHARED_DEFS EXTERNAL_OPTS_OPENVPN)
+
 # --- Imported targets ---------------------------------------------------------
 set(_MB_STATIC_LIB "${_MB_PREFIX}/lib/${_MB_OS}/static/${_MB_ARCH}/libmantisbase.a")
 if(NOT EXISTS "${_MB_STATIC_LIB}")
@@ -96,6 +107,7 @@ set_target_properties(mantisbase::static PROPERTIES
     IMPORTED_LOCATION "${_MB_STATIC_LIB}"
     INTERFACE_INCLUDE_DIRECTORIES "${MantisBase_INCLUDE_DIRS}"
     INTERFACE_LINK_LIBRARIES "${_MB_SYSTEM_LIBS}"
+    INTERFACE_COMPILE_DEFINITIONS "${_MB_STATIC_DEFS}"
 )
 
 if(_MB_OS STREQUAL "linux")
@@ -110,6 +122,7 @@ if(EXISTS "${_MB_SHARED_LIB}")
         IMPORTED_LOCATION "${_MB_SHARED_LIB}"
         INTERFACE_INCLUDE_DIRECTORIES "${MantisBase_INCLUDE_DIRS}"
         INTERFACE_LINK_LIBRARIES "${_MB_SYSTEM_LIBS}"
+        INTERFACE_COMPILE_DEFINITIONS "${_MB_SHARED_DEFS}"
     )
     if(_MB_OS STREQUAL "windows" AND EXISTS "${_MB_SHARED_IMPLIB}")
         set_target_properties(mantisbase::shared PROPERTIES
@@ -125,9 +138,9 @@ set(MantisBase_FOUND TRUE)
 unset(_MB_PREFIX)
 unset(_MB_OS)
 unset(_MB_ARCH)
-unset(_MB_INC)
-unset(_MB_INC_OS)
 unset(_MB_SYSTEM_LIBS)
+unset(_MB_STATIC_DEFS)
+unset(_MB_SHARED_DEFS)
 unset(_MB_STATIC_LIB)
 unset(_MB_SHARED_LIB)
 unset(_MB_SHARED_IMPLIB)

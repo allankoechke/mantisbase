@@ -31,17 +31,26 @@ jobs:
           path: ./dev-staging/
           merge-multiple: true
 
+      - name: Download headers artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: mantisbase_${{ github.ref_name }}_*-headers
+          path: ./dev-headers/
+
       - name: Assemble dev package
         run: |
-          cmake -P cmake/package-dev.cmake \
+          cmake \
             -DMB_SOURCE_DIR=${{ github.workspace }} \
             -DMB_VERSION_TAG=${{ github.ref_name }} \
             -DMB_LIB_STAGING_DIR=${{ github.workspace }}/dev-staging \
-            -DMB_OUTPUT_DIR=${{ github.workspace }}/dev-package
+            -DMB_LINUX_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_linux-x86_64-headers/include \
+            -DMB_WINDOWS_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_windows-x86_64-headers/include \
+            -DMB_OUTPUT_DIR=${{ github.workspace }}/dev-package \
+            -P cmake/package-dev.cmake
 
       - name: Create dev zip
         run: |
-          cd dev-package && zip -r ../mantisbase_${{ github.ref_name }}-dev.zip lib/ include/ include-linux/ include-windows/ VERSION README.md
+          cd dev-package && zip -r ../mantisbase_${{ github.ref_name }}-dev.zip lib/ include-linux/ include-windows/ VERSION README.md
 
       - name: Upload dev zip artifact
         uses: actions/upload-artifact@v4

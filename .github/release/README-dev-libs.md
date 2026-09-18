@@ -15,19 +15,21 @@ lib/
   cmake/MantisBase/
     MantisBaseConfig.cmake          # find_package(MantisBase) entry point
     MantisBaseConfigVersion.cmake   # version matching
-include/                 # Public mantisbase headers + bundled 3rd-party headers
-                         # (argparse, drogon, trantor, nlohmann/json, jsoncpp,
-                         #  soci, spdlog, fmt, dukglue, duktape, wolfssl, ...)
-include-linux/           # Linux-generated headers (soci-config.h, wolfssl options.h)
-include-windows/         # Windows-generated headers (same set)
+include-linux/           # Full header tree for Linux: public mantisbase
+                         # headers + bundled 3rd-party headers (argparse,
+                         # drogon, trantor, nlohmann/json, jsoncpp, soci,
+                         # spdlog, fmt, dukglue, duktape, wolfssl, ...) +
+                         # Linux-generated headers
+include-windows/         # Same, with Windows-generated headers
 VERSION                  # Release tag (e.g. v0.4.0)
 ```
 
 Architectures included in this release depend on the build matrix (typically `x86-64` and `aarch64` for Linux, `x86-64` for Windows).
 
-The `include-<os>/` overlay exists because a few headers are generated from build
-options and differ per OS. Add **both** `include/` and the matching
-`include-<os>/` directory to your compiler's header search path.
+Each `include-<os>/` tree is complete for its OS, so add only the one matching
+your platform to the header search path. The per-OS split exists because a few
+headers are generated from build options and differ per OS (`soci-config.h`,
+wolfssl `options.h`).
 
 ## System prerequisites (Linux)
 
@@ -84,7 +86,7 @@ dependencies:
 ```bash
 # Example: Linux x86-64, static
 g++ -std=c++20 main.cpp \
-  -I path/to/include -I path/to/include-linux \
+  -I path/to/include-linux \
   path/to/lib/linux/static/x86-64/libmantisbase.a \
   -lpq -luuid -ldl -lpthread \
   -o my_app

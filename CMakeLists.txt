@@ -294,3 +294,8 @@ if(TARGET mantisbase-dll)
         endif()
     endif()
 endif()
+
+# Header install rules for the developer package (`cmake --install <build>
+# --component mb-dev-headers`). Kept last so every path they reference is
+# already defined above.
+include(cmake/coalesce-headers.cmake)

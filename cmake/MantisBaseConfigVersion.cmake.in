@@ -1,18 +1,23 @@
 # Version companion for MantisBaseConfig.cmake (find_package version matching).
-# @MB_VERSION_MAJOR@ / @MB_VERSION_MINOR@ are substituted at packaging time;
-# PACKAGE_FIND_VERSION* variables are provided by find_package().
+#
+# @MB_VERSION@ is the full release string (e.g. "0.4.3" or "0.4.3-rc.1").
+# Compatibility is decided on the numeric major.minor.patch triple so that a
+# prerelease suffix never poisons the comparison; EXACT requests still compare
+# the full string. Requested versions must be plain numeric dotted versions,
+# e.g. find_package(MantisBase 0.4 REQUIRED).
 set(PACKAGE_VERSION "@MB_VERSION@")
+set(_MB_PKG_TRIPLE "@MB_VERSION_MAJOR@.@MB_VERSION_MINOR@.@MB_VERSION_PATCH@")
 set(_MB_PKG_MAJOR "@MB_VERSION_MAJOR@")
 set(_MB_PKG_MINOR "@MB_VERSION_MINOR@")
 
-if(PACKAGE_FIND_VERSION VERSION_EQUAL PACKAGE_VERSION)
+if(PACKAGE_VERSION VERSION_EQUAL PACKAGE_FIND_VERSION)
     set(PACKAGE_VERSION_EXACT TRUE)
 endif()
 
 if(NOT PACKAGE_FIND_VERSION)
     # No version requested: any version is compatible.
     set(PACKAGE_VERSION_COMPATIBLE TRUE)
-elseif(PACKAGE_VERSION VERSION_LESS PACKAGE_FIND_VERSION)
+elseif(_MB_PKG_TRIPLE VERSION_LESS PACKAGE_FIND_VERSION)
     set(PACKAGE_VERSION_COMPATIBLE FALSE)
 elseif(_MB_PKG_MAJOR GREATER 0)
     # >= 1.0 (semver): same major version is compatible.
@@ -31,5 +36,6 @@ else()
     endif()
 endif()
 
+unset(_MB_PKG_TRIPLE)
 unset(_MB_PKG_MAJOR)
 unset(_MB_PKG_MINOR)
