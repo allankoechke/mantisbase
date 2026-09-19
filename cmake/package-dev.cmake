@@ -1,4 +1,4 @@
-# package-dev.cmake — assemble the mantisbase developer package.
+# package-dev.cmake — assemble the per-OS mantisbase developer packages.
 #
 # Run from the release workflow (or locally) with -D options BEFORE -P:
 #   cmake \
@@ -12,31 +12,33 @@
 #
 # Optional:
 #   -DMB_VERSION=0.4.3              (default: MB_VERSION_TAG with leading 'v' stripped)
-#   -DMB_EXPECT_PLATFORMS="linux;windows"  (default: both; platforms whose
-#     prebuilt libs must be present)
+#   -DMB_PLATFORMS="linux;windows"  (default: both; platforms to assemble)
 #
 # Inputs:
-# - <lib staging>/lib/<os>/static|shared/<arch>/libmantisbase.*  (untouched
-#   flow from build-matrix.yml; this script never alters library shipping)
+# - <lib staging>/<os>/libs/<arch>/libmantisbase.so
+#   (<os>/libs/<arch>/libmantisbase.dll + libmantisbase.dll.a on Windows)
+#   where <arch> is x86 or arm (see pkg_arch in build-matrix.yml).
+#   Only shared libraries are shipped — no static archives.
 # - <linux/windows headers>: the per-platform trees produced in each build by
 #   `cmake --install <build> --component mb-dev-headers`
 #   (see cmake/coalesce-headers.cmake). Each is a FULL include tree for its
 #   OS — no shared/overlay split, so platform-generated headers
 #   (soci-config.h, wolfssl options.h) can never leak across platforms.
 #
-# Output layout:
-#   <out>/include-linux/            full Linux header tree
-#   <out>/include-windows/          full Windows header tree
-#   <out>/lib/                      prebuilt libraries (copied from staging)
-#   <out>/lib/cmake/MantisBase/     MantisBaseConfig.cmake + version file
-#   <out>/VERSION  <out>/README.md
+# Output layout (one directory per OS, zipped separately by release.yml):
+#   <out>/<os>/CMakeLists.txt         add_subdirectory() entry point
+#   <out>/<os>/README.md              quick start (from cmake/dev-package/)
+#   <out>/<os>/VERSION                release tag
+#   <out>/<os>/include/               full header tree for this OS
+#   <out>/<os>/libs/<arch>/           prebuilt shared library
+#   <out>/<os>/lib/cmake/MantisBase/  MantisBaseConfig.cmake + version file
 #
 # Design notes:
 # - Only headers reachable from the public API (include/mantisbase/**) are
 #   coalesced at build time. jwt-cpp, bcrypt-cpp, zlib and mbs are compiled
 #   into the shipped libraries and never #included by public headers.
 # - libpq-fe.h / uuid.h are system headers (libpq-dev, uuid-dev); they are
-#   documented in README-dev-libs.md, not bundled.
+#   documented in the package README, not bundled.
 
 cmake_minimum_required(VERSION 3.22)
 
@@ -50,8 +52,8 @@ endforeach()
 if(NOT DEFINED MB_VERSION OR "${MB_VERSION}" STREQUAL "")
     string(REGEX REPLACE "^v" "" MB_VERSION "${MB_VERSION_TAG}")
 endif()
-if(NOT DEFINED MB_EXPECT_PLATFORMS OR "${MB_EXPECT_PLATFORMS}" STREQUAL "")
-    set(MB_EXPECT_PLATFORMS "linux;windows")
+if(NOT DEFINED MB_PLATFORMS OR "${MB_PLATFORMS}" STREQUAL "")
+    set(MB_PLATFORMS "linux;windows")
 endif()
 
 # Numeric components for MantisBaseConfigVersion.cmake.in. A trailing
@@ -77,7 +79,7 @@ foreach(_var _SRC _STAGING _OUT MB_LINUX_HEADERS_DIR MB_WINDOWS_HEADERS_DIR)
     get_filename_component(${_var} "${${_var}}" ABSOLUTE)
 endforeach()
 
-message(STATUS "MantisBase dev package ${MB_VERSION_TAG} -> ${_OUT}")
+message(STATUS "MantisBase dev packages ${MB_VERSION_TAG} -> ${_OUT}")
 
 # --- Helpers -----------------------------------------------------------------
 macro(_require_file path hint)
@@ -92,15 +94,18 @@ macro(_require_dir path hint)
     endif()
 endmacro()
 
-# --- 1. Per-platform header trees -----------------------------------------------
-# Each tree is complete for its OS; assert the load-bearing files so a
-# half-empty tree fails loudly instead of shipping a broken package.
+# --- Per-OS packages ------------------------------------------------------------
 set(_TREE_HINT "Run `cmake --install <build> --component mb-dev-headers` in that "
     "platform's build first; see cmake/coalesce-headers.cmake.")
+set(_LIB_HINT "The *-lib artifacts from build-matrix.yml must stage "
+    "<os>/libs/<arch>/ shared libraries first (shared only, no static).")
 
-foreach(_os linux windows)
+foreach(_os ${MB_PLATFORMS})
     string(TOUPPER "${_os}" _OS)
     set(_tree "${MB_${_OS}_HEADERS_DIR}")
+    set(_pkg "${_OUT}/${_os}")
+
+    # 1. Headers (full tree for this OS).
     _require_dir("${_tree}" "${_TREE_HINT}")
     foreach(_probe
             mantisbase/mantisbase.h mantisbase/config.hpp
@@ -113,41 +118,55 @@ foreach(_os linux windows)
             wolfssl/wolfio.h wolfssl/options.h)
         _require_file("${_tree}/${_probe}" "${_TREE_HINT}")
     endforeach()
-    file(COPY "${_tree}/" DESTINATION "${_OUT}/include-${_os}")
-    message(STATUS "  headers [${_os}]: ${_tree} -> ${_OUT}/include-${_os}")
+    file(COPY "${_tree}/" DESTINATION "${_pkg}/include")
+    message(STATUS "  [${_os}] headers: ${_tree} -> ${_pkg}/include")
+
+    # 2. Shared libraries (one folder per architecture).
+    _require_dir("${_STAGING}/${_os}/libs" "${_LIB_HINT}")
+    file(COPY "${_STAGING}/${_os}/libs/" DESTINATION "${_pkg}/libs")
+    file(GLOB _arch_dirs RELATIVE "${_pkg}/libs" "${_pkg}/libs/*")
+    if("${_arch_dirs}" STREQUAL "")
+        message(FATAL_ERROR "No architecture folders under ${_pkg}/libs/ — empty libs dir?")
+    endif()
+    foreach(_arch IN LISTS _arch_dirs)
+        if(_os STREQUAL "windows")
+            _require_file("${_pkg}/libs/${_arch}/libmantisbase.dll" "${_LIB_HINT}")
+            _require_file("${_pkg}/libs/${_arch}/libmantisbase.dll.a" "${_LIB_HINT}")
+        else()
+            _require_file("${_pkg}/libs/${_arch}/libmantisbase.so" "${_LIB_HINT}")
+        endif()
+    endforeach()
+    message(STATUS "  [${_os}] libs: arches ${_arch_dirs}")
+
+    # 3. CMake integration entry point + quick readme + version.
+    file(COPY "${_SRC}/cmake/dev-package/CMakeLists.txt" DESTINATION "${_pkg}")
+    if(_os STREQUAL "windows")
+        set(MB_OS "windows")
+        set(MB_OS_PRETTY "Windows")
+        set(MB_LIB_FILE "libmantisbase.dll (+ import lib libmantisbase.dll.a)")
+        set(MB_PREREQS "No system packages required. On MinGW the socket/RPC/IP-helper/crypto system libraries (`ws2_32`, `rpcrt4`, `iphlpapi`, `crypt32`) are linked automatically.")
+        set(MB_MANUAL "Add `include/` to the header search path and link the matching import library plus its system dependencies:\n\n```bat\n:: Example: Windows x86-64 (MinGW), shared\nrem Ensure libmantisbase.dll is next to your .exe at runtime\n```\n\n```cmake\n# CMakeLists.txt (manual, without the bundled entry point)\ntarget_include_directories(my_app PRIVATE path/to/include)\ntarget_link_libraries(my_app PRIVATE path/to/libs/x86/libmantisbase.dll.a ws2_32 rpcrt4 iphlpapi crypt32)\n```")
+    else()
+        set(MB_OS "linux")
+        set(MB_OS_PRETTY "Linux")
+        set(MB_LIB_FILE "libmantisbase.so")
+        set(MB_PREREQS "The shared library needs its system dependencies at build and run time. Install them with:\n\n```bash\nsudo apt-get update\nsudo apt-get install -y libpq-dev uuid-dev\n```\n\nRuntime shared libraries on Debian/Ubuntu are `libpq5` and `libuuid1` (see `docker/Dockerfile` in the source repo).")
+        set(MB_MANUAL "Add `include/` to the header search path and link the matching shared library plus its system dependencies (make sure the `.so` is findable at runtime, e.g. via `rpath` or `LD_LIBRARY_PATH`):\n\n```bash\n# Example: Linux x86-64, shared\ng++ -std=c++20 main.cpp -I path/to/include -L path/to/libs/x86 -lmantisbase -Wl,-rpath,path/to/libs/x86 -lpq -luuid -ldl -lpthread -lm -o my_app\n```")
+    endif()
+    configure_file("${_SRC}/cmake/dev-package/README.md.in"
+        "${_pkg}/README.md" @ONLY)
+    file(WRITE "${_pkg}/VERSION" "${MB_VERSION_TAG}\n")
+
+    # 4. CMake package config (find_package alternative).
+    file(MAKE_DIRECTORY "${_pkg}/lib/cmake/MantisBase")
+    configure_file("${_SRC}/cmake/MantisBaseConfig.cmake.in"
+        "${_pkg}/lib/cmake/MantisBase/MantisBaseConfig.cmake" @ONLY)
+    configure_file("${_SRC}/cmake/MantisBaseConfigVersion.cmake.in"
+        "${_pkg}/lib/cmake/MantisBase/MantisBaseConfigVersion.cmake" @ONLY)
+
+    message(STATUS "  [${_os}] package: ${_pkg}")
 endforeach()
 
-# --- 2. Prebuilt libraries (shipped exactly as the matrix produced them) --------
-_require_dir("${_STAGING}/lib" "The *-lib artifacts from build-matrix.yml must be downloaded first.")
-file(MAKE_DIRECTORY "${_OUT}/lib")
-file(COPY "${_STAGING}/lib/" DESTINATION "${_OUT}/lib")
-foreach(_os ${MB_EXPECT_PLATFORMS})
-    if(NOT IS_DIRECTORY "${_OUT}/lib/${_os}")
-        message(FATAL_ERROR "No prebuilt libraries for platform '${_os}' under ${_OUT}/lib. "
-            "Expected lib/${_os}/static|shared/<arch>/ from the build matrix.")
-    endif()
-    file(GLOB _libs RELATIVE "${_OUT}" "${_OUT}/lib/${_os}/*/*/*")
-    if("${_libs}" STREQUAL "")
-        message(FATAL_ERROR "No library files found under ${_OUT}/lib/${_os}/ — empty platform dir?")
-    endif()
-    message(STATUS "  libs [${_os}]: ${_libs}")
-endforeach()
-
-# --- 3. CMake package config -----------------------------------------------------
-file(MAKE_DIRECTORY "${_OUT}/lib/cmake/MantisBase")
-configure_file("${_SRC}/cmake/MantisBaseConfig.cmake.in"
-    "${_OUT}/lib/cmake/MantisBase/MantisBaseConfig.cmake" @ONLY)
-configure_file("${_SRC}/cmake/MantisBaseConfigVersion.cmake.in"
-    "${_OUT}/lib/cmake/MantisBase/MantisBaseConfigVersion.cmake" @ONLY)
-
-# --- 4. Metadata ------------------------------------------------------------------
-file(WRITE "${_OUT}/VERSION" "${MB_VERSION_TAG}\n")
-_require_file("${_SRC}/.github/release/README-dev-libs.md"
-    "README template for the dev package is missing from the repo.")
-file(COPY "${_SRC}/.github/release/README-dev-libs.md" DESTINATION "${_OUT}")
-file(RENAME "${_OUT}/README-dev-libs.md" "${_OUT}/README.md")
-
-message(STATUS "Dev package assembled:")
+message(STATUS "Dev packages assembled:")
 message(STATUS "  version : ${MB_VERSION} (${MB_VERSION_TAG})")
-message(STATUS "  headers : ${_OUT}/include-linux + ${_OUT}/include-windows")
-message(STATUS "  config  : ${_OUT}/lib/cmake/MantisBase/MantisBaseConfig.cmake")
+message(STATUS "  packages: ${_OUT}/linux + ${_OUT}/windows")

@@ -1,0 +1,71 @@
+{
+  "version": 3,
+  "targets": {
+    "net6.0": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    "net6.0": []
+  },
+  "packageFolders": {
+    "/home/codeart/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "1.3.2",
+    "restore": {
+      "projectUniqueName": "/mnt/wspace/Repos/cpp-projects/mantis-project/mantisbase/3rdParty/zlib/contrib/nuget/nuget.csproj",
+      "projectName": "madler.zlib.redist.linux",
+      "projectPath": "/mnt/wspace/Repos/cpp-projects/mantis-project/mantisbase/3rdParty/zlib/contrib/nuget/nuget.csproj",
+      "packagesPath": "/home/codeart/.nuget/packages/",
+      "outputPath": "/mnt/wspace/Repos/cpp-projects/mantis-project/mantisbase/3rdParty/zlib/contrib/nuget/obj/",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "/home/codeart/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net6.0"
+      ],
+      "sources": {
+        "/usr/lib64/dotnet/library-packs": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "noWarn": [
+          "NU5128"
+        ],
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "10.0.100"
+    },
+    "frameworks": {
+      "net6.0": {
+        "targetAlias": "net6.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/10.0.111/RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
