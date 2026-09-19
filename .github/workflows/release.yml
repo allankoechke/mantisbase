@@ -37,7 +37,7 @@ jobs:
           pattern: mantisbase_${{ github.ref_name }}_*-headers
           path: ./dev-headers/
 
-      - name: Assemble dev package
+      - name: Assemble dev packages (one per OS)
         run: |
           cmake \
             -DMB_SOURCE_DIR=${{ github.workspace }} \
@@ -48,15 +48,18 @@ jobs:
             -DMB_OUTPUT_DIR=${{ github.workspace }}/dev-package \
             -P cmake/package-dev.cmake
 
-      - name: Create dev zip
+      - name: Create dev zips (one per OS)
         run: |
-          cd dev-package && zip -r ../mantisbase_${{ github.ref_name }}-dev.zip lib/ include-linux/ include-windows/ VERSION README.md
+          (cd ${{ github.workspace }}/dev-package/linux && zip -r ../../mantisbase_${{ github.ref_name }}-dev-linux.zip CMakeLists.txt README.md VERSION include/ libs/ lib/)
+          (cd ${{ github.workspace }}/dev-package/windows && zip -r ../../mantisbase_${{ github.ref_name }}-dev-windows.zip CMakeLists.txt README.md VERSION include/ libs/ lib/)
 
-      - name: Upload dev zip artifact
+      - name: Upload dev zip artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}-dev.zip
-          path: mantisbase_${{ github.ref_name }}-dev.zip
+          name: mantisbase_${{ github.ref_name }}-dev
+          path: |
+            mantisbase_${{ github.ref_name }}-dev-linux.zip
+            mantisbase_${{ github.ref_name }}-dev-windows.zip
 
   release:
     needs: [build, package-dev-zip]

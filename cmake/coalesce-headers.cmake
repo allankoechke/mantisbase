@@ -21,8 +21,8 @@
 #
 # The tree is per-platform: soci-config.h and wolfssl/options.h are generated
 # from build options and differ between Linux and Windows builds. Release CI
-# installs each platform's tree and the pack job ships them as
-# include-linux/ + include-windows/ (see cmake/package-dev.cmake).
+# installs each platform's tree and the pack job ships it as the include/
+# tree of that OS's dev package (see cmake/package-dev.cmake).
 set(MB_DEV_HEADERS_COMPONENT mb-dev-headers)
 
 # Install a source header tree, headers only.

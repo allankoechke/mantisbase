@@ -1,0 +1,71 @@
+# MantisBase Developer Package (@MB_OS@, @MB_VERSION_TAG@)
+
+Prebuilt MantisBase shared library + headers for @MB_OS_PRETTY@.
+Static archives are not shipped in this package.
+
+## Layout
+
+```
+CMakeLists.txt   add_subdirectory() entry point (defines the `mantisbase` target)
+README.md        this file
+VERSION          release tag
+include/         header tree for this OS (mantisbase headers + bundled
+                 third-party headers: drogon, trantor, nlohmann/json,
+                 jsoncpp, soci, spdlog, fmt, dukglue, duktape, wolfssl, ...)
+libs/
+  x86/           prebuilt shared library for x86-64 (@MB_LIB_FILE@)
+  arm/           prebuilt shared library for aarch64 (@MB_LIB_FILE@)
+                 (Windows ships x86 only)
+lib/cmake/MantisBase/
+  MantisBaseConfig.cmake         find_package(MantisBase) entry point
+  MantisBaseConfigVersion.cmake  version matching
+```
+
+## System prerequisites (@MB_OS@)
+
+@MB_PREREQS@
+
+## Quick integration (CMake)
+
+Unzip and point your project at it:
+
+```cmake
+cmake_minimum_required(VERSION 3.22)
+project(my_app)
+
+add_subdirectory(path/to/mantisbase-dev-@MB_OS@)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE mantisbase)
+```
+
+Prefer `find_package`? Point CMake at the package instead:
+
+```cmake
+# cmake -B build -DCMAKE_PREFIX_PATH=/path/to/mantisbase-dev-@MB_OS@
+find_package(MantisBase REQUIRED)
+target_link_libraries(my_app PRIVATE mantisbase::shared)
+```
+
+`main.cpp`:
+
+```cpp
+#include <mantisbase/mantisbase.h>
+
+int main(int argc, char* argv[])
+{
+    auto app = mb::MantisBase::create(argc, argv);
+    return app->run();
+}
+```
+
+## Manual integration (without CMake)
+
+@MB_MANUAL@
+
+## Help
+
+- Documentation: https://allankoechke.github.io/mantisbase/
+- Discord: https://discord.gg/9437XTKRvN
+- GitHub Discussions: https://github.com/allankoechke/mantisbase/discussions
+- Issues: https://github.com/allankoechke/mantisbase/issues
