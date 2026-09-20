@@ -2,7 +2,7 @@
 #
 # Integrate with add_subdirectory():
 #
-#   add_subdirectory(path/to/mantisbase-dev-<os>)
+#   add_subdirectory(path/to/mantisbase-linux-cpp-dev)
 #   target_link_libraries(your_app PRIVATE mantisbase)
 #
 # This file picks the shared library matching your architecture out of

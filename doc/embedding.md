@@ -28,6 +28,19 @@ Runtime shared libraries on Debian/Ubuntu are `libpq5` and `libuuid1` (see `dock
 
 ## Integration
 
+### As a Prebuilt Package (no source build)
+
+Download the prebuilt C++ dev package for your OS from
+[GitHub Releases](https://github.com/allankoechke/mantisbase/releases)
+(`mantisbase_<tag>-linux-cpp-dev.zip` or `mantisbase_<tag>-windows-cpp-dev.zip`):
+
+```cmake
+add_subdirectory(path/to/mantisbase-linux-cpp-dev)
+target_link_libraries(your_app PRIVATE mantisbase)
+```
+
+See the [C++ Dev Package Guide](cpp-dev-package.md) for the full walkthrough.
+
 ### As a Static or Shared Library
 
 Add MantisBase as a submodule or include it in your CMake project:

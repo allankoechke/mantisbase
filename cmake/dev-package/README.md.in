@@ -1,7 +1,10 @@
-# MantisBase Developer Package (@MB_OS@, @MB_VERSION_TAG@)
+# MantisBase C++ Developer Package (@MB_OS@, @MB_VERSION_TAG@)
 
 Prebuilt MantisBase shared library + headers for @MB_OS_PRETTY@.
 Static archives are not shipped in this package.
+
+> New here? Start with the [C++ Dev Package Guide](https://github.com/allankoechke/mantisbase/blob/master/doc/cpp-dev-package.md)
+> for the full walkthrough (download, setup, CMake, troubleshooting).
 
 ## Layout
 
@@ -27,13 +30,13 @@ lib/cmake/MantisBase/
 
 ## Quick integration (CMake)
 
-Unzip and point your project at it:
+Unzip (e.g. into `mantisbase-@MB_OS@-cpp-dev/`) and point your project at it:
 
 ```cmake
 cmake_minimum_required(VERSION 3.22)
 project(my_app)
 
-add_subdirectory(path/to/mantisbase-dev-@MB_OS@)
+add_subdirectory(path/to/mantisbase-@MB_OS@-cpp-dev)
 
 add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE mantisbase)
@@ -42,7 +45,7 @@ target_link_libraries(my_app PRIVATE mantisbase)
 Prefer `find_package`? Point CMake at the package instead:
 
 ```cmake
-# cmake -B build -DCMAKE_PREFIX_PATH=/path/to/mantisbase-dev-@MB_OS@
+# cmake -B build -DCMAKE_PREFIX_PATH=/path/to/mantisbase-@MB_OS@-cpp-dev
 find_package(MantisBase REQUIRED)
 target_link_libraries(my_app PRIVATE mantisbase::shared)
 ```
