@@ -49,7 +49,7 @@ namespace mb {
      * Initializes DB-specific hooks (triggers for PostgreSQL, polling for SQLite)
      * and runs a worker that invokes the registered callback with change events.
      */
-    class RealtimeDB: public IMantisBase {
+    class MANTISBASE_API RealtimeDB: public IMantisBase {
     public:
         /** @param app Owning application (used for db access/config). Stored by reference. */
         explicit RealtimeDB(const MantisBase &app);

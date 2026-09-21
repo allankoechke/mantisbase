@@ -11,6 +11,7 @@
 
 #include <exception>
 #include <string>
+#include "types.h"
 
 namespace mb {
     /**
@@ -19,7 +20,7 @@ namespace mb {
      * Thrown by entity, file, and validation layers; caught by route handlers
      * and converted into JSON error responses.
      */
-    class MantisException final : public std::exception {
+    class MANTISBASE_API MantisException final : public std::exception {
     public:
         /**
          * @param _code HTTP-style status code (e.g. 400, 404).

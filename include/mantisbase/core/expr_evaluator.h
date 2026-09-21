@@ -9,13 +9,14 @@
 #include <string>
 #include <nlohmann/json_fwd.hpp>
 #include "../utils/utils.h"
+#include "types.h"
 
 namespace mb
 {
     /**
      * @brief Struct instance for handling evaluation of database access rules.
      */
-    struct Expr
+    struct MANTISBASE_API Expr
     {
         /**
          * @brief Evaluates a given expression in a context of the given TokenMap variables.

@@ -16,6 +16,8 @@
 #include <vector>
 #include <filesystem>
 
+#include "../export.h"
+
 namespace mb {
     class MantisBase;
     class MantisRequest;

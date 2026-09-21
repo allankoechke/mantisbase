@@ -20,7 +20,6 @@
 
 #include "context_store.h"
 #include "../utils/utils.h"
-#include "types.h"
 #include <fstream>
 #include <unordered_map>
 #include <drogon/HttpRequest.h>
@@ -31,7 +30,7 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
     /** Duktape bindings for the JS `console` object in server scripts. */
-    class DuktapeImpl {
+    class MANTISBASE_API DuktapeImpl {
     public:
         static duk_ret_t nativeConsoleInfo(duk_context *ctx);
         static duk_ret_t nativeConsoleTrace(duk_context *ctx);
@@ -39,7 +38,7 @@ namespace mb {
     };
 
     /** Fire Duktape lifecycle hooks for server start and record mutations. */
-    class ScriptingHooks {
+    class MANTISBASE_API ScriptingHooks {
     public:
         static void fireOnServerStart(duk_context *ctx);
         static void fireOnRecordCreated(duk_context *ctx, const std::string &entity, const std::string &recordId);
@@ -54,7 +53,7 @@ namespace mb {
      * underlying Drogon request via `set()` / `getOr()`, not a global context.
      * Use `mbApp()` (from @ref IMantisBase) to reach application services.
      */
-    class MantisRequest: public IMantisBase {
+    class MANTISBASE_API MantisRequest: public IMantisBase {
         drogon::HttpRequestPtr m_req;
         std::unordered_map<std::string, std::string> m_pathParams;
 
@@ -159,7 +158,7 @@ namespace mb {
      * Constructed by the router for each request; use `sendJSON()`, `send()`,
      * or header helpers to build the outgoing response.
      */
-    class MantisResponse: public IMantisBase {
+    class MANTISBASE_API MantisResponse: public IMantisBase {
         drogon::HttpResponsePtr m_res;
 
     public:
@@ -231,7 +230,7 @@ namespace mb {
     };
 
     /** Single field from a parsed `multipart/form-data` body. */
-    struct FormDataItem {
+    struct MANTISBASE_API FormDataItem {
         std::string name;
         std::string content;
         std::string filename;
@@ -243,7 +242,7 @@ namespace mb {
      *
      * Parses once, then exposes form fields, file metadata, and typed entity binding.
      */
-    class MantisContentReader {
+    class MANTISBASE_API MantisContentReader {
         const MantisRequest &m_req;
 
         std::vector<FormDataItem> m_formData;

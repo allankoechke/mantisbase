@@ -22,7 +22,7 @@ namespace mb {
      * @param fields Schema field array (`name`, `type`, constraints, …).
      * @throws std::invalid_argument if `fields` is not an array.
      */
-    inline soci::values json2SociValue(const json &entity, const json &fields) {
+    MANTISBASE_API inline soci::values json2SociValue(const json &entity, const json &fields) {
         if (!fields.is_array()) throw std::invalid_argument("Fields must be an array");
 
         soci::values vals;
@@ -87,7 +87,7 @@ namespace mb {
     }
 
     /** Resolve int precision for a column by matching field name in schema metadata. */
-    inline IntPrecision getColumnIntPrecision(const std::string &column_name, const std::vector<json> &fields) {
+    MANTISBASE_API inline IntPrecision getColumnIntPrecision(const std::string &column_name, const std::vector<json> &fields) {
         for (const auto &field: fields) {
             if (field.value("name", "") == column_name) {
                 return intPrecisionFromField(field);
@@ -97,7 +97,7 @@ namespace mb {
     }
 
     /** Look up declared field `type` string for a column name. @throws on unknown column. */
-    inline std::string getColumnType(const std::string &column_name, const std::vector<json> &fields) {
+    MANTISBASE_API inline std::string getColumnType(const std::string &column_name, const std::vector<json> &fields) {
         if (column_name.empty()) throw std::invalid_argument("Column name can't be empty!");
 
         for (const auto &field: fields) {
@@ -114,7 +114,7 @@ namespace mb {
      * @param row SOCI row from a SELECT.
      * @param entity_fields Schema fields array for type lookup.
      */
-    inline json sociRow2Json(const std::string& db_type, const soci::row &row, const std::vector<json> &entity_fields) {
+    MANTISBASE_API inline json sociRow2Json(const std::string& db_type, const soci::row &row, const std::vector<json> &entity_fields) {
         // Guard against empty reference schema fields
         if (entity_fields.empty())
             throw std::invalid_argument("Reference schema fields can't be empty!");

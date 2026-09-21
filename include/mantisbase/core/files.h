@@ -46,7 +46,7 @@ namespace mb {
      * }
      * @endcode
      */
-    class FilesMgr : public IMantisBase {
+    class MANTISBASE_API FilesMgr : public IMantisBase {
     public:
         explicit FilesMgr(const MantisBase &app);
 
@@ -131,7 +131,7 @@ namespace mb {
          * @param filename File name to remove
          * @return true if file was successfully removed, false otherwise
          */
-        bool removeFile(const std::string &entity_name, const std::string &filename) const;
+        [[nodiscard]] bool removeFile(const std::string &entity_name, const std::string &filename) const;
 
         /**
          * @brief Remove multiple files from an entity's directory.
@@ -148,7 +148,7 @@ namespace mb {
          * @param filename File name to check
          * @return true if file exists, false otherwise
          */
-        bool fileExists(const std::string &entity_name, const std::string &filename) const;
+        [[nodiscard]] bool fileExists(const std::string &entity_name, const std::string &filename) const;
 
         /**
          * @brief Get canonical path and verify it's within the files base directory.

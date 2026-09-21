@@ -25,7 +25,7 @@ namespace mb {
      * attributes consumed by `requireEntityAuth()` and access-rule checks.
      * @return Middleware function
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> getAuthToken();
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> getAuthToken();
 
     /**
      * @brief Hydrate request context with additional data.
@@ -33,7 +33,7 @@ namespace mb {
      * Populates context store with request metadata and user information.
      * @return Middleware function
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hydrateContextData();
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hydrateContextData();
 
     /**
      * @brief Resolve schema from `:schema_name_or_id` path param and validate it exists.
@@ -41,7 +41,7 @@ namespace mb {
      * Returns 404 when the schema id/name is invalid or not found.
      * @return Middleware function
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveSchema();
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveSchema();
 
     /**
      * @brief Resolve auth entity from `:entity_name` path param.
@@ -50,7 +50,7 @@ namespace mb {
      * or has API disabled.
      * @return Middleware function
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveAuthEntity();
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveAuthEntity();
 
     /**
      * @brief Resolve entity from `:entity_name` path param and validate it is API-accessible.
@@ -58,19 +58,19 @@ namespace mb {
      * Returns 404 when the entity does not exist, is a system entity, or has API disabled.
      * @return Middleware function
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveEntity();
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveEntity();
 
     /**
      * @brief Reject POST, PATCH, and DELETE requests against view-type entities.
      * @return Middleware function
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rejectViewMutations();
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rejectViewMutations();
 
     /**
      * @brief Check access rules for the entity named in the `:entity_name` path param.
      * @return Middleware function that validates access rules
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasEntityAccess();
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasEntityAccess();
 
     /**
      * @brief Check if request has access to entity based on access rules.
@@ -80,7 +80,7 @@ namespace mb {
      * router.Get("/api/v1/posts", handler, {hasAccess("posts")});
      * @endcode
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const std::string &entity_name);
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const std::string &entity_name);
 
     /**
      * @brief Require expression evaluation to pass.
@@ -92,7 +92,7 @@ namespace mb {
      * @param expr Expression string to evaluate (`auth.id`, `@auth.id`, `req.body`, etc.)
      * @return Middleware function that evaluates expression
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr);
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr);
 
     /**
      * @brief Require guest-only access (no authentication).
@@ -100,7 +100,7 @@ namespace mb {
      * Blocks authenticated users, only allows unauthenticated requests.
      * @return Middleware function
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireGuestOnly();
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireGuestOnly();
 
     /**
      * @brief Require admin authentication.
@@ -108,7 +108,7 @@ namespace mb {
      * Only allows requests from users authenticated as admins.
      * @return Middleware function
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminAuth();
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminAuth();
 
     /**
      * @brief Block the request when an environment variable matches a truthy state.
@@ -127,7 +127,7 @@ namespace mb {
      * @param block_when_truthy Truthy env value that triggers the 503 block
      * @return Middleware function
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> envGateMiddleware(
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> envGateMiddleware(
         const std::string &env_var, bool block_when_truthy);
 
     /**
@@ -139,7 +139,7 @@ namespace mb {
      * Used for production safety toggles such as `allowRegistration` (when true, blocks admin
      * API signup) and `disableSchemaMutations` (when true, blocks schema POST/PATCH/DELETE).
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> settingsFeatureGate(
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> settingsFeatureGate(
         const std::string &setting_key);
 
     /**
@@ -152,7 +152,7 @@ namespace mb {
      * @param entity_name Entity name for entity-based auth
      * @return Middleware function that allows admins or entity users
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
         const std::string &entity_name);
 
     /**
@@ -164,7 +164,7 @@ namespace mb {
      * @param entity_name Entity name to authenticate against
      * @return Middleware function that validates entity auth
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireEntityAuth(const std::string &entity_name);
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireEntityAuth(const std::string &entity_name);
 
     /**
      * @brief Rate limiting middleware to prevent abuse.
@@ -194,7 +194,7 @@ namespace mb {
      * router.Post("/api/v1/auth/users/login", loginHandler, {rateLimit(5, 60, false), resolveAuthEntity()});
      * @endcode
      */
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rateLimit(
+    MANTISBASE_API std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rateLimit(
         int max_requests,
         int window_seconds,
         bool use_user_id = false

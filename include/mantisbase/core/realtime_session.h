@@ -25,6 +25,7 @@
 
 #include <drogon/HttpRequest.h>
 #include <nlohmann/json.hpp>
+#include <mantisbase/core/types.h>
 
 namespace mb {
     class MantisBase;
@@ -46,7 +47,7 @@ namespace mb {
      * `auth` and `verification` mirror the shape produced by HTTP auth middleware.
      * `token` is empty for guest sessions. `expires_at` is set for JWT-backed sessions.
      */
-    struct RealtimeAuthSnapshot {
+    struct MANTISBASE_API RealtimeAuthSnapshot {
         json auth = json::object();
         json verification = json::object();
         std::string token;
@@ -54,7 +55,7 @@ namespace mb {
     };
 
     /** Result of filtering a subscribe request against entity access rules. */
-    struct TopicAccessResult {
+    struct MANTISBASE_API TopicAccessResult {
         std::vector<std::string> granted;
         /** Each denied entry: `{ "topic", "reason", "status" }`. */
         std::vector<json> denied;
@@ -69,7 +70,7 @@ namespace mb {
     };
 
     /** Per-connection WebSocket session state (also stored on the Drogon connection context). */
-    struct RealtimeWsSession {
+    struct MANTISBASE_API RealtimeWsSession {
         std::string client_id;
         RealtimeAuthSnapshot auth;
         std::set<std::string> topics;
@@ -78,21 +79,21 @@ namespace mb {
     };
 
     /** @return Guest auth snapshot (`type: guest`) with empty token and verification. */
-    [[nodiscard]] RealtimeAuthSnapshot makeGuestAuthSnapshot();
+    MANTISBASE_API [[nodiscard]] RealtimeAuthSnapshot makeGuestAuthSnapshot();
 
     /**
      * @brief Resolve bearer/API-key token from a realtime HTTP upgrade or SSE request.
      * @param req Drogon request (`?token=` wins over `Authorization: Bearer`).
      * @return Trimmed token string, or empty for unauthenticated connect.
      */
-    [[nodiscard]] std::string resolveRealtimeToken(const drogon::HttpRequestPtr &req);
+    MANTISBASE_API [[nodiscard]] std::string resolveRealtimeToken(const drogon::HttpRequestPtr &req);
 
     /**
      * @brief Hydrate auth from a JWT or `mb_sk_` API key.
      * @param app Application instance (for verification and user hydration).
      * @param token Raw token; empty yields guest. Invalid/expired tokens yield guest.
      */
-    [[nodiscard]] RealtimeAuthSnapshot resolveRealtimeAuth(const MantisBase &app, const std::string &token);
+    MANTISBASE_API [[nodiscard]] RealtimeAuthSnapshot resolveRealtimeAuth(const MantisBase &app, const std::string &token);
 
     /**
      * @brief Filter topics by entity access rules.
@@ -103,7 +104,7 @@ namespace mb {
      * @param topics Requested topic strings.
      * @param snap Current session auth snapshot.
      */
-    [[nodiscard]] TopicAccessResult filterAuthorizedTopics(const MantisBase &app,
+    MANTISBASE_API [[nodiscard]] TopicAccessResult filterAuthorizedTopics(const MantisBase &app,
                                                              const std::vector<std::string> &topics,
                                                              const RealtimeAuthSnapshot &snap);
 
@@ -112,23 +113,23 @@ namespace mb {
      * @param session Session snapshot to update when upgrade is allowed.
      * @param incoming Auth resolved from the subscribe request.
      */
-    [[nodiscard]] AuthUpgradeResult tryUpgradeAuth(RealtimeAuthSnapshot &session,
+    MANTISBASE_API [[nodiscard]] AuthUpgradeResult tryUpgradeAuth(RealtimeAuthSnapshot &session,
                                                    const RealtimeAuthSnapshot &incoming);
 
     /**
      * @brief Generate a unique realtime client/session ID.
      * @param prefix `"rt_sse"` or `"rt_ws"`.
      */
-    [[nodiscard]] std::string generateRealtimeClientId(std::string_view prefix);
+    MANTISBASE_API [[nodiscard]] std::string generateRealtimeClientId(std::string_view prefix);
 
     /** @return `true` when the snapshot JWT/session has expired or been revoked. */
-    [[nodiscard]] bool isAuthExpired(const RealtimeAuthSnapshot &snap, const MantisBase &app);
+    MANTISBASE_API [[nodiscard]] bool isAuthExpired(const RealtimeAuthSnapshot &snap, const MantisBase &app);
 
     /** @return `true` when the snapshot represents a verified, hydrated authenticated user. */
-    [[nodiscard]] bool isAuthenticatedSnapshot(const RealtimeAuthSnapshot &snap);
+    MANTISBASE_API [[nodiscard]] bool isAuthenticatedSnapshot(const RealtimeAuthSnapshot &snap);
 
     /** Update `last_activity` on a WebSocket session to the current time. */
-    void touchWsSession(RealtimeWsSession &session);
+    MANTISBASE_API void touchWsSession(RealtimeWsSession &session);
 
 } // namespace mb
 

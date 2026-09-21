@@ -45,7 +45,7 @@ namespace mb {
      * - `POST|GET|PATCH|DELETE /api/v1/sys/oauth/providers` (admin)
      * - `POST|DELETE /api/v1/sys/oauth/entity-config` (admin)
      */
-    class OAuthManager : public IMantisBase {
+    class MANTISBASE_API OAuthManager : public IMantisBase {
     public:
         explicit OAuthManager(const MantisBase &app);
 

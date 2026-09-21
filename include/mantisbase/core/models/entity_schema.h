@@ -16,6 +16,7 @@
 #include "entity.h"
 #include "entity_schema_field.h"
 #include "access_rules.h"
+#include "mantisbase/core/types.h"
 
 namespace mb {
     /**
@@ -34,7 +35,7 @@ namespace mb {
      * Entity entity = schema.toEntity();
      * @endcode
      */
-    class EntitySchema: public IMantisBase {
+    class MANTISBASE_API EntitySchema: public IMantisBase {
     public:
         /**
          * @brief Construct an empty schema bound to its application.

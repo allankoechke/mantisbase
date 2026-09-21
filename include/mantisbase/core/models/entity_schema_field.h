@@ -15,10 +15,11 @@
 #include "nlohmann/json.hpp"
 #include "soci/soci-backend.h"
 #include "mantisbase/core/models/int_precision.h"
+#include "mantisbase/core/types.h"
 
 namespace mb {
     /** Secondary index definition attached to an entity schema. */
-    struct IndexDefinition {
+    struct MANTISBASE_API IndexDefinition {
         std::string name;
         bool unique = false;
         std::vector<std::string> columns;
@@ -30,7 +31,7 @@ namespace mb {
         static IndexDefinition fromJSON(const nlohmann::json &j);
     };
 
-    class EntitySchemaField {
+    class MANTISBASE_API EntitySchemaField {
     public:
         EntitySchemaField(std::string field_name, std::string field_type);
 

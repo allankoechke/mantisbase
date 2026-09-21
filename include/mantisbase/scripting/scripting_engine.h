@@ -11,6 +11,7 @@
 #include <dukglue/dukglue.h>
 #include <mutex>
 #include <string>
+#include <mantisbase/core/types.h>
 
 struct duk_hthread;
 typedef struct duk_hthread duk_context;
@@ -26,7 +27,7 @@ namespace mb {
      * One instance per @ref MantisBase. Handlers and middleware run under
      * @ref withLock because Drogon serves requests on worker threads.
      */
-    class ScriptingEngine {
+    class MANTISBASE_API ScriptingEngine {
     public:
         explicit ScriptingEngine(MantisBase &app);
         ~ScriptingEngine();

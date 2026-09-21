@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 #include "../utils/utils.h"
 #include "http.h"
+#include "../export.h"
 
 namespace mb
 {
@@ -21,7 +22,7 @@ namespace mb
     /**
      * @brief Manages application settings
      */
-    class KeyValStore
+    class MANTISBASE_API KeyValStore
     {
     public:
         /**
@@ -69,7 +70,7 @@ namespace mb
         void setupConfigRoutes();
 
         json loadFromDb();
-        json redactForResponse(const json &configs) const;
+        [[nodiscard]] json redactForResponse(const json &configs) const;
         void applyPatch(const json &body);
 
         json m_configs;

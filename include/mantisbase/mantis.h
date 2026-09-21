@@ -15,6 +15,7 @@
 #include "utils/soci_wrappers.h"
 
 // Core application
+#include "export.h"
 #include "mantisbase.h"
 
 // Core components

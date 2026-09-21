@@ -41,7 +41,7 @@ namespace mb {
      * Holds subscribed topics, auth snapshot, activity timestamps, and a Drogon
      * @ref drogon::ResponseStreamPtr for zero-thread event delivery.
      */
-    class SSESession {
+    class MANTISBASE_API SSESession {
         std::string m_clientID;
         std::set<std::string> m_topics;
         drogon::ResponseStreamPtr m_stream;
@@ -102,7 +102,7 @@ namespace mb {
      * Owns a @ref WSMgr instance and runs a background thread that closes expired,
      * idle, and connect-only sessions for both SSE and WebSocket.
      */
-    class SSEMgr : public IMantisBase {
+    class MANTISBASE_API SSEMgr : public IMantisBase {
         std::unordered_map<std::string, std::shared_ptr<SSESession>> m_sessions;
         std::mutex m_sessions_mutex;
         std::condition_variable m_cv;
