@@ -50,16 +50,19 @@ jobs:
 
       - name: Create dev zips (one per OS)
         run: |
-          (cd ${{ github.workspace }}/dev-package/linux && zip -r ../../mantisbase_${{ github.ref_name }}-dev-linux.zip CMakeLists.txt README.md VERSION include/ libs/ lib/)
-          (cd ${{ github.workspace }}/dev-package/windows && zip -r ../../mantisbase_${{ github.ref_name }}-dev-windows.zip CMakeLists.txt README.md VERSION include/ libs/ lib/)
+          (cd ${{ github.workspace }}/dev-package/linux && zip -r ../../mantisbase_${{ github.ref_name }}-linux-cpp-dev.zip CMakeLists.txt README.md VERSION include/ libs/ lib/)
+          (cd ${{ github.workspace }}/dev-package/windows && zip -r ../../mantisbase_${{ github.ref_name }}-windows-cpp-dev.zip CMakeLists.txt README.md VERSION include/ libs/ lib/)
 
       - name: Upload dev zip artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mantisbase_${{ github.ref_name }}-dev
+          # NOTE: the artifact name must keep the `.zip` suffix — the release
+          # job downloads by artifact-name pattern `mantisbase_<tag>*.zip`,
+          # so a name without it silently drops the dev zips from the release.
+          name: mantisbase_${{ github.ref_name }}-cpp-dev.zip
           path: |
-            mantisbase_${{ github.ref_name }}-dev-linux.zip
-            mantisbase_${{ github.ref_name }}-dev-windows.zip
+            mantisbase_${{ github.ref_name }}-linux-cpp-dev.zip
+            mantisbase_${{ github.ref_name }}-windows-cpp-dev.zip
 
   release:
     needs: [build, package-dev-zip]
