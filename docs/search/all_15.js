@@ -85,7 +85,7 @@ var searchData=
   ['routehandler_82',['RouteHandler',['../structmb_1_1RouteHandler.html',1,'mb']]],
   ['routekey_83',['RouteKey',['../namespacemb.html#a418920a172df52fe09c0c81787230888',1,'mb']]],
   ['routekeyhash_84',['RouteKeyHash',['../structmb_1_1RouteKeyHash.html',1,'mb']]],
-  ['router_85',['router',['../classmb_1_1Router.html',1,'mb::Router'],['../classmb_1_1MantisBase.html#aaa93f1df96bfd253eebeb4ccda53cb29',1,'mb::MantisBase::router()'],['../classmb_1_1Router.html#a50d8e904d31e641417685b63a8656c6a',1,'mb::Router::Router()'],['../docs_scripting.html#autotoc_md312',1,'Router']]],
+  ['router_85',['router',['../classmb_1_1Router.html',1,'mb::Router'],['../classmb_1_1Router.html#a50d8e904d31e641417685b63a8656c6a',1,'mb::Router::Router()'],['../classmb_1_1MantisBase.html#aaa93f1df96bfd253eebeb4ccda53cb29',1,'mb::MantisBase::router()'],['../docs_scripting.html#autotoc_md312',1,'Router']]],
   ['router_2ecpp_86',['router.cpp',['../router_8cpp.html',1,'']]],
   ['router_2eh_87',['router.h',['../router_8h.html',1,'']]],
   ['router_5fapi_5fkeys_2ecpp_88',['router_api_keys.cpp',['../router__api__keys_8cpp.html',1,'']]],

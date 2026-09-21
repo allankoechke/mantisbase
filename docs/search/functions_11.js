@@ -41,7 +41,7 @@ var searchData=
   ['revoke_38',['revoke',['../classmb_1_1ApiKeyManager.html#a8ff0c1e73195e4974d11cc17276fd192',1,'mb::ApiKeyManager']]],
   ['revokeadmin_39',['revokeAdmin',['../classmb_1_1ApiKeyManager.html#aad583a2921cf59e564f56d9e57479da1',1,'mb::ApiKeyManager']]],
   ['revokebyid_40',['revokeById',['../classmb_1_1ApiKeyManager.html#aa6be86ca69ee5226c25547a1760444be',1,'mb::ApiKeyManager']]],
-  ['router_41',['router',['../classmb_1_1Router.html#a50d8e904d31e641417685b63a8656c6a',1,'mb::Router::Router()'],['../classmb_1_1MantisBase.html#aaa93f1df96bfd253eebeb4ccda53cb29',1,'mb::MantisBase::router() const']]],
+  ['router_41',['router',['../classmb_1_1MantisBase.html#aaa93f1df96bfd253eebeb4ccda53cb29',1,'mb::MantisBase::router()'],['../classmb_1_1Router.html#a50d8e904d31e641417685b63a8656c6a',1,'mb::Router::Router()']]],
   ['rt_42',['rt',['../classmb_1_1MantisBase.html#a470ee74c61556ca8105993f8df49dac1',1,'mb::MantisBase']]],
   ['rtdbworker_43',['RtDbWorker',['../classmb_1_1RtDbWorker.html#af396d5f2782ed411f70bd522a51928a1',1,'mb::RtDbWorker']]],
   ['rules_44',['rules',['../classmb_1_1Entity.html#a6a98ee912a8e6c32200a3fa4e2666de3',1,'mb::Entity']]],

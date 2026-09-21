@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.4</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.5</span>
    </div>
   </td>
  </tr>
@@ -106,26 +106,26 @@ $(document).ready(function(){initNavTree('context__store_8h_source.html',''); in
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;nlohmann/json.hpp&gt;</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../utils/utils.h&quot;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;dukglue/dukglue.h&gt;</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>{</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> = nlohmann::json;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="foldopen" id="foldopen00060" data-start="{" data-end="};">
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classmb_1_1ContextStore.html">   60</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classmb_1_1ContextStore.html">ContextStore</a></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    {</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        std::unordered_map&lt;std::string, std::any&gt; data;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        std::string __class_name__ = <span class="stringliteral">&quot;mb::ContextStore&quot;</span>;</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="types_8h.html">types.h</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;dukglue/dukglue.h&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> = nlohmann::json;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="foldopen" id="foldopen00061" data-start="{" data-end="};">
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classmb_1_1ContextStore.html">   61</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1ContextStore.html">ContextStore</a></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    {</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        std::unordered_map&lt;std::string, std::any&gt; data;</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classmb_1_1ContextStore.html#af72a2f9cc741baf2a6d02d380ecae805">   66</a></span>        <a class="code hl_function" href="classmb_1_1ContextStore.html#af72a2f9cc741baf2a6d02d380ecae805">ContextStore</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1ContextStore.html#a78f772e5fe96acb522af43d7f1f04a17">dump</a>();</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordtype">void</span> dump();</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1ContextStore.html#a26630885aab45d06749702f07088167f">hasKey</a>(<span class="keyword">const</span> std::string&amp; key) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordtype">bool</span> hasKey(<span class="keyword">const</span> std::string&amp; key) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00087" data-start="{" data-end="}">
@@ -172,15 +172,15 @@ $(document).ready(function(){initNavTree('context__store_8h_source.html',''); in
 <div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>} <span class="comment">// mb</span></div>
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="preprocessor">#endif </span><span class="comment">//MANTISAPP_CONTEXTSTORE_H</span></div>
-<div class="ttc" id="aclassmb_1_1ContextStore_html"><div class="ttname"><a href="classmb_1_1ContextStore.html">mb::ContextStore</a></div><div class="ttdef"><b>Definition</b> context_store.h:61</div></div>
-<div class="ttc" id="aclassmb_1_1ContextStore_html_a26630885aab45d06749702f07088167f"><div class="ttname"><a href="classmb_1_1ContextStore.html#a26630885aab45d06749702f07088167f">mb::ContextStore::hasKey</a></div><div class="ttdeci">bool hasKey(const std::string &amp;key) const</div><div class="ttdef"><b>Definition</b> context_store.cpp:52</div></div>
-<div class="ttc" id="aclassmb_1_1ContextStore_html_a78f772e5fe96acb522af43d7f1f04a17"><div class="ttname"><a href="classmb_1_1ContextStore.html#a78f772e5fe96acb522af43d7f1f04a17">mb::ContextStore::dump</a></div><div class="ttdeci">void dump()</div><div class="ttdoc">Convenience method for dumping context data for debugging.</div><div class="ttdef"><b>Definition</b> context_store.cpp:12</div></div>
+<div class="ttc" id="aclassmb_1_1ContextStore_html"><div class="ttname"><a href="classmb_1_1ContextStore.html">mb::ContextStore</a></div><div class="ttdef"><b>Definition</b> context_store.h:62</div></div>
 <div class="ttc" id="aclassmb_1_1ContextStore_html_aa77275ed339fe00137073d7c77fee7aa"><div class="ttname"><a href="classmb_1_1ContextStore.html#aa77275ed339fe00137073d7c77fee7aa">mb::ContextStore::getOr</a></div><div class="ttdeci">T &amp; getOr(const std::string &amp;key, T default_value)</div><div class="ttdoc">Get context value given the key.</div><div class="ttdef"><b>Definition</b> context_store.h:118</div></div>
 <div class="ttc" id="aclassmb_1_1ContextStore_html_abf98fe301e99f96a6e7cec99aea0f400"><div class="ttname"><a href="classmb_1_1ContextStore.html#abf98fe301e99f96a6e7cec99aea0f400">mb::ContextStore::set</a></div><div class="ttdeci">void set(const std::string &amp;key, T value)</div><div class="ttdoc">Store a key-value data in the context.</div><div class="ttdef"><b>Definition</b> context_store.h:87</div></div>
 <div class="ttc" id="aclassmb_1_1ContextStore_html_af72a2f9cc741baf2a6d02d380ecae805"><div class="ttname"><a href="classmb_1_1ContextStore.html#af72a2f9cc741baf2a6d02d380ecae805">mb::ContextStore::ContextStore</a></div><div class="ttdeci">ContextStore()=default</div></div>
 <div class="ttc" id="aclassmb_1_1ContextStore_html_afc3f6f5f2897979f6ee43b28b883cbe0"><div class="ttname"><a href="classmb_1_1ContextStore.html#afc3f6f5f2897979f6ee43b28b883cbe0">mb::ContextStore::get</a></div><div class="ttdeci">std::optional&lt; T * &gt; get(const std::string &amp;key)</div><div class="ttdoc">Get context value given the key.</div><div class="ttdef"><b>Definition</b> context_store.h:100</div></div>
+<div class="ttc" id="aexport_8h_html_ad67b3f9a509bd18bd030486e98d14e34"><div class="ttname"><a href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a></div><div class="ttdeci">#define MANTISBASE_API</div><div class="ttdef"><b>Definition</b> export.h:25</div></div>
 <div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdef"><b>Definition</b> api_keys.h:32</div></div>
 <div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the IMantisBase DI mixin.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

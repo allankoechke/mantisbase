@@ -1,7 +1,20 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/exceptions.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/exceptions.h">
-<area shape="rect" id="Node000001" title="Custom exception class for MantisBase errors." alt="" coords="5,5,239,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="31,108,117,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,61,90,97,85,95,105,59"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="142,108,201,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="139,59,160,95,155,97,135,61"/>
+<area shape="rect" id="Node000001" title="Custom exception class for MantisBase errors." alt="" coords="15,5,249,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="7,108,94,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,62,73,100,69,96,105,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,64,207"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="132,61,124,97,108,135,89,157,67,175,64,171,85,153,103,132,119,96,127,60"/>
+<area shape="rect" id="Node000004" href="$types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="267,108,338,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,58,269,99,266,104,183,62"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="268,134,78,184,76,179,267,129"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="88,181,235,207"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="281,136,198,177,195,173,279,131"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="259,181,346,207"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="305,134,305,168,300,168,300,134"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="370,181,433,207"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="320,131,376,171,373,175,317,136"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="457,181,548,207"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="336,131,458,174,456,179,334,136"/>
+<area shape="rect" id="Node000009" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="572,181,660,207"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="339,127,559,177,558,182,337,133"/>
 </map>

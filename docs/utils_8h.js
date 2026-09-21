@@ -6,7 +6,7 @@ var utils_8h =
     [ "generateReadableTimeId", "utils_8h.html#af1b47490bcd171b34e7371a721ec4d82", null ],
     [ "generateShortId", "utils_8h.html#ab5004cdfdf21f04cf630c15f7f191bac", null ],
     [ "generateTimeBasedId", "utils_8h.html#a4bbd6b13fd498f212dd8f5d7b7565e2e", null ],
-    [ "getCurrentTimestampUTC", "utils_8h.html#aadfd14faa4a1190f3ef60a73fee241e7", null ],
+    [ "getCurrentTimestampUTC", "utils_8h.html#a4a17273fb49d7a4d2e376618b0b47c17", null ],
     [ "getEnvOrDefault", "utils_8h.html#a98ec5c96bf449442fcf900d7061e7406", null ],
     [ "hashPassword", "utils_8h.html#ab16eec531440dbc19ec0880549d0638e", null ],
     [ "invalidChar", "utils_8h.html#aa98dbdb983996e7b60b25c3e0f8eac98", null ],

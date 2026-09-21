@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.4</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.5</span>
    </div>
   </td>
  </tr>
@@ -106,41 +106,43 @@ $(document).ready(function(){initNavTree('auth_8h.html',''); initResizable(); })
 <code>#include &lt;wolfssl/wolfio.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="api__keys_8h_source.html">api_keys.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="oauth_8h_source.html">oauth.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="types_8h_source.html">../core/types.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="types_8h_source.html">types.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for auth.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="auth_8h__incl.png" border="0" usemap="#a_2home_2runner_2work_2mantisbase_2mantisbase_2include_2mantisbase_2core_2auth_8h" alt=""/></div>
 <map name="a_2home_2runner_2work_2mantisbase_2mantisbase_2include_2mantisbase_2core_2auth_8h" id="a_2home_2runner_2work_2mantisbase_2mantisbase_2include_2mantisbase_2core_2auth_8h">
-<area shape="rect" title="JWT session management and entry point for API keys and OAuth." alt="" coords="93,5,326,60"/>
-<area shape="rect" title=" " alt="" coords="100,255,159,280"/>
-<area shape="poly" title=" " alt="" coords="94,56,51,77,32,92,17,109,9,128,9,147,16,165,29,184,63,218,100,245,97,249,60,222,25,187,12,168,4,148,4,127,13,107,29,88,48,73,91,51"/>
-<area shape="rect" title=" " alt="" coords="27,108,150,133"/>
-<area shape="poly" title=" " alt="" coords="174,62,118,102,115,98,171,58"/>
-<area shape="rect" href="api__keys_8h.html" title="Programmatic and REST&#45;backed API key management." alt="" coords="270,108,360,133"/>
-<area shape="poly" title=" " alt="" coords="243,58,292,97,288,101,240,62"/>
-<area shape="rect" href="types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="362,181,545,207"/>
-<area shape="poly" title=" " alt="" coords="283,58,329,79,374,106,410,137,438,169,434,172,406,141,371,110,327,84,281,62"/>
-<area shape="rect" href="oauth_8h.html" title="OAuth 2.0 / OIDC provider configuration and user login flows." alt="" coords="174,108,245,133"/>
-<area shape="poly" title=" " alt="" coords="212,60,212,94,207,94,207,60"/>
-<area shape="poly" title=" " alt="" coords="310,135,286,170,250,209,212,234,173,253,171,248,209,229,247,205,282,167,306,132"/>
-<area shape="rect" title=" " alt="" coords="162,181,236,207"/>
-<area shape="poly" title=" " alt="" coords="298,136,231,176,228,172,295,131"/>
-<area shape="rect" title=" " alt="" coords="190,255,336,280"/>
-<area shape="poly" title=" " alt="" coords="315,134,295,208,278,243,274,241,290,206,310,133"/>
-<area shape="poly" title=" " alt="" coords="338,131,420,173,418,177,336,136"/>
-<area shape="poly" title=" " alt="" coords="400,209,178,257,173,258,172,253,177,252,399,204"/>
-<area shape="poly" title=" " alt="" coords="424,209,308,252,306,247,422,204"/>
-<area shape="rect" title=" " alt="" coords="361,255,448,280"/>
-<area shape="poly" title=" " alt="" coords="448,209,422,245,418,242,443,205"/>
-<area shape="rect" title=" " alt="" coords="472,255,534,280"/>
-<area shape="poly" title=" " alt="" coords="464,205,489,242,485,245,460,209"/>
-<area shape="rect" title=" " alt="" coords="559,255,650,280"/>
-<area shape="poly" title=" " alt="" coords="479,204,568,246,566,251,477,209"/>
-<area shape="poly" title=" " alt="" coords="191,136,165,156,143,183,133,212,131,241,126,240,128,211,138,180,161,152,187,132"/>
-<area shape="poly" title=" " alt="" coords="211,134,205,168,200,167,205,133"/>
-<area shape="poly" title=" " alt="" coords="193,136,174,150,158,167,149,187,148,196,152,205,175,230,206,247,203,252,172,234,147,208,143,197,143,185,153,164,171,146,190,131"/>
-<area shape="poly" title=" " alt="" coords="246,130,402,175,400,180,244,135"/>
+<area shape="rect" title="JWT session management and entry point for API keys and OAuth." alt="" coords="94,5,327,60"/>
+<area shape="rect" title=" " alt="" coords="53,255,112,280"/>
+<area shape="poly" title=" " alt="" coords="94,56,51,77,33,92,18,109,10,126,8,143,11,162,18,180,39,214,62,243,58,246,34,218,13,182,6,163,3,144,5,125,13,107,29,88,48,73,92,51"/>
+<area shape="rect" title=" " alt="" coords="28,108,150,133"/>
+<area shape="poly" title=" " alt="" coords="175,62,118,102,115,98,172,58"/>
+<area shape="rect" href="api__keys_8h.html" title="Programmatic and REST&#45;backed API key management." alt="" coords="270,108,361,133"/>
+<area shape="poly" title=" " alt="" coords="244,58,292,97,289,101,241,62"/>
+<area shape="rect" href="types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="371,181,442,207"/>
+<area shape="poly" title=" " alt="" coords="301,58,340,78,375,106,394,136,404,167,399,168,389,138,371,110,337,83,298,63"/>
+<area shape="rect" href="oauth_8h.html" title="OAuth 2.0 / OIDC provider configuration and user login flows." alt="" coords="175,108,246,133"/>
+<area shape="poly" title=" " alt="" coords="213,60,213,94,208,94,208,60"/>
+<area shape="poly" title=" " alt="" coords="313,135,293,171,277,191,258,209,206,230,125,256,124,251,204,225,256,204,273,188,288,168,308,132"/>
+<area shape="rect" title=" " alt="" coords="170,181,245,207"/>
+<area shape="poly" title=" " alt="" coords="300,136,238,176,235,171,297,131"/>
+<area shape="rect" title=" " alt="" coords="136,255,282,280"/>
+<area shape="poly" title=" " alt="" coords="319,134,317,168,312,189,303,208,280,233,252,251,249,246,276,229,299,205,307,187,312,168,314,133"/>
+<area shape="poly" title=" " alt="" coords="332,131,382,170,379,175,329,135"/>
+<area shape="poly" title=" " alt="" coords="371,205,126,257,125,252,370,199"/>
+<area shape="poly" title=" " alt="" coords="375,209,255,252,253,247,374,204"/>
+<area shape="rect" title=" " alt="" coords="534,255,620,280"/>
+<area shape="poly" title=" " alt="" coords="435,204,538,247,536,252,433,209"/>
+<area shape="rect" title=" " alt="" coords="644,255,707,280"/>
+<area shape="poly" title=" " alt="" coords="442,202,632,252,630,257,441,207"/>
+<area shape="rect" title=" " alt="" coords="306,255,397,280"/>
+<area shape="poly" title=" " alt="" coords="399,209,371,245,367,242,395,205"/>
+<area shape="rect" href="export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="421,255,509,280"/>
+<area shape="poly" title=" " alt="" coords="418,205,449,243,445,246,414,209"/>
+<area shape="poly" title=" " alt="" coords="200,135,154,183,102,245,98,242,150,180,196,132"/>
+<area shape="poly" title=" " alt="" coords="212,134,211,168,206,168,207,134"/>
+<area shape="poly" title=" " alt="" coords="198,135,177,156,161,182,159,199,164,215,186,244,182,247,159,217,154,199,156,180,173,152,194,131"/>
+<area shape="poly" title=" " alt="" coords="243,131,362,174,361,179,241,136"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -349,9 +351,9 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:ab140f8eb0c5d2a92724601d3a2db7c28" id="r_ab140f8eb0c5d2a92724601d3a2db7c28"><td class="memItemLeft" align="right" valign="top">constexpr const char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#ab140f8eb0c5d2a92724601d3a2db7c28">mb::kAuthTokenCookieName</a> [] = &quot;mb_token&quot;</td></tr>
-<tr class="memdesc:ab140f8eb0c5d2a92724601d3a2db7c28"><td class="mdescLeft">&#160;</td><td class="mdescRight">HttpOnly cookie name used for JWT session tokens on login/refresh responses.  <br /></td></tr>
-<tr class="separator:ab140f8eb0c5d2a92724601d3a2db7c28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3577855d94ded18e61381684a8459ef2" id="r_a3577855d94ded18e61381684a8459ef2"><td class="memItemLeft" align="right" valign="top">constexpr char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a3577855d94ded18e61381684a8459ef2">mb::kAuthTokenCookieName</a> [] = &quot;mb_token&quot;</td></tr>
+<tr class="memdesc:a3577855d94ded18e61381684a8459ef2"><td class="mdescLeft">&#160;</td><td class="mdescRight">HttpOnly cookie name used for JWT session tokens on login/refresh responses.  <br /></td></tr>
+<tr class="separator:a3577855d94ded18e61381684a8459ef2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>JWT session management and entry point for API keys and OAuth. </p>

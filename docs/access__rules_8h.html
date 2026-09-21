@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.4</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.5</span>
    </div>
   </td>
  </tr>
@@ -106,18 +106,31 @@ $(document).ready(function(){initNavTree('access__rules_8h.html',''); initResiza
 <div class="textblock"><code>#include &lt;string&gt;</code><br />
 <code>#include &lt;utility&gt;</code><br />
 <code>#include &lt;nlohmann/json.hpp&gt;</code><br />
+<code>#include &lt;<a class="el" href="types_8h_source.html">mantisbase/core/types.h</a>&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for access_rules.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="access__rules_8h__incl.png" border="0" usemap="#a_2home_2runner_2work_2mantisbase_2mantisbase_2include_2mantisbase_2core_2models_2access__rules_8h" alt=""/></div>
 <map name="a_2home_2runner_2work_2mantisbase_2mantisbase_2include_2mantisbase_2core_2models_2access__rules_8h" id="a_2home_2runner_2work_2mantisbase_2mantisbase_2include_2mantisbase_2core_2models_2access__rules_8h">
-<area shape="rect" title="Access rule definition and shared evaluation for entity permissions." alt="" coords="5,5,239,60"/>
-<area shape="rect" title=" " alt="" coords="9,108,67,133"/>
-<area shape="poly" title=" " alt="" coords="98,62,61,100,57,96,94,58"/>
-<area shape="rect" title=" " alt="" coords="92,108,152,133"/>
-<area shape="poly" title=" " alt="" coords="125,60,125,94,119,94,119,60"/>
-<area shape="rect" title=" " alt="" coords="177,108,323,133"/>
-<area shape="poly" title=" " alt="" coords="163,58,223,98,220,103,160,62"/>
+<area shape="rect" title="Access rule definition and shared evaluation for entity permissions." alt="" coords="111,5,345,60"/>
+<area shape="rect" title=" " alt="" coords="5,181,64,207"/>
+<area shape="poly" title=" " alt="" coords="198,62,61,174,58,170,194,58"/>
+<area shape="rect" title=" " alt="" coords="415,108,475,133"/>
+<area shape="poly" title=" " alt="" coords="295,58,405,101,403,105,293,63"/>
+<area shape="rect" title=" " alt="" coords="88,181,235,207"/>
+<area shape="poly" title=" " alt="" coords="219,61,198,109,174,170,169,168,194,107,214,59"/>
+<area shape="rect" href="types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="209,108,391,133"/>
+<area shape="poly" title=" " alt="" coords="252,58,283,96,279,99,248,62"/>
+<area shape="poly" title=" " alt="" coords="257,136,78,184,76,178,256,131"/>
+<area shape="poly" title=" " alt="" coords="279,136,197,177,195,173,277,131"/>
+<area shape="rect" title=" " alt="" coords="486,181,573,207"/>
+<area shape="poly" title=" " alt="" coords="338,131,480,175,478,180,336,136"/>
+<area shape="rect" title=" " alt="" coords="597,181,659,207"/>
+<area shape="poly" title=" " alt="" coords="360,131,584,178,583,184,359,136"/>
+<area shape="rect" title=" " alt="" coords="259,181,349,207"/>
+<area shape="poly" title=" " alt="" coords="303,134,305,168,300,168,298,134"/>
+<area shape="rect" href="export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="373,181,461,207"/>
+<area shape="poly" title=" " alt="" coords="320,131,388,172,385,176,317,136"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -336,19 +349,19 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a60bac1ca414c3efdc014dc205550fb4e" id="r_a60bac1ca414c3efdc014dc205550fb4e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a60bac1ca414c3efdc014dc205550fb4e">mb::isGuestAuth</a> (const nlohmann::json &amp;auth)</td></tr>
+<tr class="memitem:a60bac1ca414c3efdc014dc205550fb4e" id="r_a60bac1ca414c3efdc014dc205550fb4e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a60bac1ca414c3efdc014dc205550fb4e">mb::isGuestAuth</a> (const nlohmann::json &amp;auth)</td></tr>
 <tr class="separator:a60bac1ca414c3efdc014dc205550fb4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a89c9a4043ad8ff8dd18dd3f13a782a7c" id="r_a89c9a4043ad8ff8dd18dd3f13a782a7c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a89c9a4043ad8ff8dd18dd3f13a782a7c">mb::isAdminAuth</a> (const nlohmann::json &amp;auth)</td></tr>
+<tr class="memitem:a89c9a4043ad8ff8dd18dd3f13a782a7c" id="r_a89c9a4043ad8ff8dd18dd3f13a782a7c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a89c9a4043ad8ff8dd18dd3f13a782a7c">mb::isAdminAuth</a> (const nlohmann::json &amp;auth)</td></tr>
 <tr class="separator:a89c9a4043ad8ff8dd18dd3f13a782a7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38c5ed23527c1c39c1f15aed27d0649c" id="r_a38c5ed23527c1c39c1f15aed27d0649c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a38c5ed23527c1c39c1f15aed27d0649c">mb::isUserAuth</a> (const nlohmann::json &amp;auth)</td></tr>
+<tr class="memitem:a38c5ed23527c1c39c1f15aed27d0649c" id="r_a38c5ed23527c1c39c1f15aed27d0649c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a38c5ed23527c1c39c1f15aed27d0649c">mb::isUserAuth</a> (const nlohmann::json &amp;auth)</td></tr>
 <tr class="separator:a38c5ed23527c1c39c1f15aed27d0649c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78ff3e05ae0db1f9cb44d04e60476dca" id="r_a78ff3e05ae0db1f9cb44d04e60476dca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">AccessEvalResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a78ff3e05ae0db1f9cb44d04e60476dca">mb::evaluateAccessRule</a> (const <a class="el" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;rule, const <a class="el" href="structmb_1_1AccessEvalContext.html">AccessEvalContext</a> &amp;ctx)</td></tr>
+<tr class="memitem:a78ff3e05ae0db1f9cb44d04e60476dca" id="r_a78ff3e05ae0db1f9cb44d04e60476dca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">AccessEvalResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a78ff3e05ae0db1f9cb44d04e60476dca">mb::evaluateAccessRule</a> (const <a class="el" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;rule, const <a class="el" href="structmb_1_1AccessEvalContext.html">AccessEvalContext</a> &amp;ctx)</td></tr>
 <tr class="separator:a78ff3e05ae0db1f9cb44d04e60476dca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf21ba1339ea77eaf96f1ce402c3c8d8" id="r_abf21ba1339ea77eaf96f1ce402c3c8d8"><td class="memItemLeft" align="right" valign="top">nlohmann::json&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#abf21ba1339ea77eaf96f1ce402c3c8d8">mb::buildAccessExprVars</a> (const <a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;req, const nlohmann::json &amp;auth)</td></tr>
+<tr class="memitem:abf21ba1339ea77eaf96f1ce402c3c8d8" id="r_abf21ba1339ea77eaf96f1ce402c3c8d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> nlohmann::json&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#abf21ba1339ea77eaf96f1ce402c3c8d8">mb::buildAccessExprVars</a> (const <a class="el" href="classmb_1_1MantisRequest.html">MantisRequest</a> &amp;req, const nlohmann::json &amp;auth)</td></tr>
 <tr class="separator:abf21ba1339ea77eaf96f1ce402c3c8d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6c2dcb3f695dd5a949294cd3c4f15153" id="r_a6c2dcb3f695dd5a949294cd3c4f15153"><td class="memItemLeft" align="right" valign="top">nlohmann::json&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a6c2dcb3f695dd5a949294cd3c4f15153">mb::buildAccessExprVars</a> (const nlohmann::json &amp;auth, const std::string &amp;remote_addr, int remote_port, const std::string &amp;local_addr, int local_port, const nlohmann::json &amp;body=nlohmann::json::object())</td></tr>
+<tr class="memitem:a6c2dcb3f695dd5a949294cd3c4f15153" id="r_a6c2dcb3f695dd5a949294cd3c4f15153"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> nlohmann::json&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a6c2dcb3f695dd5a949294cd3c4f15153">mb::buildAccessExprVars</a> (const nlohmann::json &amp;auth, const std::string &amp;remote_addr, int remote_port, const std::string &amp;local_addr, int local_port, const nlohmann::json &amp;body=nlohmann::json::object())</td></tr>
 <tr class="separator:a6c2dcb3f695dd5a949294cd3c4f15153"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1306623f5aebfe023cbc8a7439353b78" id="r_a1306623f5aebfe023cbc8a7439353b78"><td class="memItemLeft" align="right" valign="top">std::pair&lt; int, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a1306623f5aebfe023cbc8a7439353b78">mb::accessEvalHttpError</a> (<a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">AccessEvalResult</a> result, const <a class="el" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;rule=<a class="el" href="classmb_1_1AccessRule.html">AccessRule</a>{})</td></tr>
+<tr class="memitem:a1306623f5aebfe023cbc8a7439353b78" id="r_a1306623f5aebfe023cbc8a7439353b78"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> std::pair&lt; int, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemb.html#a1306623f5aebfe023cbc8a7439353b78">mb::accessEvalHttpError</a> (<a class="el" href="namespacemb.html#a935a06f050f59b9c3fb19ee701afd654">AccessEvalResult</a> result, const <a class="el" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;rule=<a class="el" href="classmb_1_1AccessRule.html">AccessRule</a>{})</td></tr>
 <tr class="separator:a1306623f5aebfe023cbc8a7439353b78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
