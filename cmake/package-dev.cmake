@@ -139,7 +139,6 @@ foreach(_os ${MB_PLATFORMS})
     message(STATUS "  [${_os}] libs: arches ${_arch_dirs}")
 
     # 3. CMake integration entry point + quick readme + version.
-    file(COPY "${_SRC}/cmake/dev-package/CMakeLists.txt" DESTINATION "${_pkg}")
     if(_os STREQUAL "windows")
         set(MB_OS "windows")
         set(MB_OS_PRETTY "Windows")
