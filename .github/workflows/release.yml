@@ -50,8 +50,8 @@ jobs:
 
       - name: Create dev zips (one per OS)
         run: |
-          (cd ${{ github.workspace }}/dev-package/linux && zip -r ../../mantisbase_${{ github.ref_name }}-linux-cpp-dev.zip CMakeLists.txt README.md VERSION include/ libs/ lib/)
-          (cd ${{ github.workspace }}/dev-package/windows && zip -r ../../mantisbase_${{ github.ref_name }}-windows-cpp-dev.zip CMakeLists.txt README.md VERSION include/ libs/ lib/)
+          (cd ${{ github.workspace }}/dev-package/linux && zip -r ../../mantisbase_${{ github.ref_name }}-linux-cpp-dev.zip README.md VERSION include/ libs/ cmake/)
+          (cd ${{ github.workspace }}/dev-package/windows && zip -r ../../mantisbase_${{ github.ref_name }}-windows-cpp-dev.zip README.md VERSION include/ libs/ cmake/)
 
       - name: Upload dev zip artifacts
         uses: actions/upload-artifact@v4
