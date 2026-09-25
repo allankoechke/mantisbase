@@ -9,7 +9,6 @@ Static archives are not shipped in this package.
 ## Layout
 
 ```
-CMakeLists.txt   add_subdirectory() entry point (defines the `mantisbase` target)
 README.md        this file
 VERSION          release tag
 include/         header tree for this OS (mantisbase headers + bundled
@@ -19,7 +18,7 @@ libs/
   x86/           prebuilt shared library for x86-64 (@MB_LIB_FILE@)
   arm/           prebuilt shared library for aarch64 (@MB_LIB_FILE@)
                  (Windows ships x86 only)
-lib/cmake/MantisBase/
+cmake/
   MantisBaseConfig.cmake         find_package(MantisBase) entry point
   MantisBaseConfigVersion.cmake  version matching
 ```
@@ -30,22 +29,10 @@ lib/cmake/MantisBase/
 
 ## Quick integration (CMake)
 
-Unzip (e.g. into `mantisbase-@MB_OS@-cpp-dev/`) and point your project at it:
+Unzip (e.g. into `mantisbase-@MB_OS@-cpp-dev/`) and point your project at it using `find_package`.
 
 ```cmake
-cmake_minimum_required(VERSION 3.22)
-project(my_app)
-
-add_subdirectory(path/to/mantisbase-@MB_OS@-cpp-dev)
-
-add_executable(my_app main.cpp)
-target_link_libraries(my_app PRIVATE mantisbase)
-```
-
-Prefer `find_package`? Point CMake at the package instead:
-
-```cmake
-# cmake -B build -DCMAKE_PREFIX_PATH=/path/to/mantisbase-@MB_OS@-cpp-dev
+set(MantisBase_DIR "/path/to/mantisbase-@MB_OS@-cpp-dev/cmake")
 find_package(MantisBase REQUIRED)
 target_link_libraries(my_app PRIVATE mantisbase::shared)
 ```

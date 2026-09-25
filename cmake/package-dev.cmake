@@ -158,11 +158,11 @@ foreach(_os ${MB_PLATFORMS})
     file(WRITE "${_pkg}/VERSION" "${MB_VERSION_TAG}\n")
 
     # 4. CMake package config (find_package alternative).
-    file(MAKE_DIRECTORY "${_pkg}/lib/cmake/MantisBase")
-    configure_file("${_SRC}/cmake/MantisBaseConfig.cmake.in"
-        "${_pkg}/lib/cmake/MantisBase/MantisBaseConfig.cmake" @ONLY)
-    configure_file("${_SRC}/cmake/MantisBaseConfigVersion.cmake.in"
-        "${_pkg}/lib/cmake/MantisBase/MantisBaseConfigVersion.cmake" @ONLY)
+    file(MAKE_DIRECTORY "${_pkg}/cmake")
+    configure_file("${_SRC}/cmake/dev-package/MantisBaseConfig.cmake.in"
+        "${_pkg}/cmake/MantisBaseConfig.cmake" @ONLY)
+    configure_file("${_SRC}/cmake/dev-package/MantisBaseConfigVersion.cmake.in"
+        "${_pkg}/cmake/MantisBaseConfigVersion.cmake" @ONLY)
 
     message(STATUS "  [${_os}] package: ${_pkg}")
 endforeach()
