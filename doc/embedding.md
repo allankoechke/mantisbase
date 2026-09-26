@@ -35,8 +35,12 @@ Download the prebuilt C++ dev package for your OS from
 (`mantisbase_<tag>-linux-cpp-dev.zip` or `mantisbase_<tag>-windows-cpp-dev.zip`):
 
 ```cmake
-add_subdirectory(path/to/mantisbase-linux-cpp-dev)
-target_link_libraries(your_app PRIVATE mantisbase)
+# For Windows
+# set(MantisBase_DIR "/path/to/mantisbase-windows-cpp-dev/cmake")
+
+set(MantisBase_DIR "/path/to/mantisbase-linux-cpp-dev/cmake")
+find_package(MantisBase REQUIRED)
+target_link_libraries(my_app PRIVATE mantisbase::shared)
 ```
 
 See the [C++ Dev Package Guide](cpp-dev-package.md) for the full walkthrough.
@@ -298,22 +302,6 @@ int main()
     
     return app->run();
 }
-```
-
----
-
-## Project Structure
-
-A typical embedded project structure:
-
-```
-your-app/
-├── main.cpp
-├── CMakeLists.txt
-├── data/              # SQLite database and files (created automatically)
-├── public/            # Static assets (optional)
-├── scripts/           # JavaScript extensions (optional)
-└── mantisbase/        # MantisBase submodule
 ```
 
 ---

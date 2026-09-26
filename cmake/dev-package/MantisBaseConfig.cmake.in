@@ -1,7 +1,7 @@
 # MantisBaseConfig.cmake — find_package(MantisBase) entry point.
 #
 # Shipped inside each per-OS mantisbase *-dev-<os>.zip at:
-#   <prefix>/lib/cmake/MantisBase/MantisBaseConfig.cmake
+#   <prefix>/cmake/MantisBaseConfig.cmake
 #
 # Layout of the dev package it describes:
 #   <prefix>/include/             full header tree for this OS (mantisbase
@@ -29,8 +29,8 @@ endif()
 set(MantisBase_VERSION "@MB_VERSION@")
 
 # --- Locate the dev-package prefix ------------------------------------------
-# This file lives at <prefix>/lib/cmake/MantisBase/MantisBaseConfig.cmake.
-get_filename_component(_MB_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
+# This file lives at <prefix>/cmake/MantisBaseConfig.cmake.
+get_filename_component(_MB_PREFIX "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 
 # --- Detect platform / architecture -----------------------------------------
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

@@ -26,12 +26,11 @@
 #   (soci-config.h, wolfssl options.h) can never leak across platforms.
 #
 # Output layout (one directory per OS, zipped separately by release.yml):
-#   <out>/<os>/CMakeLists.txt         add_subdirectory() entry point
 #   <out>/<os>/README.md              quick start (from cmake/dev-package/)
 #   <out>/<os>/VERSION                release tag
 #   <out>/<os>/include/               full header tree for this OS
 #   <out>/<os>/libs/<arch>/           prebuilt shared library
-#   <out>/<os>/lib/cmake/MantisBase/  MantisBaseConfig.cmake + version file
+#   <out>/<os>/cmake/                 MantisBaseConfig.cmake + version file
 #
 # Design notes:
 # - Only headers reachable from the public API (include/mantisbase/**) are
