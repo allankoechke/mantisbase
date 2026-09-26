@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('docs_file.html',''); initResizable(); 
 <div class="contents">
 <div class="textblock"><p>MantisBase supports file uploads and management for database records. Files can be associated with records through <code>file</code> or <code>files</code> field types and are stored on disk with references in the database.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md200"></a>
+<h2><a class="anchor" id="autotoc_md197"></a>
 File Serving</h2>
 <p>All files stored in the database are accessible via:</p>
 <div class="fragment"><div class="line">GET /api/v1/files/&lt;entity&gt;/&lt;filename&gt;</div>
@@ -109,7 +109,7 @@ File Serving</h2>
 <div class="fragment"><div class="line">curl http://localhost:7070/api/v1/files/posts/image123.jpg</div>
 </div><!-- fragment --><p>The endpoint returns the file if it exists, or a 404 error if not found.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md202"></a>
+<h2><a class="anchor" id="autotoc_md199"></a>
 Creating Records with Files</h2>
 <p>To create a record with file uploads, send a POST request using <code>multipart/form-data</code>:</p>
 <p><b>Endpoint:</b> <code>POST /api/v1/entities/&lt;entity&gt;</code></p>
@@ -134,7 +134,7 @@ Creating Records with Files</h2>
 <div class="line">});</div>
 </div><!-- fragment --><p>The backend processes and stores the files, associating them with the new record. File names are stored in the database record.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md204"></a>
+<h2><a class="anchor" id="autotoc_md201"></a>
 Updating Files in Records</h2>
 <p>To update files associated with a record, send a PATCH request with <code>multipart/form-data</code>:</p>
 <p><b>Endpoint:</b> <code>PATCH /api/v1/entities/&lt;entity&gt;/&lt;id&gt;</code></p>
@@ -145,7 +145,7 @@ Updating Files in Records</h2>
 <div class="line">  -F &quot;image=@/path/to/new-image.jpg&quot;</div>
 </div><!-- fragment --><p><b>Important:</b> For fields that accept multiple files (<code>files</code> type), include all files you want to keep. Any files not included in the update will be deleted from both the database record and the filesystem.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md206"></a>
+<h2><a class="anchor" id="autotoc_md203"></a>
 Deleting Files</h2>
 <p>To delete a file from a record:</p>
 <ol type="1">
@@ -160,13 +160,13 @@ Deleting Files</h2>
 <div class="line">  -d &#39;{&quot;title&quot;: &quot;Updated&quot;, &quot;image&quot;: null}&#39;</div>
 </div><!-- fragment --><p>The backend detects the missing file and removes it from both the database and filesystem.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md208"></a>
+<h2><a class="anchor" id="autotoc_md205"></a>
 File Storage</h2>
 <p>Files are stored under a <code>files/</code> subdirectory inside the data directory:</p>
 <div class="fragment"><div class="line">&lt;dataDir&gt;/files/&lt;entity&gt;/&lt;filename&gt;</div>
 </div><!-- fragment --><p>For example, if <code>dataDir</code> is <code>./data</code> and entity is <code>posts</code>, a file <code>image.jpg</code> would be stored at:</p>
 <div class="fragment"><div class="line">./data/files/posts/image.jpg</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md209"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md206"></a>
 Filename Sanitization</h3>
 <p>Uploaded filenames are automatically sanitized before storage:</p>
 <ul>
@@ -177,11 +177,11 @@ Filename Sanitization</h3>
 - Filenames longer than 255 characters are truncated with &lt;tt&gt;...&lt;/tt&gt; in the middle
 - If the result is empty after sanitization, the filename falls back to &lt;tt&gt;"unnamed"&lt;/tt&gt;
 
-@subsubsection autotoc_md210 Path Traversal Protection
+@subsubsection autotoc_md207 Path Traversal Protection
 
 MantisBase uses multi-layered path traversal prevention on all file operations. Any request whose resolved path escapes the entity's storage directory is rejected with a &lt;tt&gt;400 Bad Request&lt;/tt&gt; error.
 
-@subsubsection autotoc_md211 Upload Limits
+@subsubsection autotoc_md208 Upload Limits
 
 - &lt;strong&gt;File size&lt;/strong&gt;: uploads larger than the &lt;tt&gt;maxFileSize&lt;/tt&gt; application setting (bytes, default &lt;tt&gt;10485760&lt;/tt&gt; / 10 MiB) are rejected with &lt;strong&gt;413 Payload Too Large&lt;/strong&gt;.
 - &lt;strong&gt;File types&lt;/strong&gt;: uploads are restricted to an allow-list of extensions (images, audio/video, common documents and archives, and plain-text/data formats). Anything else is rejected with &lt;strong&gt;415 Unsupported Media Type&lt;/strong&gt;.
@@ -190,17 +190,17 @@ MantisBase uses multi-layered path traversal prevention on all file operations. 
 
 &lt;tt&gt;.jpg&lt;/tt&gt;, &lt;tt&gt;.jpeg&lt;/tt&gt;, &lt;tt&gt;.png&lt;/tt&gt;, &lt;tt&gt;.gif&lt;/tt&gt;, &lt;tt&gt;.bmp&lt;/tt&gt;, &lt;tt&gt;.webp&lt;/tt&gt;, &lt;tt&gt;.ico&lt;/tt&gt;, &lt;tt&gt;.tiff&lt;/tt&gt;, &lt;tt&gt;.tif&lt;/tt&gt;, &lt;tt&gt;.svg&lt;/tt&gt;, &lt;tt&gt;.pdf&lt;/tt&gt;, &lt;tt&gt;.doc&lt;/tt&gt;, &lt;tt&gt;.docx&lt;/tt&gt;, &lt;tt&gt;.xls&lt;/tt&gt;, &lt;tt&gt;.xlsx&lt;/tt&gt;, &lt;tt&gt;.ppt&lt;/tt&gt;, &lt;tt&gt;.pptx&lt;/tt&gt;, &lt;tt&gt;.odt&lt;/tt&gt;, &lt;tt&gt;.ods&lt;/tt&gt;, &lt;tt&gt;.odp&lt;/tt&gt;, &lt;tt&gt;.txt&lt;/tt&gt;, &lt;tt&gt;.csv&lt;/tt&gt;, &lt;tt&gt;.tsv&lt;/tt&gt;, &lt;tt&gt;.rtf&lt;/tt&gt;, &lt;tt&gt;.zip&lt;/tt&gt;, &lt;tt&gt;.gz&lt;/tt&gt;, &lt;tt&gt;.tar&lt;/tt&gt;, &lt;tt&gt;.7z&lt;/tt&gt;, &lt;tt&gt;.rar&lt;/tt&gt;, &lt;tt&gt;.json&lt;/tt&gt;, &lt;tt&gt;.xml&lt;/tt&gt;, &lt;tt&gt;.yaml&lt;/tt&gt;, &lt;tt&gt;.yml&lt;/tt&gt;, &lt;tt&gt;.mp3&lt;/tt&gt;, &lt;tt&gt;.wav&lt;/tt&gt;, &lt;tt&gt;.ogg&lt;/tt&gt;, &lt;tt&gt;.flac&lt;/tt&gt;, &lt;tt&gt;.mp4&lt;/tt&gt;, &lt;tt&gt;.avi&lt;/tt&gt;, &lt;tt&gt;.mov&lt;/tt&gt;, &lt;tt&gt;.webm&lt;/tt&gt;, &lt;tt&gt;.mkv&lt;/tt&gt;
 
-@subsubsection autotoc_md212 Serving Files
+@subsubsection autotoc_md209 Serving Files
 
 &lt;tt&gt;GET /api/v1/files/:entity/:file&lt;/tt&gt; enforces the entity's &lt;strong&gt;get&lt;/strong&gt; access rule using the same evaluation order as entity endpoints (admin short-circuit, then mode/entity filter). Files on a non-public entity require a verified token; admin-only rules require &lt;tt&gt;auth.type == "admin"&lt;/tt&gt;. Auth rules may include an &lt;tt&gt;entity&lt;/tt&gt; filter to restrict which auth entity can fetch files.
 
-@subsubsection autotoc_md213 Remaining Limitations
+@subsubsection autotoc_md210 Remaining Limitations
 
 - &lt;strong&gt;Files per record&lt;/strong&gt;: No limit on the number of files per record.
 
 &lt;hr&gt;
 
-@subsection autotoc_md215 Field Types
+@subsection autotoc_md212 Field Types
 
 MantisBase supports two file field types:
 
@@ -220,7 +220,7 @@ When defining your schema:
 <p><code></p><hr  />
 <p></code></p>
 <p><code></code></p>
-<h2><a class="anchor" id="autotoc_md217"></a>
+<h2><a class="anchor" id="autotoc_md214"></a>
 Important Notes</h2>
 <p><code></code></p>
 <p><code></p><ul>

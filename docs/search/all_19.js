@@ -3,7 +3,7 @@ var searchData=
   ['v1_20realtime_20—_20open_20sse_20connection_0',['GET /api/v1/realtime — Open SSE connection',['../docs_rest_api.html#autotoc_md57',1,'']]],
   ['v1_20realtime_20—_20subscribe_20update_20session_1',['POST /api/v1/realtime — Subscribe / update session',['../docs_rest_api.html#autotoc_md58',1,'']]],
   ['validate_2',['validate',['../classmb_1_1EntitySchema.html#a13dab5c58f462268ef16c3835f011025',1,'mb::EntitySchema::validate(const EntitySchema &amp;table_schema)'],['../classmb_1_1EntitySchema.html#a37d0ab101f2ebe332b24bae36788b6c8',1,'mb::EntitySchema::validate() const'],['../classmb_1_1EntitySchemaField.html#af117d972e8658499f7f95e30993abea2',1,'mb::EntitySchemaField::validate()']]],
-  ['validate_20user_20data_20exists_3',['3. Validate User Data Exists',['../docs_rest_api_rules.html#autotoc_md298',1,'']]],
+  ['validate_20user_20data_20exists_3',['3. Validate User Data Exists',['../docs_rest_api_rules.html#autotoc_md295',1,'']]],
   ['validateintconstraintbounds_4',['validateIntConstraintBounds',['../namespacemb.html#aeee48d117ecdb58563be7bc289fc4771',1,'mb']]],
   ['validateintfieldvalue_5',['validateIntFieldValue',['../namespacemb.html#aca3e22f5ed3a0508a7d703bc5b85354c',1,'mb']]],
   ['validateintprecisiontoken_6',['validateIntPrecisionToken',['../namespacemb.html#a396aa186b5e8e30715cfe5342f9b2111',1,'mb']]],
@@ -20,7 +20,7 @@ var searchData=
   ['verify_20token_17',['Verify Token',['../docs_auth_api.html#autotoc_md93',1,'']]],
   ['verifypassword_18',['verifyPassword',['../namespacemb.html#aa3085c18b75188b1e46d16c21ab2e58b',1,'mb']]],
   ['verifytoken_19',['verifyToken',['../classmb_1_1Auth.html#afbda2e1689cce183f65525f331c8011a',1,'mb::Auth']]],
-  ['via_20api_20',['Setting Rules via API',['../docs_rest_api_rules.html#autotoc_md283',1,'']]],
+  ['via_20api_20',['Setting Rules via API',['../docs_rest_api_rules.html#autotoc_md280',1,'']]],
   ['view_20query_20validation_21',['View Query Validation',['../docs_rest_api.html#autotoc_md25',1,'']]],
   ['viewquery_22',['viewquery',['../classmb_1_1EntitySchema.html#a5dca679b4d803cf7bfacc93102d6950f',1,'mb::EntitySchema::viewQuery()'],['../classmb_1_1Entity.html#a0cecc9118e992c15d1b8dabb671b7748',1,'mb::Entity::viewQuery()']]],
   ['viewtypesqlcheck_23',['viewTypeSQLCheck',['../classmb_1_1Validators.html#a5e2e7fe072dd5a7d95de9c4757374bbb',1,'mb::Validators']]]

@@ -97,11 +97,11 @@ $(document).ready(function(){initNavTree('docs_healthcheck.html',''); initResiza
 <div class="contents">
 <div class="textblock"><p>The health check endpoint provides a simple way to verify that the MantisBase server is running and responsive. It is useful for monitoring tools, load balancers, and deployment scripts.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md219"></a>
+<h2><a class="anchor" id="autotoc_md216"></a>
 Endpoint</h2>
 <div class="fragment"><div class="line">GET /api/v1/health</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md221"></a>
+<h2><a class="anchor" id="autotoc_md218"></a>
 Response</h2>
 <p>A successful request returns:</p>
 <div class="fragment"><div class="line">{</div>
@@ -109,7 +109,7 @@ Response</h2>
 <div class="line">}</div>
 </div><!-- fragment --><p>The HTTP status code for a healthy response is <code>200 OK</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md223"></a>
+<h2><a class="anchor" id="autotoc_md220"></a>
 Example</h2>
 <p><b>Request:</b></p>
 <div class="fragment"><div class="line">curl http://localhost:7070/api/v1/health</div>
@@ -118,11 +118,11 @@ Example</h2>
 <div class="line">  &quot;status&quot;: &quot;OK&quot;</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md225"></a>
+<h2><a class="anchor" id="autotoc_md222"></a>
 Error Handling</h2>
 <p>If the server encounters an error while processing the health check, it may return a <code>500 Internal Server Error</code> with an appropriate error message.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md227"></a>
+<h2><a class="anchor" id="autotoc_md224"></a>
 Usage</h2>
 <ul>
 <li>Verify server availability and responsiveness</li>
