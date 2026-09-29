@@ -26,12 +26,11 @@
 #   (soci-config.h, wolfssl options.h) can never leak across platforms.
 #
 # Output layout (one directory per OS, zipped separately by release.yml):
-#   <out>/<os>/CMakeLists.txt         add_subdirectory() entry point
 #   <out>/<os>/README.md              quick start (from cmake/dev-package/)
 #   <out>/<os>/VERSION                release tag
 #   <out>/<os>/include/               full header tree for this OS
 #   <out>/<os>/libs/<arch>/           prebuilt shared library
-#   <out>/<os>/lib/cmake/MantisBase/  MantisBaseConfig.cmake + version file
+#   <out>/<os>/cmake/                 MantisBaseConfig.cmake + version file
 #
 # Design notes:
 # - Only headers reachable from the public API (include/mantisbase/**) are
@@ -139,7 +138,6 @@ foreach(_os ${MB_PLATFORMS})
     message(STATUS "  [${_os}] libs: arches ${_arch_dirs}")
 
     # 3. CMake integration entry point + quick readme + version.
-    file(COPY "${_SRC}/cmake/dev-package/CMakeLists.txt" DESTINATION "${_pkg}")
     if(_os STREQUAL "windows")
         set(MB_OS "windows")
         set(MB_OS_PRETTY "Windows")
@@ -158,11 +156,11 @@ foreach(_os ${MB_PLATFORMS})
     file(WRITE "${_pkg}/VERSION" "${MB_VERSION_TAG}\n")
 
     # 4. CMake package config (find_package alternative).
-    file(MAKE_DIRECTORY "${_pkg}/lib/cmake/MantisBase")
-    configure_file("${_SRC}/cmake/MantisBaseConfig.cmake.in"
-        "${_pkg}/lib/cmake/MantisBase/MantisBaseConfig.cmake" @ONLY)
-    configure_file("${_SRC}/cmake/MantisBaseConfigVersion.cmake.in"
-        "${_pkg}/lib/cmake/MantisBase/MantisBaseConfigVersion.cmake" @ONLY)
+    file(MAKE_DIRECTORY "${_pkg}/cmake")
+    configure_file("${_SRC}/cmake/dev-package/MantisBaseConfig.cmake.in"
+        "${_pkg}/cmake/MantisBaseConfig.cmake" @ONLY)
+    configure_file("${_SRC}/cmake/dev-package/MantisBaseConfigVersion.cmake.in"
+        "${_pkg}/cmake/MantisBaseConfigVersion.cmake" @ONLY)
 
     message(STATUS "  [${_os}] package: ${_pkg}")
 endforeach()

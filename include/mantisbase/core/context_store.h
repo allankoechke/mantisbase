@@ -12,6 +12,7 @@
 
 #include <nlohmann/json.hpp>
 #include "../utils/utils.h"
+#include "types.h"
 
 #ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
@@ -57,10 +58,9 @@ namespace mb
      * Additionally, we have a @see get_or() method that takes in a key and a default value if the key is missing. This
      * unlike @see get() method, returns a `T&` instead of `T*` depending on the usage needs.
      */
-    class ContextStore
+    class MANTISBASE_API ContextStore
     {
         std::unordered_map<std::string, std::any> data;
-        std::string __class_name__ = "mb::ContextStore";
 
     public:
         ContextStore() = default;

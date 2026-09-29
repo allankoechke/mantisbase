@@ -37,7 +37,7 @@ namespace mb {
      * Thread-safe. One instance is owned by @ref SSEMgr and shares the SSE cleanup loop
      * via @ref cleanupStaleConnections.
      */
-    class WSMgr {
+    class MANTISBASE_API WSMgr {
     public:
         explicit WSMgr(const MantisBase&);
         ~WSMgr() = default;

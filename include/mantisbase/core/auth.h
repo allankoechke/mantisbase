@@ -13,12 +13,12 @@
 
 #include "api_keys.h"
 #include "oauth.h"
-#include "../core/types.h"
+#include "types.h"
 
 namespace mb
 {
     /// HttpOnly cookie name used for JWT session tokens on login/refresh responses.
-    inline constexpr const char kAuthTokenCookieName[] = "mb_token";
+    inline constexpr char kAuthTokenCookieName[] = "mb_token";
 
     /**
      * @brief JWT token creation and verification utilities.
@@ -43,7 +43,7 @@ namespace mb
      * auth.oauth().buildAuthorizeUrl("users", "google", redirect_uri);
      * @endcode
      */
-    class Auth
+    class MANTISBASE_API Auth
     {
         const MantisBase& mApp;
         std::unique_ptr<OAuthManager> m_oauth;

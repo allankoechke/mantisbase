@@ -9,16 +9,17 @@
 #include <string>
 #include <utility>
 #include <nlohmann/json.hpp>
+#include <mantisbase/core/types.h>
 
 namespace mb {
     class MantisRequest;
 
     /** @return `true` when @p auth represents an unauthenticated guest. */
-    [[nodiscard]] bool isGuestAuth(const nlohmann::json &auth);
+    MANTISBASE_API [[nodiscard]] bool isGuestAuth(const nlohmann::json &auth);
     /** @return `true` when @p auth represents an `mb_admins` session. */
-    [[nodiscard]] bool isAdminAuth(const nlohmann::json &auth);
+    MANTISBASE_API [[nodiscard]] bool isAdminAuth(const nlohmann::json &auth);
     /** @return `true` when @p auth represents a regular entity user session. */
-    [[nodiscard]] bool isUserAuth(const nlohmann::json &auth);
+    MANTISBASE_API [[nodiscard]] bool isUserAuth(const nlohmann::json &auth);
 
     /** Outcome of @ref evaluateAccessRule for HTTP, SSE, and WebSocket checks. */
     enum class AccessEvalResult {
@@ -29,7 +30,7 @@ namespace mb {
     };
 
     /** Inputs shared by entity list/get/create/update/delete access checks. */
-    struct AccessEvalContext {
+    struct MANTISBASE_API AccessEvalContext {
         const nlohmann::json &auth;          ///< Resolved auth block from middleware
         const nlohmann::json &verification;  ///< JWT/API-key verification metadata
         MantisRequest *req = nullptr;        ///< Optional HTTP request (custom rules)
@@ -41,7 +42,7 @@ namespace mb {
      * Modes: `public`, `auth` (optional comma-separated `entity` filter), `custom` (expr),
      * or empty string (admin only).
      */
-    class AccessRule {
+    class MANTISBASE_API AccessRule {
     public:
         /** Construct a rule from mode, optional custom expression, and optional entity filter. */
         explicit AccessRule(const std::string &mode = "", const std::string &expr = "",
@@ -75,18 +76,18 @@ namespace mb {
     };
 
     /** Evaluate @p rule against @p ctx (auth, verification, optional request). */
-    [[nodiscard]] AccessEvalResult evaluateAccessRule(const AccessRule &rule, const AccessEvalContext &ctx);
+    MANTISBASE_API [[nodiscard]] AccessEvalResult evaluateAccessRule(const AccessRule &rule, const AccessEvalContext &ctx);
 
     /** Build expression variables from an HTTP request and auth block (custom rules). */
-    [[nodiscard]] nlohmann::json buildAccessExprVars(const MantisRequest &req, const nlohmann::json &auth);
+    MANTISBASE_API [[nodiscard]] nlohmann::json buildAccessExprVars(const MantisRequest &req, const nlohmann::json &auth);
 
     /** Build expression variables for non-HTTP contexts (SSE/WS, tests). */
-    [[nodiscard]] nlohmann::json buildAccessExprVars(const nlohmann::json &auth, const std::string &remote_addr,
+    MANTISBASE_API [[nodiscard]] nlohmann::json buildAccessExprVars(const nlohmann::json &auth, const std::string &remote_addr,
                                                      int remote_port, const std::string &local_addr, int local_port,
                                                      const nlohmann::json &body = nlohmann::json::object());
 
     /** @return `{status, error}` for HTTP error responses. */
-    [[nodiscard]] std::pair<int, std::string> accessEvalHttpError(AccessEvalResult result,
+    MANTISBASE_API [[nodiscard]] std::pair<int, std::string> accessEvalHttpError(AccessEvalResult result,
                                                                   const AccessRule &rule = AccessRule{});
 } // mb
 

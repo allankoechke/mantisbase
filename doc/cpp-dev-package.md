@@ -18,7 +18,6 @@ Each GitHub release ships one C++ dev package per OS (shared library only, no st
 Download from [GitHub Releases](https://github.com/allankoechke/mantisbase/releases) and unzip, e.g. into `mantisbase-linux-cpp-dev/`. Every package contains:
 
 ```
-CMakeLists.txt   add_subdirectory() entry point (defines the `mantisbase` target)
 README.md        quick start
 VERSION          release tag
 include/         header tree for this OS (mantisbase headers + bundled
@@ -27,7 +26,7 @@ include/         header tree for this OS (mantisbase headers + bundled
 libs/
   x86/           prebuilt shared library for x86-64
   arm/           prebuilt shared library for aarch64 (Linux only)
-lib/cmake/MantisBase/
+cmake/
   MantisBaseConfig.cmake         find_package(MantisBase) entry point
   MantisBaseConfigVersion.cmake  version matching
 ```
@@ -55,21 +54,7 @@ sudo apt-get install -y libpq-dev uuid-dev
 
 ## Integration
 
-### Option A: `add_subdirectory` (recommended)
-
-```cmake
-cmake_minimum_required(VERSION 3.22)
-project(my_app)
-
-add_subdirectory(path/to/mantisbase-linux-cpp-dev)
-
-add_executable(my_app main.cpp)
-target_link_libraries(my_app PRIVATE mantisbase)
-```
-
-The right `libs/<arch>/` binary is picked automatically for your CPU.
-
-### Option B: `find_package`
+### Option A: `find_package` (recommended)
 
 ```cmake
 # cmake -B build -DCMAKE_PREFIX_PATH=/path/to/mantisbase-linux-cpp-dev
@@ -79,7 +64,9 @@ target_link_libraries(my_app PRIVATE mantisbase::shared)
 
 A version can be requested: `find_package(MantisBase 0.4 REQUIRED)`.
 
-### Option C: manual (without CMake)
+The right `libs/<arch>/` binary is picked automatically for your CPU.
+
+### Option B: manual (without CMake)
 
 Linux — make sure the `.so` is findable at runtime (via `rpath` or `LD_LIBRARY_PATH`):
 

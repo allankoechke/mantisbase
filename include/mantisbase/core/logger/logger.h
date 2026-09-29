@@ -39,7 +39,7 @@ namespace mb {
      * A wrapper class around the `spdlog's` logging functions.
      * For more info, check docs here: @see https://github.com/gabime/spdlog
      */
-    class Logger {
+    class MANTISBASE_API Logger {
         std::unique_ptr<LogDatabase> m_logsDb;
         const MantisBase &mApp;
 

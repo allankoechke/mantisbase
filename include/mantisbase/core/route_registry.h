@@ -29,7 +29,7 @@ namespace mb
     };
 
     /** Handler plus ordered middleware chain for a single route. */
-    struct RouteHandler
+    struct MANTISBASE_API RouteHandler
     {
         std::vector<MiddlewareFn> middlewares;
         std::variant<HandlerFn, HandlerWithContentReaderFn> handler;
@@ -40,7 +40,7 @@ namespace mb
      *
      * Supports both plain and content-reader handler variants (multipart uploads).
      */
-    class RouteRegistry
+    class MANTISBASE_API RouteRegistry
     {
         std::unordered_map<RouteKey, RouteHandler, RouteKeyHash> routes;
 

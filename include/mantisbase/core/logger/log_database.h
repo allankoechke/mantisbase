@@ -16,6 +16,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include <mantisbase/core/types.h>
 
 namespace soci {
     class session;
@@ -31,7 +32,7 @@ namespace mb {
      * Provides methods to store logs in a separate SQLite database,
      * with automatic cleanup of logs older than the configured retention period.
      */
-    class LogDatabase {
+    class MANTISBASE_API LogDatabase {
     public:
         /**
          * @brief Construct LogDatabase instance.

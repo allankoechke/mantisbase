@@ -102,7 +102,7 @@ namespace mb {
 
         m_app.logger().trace(
             "Scripting",
-            fmt::format("No entry script found in `{}` (expected main.mb.js)", scripts_dir.string()));
+            fmt::format("No entry script found in scripts dir (expected main.mb.js)"));
     }
 
     void ScriptingEngine::loadScript(const std::string &relativePath) {

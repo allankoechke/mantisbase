@@ -36,7 +36,7 @@ namespace mb {
     /**
      * @brief Central HTTP router and schema cache for a @ref MantisBase instance.
      */
-    class Router: public IMantisBase {
+    class MANTISBASE_API Router: public IMantisBase {
     public:
         explicit Router(const MantisBase& app);
         ~Router();

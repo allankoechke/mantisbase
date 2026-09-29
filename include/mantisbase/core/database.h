@@ -14,6 +14,7 @@
 #include <soci/soci.h>
 #include <nlohmann/json.hpp>
 #include <mantisbase/core/private-impl/soci_custom_types.hpp>
+#include "types.h"
 
 #ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
@@ -41,7 +42,7 @@ namespace mb {
      * *session << "SELECT * FROM users", soci::into(rows);
      * @endcode
      */
-    class Database {
+    class MANTISBASE_API Database {
     public:
         /**
          * @brief Construct database instance bound to an application.

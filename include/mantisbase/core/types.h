@@ -16,6 +16,8 @@
 #include <vector>
 #include <filesystem>
 
+#include "../export.h"
+
 namespace mb {
     class MantisBase;
     class MantisRequest;
@@ -80,7 +82,7 @@ namespace mb {
      * });
      * @endcode
      */
-    class IMantisBase {
+    class MANTISBASE_API IMantisBase {
         const MantisBase& m_app; ///< Const ref to the parent MantisBase instance //
 
     public:

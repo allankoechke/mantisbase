@@ -24,7 +24,7 @@ namespace mb {
     using Records = std::vector<Record>;  ///< Collection of database records
 
     /** Result of a paginated entity list query. */
-    struct EntityListPage {
+    struct MANTISBASE_API EntityListPage {
         Records items;
         bool has_more = false;
     };
@@ -50,7 +50,7 @@ namespace mb {
      * Entity users = app->entity("users");
      * @endcode
      */
-    class Entity: public IMantisBase {
+    class MANTISBASE_API Entity: public IMantisBase {
     public:
         /**
          * @brief Construct entity from schema JSON object, bound to its app.

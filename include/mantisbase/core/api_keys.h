@@ -27,13 +27,13 @@
 #include <optional>
 #include <nlohmann/json.hpp>
 
-#include "mantisbase/core/types.h"
+#include "types.h"
 
 namespace mb {
     using json = nlohmann::json;
 
     /** Raw key material returned once from @ref ApiKeyManager::generateApiKey(). */
-    struct ApiKeyResult {
+    struct MANTISBASE_API ApiKeyResult {
         std::string id;
         std::string key;
         std::string key_hash;
@@ -48,7 +48,7 @@ namespace mb {
      * - `POST|GET /api/v1/sys/api-keys` (admin)
      * - `DELETE /api/v1/sys/api-keys/:id` (admin)
      */
-    class ApiKeyManager: public IMantisBase {
+    class MANTISBASE_API ApiKeyManager: public IMantisBase {
     public:
         explicit ApiKeyManager(const MantisBase& app);
 

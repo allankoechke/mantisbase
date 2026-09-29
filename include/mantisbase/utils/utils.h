@@ -51,7 +51,7 @@ namespace mb {
      * @param path2 The relative path, subject to the first
      * @return An absolute path if successfully joined, else an empty path.
      */
-    fs::path joinPaths(const std::string &path1, const std::string &path2);
+    MANTISBASE_API fs::path joinPaths(const std::string &path1, const std::string &path2);
 
     /**
      * Resolves given path as a string to an absolute path.
@@ -63,7 +63,7 @@ namespace mb {
      * @param input_path The path to resolve
      * @return Returns an absolute filesystem path.
      */
-    fs::path resolvePath(const std::string &input_path);
+    MANTISBASE_API fs::path resolvePath(const std::string &input_path);
 
     /**
      * @brief Create directory, given a path
@@ -74,7 +74,7 @@ namespace mb {
      * @param path The directory path to create like `/foo/bar`.
      * @return True if creation was successful. If the directory exists, it returns false.
      */
-    bool createDirs(const fs::path &path);
+    MANTISBASE_API bool createDirs(const fs::path &path);
 
     /**
      * @brief Returns a created/existing directory from a path.
@@ -87,7 +87,7 @@ namespace mb {
      * @param path The file path
      * @return Returns the directory path if successful, else an empty string.
      */
-    std::string dirFromPath(const std::string &path);
+    MANTISBASE_API std::string dirFromPath(const std::string &path);
 
     // ----------------------------------------------------------------- //
     // STRING UTILS
@@ -100,7 +100,7 @@ namespace mb {
      * @param str The string to convert.
      * @see toUpperCase() To convert string to uppercase.
      */
-    void toLowerCase(std::string &str);
+    MANTISBASE_API void toLowerCase(std::string &str);
 
     /**
      * @brief Converts a string to its uppercase variant.
@@ -110,7 +110,7 @@ namespace mb {
      * @param str The string to convert.
      * @see toLowerCase() To convert string to lowercase.
      */
-    void toUpperCase(std::string &str);
+    MANTISBASE_API void toUpperCase(std::string &str);
 
     /**
      * @brief Trims leading and trailing whitespaces from a string.
@@ -118,7 +118,7 @@ namespace mb {
      * @param s The string to trim.
      * @return String with all leading and trailing whitespaces removed.
      */
-    std::string trim(const std::string &s);
+    MANTISBASE_API std::string trim(const std::string &s);
 
     /**
      * @brief Validate a string as a safe SQL identifier and return it unchanged.
@@ -135,7 +135,7 @@ namespace mb {
      * @return The identifier unchanged if valid.
      * @throws MantisException(400) if the identifier is not a valid SQL identifier.
      */
-    std::string sqlIdentifier(const std::string &ident);
+    MANTISBASE_API std::string sqlIdentifier(const std::string &ident);
 
     /**
      * @brief Try parsing a string to a JSON object and return the object and any error
@@ -153,7 +153,7 @@ namespace mb {
      * }
      * @endcode
      */
-    std::pair<json, std::string> tryParseJsonStr(const std::string &json_str);
+    MANTISBASE_API std::pair<json, std::string> tryParseJsonStr(const std::string &json_str);
 
     /**
      * @brief Convert given string value to boolean type.
@@ -164,7 +164,7 @@ namespace mb {
      * @param value String value to convert to bool
      * @return true or false value
      */
-    bool strToBool(const std::string &value);
+    MANTISBASE_API bool strToBool(const std::string &value);
 
     /**
      * @brief Generate a time base UUID
@@ -179,7 +179,7 @@ namespace mb {
      * @see generateReadableTimeId() For a readable time-based UUID.
      * @see generateShortId() For a short UUID.
      */
-    std::string generateTimeBasedId();
+    MANTISBASE_API std::string generateTimeBasedId();
 
     /**
      * @brief Generates a readable time-based UUID.
@@ -194,7 +194,7 @@ namespace mb {
      * @see generateTimeBasedId() For a time-based UUID.
      * @see generateShortId() For a short UUID.
     */
-    std::string generateReadableTimeId();
+    MANTISBASE_API std::string generateReadableTimeId();
 
     /**
      * @brief Generates a short UUID
@@ -209,7 +209,7 @@ namespace mb {
      * @see generateTimeBasedId() For a time-based UUID.
      * @see generateReadableTimeId() For a readable time-based UUID.
      */
-    std::string generateShortId(size_t length = 16);
+    MANTISBASE_API std::string generateShortId(size_t length = 16);
 
     /**
      * @brief Split given string based on given delimiter
@@ -224,7 +224,7 @@ namespace mb {
      * // > Should be a vector of two strings `Hello` and ` World`
      * @endcode
      */
-    std::vector<std::string> splitString(const std::string &input, const std::string &delimiter);
+    MANTISBASE_API std::vector<std::string> splitString(const std::string &input, const std::string &delimiter);
 
     /**
      * @brief Retrieves a value from an environment variable or a default value if the env variable was not set.
@@ -232,7 +232,7 @@ namespace mb {
      * @param defaultValue A default value if the key is not set.
      * @return The env value if found, else the default value passed in.
      */
-    std::string getEnvOrDefault(const std::string &key, const std::string &defaultValue);
+    MANTISBASE_API std::string getEnvOrDefault(const std::string &key, const std::string &defaultValue);
 
     /**
      *
@@ -245,7 +245,7 @@ namespace mb {
      * @param c Character to check.
      * @return true if the character is invalid in a filename, false otherwise.
      */
-    bool invalidChar(unsigned char c);
+    MANTISBASE_API bool invalidChar(unsigned char c);
 
     /**
      * @brief Sanitize a string in-place by removing or replacing invalid characters.
@@ -255,7 +255,7 @@ namespace mb {
      *
      * @param s Reference to the string to sanitize.
      */
-    void sanitizeInPlace(std::string &s);
+    MANTISBASE_API void sanitizeInPlace(std::string &s);
 
     /**
      * @brief Sanitize a filename and ensure uniqueness.
@@ -274,7 +274,7 @@ namespace mb {
      * @param idSep Separator inserted between the name and the ID. Default = "_".
      * @return Sanitized filename with appended unique ID.
      */
-    std::string sanitizeFilename(std::string_view original,
+    MANTISBASE_API std::string sanitizeFilename(std::string_view original,
                                  std::size_t maxLen = 50,
                                  std::size_t idLen = 12,
                                  std::string_view idSep = "_");
@@ -283,10 +283,10 @@ namespace mb {
     std::string sanitizeFilename_JSWrapper(const std::string &original);
 
     /** @return `true` if @p extension is on the upload allow-list. */
-    bool isAllowedFileExtension(const std::string &extension);
+    MANTISBASE_API bool isAllowedFileExtension(const std::string &extension);
 
     /** Map a file extension to a safe MIME type for `Content-Type` headers. */
-    std::string safeContentType(const std::string &extension);
+    MANTISBASE_API std::string safeContentType(const std::string &extension);
 
     // ----------------------------------------------------------------- //
     // AUTH UTILS
@@ -296,7 +296,7 @@ namespace mb {
      * @param password Password input to hash.
      * @return A hash string representation of the password + salt.
      */
-    std::string hashPassword(const std::string &password);
+    MANTISBASE_API std::string hashPassword(const std::string &password);
 
     /**
      * @brief Verifies user password if it matches the given hashed password.
@@ -308,7 +308,7 @@ namespace mb {
      * @param stored_hash Database stored hashed user password.
      * @return boolean indicating whether the verification was successful or not.
      */
-    bool verifyPassword(const std::string &password, const std::string &stored_hash);
+    MANTISBASE_API bool verifyPassword(const std::string &password, const std::string &stored_hash);
 
     // ----------------------------------------------------------------- //
     // AUTH UTILS
@@ -326,7 +326,7 @@ namespace mb {
      * @param t Epoch time value.
      * @return std::tm in UTC.
      */
-    std::tm toUtcTime(std::time_t t);
+    MANTISBASE_API std::tm toUtcTime(std::time_t t);
 
     /**
      * @brief Thread-safe conversion of an epoch time to a local-time std::tm.
@@ -343,10 +343,10 @@ namespace mb {
      * @param t Epoch time value.
      * @return std::tm in the server's local timezone.
      */
-    std::tm toLocalTime(std::time_t t);
+    MANTISBASE_API std::tm toLocalTime(std::time_t t);
 
     /** @return Current UTC timestamp as `YYYY-MM-DD HH:MM:SS`. */
-    inline std::string getCurrentTimestampUTC() {
+    MANTISBASE_API inline std::string getCurrentTimestampUTC() {
         const std::time_t now = std::time(nullptr);
         const std::tm utc = toUtcTime(now);
 
@@ -360,14 +360,14 @@ namespace mb {
      * @param t std::tm value
      * @return ISO formatted datetime value
      */
-    std::string tmToStr(const std::tm &t);
+    MANTISBASE_API std::string tmToStr(const std::tm &t);
 
     /**
      * @brief Convert ISO formatted datetime string to std::tm structure.
      * @param value ISO formatted datetime string
      * @return std::tm structure representing the datetime
      */
-    std::tm strToTM(const std::string &value);
+    MANTISBASE_API std::tm strToTM(const std::string &value);
 
     /**
      * @brief Convert database date value from SOCI row to string.
@@ -376,7 +376,7 @@ namespace mb {
      * @param index Column index in the row
      * @return String representation of the date
      */
-    std::string dbDateToString(const std::string& db_type, const soci::row &row, int index);
+    MANTISBASE_API std::string dbDateToString(const std::string& db_type, const soci::row &row, int index);
 
     /**
      * @brief Safely convert string to integer with default fallback.
@@ -415,7 +415,7 @@ namespace mb {
      * }
      * @endcode
      */
-    bool isValidIPv4(const std::string &ip);
+    MANTISBASE_API bool isValidIPv4(const std::string &ip);
 
     /**
      * @brief Validates if a string is a valid IPv6 address.
@@ -426,7 +426,7 @@ namespace mb {
      * @param ip String to validate as IPv6 address
      * @return true if the string is a valid IPv6 format, false otherwise
      */
-    bool isValidIPv6(const std::string &ip);
+    MANTISBASE_API bool isValidIPv6(const std::string &ip);
 
     /**
      * @brief Validates if a string is a valid IP address (IPv4 or IPv6).
@@ -434,7 +434,7 @@ namespace mb {
      * @param ip String to validate
      * @return true if valid IPv4 or IPv6, false otherwise
      */
-    bool isValidIP(const std::string &ip);
+    MANTISBASE_API bool isValidIP(const std::string &ip);
 }
 
 #endif // MB_UTILS_H

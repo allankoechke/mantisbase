@@ -14,7 +14,7 @@
 #include "mantisbase/core/database.h"
 #include "mantisbase/core/models/entity.h"
 #include "nlohmann/json.hpp"
-
+#include "../types.h"
 
 namespace mb {
     using json = nlohmann::json;
@@ -24,7 +24,7 @@ namespace mb {
      *
      * Each check returns `std::nullopt` on success or an error message string.
      */
-    class Validators {
+    class MANTISBASE_API Validators {
     public:
         /** Look up a built-in validator preset definition by key. */
         static std::optional<json> findPreset(const std::string &key);
