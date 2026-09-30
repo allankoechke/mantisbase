@@ -62,3 +62,38 @@ target_include_directories ( mantisbase
         ${CMAKE_BINARY_DIR}/include                 # Generated headers
         ${CMAKE_BINARY_DIR}/3rdParty/soci/include   # Same as above, just in case it ends up here
 )
+
+# --- Dev-package shared library: export SOCI *core* symbols ------------------
+# `Database` exposes soci types in its public API (`session()` returns
+# `std::shared_ptr<soci::session>`, `connectionPool()` returns
+# `soci::connection_pool&`, `MantisLoggerImpl` derives `soci::logger_impl`)
+# and dev consumers call soci functions directly
+# (`*sql << "...", soci::use(x), soci::into(y)`).
+# SOCI compiles its static libs with hidden visibility
+# (see 3rdParty/soci/CMakeLists.txt: `set(CMAKE_CXX_VISIBILITY_PRESET hidden)`),
+# so without this the shared dev library would not provide soci symbols and
+# dev consumers would fail to link (`undefined reference to soci::...`).
+#
+# SOCI splits into core vs backends: once a session is open, everything devs
+# touch (prepare/streaming, use/into, row, statement, transaction, pool)
+# dispatches through `soci_core` interfaces (`session_backend` /
+# `statement_backend` polymorphism). The backend libs (`soci_sqlite3`,
+# `soci_postgresql`) hold only the factories plus backend impls, which
+# `Database::connect()` uses internally. Devs work with sessions handed out
+# by `Database`, so only the core needs exporting: default visibility on
+# `soci_core` alone. Backends stay hidden (still embedded for internal use),
+# which also keeps the sqlite amalgamation's `sqlite3_*` symbols from leaking
+# and interposing with a system sqlite3. Deliberately no `--whole-archive`:
+# normal linking already pulls every core object `Database` references — the
+# same surface devs use — while whole-archive doubled the .so (15MB -> 30MB).
+#
+# Constraint this implies (documented in doc/cpp-dev-package.md): devs must
+# obtain sessions from `Database::session()`/`connectionPool()`, not open
+# backend sessions directly (`soci::session(soci::sqlite3, ...)`), and catch
+# `soci::soci_error` rather than backend-specific error types.
+if(TARGET soci_core)
+    set_target_properties(soci_core PROPERTIES
+        CXX_VISIBILITY_PRESET default
+        VISIBILITY_INLINES_HIDDEN NO
+    )
+endif()
