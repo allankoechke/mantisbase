@@ -619,4 +619,33 @@ namespace mb {
             }
         };
     }
+
+    Router::Constraints Router::validateConstraints(const std::vector<std::string> &constraints) {
+        // Allow: Get, Post, Head, Put, Delete, Options, Patch
+        Constraints result{};
+
+        if (constraints.empty()) {
+            return result;
+        }
+
+        for (auto constraint: constraints) {
+            mb::toUpperCase(constraint);
+            if (constraint.empty()) throw MantisException(400, "Invalid redirect constraint");
+
+            if (constraint == "GET") result.emplace_back(drogon::Get);
+            else if (constraint == "POST") result.emplace_back(drogon::Post);
+            else if (constraint == "HEAD") result.emplace_back(drogon::Head);
+            else if (constraint == "PUT") result.emplace_back(drogon::Put);
+            else if (constraint == "DELETE") result.emplace_back(drogon::Delete);
+            else if (constraint == "OPTIONS") result.emplace_back(drogon::Options);
+            else if (constraint == "PATCH") result.emplace_back(drogon::Patch);
+            else
+                throw MantisException(400,
+                                      std::format(
+                                          "Invalid constraint. Expected '{}' to be one of: Get, Post, Head, Put, Delete, Options, Patch",
+                                          constraint));
+        }
+
+        return result;
+    }
 }
