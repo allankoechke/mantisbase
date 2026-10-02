@@ -14,5 +14,5 @@ var searchData=
   ['writefiles_11',['writeFiles',['../classmb_1_1MantisContentReader.html#a541f9a8c336f4e02878306bcb8bb236e',1,'mb::MantisContentReader']]],
   ['ws_2eh_12',['ws.h',['../ws_8h.html',1,'']]],
   ['ws_5fpath_5fadd_13',['WS_PATH_ADD',['../classmb_1_1RealtimeWSController.html#a3e7a845fe22d2f2cc911a441c04ddc0b',1,'mb::RealtimeWSController']]],
-  ['wsmgr_14',['wsmgr',['../classmb_1_1WSMgr.html#a0df2cd464fa11e1cc5cb055cdbb1c1cc',1,'mb::WSMgr::WSMgr()'],['../classmb_1_1SSEMgr.html#ab7b226977b7aa94d87a73d70f83fa4c2',1,'mb::SSEMgr::wsMgr()'],['../classmb_1_1WSMgr.html',1,'mb::WSMgr']]]
+  ['wsmgr_14',['wsmgr',['../classmb_1_1SSEMgr.html#ab7b226977b7aa94d87a73d70f83fa4c2',1,'mb::SSEMgr::wsMgr()'],['../classmb_1_1WSMgr.html#a0df2cd464fa11e1cc5cb055cdbb1c1cc',1,'mb::WSMgr::WSMgr()'],['../classmb_1_1WSMgr.html',1,'mb::WSMgr']]]
 ];

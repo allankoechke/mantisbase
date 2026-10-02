@@ -155,12 +155,12 @@ Database</h2>
 <li><code>db.query(sql_query, [bind objects])</code>: Useful for executing SQL queries on database directly. Expects the first argument to a valid SQL query followed by optional values to bind if any.</li>
 </ul>
 <div class="fragment"><div class="line">const db = app.db();</div>
-<div class="line">const items = db.query(&quot;SELECT * FROM __settings&quot;);</div>
+<div class="line">const items = db.query(&quot;SELECT * FROM mb_settings&quot;);</div>
 <div class="line">console.log(&quot;Settings: &quot;, JSON.stringify(items));</div>
 <div class="line"> </div>
 <div class="line">// Find a specific data or value based on some column</div>
 <div class="line">// The bind value name in SQL (`:id` here) should match the bind&#39;s object key `id`</div>
-<div class="line">const r = db.query(&quot;SELECT * FROM __settings WHERE id = :id&quot;, { id: &quot;12509202836555480207&quot; });</div>
+<div class="line">const r = db.query(&quot;SELECT * FROM mb_settings WHERE id = :id&quot;, { id: &quot;12509202836555480207&quot; });</div>
 <div class="line">// db.query(&quot;SELECT * FROM __settings WHERE id = :id &amp;&amp; updated = :updated&quot;, { id: &quot;12509202836555480207&quot; }, { updated: &quot;2025-10-24 01:32:49&quot; });</div>
 <div class="line">console.log(&quot;Settings:  &quot;, r.id); // `r` may be null if not found.</div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md310"></a>
@@ -187,6 +187,7 @@ Router</h2>
 <li><code>app.router().addRoute(method, path, handler, [middlewares])</code>: Create a route for a given HTTP method, on a given <em>path</em> with the given handler function with optional middleware functions.</li>
 <li><code>app.router().get(path, handler, [middlewares])</code>: Shorthand for <code>addRoute("GET", ...)</code>.</li>
 <li><code>app.router().post(path, handler, [middlewares])</code>: Shorthand for <code>addRoute("POST", ...)</code>.</li>
+<li><code>app.router().put(path, handler, [middlewares])</code>: Shorthand for <code>addRoute("PUT", ...)</code>.</li>
 <li><code>app.router().patch(path, handler, [middlewares])</code>: Shorthand for <code>addRoute("PATCH", ...)</code>.</li>
 <li><code>app.router().delete(path, handler, [middlewares])</code>: Shorthand for <code>addRoute("DELETE", ...)</code>. (<code>delete</code> is a reserved word, so some editors/linters prefer the <code>app.router()["delete"](...)</code> spelling — both work.)</li>
 <li><code>app.router().redirect(from, to[, status[, methods]])</code>: Redirect requests from one path to another without a handler. <code>status</code> is a 3xx code (default <code>302</code>); <code>methods</code> is a single method name or an array of method names allowed for the redirect (default <code>["GET"]</code>, pass <code>[]</code> to allow all methods).</li>
@@ -197,6 +198,10 @@ Router</h2>
 <div class="line"> </div>
 <div class="line">// Shorthand equivalents</div>
 <div class="line">app.router().get(&quot;/test&quot;, function (req, res){</div>
+<div class="line">    // ...</div>
+<div class="line">})</div>
+<div class="line"> </div>
+<div class="line">app.router().put(&quot;/test/:id&quot;, function (req, res){</div>
 <div class="line">    // ...</div>
 <div class="line">})</div>
 <div class="line"> </div>
@@ -219,7 +224,7 @@ Requests</h2>
 <div class="fragment"><div class="line">app.router().addRoute(method, path, function_handler) </div>
 <div class="line">// With Middlewares</div>
 <div class="line">app.router().addRoute(method, path, function_handler, middleware1, middleware2, ...)</div>
-<div class="line">// Shorthands: app.router().get/post/patch/delete(path, function_handler, ...middlewares)</div>
+<div class="line">// Shorthands: app.router().get/post/put/patch/delete(path, function_handler, ...middlewares)</div>
 </div><!-- fragment --><p> Let's add a <code>/test</code> route. </p><div class="fragment"><div class="line">app.router().addRoute(&quot;GET&quot;, &quot;/test&quot;, function (req, res){</div>
 <div class="line">    // Request Handler Method</div>
 <div class="line">    res.json(200, JSON.stringify({a: 5, b: 4}))</div>
@@ -328,7 +333,13 @@ Middlewares (C++ factories)</h2>
 <div class="fragment"><div class="line">app.router().addRoute(&quot;GET&quot;, &quot;/api/v1/custom/protected&quot;, handler,</div>
 <div class="line">    middlewares.getAuthToken(),</div>
 <div class="line">    middlewares.hydrateContextData()</div>
-<div class="line">);  </div>
+<div class="line">);</div>
+<div class="line"> </div>
+<div class="line">// Shorthand notation</div>
+<div class="line">app.router().get(&quot;/api/v1/custom/protected&quot;, handler,</div>
+<div class="line">    middlewares.getAuthToken(),</div>
+<div class="line">    middlewares.hydrateContextData()</div>
+<div class="line">); </div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md317"></a>
 Utils (utility functions)</h2>
 <p>Mantis exposes an object <code>utils</code> which has the following utility functions.</p><ul>

@@ -30,5 +30,6 @@ var searchData=
   ['proxies_20and_20client_20ip_27',['Reverse Proxies and Client IP',['../docs_rest_api.html#autotoc_md3',1,'']]],
   ['public_20access_28',['Public Access',['../docs_rest_api_rules.html#autotoc_md274',1,'']]],
   ['public_20mode_29',['Public Mode',['../docs_rest_api_rules.html#autotoc_md265',1,'']]],
-  ['publicdir_30',['publicDir',['../classmb_1_1MantisBase.html#a616493c105acd0717ed9b8f65bfcf074',1,'mb::MantisBase']]]
+  ['publicdir_30',['publicDir',['../classmb_1_1MantisBase.html#a616493c105acd0717ed9b8f65bfcf074',1,'mb::MantisBase']]],
+  ['put_31',['put',['../classmb_1_1Router.html#a1361a266369fd6aebf8f41dd17d5d7ac',1,'mb::Router::Put(const std::string &amp;path, const HandlerWithContentReaderFn &amp;handler, const Middlewares &amp;middlewares={})'],['../classmb_1_1Router.html#aa08255f9168740b6c09356b9998bab30',1,'mb::Router::Put(const std::string &amp;path, const HandlerFn &amp;handler, const Middlewares &amp;middlewares={})']]]
 ];
