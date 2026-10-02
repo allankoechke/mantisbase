@@ -215,6 +215,7 @@ jobs:
           mkdir -p "$STAGING"
           cp mantisbase "$STAGING/"
           cp "${{ github.workspace }}/LICENSE" "$STAGING/"
+          cp "${{ github.workspace }}/mantisbase.d.ts" "$STAGING/"
           cp "${{ github.workspace }}/.github/release/README-linux-binary.md" "$STAGING/README.md"
           mkdir -p zip
           (cd "$STAGING" && zip -r "../mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip" .)
@@ -231,6 +232,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $Staging | Out-Null
           Copy-Item "$BinPath\mantisbase.exe" -Destination $Staging
           Copy-Item "${{ github.workspace }}\LICENSE" -Destination $Staging
+          Copy-Item "${{ github.workspace }}\mantisbase.d.ts" -Destination $Staging
           Copy-Item "${{ github.workspace }}\.github\release\README-windows-binary.md" -Destination "$Staging\README.md"
           Compress-Archive -Path "$Staging\*" -DestinationPath $ZipFile -Force
 

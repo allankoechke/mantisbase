@@ -28,6 +28,8 @@
 # Output layout (one directory per OS, zipped separately by release.yml):
 #   <out>/<os>/README.md              quick start (from cmake/dev-package/)
 #   <out>/<os>/VERSION                release tag
+#   <out>/<os>/mantisbase.d.ts        JS scripting type definitions (copy next
+#                                     to server scripts for editor hinting)
 #   <out>/<os>/include/               full header tree for this OS
 #   <out>/<os>/libs/<arch>/           prebuilt shared library
 #   <out>/<os>/cmake/                 MantisBaseConfig.cmake + version file
@@ -161,6 +163,12 @@ foreach(_os ${MB_PLATFORMS})
         "${_pkg}/cmake/MantisBaseConfig.cmake" @ONLY)
     configure_file("${_SRC}/cmake/dev-package/MantisBaseConfigVersion.cmake.in"
         "${_pkg}/cmake/MantisBaseConfigVersion.cmake" @ONLY)
+
+    # 5. JS scripting type definitions for editor hinting.
+    _require_file("${_SRC}/mantisbase.d.ts"
+        "mantisbase.d.ts must exist at the repo root; see doc/scripting.md.")
+    file(COPY "${_SRC}/mantisbase.d.ts" DESTINATION "${_pkg}/")
+    message(STATUS "  [${_os}] types: mantisbase.d.ts")
 
     message(STATUS "  [${_os}] package: ${_pkg}")
 endforeach()

@@ -8,6 +8,16 @@ The scripts directory is resolved as follows:
 - By default: a `scripts` folder next to the `mantisbase` binary
 - Override with `--scriptsDir /some/path` (see [Command-line options](@ref docs_cmd))
 
+### Type hinting
+
+Copy `mantisbase.d.ts` (repo root) next to your scripts for autocompletion and inline docs in VS Code, Cursor, and other editors with JavaScript type checking:
+
+```bash
+cp mantisbase.d.ts ./scripts/
+```
+
+It covers the whole JS surface: `app` (router, db, settings, auth, files, logs, realtime), `middlewares`, `utils`, `console`, request/response objects, and the `onServerStart` / `onRecordCreated` / `onRecordUpdated` lifecycle hooks.
+
 ### Build and runtime switches
 
 | Switch | Effect |

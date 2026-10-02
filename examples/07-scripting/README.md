@@ -25,6 +25,12 @@ docker run -v $(pwd)/examples/07-scripting/scripts:/mb/scripts:ro ...
 mantisbase --scriptsDir=./scripts serve
 ```
 
+For editor autocompletion, copy the type definitions next to your scripts:
+
+```bash
+cp ../../mantisbase.d.ts ./scripts/
+```
+
 To disable scripting at runtime (even when compiled in):
 
 ```bash
