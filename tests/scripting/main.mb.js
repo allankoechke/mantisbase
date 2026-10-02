@@ -19,4 +19,25 @@ app.router().addRoute("GET", "/api/v1/test/scripting/protected", function (req, 
     res.json(200, { protected: true });
 }, middlewares.requireEntityAuth("test_users"));
 
+// Per-method shorthand bindings (equivalent to addRoute with a fixed method).
+app.router().get("/api/v1/test/scripting/shorthand-get", function (req, res) {
+    res.json(200, { ok: true, method: "get" });
+});
+
+app.router().post("/api/v1/test/scripting/shorthand-post", function (req, res) {
+    res.json(200, { ok: true, method: "post" });
+});
+
+app.router().patch("/api/v1/test/scripting/shorthand-patch", function (req, res) {
+    res.json(200, { ok: true, method: "patch" });
+});
+
+app.router()["delete"]("/api/v1/test/scripting/shorthand-delete", function (req, res) {
+    res.json(200, { ok: true, method: "delete" });
+});
+
+// Path redirects (default 302 + permanent 301).
+app.router().redirect("/api/v1/test/scripting/old-path", "/api/v1/test/scripting/shorthand-get");
+app.router().redirect("/api/v1/test/scripting/old-permanent", "/api/v1/test/scripting/shorthand-get", 301);
+
 console.log("MantisBase test scripting routes registered");

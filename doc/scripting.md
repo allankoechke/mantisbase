@@ -87,19 +87,35 @@ const sess = db.session() // Lease a session for executing db actions
 ## Router
 The router instance allows binding handlers and optional middlewares to given routes from JavaScript.
 - `app.router().addRoute(method, path, handler, [middlewares])`: Create a route for a given HTTP method, on a given *path* with the given handler function with optional middleware functions.
+- `app.router().get(path, handler, [middlewares])`: Shorthand for `addRoute("GET", ...)`.
+- `app.router().post(path, handler, [middlewares])`: Shorthand for `addRoute("POST", ...)`.
+- `app.router().patch(path, handler, [middlewares])`: Shorthand for `addRoute("PATCH", ...)`.
+- `app.router().delete(path, handler, [middlewares])`: Shorthand for `addRoute("DELETE", ...)`. (`delete` is a reserved word, so some editors/linters prefer the `app.router()["delete"](...)` spelling — both work.)
+- `app.router().redirect(from, to[, status[, methods]])`: Redirect requests from one path to another without a handler. `status` is a 3xx code (default `302`); `methods` is a single method name or an array of method names allowed for the redirect (default `["GET"]`, pass `[]` to allow all methods).
 
 ```js
 app.router().addRoute("GET", "/test", function (req, res){
     // ...
 }) 
 
+// Shorthand equivalents
+app.router().get("/test", function (req, res){
+    // ...
+})
+
 // With one or more middlewares
-app.router().addRoute("GET", "/test", function (req, res){
+app.router().get("/test", function (req, res){
     // ...
 }, function (req, res){
     // ...
     return true
 }) 
+
+// Redirect an old path to a new one (302 Found, GET-only by default)
+app.router().redirect("/old/path", "/test")
+
+// Permanent redirect allowing several methods
+app.router().redirect("/old/upload", "/test", 301, ["GET", "POST"])
 ```
 
 ## Requests
@@ -109,6 +125,7 @@ To add a new request endpoint in JS, Mantis exposes a `addRoute` method having t
 app.router().addRoute(method, path, function_handler) 
 // With Middlewares
 app.router().addRoute(method, path, function_handler, middleware1, middleware2, ...)
+// Shorthands: app.router().get/post/patch/delete(path, function_handler, ...middlewares)
 ```
 Let's add a `/test` route.
 ```js
@@ -194,6 +211,7 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 - `res.getHeaderCount("key")` -> Count for header values given the header key
 - `res.setHeader("Cow", "Cow Value")`
 - `res.redirect("http://some-url.com", 302)`
+> **Note:** `res.redirect(url, status)` redirects a single in-flight request from inside a handler. To redirect a whole path without writing a handler, use `app.router().redirect(from, to[, status[, methods]])` (see [Router](#router)).
 - `res.setContent(content, content_type)`: i.e. `res.setContent("<html>...</html>", "text/html")`
 - `res.setFileContent("/foo/file_path")`
 - `res.send(200, "some data here", "text/plain")`

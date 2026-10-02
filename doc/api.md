@@ -440,6 +440,18 @@ router.Get("/api/v1/custom", [](MantisRequest& req, MantisResponse& res) {
 }, {requireAdminAuth()});
 ```
 
+### Path redirects
+
+Redirect one path to another without writing a handler. The default is a `302 Found` redirect for `GET` requests; pass an explicit 3xx status and method constraints to customize, or an empty constraint list to allow all methods:
+
+```cpp
+// GET /api/v1/legacy -> 302 to /api/v1/custom
+router.redirect("/api/v1/legacy", "/api/v1/custom");
+
+// Permanent redirect for several methods
+router.redirect("/api/v1/old-upload", "/api/v1/custom", 301, {"GET", "POST"});
+```
+
 Check the [Embedding Guide](embedding.md) for more details.
 
 ---

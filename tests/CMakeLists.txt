@@ -48,6 +48,7 @@ file(GLOB TEST_FILES
         integration/test_integration_multi_instance.cpp
         integration/test_integration_settings.cpp
         integration/test_integration_scripting.cpp
+        integration/test_integration_redirect.cpp
 )
 
 add_executable(mantisbase_tests ${TEST_FILES})

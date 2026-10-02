@@ -2,6 +2,8 @@
 #define MANTISBASE_TEST_HTTP_CLIENT_H
 
 #include <string>
+#include <algorithm>
+#include <cctype>
 #include <map>
 #include <memory>
 #include <vector>
@@ -22,6 +24,15 @@ struct Response {
     std::map<std::string, std::string> headers;
 
     explicit operator bool() const { return status > 0; }
+
+    /// Case-insensitive header lookup (Drogon normalizes names to lowercase).
+    [[nodiscard]] std::string header(const std::string &name) const {
+        auto lower = name;
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        const auto it = headers.find(lower);
+        return it != headers.end() ? it->second : std::string{};
+    }
 };
 
 class Client {
@@ -128,6 +139,12 @@ private:
             if (result == drogon::ReqResult::Ok && resp) {
                 r->status = static_cast<int>(resp->statusCode());
                 r->body = std::string(resp->body());
+                for (const auto& [key, value] : resp->headers()) {
+                    auto lower = key;
+                    std::transform(lower.begin(), lower.end(), lower.begin(),
+                                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                    r->headers.emplace(std::move(lower), value);
+                }
             }
             promise->set_value(std::move(r));
         }, timeoutSec);

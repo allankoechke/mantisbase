@@ -26,6 +26,7 @@
 #include "test_helpers.h"
 #include "test_http_client.h"
 #include "test_middleware_routes.h"
+#include "test_redirect_routes.h"
 
 namespace fs = std::filesystem;
 
@@ -137,6 +138,7 @@ public:
             }
             app_ = mb::MantisBase::create(buildAppConfig(baseDir_, port_));
             registerMiddlewareTestRoutes(app_->router());
+            registerRedirectTestRoutes(app_->router());
         }
         ++refCount_;
         return *app_;

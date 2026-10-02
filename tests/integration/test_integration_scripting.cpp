@@ -58,6 +58,60 @@ TEST_F(IntegrationScriptingTest, CppMiddlewareBlocksUnauthenticatedRequest) {
     EXPECT_EQ(res->body.find("\"protected\":true"), std::string::npos);
 }
 
+TEST_F(IntegrationScriptingTest, JsShorthandGetRouteReturnsJson) {
+    const auto res = client->Get("/api/v1/test/scripting/shorthand-get");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200);
+
+    const auto body = parseBody(*res);
+    EXPECT_TRUE(body.value("ok", false));
+    EXPECT_EQ(body.value("method", ""), "get");
+}
+
+TEST_F(IntegrationScriptingTest, JsShorthandPostRouteReturnsJson) {
+    const auto res = client->Post("/api/v1/test/scripting/shorthand-post", "{}", "application/json");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200);
+
+    const auto body = parseBody(*res);
+    EXPECT_TRUE(body.value("ok", false));
+    EXPECT_EQ(body.value("method", ""), "post");
+}
+
+TEST_F(IntegrationScriptingTest, JsShorthandPatchRouteReturnsJson) {
+    const auto res = client->Patch("/api/v1/test/scripting/shorthand-patch", {}, "{}", "application/json");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200);
+
+    const auto body = parseBody(*res);
+    EXPECT_TRUE(body.value("ok", false));
+    EXPECT_EQ(body.value("method", ""), "patch");
+}
+
+TEST_F(IntegrationScriptingTest, JsShorthandDeleteRouteReturnsJson) {
+    const auto res = client->Delete("/api/v1/test/scripting/shorthand-delete");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200);
+
+    const auto body = parseBody(*res);
+    EXPECT_TRUE(body.value("ok", false));
+    EXPECT_EQ(body.value("method", ""), "delete");
+}
+
+TEST_F(IntegrationScriptingTest, JsRedirectDefaultsTo302WithLocation) {
+    const auto res = client->Get("/api/v1/test/scripting/old-path");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res->status, 302);
+    EXPECT_EQ(res->header("Location"), "/api/v1/test/scripting/shorthand-get");
+}
+
+TEST_F(IntegrationScriptingTest, JsRedirectSupportsPermanent301) {
+    const auto res = client->Get("/api/v1/test/scripting/old-permanent");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res->status, 301);
+    EXPECT_EQ(res->header("Location"), "/api/v1/test/scripting/shorthand-get");
+}
+
 #else
 
 TEST(ScriptingDisabledAtCompileTime, Skipped) {

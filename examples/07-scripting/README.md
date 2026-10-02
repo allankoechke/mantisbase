@@ -40,6 +40,14 @@ curl http://localhost:7070/api/v1/custom/health
 
 Expected: `{"status":"ok","source":"script"}`
 
+Shorthand routes and redirects from the same script:
+
+```bash
+curl http://localhost:7070/api/v1/custom/ping
+curl -X POST http://localhost:7070/api/v1/custom/echo
+curl -i http://localhost:7070/api/v1/custom/health-old  # 302 -> /api/v1/custom/health
+```
+
 ## Entry script
 
 | File | Status |

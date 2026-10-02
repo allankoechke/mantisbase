@@ -226,6 +226,12 @@ int main()
         std::string userId = auth["id"];
         res.sendJSON(200, {{"user_id", userId}});
     }, {mb::requireEntityAuth("users")});
+
+    // Redirect an old path to a new one (302 Found, GET-only by default).
+    // Pass an explicit status (301/302/307/308) and method constraints,
+    // or an empty constraint list to allow all methods.
+    router.redirect("/api/v2/legacy", "/api/v2/custom");
+    router.redirect("/api/v2/old-upload", "/api/v2/admin/stats", 301, {"GET", "POST"});
     
     return app->run();
 }

@@ -73,8 +73,10 @@ namespace mb {
          *
          * @param initialPath Existing path to be redirected elsewhere (/some/old/path)
          * @param destinationPath Destination path, either relative (/some/path) or absolute URL (http(s)://some.domain/path)
-         * @param redirectStatus The redirect status, by default 302Found
-         * @param constraints Array of any HTTP methods allowed for this redirect, by default empty to allow all
+         * @param redirectStatus The redirect status, by default 302 Found.
+         *        Use 301 for permanent moves, 302/303/307/308 for temporary ones.
+         * @param constraints Array of HTTP methods allowed for this redirect.
+         *        Defaults to `{"GET"}` (GET-only). Pass an empty array to allow all methods.
          */
         void redirect(const std::string &initialPath, const std::string &destinationPath, int redirectStatus = 302,
                       const std::vector<std::string> &constraints = {"GET"}) const;
@@ -114,15 +116,30 @@ namespace mb {
         /** Register a custom route from JavaScript (`app.router().addRoute(...)`). */
         duk_ret_t bindRoute(duk_context *ctx);
 
+        /** Shorthand for `addRoute("GET", path, handler, ...middlewares)`. */
+        duk_ret_t bindGet(duk_context *ctx);
+        /** Shorthand for `addRoute("POST", path, handler, ...middlewares)`. */
+        duk_ret_t bindPost(duk_context *ctx);
+        /** Shorthand for `addRoute("PATCH", path, handler, ...middlewares)`. */
+        duk_ret_t bindPatch(duk_context *ctx);
+        /** Shorthand for `addRoute("DELETE", path, handler, ...middlewares)`. */
+        duk_ret_t bindDelete(duk_context *ctx);
+
+        /**
+         * Register a path redirect from JavaScript
+         * (`app.router().redirect(from, to[, status[, methods]])`).
+         */
+        duk_ret_t bindRedirect(duk_context *ctx);
+
         /** Push a change event to all realtime subscribers. */
         void broadcastChange(const nlohmann::json &change_event) const;
 
         void broadcastChangeJson(const std::string &event_json) const;
 
-        void executeJsRoute(const DukValue &handler,
+        static void executeJsRoute(const DukValue &handler,
                             const std::vector<DukValue> &middlewares,
                             MantisRequest &req,
-                            MantisResponse &res) const;
+                            MantisResponse &res) ;
 #endif
 
     private:
