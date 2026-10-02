@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.5</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.6</span>
    </div>
   </td>
  </tr>
@@ -519,18 +519,26 @@ Custom Endpoints</h2>
 <div class="fragment"><div class="line">router.Get(<span class="stringliteral">&quot;/api/v1/custom&quot;</span>, [](MantisRequest&amp; req, MantisResponse&amp; res) {</div>
 <div class="line">    res.sendJSON(200, {{<span class="stringliteral">&quot;message&quot;</span>, <span class="stringliteral">&quot;Custom endpoint&quot;</span>}});</div>
 <div class="line">}, {<a class="code hl_function" href="namespacemb.html#ab7c5922d7edd2da97857b5383049101f">requireAdminAuth</a>()});</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md31"></a>
+Path redirects</h3>
+<p>Redirect one path to another without writing a handler. The default is a <code>302 Found</code> redirect for <code>GET</code> requests; pass an explicit 3xx status and method constraints to customize, or an empty constraint list to allow all methods:</p>
+<div class="fragment"><div class="line"><span class="comment">// GET /api/v1/legacy -&gt; 302 to /api/v1/custom</span></div>
+<div class="line">router.redirect(<span class="stringliteral">&quot;/api/v1/legacy&quot;</span>, <span class="stringliteral">&quot;/api/v1/custom&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Permanent redirect for several methods</span></div>
+<div class="line">router.redirect(<span class="stringliteral">&quot;/api/v1/old-upload&quot;</span>, <span class="stringliteral">&quot;/api/v1/custom&quot;</span>, 301, {<span class="stringliteral">&quot;GET&quot;</span>, <span class="stringliteral">&quot;POST&quot;</span>});</div>
 </div><!-- fragment --><p>Check the <a class="el" href="embedding_8md.html">Embedding Guide</a> for more details.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md32"></a>
+<h2><a class="anchor" id="autotoc_md33"></a>
 File Handling</h2>
 <p>Files uploaded via multipart/form-data are stored and can be accessed at:</p>
 <div class="fragment"><div class="line">GET /api/v1/files/&lt;entity&gt;/&lt;filename&gt;</div>
 </div><!-- fragment --><p>See <a class="el" href="files_8md.html">File Handling</a> for more details.</p>
 <hr  />
-<h3><a class="anchor" id="autotoc_md34"></a>
+<h3><a class="anchor" id="autotoc_md35"></a>
 Foreign Key Relationships</h3>
 <p>Foreign keys allow you to establish relationships between entities. When creating or updating schemas with foreign key fields, MantisBase automatically validates the relationships.</p>
-<h4><a class="anchor" id="autotoc_md35"></a>
+<h4><a class="anchor" id="autotoc_md36"></a>
 Foreign Key Structure</h4>
 <p>Foreign keys are defined using a <code>foreign_key</code> object in the field definition:</p>
 <div class="fragment"><div class="line">{</div>
@@ -543,7 +551,7 @@ Foreign Key Structure</h4>
 <div class="line">    &quot;on_delete&quot;: &quot;CASCADE&quot;</div>
 <div class="line">  }</div>
 <div class="line">}</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md36"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md37"></a>
 Foreign Key Properties</h4>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -557,7 +565,7 @@ Foreign Key Properties</h4>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>on_delete</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">No   </td><td class="markdownTableBodyNone"><code>"RESTRICT"</code>   </td><td class="markdownTableBodyNone">Action when referenced record is deleted   </td></tr>
 </table>
-<h4><a class="anchor" id="autotoc_md37"></a>
+<h4><a class="anchor" id="autotoc_md38"></a>
 Foreign Key Policies</h4>
 <p>Both <code>on_update</code> and <code>on_delete</code> support the following policies:</p>
 <table class="markdownTable">
@@ -574,7 +582,7 @@ Foreign Key Policies</h4>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>SET DEFAULT</code>   </td><td class="markdownTableBodyNone">Set foreign key field to its default value   </td></tr>
 </table>
-<h4><a class="anchor" id="autotoc_md38"></a>
+<h4><a class="anchor" id="autotoc_md39"></a>
 Foreign Key Validation</h4>
 <p>When creating or updating schemas with foreign keys, MantisBase automatically validates:</p>
 <ol type="1">
@@ -583,7 +591,7 @@ Foreign Key Validation</h4>
 <li><b>Type Compatibility</b> - Field types should be compatible (warnings issued for mismatches)</li>
 </ol>
 <p><b>Note:</b> If the referenced entity doesn't exist yet, a warning is issued but the schema is still created. The database will enforce the constraint when the DDL is executed.</p>
-<h4><a class="anchor" id="autotoc_md39"></a>
+<h4><a class="anchor" id="autotoc_md40"></a>
 Examples</h4>
 <p><b>Example 1: Comments with Post Reference</b></p>
 <div class="fragment"><div class="line">{</div>
@@ -633,15 +641,15 @@ Examples</h4>
 <div class="line">    }</div>
 <div class="line">  ]</div>
 <div class="line">}</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md40"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md41"></a>
 Constraint Naming</h4>
 <p>Foreign key constraints are automatically named using the pattern: <code>fk_&lt;table_name&gt;_&lt;field_name&gt;</code></p>
 <p>For example, a foreign key on <code>post_id</code> in the <code>comments</code> table would create a constraint named <code>fk_comments_post_id</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md42"></a>
+<h2><a class="anchor" id="autotoc_md43"></a>
 System Endpoints</h2>
 <p>Most system endpoints are grouped under <code>/api/v1/sys/</code>. The health check is at <code>/api/v1/health</code>.</p>
-<h3><a class="anchor" id="autotoc_md43"></a>
+<h3><a class="anchor" id="autotoc_md44"></a>
 Health Check</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -650,7 +658,7 @@ Health Check</h3>
 <td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/health</code>   </td><td class="markdownTableBodyNone">Server health and uptime   </td></tr>
 </table>
 <p>See <a class="el" href="healthcheck_8md.html">Healthcheck</a> for details.</p>
-<h3><a class="anchor" id="autotoc_md44"></a>
+<h3><a class="anchor" id="autotoc_md45"></a>
 Settings</h3>
 <p>Requires <b>admin authentication</b> for all settings endpoints.</p>
 <table class="markdownTable">
@@ -695,7 +703,7 @@ Settings</h3>
 </table>
 <p>SMTP object fields: <code>host</code>, <code>port</code> (default 587), <code>user</code>, <code>password</code>, <code>from</code>, <code>tls</code>. On GET, a non-empty password is returned as <code>"********"</code>. On PATCH, send <code>"********"</code> for <code>smtp.password</code> to keep the existing value.</p>
 <p>The GET response also includes <code>mantisVersion</code> (the running server version).</p>
-<h4><a class="anchor" id="autotoc_md45"></a>
+<h4><a class="anchor" id="autotoc_md46"></a>
 Cross-Origin Resource Sharing (CORS)</h4>
 <p>MantisBase enables credentialed cross-origin browser access when the request <code>Origin</code> header matches an entry in the allowlist. Allowed origins are loaded from:</p>
 <ol type="1">
@@ -714,7 +722,7 @@ Cross-Origin Resource Sharing (CORS)</h4>
 </div><!-- fragment --><p>For credentialed requests (<code>fetch(..., { credentials: "include" })</code>), responses echo the exact matching origin and set <code>Access-Control-Allow-Credentials: true</code>. Wildcard <code>Access-Control-Allow-Origin: *</code> is not used.</p>
 <p><code><a href="http://localhost:3000">http://localhost:3000</a></code> and <code><a href="http://127.0.0.1:3000">http://127.0.0.1:3000</a></code> are different origins; list each host your frontend uses. Preflight <code>OPTIONS</code> requests are handled automatically for allowed origins.</p>
 <p>See also <a class="el" href="docker_8md.html">Docker configuration</a> for <code>MB_CORS_ORIGINS</code> in container deployments.</p>
-<h3><a class="anchor" id="autotoc_md46"></a>
+<h3><a class="anchor" id="autotoc_md47"></a>
 Admin Accounts</h3>
 <p>Admin account CRUD and authentication live under <code>/api/v1/sys/admins/</code>.</p>
 <table class="markdownTable">
@@ -739,7 +747,7 @@ Admin Accounts</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">DELETE   </td><td class="markdownTableBodyNone"><code>/api/v1/sys/admins/:id</code>   </td><td class="markdownTableBodyNone">Delete admin account   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md47"></a>
+<h3><a class="anchor" id="autotoc_md48"></a>
 Logs Endpoint</h3>
 <p>The logs endpoint provides access to system logs with filtering and cursor pagination. <b>Requires admin authentication.</b> Results are ordered by log <code>id</code> (ascending).</p>
 <table class="markdownTable">
@@ -748,7 +756,7 @@ Logs Endpoint</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/sys/logs</code>   </td><td class="markdownTableBodyNone">Get system logs with filtering and pagination   </td></tr>
 </table>
-<h4><a class="anchor" id="autotoc_md48"></a>
+<h4><a class="anchor" id="autotoc_md49"></a>
 Query Parameters</h4>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -768,7 +776,7 @@ Query Parameters</h4>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>end_date</code>   </td><td class="markdownTableBodyNone">string   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">End date filter (ISO 8601 format)   </td></tr>
 </table>
-<h4><a class="anchor" id="autotoc_md49"></a>
+<h4><a class="anchor" id="autotoc_md50"></a>
 Example Requests</h4>
 <div class="fragment"><div class="line"># Get recent logs (default: 50 records)</div>
 <div class="line">curl -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
@@ -797,7 +805,7 @@ Example Requests</h4>
 <div class="line"># Combined filters</div>
 <div class="line">curl -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
 <div class="line">  &quot;http://localhost:7070/api/v1/sys/logs?min_level=warn&amp;search=error&amp;limit=20&quot;</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md50"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md51"></a>
 Response Format</h4>
 <div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;data&quot;: {</div>
@@ -819,7 +827,7 @@ Response Format</h4>
 <div class="line">  }</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>Pass the returned <code>cursor</code> value as the <code>after</code> parameter in subsequent requests to page through results. When <code>has_more</code> is <code>false</code>, you have reached the last page.</p>
-<h4><a class="anchor" id="autotoc_md51"></a>
+<h4><a class="anchor" id="autotoc_md52"></a>
 Log Levels</h4>
 <p>Log levels in order of severity (lowest to highest):</p>
 <ol type="1">
@@ -830,7 +838,7 @@ Log Levels</h4>
 <li><code>critical</code> - Critical errors</li>
 </ol>
 <p>When using <code>min_level</code>, all logs at that level and above are included. For example, <code>min_level=warn</code> includes <code>warn</code> and <code>critical</code> logs.</p>
-<h4><a class="anchor" id="autotoc_md52"></a>
+<h4><a class="anchor" id="autotoc_md53"></a>
 Error Responses</h4>
 <p><b>503 Service Unavailable</b> - Log database not initialized: </p><div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;error&quot;: &quot;Log database not initialized&quot;,</div>
@@ -843,10 +851,10 @@ Error Responses</h4>
 <div class="line">  &quot;data&quot;: {}</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md54"></a>
+<h2><a class="anchor" id="autotoc_md55"></a>
 Realtime API</h2>
 <p>MantisBase provides <b>realtime database change notifications</b> over <b>Server-Sent Events (SSE)</b> for both SQLite and PostgreSQL backends. Clients subscribe to topics (entity names and optionally specific row IDs) and receive live <code>insert</code>, <code>update</code>, and <code>delete</code> events as they occur.</p>
-<h3><a class="anchor" id="autotoc_md55"></a>
+<h3><a class="anchor" id="autotoc_md56"></a>
 Endpoints</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -856,12 +864,12 @@ Endpoints</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/realtime</code>   </td><td class="markdownTableBodyNone">Set topics for an existing session. Returns granted topics and a <code>denied</code> list.   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md56"></a>
+<h3><a class="anchor" id="autotoc_md57"></a>
 Authentication</h3>
 <p>Realtime connections accept optional credentials via <code>?token=</code> (overrides header) or <code>Authorization: Bearer &lt;token&gt;</code>. Invalid or expired tokens at connect time are treated as <b>guest</b>. Auth can be upgraded on subscribe (POST or WS <code>subscribe</code> message) but cannot be downgraded or switched to another user.</p>
 <p>Session IDs use the prefixes <code>rt_sse_...</code> and <code>rt_ws_...</code>.</p>
 <p>Connect-only sessions with no subscribed topics are closed after <b>60 seconds</b>. Authenticated sessions expire when the JWT/session is revoked or expires; idle subscribed sessions are closed after <b>10 minutes</b>.</p>
-<h3><a class="anchor" id="autotoc_md57"></a>
+<h3><a class="anchor" id="autotoc_md58"></a>
 GET /api/v1/realtime — Open SSE connection</h3>
 <p>Establishes a long-lived SSE stream. Topics are optional on connect; use POST to subscribe after receiving <code>client_id</code>.</p>
 <p><b>Query parameters</b></p>
@@ -883,7 +891,7 @@ GET /api/v1/realtime — Open SSE connection</h3>
 <li><b>Connection:</b> keep-alive</li>
 </ul>
 <p>The stream sends events in SSE format. Each event has an <code>event</code> type and a <code>data</code> line (JSON).</p>
-<h3><a class="anchor" id="autotoc_md58"></a>
+<h3><a class="anchor" id="autotoc_md59"></a>
 POST /api/v1/realtime — Subscribe / update session</h3>
 <p>Sets the topic list for an existing SSE session (replaces prior subscriptions). Pass optional auth to upgrade from guest.</p>
 <p><b>Request body (JSON)</b></p>
@@ -914,7 +922,7 @@ POST /api/v1/realtime — Subscribe / update session</h3>
 <div class="line">    &quot;client_id&quot;: &quot;rt_sse_1769987962000_0abc1&quot;,</div>
 <div class="line">    &quot;topics&quot;: [&quot;posts&quot;, &quot;comments&quot;]</div>
 <div class="line">  }&#39;</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md59"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md60"></a>
 SSE event types</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -928,7 +936,7 @@ SSE event types</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>error</code>   </td><td class="markdownTableBodyNone">Session error (e.g. <code>token_expired</code>). Connection may close afterward.   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md60"></a>
+<h3><a class="anchor" id="autotoc_md61"></a>
 Event data format</h3>
 <p><b>connected</b></p>
 <div class="fragment"><div class="line">{</div>
@@ -977,7 +985,7 @@ Event data format</h3>
 <div class="line">  &quot;timestamp&quot;: 1769988013,</div>
 <div class="line">  &quot;topic&quot;: &quot;test&quot;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md61"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md62"></a>
 Access control</h3>
 <p>Realtime endpoints use the same access rules as entity <code>list</code> and <code>get</code>:</p>
 <ul>
@@ -985,7 +993,7 @@ Access control</h3>
 <li>Subscribing to a specific row (e.g. <code>posts:&amp;lt;id&amp;gt;</code>) requires <b>get</b> access.</li>
 </ul>
 <p>Invalid or unauthorized topics result in <code>400</code>, <code>401</code>, or <code>403</code> responses depending on whether the request is malformed, unauthenticated, or forbidden by access rules.</p>
-<h3><a class="anchor" id="autotoc_md62"></a>
+<h3><a class="anchor" id="autotoc_md63"></a>
 Backend support</h3>
 <p>Realtime is supported for:</p>
 <ul>
@@ -993,13 +1001,13 @@ Backend support</h3>
 <li><b>PostgreSQL</b> — Change detection via <code>LISTEN</code>/<code>NOTIFY</code> and triggers.</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md64"></a>
+<h2><a class="anchor" id="autotoc_md65"></a>
 WebSocket Realtime API</h2>
 <p>In addition to SSE, MantisBase provides a <b>WebSocket endpoint</b> for realtime notifications. It uses the same topic model as SSE.</p>
-<h3><a class="anchor" id="autotoc_md65"></a>
+<h3><a class="anchor" id="autotoc_md66"></a>
 Endpoint</h3>
 <div class="fragment"><div class="line">WS /api/v1/realtime/ws</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md66"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md67"></a>
 Connection</h3>
 <p>Authentication is <b>optional</b> at connect. Supply a JWT or API key (<code>mb_sk_...</code>) via <code>?token=</code> (overrides header) or <code>Authorization: Bearer &lt;token&gt;</code>. Invalid tokens are treated as guest. You receive a <code>client_id</code> immediately and subscribe afterward.</p>
 <div class="fragment"><div class="line">const ws = new WebSocket(&quot;ws://localhost:7070/api/v1/realtime/ws&quot;);</div>
@@ -1017,7 +1025,7 @@ Connection</h3>
 <div class="line">  const msg = JSON.parse(event.data);</div>
 <div class="line">  console.log(msg);</div>
 <div class="line">};</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md67"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md68"></a>
 Welcome message</h3>
 <p>On connect, the server sends:</p>
 <div class="fragment"><div class="line">{</div>
@@ -1025,7 +1033,7 @@ Welcome message</h3>
 <div class="line">  &quot;client_id&quot;: &quot;rt_ws_1769987962000_0abc1&quot;,</div>
 <div class="line">  &quot;topics&quot;: []</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md68"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md69"></a>
 Subscribing</h3>
 <p>Send <code>{ "type": "subscribe", "topics": [...] }</code>. Optional <code>token</code> upgrades auth (for browsers that cannot set headers after connect). <code>{ "type": "auth", "token": "..." }</code> is equivalent to a token-only upgrade.</p>
 <p>Topics follow the same format as SSE — entity name or <code>entity:row_id</code>. Subscribing <b>replaces</b> the current topic set.</p>
@@ -1036,7 +1044,7 @@ Subscribing</h3>
 <div class="line">  &quot;topics&quot;: [&quot;posts&quot;],</div>
 <div class="line">  &quot;denied&quot;: [{ &quot;topic&quot;: &quot;private_items&quot;, &quot;reason&quot;: &quot;forbidden&quot;, &quot;status&quot;: 403 }]</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md69"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md70"></a>
 Change events</h3>
 <p>Database changes are delivered in the same format as SSE <code>change</code> events:</p>
 <div class="fragment"><div class="line">{</div>
@@ -1049,12 +1057,12 @@ Change events</h3>
 <div class="line">}</div>
 </div><!-- fragment --><p>WebSocket realtime can be disabled by setting the environment variable <code>MB_DISABLE_REALTIME_WS=1</code> (or <code>true</code>). SSE can be disabled with <code>MB_DISABLE_REALTIME_SSE=1</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md71"></a>
+<h2><a class="anchor" id="autotoc_md72"></a>
 Admin Dashboard</h2>
 <p>The MantisBase Admin Dashboard is a comprehensive web-based interface accessible at <code>/mb</code> (e.g., <code><a href="http://localhost:7070/mb">http://localhost:7070/mb</a></code>). It provides a visual alternative to the REST API for managing your backend.</p>
-<h3><a class="anchor" id="autotoc_md72"></a>
+<h3><a class="anchor" id="autotoc_md73"></a>
 Dashboard Features</h3>
-<h4><a class="anchor" id="autotoc_md73"></a>
+<h4><a class="anchor" id="autotoc_md74"></a>
 Entity Management</h4>
 <ul>
 <li><b>Browse Entities</b> - View all entities (tables) in your database</li>
@@ -1063,7 +1071,7 @@ Entity Management</h4>
 <li><b>Edit Records</b> - Update existing records inline</li>
 <li><b>Delete Records</b> - Remove records with confirmation</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md74"></a>
+<h4><a class="anchor" id="autotoc_md75"></a>
 Schema Management</h4>
 <ul>
 <li><b>Schema Builder</b> - Create and configure entity schemas visually</li>
@@ -1072,7 +1080,7 @@ Schema Management</h4>
 <li><b>Foreign Key Setup</b> - Configure relationships between entities</li>
 <li><b>View Entity Support</b> - Create and manage SQL view entities</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md75"></a>
+<h4><a class="anchor" id="autotoc_md76"></a>
 Data Exploration</h4>
 <ul>
 <li><b>Search &amp; Filter</b> - Quickly find records with built-in search</li>
@@ -1080,21 +1088,21 @@ Data Exploration</h4>
 <li><b>Sorting</b> - Sort records by any column</li>
 <li><b>Real-time Updates</b> - See changes reflected immediately</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md76"></a>
+<h4><a class="anchor" id="autotoc_md77"></a>
 User Management</h4>
 <ul>
 <li><b>Authentication Entities</b> - Manage auth-type entities</li>
 <li><b>User Accounts</b> - View and manage user accounts</li>
 <li><b>Admin Accounts</b> - Manage admin users</li>
 </ul>
-<h4><a class="anchor" id="autotoc_md77"></a>
+<h4><a class="anchor" id="autotoc_md78"></a>
 System Management</h4>
 <ul>
 <li><b>Logs Viewer</b> - Access system logs directly from the dashboard</li>
 <li><b>Health Status</b> - Monitor system health</li>
 <li><b>Configuration</b> - View and manage system settings</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md78"></a>
+<h3><a class="anchor" id="autotoc_md79"></a>
 Accessing the Dashboard</h3>
 <ol type="1">
 <li><b>Create an Admin Account</b> (if not already created): <div class="fragment"><div class="line">./mantisbase admins --add admin@example.com your_password</div>
@@ -1103,7 +1111,7 @@ Accessing the Dashboard</h3>
 </div><!-- fragment --></li>
 <li><b>Login</b> with your admin credentials</li>
 </ol>
-<h3><a class="anchor" id="autotoc_md79"></a>
+<h3><a class="anchor" id="autotoc_md80"></a>
 Dashboard Requirements</h3>
 <ul>
 <li><b>Admin Authentication Required</b> - Only users authenticated as admins can access the dashboard</li>

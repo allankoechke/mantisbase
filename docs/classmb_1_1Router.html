@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.5</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.6</span>
    </div>
   </td>
  </tr>
@@ -150,6 +150,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:adf04e0afecc80260f66a59dd15110db2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2acc8d159beb665b6bb1a43f8b72ebf" id="r_ac2acc8d159beb665b6bb1a43f8b72ebf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#ac2acc8d159beb665b6bb1a43f8b72ebf">Delete</a> (const std::string &amp;path, const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares={})</td></tr>
 <tr class="separator:ac2acc8d159beb665b6bb1a43f8b72ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adacfba406ceabe5b3ec0a8c708e9435b" id="r_adacfba406ceabe5b3ec0a8c708e9435b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#adacfba406ceabe5b3ec0a8c708e9435b">redirect</a> (const std::string &amp;initialPath, const std::string &amp;destinationPath, int redirectStatus=302, const std::vector&lt; std::string &gt; &amp;constraints={&quot;GET&quot;}) const</td></tr>
+<tr class="separator:adacfba406ceabe5b3ec0a8c708e9435b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b28b5c9521895ae6fcf278ae61813af" id="r_a2b28b5c9521895ae6fcf278ae61813af"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#a2b28b5c9521895ae6fcf278ae61813af">schemaCache</a> (const std::string &amp;table_name) const</td></tr>
 <tr class="separator:a2b28b5c9521895ae6fcf278ae61813af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf58352dbab6b95d4c025276830e049d" id="r_aaf58352dbab6b95d4c025276830e049d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1Router.html#aaf58352dbab6b95d4c025276830e049d">hasSchemaCache</a> (const std::string &amp;table_name) const</td></tr>
@@ -612,6 +614,56 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="adacfba406ceabe5b3ec0a8c708e9435b" name="adacfba406ceabe5b3ec0a8c708e9435b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adacfba406ceabe5b3ec0a8c708e9435b">&#9670;&#160;</a></span>redirect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::Router::redirect </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>initialPath</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>destinationPath</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>redirectStatus</em> = <code>302</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::string &gt; &amp;&#160;</td>
+          <td class="paramname"><em>constraints</em> = <code>{&quot;GET&quot;}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a redirect path with the given status code for redirect</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">initialPath</td><td>Existing path to be redirected elsewhere (/some/old/path) </td></tr>
+    <tr><td class="paramname">destinationPath</td><td>Destination path, either relative (/some/path) or absolute URL (http(s)://some.domain/path) </td></tr>
+    <tr><td class="paramname">redirectStatus</td><td>The redirect status, by default 302 Found. Use 301 for permanent moves, 302/303/307/308 for temporary ones. </td></tr>
+    <tr><td class="paramname">constraints</td><td>Array of HTTP methods allowed for this redirect. Defaults to <code>{"GET"}</code> (GET-only). Pass an empty array to allow all methods. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

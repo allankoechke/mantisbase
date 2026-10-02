@@ -29,16 +29,16 @@ var NAVTREE =
     [ "REST API Reference Guide", "docs_rest_api.html", null ],
     [ "Authentication API", "docs_auth_api.html", null ],
     [ "Command Line Usage", "docs_cli.html", [
-      [ "mantisbase CLI Reference", "docs_cli.html#autotoc_md116", [
-        [ "Global Options", "docs_cli.html#autotoc_md118", null ],
-        [ "serve", "docs_cli.html#autotoc_md120", null ],
-        [ "admins", "docs_cli.html#autotoc_md122", null ],
-        [ "schema", "docs_cli.html#autotoc_md124", null ],
-        [ "migrate", "docs_cli.html#autotoc_md126", [
-          [ "apply", "docs_cli.html#autotoc_md127", null ],
-          [ "schema", "docs_cli.html#autotoc_md128", null ]
+      [ "mantisbase CLI Reference", "docs_cli.html#autotoc_md117", [
+        [ "Global Options", "docs_cli.html#autotoc_md119", null ],
+        [ "serve", "docs_cli.html#autotoc_md121", null ],
+        [ "admins", "docs_cli.html#autotoc_md123", null ],
+        [ "schema", "docs_cli.html#autotoc_md125", null ],
+        [ "migrate", "docs_cli.html#autotoc_md127", [
+          [ "apply", "docs_cli.html#autotoc_md128", null ],
+          [ "schema", "docs_cli.html#autotoc_md129", null ]
         ] ],
-        [ "See Also", "docs_cli.html#autotoc_md130", null ]
+        [ "See Also", "docs_cli.html#autotoc_md131", null ]
       ] ]
     ] ],
     [ "C++ Dev Package", "docs_cpp_dev.html", null ],
@@ -86,9 +86,9 @@ var NAVTREEINDEX =
 "classmb_1_1EntitySchema.html#aa8066e7d302e42a6a687049dc15f3cef",
 "classmb_1_1MantisBase.html#a797bcb2d6d6d3593f6b7315559162a1f",
 "classmb_1_1RealtimeDB.html#aa07509b35ba3cb4aeef4d36c16c81e18",
-"entity_8h.html#a1617ef3fcc5a5fcfef00c1be2096e87d",
-"namespacemb.html#a425a32498cb6cadfa12f4c3daac2eaaea733d43480c8589b1368e5def6b480415",
-"structmb_1_1FormDataItem.html#a07cdffe683a7645ad6af833e59466e96"
+"entity_8cpp.html",
+"namespacemb.html#a425a32498cb6cadfa12f4c3daac2eaaea15ead7e9e753b314fa659c71eb998037",
+"structmb_1_1FormDataItem.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

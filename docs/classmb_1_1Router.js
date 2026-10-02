@@ -17,6 +17,7 @@ var classmb_1_1Router =
     [ "Post", "classmb_1_1Router.html#ac76b0ecb14b11681c9f3e4e0602bd57c", null ],
     [ "Post", "classmb_1_1Router.html#ab3e0a75c3b5eed98d1041ed49b233951", null ],
     [ "preRoutingMiddlewares", "classmb_1_1Router.html#aec5a7d651d1806d6c5ebf27e9af28511", null ],
+    [ "redirect", "classmb_1_1Router.html#adacfba406ceabe5b3ec0a8c708e9435b", null ],
     [ "reloadCorsOrigins", "classmb_1_1Router.html#a3014ac8da0ec6844af0239e2b7025612", null ],
     [ "removeSchemaCache", "classmb_1_1Router.html#ad39b4035ae72eb9c23c95337b650087b", null ],
     [ "removeSchemaCacheLocked", "classmb_1_1Router.html#ac2172250e1e2426896ed28eae3555556", null ],

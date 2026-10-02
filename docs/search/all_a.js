@@ -3,7 +3,7 @@ var searchData=
   ['genentityid_0',['genEntityId',['../classmb_1_1EntitySchema.html#a92bd6f5e4cc3976fcda7a97b71bf9205',1,'mb::EntitySchema']]],
   ['generate_5fuuidv7_1',['generate_uuidv7',['../namespacemb.html#ad67ff06c25bb2ccdd5f52404e51405f9',1,'mb']]],
   ['generateapikey_2',['generateApiKey',['../classmb_1_1ApiKeyManager.html#a42a9ad50fdbb837a955d894385188cef',1,'mb::ApiKeyManager']]],
-  ['generated_20api_3',['4. Use Your Auto-generated API',['../index.html#autotoc_md243',1,'']]],
+  ['generated_20api_3',['4. Use Your Auto-generated API',['../index.html#autotoc_md244',1,'']]],
   ['generatepkcechallenge_4',['generatePKCEChallenge',['../namespacemb.html#ab1732e537d2f880aebd13253dad4bd21',1,'mb']]],
   ['generatepkceverifier_5',['generatePKCEVerifier',['../namespacemb.html#ac5b5233790c2e722a8af39b5cb7e65c6',1,'mb']]],
   ['generatereadabletimeid_6',['generateReadableTimeId',['../namespacemb.html#af1b47490bcd171b34e7371a721ec4d82',1,'mb']]],
@@ -12,8 +12,8 @@ var searchData=
   ['generateshortid_9',['generateShortId',['../namespacemb.html#ab5004cdfdf21f04cf630c15f7f191bac',1,'mb']]],
   ['generatetimebasedid_10',['generateTimeBasedId',['../namespacemb.html#a4bbd6b13fd498f212dd8f5d7b7565e2e',1,'mb']]],
   ['genfieldid_11',['genFieldId',['../classmb_1_1EntitySchemaField.html#a6540d35413623c6a3fd54e6621de7294',1,'mb::EntitySchemaField']]],
-  ['get_12',['get',['../classmb_1_1Router.html#a3d2d6b3f6b968c4b784abd35d2dcb1ad',1,'mb::Router::Get()'],['../classmb_1_1ContextStore.html#afc3f6f5f2897979f6ee43b28b883cbe0',1,'mb::ContextStore::get()'],['../docs_cpp_dev.html#autotoc_md133',1,'What you get']]],
-  ['get_20api_20v1_20realtime_20—_20open_20sse_20connection_13',['GET /api/v1/realtime — Open SSE connection',['../docs_rest_api.html#autotoc_md57',1,'']]],
+  ['get_12',['get',['../classmb_1_1Router.html#a3d2d6b3f6b968c4b784abd35d2dcb1ad',1,'mb::Router::Get()'],['../classmb_1_1ContextStore.html#afc3f6f5f2897979f6ee43b28b883cbe0',1,'mb::ContextStore::get()'],['../docs_cpp_dev.html#autotoc_md134',1,'What you get']]],
+  ['get_20api_20v1_20realtime_20—_20open_20sse_20connection_13',['GET /api/v1/realtime — Open SSE connection',['../docs_rest_api.html#autotoc_md58',1,'']]],
   ['getauthtoken_14',['getAuthToken',['../namespacemb.html#a9abac4c99bce305c152282e027b9a934',1,'mb']]],
   ['getbearertokenauth_15',['getBearerTokenAuth',['../classmb_1_1MantisRequest.html#acc280227bd815ff0ea5d4d0a9c3162e0',1,'mb::MantisRequest']]],
   ['getbody_16',['getbody',['../classmb_1_1MantisRequest.html#a17298ba6d2a1291162860719aee3eb51',1,'mb::MantisRequest::getBody()'],['../classmb_1_1MantisResponse.html#a878043bf4ca23e77ec318d47647969a9',1,'mb::MantisResponse::getBody()']]],
@@ -59,7 +59,7 @@ var searchData=
   ['gettable_56',['getTable',['../classmb_1_1EntitySchema.html#a1f98df3fdad7bc9b9193bf98ffc7ef6c',1,'mb::EntitySchema']]],
   ['gettopics_57',['getTopics',['../classmb_1_1SSESession.html#a7789a94be201224477a2dd7b191f5324',1,'mb::SSESession']]],
   ['getversion_58',['getVersion',['../classmb_1_1MantisResponse.html#aa4bd2ce8f4b2ebc0fe9d37aaab51fe3a',1,'mb::MantisResponse']]],
-  ['global_20options_59',['Global Options',['../docs_cli.html#autotoc_md118',1,'']]],
+  ['global_20options_59',['Global Options',['../docs_cli.html#autotoc_md119',1,'']]],
   ['granted_60',['granted',['../structmb_1_1TopicAccessResult.html#a927557b82d06eaca1b2ba24e00d72d85',1,'mb::TopicAccessResult']]],
   ['guide_61',['guide',['../index.html',1,'Quick Start Guide'],['../docs_rest_api.html',1,'REST API Reference Guide']]]
 ];
