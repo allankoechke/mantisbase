@@ -140,7 +140,7 @@ To add a new request endpoint in JS, Mantis exposes a `addRoute` method having t
 app.router().addRoute(method, path, function_handler) 
 // With Middlewares
 app.router().addRoute(method, path, function_handler, middleware1, middleware2, ...)
-// Shorthands: app.router().get/post/patch/delete(path, function_handler, ...middlewares)
+// Shorthands: app.router().get/post/put/patch/delete(path, function_handler, ...middlewares)
 ```
 Let's add a `/test` route.
 ```js
