@@ -70,7 +70,7 @@ namespace mb
         void setupConfigRoutes();
 
         json loadFromDb();
-        [[nodiscard]] json redactForResponse(const json &configs) const;
+        static json redactForResponse(const json &configs) ;
         void applyPatch(const json &body);
 
         json m_configs;

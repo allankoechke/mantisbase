@@ -152,6 +152,44 @@ jobs:
           popd > /dev/null
           g++ -std=c++20 -fsyntax-only "$CHECK_DIR/smoke.cpp" -I"$CHECK_DIR/include"
 
+      - name: Check dev shared lib links soci (Linux)
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          # Linking, not just headers: Database exposes soci types in its
+          # public API and devs call soci directly, so prove soci_core symbols
+          # resolve from libmantisbase.so alone (no extra soci lib to link).
+          # The header check above is -fsyntax-only and would miss this.
+          # Link-only on purpose: backend symbols are intentionally NOT
+          # exported (see cmake/add-soci.cmake), so this exercises the core
+          # surface devs use on Database sessions without opening a backend
+          # session directly or executing anything.
+          CHECK_DIR="${{ steps.strings.outputs.build-output-dir }}/dev-headers-check"
+          cat > "$CHECK_DIR/link-smoke.cpp" <<'EOF'
+          #include <mantisbase/core/database.h>
+          #include <soci/soci.h>
+          int main() {
+              soci::session sql; // unconnected; linked, never executed
+              int v = 0;
+              sql << "SELECT COUNT(*) FROM t", soci::into(v);
+              sql << "INSERT INTO t(id) VALUES(:v)", soci::use(v);
+              soci::row r;
+              soci::statement st = (sql.prepare << "SELECT id FROM t", soci::into(r));
+              st.execute();
+              (void)st;
+              soci::transaction tr(sql);
+              (void)tr;
+              soci::values vals;
+              vals.set("k", 1);
+              mb::MantisLoggerImpl logger;
+              (void)logger;
+              return 0;
+          }
+          EOF
+          g++ -std=c++20 "$CHECK_DIR/link-smoke.cpp" -I"$CHECK_DIR/include" \
+            -L"${{ steps.strings.outputs.build-output-dir }}/lib" -lmantisbase \
+            -lpq -luuid -ldl -lpthread -lm -o "$CHECK_DIR/link-smoke"
+
       - name: Check dev headers (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh

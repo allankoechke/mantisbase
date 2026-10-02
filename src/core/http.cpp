@@ -116,6 +116,24 @@ namespace mb {
         registerDrogonHandler("DELETE", path);
     }
 
+    void Router::redirect(const std::string &initialPath, const std::string &destinationPath, int redirectStatus,
+                          const std::vector<std::string> &constraints) const {
+        logger().debug("Route Redirect Created", fmt::format("Redirect from {} to {}", initialPath, destinationPath));
+
+        // Create callback handler
+        auto _cb = [destinationPath, redirectStatus](const drogon::HttpRequestPtr &,
+                                             std::function<void(const drogon::HttpResponsePtr &)> &&cb) {
+            cb(drogon::HttpResponse::newRedirectionResponse(
+                destinationPath, static_cast<drogon::HttpStatusCode>(redirectStatus)));
+        };
+
+        // Get constraint array
+        const auto http_constraints = Router::validateConstraints(constraints);
+
+        // Register new path
+        drogon::app().registerHandler(initialPath, std::move(_cb), http_constraints);
+    }
+
     static drogon::HttpMethod toDrogonMethod(const std::string &method) {
         if (method == "GET") return drogon::Get;
         if (method == "POST") return drogon::Post;

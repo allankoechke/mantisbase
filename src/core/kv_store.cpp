@@ -110,7 +110,7 @@ namespace mb
         if (m_configs.contains(key)) {
             return m_configs.at(key);
         }
-        return json();
+        return {};
     }
 
     void KeyValStore::setScriptingValue(const std::string &key, const json &value)
@@ -163,7 +163,7 @@ namespace mb
         return json::object();
     }
 
-    json KeyValStore::redactForResponse(const json &configs) const
+    json KeyValStore::redactForResponse(const json &configs)
     {
         auto data = configs;
         if (data.contains("smtp") && data["smtp"].is_object())
@@ -185,7 +185,7 @@ namespace mb
             migrate();
         }
 
-        const auto merge_scalar = [&]<typename T>(const char *key, T default_val) {
+        const auto merge_scalar = [&]<typename T>(const char *key, const T& default_val) {
             if (body.contains(key))
             {
                 m_configs[key] = body.value(key, default_val);
@@ -283,7 +283,7 @@ namespace mb
 
         mApp.router().Get(
             "/api/v1/sys/settings/config",
-            [this](MantisRequest &req, MantisResponse &res)
+            [this](MantisRequest &req, const MantisResponse &res)
             {
                 const auto settings = loadFromDb();
                 if (settings.empty())
@@ -309,7 +309,7 @@ namespace mb
 
         mApp.router().Patch(
             "/api/v1/sys/settings/config",
-            [this](MantisRequest &req, MantisResponse &res)
+            [this](const MantisRequest &req, const MantisResponse &res)
             {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty())
