@@ -6,7 +6,7 @@
 
 namespace mb {
     namespace {
-        void handleGetOne(const MantisRequest &req, const MantisResponse &res, const std::string &entity_name) {
+        void handleGetOne(const MbRequest &req, const MbResponse &res, const std::string &entity_name) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
 
@@ -43,7 +43,7 @@ namespace mb {
             }
         }
 
-        void handleGetMany(const MantisRequest &req, const MantisResponse &res, const std::string &entity_name) {
+        void handleGetMany(const MbRequest &req, const MbResponse &res, const std::string &entity_name) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
 
@@ -104,7 +104,7 @@ namespace mb {
             }
         }
 
-        void handlePost(const MantisRequest &req, const MantisResponse &res, MantisContentReader &reader,
+        void handlePost(const MbRequest &req, const MbResponse &res, MbContentReader &reader,
                         const std::string &entity_name) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
@@ -150,7 +150,7 @@ namespace mb {
             }
         }
 
-        void handlePatch(MantisRequest &req, MantisResponse &res, MantisContentReader &reader,
+        void handlePatch(MbRequest &req, MbResponse &res, MbContentReader &reader,
                          const std::string &entity_name) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
@@ -200,7 +200,7 @@ namespace mb {
             }
         }
 
-        void handleDelete(const MantisRequest &req, const MantisResponse &res, const std::string &entity_name) {
+        void handleDelete(const MbRequest &req, const MbResponse &res, const std::string &entity_name) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
 
@@ -227,32 +227,32 @@ namespace mb {
         }
     }
 
-    HandlerFn entityGetOneHandler() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    MbHandlerFn entityGetOneHandler() {
+        return [](const MbRequest &req, const MbResponse &res) {
             handleGetOne(req, res, trim(req.getPathParamValue("entity_name")));
         };
     }
 
-    HandlerFn entityGetManyHandler() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    MbHandlerFn entityGetManyHandler() {
+        return [](const MbRequest &req, const MbResponse &res) {
             handleGetMany(req, res, trim(req.getPathParamValue("entity_name")));
         };
     }
 
-    HandlerWithContentReaderFn entityPostHandler() {
-        return [](const MantisRequest &req, const MantisResponse &res, MantisContentReader &reader) {
+    MbHandlerWithContentReaderFn entityPostHandler() {
+        return [](const MbRequest &req, const MbResponse &res, MbContentReader &reader) {
             handlePost(req, res, reader, trim(req.getPathParamValue("entity_name")));
         };
     }
 
-    HandlerWithContentReaderFn entityPatchHandler() {
-        return [](MantisRequest &req, MantisResponse &res, MantisContentReader &reader) {
+    MbHandlerWithContentReaderFn entityPatchHandler() {
+        return [](MbRequest &req, MbResponse &res, MbContentReader &reader) {
             handlePatch(req, res, reader, trim(req.getPathParamValue("entity_name")));
         };
     }
 
-    HandlerFn entityDeleteHandler() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    MbHandlerFn entityDeleteHandler() {
+        return [](const MbRequest &req, const MbResponse &res) {
             handleDelete(req, res, trim(req.getPathParamValue("entity_name")));
         };
     }
@@ -262,17 +262,17 @@ namespace mb {
         const std::string admin_entity = "mb_admins";
 
         router.Get("/api/v1/sys/admins",
-                   [admin_entity](const MantisRequest &req, const MantisResponse &res) {
+                   [admin_entity](const MbRequest &req, const MbResponse &res) {
                        handleGetMany(req, res, admin_entity);
                    },
                    {requireAdminAuth()});
         router.Get("/api/v1/sys/admins/:id",
-                   [admin_entity](const MantisRequest &req, const MantisResponse &res) {
+                   [admin_entity](const MbRequest &req, const MbResponse &res) {
                        handleGetOne(req, res, admin_entity);
                    },
                    {requireAdminAuth()});
         router.Post("/api/v1/sys/admins",
-                    [admin_entity](const MantisRequest &req, const MantisResponse &res, MantisContentReader &reader) {
+                    [admin_entity](const MbRequest &req, const MbResponse &res, MbContentReader &reader) {
                         handlePost(req, res, reader, admin_entity);
                     },
                     {
@@ -281,12 +281,12 @@ namespace mb {
                         envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)
                     });
         router.Patch("/api/v1/sys/admins/:id",
-                     [admin_entity](MantisRequest &req, MantisResponse &res, MantisContentReader &reader) {
+                     [admin_entity](MbRequest &req, MbResponse &res, MbContentReader &reader) {
                          handlePatch(req, res, reader, admin_entity);
                      },
                      {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)});
         router.Delete("/api/v1/sys/admins/:id",
-                      [admin_entity](const MantisRequest &req, const MantisResponse &res) {
+                      [admin_entity](const MbRequest &req, const MbResponse &res) {
                           handleDelete(req, res, admin_entity);
                       },
                       {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)});

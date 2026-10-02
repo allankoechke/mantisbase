@@ -5,21 +5,21 @@
 #include "../../include/mantisbase/core/http.h"
 
 namespace mb {
-    size_t RouteKeyHash::operator()(const RouteKey &k) const {
+    size_t RouteKeyHash::operator()(const MbRouteKey &k) const {
         return std::hash<std::string>()(k.first + "#" + k.second);
     }
 
     void RouteRegistry::add(const std::string &method,
                             const std::string &path,
-                            const HandlerFn &handler,
-                            const Middlewares &middlewares) {
+                            const MbHandlerFn &handler,
+                            const MbMiddlewares &middlewares) {
         routes[{method, path}] = {.middlewares = middlewares, .handler = handler};
     }
 
     void RouteRegistry::add(const std::string &method,
                             const std::string &path,
-                            const HandlerWithContentReaderFn &handler,
-                            const Middlewares &middlewares) {
+                            const MbHandlerWithContentReaderFn &handler,
+                            const MbMiddlewares &middlewares) {
         routes[{method, path}] = {.middlewares = middlewares, .handler = handler};
     }
 

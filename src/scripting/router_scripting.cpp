@@ -12,8 +12,8 @@
 namespace mb {
     void Router::executeJsRoute(const DukValue &handler,
                                 const std::vector<DukValue> &middlewares,
-                                MantisRequest &req,
-                                MantisResponse &res) {
+                                MbRequest &req,
+                                MbResponse &res) {
         auto *engine = ScriptingEngine::active();
         if (!engine) {
             res.sendJSON(500, json{{"error", "Scripting engine not available"}, {"status", "500"}, {"data", json::object()}});
@@ -78,23 +78,23 @@ namespace mb {
             }
 
             if (method == "GET") {
-                router->Get(path, [router, handler, middlewares](MantisRequest &req, MantisResponse &res) {
+                router->Get(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
                     mb::Router::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "POST") {
-                router->Post(path, [router, handler, middlewares](MantisRequest &req, MantisResponse &res) {
+                router->Post(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
                     mb::Router::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "PATCH") {
-                router->Patch(path, [router, handler, middlewares](MantisRequest &req, MantisResponse &res) {
+                router->Patch(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
                     mb::Router::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "PUT") {
-                router->Put(path, [router, handler, middlewares](MantisRequest &req, MantisResponse &res) {
+                router->Put(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
                     mb::Router::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "DELETE") {
-                router->Delete(path, [router, handler, middlewares](MantisRequest &req, MantisResponse &res) {
+                router->Delete(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
                     mb::Router::executeJsRoute(handler, middlewares, req, res);
                 });
             } else {

@@ -209,7 +209,7 @@ namespace mb {
         return false;
     }
 
-    nlohmann::json buildAccessExprVars(const MantisRequest &req, const nlohmann::json &auth) {
+    nlohmann::json buildAccessExprVars(const MbRequest &req, const nlohmann::json &auth) {
         nlohmann::json body = nlohmann::json::object();
         try {
             if (req.getMethod() == "POST" && !req.getBody().empty()) {

@@ -15,8 +15,8 @@ namespace mb {
         }
     }
 
-    HandlerFn schemaGetOneHandler() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    MbHandlerFn schemaGetOneHandler() {
+        return [](const MbRequest &req, const MbResponse &res) {
             try {
                 const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
@@ -47,8 +47,8 @@ namespace mb {
         };
     }
 
-    HandlerFn schemaGetManyHandler() {
-        return [](MantisRequest &req, MantisResponse &res) {
+    MbHandlerFn schemaGetManyHandler() {
+        return [](MbRequest &req, MbResponse &res) {
             try {
                 const auto tables = EntitySchema::listTables(req.mbApp());
                 res.sendJSON(200, {
@@ -73,8 +73,8 @@ namespace mb {
         };
     }
 
-    HandlerFn schemaPostHandler() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    MbHandlerFn schemaPostHandler() {
+        return [](const MbRequest &req, const MbResponse &res) {
             try {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
@@ -118,8 +118,8 @@ namespace mb {
         };
     }
 
-    HandlerFn schemaPatchHandler() {
-        return [](MantisRequest &req, MantisResponse &res) {
+    MbHandlerFn schemaPatchHandler() {
+        return [](MbRequest &req, MbResponse &res) {
             try {
                 const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
@@ -160,8 +160,8 @@ namespace mb {
         };
     }
 
-    HandlerFn schemaDeleteHandler() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    MbHandlerFn schemaDeleteHandler() {
+        return [](const MbRequest &req, const MbResponse &res) {
             try {
                 const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())

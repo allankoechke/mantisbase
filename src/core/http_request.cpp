@@ -12,20 +12,20 @@
 #endif
 
 namespace mb {
-    MantisRequest::MantisRequest(const MantisBase &app, drogon::HttpRequestPtr _req)
+    MbRequest::MbRequest(const MantisBase &app, drogon::HttpRequestPtr _req)
         : IMantisBase(app),
           m_req(std::move(_req)) {
     }
 
-    void MantisRequest::setPathParam(const std::string &key, const std::string &value) {
+    void MbRequest::setPathParam(const std::string &key, const std::string &value) {
         m_pathParams[key] = value;
     }
 
-    void MantisRequest::setPathParams(const std::unordered_map<std::string, std::string> &params) {
+    void MbRequest::setPathParams(const std::unordered_map<std::string, std::string> &params) {
         m_pathParams = params;
     }
 
-    std::string MantisRequest::getMethod() const {
+    std::string MbRequest::getMethod() const {
         switch (m_req->method()) {
             case drogon::Get: return "GET";
             case drogon::Post: return "POST";
@@ -38,11 +38,11 @@ namespace mb {
         }
     }
 
-    std::string MantisRequest::getPath() const { return m_req->path(); }
+    std::string MbRequest::getPath() const { return m_req->path(); }
 
-    std::string MantisRequest::getBody() const { return std::string(m_req->body()); }
+    std::string MbRequest::getBody() const { return std::string(m_req->body()); }
 
-    std::string MantisRequest::getRemoteAddr() const {
+    std::string MbRequest::getRemoteAddr() const {
         auto direct_ip = m_req->peerAddr().toIp();
 
         if (hasHeader("X-Forwarded-For")) {
@@ -82,77 +82,77 @@ namespace mb {
         return direct_ip;
     }
 
-    int MantisRequest::getRemotePort() const { return m_req->peerAddr().toPort(); }
+    int MbRequest::getRemotePort() const { return m_req->peerAddr().toPort(); }
 
-    std::string MantisRequest::getLocalAddr() const { return m_req->localAddr().toIp(); }
+    std::string MbRequest::getLocalAddr() const { return m_req->localAddr().toIp(); }
 
-    int MantisRequest::getLocalPort() const { return m_req->localAddr().toPort(); }
+    int MbRequest::getLocalPort() const { return m_req->localAddr().toPort(); }
 
-    bool MantisRequest::hasHeader(const std::string &key) const {
+    bool MbRequest::hasHeader(const std::string &key) const {
         return !m_req->getHeader(key).empty();
     }
 
-    std::string MantisRequest::getHeaderValue(const std::string &key,
+    std::string MbRequest::getHeaderValue(const std::string &key,
                                               const char *def, size_t id) const {
         auto val = m_req->getHeader(key);
         return val.empty() ? std::string(def) : val;
     }
 
-    size_t MantisRequest::getHeaderValueU64(const std::string &key, size_t def,
+    size_t MbRequest::getHeaderValueU64(const std::string &key, size_t def,
                                             size_t id) const {
         auto val = m_req->getHeader(key);
         if (val.empty()) return def;
         try { return std::stoull(val); } catch (...) { return def; }
     }
 
-    size_t MantisRequest::getHeaderValueCount(const std::string &key) const {
+    size_t MbRequest::getHeaderValueCount(const std::string &key) const {
         return m_req->getHeader(key).empty() ? 0 : 1;
     }
 
-    bool MantisRequest::hasQueryParam(const std::string &key) const {
+    bool MbRequest::hasQueryParam(const std::string &key) const {
         return m_req->getOptionalParameter<std::string>(key).has_value();
     }
 
-    std::string MantisRequest::getQueryParamValue(const std::string &key) const {
+    std::string MbRequest::getQueryParamValue(const std::string &key) const {
         auto val = m_req->getOptionalParameter<std::string>(key);
         return val.has_value() ? val.value() : "";
     }
 
-    std::string MantisRequest::getQueryParamValue(const std::string &key,
+    std::string MbRequest::getQueryParamValue(const std::string &key,
                                                   const size_t id) const {
         return getQueryParamValue(key);
     }
 
-    size_t MantisRequest::getQueryParamValueCount(const std::string &key) const {
+    size_t MbRequest::getQueryParamValueCount(const std::string &key) const {
         return hasQueryParam(key) ? 1 : 0;
     }
 
-    bool MantisRequest::hasPathParams() const { return !m_pathParams.empty(); }
+    bool MbRequest::hasPathParams() const { return !m_pathParams.empty(); }
 
-    bool MantisRequest::hasPathParam(const std::string &key) const {
+    bool MbRequest::hasPathParam(const std::string &key) const {
         return m_pathParams.contains(key);
     }
 
-    std::string MantisRequest::getPathParamValue(const std::string &key) const {
+    std::string MbRequest::getPathParamValue(const std::string &key) const {
         if (auto it = m_pathParams.find(key); it != m_pathParams.end())
             return it->second;
         return "";
     }
 
-    size_t MantisRequest::getPathParamValueCount(const std::string &key) const {
+    size_t MbRequest::getPathParamValueCount(const std::string &key) const {
         return m_pathParams.contains(key) ? 1 : 0;
     }
 
-    bool MantisRequest::isMultipartFormData() const {
+    bool MbRequest::isMultipartFormData() const {
         auto ct = m_req->getHeader("Content-Type");
         return ct.find("multipart/form-data") != std::string::npos;
     }
 
-    bool MantisRequest::hasKey(const std::string &key) const {
+    bool MbRequest::hasKey(const std::string &key) const {
         return m_req->attributes()->find(key);
     }
 
-    std::string MantisRequest::getBearerTokenAuth() const {
+    std::string MbRequest::getBearerTokenAuth() const {
         if (hasHeader("Authorization")) {
             const auto auth = getHeaderValue("Authorization", "", 0);
             constexpr size_t bearer_prefix_len = 7; // "Bearer "
@@ -161,11 +161,11 @@ namespace mb {
         return "";
     }
 
-    std::string MantisRequest::getCookieValue(const std::string &key) const {
+    std::string MbRequest::getCookieValue(const std::string &key) const {
         return m_req->getCookie(key);
     }
 
-    std::string MantisRequest::resolveAuthToken() const {
+    std::string MbRequest::resolveAuthToken() const {
         if (hasHeader("Authorization")) {
             const auto bearer = trim(getBearerTokenAuth());
             if (!bearer.empty()) {
@@ -176,7 +176,7 @@ namespace mb {
         return trim(getCookieValue(kAuthTokenCookieName));
     }
 
-    std::pair<nlohmann::json, std::string> MantisRequest::getBodyAsJson() const {
+    std::pair<nlohmann::json, std::string> MbRequest::getBodyAsJson() const {
         try {
             const auto b = getBody();
             auto obj = b.empty() ? nlohmann::json::object() : nlohmann::json::parse(b);
@@ -186,18 +186,26 @@ namespace mb {
         }
     }
 
-    const drogon::HttpRequestPtr & MantisRequest::drogonRequest() const { return m_req; }
+    const drogon::HttpRequestPtr & MbRequest::drogonRequest() const { return m_req; }
 
-    bool MantisRequest::isGuestAuth() {
+    bool MbRequest::isGuestAuth() {
         return mb::isGuestAuth(getOr<json>("auth", json::object()));
     }
 
-    bool MantisRequest::isAdminAuth() {
+    bool MbRequest::isAdminAuth() {
         return mb::isAdminAuth(getOr<json>("auth", json::object()));
     }
 
-    bool MantisRequest::isUserAuth() {
+    bool MbRequest::isUserAuth() {
         return mb::isUserAuth(getOr<json>("auth", json::object()));
+    }
+
+    json MbRequest::jsonBody() const {
+        auto [obj, err] = getBodyAsJson();
+        if (!err.empty()) {
+            return json::object();
+        }
+        return obj;
     }
 
 #ifdef MB_SCRIPTING_ENABLED
@@ -223,10 +231,10 @@ namespace mb {
         }
     }
 
-    void MantisRequest::registerDuktapeMethods() {
+    void MbRequest::registerDuktapeMethods() {
     }
 
-    DukValue MantisRequest::get_duk(const std::string &key) {
+    DukValue MbRequest::get_duk(const std::string &key) {
         if (!hasKey(key)) {
             return {};
         }
@@ -264,7 +272,7 @@ namespace mb {
         return {};
     }
 
-    DukValue MantisRequest::getOr_duk(const std::string &key, const DukValue &default_value) {
+    DukValue MbRequest::getOr_duk(const std::string &key, const DukValue &default_value) {
         if (!hasKey(key)) {
             return default_value;
         }
@@ -275,7 +283,7 @@ namespace mb {
         return val;
     }
 
-    void MantisRequest::set_duk(const std::string &key, const DukValue &value) {
+    void MbRequest::set_duk(const std::string &key, const DukValue &value) {
         auto *ctx = scriptingCtx();
         if (!ctx) {
             return;

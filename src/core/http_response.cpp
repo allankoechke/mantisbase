@@ -8,77 +8,77 @@
 #include <fstream>
 
 namespace mb {
-    MantisResponse::MantisResponse(const MantisBase &app)
+    MbResponse::MbResponse(const MantisBase &app)
         : IMantisBase(app),
           m_res(drogon::HttpResponse::newHttpResponse()) {
     }
 
-    const drogon::HttpResponsePtr &MantisResponse::drogonResponse() const { return m_res; }
+    const drogon::HttpResponsePtr &MbResponse::drogonResponse() const { return m_res; }
 
-    int MantisResponse::getStatus() const {
+    int MbResponse::getStatus() const {
         return static_cast<int>(m_res->statusCode());
     }
 
-    void MantisResponse::setStatus(const int s) const {
+    void MbResponse::setStatus(const int s) const {
         m_res->setStatusCode(static_cast<drogon::HttpStatusCode>(s));
     }
 
-    std::string MantisResponse::getVersion() const {
+    std::string MbResponse::getVersion() const {
         return m_res->getHeader("version");
     }
 
-    void MantisResponse::setVersion(const std::string &b) {
+    void MbResponse::setVersion(const std::string &b) {
         // Drogon handles version internally
     }
 
-    std::string MantisResponse::getBody() const {
+    std::string MbResponse::getBody() const {
         return std::string(m_res->body());
     }
 
-    void MantisResponse::setBody(const std::string &b) {
+    void MbResponse::setBody(const std::string &b) {
         m_res->setBody(b);
     }
 
-    std::string MantisResponse::getLocation() const {
+    std::string MbResponse::getLocation() const {
         return m_res->getHeader("Location");
     }
 
-    void MantisResponse::setLocation(const std::string &b) {
+    void MbResponse::setLocation(const std::string &b) {
         m_res->addHeader("Location", b);
     }
 
-    std::string MantisResponse::getReason() const {
+    std::string MbResponse::getReason() const {
         return "";
     }
 
-    void MantisResponse::setReason(const std::string &b) {
+    void MbResponse::setReason(const std::string &b) {
         // Drogon auto-generates reason from status code
     }
 
-    bool MantisResponse::hasHeader(const std::string &key) const {
+    bool MbResponse::hasHeader(const std::string &key) const {
         return !m_res->getHeader(key).empty();
     }
 
-    std::string MantisResponse::getHeaderValue(const std::string &key, const char *def, size_t id) const {
+    std::string MbResponse::getHeaderValue(const std::string &key, const char *def, size_t id) const {
         auto val = m_res->getHeader(key);
         return val.empty() ? std::string(def) : val;
     }
 
-    size_t MantisResponse::getHeaderValueU64(const std::string &key, size_t def, size_t id) const {
+    size_t MbResponse::getHeaderValueU64(const std::string &key, size_t def, size_t id) const {
         auto val = m_res->getHeader(key);
         if (val.empty()) return def;
         try { return std::stoull(val); } catch (...) { return def; }
     }
 
-    size_t MantisResponse::getHeaderValueCount(const std::string &key) const {
+    size_t MbResponse::getHeaderValueCount(const std::string &key) const {
         return m_res->getHeader(key).empty() ? 0 : 1;
     }
 
-    void MantisResponse::setHeader(const std::string &key, const std::string &val) const {
+    void MbResponse::setHeader(const std::string &key, const std::string &val) const {
         m_res->addHeader(key, val);
     }
 
-    void MantisResponse::setAuthTokenCookie(const std::string &token, const int max_age_seconds) const {
+    void MbResponse::setAuthTokenCookie(const std::string &token, const int max_age_seconds) const {
         drogon::Cookie cookie(kAuthTokenCookieName, token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
@@ -86,34 +86,34 @@ namespace mb {
         m_res->addCookie(std::move(cookie));
     }
 
-    void MantisResponse::clearAuthTokenCookie() const {
+    void MbResponse::clearAuthTokenCookie() const {
         drogon::Cookie cookie(kAuthTokenCookieName, "");
         cookie.setPath("/");
         cookie.setMaxAge(0);
         m_res->addCookie(std::move(cookie));
     }
 
-    void MantisResponse::setRedirect(const std::string &url, int status) const {
+    void MbResponse::setRedirect(const std::string &url, int status) const {
         m_res->setStatusCode(static_cast<drogon::HttpStatusCode>(status));
         m_res->addHeader("Location", url);
     }
 
-    void MantisResponse::setContent(const char *s, size_t n, const std::string &content_type) const {
+    void MbResponse::setContent(const char *s, size_t n, const std::string &content_type) const {
         m_res->setBody(std::string(s, n));
         m_res->setContentTypeString(content_type);
     }
 
-    void MantisResponse::setContent(const std::string &s, const std::string &content_type) const {
+    void MbResponse::setContent(const std::string &s, const std::string &content_type) const {
         m_res->setBody(s);
         m_res->setContentTypeString(content_type);
     }
 
-    void MantisResponse::setContent(std::string &&s, const std::string &content_type) const {
+    void MbResponse::setContent(std::string &&s, const std::string &content_type) const {
         m_res->setBody(std::move(s));
         m_res->setContentTypeString(content_type);
     }
 
-    void MantisResponse::setFileContent(const std::string &path, const std::string &content_type) const {
+    void MbResponse::setFileContent(const std::string &path, const std::string &content_type) const {
         std::ifstream file(path, std::ios::binary);
         if (file.is_open()) {
             std::string content((std::istreambuf_iterator<char>(file)),
@@ -123,7 +123,7 @@ namespace mb {
         }
     }
 
-    void MantisResponse::setFileContent(const std::string &path) const {
+    void MbResponse::setFileContent(const std::string &path) const {
         std::string content_type = "application/octet-stream";
         if (path.ends_with(".html")) content_type = "text/html";
         else if (path.ends_with(".css")) content_type = "text/css";
@@ -135,31 +135,31 @@ namespace mb {
         setFileContent(path, content_type);
     }
 
-    void MantisResponse::send(int statusCode, const std::string &data, const std::string &content_type) const {
+    void MbResponse::send(int statusCode, const std::string &data, const std::string &content_type) const {
         m_res->setBody(data);
         m_res->setContentTypeString(content_type);
         m_res->setStatusCode(static_cast<drogon::HttpStatusCode>(statusCode));
     }
 
-    void MantisResponse::sendText(const int statusCode, const std::string &data) const {
+    void MbResponse::sendText(const int statusCode, const std::string &data) const {
         send(statusCode, data, "text/plain");
     }
 
-    void MantisResponse::sendJSON(const int statusCode, const json &data) const {
+    void MbResponse::sendJSON(const int statusCode, const json &data) const {
         send(statusCode, data.dump(), "application/json");
     }
 
-    void MantisResponse::sendHtml(const int statusCode, const std::string &data) const {
+    void MbResponse::sendHtml(const int statusCode, const std::string &data) const {
         send(statusCode, data, "text/html");
     }
 
-    void MantisResponse::sendEmpty(const int statusCode) const {
+    void MbResponse::sendEmpty(const int statusCode) const {
         m_res->setBody(std::string{});
         m_res->setStatusCode(static_cast<drogon::HttpStatusCode>(statusCode));
     }
 
 #ifdef MB_SCRIPTING_ENABLED
-    void MantisResponse::sendJson(const int statusCode, const DukValue &data) const {
+    void MbResponse::sendJson(const int statusCode, const DukValue &data) const {
         auto *engine = ScriptingEngine::active();
         if (!engine || !engine->ctx()) {
             send(statusCode, "{}", "application/json");
@@ -173,7 +173,7 @@ namespace mb {
         send(statusCode, body, "application/json");
     }
 
-    void MantisResponse::registerDuktapeMethods() {
+    void MbResponse::registerDuktapeMethods() {
     }
 #else
     void MantisResponse::registerDuktapeMethods() {

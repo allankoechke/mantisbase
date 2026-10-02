@@ -13,19 +13,19 @@
 
 namespace mb {
     /** `GET /api/v1/entities/:entity_name` — cursor-paginated list. */
-    HandlerFn entityGetManyHandler();
+    MbHandlerFn entityGetManyHandler();
 
     /** `GET /api/v1/entities/:entity_name/:id` — read one record. */
-    HandlerFn entityGetOneHandler();
+    MbHandlerFn entityGetOneHandler();
 
     /** `POST /api/v1/entities/:entity_name` — create (supports multipart/file fields). */
-    HandlerWithContentReaderFn entityPostHandler();
+    MbHandlerWithContentReaderFn entityPostHandler();
 
     /** `PATCH /api/v1/entities/:entity_name/:id` — partial update (supports multipart). */
-    HandlerWithContentReaderFn entityPatchHandler();
+    MbHandlerWithContentReaderFn entityPatchHandler();
 
     /** `DELETE /api/v1/entities/:entity_name/:id` — delete one record. */
-    HandlerFn entityDeleteHandler();
+    MbHandlerFn entityDeleteHandler();
 
     /** Register built-in admin entity routes (`mb_admins`, etc.) on the app router. */
     void registerAdminEntityRoutes(const MantisBase& app);

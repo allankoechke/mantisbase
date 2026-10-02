@@ -4,12 +4,12 @@
 #include "drogon/MultiPart.h"
 
 namespace mb {
-    MantisContentReader::MantisContentReader(const MantisRequest &req)
+    MbContentReader::MbContentReader(const MbRequest &req)
         : m_req(req) { read(); }
 
-    bool MantisContentReader::isMultipartFormData() const { return m_req.isMultipartFormData(); }
+    bool MbContentReader::isMultipartFormData() const { return m_req.isMultipartFormData(); }
 
-    void MantisContentReader::read() {
+    void MbContentReader::read() {
         if (m_parsed) return;
 
         if (isMultipartFormData()) {
@@ -23,19 +23,19 @@ namespace mb {
         m_parsed = true;
     }
 
-    const std::vector<FormDataItem> &MantisContentReader::formData() const {
+    const std::vector<MbFormDataItem> &MbContentReader::formData() const {
         return m_formData;
     }
 
-    const json &MantisContentReader::filesMetadata() const {
+    const json &MbContentReader::filesMetadata() const {
         return m_filesMetadata;
     }
 
-    const json &MantisContentReader::jsonBody() const {
+    const json &MbContentReader::jsonBody() const {
         return m_json;
     }
 
-    void MantisContentReader::parseFormDataToEntity(const Entity &entity) {
+    void MbContentReader::parseFormDataToEntity(const Entity &entity) {
         if (!isMultipartFormData()) {
             return;
         }
@@ -94,7 +94,7 @@ namespace mb {
                 file_record["filename"] = new_filename;
                 file_record["path"] = filepath;
                 file_record["name"] = form_data.name;
-                file_record["hash"] = MantisContentReader::hashMultipartMetadata(form_data);
+                file_record["hash"] = MbContentReader::hashMultipartMetadata(form_data);
 
                 if (e_field.type() == "file") {
                     json_files[form_data.name] = file_record;
@@ -161,7 +161,7 @@ namespace mb {
         m_filesMetadata = json_files;
     }
 
-    void MantisContentReader::writeFiles(const std::string &entity_name) {
+    void MbContentReader::writeFiles(const std::string &entity_name) {
         if (!isMultipartFormData()) return;
 
         for (const auto &formData: m_formData) {
@@ -172,7 +172,7 @@ namespace mb {
                                        : json::array({m_filesMetadata[formData.name]});
 
             auto it = std::ranges::find_if(file_list, [&](const json &f) {
-                return f["hash"].get<std::string>() == MantisContentReader::hashMultipartMetadata(formData);
+                return f["hash"].get<std::string>() == MbContentReader::hashMultipartMetadata(formData);
             });
 
             if (it == file_list.end()) {
@@ -191,7 +191,7 @@ namespace mb {
         }
     }
 
-    void MantisContentReader::undoWrittenFiles(const std::string &entity_name) {
+    void MbContentReader::undoWrittenFiles(const std::string &entity_name) {
         if (!isMultipartFormData()) return;
 
         for (const auto &file: m_filesMetadata) {
@@ -202,7 +202,7 @@ namespace mb {
         }
     }
 
-    std::string MantisContentReader::hashMultipartMetadata(const FormDataItem &data) {
+    std::string MbContentReader::hashMultipartMetadata(const MbFormDataItem &data) {
         constexpr std::hash<std::string> hasher;
         const size_t h1 = hasher(data.name);
         const size_t h3 = hasher(data.filename);
@@ -217,7 +217,7 @@ namespace mb {
         return std::to_string(result);
     }
 
-    json MantisContentReader::getValueFromType(const std::string &type, const std::string &value) {
+    json MbContentReader::getValueFromType(const std::string &type, const std::string &value) {
         json obj;
         const auto content = trim(value);
         if (content.empty()) {
@@ -235,7 +235,7 @@ namespace mb {
         return obj;
     }
 
-    void MantisContentReader::readMultipart() {
+    void MbContentReader::readMultipart() {
         const auto &dReq = m_req.drogonRequest();
 
         drogon::MultiPartParser fileUpload;
@@ -243,7 +243,7 @@ namespace mb {
             auto &files = fileUpload.getFiles();
             // Get uploaded files
             for (auto &file: files) {
-                FormDataItem item;
+                MbFormDataItem item;
                 item.name = file.getItemName();
                 item.filename = file.getFileName();
                 item.content_type = file.getContentType();
@@ -265,14 +265,14 @@ namespace mb {
             }
             if (is_file) continue;
 
-            FormDataItem item;
+            MbFormDataItem item;
             item.name = key;
             item.content = value;
             m_formData.push_back(std::move(item));
         }
     }
 
-    void MantisContentReader::readJSON() {
+    void MbContentReader::readJSON() {
         std::string body = m_req.getBody();
         try {
             if (trim(body).empty()) m_json = json::object();

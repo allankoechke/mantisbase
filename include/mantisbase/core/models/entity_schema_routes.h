@@ -12,19 +12,19 @@
 
 namespace mb {
     /** `GET /api/v1/schemas` — list entity schemas. */
-    HandlerFn schemaGetManyHandler();
+    MbHandlerFn schemaGetManyHandler();
 
     /** `GET /api/v1/schemas/:id` — fetch one schema by id or name. */
-    HandlerFn schemaGetOneHandler();
+    MbHandlerFn schemaGetOneHandler();
 
     /** `POST /api/v1/schemas` — create a new entity schema and table. */
-    HandlerFn schemaPostHandler();
+    MbHandlerFn schemaPostHandler();
 
     /** `PATCH /api/v1/schemas/:id` — update schema metadata/fields. */
-    HandlerFn schemaPatchHandler();
+    MbHandlerFn schemaPatchHandler();
 
     /** `DELETE /api/v1/schemas/:id` — drop schema and underlying table. */
-    HandlerFn schemaDeleteHandler();
+    MbHandlerFn schemaDeleteHandler();
 }
 
 #endif // MANTISBASE_ENTITY_SCHEMA_ROUTES_H

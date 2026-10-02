@@ -155,6 +155,15 @@ namespace mb {
         });
     }
 
+    void ScriptingEngine::fireOnServerShutdown() {
+        if (!m_ctx) {
+            return;
+        }
+        withLock([&] {
+            ScriptingHooks::fireOnServerShutdown(m_ctx);
+        });
+    }
+
     void ScriptingEngine::fireOnRecordCreated(const std::string &entity, const std::string &recordId) {
         if (!m_ctx) {
             return;
@@ -173,7 +182,7 @@ namespace mb {
         });
     }
 
-    bool ScriptingEngine::pcallBool(const DukValue &fn, MantisRequest &req, MantisResponse &res) {
+    bool ScriptingEngine::pcallBool(const DukValue &fn, MbRequest &req, MbResponse &res) {
         return withLock([&] -> bool {
             try {
                 return dukglue_pcall<bool>(m_ctx, fn, &req, &res);
@@ -184,7 +193,7 @@ namespace mb {
         });
     }
 
-    void ScriptingEngine::pcallVoid(const DukValue &fn, MantisRequest &req, MantisResponse &res) {
+    void ScriptingEngine::pcallVoid(const DukValue &fn, MbRequest &req, MbResponse &res) {
         withLock([&] {
             try {
                 dukglue_pcall<void>(m_ctx, fn, &req, &res);

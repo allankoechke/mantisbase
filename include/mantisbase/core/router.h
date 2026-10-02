@@ -55,24 +55,24 @@ namespace mb {
         /** @return SSE/WebSocket realtime manager. */
         SSEMgr &sseMgr() const;
 
-        void Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
+        void Get(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
-        void Post(const std::string &path, const HandlerWithContentReaderFn &handler,
-                  const Middlewares &middlewares = {});
+        void Post(const std::string &path, const MbHandlerWithContentReaderFn &handler,
+                  const MbMiddlewares &middlewares = {});
 
-        void Post(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
+        void Post(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
-        void Patch(const std::string &path, const HandlerWithContentReaderFn &handler,
-                   const Middlewares &middlewares = {});
+        void Patch(const std::string &path, const MbHandlerWithContentReaderFn &handler,
+                   const MbMiddlewares &middlewares = {});
 
-        void Patch(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
+        void Patch(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
-        void Put(const std::string &path, const HandlerWithContentReaderFn &handler,
-                   const Middlewares &middlewares = {});
+        void Put(const std::string &path, const MbHandlerWithContentReaderFn &handler,
+                   const MbMiddlewares &middlewares = {});
 
-        void Put(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
+        void Put(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
-        void Delete(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
+        void Delete(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
         /** Create a redirect path with the given status code for redirect
          *
@@ -115,7 +115,7 @@ namespace mb {
         void applyCorsHeaders(const drogon::HttpRequestPtr &req,
                               const drogon::HttpResponsePtr &resp) const;
 
-        const std::vector<MiddlewareFn> &preRoutingMiddlewares() const { return m_preRoutingMiddlewares; }
+        const std::vector<MbMiddlewareFn> &preRoutingMiddlewares() const { return m_preRoutingMiddlewares; }
 
 #ifdef MB_SCRIPTING_ENABLED
         /** Register a custom route from JavaScript (`app.router().addRoute(...)`). */
@@ -144,8 +144,8 @@ namespace mb {
 
         static void executeJsRoute(const DukValue &handler,
                             const std::vector<DukValue> &middlewares,
-                            MantisRequest &req,
-                            MantisResponse &res) ;
+                            MbRequest &req,
+                            MbResponse &res) ;
 #endif
 
     private:
@@ -157,7 +157,7 @@ namespace mb {
 
         static std::vector<std::string> extractParamNames(const std::string &httplib_path);
 
-        void executeMiddlewareChain(MantisRequest &req, MantisResponse &res, const RouteHandler *route) const;
+        void executeMiddlewareChain(MbRequest &req, MbResponse &res, const RouteHandler *route) const;
 
         void generateMiscEndpoints();
 
@@ -173,11 +173,11 @@ namespace mb {
 
         static std::string getMimeType(const std::string &path);
 
-        static std::function<void(const MantisRequest &, MantisResponse &)> handleAdminDashboardRoute();
+        static std::function<void(const MbRequest &, MbResponse &)> handleAdminDashboardRoute();
 
-        static std::function<void(MantisRequest &, MantisResponse &)> fileServingHandler();
+        static std::function<void(MbRequest &, MbResponse &)> fileServingHandler();
 
-        static std::function<void(const MantisRequest &, MantisResponse &)> healthCheckHandler();
+        static std::function<void(const MbRequest &, MbResponse &)> healthCheckHandler();
 
         ///> Sync Advice to return handler that generates unique IDs per request
         const std::function<drogon::HttpResponsePtr(const drogon::HttpRequestPtr &)> reqIdSyncAdvice();
@@ -201,19 +201,19 @@ namespace mb {
         ///> Get default 404 handler
         static drogon::HttpResponsePtr default404Response();
 
-        std::function<void(MantisRequest &, MantisResponse &)> handleAuthVerify();
+        std::function<void(MbRequest &, MbResponse &)> handleAuthVerify();
 
-        std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogin();
+        std::function<void(MbRequest &, MbResponse &)> handleAuthLogin();
 
-        static std::function<void(MantisRequest &, MantisResponse &)> handleAdminLogin();
+        static std::function<void(MbRequest &, MbResponse &)> handleAdminLogin();
 
-        std::function<void(MantisRequest &, MantisResponse &)> handleAuthRefresh() const;
+        std::function<void(MbRequest &, MbResponse &)> handleAuthRefresh() const;
 
-        std::function<void(MantisRequest &, MantisResponse &)> handleAuthLogout();
+        std::function<void(MbRequest &, MbResponse &)> handleAuthLogout();
 
-        std::function<void(MantisRequest &, MantisResponse &)> handleSetupAdmin();
+        std::function<void(MbRequest &, MbResponse &)> handleSetupAdmin();
 
-        static std::function<void(const MantisRequest &, MantisResponse &)> handleLogs();
+        static std::function<void(const MbRequest &, MbResponse &)> handleLogs();
 
         using Constraints = std::vector<drogon::internal::HttpConstraint>;
 
@@ -226,8 +226,8 @@ namespace mb {
 
         RouteRegistry m_routeRegistry;
         std::unique_ptr<SSEMgr> m_sseMgr;
-        std::vector<MiddlewareFn> m_preRoutingMiddlewares;
-        std::vector<HandlerFn> m_postRoutingMiddlewares;
+        std::vector<MbMiddlewareFn> m_preRoutingMiddlewares;
+        std::vector<MbHandlerFn> m_postRoutingMiddlewares;
 
         /// Entity schema cache. Read on every request by the http worker
         /// threads and mutated at runtime by the schema CRUD endpoints, so all
