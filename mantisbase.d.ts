@@ -14,7 +14,7 @@
  */
 
 /** HTTP methods accepted by `Router.addRoute`. */
-type MbHttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
+type MbHttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 /** 3xx status codes accepted by `Router.redirect` / `MantisResponse.redirect`. */
 type MbRedirectStatus = 300 | 301 | 302 | 303 | 304 | 307 | 308;
@@ -97,6 +97,8 @@ interface MantisRouter {
     get(path: string, handler: MbHandler, ...middlewares: MbMiddleware[]): void;
     /** Shorthand for `addRoute("POST", ...)`. */
     post(path: string, handler: MbHandler, ...middlewares: MbMiddleware[]): void;
+    /** Shorthand for `addRoute("PUT", ...)`. */
+    put(path: string, handler: MbHandler, ...middlewares: MbMiddleware[]): void;
     /** Shorthand for `addRoute("PATCH", ...)`. */
     patch(path: string, handler: MbHandler, ...middlewares: MbMiddleware[]): void;
     /** Shorthand for `addRoute("DELETE", ...)`. Bracket notation (`router["delete"](...)`) also works. */
@@ -271,11 +273,11 @@ interface MantisFiles {
 
 /** Structured logging unit returned by `app.logs()`. */
 interface MantisLogs {
-    info(origin: string, message: string): void;
-    warn(origin: string, message: string): void;
-    error(origin: string, message: string): void;
-    debug(origin: string, message: string): void;
-    trace(origin: string, message: string): void;
+    info(message: string): void;
+    warn(message: string): void;
+    error(message: string): void;
+    debug(message: string): void;
+    trace(message: string): void;
 }
 
 /** Realtime unit returned by `app.rt()`. */

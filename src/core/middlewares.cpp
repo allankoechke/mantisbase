@@ -371,13 +371,13 @@ namespace mb {
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const std::string &entity_name) {
         std::string msg = MB_FUNC();
-        return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
+        return [entity_name, msg](MantisRequest &req, const MantisResponse &res) {
             return checkEntityAccess(req, res, entity_name, msg);
         };
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr) {
-        return [expr](MantisRequest &req, MantisResponse &res) {
+        return [expr](MantisRequest &req, const MantisResponse &res) {
             const auto &auth = req.getOr<json>("auth", json::object());
             const auto vars = buildAccessExprVars(req, auth);
 
@@ -390,7 +390,7 @@ namespace mb {
     }
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireGuestOnly() {
-        return [](MantisRequest &req, MantisResponse &res) {
+        return [](MantisRequest &req, const MantisResponse &res) {
             const auto &auth = req.getOr<json>("auth", json::object());
             if (req.isGuestAuth())
                 return HandlerResponse::Unhandled;
@@ -510,7 +510,7 @@ namespace mb {
 
     std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
         const std::string &entity_name) {
-        return [entity_name](MantisRequest &req, MantisResponse &res) {
+        return [entity_name](MantisRequest &req, const MantisResponse &res) {
             const auto auth = requireAuthenticatedUser(req, res);
             if (!auth.has_value()) {
                 return HandlerResponse::Handled;
@@ -589,7 +589,7 @@ namespace mb {
         std::string msg = MB_FUNC();
 
         return [max_requests, window_seconds, use_user_id](
-            MantisRequest &req, MantisResponse &res) {
+            MantisRequest &req, const MantisResponse &res) {
             // MB_DISABLE_RATE_LIMIT can be set in production to help with test harness
             // without which, tests fail
             if (const char *test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");

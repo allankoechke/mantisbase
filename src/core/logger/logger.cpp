@@ -183,23 +183,23 @@ void mb::Logger::critical(const std::string &origin,
 }
 
 #ifdef MB_SCRIPTING_ENABLED
-void mb::Logger::jsInfo(const std::string &origin, const std::string &message) const {
-    info(origin, message);
+void mb::Logger::jsInfo(const std::string &message) const {
+    info("Scripting", message);
 }
 
-void mb::Logger::jsWarn(const std::string &origin, const std::string &message) const {
-    warn(origin, message);
+void mb::Logger::jsWarn(const std::string &message) const {
+    warn("Scripting", message);
 }
 
-void mb::Logger::jsError(const std::string &origin, const std::string &message) const {
-    critical(origin, message);
+void mb::Logger::jsError(const std::string &message) const {
+    critical("Scripting", message);
 }
 
-void mb::Logger::jsDebug(const std::string &origin, const std::string &message) const {
-    debug(origin, message);
+void mb::Logger::jsDebug(const std::string &message) const {
+    debug("Scripting", message);
 }
 
-void mb::Logger::jsTrace(const std::string &origin, const std::string &message) const {
-    trace(origin, message);
+void mb::Logger::jsTrace(const std::string &message) const {
+    trace("Scripting", message);
 }
 #endif

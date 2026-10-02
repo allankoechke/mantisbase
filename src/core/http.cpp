@@ -110,6 +110,20 @@ namespace mb {
         registerDrogonHandler("PATCH", path);
     }
 
+    void Router::Put(const std::string &path, const HandlerWithContentReaderFn &handler,
+                       const Middlewares &middlewares) {
+        logger().debug("Route Created", fmt::format("PUT {}", path));
+        m_routeRegistry.add("PUT", path, handler, middlewares);
+        registerDrogonHandlerWithReader("PUT", path);
+    }
+
+    void Router::Put(const std::string &path, const HandlerFn &handler,
+                       const Middlewares &middlewares) {
+        logger().debug("Route Created", fmt::format("PUT {}", path));
+        m_routeRegistry.add("PUT", path, handler, middlewares);
+        registerDrogonHandler("PUT", path);
+    }
+
     void Router::Delete(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
         logger().debug("Route Created", fmt::format("DELETE {}", path));
         m_routeRegistry.add("DELETE", path, handler, middlewares);

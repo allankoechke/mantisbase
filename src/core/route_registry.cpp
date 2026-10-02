@@ -13,14 +13,14 @@ namespace mb {
                             const std::string &path,
                             const HandlerFn &handler,
                             const Middlewares &middlewares) {
-        routes[{method, path}] = {middlewares, handler};
+        routes[{method, path}] = {.middlewares = middlewares, .handler = handler};
     }
 
     void RouteRegistry::add(const std::string &method,
                             const std::string &path,
                             const HandlerWithContentReaderFn &handler,
                             const Middlewares &middlewares) {
-        routes[{method, path}] = {middlewares, handler};
+        routes[{method, path}] = {.middlewares = middlewares, .handler = handler};
     }
 
     const RouteHandler *RouteRegistry::find(const std::string &method, const std::string &path) const {
@@ -43,6 +43,7 @@ namespace mb {
 
         // Remove item found at the iterator
         routes.erase(it);
+
         // LogOrigin::info("Route Removed", fmt::format("Route for {} {} erased!", method, path));
         return res;
     }

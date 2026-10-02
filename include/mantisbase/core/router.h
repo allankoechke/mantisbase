@@ -67,6 +67,11 @@ namespace mb {
 
         void Patch(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
+        void Put(const std::string &path, const HandlerWithContentReaderFn &handler,
+                   const Middlewares &middlewares = {});
+
+        void Put(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
+
         void Delete(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares = {});
 
         /** Create a redirect path with the given status code for redirect
@@ -115,13 +120,14 @@ namespace mb {
 #ifdef MB_SCRIPTING_ENABLED
         /** Register a custom route from JavaScript (`app.router().addRoute(...)`). */
         duk_ret_t bindRoute(duk_context *ctx);
-
         /** Shorthand for `addRoute("GET", path, handler, ...middlewares)`. */
         duk_ret_t bindGet(duk_context *ctx);
         /** Shorthand for `addRoute("POST", path, handler, ...middlewares)`. */
         duk_ret_t bindPost(duk_context *ctx);
         /** Shorthand for `addRoute("PATCH", path, handler, ...middlewares)`. */
         duk_ret_t bindPatch(duk_context *ctx);
+        /** Shorthand for `addRoute("PUT", path, handler, ...middlewares)`. */
+        duk_ret_t bindPut(duk_context *ctx);
         /** Shorthand for `addRoute("DELETE", path, handler, ...middlewares)`. */
         duk_ret_t bindDelete(duk_context *ctx);
 
@@ -129,7 +135,7 @@ namespace mb {
          * Register a path redirect from JavaScript
          * (`app.router().redirect(from, to[, status[, methods]])`).
          */
-        duk_ret_t bindRedirect(duk_context *ctx);
+        duk_ret_t bindRedirect(duk_context *ctx) const;
 
         /** Push a change event to all realtime subscribers. */
         void broadcastChange(const nlohmann::json &change_event) const;

@@ -65,12 +65,12 @@ const db = app.db() // Get db unit instance
 
 ```js
 const db = app.db();
-const items = db.query("SELECT * FROM __settings");
+const items = db.query("SELECT * FROM mb_settings");
 console.log("Settings: ", JSON.stringify(items));
 
 // Find a specific data or value based on some column
 // The bind value name in SQL (`:id` here) should match the bind's object key `id`
-const r = db.query("SELECT * FROM __settings WHERE id = :id", { id: "12509202836555480207" });
+const r = db.query("SELECT * FROM mb_settings WHERE id = :id", { id: "12509202836555480207" });
 // db.query("SELECT * FROM __settings WHERE id = :id && updated = :updated", { id: "12509202836555480207" }, { updated: "2025-10-24 01:32:49" });
 console.log("Settings:  ", r.id); // `r` may be null if not found.
 ```
@@ -99,6 +99,7 @@ The router instance allows binding handlers and optional middlewares to given ro
 - `app.router().addRoute(method, path, handler, [middlewares])`: Create a route for a given HTTP method, on a given *path* with the given handler function with optional middleware functions.
 - `app.router().get(path, handler, [middlewares])`: Shorthand for `addRoute("GET", ...)`.
 - `app.router().post(path, handler, [middlewares])`: Shorthand for `addRoute("POST", ...)`.
+- `app.router().put(path, handler, [middlewares])`: Shorthand for `addRoute("PUT", ...)`.
 - `app.router().patch(path, handler, [middlewares])`: Shorthand for `addRoute("PATCH", ...)`.
 - `app.router().delete(path, handler, [middlewares])`: Shorthand for `addRoute("DELETE", ...)`. (`delete` is a reserved word, so some editors/linters prefer the `app.router()["delete"](...)` spelling — both work.)
 - `app.router().redirect(from, to[, status[, methods]])`: Redirect requests from one path to another without a handler. `status` is a 3xx code (default `302`); `methods` is a single method name or an array of method names allowed for the redirect (default `["GET"]`, pass `[]` to allow all methods).
@@ -110,6 +111,10 @@ app.router().addRoute("GET", "/test", function (req, res){
 
 // Shorthand equivalents
 app.router().get("/test", function (req, res){
+    // ...
+})
+
+app.router().put("/test/:id", function (req, res){
     // ...
 })
 
@@ -252,7 +257,13 @@ The global `middlewares` object exposes C++ middleware factories. Each factory r
 app.router().addRoute("GET", "/api/v1/custom/protected", handler,
     middlewares.getAuthToken(),
     middlewares.hydrateContextData()
-);  
+);
+
+// Shorthand notation
+app.router().get("/api/v1/custom/protected", handler,
+    middlewares.getAuthToken(),
+    middlewares.hydrateContextData()
+); 
 ```
 
 ## Utils (utility functions)
