@@ -20,7 +20,6 @@ include/         header tree for this OS (mantisbase headers + bundled
 libs/
   x86/           prebuilt shared library for x86-64 (@MB_LIB_FILE@)
   arm/           prebuilt shared library for aarch64 (@MB_LIB_FILE@)
-                 (Windows ships x86 only)
 cmake/
   MantisBaseConfig.cmake         find_package(MantisBase) entry point
   MantisBaseConfigVersion.cmake  version matching

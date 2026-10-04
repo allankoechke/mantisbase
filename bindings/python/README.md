@@ -80,12 +80,28 @@ other — the same model as Flask's default threaded server.
 
 ## Building from source
 
+The bindings link the mantisbase shared library, so build and install it first
+(`install` only runs on `cmake --install` — a plain build is not enough):
+
 ```bash
-pip install -e bindings/python
+cmake -B build -DMB_BUILD_SHARED_LIB=ON
+cmake --build build
+cmake --install build --prefix ./install
 ```
 
-Requires CMake >= 3.22, a C++20 compiler, and the mantisbase shared library
-(`cmake -DMB_BUILD_SHARED_LIB=ON -DMB_BUILD_BINDINGS=ON ..`).
+Then point the standalone bindings build at that prefix:
+
+```bash
+pip install -e bindings/python \
+  --config-settings=cmake.define.CMAKE_PREFIX_PATH=$PWD/install
+```
+
+Requires CMake >= 3.22, a C++20 compiler, and `nanobind`/`scikit-build-core`
+(fetched automatically via pip build isolation). At runtime the loader must
+find `libmantisbase.so`, e.g. `export LD_LIBRARY_PATH=$PWD/install/lib`.
+
+To produce a distributable wheel instead, see `.github/workflows/bindings-python.yml`
+(engine install → `pip wheel` → `auditwheel`/`delocate`/`delvewheel` repair).
 
 ## License
 

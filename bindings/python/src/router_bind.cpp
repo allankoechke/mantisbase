@@ -9,10 +9,10 @@ namespace nb = nanobind;
 using RegisterMethod = void(mb::Router::*)(const std::string&, const mb::MbHandlerFn&, const mb::MbMiddlewares&);
 
 static void register_route(mb::Router& router, const std::string& path,
-                           nb::callable handler, RegisterMethod method) {
+                           const nb::callable &handler, const RegisterMethod method) {
     nb::callable stored_handler(handler);
 
-    mb::MbHandlerFn fn = [stored_handler](mb::MbRequest& req, mb::MbResponse& res) {
+    const mb::MbHandlerFn fn = [stored_handler](mb::MbRequest& req, mb::MbResponse& res) {
         nb::gil_scoped_acquire gil;
         try {
             stored_handler(&req, &res);
@@ -27,7 +27,7 @@ static void register_route(mb::Router& router, const std::string& path,
 static nb::object make_route_method(mb::Router& router, const std::string& path,
                                     nb::object handler_or_none, RegisterMethod method) {
     if (!handler_or_none.is_none()) {
-        register_route(router, path, nb::callable(handler_or_none), method);
+        register_route(router, path, nb::callable(handler_or_none, nb::detail::borrow_t{}), method);
         return handler_or_none;
     }
 

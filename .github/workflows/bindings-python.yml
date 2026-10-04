@@ -7,42 +7,188 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Main C++ build (engine). The wheel jobs below wait for this via `needs`,
+  # then reuse its per-platform `-lib` / `-headers` artifacts instead of
+  # rebuilding the engine.
+  engine:
+    uses: ./.github/workflows/build-matrix.yml
+
   build-wheels:
+    needs: [engine]
+    # Engine `-lib`/`-headers` artifacts are only uploaded on tag builds.
+    if: startsWith(github.ref, 'refs/tags/v')
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        include:
+          - runner: ubuntu-latest
+            engine_platform: linux-x86_64
+            repair: auditwheel
+          - runner: ubuntu-24.04-arm
+            engine_platform: linux-aarch64
+            repair: auditwheel
+          - runner: windows-latest
+            engine_platform: windows-x86_64
+            repair: delvewheel
+          - runner: windows-11-arm
+            engine_platform: windows-aarch64
+            repair: delvewheel
+          - runner: macos-latest
+            engine_platform: macos-aarch64
+            repair: delocate
+          # NOTE: macos-15-intel is GitHub's last x86-64 macOS image and is on
+          # the deprecation path — if it disappears, drop this entry.
+          - runner: macos-15-intel
+            engine_platform: macos-x86_64
+            repair: delocate
+    runs-on: ${{ matrix.runner }}
+
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          # Standalone bindings build: engine comes from artifacts below,
+          # nanobind from pip — no submodules needed.
+          fetch-depth: 1
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install cibuildwheel
-        run: pip install cibuildwheel==2.21.3
+      - name: Install MinGW (Windows x86-64)
+        if: runner.os == 'Windows' && matrix.engine_platform == 'windows-x86_64'
+        run: |
+          choco install mingw --no-progress
+          echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
 
-      - name: Build wheels
-        run: cibuildwheel --output-dir wheelhouse bindings/python
+      - name: Install llvm-mingw (Windows ARM64)
+        if: runner.os == 'Windows' && matrix.engine_platform == 'windows-aarch64'
+        run: |
+          choco install llvm-mingw --no-progress
+
+      - name: Install build tooling
+        run: |
+          pip install -U scikit-build-core nanobind build ninja
+          if [ "${{ matrix.repair }}" = "auditwheel" ]; then pip install -U auditwheel; fi
+          if [ "${{ matrix.repair }}" = "delocate" ]; then pip install -U delocate; fi
+          if [ "${{ matrix.repair }}" = "delvewheel" ]; then pip install -U delvewheel; fi
+        shell: bash
+
+      - name: Download engine artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: mantisbase_${{ github.ref_name }}_${{ matrix.engine_platform }}-*
+          path: engine-dl/
+          merge-multiple: true
+
+      - name: Assemble engine prefix (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          # Normalize the lib-staging/ + headers-staging/ trees into a standard
+          # CMAKE_PREFIX_PATH layout: <prefix>/lib + <prefix>/include.
+          PREFIX="$RUNNER_TEMP/engine"
+          mkdir -p "$PREFIX/lib" "$PREFIX/include"
+          LIB=$(find engine-dl -name 'libmantisbase.so' -o -name 'libmantisbase.dylib' | head -n 1)
+          test -n "$LIB" || { echo "::error::engine shared library missing in artifacts"; exit 1; }
+          cp "$LIB" "$PREFIX/lib/"
+          # NOTE: upload-artifact strips the uploaded root dir, so the headers
+          # artifact lands as engine-dl/include/... (not headers-staging/...).
+          test -d engine-dl/include || { echo "::error::engine headers missing in artifacts"; exit 1; }
+          cp -r engine-dl/include/. "$PREFIX/include/"
+          echo "ENGINE_PREFIX=$PREFIX" >> "$GITHUB_ENV"
+
+      - name: Assemble engine prefix (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $Prefix = Join-Path $env:RUNNER_TEMP "engine"
+          New-Item -ItemType Directory -Force -Path "$Prefix\lib", "$Prefix\include" | Out-Null
+          $dll = Get-ChildItem "engine-dl" -Recurse -Filter "libmantisbase.dll" | Select-Object -First 1
+          if (-not $dll) { Write-Error "engine DLL missing in artifacts"; exit 1 }
+          Copy-Item $dll.FullName "$Prefix\lib\"
+          Copy-Item (Join-Path $dll.DirectoryName "libmantisbase.dll.a") "$Prefix\lib\"
+          # NOTE: upload-artifact strips the uploaded root dir, so headers land
+          # as engine-dl\include\... (not headers-staging\...).
+          if (-not (Test-Path "engine-dl\include\mantisbase\mantisbase.h")) { Write-Error "engine headers missing in artifacts"; exit 1 }
+          Copy-Item "engine-dl\include\*" "$Prefix\include\" -Recurse -Force
+          echo "ENGINE_PREFIX=$Prefix" >> $env:GITHUB_ENV
+
+      - name: Locate Windows compilers
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # The extension must link the MinGW import lib, so build it with the
+          # matching GNU toolchain (not MSVC).
+          if ("${{ matrix.engine_platform }}" -eq "windows-x86_64") {
+            echo "MB_CC=C:\ProgramData\mingw64\mingw64\bin\gcc.exe" >> $env:GITHUB_ENV
+            echo "MB_CXX=C:\ProgramData\mingw64\mingw64\bin\g++.exe" >> $env:GITHUB_ENV
+          } else {
+            $cxx = (Get-Command aarch64-w64-mingw32-clang++.exe -ErrorAction SilentlyContinue)
+            if (-not $cxx) {
+              $found = Get-ChildItem "C:\ProgramData", $env:ChocolateyInstall -Recurse `
+                -Filter "aarch64-w64-mingw32-clang++.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+              if (-not $found) { throw "llvm-mingw toolchain not found after choco install" }
+              $cxxPath = $found.FullName
+            } else {
+              $cxxPath = $cxx.Source
+            }
+            echo "MB_CC=$($cxxPath -replace 'clang\+\+\.exe$', 'clang.exe')" >> $env:GITHUB_ENV
+            echo "MB_CXX=$cxxPath" >> $env:GITHUB_ENV
+          }
+
+      - name: Build wheel (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: pip wheel bindings/python --no-deps --wheel-dir wheelhouse
         env:
-          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-* cp313-*"
-          CIBW_SKIP: "*-musllinux_i686 *-manylinux_i686 *-win32"
-          CIBW_ARCHS_LINUX: "x86_64 aarch64"
-          CIBW_ARCHS_MACOS: "x86_64 arm64"
-          CIBW_ARCHS_WINDOWS: "AMD64"
-          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
-          CIBW_MUSLLINUX_X86_64_IMAGE: "musllinux_1_2"
-          CIBW_TEST_COMMAND: "python -c \"import mantisbase; print('ok')\""
-          CIBW_BUILD_VERBOSITY: 1
+          CMAKE_PREFIX_PATH: ${{ env.ENGINE_PREFIX }}
+
+      - name: Build wheel (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          pip wheel bindings/python --no-deps --wheel-dir wheelhouse `
+            --config-settings=cmake.generator="MinGW Makefiles" `
+            --config-settings=cmake.define.CMAKE_PREFIX_PATH="$env:ENGINE_PREFIX" `
+            --config-settings=cmake.define.CMAKE_C_COMPILER="$env:MB_CC" `
+            --config-settings=cmake.define.CMAKE_CXX_COMPILER="$env:MB_CXX"
+
+      - name: Repair wheel (auditwheel)
+        if: matrix.repair == 'auditwheel'
+        shell: bash
+        run: |
+          # Vendors libmantisbase.so into the wheel and stamps the correct
+          # manylinux tag (plain linux_* tags are rejected by PyPI).
+          auditwheel repair wheelhouse/*.whl -w repaired/
+
+      - name: Repair wheel (delocate)
+        if: matrix.repair == 'delocate'
+        shell: bash
+        run: |
+          # macOS equivalent of auditwheel: vendors libmantisbase.dylib.
+          delocate-wheel -w repaired -v 2 wheelhouse/*.whl
+
+      - name: Repair wheel (delvewheel)
+        if: matrix.repair == 'delvewheel'
+        shell: pwsh
+        run: |
+          # Windows equivalent of auditwheel: vendors libmantisbase.dll.
+          # The engine prefix must be on PATH so its DLLs are discoverable.
+          $env:PATH = "$env:ENGINE_PREFIX\lib;$env:PATH"
+          delvewheel repair -w repaired wheelhouse/*.whl --add-path "$env:ENGINE_PREFIX\lib"
+
+      - name: Smoke-test repaired wheel
+        shell: bash
+        run: |
+          pip install repaired/*.whl --force-reinstall --no-deps
+          python -c "import mantisbase; print('ok')"
 
       - name: Upload wheel artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}
-          path: wheelhouse/*.whl
+          name: wheels-${{ matrix.engine_platform }}-py${{ matrix.python-version }}
+          path: repaired/*.whl
 
   build-sdist:
     runs-on: ubuntu-latest

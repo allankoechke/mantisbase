@@ -7,7 +7,7 @@
 namespace nb = nanobind;
 using json = nlohmann::json;
 
-static nb::object json_to_python(const json& j) {
+static nb::object json_to_python(const json &j) {
     if (j.is_null()) return nb::none();
     if (j.is_boolean()) return nb::cast(j.get<bool>());
     if (j.is_number_integer()) return nb::cast(j.get<int64_t>());
@@ -15,7 +15,7 @@ static nb::object json_to_python(const json& j) {
     if (j.is_string()) return nb::cast(j.get<std::string>());
     if (j.is_array()) {
         nb::list lst;
-        for (const auto& elem : j)
+        for (const auto &elem: j)
             lst.append(json_to_python(elem));
         return lst;
     }
@@ -28,11 +28,11 @@ static nb::object json_to_python(const json& j) {
     return nb::none();
 }
 
-static json soci_row_to_json(const soci::row& row) {
+static json soci_row_to_json(const soci::row &row) {
     json obj = json::object();
     for (size_t i = 0; i < row.size(); ++i) {
-        const auto& props = row.get_properties(i);
-        const std::string& name = props.get_name();
+        const auto &props = row.get_properties(i);
+        const std::string &name = props.get_name();
 
         if (row.get_indicator(i) == soci::i_null) {
             obj[name] = nullptr;
@@ -86,59 +86,59 @@ static json soci_row_to_json(const soci::row& row) {
     return obj;
 }
 
-static void register_db(const nb::module_& m) {
+static void register_db(const nb::module_ &m) {
     nb::class_<mb::Database>(m, "Database")
-        .def("query", [](mb::Database& self, const std::string& sql, nb::args params) -> nb::list {
-            soci::values binds;
-            bool has_binds = false;
+            .def("query", [](mb::Database &self, const std::string &sql, const nb::args &params) -> nb::list {
+                soci::values binds;
+                bool has_binds = false;
 
-            for (auto && param_i : params) {
-                nb::handle param = param_i;
-                if (!nb::isinstance<nb::dict>(param))
-                    throw nb::type_error("Bind parameters must be dicts");
+                for (auto &&param_i: params) {
+                    nb::handle param = param_i;
+                    if (!nb::isinstance<nb::dict>(param))
+                        throw nb::type_error("Bind parameters must be dicts");
 
-                has_binds = true;
-                auto d = nb::cast<nb::dict>(param);
-                for (auto [key_handle, val] : d) {
-                    auto key = nb::cast<std::string>(key_handle);
+                    has_binds = true;
+                    auto d = nb::cast<nb::dict>(param);
+                    for (auto [key_handle, val]: d) {
+                        auto key = nb::cast<std::string>(key_handle);
 
-                    if (val.is_none()) {
-                        std::optional<int> null_val;
-                        binds.set(key, null_val, soci::i_null);
-                    } else if (nb::isinstance<nb::str>(val)) {
-                        binds.set(key, nb::cast<std::string>(val));
-                    } else if (nb::isinstance<nb::bool_>(val)) {
-                        binds.set(key, nb::cast<bool>(val));
-                    } else if (nb::isinstance<nb::int_>(val)) {
-                        binds.set(key, nb::cast<int>(val));
-                    } else if (nb::isinstance<nb::float_>(val)) {
-                        binds.set(key, nb::cast<double>(val));
+                        if (val.is_none()) {
+                            std::optional<int> null_val;
+                            binds.set(key, null_val, soci::i_null);
+                        } else if (nb::isinstance<nb::str>(val)) {
+                            binds.set(key, nb::cast<std::string>(val));
+                        } else if (nb::isinstance<nb::bool_>(val)) {
+                            binds.set(key, nb::cast<bool>(val));
+                        } else if (nb::isinstance<nb::int_>(val)) {
+                            binds.set(key, nb::cast<int>(val));
+                        } else if (nb::isinstance<nb::float_>(val)) {
+                            binds.set(key, nb::cast<double>(val));
+                        }
                     }
                 }
-            }
 
-            json results;
-            {
-                nb::gil_scoped_release release;
-                auto session = self.session();
+                json results;
+                {
+                    nb::gil_scoped_release release;
+                    auto session = self.session();
 
-                soci::row data_row;
-                soci::statement st = has_binds
-                    ? (session->prepare << sql, soci::use(binds), soci::into(data_row))
-                    : (session->prepare << sql, soci::into(data_row));
-                st.execute();
+                    soci::row data_row;
+                    soci::statement st = has_binds
+                                             ? (session->prepare << sql, soci::use(binds), soci::into(data_row))
+                                             : (session->prepare << sql, soci::into(data_row));
+                    st.execute();
 
-                results = json::array();
-                while (st.fetch()) {
-                    results.push_back(soci_row_to_json(data_row));
+                    results = json::array();
+                    while (st.fetch()) {
+                        results.push_back(soci_row_to_json(data_row));
+                    }
                 }
-            }
 
-            nb::list py_results;
-            for (const auto& row : results) {
-                py_results.append(json_to_python(row));
-            }
-            return py_results;
-        }, nb::arg("sql"))
-        .def_prop_ro("connected", &mb::Database::isConnected);
+                nb::list py_results;
+                for (const auto &row: results) {
+                    py_results.append(json_to_python(row));
+                }
+                return py_results;
+            }, nb::arg("sql"), nb::arg("params"))
+            .def_prop_ro("connected", &mb::Database::isConnected);
 }

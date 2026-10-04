@@ -16,20 +16,20 @@
 /** HTTP methods accepted by `Router.addRoute`. */
 type MbHttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
-/** 3xx status codes accepted by `Router.redirect` / `MantisResponse.redirect`. */
+/** 3xx status codes accepted by `Router.redirect` / `MbResponse.redirect`. */
 type MbRedirectStatus = 300 | 301 | 302 | 303 | 304 | 307 | 308;
 
 /** Route handler: receives the request and response objects. */
-type MbHandler = (req: MantisRequest, res: MantisResponse) => void;
+type MbHandler = (req: MbRequest, res: MbResponse) => void;
 
 /**
  * Route middleware: same signature as a handler but returns a boolean.
  * - `true`: continue to the next middleware / handler.
  * - `false`: abort route execution (the middleware should set the response).
  */
-type MbMiddleware = (req: MantisRequest, res: MantisResponse) => boolean;
+type MbMiddleware = (req: MbRequest, res: MbResponse) => boolean;
 
-/** Method constraint for `MantisRouter.redirect`: one method or a list (`[]` allows all). */
+/** Method constraint for `MbRouter.redirect`: one method or a list (`[]` allows all). */
 type MbRedirectMethods = string | string[];
 
 /** A database bind object for `db.query(sql, ...binds)` (`:name` <-> `name`). */
@@ -44,7 +44,7 @@ type MbDbBinds = Record<string, any>;
 type MbQueryResult = any;
 
 /** Global application object. */
-interface MantisApp {
+interface MantisBaseApp {
     /** HTTP server host (`0.0.0.0` by default). */
     host: string;
     /** HTTP server port (`7070` by default). */
@@ -69,25 +69,25 @@ interface MantisApp {
     /** Close the application gracefully with an exit code and reason. */
     quit(exitCode: number, reason: string): void;
     /** Database unit instance. */
-    db(): MantisDatabase;
+    db(): MbDatabase;
     /** Router unit instance. */
-    router(): MantisRouter;
+    router(): MbRouter;
     /** Key/value app configuration unit. */
-    settings(): MantisSettings;
+    settings(): MbSettings;
     /** JWT and session helpers unit. */
-    auth(): MantisAuth;
+    auth(): MbAuth;
     /** File path helpers for entity uploads unit. */
-    files(): MantisFiles;
+    files(): MbFiles;
     /** Structured logging unit. */
-    logs(): MantisLogs;
+    logs(): MbLogs;
     /** Realtime change notifications unit. */
-    rt(): MantisRealtime;
+    rt(): MbRealtime;
     /** Load an additional script relative to `scriptsDir`. */
     loadScript(path: string): void;
 }
 
 /** Router unit returned by `app.router()`. */
-interface MantisRouter {
+interface MbRouter {
     /**
      * Register a route for `method` on `path` (must start with `/`)
      * with `handler` and optional middlewares (run in order).
@@ -115,8 +115,8 @@ interface MantisRouter {
     broadcastChange(eventJson: string): void;
 }
 
-/** Incoming request object (`MantisRequest` in C++). */
-interface MantisRequest {
+/** Incoming request object (`MbRequest` in C++). */
+interface MbRequest {
     /** Raw request body. */
     readonly body: string;
     /** Request method (`GET`, `POST`, ...). */
@@ -165,8 +165,8 @@ interface MantisRequest {
     getOr(key: string, defaultValue: any): any;
 }
 
-/** Outgoing response object (`MantisResponse` in C++). */
-interface MantisResponse {
+/** Outgoing response object (`MbResponse` in C++). */
+interface MbResponse {
     /** Response body. */
     body: string;
 
@@ -182,7 +182,7 @@ interface MantisResponse {
     setHeader(key: string, value: string): void;
     /**
      * Redirect this in-flight request to `url` with `status` (default `302`).
-     * For whole-path redirects without a handler, see `MantisRouter.redirect`.
+     * For whole-path redirects without a handler, see `MbRouter.redirect`.
      */
     redirect(url: string, status?: MbRedirectStatus): void;
     /** Set the response body with an explicit content type. */
@@ -202,11 +202,11 @@ interface MantisResponse {
 }
 
 /** Database unit returned by `app.db()`. */
-interface MantisDatabase {
+interface MbDatabase {
     /** `true` when connected to the database. Read-only. */
     readonly connected: boolean;
     /** Lease a database session for executing SQL directly. */
-    session(): MantisDbSession;
+    session(): MbDbSession;
     /**
      * Execute `sql` with optional `:named` bind objects.
      * @example db.query("SELECT * FROM __settings WHERE id = :id", { id: "123" })
@@ -215,7 +215,7 @@ interface MantisDatabase {
 }
 
 /** Leased database session (`soci::session` in C++). */
-interface MantisDbSession {
+interface MbDbSession {
     /** Release the leased session back to the pool. */
     close(): void;
     /** Reconnect the session. */
@@ -234,7 +234,7 @@ interface MantisDbSession {
 }
 
 /** Key/value app configuration unit returned by `app.settings()`. */
-interface MantisSettings {
+interface MbSettings {
     /** Read a setting as a JSON-encoded string. */
     get(key: string): string;
     /** Write a setting (value as a JSON-encoded string). */
@@ -246,7 +246,7 @@ interface MantisSettings {
 }
 
 /** JWT and session helpers unit returned by `app.auth()`. */
-interface MantisAuth {
+interface MbAuth {
     /** Create a JWT from a JSON-encoded claims string. Returns the token. */
     createToken(claimsJson: string, timeoutSeconds?: number): string;
     /** Verify a token. Returns the claims as a JSON-encoded string. */
@@ -260,7 +260,7 @@ interface MantisAuth {
 }
 
 /** File path helpers for entity uploads, returned by `app.files()`. */
-interface MantisFiles {
+interface MbFiles {
     /** Directory for `entityName` uploads (created when `createIfMissing`). */
     dirPath(entityName: string, createIfMissing?: boolean): string;
     /** Absolute path of `filename` under `entityName`. */
@@ -272,7 +272,7 @@ interface MantisFiles {
 }
 
 /** Structured logging unit returned by `app.logs()`. */
-interface MantisLogs {
+interface MbLogs {
     info(message: string): void;
     warn(message: string): void;
     error(message: string): void;
@@ -281,13 +281,13 @@ interface MantisLogs {
 }
 
 /** Realtime unit returned by `app.rt()`. */
-interface MantisRealtime {
+interface MbRealtime {
     /** Wake the realtime worker to drain change events immediately. */
     notifyChange(): void;
 }
 
 /** C++ middleware factories. Each returns a `(req, res) => boolean` function. */
-interface MantisMiddlewares {
+interface MbMiddlewares {
     getAuthToken(): MbMiddleware;
     hydrateContextData(): MbMiddleware;
     resolveSchema(): MbMiddleware;
@@ -305,7 +305,7 @@ interface MantisMiddlewares {
 }
 
 /** Utility functions. */
-interface MantisUtils {
+interface MbUtils {
     /** Time-based unique id. */
     generateTimeBasedId(): string;
     /** Readable time-based id. */
@@ -323,7 +323,7 @@ interface MantisUtils {
 }
 
 /** Console output (goes to the server stdout). */
-interface MantisConsole {
+interface MbConsole {
     (...args: any[]): void;
     /** Alias of `info`. */
     log(...args: any[]): void;
@@ -331,17 +331,19 @@ interface MantisConsole {
     trace(...args: any[]): void;
 }
 
-declare const app: MantisApp;
-declare const middlewares: MantisMiddlewares;
-declare const utils: MantisUtils;
-declare const console: MantisConsole;
+declare const app: MantisBaseApp;
+declare const middlewares: MbMiddlewares;
+declare const utils: MbUtils;
+declare const console: MbConsole;
 
 /**
  * Optional lifecycle hooks — define any of these in your script:
  * - `onServerStart()`: runs after scripts load, before listening.
+ * - `onServerShutdown()`: runs before scripting engine is destroyed.
  * - `onRecordCreated(entity, recordId)` / `onRecordUpdated(entity, recordId)`:
  *   fired on record mutations.
  */
 declare var onServerStart: (() => void) | undefined;
+declare var onServerShutdown: (() => void) | undefined;
 declare var onRecordCreated: ((entity: string, recordId: string) => void) | undefined;
 declare var onRecordUpdated: ((entity: string, recordId: string) => void) | undefined;

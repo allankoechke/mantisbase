@@ -71,7 +71,7 @@ namespace mb {
         }
 
         MbHandlerResponse checkEntityAccess(MbRequest &req, const MbResponse &res, const std::string &entity_name,
-                                          const std::string &trace_msg) {
+                                            const std::string &trace_msg) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
                 const auto &auth = req.getOr<json>("auth", json::object());
@@ -90,14 +90,14 @@ namespace mb {
                 }
 
                 const AccessRule rule = method == "GET"
-                                      ? (req.hasPathParam("id")
-                                             ? entity.getRule()
-                                             : entity.listRule())
-                                      : method == "POST"
-                                            ? entity.addRule()
-                                            : method == "PATCH"
-                                                  ? entity.updateRule()
-                                                  : entity.deleteRule();
+                                            ? (req.hasPathParam("id")
+                                                   ? entity.getRule()
+                                                   : entity.listRule())
+                                            : method == "POST"
+                                                  ? entity.addRule()
+                                                  : method == "PATCH"
+                                                        ? entity.updateRule()
+                                                        : entity.deleteRule();
 
                 if (req.isAdminAuth()) {
                     return MbHandlerResponse::Unhandled;
@@ -128,7 +128,8 @@ namespace mb {
                 }
                 return MbHandlerResponse::Handled;
             } catch (std::exception &e) {
-                req.mbApp().logger().critical("Access", "Access Check Error", fmt::format("Access check error: {}", e.what()));
+                req.mbApp().logger().critical("Access", "Access Check Error",
+                                              fmt::format("Access check error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
@@ -139,7 +140,7 @@ namespace mb {
         }
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> getAuthToken() {
+    MbMiddlewareFn getAuthToken() {
         return [](MbRequest &req, MbResponse &_) {
             try {
                 json auth;
@@ -209,7 +210,7 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> hydrateContextData() {
+    MbMiddlewareFn hydrateContextData() {
         return [](MbRequest &req, MbResponse &) {
             // Get the auth var from the context, resort to empty object if it's not set.
             auto auth = req.getOr<json>("auth", json::object());
@@ -244,7 +245,7 @@ namespace mb {
 
                 try {
                     const auto user_entity = req.mbApp().entity(user_table);
-                    if (auto user = user_entity.read(user_id); user.has_value()) {
+                    if (const auto user = user_entity.read(user_id); user.has_value()) {
                         auth["user"] = user.value();
                     }
                 } catch (...) {
@@ -256,7 +257,7 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> resolveSchema() {
+    MbMiddlewareFn resolveSchema() {
         return [](const MbRequest &req, const MbResponse &res) {
             const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
             if (schema_id_or_name.empty()) {
@@ -294,7 +295,7 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> resolveAuthEntity() {
+    MbMiddlewareFn resolveAuthEntity() {
         return [](const MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
@@ -317,7 +318,7 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> resolveEntity() {
+    MbMiddlewareFn resolveEntity() {
         return [](const MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
@@ -340,8 +341,8 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> rejectViewMutations() {
-        return [](MbRequest &req, MbResponse &res) {
+    MbMiddlewareFn rejectViewMutations() {
+        return [](const MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             const auto entity = req.mbApp().entity(entity_name);
             if (entity.type() == "view") {
@@ -361,22 +362,22 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> hasEntityAccess() {
+    MbMiddlewareFn hasEntityAccess() {
         std::string msg = MB_FUNC();
-        return [msg](MbRequest &req, MbResponse &res) {
+        return [msg](MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             return checkEntityAccess(req, res, entity_name, msg);
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> hasAccess(const std::string &entity_name) {
+    MbMiddlewareFn hasAccess(const std::string &entity_name) {
         std::string msg = MB_FUNC();
         return [entity_name, msg](MbRequest &req, const MbResponse &res) {
             return checkEntityAccess(req, res, entity_name, msg);
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> requireExprEval(const std::string &expr) {
+    MbMiddlewareFn requireExprEval(const std::string &expr) {
         return [expr](MbRequest &req, const MbResponse &res) {
             const auto &auth = req.getOr<json>("auth", json::object());
             const auto vars = buildAccessExprVars(req, auth);
@@ -389,7 +390,7 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> requireGuestOnly() {
+    MbMiddlewareFn requireGuestOnly() {
         return [](MbRequest &req, const MbResponse &res) {
             const auto &auth = req.getOr<json>("auth", json::object());
             if (req.isGuestAuth())
@@ -404,7 +405,7 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> requireAdminAuth() {
+    MbMiddlewareFn requireAdminAuth() {
         return [](MbRequest &req, const MbResponse &res) {
             try {
                 // Require admin authentication
@@ -474,8 +475,7 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> envGateMiddleware(
-        const std::string &env_var, const bool block_when_truthy) {
+    MbMiddlewareFn envGateMiddleware(const std::string &env_var, const bool block_when_truthy) {
         return [env_var, block_when_truthy](MbRequest &req, const MbResponse &res) {
             if (strToBool(getEnvOrDefault(env_var, "")) == block_when_truthy) {
                 // Let the user know resource action is temporarily disabled
@@ -492,8 +492,7 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> settingsFeatureGate(
-        const std::string &setting_key) {
+    MbMiddlewareFn settingsFeatureGate(const std::string &setting_key) {
         return [setting_key](const MbRequest &req, const MbResponse &res) {
             if (!req.mbApp().settings().configs().value(setting_key, false)) {
                 return MbHandlerResponse::Unhandled;
@@ -508,8 +507,7 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> requireAdminOrEntityAuth(
-        const std::string &entity_name) {
+    MbMiddlewareFn requireAdminOrEntityAuth(const std::string &entity_name) {
         return [entity_name](MbRequest &req, const MbResponse &res) {
             const auto auth = requireAuthenticatedUser(req, res);
             if (!auth.has_value()) {
@@ -534,9 +532,8 @@ namespace mb {
         };
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)>
-    requireEntityAuth(const std::string &entity_name) {
-        return [entity_name](MbRequest &req, MbResponse &res) {
+    MbMiddlewareFn requireEntityAuth(const std::string &entity_name) {
+        return [entity_name](MbRequest &req, const MbResponse &res) {
             const auto auth = requireAuthenticatedUser(req, res);
             if (!auth.has_value()) {
                 return MbHandlerResponse::Handled;
@@ -582,7 +579,7 @@ namespace mb {
         constexpr auto STALE_ENTRY_TTL = std::chrono::hours(1);
     }
 
-    std::function<MbHandlerResponse(MbRequest &, MbResponse &)> rateLimit(
+    MbMiddlewareFn rateLimit(
         int max_requests,
         int window_seconds,
         bool use_user_id) {
