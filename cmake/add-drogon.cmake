@@ -41,7 +41,7 @@ set(TRANTOR_USE_TLS "none" CACHE STRING "" FORCE)
 # Use std::filesystem (C++20 is set project-wide)
 set(HAS_STD_FILESYSTEM_PATH ON CACHE BOOL "" FORCE)
 
-add_subdirectory(../3rdParty/drogon)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/drogon)
 
 # Drogon's install(EXPORT "DrogonTargets") requires all linked targets to be
 # in an export set. Add jsoncpp_static so cmake generate doesn't fail.
