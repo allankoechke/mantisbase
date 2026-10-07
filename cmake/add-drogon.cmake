@@ -35,24 +35,26 @@ set(BUILD_YAML_CONFIG OFF CACHE BOOL "" FORCE)
 set(BUILD_DOC OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 
-# Fix for macOS BYTE_ORDER detection on sha1.cc compilation
-if(APPLE)
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-        # Apple Silicon (M1/M2/etc) - little endian
-        target_compile_definitions(mantisbase PRIVATE BYTE_ORDER=1234 LITTLE_ENDIAN=1234 BIG_ENDIAN=4321)
-    else()
-        # Intel Macs - little endian
-        target_compile_definitions(mantisbase PRIVATE BYTE_ORDER=1234 LITTLE_ENDIAN=1234 BIG_ENDIAN=4321)
-    endif()
-endif()
-
 # Disable TLS in Trantor (wolfSSL handles JWT signing separately)
 set(TRANTOR_USE_TLS "none" CACHE STRING "" FORCE)
 
 # Use std::filesystem (C++20 is set project-wide)
 set(HAS_STD_FILESYSTEM_PATH ON CACHE BOOL "" FORCE)
 
+# Add drogon sub dir
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/drogon)
+
+# Fix for macOS BYTE_ORDER detection on sha1.cc compilation
+if(APPLE)
+    if(TARGET trantor)
+        target_compile_definitions(trantor PRIVATE
+                BYTE_ORDER=1234
+                LITTLE_ENDIAN=1234
+                BIG_ENDIAN=4321
+        )
+    endif()
+endif()
+
 
 # Drogon's install(EXPORT "DrogonTargets") requires all linked targets to be
 # in an export set. Add jsoncpp_static so cmake generate doesn't fail.
