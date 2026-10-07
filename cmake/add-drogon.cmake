@@ -35,6 +35,17 @@ set(BUILD_YAML_CONFIG OFF CACHE BOOL "" FORCE)
 set(BUILD_DOC OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 
+# Fix for macOS BYTE_ORDER detection on sha1.cc compilation
+if(APPLE)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+        # Apple Silicon (M1/M2/etc) - little endian
+        target_compile_definitions(mantisbase PRIVATE BYTE_ORDER=1234 LITTLE_ENDIAN=1234 BIG_ENDIAN=4321)
+    else()
+        # Intel Macs - little endian
+        target_compile_definitions(mantisbase PRIVATE BYTE_ORDER=1234 LITTLE_ENDIAN=1234 BIG_ENDIAN=4321)
+    endif()
+endif()
+
 # Disable TLS in Trantor (wolfSSL handles JWT signing separately)
 set(TRANTOR_USE_TLS "none" CACHE STRING "" FORCE)
 
