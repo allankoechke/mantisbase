@@ -186,7 +186,7 @@ include(cmake/add-drogon.cmake)
 # Add the independent FMT package
 include(cmake/add-fmt.cmake)
 
-# SPDLOG
+# SPDLOG inclusion
 include(cmake/add-spdlog.cmake)
 
 # Add JSON
