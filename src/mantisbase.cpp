@@ -33,10 +33,13 @@ namespace mb {
     }
 
     MantisBase::~MantisBase() {
-        close(); // Confirm all units were closed/cleared before we exit
 #ifdef MB_SCRIPTING_ENABLED
+        // Run any shutdown scripting actions before we exit
+        if (m_scripting) m_scripting->fireOnServerShutdown();
         m_scripting.reset();
 #endif
+
+        close(); // Confirm all units were closed/cleared before we exit
     }
 
     void MantisBase::init(const int argc, char *argv[]) {

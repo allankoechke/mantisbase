@@ -12,7 +12,7 @@
 namespace mb {
     namespace {
         struct MiddlewareHolder {
-            MiddlewareFn fn;
+            MbMiddlewareFn fn;
         };
 
         duk_ret_t run_middleware(duk_context *ctx) {
@@ -26,17 +26,17 @@ namespace mb {
                 return 1;
             }
 
-            MantisRequest *req = nullptr;
-            MantisResponse *res = nullptr;
+            MbRequest *req = nullptr;
+            MbResponse *res = nullptr;
             dukglue_read(ctx, 0, &req);
             dukglue_read(ctx, 1, &res);
 
-            const bool ok = holder->fn(*req, *res) == HandlerResponse::Unhandled;
+            const bool ok = holder->fn(*req, *res) == MbHandlerResponse::Unhandled;
             duk_push_boolean(ctx, ok);
             return 1;
         }
 
-        duk_ret_t push_middleware(duk_context *ctx, MiddlewareFn fn) {
+        duk_ret_t push_middleware(duk_context *ctx, MbMiddlewareFn fn) {
             auto *holder = new MiddlewareHolder{std::move(fn)};
             duk_push_c_function(ctx, run_middleware, 2);
             duk_push_pointer(ctx, holder);

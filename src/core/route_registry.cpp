@@ -5,22 +5,22 @@
 #include "../../include/mantisbase/core/http.h"
 
 namespace mb {
-    size_t RouteKeyHash::operator()(const RouteKey &k) const {
+    size_t RouteKeyHash::operator()(const MbRouteKey &k) const {
         return std::hash<std::string>()(k.first + "#" + k.second);
     }
 
     void RouteRegistry::add(const std::string &method,
                             const std::string &path,
-                            const HandlerFn &handler,
-                            const Middlewares &middlewares) {
-        routes[{method, path}] = {middlewares, handler};
+                            const MbHandlerFn &handler,
+                            const MbMiddlewares &middlewares) {
+        routes[{method, path}] = {.middlewares = middlewares, .handler = handler};
     }
 
     void RouteRegistry::add(const std::string &method,
                             const std::string &path,
-                            const HandlerWithContentReaderFn &handler,
-                            const Middlewares &middlewares) {
-        routes[{method, path}] = {middlewares, handler};
+                            const MbHandlerWithContentReaderFn &handler,
+                            const MbMiddlewares &middlewares) {
+        routes[{method, path}] = {.middlewares = middlewares, .handler = handler};
     }
 
     const RouteHandler *RouteRegistry::find(const std::string &method, const std::string &path) const {
@@ -43,6 +43,7 @@ namespace mb {
 
         // Remove item found at the iterator
         routes.erase(it);
+
         // LogOrigin::info("Route Removed", fmt::format("Route for {} {} erased!", method, path));
         return res;
     }

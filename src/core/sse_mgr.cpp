@@ -42,7 +42,7 @@ namespace mb {
             return arr;
         }
 
-        std::string resolveSubscribeToken(MantisRequest &req) {
+        std::string resolveSubscribeToken(MbRequest &req) {
             const auto &[body, err] = req.getBodyAsJson();
             if (err.empty() && body.contains("token") && body["token"].is_string()) {
                 const auto token = trim(body["token"].get<std::string>());
@@ -65,8 +65,8 @@ namespace mb {
     void SSEMgr::createRoutes() {
         auto &router = mbApp().router();
 
-        auto sseGetMiddlewares = std::make_shared<std::vector<MiddlewareFn>>(
-            std::vector<MiddlewareFn>{validateSubTopics(false)});
+        auto sseGetMiddlewares = std::make_shared<std::vector<MbMiddlewareFn>>(
+            std::vector<MbMiddlewareFn>{validateSubTopics(false)});
 
         drogon::app().registerHandler(
             "/api/v1/realtime",
@@ -81,19 +81,19 @@ namespace mb {
                     return;
                 }
 
-                MantisRequest ma_req{mbApp(), req};
-                MantisResponse ma_res{mbApp()};
+                MbRequest ma_req{mbApp(), req};
+                MbResponse ma_res{mbApp()};
 
                 auto &preMiddlewares = mbApp().router().preRoutingMiddlewares();
                 for (const auto &mw : preMiddlewares) {
-                    if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
+                    if (mw(ma_req, ma_res) == MbHandlerResponse::Handled) {
                         callback(ma_res.drogonResponse());
                         return;
                     }
                 }
 
                 for (const auto &mw : *sseGetMiddlewares) {
-                    if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
+                    if (mw(ma_req, ma_res) == MbHandlerResponse::Handled) {
                         callback(ma_res.drogonResponse());
                         return;
                     }
@@ -282,8 +282,8 @@ namespace mb {
 
     bool SSEMgr::isRunning() const { return m_running.load(); }
 
-    std::function<void(MantisRequest &, MantisResponse &)> SSEMgr::handleSSESessionUpdate() {
-        return [](MantisRequest &req, MantisResponse &res) {
+    std::function<void(MbRequest &, MbResponse &)> SSEMgr::handleSSESessionUpdate() {
+        return [](MbRequest &req, MbResponse &res) {
             const auto topics = req.getOr<json>("topics", json::array());
             const auto client_id = req.getOr<std::string>("client_id", std::string{});
 
@@ -351,9 +351,9 @@ namespace mb {
         };
     }
 
-    std::function<mb::HandlerResponse(MantisRequest &, MantisResponse &)> SSEMgr::validateSubTopics(
+    std::function<mb::MbHandlerResponse(MbRequest &, MbResponse &)> SSEMgr::validateSubTopics(
         bool is_updating) {
-        return [is_updating](MantisRequest &req, const MantisResponse &res) {
+        return [is_updating](MbRequest &req, const MbResponse &res) {
             try {
                 std::set<std::string> topics;
                 if (is_updating) {
@@ -365,7 +365,7 @@ namespace mb {
                             {"data", json::object()},
                             {"status", 400}
                         });
-                        return HandlerResponse::Handled;
+                        return MbHandlerResponse::Handled;
                     }
 
                     if (!body.contains("client_id")) {
@@ -374,7 +374,7 @@ namespace mb {
                             {"data", json::object()},
                             {"status", 400}
                         });
-                        return HandlerResponse::Handled;
+                        return MbHandlerResponse::Handled;
                     }
 
                     const std::string client_id = body["client_id"];
@@ -384,7 +384,7 @@ namespace mb {
                             {"data", json::object()},
                             {"status", 400}
                         });
-                        return HandlerResponse::Handled;
+                        return MbHandlerResponse::Handled;
                     }
 
                     if (!body.contains("topics")) {
@@ -393,7 +393,7 @@ namespace mb {
                             {"data", json::object()},
                             {"status", 400}
                         });
-                        return HandlerResponse::Handled;
+                        return MbHandlerResponse::Handled;
                     }
 
                     if (!body["topics"].is_array()) {
@@ -404,7 +404,7 @@ namespace mb {
                             {"data", json::object()},
                             {"status", 400}
                         });
-                        return HandlerResponse::Handled;
+                        return MbHandlerResponse::Handled;
                     }
 
                     for (const auto &sub : body["topics"]) {
@@ -439,7 +439,7 @@ namespace mb {
                             {"data", json::object()},
                             {"status", 400}
                         });
-                        return HandlerResponse::Handled;
+                        return MbHandlerResponse::Handled;
                     }
 
                     parsed_topics.push_back({
@@ -456,10 +456,10 @@ namespace mb {
                     {"data", json::object()},
                     {"error", "An internal error occurred."}
                 });
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
-            return HandlerResponse::Unhandled;
+            return MbHandlerResponse::Unhandled;
         };
     }
 

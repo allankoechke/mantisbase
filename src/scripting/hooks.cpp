@@ -47,6 +47,17 @@ namespace mb {
         duk_pop(ctx);
     }
 
+    void ScriptingHooks::fireOnServerShutdown(duk_context *ctx) {
+        duk_get_global_string(ctx, "onServerShutdown");
+        if (duk_is_function(ctx, -1)) {
+            if (duk_pcall(ctx, 0) != 0) {
+                std::cerr << "[SCRIPT] onServerShutdown error: "
+                          << duk_safe_to_string(ctx, -1) << std::endl;
+            }
+        }
+        duk_pop(ctx);
+    }
+
     void ScriptingHooks::fireOnRecordCreated(duk_context *ctx,
                                              const std::string &entity,
                                              const std::string &recordId) {

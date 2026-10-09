@@ -15,149 +15,154 @@
 #include <trantor/net/EventLoopThread.h>
 
 namespace TestHttp {
+    using Headers = std::vector<std::pair<std::string, std::string> >;
 
-using Headers = std::vector<std::pair<std::string, std::string>>;
+    struct Response {
+        int status = 0;
+        std::string body;
+        std::map<std::string, std::string> headers;
 
-struct Response {
-    int status = 0;
-    std::string body;
-    std::map<std::string, std::string> headers;
+        explicit operator bool() const { return status > 0; }
 
-    explicit operator bool() const { return status > 0; }
+        /// Case-insensitive header lookup (Drogon normalizes names to lowercase).
+        [[nodiscard]] std::string header(const std::string &name) const {
+            auto lower = name;
+            std::transform(lower.begin(), lower.end(), lower.begin(),
+                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            const auto it = headers.find(lower);
+            return it != headers.end() ? it->second : std::string{};
+        }
+    };
 
-    /// Case-insensitive header lookup (Drogon normalizes names to lowercase).
-    [[nodiscard]] std::string header(const std::string &name) const {
-        auto lower = name;
-        std::transform(lower.begin(), lower.end(), lower.begin(),
-                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        const auto it = headers.find(lower);
-        return it != headers.end() ? it->second : std::string{};
-    }
-};
-
-class Client {
-public:
-    Client(const std::string& host, int port)
-        : host_(host), port_(port) {
-        loopThread_.run();
-        auto url = "http://" + host + ":" + std::to_string(port);
-        client_ = drogon::HttpClient::newHttpClient(url, loopThread_.getLoop());
-        client_->setUserAgent("MantisBase-Test/1.0");
-    }
-
-    ~Client() { shutdown(); }
-
-    void shutdown() {
-        if (!client_) {
-            return;
+    class Client {
+    public:
+        Client(const std::string &host, int port)
+            : host_(host), port_(port) {
+            loopThread_.run();
+            auto url = "http://" + host + ":" + std::to_string(port);
+            client_ = drogon::HttpClient::newHttpClient(url, loopThread_.getLoop());
+            client_->setUserAgent("MantisBase-Test/1.0");
         }
 
-        if (auto* loop = loopThread_.getLoop()) {
-            std::promise<void> done;
-            auto doneFuture = done.get_future();
-            loop->runInLoop([this, &done]() {
+        ~Client() { shutdown(); }
+
+        void shutdown() {
+            if (!client_) {
+                return;
+            }
+
+            if (auto *loop = loopThread_.getLoop()) {
+                std::promise<void> done;
+                auto doneFuture = done.get_future();
+                loop->runInLoop([this, &done]() {
+                    client_.reset();
+                    done.set_value();
+                });
+                doneFuture.wait();
+            } else {
                 client_.reset();
-                done.set_value();
-            });
-            doneFuture.wait();
-        } else {
-            client_.reset();
-        }
-    }
-
-    void set_connection_timeout(int sec, int usec) {
-        // Drogon client handles timeouts differently
-        (void)sec;
-        (void)usec;
-    }
-
-    void set_read_timeout(int sec, int usec) {
-        // Drogon client handles timeouts differently
-        (void)sec;
-        (void)usec;
-    }
-
-    std::unique_ptr<Response> Get(const std::string& path,
-                                  const Headers& headers = {},
-                                  double timeoutSec = 10.0) {
-        return sendRequest(drogon::Get, path, headers, "", "", timeoutSec);
-    }
-
-    std::unique_ptr<Response> Post(const std::string& path,
-                                    const std::string& body,
-                                    const std::string& content_type) {
-        return sendRequest(drogon::Post, path, {}, body, content_type);
-    }
-
-    std::unique_ptr<Response> Post(const std::string& path,
-                                    const Headers& headers,
-                                    const std::string& body,
-                                    const std::string& content_type) {
-        return sendRequest(drogon::Post, path, headers, body, content_type);
-    }
-
-    std::unique_ptr<Response> Patch(const std::string& path,
-                                     const Headers& headers,
-                                     const std::string& body,
-                                     const std::string& content_type) {
-        return sendRequest(drogon::Patch, path, headers, body, content_type);
-    }
-
-    std::unique_ptr<Response> Delete(const std::string& path,
-                                      const Headers& headers = {}) {
-        return sendRequest(drogon::Delete, path, headers);
-    }
-
-private:
-    std::unique_ptr<Response> sendRequest(drogon::HttpMethod method,
-                                           const std::string& path,
-                                           const Headers& headers,
-                                           const std::string& body = "",
-                                           const std::string& content_type = "",
-                                           double timeoutSec = 10.0) {
-        auto req = drogon::HttpRequest::newHttpRequest();
-        req->setMethod(method);
-        req->setPath(path);
-
-        for (const auto& [key, value] : headers) {
-            req->addHeader(key, value);
-        }
-
-        if (!body.empty()) {
-            req->setBody(body);
-            if (!content_type.empty()) {
-                req->setContentTypeString(content_type);
             }
         }
 
-        auto promise = std::make_shared<std::promise<std::unique_ptr<Response>>>();
-        auto future = promise->get_future();
+        void set_connection_timeout(int sec, int usec) {
+            // Drogon client handles timeouts differently
+            (void) sec;
+            (void) usec;
+        }
 
-        client_->sendRequest(req, [promise](drogon::ReqResult result,
-                                             const drogon::HttpResponsePtr& resp) {
-            auto r = std::make_unique<Response>();
-            if (result == drogon::ReqResult::Ok && resp) {
-                r->status = static_cast<int>(resp->statusCode());
-                r->body = std::string(resp->body());
-                for (const auto& [key, value] : resp->headers()) {
-                    auto lower = key;
-                    std::transform(lower.begin(), lower.end(), lower.begin(),
-                                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-                    r->headers.emplace(std::move(lower), value);
+        void set_read_timeout(int sec, int usec) {
+            // Drogon client handles timeouts differently
+            (void) sec;
+            (void) usec;
+        }
+
+        std::unique_ptr<Response> Get(const std::string &path,
+                                      const Headers &headers = {},
+                                      double timeoutSec = 10.0) {
+            return sendRequest(drogon::Get, path, headers, "", "", timeoutSec);
+        }
+
+        std::unique_ptr<Response> Post(const std::string &path,
+                                       const std::string &body,
+                                       const std::string &content_type) {
+            return sendRequest(drogon::Post, path, {}, body, content_type);
+        }
+
+        std::unique_ptr<Response> Post(const std::string &path,
+                                       const Headers &headers,
+                                       const std::string &body,
+                                       const std::string &content_type) {
+            return sendRequest(drogon::Post, path, headers, body, content_type);
+        }
+
+        std::unique_ptr<Response> Patch(const std::string &path,
+                                        const Headers &headers,
+                                        const std::string &body,
+                                        const std::string &content_type) {
+            return sendRequest(drogon::Patch, path, headers, body, content_type);
+        }
+
+        std::unique_ptr<Response> Put(const std::string &path,
+                                      const Headers &headers,
+                                      const std::string &body,
+                                      const std::string &content_type) {
+            return sendRequest(drogon::Put, path, headers, body, content_type);
+        }
+
+        std::unique_ptr<Response> Delete(const std::string &path,
+                                         const Headers &headers = {}) {
+            return sendRequest(drogon::Delete, path, headers);
+        }
+
+    private:
+        std::unique_ptr<Response> sendRequest(drogon::HttpMethod method,
+                                              const std::string &path,
+                                              const Headers &headers,
+                                              const std::string &body = "",
+                                              const std::string &content_type = "",
+                                              double timeoutSec = 10.0) {
+            const auto req = drogon::HttpRequest::newHttpRequest();
+            req->setMethod(method);
+            req->setPath(path);
+
+            for (const auto &[key, value]: headers) {
+                req->addHeader(key, value);
+            }
+
+            if (!body.empty()) {
+                req->setBody(body);
+                if (!content_type.empty()) {
+                    req->setContentTypeString(content_type);
                 }
             }
-            promise->set_value(std::move(r));
-        }, timeoutSec);
 
-        return future.get();
-    }
+            auto promise = std::make_shared<std::promise<std::unique_ptr<Response> > >();
+            auto future = promise->get_future();
 
-    std::string host_;
-    int port_;
-    drogon::HttpClientPtr client_;
-    trantor::EventLoopThread loopThread_;
-};
+            client_->sendRequest(req, [promise](drogon::ReqResult result,
+                                                const drogon::HttpResponsePtr &resp) {
+                auto r = std::make_unique<Response>();
+                if (result == drogon::ReqResult::Ok && resp) {
+                    r->status = static_cast<int>(resp->statusCode());
+                    r->body = std::string(resp->body());
+                    for (const auto &[key, value]: resp->headers()) {
+                        auto lower = key;
+                        std::transform(lower.begin(), lower.end(), lower.begin(),
+                                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                        r->headers.emplace(std::move(lower), value);
+                    }
+                }
+                promise->set_value(std::move(r));
+            }, timeoutSec);
 
+            return future.get();
+        }
+
+        std::string host_;
+        int port_;
+        drogon::HttpClientPtr client_;
+        trantor::EventLoopThread loopThread_;
+    };
 } // namespace TestHttp
 
 #endif // MANTISBASE_TEST_HTTP_CLIENT_H

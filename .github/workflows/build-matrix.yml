@@ -40,6 +40,34 @@ jobs:
             arch: x86_64
             arch_label: x86-64
             pkg_arch: x86
+          # NOTE: macos-15-intel is GitHub's last x86-64 macOS image and is on
+          # the deprecation path — if it disappears, drop this entry (ARM covers macOS).
+          - os: macos-15-intel
+            c_compiler: clang
+            cpp_compiler: clang++
+            platform: macos-x86_64
+            lib_platform: macos
+            arch: x86_64
+            arch_label: x86-64
+            pkg_arch: x86
+          - os: macos-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+            platform: macos-aarch64
+            lib_platform: macos
+            arch: aarch64
+            arch_label: aarch64
+            pkg_arch: arm
+          # Windows on ARM builds with llvm-mingw (GNU-compatible Clang for
+          # aarch64-windows); the choco `mingw` package is x86-64 only.
+          - os: windows-11-arm
+            c_compiler: clang
+            cpp_compiler: clang++
+            platform: windows-aarch64
+            lib_platform: windows
+            arch: aarch64
+            arch_label: aarch64
+            pkg_arch: arm
 
     steps:
       - uses: actions/checkout@v4
@@ -48,23 +76,37 @@ jobs:
           fetch-depth: 1
 
       - name: Install dependencies (Linux)
-        if: matrix.os != 'windows-latest'
+        if: matrix.lib_platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libpq-dev uuid-dev
 
-      - name: Install MinGW (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Install dependencies (macOS)
+        if: matrix.lib_platform == 'macos'
+        run: |
+          # PostgreSQL backend is enabled on all UNIX (see cmake/add-soci.cmake);
+          # brew libpq is keg-only, so expose it for find_package(PostgreSQL).
+          # uuid/ is provided by the macOS SDK — no package needed.
+          brew install libpq
+          echo "CMAKE_PREFIX_PATH=$(brew --prefix libpq)" >> "$GITHUB_ENV"
+
+      - name: Install MinGW (Windows x86-64)
+        if: matrix.lib_platform == 'windows' && matrix.arch == 'x86_64'
         run: |
           choco install mingw --no-progress
 
+      - name: Install llvm-mingw (Windows ARM64)
+        if: matrix.lib_platform == 'windows' && matrix.arch == 'aarch64'
+        run: |
+          choco install llvm-mingw ninja --no-progress
+
       - name: Add MinGW to PATH
-        if: matrix.os == 'windows-latest'
+        if: matrix.lib_platform == 'windows' && matrix.arch == 'x86_64'
         run: |
           echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
 
       - name: Verify MinGW installation
-        if: matrix.os == 'windows-latest'
+        if: matrix.lib_platform == 'windows' && matrix.arch == 'x86_64'
         shell: pwsh
         run: |
           $mingwPath = "C:\ProgramData\mingw64\mingw64\bin"
@@ -87,8 +129,8 @@ jobs:
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-      - name: Configure CMake (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Configure CMake (Windows x86-64)
+        if: matrix.lib_platform == 'windows' && matrix.arch == 'x86_64'
         shell: pwsh
         run: |
           $mingwBin = "C:\ProgramData\mingw64\mingw64\bin"
@@ -117,8 +159,45 @@ jobs:
             -DMB_BUILD_SHARED_LIB=ON `
             -S ${{ github.workspace }}
 
+      - name: Configure CMake (Windows ARM64)
+        if: matrix.lib_platform == 'windows' && matrix.arch == 'aarch64'
+        shell: pwsh
+        run: |
+          # Locate the llvm-mingw cross toolchain (aarch64-windows target).
+          $cxx = (Get-Command aarch64-w64-mingw32-clang++.exe -ErrorAction SilentlyContinue)
+          if (-not $cxx) {
+            $found = Get-ChildItem "C:\ProgramData", $env:ChocolateyInstall -Recurse `
+              -Filter "aarch64-w64-mingw32-clang++.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if (-not $found) { throw "llvm-mingw toolchain not found after choco install" }
+            $cxxPath = $found.FullName
+          } else {
+            $cxxPath = $cxx.Source
+          }
+          $ccPath = $cxxPath -replace 'clang\+\+\.exe$', 'clang.exe'
+          Write-Host "Using C++ compiler at: $cxxPath"
+
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} `
+            -G Ninja `
+            -DCMAKE_CXX_COMPILER="$cxxPath" `
+            -DCMAKE_C_COMPILER="$ccPath" `
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+            -DMB_BUILD_TESTS=true `
+            -DMB_BUILD_DOCS=OFF `
+            -DMB_BUILD_SHARED_LIB=ON `
+            -S ${{ github.workspace }}
+
+      - name: Configure CMake (macOS)
+        if: matrix.lib_platform == 'macos'
+        run: |
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DMB_BUILD_TESTS=ON \
+            -DMB_BUILD_DOCS=OFF \
+            -DMB_BUILD_SHARED_LIB=ON \
+            -S ${{ github.workspace }}
+
       - name: Configure CMake (Linux)
-        if: matrix.os != 'windows-latest'
+        if: matrix.lib_platform == 'linux'
         run: |
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
@@ -132,8 +211,8 @@ jobs:
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release # ${{ matrix.build_type }}
 
-      - name: Check dev headers (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Check dev headers (Linux/macOS)
+        if: matrix.lib_platform == 'linux' || matrix.lib_platform == 'macos'
         shell: bash
         run: |
           # Coalesce the dev-package header tree, then prove every public
@@ -153,7 +232,7 @@ jobs:
           g++ -std=c++20 -fsyntax-only "$CHECK_DIR/smoke.cpp" -I"$CHECK_DIR/include"
 
       - name: Check dev shared lib links soci (Linux)
-        if: matrix.os != 'windows-latest'
+        if: matrix.lib_platform == 'linux'
         shell: bash
         run: |
           # Linking, not just headers: Database exposes soci types in its
@@ -191,7 +270,7 @@ jobs:
             -lpq -luuid -ldl -lpthread -lm -o "$CHECK_DIR/link-smoke"
 
       - name: Check dev headers (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.lib_platform == 'windows'
         shell: pwsh
         run: |
           # Validate the coalescing rules on Windows (compile check runs on Linux).
@@ -207,7 +286,7 @@ jobs:
         run: ctest --build-config Release --output-on-failure -VV
 
       - name: Zip the build output (Linux)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'linux'
         run: |
           cd ${{ github.workspace }}/build/bin
           rm -f mantisbase_tests
@@ -215,12 +294,27 @@ jobs:
           mkdir -p "$STAGING"
           cp mantisbase "$STAGING/"
           cp "${{ github.workspace }}/LICENSE" "$STAGING/"
+          cp "${{ github.workspace }}/mantisbase.d.ts" "$STAGING/"
           cp "${{ github.workspace }}/.github/release/README-linux-binary.md" "$STAGING/README.md"
           mkdir -p zip
           (cd "$STAGING" && zip -r "../mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip" .)
 
+      - name: Zip the build output (macOS)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        run: |
+          cd ${{ github.workspace }}/build/bin
+          rm -f mantisbase_tests
+          STAGING="zip/staging"
+          mkdir -p "$STAGING"
+          cp mantisbase "$STAGING/"
+          cp "${{ github.workspace }}/LICENSE" "$STAGING/"
+          cp "${{ github.workspace }}/mantisbase.d.ts" "$STAGING/"
+          cp "${{ github.workspace }}/.github/release/README-macos-binary.md" "$STAGING/README.md"
+          mkdir -p zip
+          (cd "$STAGING" && zip -r "../mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip" .)
+
       - name: Zip the build output (Windows)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'windows'
         shell: pwsh
         run: |
           del "${{ steps.strings.outputs.build-output-dir }}\bin\mantisbase_tests.exe" -ErrorAction SilentlyContinue
@@ -231,6 +325,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $Staging | Out-Null
           Copy-Item "$BinPath\mantisbase.exe" -Destination $Staging
           Copy-Item "${{ github.workspace }}\LICENSE" -Destination $Staging
+          Copy-Item "${{ github.workspace }}\mantisbase.d.ts" -Destination $Staging
           Copy-Item "${{ github.workspace }}\.github\release\README-windows-binary.md" -Destination "$Staging\README.md"
           Compress-Archive -Path "$Staging\*" -DestinationPath $ZipFile -Force
 
@@ -243,7 +338,7 @@ jobs:
             ${{ github.workspace }}/build/bin/zip/mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip
 
       - name: Stage library files (Linux)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'linux'
         shell: bash
         run: |
           # Dev packages ship shared libraries only (no static archives).
@@ -260,30 +355,32 @@ jobs:
           fi
 
       - name: Upload library artifact (Linux)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-lib
           path: lib-staging/
 
       - name: Stage dev headers (Linux)
-        # One coalesced tree per OS (gated to x86_64); consumed by
-        # cmake/package-dev.cmake in the release workflow.
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest' && matrix.arch == 'x86_64'
+        # One coalesced tree per platform (platform-generated headers such as
+        # soci-config.h can differ per arch). package-dev.cmake consumes the
+        # linux-x86_64 tree; the Python wheel jobs use their own platform's.
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'linux'
         shell: bash
         run: |
           cmake --install ${{ steps.strings.outputs.build-output-dir }} \
             --component mb-dev-headers --prefix headers-staging
 
       - name: Upload headers artifact (Linux)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os != 'windows-latest' && matrix.arch == 'x86_64'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-headers
           path: headers-staging/
 
       - name: Stage library files (Windows)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        # Both arches merge into lib-staging/windows/libs/{x86,arm}.
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'windows'
         shell: pwsh
         run: |
           # Dev packages ship shared libraries only (no static archives).
@@ -295,24 +392,58 @@ jobs:
           Copy-Item "build\include\mantisbase\config.hpp" -Destination "lib-staging\generated-include\mantisbase\"
 
       - name: Upload library artifact (Windows)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'windows'
         uses: actions/upload-artifact@v4
         with:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-lib
           path: lib-staging\
 
       - name: Stage dev headers (Windows)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        # Per-arch trees (see Linux note). package-dev.cmake consumes the
+        # windows-x86_64 tree (see release.yml); wheels use their own arch's.
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'windows'
         shell: pwsh
         run: |
           cmake --install "${{ steps.strings.outputs.build-output-dir }}" --component mb-dev-headers --prefix headers-staging
 
       - name: Upload headers artifact (Windows)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'windows'
         uses: actions/upload-artifact@v4
         with:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-headers
           path: headers-staging\
+
+      - name: Stage library files (macOS)
+        # NOTE: the dev-package (cmake/package-dev.cmake) currently supports
+        # linux + windows only — macOS dylibs are staged for the Python wheels.
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        shell: bash
+        run: |
+          STAGING="lib-staging/macos/libs/${{ matrix.pkg_arch }}"
+          mkdir -p "${STAGING}"
+          cp "${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.dylib" \
+            "${STAGING}/"
+
+      - name: Upload library artifact (macOS)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-lib
+          path: lib-staging/
+
+      - name: Stage dev headers (macOS)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        shell: bash
+        run: |
+          cmake --install ${{ steps.strings.outputs.build-output-dir }} \
+            --component mb-dev-headers --prefix headers-staging
+
+      - name: Upload headers artifact (macOS)
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-headers
+          path: headers-staging/
 
   scripting:
     name: Build with scripting (linux-x86_64)

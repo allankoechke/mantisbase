@@ -5,10 +5,10 @@
 
 namespace mb {
     void Router::registerApiKeyRoutes() {
-        const Middlewares authEntityMiddleware = {resolveAuthEntity()};
+        const MbMiddlewares authEntityMiddleware = {resolveAuthEntity()};
 
         // Entity-scoped API key routes
-        Post("/api/v1/auth/:entity_name/api-keys", [](MantisRequest &req, const MantisResponse &res) {
+        Post("/api/v1/auth/:entity_name/api-keys", [](MbRequest &req, const MbResponse &res) {
             try {
                 auto auth = req.getOr<json>("auth", json::object());
                 auto verification = req.getOr<json>("verification", json::object());
@@ -39,7 +39,7 @@ namespace mb {
             }
         }, authEntityMiddleware);
 
-        Get("/api/v1/auth/:entity_name/api-keys", [](MantisRequest &req, const MantisResponse &res) {
+        Get("/api/v1/auth/:entity_name/api-keys", [](MbRequest &req, const MbResponse &res) {
             try {
                 auto& auth = req.getOr<json>("auth", json::object());
                 auto& verification = req.getOr<json>("verification", json::object());
@@ -60,7 +60,7 @@ namespace mb {
             }
         }, authEntityMiddleware);
 
-        Delete("/api/v1/auth/:entity_name/api-keys/:id", [this](MantisRequest &req, const MantisResponse &res) {
+        Delete("/api/v1/auth/:entity_name/api-keys/:id", [this](MbRequest &req, const MbResponse &res) {
             try {
                 auto auth = req.getOr<json>("auth", json::object());
                 auto verification = req.getOr<json>("verification", json::object());
@@ -92,9 +92,9 @@ namespace mb {
         }, authEntityMiddleware);
 
         // System-scoped API key routes (admin)
-        const Middlewares adminAuth = {requireAdminAuth()};
+        const MbMiddlewares adminAuth = {requireAdminAuth()};
 
-        Post("/api/v1/sys/api-keys", [](MantisRequest &req, const MantisResponse &res) {
+        Post("/api/v1/sys/api-keys", [](MbRequest &req, const MbResponse &res) {
             try {
                 auto auth = req.getOr<json>("auth", json::object());
                 auto user_id = auth["id"].get<std::string>();
@@ -117,7 +117,7 @@ namespace mb {
             }
         }, adminAuth);
 
-        Get("/api/v1/sys/api-keys", [](const MantisRequest &req, const MantisResponse &res) {
+        Get("/api/v1/sys/api-keys", [](const MbRequest &req, const MbResponse &res) {
             try {
                 auto keys = req.mbApp().auth().apiKey().listAdmin();
                 res.sendJSON(200, {{"status", 200}, {"data", keys}, {"error", ""}});
@@ -127,7 +127,7 @@ namespace mb {
             }
         }, adminAuth);
 
-        Delete("/api/v1/sys/api-keys/:id", [](MantisRequest &req, const MantisResponse &res) {
+        Delete("/api/v1/sys/api-keys/:id", [](MbRequest &req, const MbResponse &res) {
             try {
                 auto key_id = trim(req.getPathParamValue("id"));
 

@@ -275,15 +275,15 @@ namespace mb
 
     void KeyValStore::setupConfigRoutes()
     {
-        const Middlewares adminAuth = {requireAdminAuth()};
-        const Middlewares patchMiddleware = {
+        const MbMiddlewares adminAuth = {requireAdminAuth()};
+        const MbMiddlewares patchMiddleware = {
             requireAdminAuth(),
             envGateMiddleware("MB_DISABLE_CONFIG_MUTATIONS", true)
         };
 
         mApp.router().Get(
             "/api/v1/sys/settings/config",
-            [this](MantisRequest &req, const MantisResponse &res)
+            [this](MbRequest &req, const MbResponse &res)
             {
                 const auto settings = loadFromDb();
                 if (settings.empty())
@@ -309,7 +309,7 @@ namespace mb
 
         mApp.router().Patch(
             "/api/v1/sys/settings/config",
-            [this](const MantisRequest &req, const MantisResponse &res)
+            [this](const MbRequest &req, const MbResponse &res)
             {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty())

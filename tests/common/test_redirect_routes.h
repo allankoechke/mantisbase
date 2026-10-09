@@ -16,7 +16,7 @@ inline void registerRedirectTestRoutes(mb::Router &router) {
     }
     registered = true;
 
-    const mb::HandlerFn targetHandler = [](const mb::MantisRequest &, const mb::MantisResponse &res) {
+    const mb::MbHandlerFn targetHandler = [](const mb::MbRequest &, const mb::MbResponse &res) {
         res.sendJSON(200, {
                              {"status", 200},
                              {"data", {{"redirect_target", true}}},

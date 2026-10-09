@@ -32,6 +32,17 @@ The API is available at http://localhost:7070/api/v1/.
 
 Set `MB_JWT_SECRET` in production. See the [CLI Reference](https://github.com/allankoechke/mantisbase/blob/master/doc/cmd.md).
 
+## JavaScript scripting
+
+Custom routes and database queries live in `main.mb.js` inside your scripts directory (next to the binary by default, or `--scriptsDir C:\some\path`):
+
+```powershell
+mkdir scripts
+Copy-Item mantisbase.d.ts .\scripts\
+```
+
+`mantisbase.d.ts` (included in this archive) gives you editor autocompletion for the whole script API: `app.router().get/post(...)`, `app.db().query(...)`, middlewares, `utils`, and request/response objects. See the [Scripting Guide](https://github.com/allankoechke/mantisbase/blob/master/doc/scripting.md).
+
 > **Note:** Prebuilt Windows binaries use SQLite by default. PostgreSQL backend support is included in Linux builds; build from source on Windows if you need PostgreSQL.
 
 ## Other install options

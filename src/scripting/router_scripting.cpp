@@ -12,8 +12,8 @@
 namespace mb {
     void Router::executeJsRoute(const DukValue &handler,
                                 const std::vector<DukValue> &middlewares,
-                                MantisRequest &req,
-                                MantisResponse &res) {
+                                MbRequest &req,
+                                MbResponse &res) {
         auto *engine = ScriptingEngine::active();
         if (!engine) {
             res.sendJSON(500, json{{"error", "Scripting engine not available"}, {"status", "500"}, {"data", json::object()}});
@@ -78,20 +78,24 @@ namespace mb {
             }
 
             if (method == "GET") {
-                router->Get(path, [router, handler, middlewares](MantisRequest &req, MantisResponse &res) {
-                    router->executeJsRoute(handler, middlewares, req, res);
+                router->Get(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
+                    mb::Router::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "POST") {
-                router->Post(path, [router, handler, middlewares](MantisRequest &req, MantisResponse &res) {
-                    router->executeJsRoute(handler, middlewares, req, res);
+                router->Post(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
+                    mb::Router::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "PATCH") {
-                router->Patch(path, [router, handler, middlewares](MantisRequest &req, MantisResponse &res) {
-                    router->executeJsRoute(handler, middlewares, req, res);
+                router->Patch(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
+                    mb::Router::executeJsRoute(handler, middlewares, req, res);
+                });
+            } else if (method == "PUT") {
+                router->Put(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
+                    mb::Router::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "DELETE") {
-                router->Delete(path, [router, handler, middlewares](MantisRequest &req, MantisResponse &res) {
-                    router->executeJsRoute(handler, middlewares, req, res);
+                router->Delete(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
+                    mb::Router::executeJsRoute(handler, middlewares, req, res);
                 });
             } else {
                 duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported HTTP method: %s", method.c_str());
@@ -107,9 +111,9 @@ namespace mb {
         auto method = trim(duk_require_string(ctx, 0));
         std::ranges::transform(method, method.begin(), ::toupper);
         if (method.empty()
-            || !(method == "GET" || method == "POST" || method == "PATCH" || method == "DELETE")) {
+            || !(method == "GET" || method == "POST" || method == "PATCH" || method == "PUT" || method == "DELETE")) {
             duk_error(ctx, DUK_ERR_TYPE_ERROR,
-                      "addRoute expects request method of type `GET`, `POST`, `PATCH` or `DELETE` only!");
+                      "addRoute expects request method of type `GET`, `POST`, `PATCH`, `PUT`, or `DELETE` only!");
             return DUK_RET_TYPE_ERROR;
         }
 
@@ -136,11 +140,15 @@ namespace mb {
         return bindJsRouteForMethod(this, "PATCH", ctx);
     }
 
+    duk_ret_t Router::bindPut(duk_context *ctx) {
+        return bindJsRouteForMethod(this, "PUT", ctx);
+    }
+
     duk_ret_t Router::bindDelete(duk_context *ctx) {
         return bindJsRouteForMethod(this, "DELETE", ctx);
     }
 
-    duk_ret_t Router::bindRedirect(duk_context *ctx) {
+    duk_ret_t Router::bindRedirect(duk_context *ctx) const {
         const duk_idx_t n = duk_get_top(ctx);
         if (n < 2) {
             duk_error(ctx, DUK_ERR_TYPE_ERROR,

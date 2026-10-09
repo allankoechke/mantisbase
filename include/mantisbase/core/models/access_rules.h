@@ -12,7 +12,7 @@
 #include <mantisbase/core/types.h>
 
 namespace mb {
-    class MantisRequest;
+    class MbRequest;
 
     /** @return `true` when @p auth represents an unauthenticated guest. */
     MANTISBASE_API [[nodiscard]] bool isGuestAuth(const nlohmann::json &auth);
@@ -33,7 +33,7 @@ namespace mb {
     struct MANTISBASE_API AccessEvalContext {
         const nlohmann::json &auth;          ///< Resolved auth block from middleware
         const nlohmann::json &verification;  ///< JWT/API-key verification metadata
-        MantisRequest *req = nullptr;        ///< Optional HTTP request (custom rules)
+        MbRequest *req = nullptr;        ///< Optional HTTP request (custom rules)
     };
 
     /**
@@ -79,7 +79,7 @@ namespace mb {
     MANTISBASE_API [[nodiscard]] AccessEvalResult evaluateAccessRule(const AccessRule &rule, const AccessEvalContext &ctx);
 
     /** Build expression variables from an HTTP request and auth block (custom rules). */
-    MANTISBASE_API [[nodiscard]] nlohmann::json buildAccessExprVars(const MantisRequest &req, const nlohmann::json &auth);
+    MANTISBASE_API [[nodiscard]] nlohmann::json buildAccessExprVars(const MbRequest &req, const nlohmann::json &auth);
 
     /** Build expression variables for non-HTTP contexts (SSE/WS, tests). */
     MANTISBASE_API [[nodiscard]] nlohmann::json buildAccessExprVars(const nlohmann::json &auth, const std::string &remote_addr,

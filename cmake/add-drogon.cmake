@@ -41,7 +41,20 @@ set(TRANTOR_USE_TLS "none" CACHE STRING "" FORCE)
 # Use std::filesystem (C++20 is set project-wide)
 set(HAS_STD_FILESYSTEM_PATH ON CACHE BOOL "" FORCE)
 
+# Add drogon sub dir
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/drogon)
+
+# Fix for macOS BYTE_ORDER detection on sha1.cc compilation
+if(APPLE)
+    if(TARGET trantor)
+        target_compile_definitions(trantor PRIVATE
+                BYTE_ORDER=1234
+                LITTLE_ENDIAN=1234
+                BIG_ENDIAN=4321
+        )
+    endif()
+endif()
+
 
 # Drogon's install(EXPORT "DrogonTargets") requires all linked targets to be
 # in an export set. Add jsoncpp_static so cmake generate doesn't fail.

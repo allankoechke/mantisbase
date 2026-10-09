@@ -11,13 +11,15 @@ Static archives are not shipped in this package.
 ```
 README.md        this file
 VERSION          release tag
+mantisbase.d.ts  TypeScript definitions for server-side JavaScript
+                 (`main.mb.js`): copy next to your scripts for editor
+                 autocompletion — see "JavaScript type hinting" below
 include/         header tree for this OS (mantisbase headers + bundled
                  third-party headers: drogon, trantor, nlohmann/json,
                  jsoncpp, soci, spdlog, fmt, dukglue, duktape, wolfssl, ...)
 libs/
   x86/           prebuilt shared library for x86-64 (@MB_LIB_FILE@)
   arm/           prebuilt shared library for aarch64 (@MB_LIB_FILE@)
-                 (Windows ships x86 only)
 cmake/
   MantisBaseConfig.cmake         find_package(MantisBase) entry point
   MantisBaseConfigVersion.cmake  version matching
@@ -52,6 +54,16 @@ int main(int argc, char* argv[])
 ## Manual integration (without CMake)
 
 @MB_MANUAL@
+
+## JavaScript type hinting
+
+`mantisbase.d.ts` covers the whole server-script API (`app.router()`, `app.db()`,
+middlewares, `utils`, request/response objects, ...). Copy it next to your
+scripts for autocompletion in VS Code, Cursor, and other editors:
+
+```bash
+cp mantisbase.d.ts /path/to/scripts/
+```
 
 ## Help
 

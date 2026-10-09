@@ -13,6 +13,7 @@ namespace mb {
         dukglue_register_method_varargs(ctx, &Router::bindGet, "get");
         dukglue_register_method_varargs(ctx, &Router::bindPost, "post");
         dukglue_register_method_varargs(ctx, &Router::bindPatch, "patch");
+        dukglue_register_method_varargs(ctx, &Router::bindPut, "put");
         dukglue_register_method_varargs(ctx, &Router::bindDelete, "delete");
         dukglue_register_method_varargs(ctx, &Router::bindRedirect, "redirect");
     }

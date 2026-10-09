@@ -18,8 +18,8 @@ typedef struct duk_hthread duk_context;
 
 namespace mb {
     class MantisBase;
-    class MantisRequest;
-    class MantisResponse;
+    class MbRequest;
+    class MbResponse;
 
     /**
      * @brief Owns the Duktape heap and serializes all JS execution.
@@ -45,6 +45,7 @@ namespace mb {
         void loadScript(const std::string &relativePath);
 
         void fireOnServerStart();
+        void fireOnServerShutdown();
         void fireOnRecordCreated(const std::string &entity, const std::string &recordId);
         void fireOnRecordUpdated(const std::string &entity, const std::string &recordId);
 
@@ -61,8 +62,8 @@ namespace mb {
             return fn();
         }
 
-        bool pcallBool(const DukValue &fn, MantisRequest &req, MantisResponse &res);
-        void pcallVoid(const DukValue &fn, MantisRequest &req, MantisResponse &res);
+        bool pcallBool(const DukValue &fn, MbRequest &req, MbResponse &res);
+        void pcallVoid(const DukValue &fn, MbRequest &req, MbResponse &res);
 
     private:
         void registerBindings() const;

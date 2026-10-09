@@ -22,16 +22,16 @@ namespace mb {
             };
         }
 
-        HandlerResponse sendAccessDenied(const MantisResponse &res) {
+        MbHandlerResponse sendAccessDenied(const MbResponse &res) {
             res.sendJSON(403, {
                              {"status", 403},
                              {"data", json::object()},
                              {"error", "Access denied!"}
                          });
-            return HandlerResponse::Handled;
+            return MbHandlerResponse::Handled;
         }
 
-        std::optional<json> requireAuthenticatedUser(MantisRequest &req, const MantisResponse &res) {
+        std::optional<json> requireAuthenticatedUser(MbRequest &req, const MbResponse &res) {
             const auto &verification = req.getOr<json>("verification", json::object());
 
             if (verification.empty()) {
@@ -70,8 +70,8 @@ namespace mb {
             return auth;
         }
 
-        HandlerResponse checkEntityAccess(MantisRequest &req, const MantisResponse &res, const std::string &entity_name,
-                                          const std::string &trace_msg) {
+        MbHandlerResponse checkEntityAccess(MbRequest &req, const MbResponse &res, const std::string &entity_name,
+                                            const std::string &trace_msg) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
                 const auto &auth = req.getOr<json>("auth", json::object());
@@ -86,28 +86,28 @@ namespace mb {
                                      {"data", json::object()},
                                      {"error", "Unsupported method `" + method + "`"}
                                  });
-                    return HandlerResponse::Handled;
+                    return MbHandlerResponse::Handled;
                 }
 
                 const AccessRule rule = method == "GET"
-                                      ? (req.hasPathParam("id")
-                                             ? entity.getRule()
-                                             : entity.listRule())
-                                      : method == "POST"
-                                            ? entity.addRule()
-                                            : method == "PATCH"
-                                                  ? entity.updateRule()
-                                                  : entity.deleteRule();
+                                            ? (req.hasPathParam("id")
+                                                   ? entity.getRule()
+                                                   : entity.listRule())
+                                            : method == "POST"
+                                                  ? entity.addRule()
+                                                  : method == "PATCH"
+                                                        ? entity.updateRule()
+                                                        : entity.deleteRule();
 
                 if (req.isAdminAuth()) {
-                    return HandlerResponse::Unhandled;
+                    return MbHandlerResponse::Unhandled;
                 }
 
                 const auto &verification = req.getOr<json>("verification", json::object());
                 const AccessEvalContext ctx{.auth = auth, .verification = verification, .req = &req};
                 const auto result = evaluateAccessRule(rule, ctx);
                 if (result == AccessEvalResult::Allow) {
-                    return HandlerResponse::Unhandled;
+                    return MbHandlerResponse::Unhandled;
                 }
 
                 const auto [status, error] = accessEvalHttpError(result, rule);
@@ -126,21 +126,22 @@ namespace mb {
                                      {"error", error}
                                  });
                 }
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             } catch (std::exception &e) {
-                req.mbApp().logger().critical("Access", "Access Check Error", fmt::format("Access check error: {}", e.what()));
+                req.mbApp().logger().critical("Access", "Access Check Error",
+                                              fmt::format("Access check error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
                                  {"error", "An internal error occurred."}
                              });
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
         }
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> getAuthToken() {
-        return [](MantisRequest &req, MantisResponse &_) {
+    MbMiddlewareFn getAuthToken() {
+        return [](MbRequest &req, MbResponse &_) {
             try {
                 json auth;
                 auth["type"] = "guest";
@@ -191,7 +192,7 @@ namespace mb {
                             verification["claims"] = {{"id", auth["id"]}, {"entity", auth["entity"]}};
                             verification["error"] = "";
                             req.set("verification", verification);
-                            return HandlerResponse::Unhandled;
+                            return MbHandlerResponse::Unhandled;
                         }
                     }
 
@@ -201,7 +202,7 @@ namespace mb {
 
                 req.set("auth", auth);
                 req.set("verification", json::object());
-                return HandlerResponse::Unhandled;
+                return MbHandlerResponse::Unhandled;
             } catch (const std::exception &e) {
                 std::cout << "Failed to get access token: " << e.what() << std::endl;
                 throw MantisException(500, "An internal error occurred.");
@@ -209,8 +210,8 @@ namespace mb {
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hydrateContextData() {
-        return [](MantisRequest &req, MantisResponse &) {
+    MbMiddlewareFn hydrateContextData() {
+        return [](MbRequest &req, MbResponse &) {
             // Get the auth var from the context, resort to empty object if it's not set.
             auto auth = req.getOr<json>("auth", json::object());
 
@@ -225,7 +226,7 @@ namespace mb {
                 // Update context data and exit from middleware if not verified
                 if (!resp.at("verified").get<bool>()) {
                     req.set("auth", auth); // Update the `auth` data
-                    return HandlerResponse::Unhandled;
+                    return MbHandlerResponse::Unhandled;
                 }
 
                 // If token is valid, try getting user record from db and populate context record
@@ -244,7 +245,7 @@ namespace mb {
 
                 try {
                     const auto user_entity = req.mbApp().entity(user_table);
-                    if (auto user = user_entity.read(user_id); user.has_value()) {
+                    if (const auto user = user_entity.read(user_id); user.has_value()) {
                         auth["user"] = user.value();
                     }
                 } catch (...) {
@@ -252,16 +253,16 @@ namespace mb {
             }
 
             req.set("auth", auth); // Update the `auth` data
-            return HandlerResponse::Unhandled;
+            return MbHandlerResponse::Unhandled;
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveSchema() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    MbMiddlewareFn resolveSchema() {
+        return [](const MbRequest &req, const MbResponse &res) {
             const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
             if (schema_id_or_name.empty()) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
             try {
@@ -273,15 +274,15 @@ namespace mb {
 
                 if (!schema_id_or_name.starts_with("mbt_") &&
                     req.mbApp().hasEntity(schema_id_or_name)) {
-                    return HandlerResponse::Unhandled;
+                    return MbHandlerResponse::Unhandled;
                 }
 
                 EntitySchema::getTable(req.mbApp(), schema_id);
-                return HandlerResponse::Unhandled;
+                return MbHandlerResponse::Unhandled;
             } catch (const MantisException &e) {
                 if (e.code() == 404 || e.code() == 400) {
                     res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
-                    return HandlerResponse::Handled;
+                    return MbHandlerResponse::Handled;
                 }
 
                 res.sendJSON(e.code(), {
@@ -289,59 +290,59 @@ namespace mb {
                                  {"data", json::object()},
                                  {"error", e.code() >= 500 ? "An internal error occurred." : e.what()}
                              });
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveAuthEntity() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    MbMiddlewareFn resolveAuthEntity() {
+        return [](const MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
             if (!req.mbApp().hasEntity(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
             const auto entity = req.mbApp().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi() || entity.type() != "auth") {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
-            return HandlerResponse::Unhandled;
+            return MbHandlerResponse::Unhandled;
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> resolveEntity() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    MbMiddlewareFn resolveEntity() {
+        return [](const MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
             if (!req.mbApp().hasEntity(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
             const auto entity = req.mbApp().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi()) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
-            return HandlerResponse::Unhandled;
+            return MbHandlerResponse::Unhandled;
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rejectViewMutations() {
-        return [](MantisRequest &req, MantisResponse &res) {
+    MbMiddlewareFn rejectViewMutations() {
+        return [](const MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             const auto entity = req.mbApp().entity(entity_name);
             if (entity.type() == "view") {
@@ -354,58 +355,58 @@ namespace mb {
                                                  entity_name)
                                  }
                              });
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
-            return HandlerResponse::Unhandled;
+            return MbHandlerResponse::Unhandled;
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasEntityAccess() {
+    MbMiddlewareFn hasEntityAccess() {
         std::string msg = MB_FUNC();
-        return [msg](MantisRequest &req, MantisResponse &res) {
+        return [msg](MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.getPathParamValue("entity_name"));
             return checkEntityAccess(req, res, entity_name, msg);
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> hasAccess(const std::string &entity_name) {
+    MbMiddlewareFn hasAccess(const std::string &entity_name) {
         std::string msg = MB_FUNC();
-        return [entity_name, msg](MantisRequest &req, MantisResponse &res) {
+        return [entity_name, msg](MbRequest &req, const MbResponse &res) {
             return checkEntityAccess(req, res, entity_name, msg);
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireExprEval(const std::string &expr) {
-        return [expr](MantisRequest &req, MantisResponse &res) {
+    MbMiddlewareFn requireExprEval(const std::string &expr) {
+        return [expr](MbRequest &req, const MbResponse &res) {
             const auto &auth = req.getOr<json>("auth", json::object());
             const auto vars = buildAccessExprVars(req, auth);
 
             if (Expr::eval(expr, vars)) {
-                return HandlerResponse::Unhandled;
+                return MbHandlerResponse::Unhandled;
             }
 
             return sendAccessDenied(res);
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireGuestOnly() {
-        return [](MantisRequest &req, MantisResponse &res) {
+    MbMiddlewareFn requireGuestOnly() {
+        return [](MbRequest &req, const MbResponse &res) {
             const auto &auth = req.getOr<json>("auth", json::object());
             if (req.isGuestAuth())
-                return HandlerResponse::Unhandled;
+                return MbHandlerResponse::Unhandled;
 
             res.sendJSON(403, {
                              {"status", 403},
                              {"data", json::object()},
                              {"data", "Only guest users allowed to access this resource."}
                          });
-            return HandlerResponse::Handled;
+            return MbHandlerResponse::Handled;
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminAuth() {
-        return [](MantisRequest &req, const MantisResponse &res) {
+    MbMiddlewareFn requireAdminAuth() {
+        return [](MbRequest &req, const MbResponse &res) {
             try {
                 // Require admin authentication
                 const auto &verification = req.getOr<json>("verification", json::object());
@@ -417,7 +418,7 @@ namespace mb {
                                      {"status", 401},
                                      {"error", "Auth required to access this resource!"}
                                  });
-                    return HandlerResponse::Handled;
+                    return MbHandlerResponse::Handled;
                 }
 
                 const bool ok = verification.contains("verified") &&
@@ -434,13 +435,13 @@ namespace mb {
                                          {"status", 401},
                                          {"error", "Auth user not found!"}
                                      });
-                        return HandlerResponse::Handled;
+                        return MbHandlerResponse::Handled;
                     }
 
                     // logEntry::trace("Auth: {}", auth.dump());
                     // Ensure the auth user was for admin table
                     if (auth["entity"].get<std::string>() == "mb_admins") {
-                        return HandlerResponse::Unhandled;
+                        return MbHandlerResponse::Unhandled;
                     }
 
                     // Send auth error
@@ -449,7 +450,7 @@ namespace mb {
                                      {"status", 403},
                                      {"error", "Admin auth required to access this resource."}
                                  });
-                    return HandlerResponse::Handled;
+                    return MbHandlerResponse::Handled;
                 }
 
                 // Send auth error
@@ -459,7 +460,7 @@ namespace mb {
                                  {"status", 401},
                                  {"error", err_str}
                              });
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             } catch (std::exception &e) {
                 req.mbApp().logger().critical("Auth", "Admin Authentication Error",
                                               fmt::format("Error authenticating as admin: {}", e.what()));
@@ -469,14 +470,13 @@ namespace mb {
                                  {"status", 500},
                                  {"error", "An internal error occurred."}
                              });
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> envGateMiddleware(
-        const std::string &env_var, const bool block_when_truthy) {
-        return [env_var, block_when_truthy](MantisRequest &req, const MantisResponse &res) {
+    MbMiddlewareFn envGateMiddleware(const std::string &env_var, const bool block_when_truthy) {
+        return [env_var, block_when_truthy](MbRequest &req, const MbResponse &res) {
             if (strToBool(getEnvOrDefault(env_var, "")) == block_when_truthy) {
                 // Let the user know resource action is temporarily disabled
                 res.sendJSON(503, {
@@ -492,11 +492,10 @@ namespace mb {
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> settingsFeatureGate(
-        const std::string &setting_key) {
-        return [setting_key](const MantisRequest &req, const MantisResponse &res) {
+    MbMiddlewareFn settingsFeatureGate(const std::string &setting_key) {
+        return [setting_key](const MbRequest &req, const MbResponse &res) {
             if (!req.mbApp().settings().configs().value(setting_key, false)) {
-                return HandlerResponse::Unhandled;
+                return MbHandlerResponse::Unhandled;
             }
 
             res.sendJSON(503, {
@@ -504,16 +503,15 @@ namespace mb {
                              {"status", 503},
                              {"error", "This feature has been disabled."}
                          });
-            return HandlerResponse::Handled;
+            return MbHandlerResponse::Handled;
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> requireAdminOrEntityAuth(
-        const std::string &entity_name) {
-        return [entity_name](MantisRequest &req, MantisResponse &res) {
+    MbMiddlewareFn requireAdminOrEntityAuth(const std::string &entity_name) {
+        return [entity_name](MbRequest &req, const MbResponse &res) {
             const auto auth = requireAuthenticatedUser(req, res);
             if (!auth.has_value()) {
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
             if (!auth->contains("entity") || !(*auth)["entity"].is_string()) {
@@ -522,7 +520,7 @@ namespace mb {
 
             const auto user_entity = auth->at("entity").get<std::string>();
             if (user_entity == "mb_admins" || user_entity == entity_name) {
-                return HandlerResponse::Unhandled;
+                return MbHandlerResponse::Unhandled;
             }
 
             res.sendJSON(403, {
@@ -530,16 +528,15 @@ namespace mb {
                              {"data", json::object()},
                              {"error", std::format("Admin or `{}` auth required to access this resource.", entity_name)}
                          });
-            return HandlerResponse::Handled;
+            return MbHandlerResponse::Handled;
         };
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)>
-    requireEntityAuth(const std::string &entity_name) {
-        return [entity_name](MantisRequest &req, MantisResponse &res) {
+    MbMiddlewareFn requireEntityAuth(const std::string &entity_name) {
+        return [entity_name](MbRequest &req, const MbResponse &res) {
             const auto auth = requireAuthenticatedUser(req, res);
             if (!auth.has_value()) {
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
             if (!auth->contains("entity") || !(*auth)["entity"].is_string() ||
@@ -549,10 +546,10 @@ namespace mb {
                                  {"data", json::object()},
                                  {"error", std::format("Auth required from entity `{}`.", entity_name)}
                              });
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
 
-            return HandlerResponse::Unhandled;
+            return MbHandlerResponse::Unhandled;
         };
     }
 
@@ -582,19 +579,19 @@ namespace mb {
         constexpr auto STALE_ENTRY_TTL = std::chrono::hours(1);
     }
 
-    std::function<HandlerResponse(MantisRequest &, MantisResponse &)> rateLimit(
+    MbMiddlewareFn rateLimit(
         int max_requests,
         int window_seconds,
         bool use_user_id) {
         std::string msg = MB_FUNC();
 
         return [max_requests, window_seconds, use_user_id](
-            MantisRequest &req, MantisResponse &res) {
+            MbRequest &req, const MbResponse &res) {
             // MB_DISABLE_RATE_LIMIT can be set in production to help with test harness
             // without which, tests fail
             if (const char *test_disable = std::getenv("MB_DISABLE_RATE_LIMIT");
                 test_disable && std::string(test_disable) == "1") {
-                return HandlerResponse::Unhandled;
+                return MbHandlerResponse::Unhandled;
             }
 
             try {
@@ -620,7 +617,7 @@ namespace mb {
                     // (could also deny, but allowing is safer for legitimate users)
                     req.mbApp().logger().warn("Rate Limit Client Unknown",
                                               "Rate limit: Unable to identify client, allowing request");
-                    return HandlerResponse::Unhandled;
+                    return MbHandlerResponse::Unhandled;
                 }
 
                 const auto now = std::chrono::steady_clock::now();
@@ -689,7 +686,7 @@ namespace mb {
                                                   "Rate limit exceeded for identifier: {} ({} requests in {}s window)",
                                                   identifier, entry.requests.size(), window_seconds));
 
-                    return HandlerResponse::Handled;
+                    return MbHandlerResponse::Handled;
                 }
 
                 // Add current request timestamp
@@ -715,7 +712,7 @@ namespace mb {
                     res.setHeader("X-RateLimit-Reset", std::to_string(reset_time));
                 }
 
-                return HandlerResponse::Unhandled;
+                return MbHandlerResponse::Unhandled;
             } catch (const std::exception &e) {
                 req.mbApp().logger().critical("Rate Limit Middleware Error",
                                               fmt::format("Rate limit middleware error: {}", e.what()));
@@ -725,7 +722,7 @@ namespace mb {
                                  {"data", json::object()},
                                  {"error", "Rate limiting unavailable. Please try again later."}
                              });
-                return HandlerResponse::Handled;
+                return MbHandlerResponse::Handled;
             }
         };
     }

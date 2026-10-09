@@ -269,8 +269,8 @@ namespace mb {
     }
 
     void Router::registerAuthRoutes() {
-        const Middlewares authEntityMiddleware = {resolveAuthEntity()};
-        const Middlewares authLoginMiddleware = {resolveAuthEntity(), rateLimit(5, 60, false)};
+        const MbMiddlewares authEntityMiddleware = {resolveAuthEntity()};
+        const MbMiddlewares authLoginMiddleware = {resolveAuthEntity(), rateLimit(5, 60, false)};
 
         // Verify that the logged in user is valid or still
         Get("/api/v1/auth/verify", handleAuthVerify(), {rateLimit(5, 60, false)});
@@ -280,17 +280,17 @@ namespace mb {
     }
 
     void Router::registerSchemaRoutes() {
-        const Middlewares adminAuth = {requireAdminAuth()};
-        const Middlewares schemaMutateMiddleware = {
+        const MbMiddlewares adminAuth = {requireAdminAuth()};
+        const MbMiddlewares schemaMutateMiddleware = {
             requireAdminAuth(),
             settingsFeatureGate("disableSchemaMutations")
         };
-        const Middlewares schemaItemMutateMiddleware = {
+        const MbMiddlewares schemaItemMutateMiddleware = {
             requireAdminAuth(),
             resolveSchema(),
             settingsFeatureGate("disableSchemaMutations")
         };
-        const Middlewares schemaItemReadMiddleware = {requireAdminAuth(), resolveSchema()};
+        const MbMiddlewares schemaItemReadMiddleware = {requireAdminAuth(), resolveSchema()};
 
         Get("/api/v1/schemas", schemaGetManyHandler(), adminAuth);
         Post("/api/v1/schemas", schemaPostHandler(), schemaMutateMiddleware);
@@ -300,8 +300,8 @@ namespace mb {
     }
 
     void Router::registerEntityRoutes() {
-        const Middlewares readMiddleware = {resolveEntity(), hasEntityAccess()};
-        const Middlewares mutateMiddleware = {resolveEntity(), rejectViewMutations(), hasEntityAccess()};
+        const MbMiddlewares readMiddleware = {resolveEntity(), hasEntityAccess()};
+        const MbMiddlewares mutateMiddleware = {resolveEntity(), rejectViewMutations(), hasEntityAccess()};
 
         Get("/api/v1/entities/:entity_name", entityGetManyHandler(), readMiddleware);
         Get("/api/v1/entities/:entity_name/:id", entityGetOneHandler(), readMiddleware);
@@ -319,8 +319,8 @@ namespace mb {
             R"(/mb(/.*)?)",
             [adminHandler, this](const drogon::HttpRequestPtr &req,
                                  std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-                const MantisRequest ma_req{mbApp(), req};
-                MantisResponse ma_res{mbApp()};
+                const MbRequest ma_req{mbApp(), req};
+                MbResponse ma_res{mbApp()};
                 adminHandler(ma_req, ma_res);
                 callback(ma_res.drogonResponse());
             },
@@ -361,8 +361,8 @@ namespace mb {
         }
     }
 
-    std::function<void(const MantisRequest &, MantisResponse &)> Router::handleAdminDashboardRoute() {
-        return [](const MantisRequest &req, MantisResponse &res) {
+    std::function<void(const MbRequest &, MbResponse &)> Router::handleAdminDashboardRoute() {
+        return [](const MbRequest &req, MbResponse &res) {
             try {
                 const auto fs = cmrc::mantis::get_filesystem();
 
@@ -410,8 +410,8 @@ namespace mb {
         };
     }
 
-    std::function<void(MantisRequest &, MantisResponse &)> Router::fileServingHandler() {
-        return [](MantisRequest &req, MantisResponse &res) {
+    std::function<void(MbRequest &, MbResponse &)> Router::fileServingHandler() {
+        return [](MbRequest &req, MbResponse &res) {
             const auto table_name = req.getPathParamValue("entity");
             const auto file_name = req.getPathParamValue("file");
 
@@ -448,7 +448,7 @@ namespace mb {
             const auto rule = entity.getRule();
 
             if (!req.isAdminAuth()) {
-                AccessEvalContext ctx{auth, verification, const_cast<MantisRequest *>(&req)};
+                AccessEvalContext ctx{auth, verification, const_cast<MbRequest *>(&req)};
                 const auto result = evaluateAccessRule(rule, ctx);
                 if (result != AccessEvalResult::Allow) {
                     const auto [status, error] = accessEvalHttpError(result, rule);
@@ -508,8 +508,8 @@ namespace mb {
         };
     }
 
-    std::function<void(const MantisRequest &, MantisResponse &)> Router::healthCheckHandler() {
-        return [](const MantisRequest &, const MantisResponse &res) {
+    std::function<void(const MbRequest &, MbResponse &)> Router::healthCheckHandler() {
+        return [](const MbRequest &, const MbResponse &res) {
             res.setHeader("Cache-Control", "no-cache");
             res.send(200, R"({"status": "OK"})", "application/json");
         };
@@ -525,8 +525,8 @@ namespace mb {
         return "application/octet-stream";
     }
 
-    std::function<void(const MantisRequest &, MantisResponse &)> Router::handleLogs() {
-        return [&](const MantisRequest &req, MantisResponse &res) {
+    std::function<void(const MbRequest &, MbResponse &)> Router::handleLogs() {
+        return [&](const MbRequest &req, MbResponse &res) {
             try {
                 if (!Logger::isDbInitialized) {
                     json response;

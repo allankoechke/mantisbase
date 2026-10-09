@@ -26,7 +26,7 @@
 #include <drogon/HttpResponse.h>
 
 namespace mb {
-    class MantisBase; // forward declaration; MantisRequest holds a reference to it
+    class MantisBase; // forward declaration; MbRequest holds a reference to it
 
 #ifdef MB_SCRIPTING_ENABLED
     /** Duktape bindings for the JS `console` object in server scripts. */
@@ -41,6 +41,7 @@ namespace mb {
     class MANTISBASE_API ScriptingHooks {
     public:
         static void fireOnServerStart(duk_context *ctx);
+        static void fireOnServerShutdown(duk_context *ctx);
         static void fireOnRecordCreated(duk_context *ctx, const std::string &entity, const std::string &recordId);
         static void fireOnRecordUpdated(duk_context *ctx, const std::string &entity, const std::string &recordId);
     };
@@ -53,7 +54,7 @@ namespace mb {
      * underlying Drogon request via `set()` / `getOr()`, not a global context.
      * Use `mbApp()` (from @ref IMantisBase) to reach application services.
      */
-    class MANTISBASE_API MantisRequest: public IMantisBase {
+    class MANTISBASE_API MbRequest: public IMantisBase {
         drogon::HttpRequestPtr m_req;
         std::unordered_map<std::string, std::string> m_pathParams;
 
@@ -63,7 +64,7 @@ namespace mb {
         mutable std::optional<std::pair<nlohmann::json, std::string>> m_bodyJsonCache;
 
     public:
-        explicit MantisRequest(const MantisBase& app, drogon::HttpRequestPtr _req);
+        explicit MbRequest(const MantisBase& app, drogon::HttpRequestPtr _req);
 
         /** Set a single route path parameter (e.g. `:id`). */
         void setPathParam(const std::string &key, const std::string &value);
@@ -128,6 +129,14 @@ namespace mb {
         /** @return `true` when the request auth block is a regular user session. */
         [[nodiscard]] bool isUserAuth();
 
+        /**
+         * @brief Parsed JSON body, or an empty object when absent or malformed.
+         *
+         * Convenience wrapper over getBodyAsJson() for callers -- notably the
+         * language bindings -- that want a value rather than a (value, error) pair.
+         */
+        json jsonBody() const;
+
         /** Store a per-request attribute on the underlying Drogon request. */
         template<typename T>
         void set(const std::string &key, T value) {
@@ -158,13 +167,13 @@ namespace mb {
      * Constructed by the router for each request; use `sendJSON()`, `send()`,
      * or header helpers to build the outgoing response.
      */
-    class MANTISBASE_API MantisResponse: public IMantisBase {
+    class MANTISBASE_API MbResponse: public IMantisBase {
         drogon::HttpResponsePtr m_res;
 
     public:
-        explicit MantisResponse(const MantisBase& app);
+        explicit MbResponse(const MantisBase& app);
 
-        ~MantisResponse() = default;
+        ~MbResponse() = default;
 
         /** @return Underlying Drogon response pointer. */
         [[nodiscard]] const drogon::HttpResponsePtr& drogonResponse() const;
@@ -230,7 +239,7 @@ namespace mb {
     };
 
     /** Single field from a parsed `multipart/form-data` body. */
-    struct MANTISBASE_API FormDataItem {
+    struct MANTISBASE_API MbFormDataItem {
         std::string name;
         std::string content;
         std::string filename;
@@ -242,21 +251,21 @@ namespace mb {
      *
      * Parses once, then exposes form fields, file metadata, and typed entity binding.
      */
-    class MANTISBASE_API MantisContentReader {
-        const MantisRequest &m_req;
+    class MANTISBASE_API MbContentReader {
+        const MbRequest &m_req;
 
-        std::vector<FormDataItem> m_formData;
+        std::vector<MbFormDataItem> m_formData;
         json m_json{}, m_filesMetadata{};
         bool m_parsed = false;
 
     public:
-        explicit MantisContentReader(const MantisRequest &req);
+        explicit MbContentReader(const MbRequest &req);
 
         /** @return `true` when the request body is multipart form data. */
         [[nodiscard]] bool isMultipartFormData() const;
 
         /** Parsed form fields (text and file parts). */
-        [[nodiscard]] const std::vector<FormDataItem> &formData() const;
+        [[nodiscard]] const std::vector<MbFormDataItem> &formData() const;
 
         /** File field metadata keyed by form field name. */
         [[nodiscard]] const json &filesMetadata() const;
@@ -274,7 +283,7 @@ namespace mb {
         void undoWrittenFiles(const std::string& entity_name);
 
         /** Stable hash of multipart metadata for deduplication checks. */
-        static std::string hashMultipartMetadata(const FormDataItem& data);
+        static std::string hashMultipartMetadata(const MbFormDataItem& data);
 
     private:
         void read();

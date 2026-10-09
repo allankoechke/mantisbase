@@ -52,20 +52,20 @@ namespace mb {
         return names;
     }
 
-    void Router::executeMiddlewareChain(MantisRequest &req, MantisResponse &res, const RouteHandler *route) const {
+    void Router::executeMiddlewareChain(MbRequest &req, MbResponse &res, const RouteHandler *route) const {
         // Execute global pre-routing middlewares
         for (const auto &g_mw: m_preRoutingMiddlewares) {
-            if (g_mw(req, res) == HandlerResponse::Handled) return;
+            if (g_mw(req, res) == MbHandlerResponse::Handled) return;
         }
 
         // Execute route-specific middlewares
         if (route) {
             for (const auto &mw: route->middlewares) {
-                if (mw(req, res) == HandlerResponse::Handled) return;
+                if (mw(req, res) == MbHandlerResponse::Handled) return;
             }
 
             // Execute the handler
-            if (const auto func = std::get_if<HandlerFn>(&route->handler)) {
+            if (const auto func = std::get_if<MbHandlerFn>(&route->handler)) {
                 (*func)(req, res);
             }
         }
@@ -76,41 +76,55 @@ namespace mb {
         }
     }
 
-    void Router::Get(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
+    void Router::Get(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("GET {}", path));
         m_routeRegistry.add("GET", path, handler, middlewares);
         registerDrogonHandler("GET", path);
     }
 
-    void Router::Post(const std::string &path, const HandlerWithContentReaderFn &handler,
-                      const Middlewares &middlewares) {
+    void Router::Post(const std::string &path, const MbHandlerWithContentReaderFn &handler,
+                      const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("POST {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         registerDrogonHandlerWithReader("POST", path);
     }
 
-    void Router::Post(const std::string &path, const HandlerFn &handler,
-                      const Middlewares &middlewares) {
+    void Router::Post(const std::string &path, const MbHandlerFn &handler,
+                      const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("POST {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         registerDrogonHandler("POST", path);
     }
 
-    void Router::Patch(const std::string &path, const HandlerWithContentReaderFn &handler,
-                       const Middlewares &middlewares) {
+    void Router::Patch(const std::string &path, const MbHandlerWithContentReaderFn &handler,
+                       const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("PATCH {}", path));
         m_routeRegistry.add("PATCH", path, handler, middlewares);
         registerDrogonHandlerWithReader("PATCH", path);
     }
 
-    void Router::Patch(const std::string &path, const HandlerFn &handler,
-                       const Middlewares &middlewares) {
+    void Router::Patch(const std::string &path, const MbHandlerFn &handler,
+                       const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("PATCH {}", path));
         m_routeRegistry.add("PATCH", path, handler, middlewares);
         registerDrogonHandler("PATCH", path);
     }
 
-    void Router::Delete(const std::string &path, const HandlerFn &handler, const Middlewares &middlewares) {
+    void Router::Put(const std::string &path, const MbHandlerWithContentReaderFn &handler,
+                       const MbMiddlewares &middlewares) {
+        logger().debug("Route Created", fmt::format("PUT {}", path));
+        m_routeRegistry.add("PUT", path, handler, middlewares);
+        registerDrogonHandlerWithReader("PUT", path);
+    }
+
+    void Router::Put(const std::string &path, const MbHandlerFn &handler,
+                       const MbMiddlewares &middlewares) {
+        logger().debug("Route Created", fmt::format("PUT {}", path));
+        m_routeRegistry.add("PUT", path, handler, middlewares);
+        registerDrogonHandler("PUT", path);
+    }
+
+    void Router::Delete(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("DELETE {}", path));
         m_routeRegistry.add("DELETE", path, handler, middlewares);
         registerDrogonHandler("DELETE", path);
@@ -155,8 +169,8 @@ namespace mb {
                 ](
             const drogon::HttpRequestPtr &req,
             std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-            MantisRequest ma_req{mbApp(), req};
-            MantisResponse ma_res{mbApp()};
+            MbRequest ma_req{mbApp(), req};
+            MbResponse ma_res{mbApp()};
 
             const auto param_names = req->getRoutingParameters();
 
@@ -200,9 +214,9 @@ namespace mb {
         auto handler = [this, method, path, param_names](
             const drogon::HttpRequestPtr &req,
             std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-            MantisRequest ma_req{mbApp(), req};
-            MantisResponse ma_res{mbApp()};
-            MantisContentReader ma_cr{ma_req};
+            MbRequest ma_req{mbApp(), req};
+            MbResponse ma_res{mbApp()};
+            MbContentReader ma_cr{ma_req};
 
             // Extract path params
             if (!param_names.empty()) {
@@ -229,7 +243,7 @@ namespace mb {
 
             // Execute global middlewares
             for (const auto &g_mw: m_preRoutingMiddlewares) {
-                if (g_mw(ma_req, ma_res) == HandlerResponse::Handled) {
+                if (g_mw(ma_req, ma_res) == MbHandlerResponse::Handled) {
                     callback(ma_res.drogonResponse());
                     return;
                 }
@@ -237,14 +251,14 @@ namespace mb {
 
             // Execute route-specific middlewares
             for (const auto &mw: route->middlewares) {
-                if (mw(ma_req, ma_res) == HandlerResponse::Handled) {
+                if (mw(ma_req, ma_res) == MbHandlerResponse::Handled) {
                     callback(ma_res.drogonResponse());
                     return;
                 }
             }
 
             // Execute handler with content reader
-            if (const auto func = std::get_if<HandlerWithContentReaderFn>(&route->handler)) {
+            if (const auto func = std::get_if<MbHandlerWithContentReaderFn>(&route->handler)) {
                 (*func)(ma_req, ma_res, ma_cr);
             }
 

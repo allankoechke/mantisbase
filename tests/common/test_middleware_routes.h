@@ -17,7 +17,7 @@ inline void registerMiddlewareTestRoutes(mb::Router &router) {
 
     static constexpr const char *kEntity = "test_users";
 
-    const mb::HandlerFn okHandler = [](const mb::MantisRequest &, const mb::MantisResponse &res) {
+    const mb::MbHandlerFn okHandler = [](const mb::MbRequest &, const mb::MbResponse &res) {
         res.sendJSON(200, {
                              {"status", 200},
                              {"data", {{"ok", true}}},

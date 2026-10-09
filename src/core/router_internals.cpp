@@ -175,8 +175,8 @@ namespace mb {
         return notFoundResp;
     }
 
-    std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthVerify() {
-        return [](MantisRequest &req, const MantisResponse &res) {
+    std::function<void(MbRequest &, MbResponse &)> Router::handleAuthVerify() {
+        return [](MbRequest &req, const MbResponse &res) {
             try {
                 // Require admin authentication
                 const auto &verification = req.getOr<json>("verification", json::object());
@@ -225,8 +225,8 @@ namespace mb {
         };
     }
 
-    std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthLogin() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    std::function<void(MbRequest &, MbResponse &)> Router::handleAuthLogin() {
+        return [](const MbRequest &req, const MbResponse &res) {
             try {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
@@ -319,8 +319,8 @@ namespace mb {
         };
     }
 
-    std::function<void(MantisRequest &, MantisResponse &)> Router::handleAdminLogin() {
-        return [](const MantisRequest &req, const MantisResponse &res) {
+    std::function<void(MbRequest &, MbResponse &)> Router::handleAdminLogin() {
+        return [](const MbRequest &req, const MbResponse &res) {
             try {
                 const auto &[body, err] = req.getBodyAsJson();
                 if (!err.empty()) {
@@ -404,8 +404,8 @@ namespace mb {
         };
     }
 
-    std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthRefresh() const {
-        return [](MantisRequest &req, const MantisResponse &res) {
+    std::function<void(MbRequest &, MbResponse &)> Router::handleAuthRefresh() const {
+        return [](MbRequest &req, const MbResponse &res) {
             try {
                 auto auth = req.getOr<json>("auth", json::object());
                 auto verification = req.getOr<json>("verification", json::object());
@@ -466,8 +466,8 @@ namespace mb {
         };
     }
 
-    std::function<void(MantisRequest &, MantisResponse &)> Router::handleAuthLogout() {
-        return [](MantisRequest &req, const MantisResponse &res) {
+    std::function<void(MbRequest &, MbResponse &)> Router::handleAuthLogout() {
+        return [](MbRequest &req, const MbResponse &res) {
             try {
                 auto verification = req.getOr<json>("verification", json::object());
 
@@ -521,8 +521,8 @@ namespace mb {
         };
     }
 
-    std::function<void(MantisRequest &, MantisResponse &)> Router::handleSetupAdmin() {
-        return [](MantisRequest &req, const MantisResponse &res) {
+    std::function<void(MbRequest &, MbResponse &)> Router::handleSetupAdmin() {
+        return [](MbRequest &req, const MbResponse &res) {
             try {
                 auto auth = req.getOr<json>("auth", json::object());
                 auto verification = req.getOr<json>("verification", json::object());

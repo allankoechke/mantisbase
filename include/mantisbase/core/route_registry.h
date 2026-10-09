@@ -25,14 +25,14 @@ namespace mb
     /** Hash functor for @ref RouteKey (`method`, `path`) pairs. */
     struct RouteKeyHash
     {
-        size_t operator()(const RouteKey& k) const;
+        size_t operator()(const MbRouteKey& k) const;
     };
 
     /** Handler plus ordered middleware chain for a single route. */
     struct MANTISBASE_API RouteHandler
     {
-        std::vector<MiddlewareFn> middlewares;
-        std::variant<HandlerFn, HandlerWithContentReaderFn> handler;
+        std::vector<MbMiddlewareFn> middlewares;
+        std::variant<MbHandlerFn, MbHandlerWithContentReaderFn> handler;
     };
 
     /**
@@ -42,20 +42,20 @@ namespace mb
      */
     class MANTISBASE_API RouteRegistry
     {
-        std::unordered_map<RouteKey, RouteHandler, RouteKeyHash> routes;
+        std::unordered_map<MbRouteKey, RouteHandler, RouteKeyHash> routes;
 
     public:
         /** Register a standard handler for `method` + `path`. */
         void add(const std::string& method,
                  const std::string& path,
-                 const HandlerFn &handler,
-                 const Middlewares& middlewares);
+                 const MbHandlerFn &handler,
+                 const MbMiddlewares& middlewares);
 
         /** Register a handler that receives a @ref MantisContentReader. */
         void add(const std::string& method,
                  const std::string& path,
-                 const HandlerWithContentReaderFn &handler,
-                 const Middlewares& middlewares);
+                 const MbHandlerWithContentReaderFn &handler,
+                 const MbMiddlewares& middlewares);
 
         /** @return Route handler metadata, or `nullptr` if not registered. */
         const RouteHandler* find(const std::string& method, const std::string& path) const;

@@ -7,11 +7,9 @@
 #ifdef MB_SCRIPTING_ENABLED
 
 namespace {
-
-nlohmann::json parseBody(const TestHttp::Response &res) {
-    return nlohmann::json::parse(res.body);
-}
-
+    nlohmann::json parseBody(const TestHttp::Response &res) {
+        return nlohmann::json::parse(res.body);
+    }
 } // namespace
 
 class IntegrationScriptingTest : public MbServerFixture {
@@ -86,6 +84,16 @@ TEST_F(IntegrationScriptingTest, JsShorthandPatchRouteReturnsJson) {
     const auto body = parseBody(*res);
     EXPECT_TRUE(body.value("ok", false));
     EXPECT_EQ(body.value("method", ""), "patch");
+}
+
+TEST_F(IntegrationScriptingTest, JsShorthandPutRouteReturnsJson) {
+    const auto res = client->Put("/api/v1/test/scripting/shorthand-put", {}, "{}", "application/json");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200);
+
+    const auto body = parseBody(*res);
+    EXPECT_TRUE(body.value("ok", false));
+    EXPECT_EQ(body.value("method", ""), "put");
 }
 
 TEST_F(IntegrationScriptingTest, JsShorthandDeleteRouteReturnsJson) {

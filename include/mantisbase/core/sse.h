@@ -155,9 +155,9 @@ namespace mb {
         [[nodiscard]] bool isRunning() const;
 
     private:
-        static std::function<void(MantisRequest &, MantisResponse &)> handleSSESessionUpdate();
+        static std::function<void(MbRequest &, MbResponse &)> handleSSESessionUpdate();
 
-        static std::function<HandlerResponse(MantisRequest &, MantisResponse &)> validateSubTopics(bool is_updating = false);
+        static std::function<MbHandlerResponse(MbRequest &, MbResponse &)> validateSubTopics(bool is_updating = false);
 
         void cleanupIdleSessions();
     };

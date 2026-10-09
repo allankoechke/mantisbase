@@ -3,8 +3,8 @@ app.router().addRoute("GET", "/api/v1/test/scripting/ping", function (req, res) 
 });
 
 app.router().addRoute("GET", "/api/v1/test/scripting/settings-count", function (req, res) {
-    var row = app.db().query("SELECT COUNT(*) AS cnt FROM mb_store");
-    var count = row && row.cnt !== undefined ? row.cnt : 0;
+    const row = app.db().query("SELECT COUNT(*) AS cnt FROM mb_store");
+    const count = row && row.cnt !== undefined ? row.cnt : 0;
     res.json(200, { settings_count: count | 0 });
 });
 
@@ -28,6 +28,10 @@ app.router().post("/api/v1/test/scripting/shorthand-post", function (req, res) {
     res.json(200, { ok: true, method: "post" });
 });
 
+app.router().put("/api/v1/test/scripting/shorthand-put", function (req, res) {
+    res.json(200, { ok: true, method: "put" });
+});
+
 app.router().patch("/api/v1/test/scripting/shorthand-patch", function (req, res) {
     res.json(200, { ok: true, method: "patch" });
 });
@@ -40,4 +44,5 @@ app.router()["delete"]("/api/v1/test/scripting/shorthand-delete", function (req,
 app.router().redirect("/api/v1/test/scripting/old-path", "/api/v1/test/scripting/shorthand-get");
 app.router().redirect("/api/v1/test/scripting/old-permanent", "/api/v1/test/scripting/shorthand-get", 301);
 
+app.logs().info("Hello World!")
 console.log("MantisBase test scripting routes registered");
