@@ -15,6 +15,15 @@ endif()
 # Critical: Set SOCI_SHARED before adding subdirectory
 set ( SOCI_SHARED OFF CACHE BOOL "Build SOCI as static library" FORCE )
 
+# Clang + SOCI LTO breaks the link: SOCI compiles with -flto (thin-LTO
+# bitcode objects), but libmantisbase.so links without IPO flags, so the
+# link goes through GNU ld.bfd, which cannot parse LLVM bitcode members
+# ("error adding symbols: file format not recognized"). GCC is unaffected
+# (fat LTO objects). Disable SOCI LTO when building with Clang.
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set ( SOCI_LTO OFF CACHE BOOL "Disable SOCI LTO (bitcode breaks GNU ld links)" FORCE )
+endif()
+
 # Disable all backends except SQLite
 set ( SOCI_TESTS OFF CACHE BOOL "Disable SOCI tests" FORCE )
 set ( WITH_BOOST OFF CACHE BOOL "Disable Boost dependency" FORCE )
