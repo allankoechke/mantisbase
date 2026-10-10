@@ -109,7 +109,7 @@ namespace mb {
         [[nodiscard]] bool isRunning() const;
 
         /** Reload allowed CORS origins from settings and MB_CORS_ORIGINS. */
-        void reloadCorsOrigins();
+        void reloadCorsOrigins() const;
 
         /** Add CORS headers when the request Origin is in the allowlist. */
         void applyCorsHeaders(const drogon::HttpRequestPtr &req,
@@ -238,7 +238,9 @@ namespace mb {
 
         Snowflake<1534832906275L> m_sfId;
 
-        std::atomic<std::shared_ptr<const std::set<std::string>> > m_corsAllowedOrigins;
+        // Synchronized set
+        mutable std::shared_ptr<const std::set<std::string>> m_corsAllowedOrigins;
+        mutable std::shared_mutex m_corsOriginsMutex;
     };
 } // mb
 
