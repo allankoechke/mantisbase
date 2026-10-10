@@ -79,7 +79,7 @@ jobs:
         if: matrix.lib_platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libpq-dev uuid-dev
+          sudo apt-get install -y libpq-dev uuid-dev ninja-build
 
       - name: Install dependencies (macOS)
         if: matrix.lib_platform == 'macos'
@@ -87,13 +87,13 @@ jobs:
           # PostgreSQL backend is enabled on all UNIX (see cmake/add-soci.cmake);
           # brew libpq is keg-only, so expose it for find_package(PostgreSQL).
           # uuid/ is provided by the macOS SDK — no package needed.
-          brew install libpq
+          brew install libpq ninja
           echo "CMAKE_PREFIX_PATH=$(brew --prefix libpq)" >> "$GITHUB_ENV"
 
       - name: Install MinGW (Windows x86-64)
         if: matrix.lib_platform == 'windows' && matrix.arch == 'x86_64'
         run: |
-          choco install mingw --no-progress
+          choco install mingw ninja --no-progress
 
       - name: Install llvm-mingw (Windows ARM64)
         if: matrix.lib_platform == 'windows' && matrix.arch == 'aarch64'
@@ -462,7 +462,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libpq-dev uuid-dev
+          sudo apt-get install -y libpq-dev uuid-dev ninja-build
 
       - name: Configure CMake
         run: |
