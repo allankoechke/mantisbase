@@ -60,9 +60,10 @@ namespace mb {
         EntitySchema(const EntitySchema &);
         EntitySchema &operator=(const EntitySchema &);
 
-        // Move operators ...
+        // Move operators (move ctor can copy the app ref; move assignment
+        // keeps the bound app and moves the rest, mirroring copy assignment)
         EntitySchema(EntitySchema &&) noexcept = default;
-        EntitySchema &operator=(EntitySchema &&) noexcept = default;
+        EntitySchema &operator=(EntitySchema &&) noexcept;
 
         ~EntitySchema();
 

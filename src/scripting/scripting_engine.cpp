@@ -136,7 +136,7 @@ namespace mb {
         }
 
         try {
-            withLock([&] {
+            withLock([&]() {
                 dukglue_peval<void>(m_ctx, content.c_str());
             });
         } catch (const DukErrorException &e) {
@@ -150,7 +150,7 @@ namespace mb {
         if (!m_ctx) {
             return;
         }
-        withLock([&] {
+        withLock([&]() {
             ScriptingHooks::fireOnServerStart(m_ctx);
         });
     }
@@ -159,7 +159,7 @@ namespace mb {
         if (!m_ctx) {
             return;
         }
-        withLock([&] {
+        withLock([&]() {
             ScriptingHooks::fireOnServerShutdown(m_ctx);
         });
     }
@@ -168,7 +168,7 @@ namespace mb {
         if (!m_ctx) {
             return;
         }
-        withLock([&] {
+        withLock([&]() {
             ScriptingHooks::fireOnRecordCreated(m_ctx, entity, recordId);
         });
     }
@@ -177,13 +177,13 @@ namespace mb {
         if (!m_ctx) {
             return;
         }
-        withLock([&] {
+        withLock([&]() {
             ScriptingHooks::fireOnRecordUpdated(m_ctx, entity, recordId);
         });
     }
 
     bool ScriptingEngine::pcallBool(const DukValue &fn, MbRequest &req, MbResponse &res) {
-        return withLock([&] -> bool {
+        return withLock([&]() -> bool {
             try {
                 return dukglue_pcall<bool>(m_ctx, fn, &req, &res);
             } catch (const DukErrorException &e) {
@@ -194,7 +194,7 @@ namespace mb {
     }
 
     void ScriptingEngine::pcallVoid(const DukValue &fn, MbRequest &req, MbResponse &res) {
-        withLock([&] {
+        withLock([&]() {
             try {
                 dukglue_pcall<void>(m_ctx, fn, &req, &res);
             } catch (const DukErrorException &e) {
