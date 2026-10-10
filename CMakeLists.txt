@@ -16,7 +16,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
 option(MB_SCRIPTING_ENABLED "Enable JS Scripting vis duktape" ON)
-option(MB_BUILD_BINDINGS "Build language bindings (Node.js, Python)" ON)
+option(MB_BUILD_BINDINGS "Build language bindings (Node.js, Python)" OFF)
 
 # Flag for building deps as shared/static libs
 option(MB_SHARED_DEPS "Build MantisBase as a shared library" FALSE)

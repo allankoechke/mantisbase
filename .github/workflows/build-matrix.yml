@@ -157,6 +157,7 @@ jobs:
             -DMB_BUILD_TESTS=true `
             -DMB_BUILD_DOCS=OFF `
             -DMB_BUILD_SHARED_LIB=ON `
+            -DMB_BUILD_BINDINGS=ON `
             -S ${{ github.workspace }}
 
       - name: Configure CMake (Windows ARM64)
@@ -184,6 +185,7 @@ jobs:
             -DMB_BUILD_TESTS=true `
             -DMB_BUILD_DOCS=OFF `
             -DMB_BUILD_SHARED_LIB=ON `
+            -DMB_BUILD_BINDINGS=ON `
             -S ${{ github.workspace }}
 
       - name: Configure CMake (macOS)
@@ -194,6 +196,7 @@ jobs:
             -DMB_BUILD_TESTS=ON \
             -DMB_BUILD_DOCS=OFF \
             -DMB_BUILD_SHARED_LIB=ON \
+            -DMB_BUILD_BINDINGS=ON \
             -S ${{ github.workspace }}
 
       - name: Configure CMake (Linux)
@@ -206,10 +209,11 @@ jobs:
             -DMB_BUILD_TESTS=ON \
             -DMB_BUILD_DOCS=OFF \
             -DMB_BUILD_SHARED_LIB=ON \
+            -DMB_BUILD_BINDINGS=ON \
             -S ${{ github.workspace }}
 
       - name: Build
-        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release # ${{ matrix.build_type }}
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
 
       - name: Check dev headers (Linux/macOS)
         if: matrix.lib_platform == 'linux' || matrix.lib_platform == 'macos'
@@ -467,6 +471,7 @@ jobs:
             -DMB_BUILD_TESTS=ON \
             -DMB_SCRIPTING_ENABLED=ON \
             -DMB_BUILD_DOCS=OFF \
+            -DMB_BUILD_BINDINGS=OFF \
             -S ${{ github.workspace }}
 
       - name: Build
