@@ -97,8 +97,32 @@ jobs:
 
       - name: Install llvm-mingw (Windows ARM64)
         if: matrix.lib_platform == 'windows' && matrix.arch == 'aarch64'
+        shell: pwsh
         run: |
-          choco install llvm-mingw ninja --no-progress
+          # No llvm-mingw package exists on the Chocolatey community feed,
+          # so fetch the toolchain directly from upstream GitHub releases.
+          # The x86_64-hosted build runs fine under x64 emulation on the
+          # ARM64 runner and ships the aarch64-windows target we need.
+          choco install ninja --no-progress
+          $headers = @{}
+          if ($env:GITHUB_TOKEN) { $headers['Authorization'] = "Bearer $env:GITHUB_TOKEN" }
+          $rel = Invoke-RestMethod -Uri 'https://api.github.com/repos/mstorsjo/llvm-mingw/releases/latest' -Headers $headers
+          $tag = $rel.tag_name
+          $ver = $tag -replace '^llvm-mingw-', ''
+          $zip = "llvm-mingw-$ver-ucrt-x86_64.zip"
+          $url = "https://github.com/mstorsjo/llvm-mingw/releases/download/$tag/$zip"
+          Write-Host "Downloading $url"
+          Invoke-WebRequest -Uri $url -OutFile "$env:RUNNER_TEMP\$zip"
+          $dest = 'C:\llvm-mingw'
+          if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+          Expand-Archive -Path "$env:RUNNER_TEMP\$zip" -DestinationPath $dest
+          # The archive has a single top-level directory; expose its bin/.
+          $binDir = Get-ChildItem -Path $dest -Directory | Select-Object -First 1
+          $bin = Join-Path $binDir.FullName 'bin'
+          if (-not (Test-Path (Join-Path $bin 'aarch64-w64-mingw32-clang++.exe'))) { throw "llvm-mingw toolchain not found under $bin" }
+          Add-Content -Path $env:GITHUB_PATH -Value $bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Add MinGW to PATH
         if: matrix.lib_platform == 'windows' && matrix.arch == 'x86_64'
@@ -134,25 +158,11 @@ jobs:
         shell: pwsh
         run: |
           $mingwBin = "C:\ProgramData\mingw64\mingw64\bin"
-          $makePath = Join-Path $mingwBin "mingw32-make.exe"
-
-          if (-not (Test-Path $makePath)) {
-            $makePath = "C:\mingw64\bin\mingw32-make.exe"
-            if (-not (Test-Path $makePath)) {
-              $found = Get-ChildItem "C:\ProgramData\mingw64" -Recurse -Filter "mingw32-make.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-              if ($found) {
-                $makePath = $found.FullName
-              }
-            }
-          }
-
-          Write-Host "Using make at: $makePath"
 
           cmake -B ${{ steps.strings.outputs.build-output-dir }} `
-            -G "MinGW Makefiles" `
+            -G Ninja `
             -DCMAKE_CXX_COMPILER="$mingwBin\g++.exe" `
             -DCMAKE_C_COMPILER="$mingwBin\gcc.exe" `
-            -DCMAKE_MAKE_PROGRAM="$makePath" `
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
             -DMB_BUILD_TESTS=true `
             -DMB_BUILD_DOCS=OFF `
@@ -192,6 +202,7 @@ jobs:
         if: matrix.lib_platform == 'macos'
         run: |
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DMB_BUILD_TESTS=ON \
             -DMB_BUILD_DOCS=OFF \
@@ -203,6 +214,7 @@ jobs:
         if: matrix.lib_platform == 'linux'
         run: |
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -G Ninja \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
             -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
@@ -467,6 +479,7 @@ jobs:
       - name: Configure CMake
         run: |
           cmake -B build-scripting \
+            -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DMB_BUILD_TESTS=ON \
             -DMB_SCRIPTING_ENABLED=ON \
