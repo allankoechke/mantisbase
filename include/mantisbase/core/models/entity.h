@@ -72,7 +72,7 @@ namespace mb {
          */
         Entity(const MantisBase &app, const std::string &name, const std::string &type);
 
-        Entity(Entity&) = default; // default copy constructor
+        Entity(const Entity&) = default; // default copy constructor
         Entity(Entity&&) = default; // default move constructor
 
         // --------------- DB TABLE OPS ------------------ //
