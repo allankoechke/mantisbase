@@ -229,8 +229,7 @@ endif(BUILD_YAML_CONFIG)
 
 if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD"
     AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD"
-    AND NOT WIN32
-    AND NOT APPLE) # Disable uuid link in APPLE
+    AND NOT WIN32)
     find_package(UUID REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE UUID_lib)
 
@@ -243,11 +242,14 @@ if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD"
         LINK_LIBRARIES UUID_lib
         OUTPUT_VARIABLE OSSP_UUID_COMPILE_OUTPUT)
     if (normal_uuid)
+        message("--> NORMAL UUID selected")
         add_definitions(-DUSE_OSSP_UUID=0)
     elseif (ossp_uuid)
+        message("--> OSS UUID selected")
         add_definitions(-DUSE_OSSP_UUID=1)
     elseif (APPLE) # Handle MacOS error, cant find uuid
         # macOS doesn't need explicit UUID library linking (it's in libc)
+        message("--> FORCE OSS UUID on APPLE")
         add_definitions(-DUSE_OSSP_UUID=0)
     else ()
         message(FATAL_ERROR "uuid lib error:\n${NORMAL_UUID_COMPILE_OUTPUT}\n${OSSP_UUID_COMPILE_OUTPUT}")

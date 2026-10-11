@@ -87,9 +87,9 @@ jobs:
           # PostgreSQL backend is enabled on all UNIX (see cmake/add-soci.cmake);
           # brew libpq is keg-only, so expose it for find_package(PostgreSQL).
           # uuid/ is provided by the macOS SDK — no package needed.
-          brew install libpq ninja
+          brew install libpq ninja ossp-uuid
           brew link --force libpq
-          echo "CMAKE_PREFIX_PATH=$(brew --prefix libpq)" >> "$GITHUB_ENV"
+          echo "CMAKE_PREFIX_PATH=$(brew --prefix libpq);$(brew --prefix ossp-uuid)" >> "$GITHUB_ENV"
 
       - name: Install MinGW (Windows x86-64)
         if: matrix.lib_platform == 'windows' && matrix.arch == 'x86_64'
