@@ -45,13 +45,18 @@ jobs:
             -DMB_LIB_STAGING_DIR=${{ github.workspace }}/dev-staging \
             -DMB_LINUX_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_linux-x86_64-headers/include \
             -DMB_WINDOWS_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_windows-x86_64-headers/include \
+            -DMB_DARWIN_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_macos-x86_64-headers/include \
             -DMB_OUTPUT_DIR=${{ github.workspace }}/dev-package \
             -P cmake/package-dev.cmake
+          # NOTE: the x86_64 header tree is the canonical one per OS (generated
+          # headers can differ per arch). If macos-15-intel is ever dropped
+          # from the matrix, switch the darwin tree to macos-aarch64-headers.
 
       - name: Create dev zips (one per OS)
         run: |
           (cd ${{ github.workspace }}/dev-package/linux && zip -r ../../mantisbase_${{ github.ref_name }}-linux-cpp-dev.zip README.md VERSION mantisbase.d.ts include/ libs/ cmake/)
           (cd ${{ github.workspace }}/dev-package/windows && zip -r ../../mantisbase_${{ github.ref_name }}-windows-cpp-dev.zip README.md VERSION mantisbase.d.ts include/ libs/ cmake/)
+          (cd ${{ github.workspace }}/dev-package/darwin && zip -r ../../mantisbase_${{ github.ref_name }}-darwin-cpp-dev.zip README.md VERSION mantisbase.d.ts include/ libs/ cmake/)
 
       - name: Upload dev zip artifacts
         uses: actions/upload-artifact@v4
@@ -63,6 +68,7 @@ jobs:
           path: |
             mantisbase_${{ github.ref_name }}-linux-cpp-dev.zip
             mantisbase_${{ github.ref_name }}-windows-cpp-dev.zip
+            mantisbase_${{ github.ref_name }}-darwin-cpp-dev.zip
 
   release:
     needs: [build, package-dev-zip]

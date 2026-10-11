@@ -16,6 +16,7 @@
 
 #include <trantor/utils/TaskQueue.h>
 #include <trantor/exports.h>
+#include <atomic>
 #include <list>
 #include <memory>
 #include <vector>

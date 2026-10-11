@@ -28,10 +28,15 @@ The server starts on `http://localhost:7070`.
 sudo apt-get install -y libpq-dev uuid-dev
 ```
 
+**macOS dependencies:**
+```bash
+brew install libpq ossp-uuid
+```
+
 ### Build from Source
 
 ```bash
-git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git
+git clone https://github.com/allankoechke/mantisbase.git
 cd mantisbase
 cmake -B build
 cmake --build build

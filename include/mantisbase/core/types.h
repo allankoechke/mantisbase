@@ -89,6 +89,14 @@ namespace mb {
         //! Constrictor for instantiating this interface
         explicit IMantisBase(const MantisBase& app);
 
+        // Move constructor & op
+        IMantisBase(IMantisBase&&) = default;
+        IMantisBase& operator=(IMantisBase&&) = delete;
+
+        // Copy constructor & op
+        IMantisBase(const IMantisBase&) = default;
+        IMantisBase& operator=(const IMantisBase&) = delete;
+
         //! Application that owns this service or request context.
         [[nodiscard]] const MantisBase &mbApp() const;
 

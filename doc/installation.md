@@ -6,9 +6,9 @@ Getting started with **MantisBase** is simple. You can use the prebuilt binaries
 
 MantisBase is available in two formats:
 
-- ✅ **Precompiled binaries** for **Windows** and **Linux** (64-bit)
+- ✅ **Precompiled binaries** for **Windows**, **Linux** and **macOS** (64-bit)
     - You can find them in the [Releases section](https://github.com/allankoechke/mantisbase/releases).
-  > _Currently, only 64-bit builds for Linux and Windows are provided. Support for other platforms is planned for future versions._
+  > _64-bit builds are provided for Linux (x86-64, ARM64), Windows (x86-64, ARM64) and macOS (Intel + Apple Silicon)._
 
 - 💻 **Source code** for embedding into your own C++ application
     - See the [Embedding MantisBase](embedding.md) guide for details.

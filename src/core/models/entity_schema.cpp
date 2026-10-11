@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <utility>
 
 namespace mb {
     EntitySchema::EntitySchema(const MantisBase &app) : IMantisBase(app) {}
@@ -37,7 +38,24 @@ namespace mb {
             m_addRule = other.m_addRule;
             m_updateRule = other.m_updateRule;
             m_deleteRule = other.m_deleteRule;
-            // m_app = other.m_app;
+        }
+        return *this;
+    }
+
+    EntitySchema &EntitySchema::operator=(EntitySchema &&other) noexcept {
+        if (this != &other) {
+            m_name = std::move(other.m_name);
+            m_type = std::move(other.m_type);
+            m_viewSqlQuery = std::move(other.m_viewSqlQuery);
+            m_isSystem = other.m_isSystem;
+            m_hasApi = other.m_hasApi;
+            m_fields = std::move(other.m_fields);
+            m_indexes = std::move(other.m_indexes);
+            m_listRule = std::move(other.m_listRule);
+            m_getRule = std::move(other.m_getRule);
+            m_addRule = std::move(other.m_addRule);
+            m_updateRule = std::move(other.m_updateRule);
+            m_deleteRule = std::move(other.m_deleteRule);
         }
         return *this;
     }

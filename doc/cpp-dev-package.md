@@ -13,7 +13,8 @@ Each GitHub release ships one C++ dev package per OS (shared library only, no st
 | File | Contents |
 |---|---|
 | `mantisbase_<tag>-linux-cpp-dev.zip` | `libmantisbase.so` for x86-64 (`libs/x86`) and aarch64 (`libs/arm`) + Linux headers |
-| `mantisbase_<tag>-windows-cpp-dev.zip` | `libmantisbase.dll` (+ import lib) for x86-64 + Windows headers |
+| `mantisbase_<tag>-windows-cpp-dev.zip` | `libmantisbase.dll` (+ import lib) for x86-64 (`libs/x86`) and ARM64 (`libs/arm`) + Windows headers |
+| `mantisbase_<tag>-darwin-cpp-dev.zip` | `libmantisbase.dylib` for Intel (`libs/x86`) and Apple Silicon (`libs/arm`) + macOS headers |
 
 Download from [GitHub Releases](https://github.com/allankoechke/mantisbase/releases) and unzip, e.g. into `mantisbase-linux-cpp-dev/`. Every package contains:
 
@@ -25,7 +26,7 @@ include/         header tree for this OS (mantisbase headers + bundled
                  jsoncpp, soci, spdlog, fmt, dukglue, duktape, wolfssl, ...)
 libs/
   x86/           prebuilt shared library for x86-64
-  arm/           prebuilt shared library for aarch64 (Linux only)
+  arm/           prebuilt shared library for aarch64
 cmake/
   MantisBaseConfig.cmake         find_package(MantisBase) entry point
   MantisBaseConfigVersion.cmake  version matching
@@ -48,7 +49,13 @@ sudo apt-get install -y libpq-dev uuid-dev
 
 **Windows (MinGW)** — no extra packages. The socket/RPC/IP-helper/crypto system libraries (`ws2_32`, `rpcrt4`, `iphlpapi`, `crypt32`) are linked automatically.
 
-**Toolchain** — C++20 compiler (GCC/MinGW 13+) and CMake 3.22+.
+**macOS** — the shared library needs its system dependencies at build and run time:
+
+```bash
+brew install libpq ossp-uuid
+```
+
+**Toolchain** — C++20 compiler (GCC/MinGW 13+, Apple Clang 15+) and CMake 3.22+.
 
 ---
 
@@ -81,6 +88,13 @@ target_include_directories(my_app PRIVATE path/to/include)
 target_link_libraries(my_app PRIVATE path/to/libs/x86/libmantisbase.dll.a ws2_32 rpcrt4 iphlpapi crypt32)
 ```
 
+macOS — make sure the `.dylib` is findable at runtime (via `rpath`):
+
+```bash
+# Example: Apple Silicon, shared
+clang++ -std=c++20 main.cpp -I path/to/include -L path/to/libs/arm -lmantisbase -Wl,-rpath,path/to/libs/arm -lpq -luuid -ldl -lpthread -lm -o my_app
+```
+
 ### `main.cpp`
 
 ```cpp
@@ -101,9 +115,9 @@ int main(int argc, char* argv[])
 
 | Symptom | Cause / fix |
 |---|---|
-| `MantisBase dev package does not support '<system>'` | You unzipped the wrong OS package — download the `-linux-cpp-dev` or `-windows-cpp-dev` zip matching your machine. |
-| `MantisBase shared library not found: '.../libs/<arch>/...'` | No binary for your CPU in this package (e.g. 32-bit, or arm on Windows). Check `libs/` for shipped architectures, or [build from source](installation.md). |
-| `MantisBase requires libpq / libuuid` (Linux) | Install `libpq-dev` and `uuid-dev` (see Prerequisites). |
+| `MantisBase dev package does not support '<system>'` | You unzipped the wrong OS package — download the `-linux-cpp-dev`, `-windows-cpp-dev` or `-darwin-cpp-dev` zip matching your machine. |
+| `MantisBase shared library not found: '.../libs/<arch>/...'` | No binary for your CPU in this package (e.g. 32-bit). Check `libs/` for shipped architectures, or [build from source](installation.md). |
+| `MantisBase requires libpq / libuuid` (Linux/macOS) | Install `libpq-dev` and `uuid-dev` on Linux, `libpq` and `ossp-uuid` (Homebrew) on macOS (see Prerequisites). |
 | App builds but fails to start: `libmantisbase.so: cannot open shared object file` | The loader can't find the `.so` — set `LD_LIBRARY_PATH` or link with `-Wl,-rpath,<libs dir>`. |
 | App builds but fails to start on Windows (`0xc0000135` / missing DLL) | Copy `libmantisbase.dll` next to your `.exe`. |
 | `find_package` reports a version mismatch | Request a compatible version (`find_package(MantisBase 0.4 REQUIRED)`); on `0.x` releases minor versions must match. |

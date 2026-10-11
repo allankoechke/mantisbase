@@ -1,0 +1,81 @@
+name: Export & Release Static Admin Panel
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags like v1.0.0
+
+permissions:
+  contents: write
+
+jobs:
+  export-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and Export Static Site
+        run: npm run build
+
+      - name: Zip Exported Static Files
+        run: |
+          cd out
+          zip -r ../mantis-admin-static.zip .
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: mantis-admin-static.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout mb-admin branch
+        uses: actions/checkout@v4
+        with:
+          ref: mb-admin
+          path: mb-admin-branch
+
+      - name: Clear and update public directory in mb-admin
+        run: |
+          # Remove existing public directory contents
+          rm -rf mb-admin-branch/public
+          mkdir -p mb-admin-branch/public
+          
+          # Copy built files to public directory
+          cp -r out/* mb-admin-branch/public/
+
+      - name: Commit and push to mb-admin branch
+        working-directory: mb-admin-branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add public/
+          git commit -m "chore: update static files from master tag ${{ github.ref_name }}" --allow-empty
+          git push origin mb-admin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Zip mb-admin branch
+        run: |
+          zip -r mantis-admin-branch.zip mb-admin-branch -x "mb-admin-branch/.git/*"
+
+      - name: Upload both zips to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            mantis-admin-static.zip
+            mantis-admin-branch.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

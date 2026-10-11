@@ -69,8 +69,29 @@ jobs:
 
       - name: Install llvm-mingw (Windows ARM64)
         if: runner.os == 'Windows' && matrix.engine_platform == 'windows-aarch64'
+        shell: pwsh
         run: |
-          choco install llvm-mingw --no-progress
+          # No llvm-mingw package exists on the Chocolatey community feed,
+          # so fetch the toolchain directly from upstream GitHub releases
+          # (same approach as .github/workflows/build-matrix.yml).
+          $headers = @{}
+          if ($env:GITHUB_TOKEN) { $headers['Authorization'] = "Bearer $env:GITHUB_TOKEN" }
+          $rel = Invoke-RestMethod -Uri 'https://api.github.com/repos/mstorsjo/llvm-mingw/releases/latest' -Headers $headers
+          $tag = $rel.tag_name
+          $ver = $tag -replace '^llvm-mingw-', ''
+          $zip = "llvm-mingw-$ver-ucrt-x86_64.zip"
+          $url = "https://github.com/mstorsjo/llvm-mingw/releases/download/$tag/$zip"
+          Write-Host "Downloading $url"
+          Invoke-WebRequest -Uri $url -OutFile "$env:RUNNER_TEMP\$zip"
+          $dest = 'C:\llvm-mingw'
+          if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+          Expand-Archive -Path "$env:RUNNER_TEMP\$zip" -DestinationPath $dest
+          $binDir = Get-ChildItem -Path $dest -Directory | Select-Object -First 1
+          $bin = Join-Path $binDir.FullName 'bin'
+          if (-not (Test-Path (Join-Path $bin 'aarch64-w64-mingw32-clang++.exe'))) { throw "llvm-mingw toolchain not found under $bin" }
+          Add-Content -Path $env:GITHUB_PATH -Value $bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install build tooling
         run: |

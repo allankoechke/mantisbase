@@ -68,8 +68,8 @@ namespace mb {
         };
     }
 
-    void Router::reloadCorsOrigins() {
-        auto origins = std::make_shared<std::set<std::string> >();
+    void Router::reloadCorsOrigins() const {
+        const auto origins = std::make_shared<std::set<std::string> >();
 
         const auto &cfg = mbApp().settings().configs();
         if (cfg.contains("corsAllowedOrigins") && cfg["corsAllowedOrigins"].is_array()) {
@@ -92,14 +92,19 @@ namespace mb {
             }
         }
 
-        m_corsAllowedOrigins.store(origins);
+        // Writing m_corsAllowedOrigins
+        {
+            std::unique_lock<std::shared_mutex> lock(m_corsOriginsMutex);
+            m_corsAllowedOrigins = origins;
+        }
 
         logger().info("CORS", fmt::format("Loaded {} allowed origin(s)", origins->size()));
     }
 
     bool Router::isOriginAllowed(const std::string &origin) const {
-        const auto allowed = m_corsAllowedOrigins.load();
-        return allowed && allowed->count(origin) > 0;
+        std::shared_lock<std::shared_mutex> lock(m_corsOriginsMutex);
+        const auto allowed = m_corsAllowedOrigins;
+        return allowed && allowed->contains(origin);
     }
 
     void Router::applyCorsHeaders(const drogon::HttpRequestPtr &req,
