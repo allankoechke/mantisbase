@@ -58,8 +58,6 @@ if(MB_HAS_POSTGRESQL)
     target_link_libraries ( mantisbase
             PUBLIC
             soci_postgresql
-            pq
-            dl
     )
 endif(MB_HAS_POSTGRESQL)
 
