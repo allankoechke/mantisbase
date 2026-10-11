@@ -88,6 +88,7 @@ jobs:
           # brew libpq is keg-only, so expose it for find_package(PostgreSQL).
           # uuid/ is provided by the macOS SDK — no package needed.
           brew install libpq
+          brew link --force libpq
           echo "CMAKE_PREFIX_PATH=$(brew --prefix libpq)" >> "$GITHUB_ENV"
 
       - name: Install MinGW (Windows x86-64)
