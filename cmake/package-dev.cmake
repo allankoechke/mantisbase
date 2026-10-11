@@ -7,19 +7,20 @@
 #     -DMB_LIB_STAGING_DIR=<merged per-platform lib artifacts> \
 #     -DMB_LINUX_HEADERS_DIR=<linux coalesced include tree> \
 #     -DMB_WINDOWS_HEADERS_DIR=<windows coalesced include tree> \
+#     -DMB_DARWIN_HEADERS_DIR=<macos coalesced include tree> \
 #     -DMB_OUTPUT_DIR=<destination dev-package root> \
 #     -P cmake/package-dev.cmake
 #
 # Optional:
-#   -DMB_VERSION=0.4.3              (default: MB_VERSION_TAG with leading 'v' stripped)
-#   -DMB_PLATFORMS="linux;windows"  (default: both; platforms to assemble)
+#   -DMB_VERSION=0.4.6              (default: MB_VERSION_TAG with leading 'v' stripped)
+#   -DMB_PLATFORMS="linux;windows;darwin"  (default: all; platforms to assemble)
 #
 # Inputs:
 # - <lib staging>/<os>/libs/<arch>/libmantisbase.so
 #   (<os>/libs/<arch>/libmantisbase.dll + libmantisbase.dll.a on Windows)
 #   where <arch> is x86 or arm (see pkg_arch in build-matrix.yml).
 #   Only shared libraries are shipped — no static archives.
-# - <linux/windows headers>: the per-platform trees produced in each build by
+# - <linux/windows/darwin headers>: the per-platform trees produced in each build by
 #   `cmake --install <build> --component mb-dev-headers`
 #   (see cmake/coalesce-headers.cmake). Each is a FULL include tree for its
 #   OS — no shared/overlay split, so platform-generated headers
@@ -44,7 +45,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 foreach(_var MB_SOURCE_DIR MB_VERSION_TAG MB_LIB_STAGING_DIR
-        MB_LINUX_HEADERS_DIR MB_WINDOWS_HEADERS_DIR MB_OUTPUT_DIR)
+        MB_LINUX_HEADERS_DIR MB_WINDOWS_HEADERS_DIR MB_DARWIN_HEADERS_DIR MB_OUTPUT_DIR)
     if(NOT DEFINED ${_var} OR "${${_var}}" STREQUAL "")
         message(FATAL_ERROR "package-dev.cmake requires -D${_var}=<...>")
     endif()
@@ -54,7 +55,7 @@ if(NOT DEFINED MB_VERSION OR "${MB_VERSION}" STREQUAL "")
     string(REGEX REPLACE "^v" "" MB_VERSION "${MB_VERSION_TAG}")
 endif()
 if(NOT DEFINED MB_PLATFORMS OR "${MB_PLATFORMS}" STREQUAL "")
-    set(MB_PLATFORMS "linux;windows")
+    set(MB_PLATFORMS "linux;windows;darwin")
 endif()
 
 # Numeric components for MantisBaseConfigVersion.cmake.in. A trailing
@@ -76,7 +77,7 @@ set(_OUT "${MB_OUTPUT_DIR}")
 # This matters because file(GLOB) resolves relative patterns against the
 # script's own directory, while COPY/WRITE/EXISTS resolve against the
 # invoking cwd — absolute paths behave identically for every command.
-foreach(_var _SRC _STAGING _OUT MB_LINUX_HEADERS_DIR MB_WINDOWS_HEADERS_DIR)
+foreach(_var _SRC _STAGING _OUT MB_LINUX_HEADERS_DIR MB_WINDOWS_HEADERS_DIR MB_DARWIN_HEADERS_DIR)
     get_filename_component(${_var} "${${_var}}" ABSOLUTE)
 endforeach()
 
@@ -133,6 +134,8 @@ foreach(_os ${MB_PLATFORMS})
         if(_os STREQUAL "windows")
             _require_file("${_pkg}/libs/${_arch}/libmantisbase.dll" "${_LIB_HINT}")
             _require_file("${_pkg}/libs/${_arch}/libmantisbase.dll.a" "${_LIB_HINT}")
+        elseif (_os STREQUAL "darwin")
+            _require_file("${_pkg}/libs/${_arch}/libmantisbase.dylib" "${_LIB_HINT}")
         else()
             _require_file("${_pkg}/libs/${_arch}/libmantisbase.so" "${_LIB_HINT}")
         endif()
@@ -146,6 +149,12 @@ foreach(_os ${MB_PLATFORMS})
         set(MB_LIB_FILE "libmantisbase.dll (+ import lib libmantisbase.dll.a)")
         set(MB_PREREQS "No system packages required. On MinGW the socket/RPC/IP-helper/crypto system libraries (`ws2_32`, `rpcrt4`, `iphlpapi`, `crypt32`) are linked automatically.")
         set(MB_MANUAL "Add `include/` to the header search path and link the matching import library plus its system dependencies:\n\n```bat\n:: Example: Windows x86-64 (MinGW), shared\nrem Ensure libmantisbase.dll is next to your .exe at runtime\n```\n\n```cmake\n# CMakeLists.txt (manual, without the bundled entry point)\ntarget_include_directories(my_app PRIVATE path/to/include)\ntarget_link_libraries(my_app PRIVATE path/to/libs/x86/libmantisbase.dll.a ws2_32 rpcrt4 iphlpapi crypt32)\n```")
+    elseif (_os STREQUAL "darwin")
+        set(MB_OS "darwin")
+        set(MB_OS_PRETTY "MacOS")
+        set(MB_LIB_FILE "libmantisbase.dylib")
+        set(MB_PREREQS "The shared library needs its system dependencies at build and run time. Install them with:\n\n```bash\nbrew install libpq ossp-uuid\n```.")
+        set(MB_MANUAL "Add `include/` to the header search path and link the matching shared library plus its system dependencies (make sure the `.dylib` is findable at runtime, e.g. via `rpath` or `LD_LIBRARY_PATH`):\n\n```bash\n# Example: MacOS Intel, shared\nclang++ -std=c++20 main.cpp -I path/to/include -L path/to/libs/x86 -lmantisbase -Wl,-rpath,path/to/libs/x86 -lpq -luuid -ldl -lpthread -lm -o my_app\n```")
     else()
         set(MB_OS "linux")
         set(MB_OS_PRETTY "Linux")
@@ -175,4 +184,4 @@ endforeach()
 
 message(STATUS "Dev packages assembled:")
 message(STATUS "  version : ${MB_VERSION} (${MB_VERSION_TAG})")
-message(STATUS "  packages: ${_OUT}/linux + ${_OUT}/windows")
+message(STATUS "  packages: ${_OUT}/linux + ${_OUT}/windows + ${_OUT}/darwin")

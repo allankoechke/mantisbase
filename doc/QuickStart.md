@@ -28,6 +28,11 @@ The server starts on `http://localhost:7070`.
 sudo apt-get install -y libpq-dev uuid-dev
 ```
 
+**macOS dependencies:**
+```bash
+brew install libpq ossp-uuid
+```
+
 ### Build from Source
 
 ```bash

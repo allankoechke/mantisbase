@@ -431,12 +431,13 @@ jobs:
           path: headers-staging\
 
       - name: Stage library files (macOS)
-        # NOTE: the dev-package (cmake/package-dev.cmake) currently supports
-        # linux + windows only — macOS dylibs are staged for the Python wheels.
+        # Staged under lib-staging/darwin/ (not macos/) to match the dev-package
+        # OS naming in cmake/package-dev.cmake. The Python wheels locate the
+        # .dylib by filename, so they are unaffected by the folder name.
         if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
         shell: bash
         run: |
-          STAGING="lib-staging/macos/libs/${{ matrix.pkg_arch }}"
+          STAGING="lib-staging/darwin/libs/${{ matrix.pkg_arch }}"
           mkdir -p "${STAGING}"
           cp "${{ steps.strings.outputs.build-output-dir }}/lib/libmantisbase.dylib" \
             "${STAGING}/"

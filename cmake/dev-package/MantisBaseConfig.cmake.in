@@ -7,8 +7,8 @@
 #   <prefix>/include/             full header tree for this OS (mantisbase
 #     headers + bundled 3rd-party headers + that platform's generated headers)
 #   <prefix>/libs/<arch>/         prebuilt shared library for this OS
-#     (libmantisbase.so on Linux; libmantisbase.dll + import lib on Windows,
-#     with <arch> being x86 or arm)
+#     (libmantisbase.so on Linux, libmantisbase.dylib on macOS,
+#     libmantisbase.dll + import lib on Windows, with <arch> being x86 or arm)
 #
 # Usage:
 #   find_package(MantisBase REQUIRED)
@@ -37,6 +37,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(_MB_OS "linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(_MB_OS "windows")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(_MB_OS "darwin")
 else()
     message(FATAL_ERROR "MantisBase dev package does not support '${CMAKE_SYSTEM_NAME}'. "
         "Download the dev package matching your OS.")
@@ -85,6 +87,20 @@ if(_MB_OS STREQUAL "linux")
 elseif(_MB_OS STREQUAL "windows")
     # MinGW system libraries used by MantisBase (sockets, RPC/UUID, IP helper, crypto).
     list(APPEND _MB_SYSTEM_LIBS ws2_32 rpcrt4 iphlpapi crypt32)
+elseif(_MB_OS STREQUAL "darwin")
+    # Same system libraries as Linux, via Homebrew (keg-only libpq may need
+    # -DCMAKE_PREFIX_PATH=$(brew --prefix libpq) to be found).
+    find_library(_MB_PQ_LIB pq)
+    if(NOT _MB_PQ_LIB)
+        message(FATAL_ERROR "MantisBase requires libpq (PostgreSQL client). "
+            "Install it with: brew install libpq")
+    endif()
+    find_library(_MB_UUID_LIB uuid)
+    if(NOT _MB_UUID_LIB)
+        message(FATAL_ERROR "MantisBase requires libuuid. "
+            "Install it with: brew install ossp-uuid")
+    endif()
+    list(APPEND _MB_SYSTEM_LIBS ${_MB_PQ_LIB} ${_MB_UUID_LIB} ${CMAKE_DL_LIBS} m)
 endif()
 
 # --- Compile definitions -------------------------------------------------------
@@ -101,6 +117,8 @@ set(_MB_SHARED_DEFS EXTERNAL_OPTS_OPENVPN)
 # Dev packages ship shared libraries only.
 if(_MB_OS STREQUAL "linux")
     set(_MB_SHARED_LIB "${_MB_PREFIX}/libs/${_MB_ARCH}/libmantisbase.so")
+elseif(_MB_OS STREQUAL "darwin")
+    set(_MB_SHARED_LIB "${_MB_PREFIX}/libs/${_MB_ARCH}/libmantisbase.dylib")
 else()
     set(_MB_SHARED_LIB "${_MB_PREFIX}/libs/${_MB_ARCH}/libmantisbase.dll")
     set(_MB_SHARED_IMPLIB "${_MB_PREFIX}/libs/${_MB_ARCH}/libmantisbase.dll.a")

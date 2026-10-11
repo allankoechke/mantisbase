@@ -32,11 +32,14 @@ Runtime shared libraries on Debian/Ubuntu are `libpq5` and `libuuid1` (see `dock
 
 Download the prebuilt C++ dev package for your OS from
 [GitHub Releases](https://github.com/allankoechke/mantisbase/releases)
-(`mantisbase_<tag>-linux-cpp-dev.zip` or `mantisbase_<tag>-windows-cpp-dev.zip`):
+(`mantisbase_<tag>-linux-cpp-dev.zip`, `mantisbase_<tag>-windows-cpp-dev.zip` or `mantisbase_<tag>-darwin-cpp-dev.zip`):
 
 ```cmake
 # For Windows
 # set(MantisBase_DIR "/path/to/mantisbase-windows-cpp-dev/cmake")
+
+# For macOS
+# set(MantisBase_DIR "/path/to/mantisbase-darwin-cpp-dev/cmake")
 
 set(MantisBase_DIR "/path/to/mantisbase-linux-cpp-dev/cmake")
 find_package(MantisBase REQUIRED)
