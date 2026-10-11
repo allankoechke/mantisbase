@@ -229,7 +229,8 @@ endif(BUILD_YAML_CONFIG)
 
 if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD"
     AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD"
-    AND NOT WIN32)
+    AND NOT WIN32
+    AND NOT APPLE) # Disable uuid link in APPLE
     find_package(UUID REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE UUID_lib)
 
