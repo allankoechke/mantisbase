@@ -20,7 +20,7 @@ var searchData=
   ['log_5fdatabase_2ecpp_17',['log_database.cpp',['../log__database_8cpp.html',1,'']]],
   ['log_5fdatabase_2eh_18',['log_database.h',['../log__database_8h.html',1,'']]],
   ['logdatabase_19',['logdatabase',['../classmb_1_1LogDatabase.html#aeacf0c1b50296b43379fd5748b6f3543',1,'mb::LogDatabase::LogDatabase()'],['../classmb_1_1LogDatabase.html',1,'mb::LogDatabase']]],
-  ['logger_20',['logger',['../classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf',1,'mb::IMantisBase::logger()'],['../classmb_1_1MantisBase.html#ac8d95de5b1456d77f0a7487f9d24e0f8',1,'mb::MantisBase::logger()'],['../classmb_1_1Logger.html#a32872bc194433137cccc2af253fa8829',1,'mb::Logger::Logger()'],['../classmb_1_1Logger.html',1,'mb::Logger']]],
+  ['logger_20',['logger',['../classmb_1_1MantisBase.html#ac8d95de5b1456d77f0a7487f9d24e0f8',1,'mb::MantisBase::logger()'],['../classmb_1_1Logger.html#a32872bc194433137cccc2af253fa8829',1,'mb::Logger::Logger()'],['../classmb_1_1IMantisBase.html#aeb65d721822a05d100c547f8a32a8dcf',1,'mb::IMantisBase::logger()'],['../classmb_1_1Logger.html',1,'mb::Logger']]],
   ['logger_2ecpp_21',['logger.cpp',['../logger_8cpp.html',1,'']]],
   ['logger_2eh_22',['logger.h',['../logger_8h.html',1,'']]],
   ['login_23',['Login',['../docs_auth_api.html#autotoc_md88',1,'']]],

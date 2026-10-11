@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['json_0',['json',['../namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d',1,'mb']]]
+  ['loglevel_0',['LogLevel',['../namespacemb.html#a446ef66d54a9e41b35ecb0ab9294f923',1,'mb']]]
 ];

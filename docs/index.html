@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
    </div>
   </td>
  </tr>
@@ -111,9 +111,10 @@ Pre-built Binary</h3>
 <div class="fragment"><div class="line">./mantisbase serve</div>
 </div><!-- fragment --><p>The server starts on <code><a href="http://localhost:7070">http://localhost:7070</a></code>.</p>
 <p><b>Linux dependencies:</b> </p><div class="fragment"><div class="line">sudo apt-get install -y libpq-dev uuid-dev</div>
+</div><!-- fragment --><p><b>macOS dependencies:</b> </p><div class="fragment"><div class="line">brew install libpq ossp-uuid</div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md238"></a>
 Build from Source</h3>
-<div class="fragment"><div class="line">git clone --recurse-submodules https://github.com/allankoechke/mantisbase.git</div>
+<div class="fragment"><div class="line">git clone https://github.com/allankoechke/mantisbase.git</div>
 <div class="line">cd mantisbase</div>
 <div class="line">cmake -B build</div>
 <div class="line">cmake --build build</div>

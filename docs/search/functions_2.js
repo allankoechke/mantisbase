@@ -2,7 +2,7 @@ var searchData=
 [
   ['cleanupstaleconnections_0',['cleanupStaleConnections',['../classmb_1_1WSMgr.html#abd7415b915548cd4ab3f73ac7d5e4fb3',1,'mb::WSMgr']]],
   ['clear_1',['clear',['../classmb_1_1RouteRegistry.html#a9feb322462e2f7f4a1babb368269efdb',1,'mb::RouteRegistry']]],
-  ['clearauthtokencookie_2',['clearAuthTokenCookie',['../classmb_1_1MantisResponse.html#aac13cfb6226a915124b7889485eeb756',1,'mb::MantisResponse']]],
+  ['clearauthtokencookie_2',['clearAuthTokenCookie',['../classmb_1_1MbResponse.html#af9d8336e8d369af6d2070789fe6b6f9d',1,'mb::MbResponse']]],
   ['close_3',['close',['../classmb_1_1Router.html#a219a5bab2cb5fec6d81233155b676b07',1,'mb::Router::close()'],['../classmb_1_1SSESession.html#afd2722a3c1c12ef1e17209c4a310ef2d',1,'mb::SSESession::close()'],['../classmb_1_1MantisBase.html#acd5967d75b7c8a58fbfec8ce44cc8b22',1,'mb::MantisBase::close()']]],
   ['cmd_4',['cmd',['../classmb_1_1MantisBase.html#a1c9f41a91559fa8fa1ef7c08641e4c57',1,'mb::MantisBase']]],
   ['cmrc_5fdeclare_5',['CMRC_DECLARE',['../router_8cpp.html#aa2f50095e51620f8f61c09997b3f5d92',1,'router.cpp']]],

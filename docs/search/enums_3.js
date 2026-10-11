@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['loglevel_0',['LogLevel',['../namespacemb.html#a45b395bbdb082a2a10815855bad98c81',1,'mb']]]
+  ['mbhandlerresponse_0',['MbHandlerResponse',['../namespacemb.html#a2dbfc1fb9f9a341501797489e26375dd',1,'mb']]]
 ];

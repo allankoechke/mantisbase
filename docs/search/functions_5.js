@@ -8,7 +8,7 @@ var searchData=
   ['filepath_5',['filePath',['../classmb_1_1FilesMgr.html#a662142423788cbdccb48dc731128a20b',1,'mb::FilesMgr']]],
   ['files_6',['files',['../classmb_1_1MantisBase.html#a766ac5f075b31a4b748f53fbbd9872db',1,'mb::MantisBase']]],
   ['filesbasedir_7',['filesBaseDir',['../classmb_1_1FilesMgr.html#a8af53bae3f439db6cff408bf528903f5',1,'mb::FilesMgr']]],
-  ['filesmetadata_8',['filesMetadata',['../classmb_1_1MantisContentReader.html#a5c04034d6f78d360bdcc606b0b98b1c2',1,'mb::MantisContentReader']]],
+  ['filesmetadata_8',['filesMetadata',['../classmb_1_1MbContentReader.html#a7ec316b35993bd5b1708cf69b6e1e8e0',1,'mb::MbContentReader']]],
   ['filesmgr_9',['FilesMgr',['../classmb_1_1FilesMgr.html#a788b8ac8d1a40dc945f9c79243c8267e',1,'mb::FilesMgr']]],
   ['filterauthorizedtopics_10',['filterAuthorizedTopics',['../namespacemb.html#ad854a7305442a83e62112ec6878c4bbe',1,'mb']]],
   ['find_11',['find',['../classmb_1_1RouteRegistry.html#a8af23c11906981ab71df27f6ee4902db',1,'mb::RouteRegistry']]],
@@ -20,7 +20,7 @@ var searchData=
   ['foreignkeyonupdate_17',['foreignKeyOnUpdate',['../classmb_1_1EntitySchemaField.html#af0241de1d3a2743f06533f1625b3fb5c',1,'mb::EntitySchemaField']]],
   ['foreignkeytable_18',['foreignKeyTable',['../classmb_1_1EntitySchemaField.html#a326b664eba56579bddbe737c6f9a92e9',1,'mb::EntitySchemaField']]],
   ['formatevent_19',['formatEvent',['../classmb_1_1SSESession.html#a0dfe5a3edcc372032e454419ae916232',1,'mb::SSESession']]],
-  ['formdata_20',['formData',['../classmb_1_1MantisContentReader.html#a109a2ba40c86414f31b4e6dc001607c8',1,'mb::MantisContentReader']]],
+  ['formdata_20',['formData',['../classmb_1_1MbContentReader.html#a936e9ad325222c04eccaa3121b0329b6',1,'mb::MbContentReader']]],
   ['fromentity_21',['fromEntity',['../classmb_1_1EntitySchema.html#a3cb4f8e9938f494459c976fdde32713d',1,'mb::EntitySchema']]],
   ['fromjson_22',['fromjson',['../classmb_1_1AccessRule.html#aef002a0f2bf98c4f3d8a8c2c575bdaa9',1,'mb::AccessRule::fromJSON()'],['../structmb_1_1IndexDefinition.html#ae00ab68fb72b71b289e2064cc13cbea3',1,'mb::IndexDefinition::fromJSON()']]],
   ['fromschema_23',['fromSchema',['../classmb_1_1EntitySchema.html#a1ff9980432f3bc4aa8f919c10a1d3521',1,'mb::EntitySchema']]]

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['undowrittenfiles_0',['undoWrittenFiles',['../classmb_1_1MantisContentReader.html#afb3582a2e2f5ad6903ae34a6462d8805',1,'mb::MantisContentReader']]],
+  ['undowrittenfiles_0',['undoWrittenFiles',['../classmb_1_1MbContentReader.html#a73c90a046c3dfa71ed6f715608909543',1,'mb::MbContentReader']]],
   ['unlinkaccount_1',['unlinkAccount',['../classmb_1_1OAuthManager.html#ad98b4fd5ad377dcd509c355476ebd65e',1,'mb::OAuthManager']]],
   ['unsubscribe_2',['unsubscribe',['../classmb_1_1WSMgr.html#a97b2566950ad51a3b2484fdc2f189794',1,'mb::WSMgr']]],
   ['update_3',['update',['../classmb_1_1Entity.html#a3b3def9702c7fbcf709881fab5db51ed',1,'mb::Entity']]],

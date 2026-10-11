@@ -11,7 +11,7 @@ var searchData=
   ['with_20postgresql_8',['Example: Full Setup with PostgreSQL',['../docs_docker.html#autotoc_md161',1,'']]],
   ['without_20cmake_9',['Option B: manual (without CMake)',['../docs_cpp_dev.html#autotoc_md140',1,'']]],
   ['working_20with_20entities_10',['Working with Entities',['../docs_embedding.html#autotoc_md186',1,'']]],
-  ['writefiles_11',['writeFiles',['../classmb_1_1MantisContentReader.html#a541f9a8c336f4e02878306bcb8bb236e',1,'mb::MantisContentReader']]],
+  ['writefiles_11',['writeFiles',['../classmb_1_1MbContentReader.html#a3d0ce8ef9694f7e88459256b814d3c5b',1,'mb::MbContentReader']]],
   ['ws_2eh_12',['ws.h',['../ws_8h.html',1,'']]],
   ['ws_5fpath_5fadd_13',['WS_PATH_ADD',['../classmb_1_1RealtimeWSController.html#a3e7a845fe22d2f2cc911a441c04ddc0b',1,'mb::RealtimeWSController']]],
   ['wsmgr_14',['wsmgr',['../classmb_1_1SSEMgr.html#ab7b226977b7aa94d87a73d70f83fa4c2',1,'mb::SSEMgr::wsMgr()'],['../classmb_1_1WSMgr.html#a0df2cd464fa11e1cc5cb055cdbb1c1cc',1,'mb::WSMgr::WSMgr()'],['../classmb_1_1WSMgr.html',1,'mb::WSMgr']]]

@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
    </div>
   </td>
  </tr>
@@ -106,10 +106,10 @@ $(document).ready(function(){initNavTree('classmb_1_1RouteRegistry.html',''); in
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af1c8a76ae6a18b5f29347598a42baf0b" id="r_af1c8a76ae6a18b5f29347598a42baf0b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#af1c8a76ae6a18b5f29347598a42baf0b">add</a> (const std::string &amp;method, const std::string &amp;path, const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares)</td></tr>
-<tr class="separator:af1c8a76ae6a18b5f29347598a42baf0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a587825ecfbf1557e83a8b0c7c3b86f02" id="r_a587825ecfbf1557e83a8b0c7c3b86f02"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#a587825ecfbf1557e83a8b0c7c3b86f02">add</a> (const std::string &amp;method, const std::string &amp;path, const <a class="el" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;middlewares)</td></tr>
-<tr class="separator:a587825ecfbf1557e83a8b0c7c3b86f02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8311102d33317ebc681c5666e7f5287" id="r_ae8311102d33317ebc681c5666e7f5287"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#ae8311102d33317ebc681c5666e7f5287">add</a> (const std::string &amp;method, const std::string &amp;path, const <a class="el" href="namespacemb.html#a06e35ec0827e71fe3a187bd5219a7641">MbHandlerFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a80c15028c68f1017f66c89fc99b13d89">MbMiddlewares</a> &amp;middlewares)</td></tr>
+<tr class="separator:ae8311102d33317ebc681c5666e7f5287"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee57e86403329726406727ba21c4ad93" id="r_aee57e86403329726406727ba21c4ad93"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#aee57e86403329726406727ba21c4ad93">add</a> (const std::string &amp;method, const std::string &amp;path, const <a class="el" href="namespacemb.html#a1890c6fa80acad6814589a15c1ae9e0c">MbHandlerWithContentReaderFn</a> &amp;handler, const <a class="el" href="namespacemb.html#a80c15028c68f1017f66c89fc99b13d89">MbMiddlewares</a> &amp;middlewares)</td></tr>
+<tr class="separator:aee57e86403329726406727ba21c4ad93"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8af23c11906981ab71df27f6ee4902db" id="r_a8af23c11906981ab71df27f6ee4902db"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structmb_1_1RouteHandler.html">RouteHandler</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#a8af23c11906981ab71df27f6ee4902db">find</a> (const std::string &amp;method, const std::string &amp;path) const</td></tr>
 <tr class="separator:a8af23c11906981ab71df27f6ee4902db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0f1d98d8fec98cc41da8daede8a828f" id="r_aa0f1d98d8fec98cc41da8daede8a828f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1RouteRegistry.html#aa0f1d98d8fec98cc41da8daede8a828f">remove</a> (const std::string &amp;method, const std::string &amp;path)</td></tr>
@@ -122,8 +122,8 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>Thread-local route registry backing the <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a> router. </p>
 <p>Supports both plain and content-reader handler variants (multipart uploads). </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="af1c8a76ae6a18b5f29347598a42baf0b" name="af1c8a76ae6a18b5f29347598a42baf0b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af1c8a76ae6a18b5f29347598a42baf0b">&#9670;&#160;</a></span>add() <span class="overload">[1/2]</span></h2>
+<a id="ae8311102d33317ebc681c5666e7f5287" name="ae8311102d33317ebc681c5666e7f5287"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8311102d33317ebc681c5666e7f5287">&#9670;&#160;</a></span>add() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -143,13 +143,13 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespacemb.html#ae160f2b0075e55c0f7c0988279983f78">HandlerFn</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#a06e35ec0827e71fe3a187bd5219a7641">MbHandlerFn</a> &amp;&#160;</td>
           <td class="paramname"><em>handler</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#a80c15028c68f1017f66c89fc99b13d89">MbMiddlewares</a> &amp;&#160;</td>
           <td class="paramname"><em>middlewares</em>&#160;</td>
         </tr>
         <tr>
@@ -163,8 +163,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a587825ecfbf1557e83a8b0c7c3b86f02" name="a587825ecfbf1557e83a8b0c7c3b86f02"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a587825ecfbf1557e83a8b0c7c3b86f02">&#9670;&#160;</a></span>add() <span class="overload">[2/2]</span></h2>
+<a id="aee57e86403329726406727ba21c4ad93" name="aee57e86403329726406727ba21c4ad93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee57e86403329726406727ba21c4ad93">&#9670;&#160;</a></span>add() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -184,13 +184,13 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespacemb.html#ac74c76fe24192fde8f728c74c624f668">HandlerWithContentReaderFn</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#a1890c6fa80acad6814589a15c1ae9e0c">MbHandlerWithContentReaderFn</a> &amp;&#160;</td>
           <td class="paramname"><em>handler</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespacemb.html#a5a39686a574a41ea8b04e7fb31320da5">Middlewares</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#a80c15028c68f1017f66c89fc99b13d89">MbMiddlewares</a> &amp;&#160;</td>
           <td class="paramname"><em>middlewares</em>&#160;</td>
         </tr>
         <tr>
@@ -200,7 +200,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Register a handler that receives a <a class="el" href="classmb_1_1MantisContentReader.html">MantisContentReader</a>. </p>
+<p>Register a handler that receives a MantisContentReader. </p>
 
 </div>
 </div>

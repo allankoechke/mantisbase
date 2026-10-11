@@ -2,7 +2,7 @@ var searchData=
 [
   ['accessevalhttperror_0',['accessEvalHttpError',['../namespacemb.html#a1306623f5aebfe023cbc8a7439353b78',1,'mb']]],
   ['accessrule_1',['AccessRule',['../classmb_1_1AccessRule.html#a70a2361b6298e51d8447aebdcd873f5d',1,'mb::AccessRule']]],
-  ['add_2',['add',['../classmb_1_1RouteRegistry.html#af1c8a76ae6a18b5f29347598a42baf0b',1,'mb::RouteRegistry::add(const std::string &amp;method, const std::string &amp;path, const HandlerFn &amp;handler, const Middlewares &amp;middlewares)'],['../classmb_1_1RouteRegistry.html#a587825ecfbf1557e83a8b0c7c3b86f02',1,'mb::RouteRegistry::add(const std::string &amp;method, const std::string &amp;path, const HandlerWithContentReaderFn &amp;handler, const Middlewares &amp;middlewares)']]],
+  ['add_2',['add',['../classmb_1_1RouteRegistry.html#ae8311102d33317ebc681c5666e7f5287',1,'mb::RouteRegistry::add(const std::string &amp;method, const std::string &amp;path, const MbHandlerFn &amp;handler, const MbMiddlewares &amp;middlewares)'],['../classmb_1_1RouteRegistry.html#aee57e86403329726406727ba21c4ad93',1,'mb::RouteRegistry::add(const std::string &amp;method, const std::string &amp;path, const MbHandlerWithContentReaderFn &amp;handler, const MbMiddlewares &amp;middlewares)']]],
   ['addcallback_3',['addCallback',['../classmb_1_1RtDbWorker.html#ae8ce0a38d4d48b4ddbb737c177c5ee5b',1,'mb::RtDbWorker']]],
   ['addconnection_4',['addConnection',['../classmb_1_1WSMgr.html#af220c95038a3a2834e6f08e718f36877',1,'mb::WSMgr']]],
   ['adddbhooks_5',['adddbhooks',['../classmb_1_1RealtimeDB.html#a0564616d7e21c1b1ee6e3bae84051b4d',1,'mb::RealtimeDB::addDbHooks(const std::string &amp;entity_name) const'],['../classmb_1_1RealtimeDB.html#aa07509b35ba3cb4aeef4d36c16c81e18',1,'mb::RealtimeDB::addDbHooks(const Entity &amp;entity) const'],['../classmb_1_1RealtimeDB.html#abb2015d45f84f332f26c943b2037fd1b',1,'mb::RealtimeDB::addDbHooks(const Entity &amp;entity, const std::shared_ptr&lt; soci::session &gt; &amp;sess)']]],
@@ -21,6 +21,6 @@ var searchData=
   ['appminorversion_18',['appMinorVersion',['../classmb_1_1MantisBase.html#a1719b93f9d70a6544afabd2c916c8211',1,'mb::MantisBase']]],
   ['apppatchversion_19',['appPatchVersion',['../classmb_1_1MantisBase.html#a7f953ae796264550051b90945f8ad251',1,'mb::MantisBase']]],
   ['appversion_20',['appVersion',['../classmb_1_1MantisBase.html#acff8b41afb6071721e34a0fcce975e8c',1,'mb::MantisBase']]],
-  ['auth_21',['auth',['../classmb_1_1Auth.html#ae123c20659ab981185facd80fe6d29f4',1,'mb::Auth::Auth()'],['../classmb_1_1MantisBase.html#a2416771f6717000a219a462f1f673fc9',1,'mb::MantisBase::auth()']]],
+  ['auth_21',['auth',['../classmb_1_1MantisBase.html#a2416771f6717000a219a462f1f673fc9',1,'mb::MantisBase::auth()'],['../classmb_1_1Auth.html#ae123c20659ab981185facd80fe6d29f4',1,'mb::Auth::Auth()']]],
   ['authsnapshot_22',['authsnapshot',['../classmb_1_1SSESession.html#aa9a71f9d053518c0d0f6c1aad79ba9f1',1,'mb::SSESession::authSnapshot()'],['../classmb_1_1SSESession.html#a54145dc4c1ee60836c46f9fcddc8c8d0',1,'mb::SSESession::authSnapshot() const']]]
 ];

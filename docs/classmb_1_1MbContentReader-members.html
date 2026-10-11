@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
    </div>
   </td>
  </tr>
@@ -66,7 +66,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(document).ready(function(){initNavTree('structmb_1_1FormDataItem.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('classmb_1_1MbContentReader.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -92,16 +92,21 @@ $(document).ready(function(){initNavTree('structmb_1_1FormDataItem.html',''); in
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">mb::FormDataItem Member List</div></div>
+  <div class="headertitle"><div class="title">mb::MbContentReader Member List</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>This is the complete list of members for <a class="el" href="structmb_1_1FormDataItem.html">mb::FormDataItem</a>, including all inherited members.</p>
+<p>This is the complete list of members for <a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a>, including all inherited members.</p>
 <table class="directory">
-  <tr class="even"><td class="entry"><a class="el" href="structmb_1_1FormDataItem.html#a07cdffe683a7645ad6af833e59466e96">content</a></td><td class="entry"><a class="el" href="structmb_1_1FormDataItem.html">mb::FormDataItem</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="structmb_1_1FormDataItem.html#a9aab5dbcfdbf24148f1cc86977ee1ab5">content_type</a></td><td class="entry"><a class="el" href="structmb_1_1FormDataItem.html">mb::FormDataItem</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="structmb_1_1FormDataItem.html#a21419c6dc6b7269eaf48798bbca29c33">filename</a></td><td class="entry"><a class="el" href="structmb_1_1FormDataItem.html">mb::FormDataItem</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="structmb_1_1FormDataItem.html#ad99f7c949eb3f59c04689c24f5d09e74">name</a></td><td class="entry"><a class="el" href="structmb_1_1FormDataItem.html">mb::FormDataItem</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html#a7ec316b35993bd5b1708cf69b6e1e8e0">filesMetadata</a>() const</td><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></td><td class="entry"></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html#a936e9ad325222c04eccaa3121b0329b6">formData</a>() const</td><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html#af68b2ea0e1ace34d78d7332c2bd5f9b4">hashMultipartMetadata</a>(const MbFormDataItem &amp;data)</td><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></td><td class="entry"><span class="mlabel">static</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html#ae7fd24eea07b787e35fa34a1cc6cf32e">isMultipartFormData</a>() const</td><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html#a7fb41d139d85d4671d9c6e3c4a2ced6d">jsonBody</a>() const</td><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></td><td class="entry"></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html#a1bf7745819b6cfc71d5db7ca44d53cbb">MbContentReader</a>(const MbRequest &amp;req)</td><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></td><td class="entry"><span class="mlabel">explicit</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html#ae16f19d41a058b818c79cf00cd6f9eee">parseFormDataToEntity</a>(const Entity &amp;entity)</td><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></td><td class="entry"></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html#a73c90a046c3dfa71ed6f715608909543">undoWrittenFiles</a>(const std::string &amp;entity_name)</td><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html#a3d0ce8ef9694f7e88459256b814d3c5b">writeFiles</a>(const std::string &amp;entity_name)</td><td class="entry"><a class="el" href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></td><td class="entry"></td></tr>
 </table></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

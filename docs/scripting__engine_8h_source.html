@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
    </div>
   </td>
  </tr>
@@ -116,8 +116,8 @@ $(document).ready(function(){initNavTree('scripting__engine_8h_source.html','');
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a> {</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keyword">class </span>MantisBase;</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">class </span>MantisRequest;</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">class </span>MantisResponse;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">class </span>MbRequest;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">class </span>MbResponse;</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> ScriptingEngine {</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keyword">public</span>:</div>
@@ -134,38 +134,39 @@ $(document).ready(function(){initNavTree('scripting__engine_8h_source.html','');
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keywordtype">void</span> loadScript(<span class="keyword">const</span> std::string &amp;relativePath);</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="keywordtype">void</span> fireOnServerStart();</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordtype">void</span> fireOnRecordCreated(<span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId);</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordtype">void</span> fireOnRecordUpdated(<span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId);</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        [[nodiscard]] duk_context *ctx()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_ctx; }</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        [[nodiscard]] <span class="keywordtype">bool</span> isActive()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_ctx != <span class="keyword">nullptr</span>; }</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        [[nodiscard]] <span class="keyword">static</span> ScriptingEngine *active();</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keyword">auto</span> withLock(Fn &amp;&amp;fn) -&gt; <span class="keyword">decltype</span>(fn()) {</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>            std::lock_guard lock(m_mutex);</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>            <span class="keywordflow">return</span> fn();</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        }</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="keywordtype">bool</span> pcallBool(<span class="keyword">const</span> DukValue &amp;fn, MantisRequest &amp;req, MantisResponse &amp;res);</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keywordtype">void</span> pcallVoid(<span class="keyword">const</span> DukValue &amp;fn, MantisRequest &amp;req, MantisResponse &amp;res);</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordtype">void</span> registerBindings() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordtype">void</span> evalFile(<span class="keyword">const</span> std::string &amp;filePath);</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordtype">void</span> evalString(<span class="keyword">const</span> std::string &amp;content, <span class="keyword">const</span> std::string &amp;label);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        [[nodiscard]] <span class="keywordtype">bool</span> isRuntimeDisabled() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        MantisBase &amp;m_app;</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        duk_context *m_ctx = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        <span class="keyword">mutable</span> std::mutex m_mutex;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="keyword">static</span> ScriptingEngine *s_active;</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    };</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>}</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#endif </span><span class="comment">// MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">#endif </span><span class="comment">// MB_SCRIPTING_ENGINE_H</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordtype">void</span> fireOnServerShutdown();</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordtype">void</span> fireOnRecordCreated(<span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keywordtype">void</span> fireOnRecordUpdated(<span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        [[nodiscard]] duk_context *ctx()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_ctx; }</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        [[nodiscard]] <span class="keywordtype">bool</span> isActive()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_ctx != <span class="keyword">nullptr</span>; }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        [[nodiscard]] <span class="keyword">static</span> ScriptingEngine *active();</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="keyword">auto</span> withLock(Fn &amp;&amp;fn) -&gt; <span class="keyword">decltype</span>(fn()) {</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>            std::lock_guard lock(m_mutex);</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>            <span class="keywordflow">return</span> fn();</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        }</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keywordtype">bool</span> pcallBool(<span class="keyword">const</span> DukValue &amp;fn, MbRequest &amp;req, MbResponse &amp;res);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordtype">void</span> pcallVoid(<span class="keyword">const</span> DukValue &amp;fn, MbRequest &amp;req, MbResponse &amp;res);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordtype">void</span> registerBindings() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordtype">void</span> evalFile(<span class="keyword">const</span> std::string &amp;filePath);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keywordtype">void</span> evalString(<span class="keyword">const</span> std::string &amp;content, <span class="keyword">const</span> std::string &amp;label);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        [[nodiscard]] <span class="keywordtype">bool</span> isRuntimeDisabled() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        MantisBase &amp;m_app;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        duk_context *m_ctx = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="keyword">mutable</span> std::mutex m_mutex;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keyword">static</span> ScriptingEngine *s_active;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    };</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">#endif </span><span class="comment">// MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">#endif </span><span class="comment">// MB_SCRIPTING_ENGINE_H</span></div>
 <div class="ttc" id="aexport_8h_html_ad67b3f9a509bd18bd030486e98d14e34"><div class="ttname"><a href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a></div><div class="ttdeci">#define MANTISBASE_API</div><div class="ttdef"><b>Definition</b> export.h:25</div></div>
 <div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdef"><b>Definition</b> api_keys.h:32</div></div>
 <div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the IMantisBase DI mixin.</div></div>

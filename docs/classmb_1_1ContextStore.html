@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
    </div>
   </td>
  </tr>
@@ -124,7 +124,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa77275ed339fe00137073d7c77fee7aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The <code><a class="el" href="classmb_1_1ContextStore.html">ContextStore</a></code> class provides a key-value store for scripting and internal utilities. HTTP handlers should use <a class="el" href="classmb_1_1MantisRequest.html#a23bb174cf4bb490c7b85cbdc71d39a82">MantisRequest::set</a> and <a class="el" href="classmb_1_1MantisRequest.html#a3d0c9a8518ff574fc92fa28536a38505">MantisRequest::getOr</a> for per-request attributes (<code>auth</code>, etc.).</p>
+<div class="textblock"><p>The <code><a class="el" href="classmb_1_1ContextStore.html">ContextStore</a></code> class provides a key-value store for scripting and internal utilities. HTTP handlers should use MantisRequest::set and MantisRequest::getOr for per-request attributes (<code>auth</code>, etc.).</p>
 <p>For instance, the auth middleware will inject user <code>id</code> and subsequent middlewares can retrieve it as needed.</p>
 <div class="fragment"><div class="line"><span class="comment">// Create the object</span></div>
 <div class="line"><a class="code hl_function" href="classmb_1_1ContextStore.html#abf98fe301e99f96a6e7cec99aea0f400">Context</a> <a class="code hl_function" href="classmb_1_1ContextStore.html#abf98fe301e99f96a6e7cec99aea0f400">ctx</a>;</div>

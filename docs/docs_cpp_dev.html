@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
    </div>
   </td>
  </tr>
@@ -110,7 +110,9 @@ What you get</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>mantisbase_&lt;tag&gt;-linux-cpp-dev.zip</code>   </td><td class="markdownTableBodyNone"><code>libmantisbase.so</code> for x86-64 (<code>libs/x86</code>) and aarch64 (<code>libs/arm</code>) + Linux headers    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>mantisbase_&lt;tag&gt;-windows-cpp-dev.zip</code>   </td><td class="markdownTableBodyNone"><code>libmantisbase.dll</code> (+ import lib) for x86-64 + Windows headers   </td></tr>
+<td class="markdownTableBodyNone"><code>mantisbase_&lt;tag&gt;-windows-cpp-dev.zip</code>   </td><td class="markdownTableBodyNone"><code>libmantisbase.dll</code> (+ import lib) for x86-64 (<code>libs/x86</code>) and ARM64 (<code>libs/arm</code>) + Windows headers    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>mantisbase_&lt;tag&gt;-darwin-cpp-dev.zip</code>   </td><td class="markdownTableBodyNone"><code>libmantisbase.dylib</code> for Intel (<code>libs/x86</code>) and Apple Silicon (<code>libs/arm</code>) + macOS headers   </td></tr>
 </table>
 <p>Download from <a href="https://github.com/allankoechke/mantisbase/releases">GitHub Releases</a> and unzip, e.g. into <code>mantisbase-linux-cpp-dev/</code>. Every package contains:</p>
 <div class="fragment"><div class="line">README.md        quick start</div>
@@ -120,7 +122,7 @@ What you get</h2>
 <div class="line">                 jsoncpp, soci, spdlog, fmt, dukglue, duktape, wolfssl, ...)</div>
 <div class="line">libs/</div>
 <div class="line">  x86/           prebuilt shared library for x86-64</div>
-<div class="line">  arm/           prebuilt shared library for aarch64 (Linux only)</div>
+<div class="line">  arm/           prebuilt shared library for aarch64</div>
 <div class="line">cmake/</div>
 <div class="line">  MantisBaseConfig.cmake         find_package(MantisBase) entry point</div>
 <div class="line">  MantisBaseConfigVersion.cmake  version matching</div>
@@ -133,7 +135,9 @@ Prerequisites</h2>
 <div class="line">sudo apt-get install -y libpq-dev uuid-dev</div>
 </div><!-- fragment --><p>(Runtime packages on Debian/Ubuntu are <code>libpq5</code> and <code>libuuid1</code>.)</p>
 <p><b>Windows (MinGW)</b> — no extra packages. The socket/RPC/IP-helper/crypto system libraries (<code>ws2_32</code>, <code>rpcrt4</code>, <code>iphlpapi</code>, <code>crypt32</code>) are linked automatically.</p>
-<p><b>Toolchain</b> — C++20 compiler (GCC/MinGW 13+) and CMake 3.22+.</p>
+<p><b>macOS</b> — the shared library needs its system dependencies at build and run time:</p>
+<div class="fragment"><div class="line">brew install libpq ossp-uuid</div>
+</div><!-- fragment --><p><b>Toolchain</b> — C++20 compiler (GCC/MinGW 13+, Apple Clang 15+) and CMake 3.22+.</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md138"></a>
 Integration</h2>
@@ -151,6 +155,9 @@ Option B: manual (without CMake)</h3>
 </div><!-- fragment --><p>Windows (MinGW) — keep <code>libmantisbase.dll</code> next to your <code>.exe</code> at runtime:</p>
 <div class="fragment"><div class="line">target_include_directories(my_app PRIVATE path/to/include)</div>
 <div class="line">target_link_libraries(my_app PRIVATE path/to/libs/x86/libmantisbase.dll.a ws2_32 rpcrt4 iphlpapi crypt32)</div>
+</div><!-- fragment --><p>macOS — make sure the <code>.dylib</code> is findable at runtime (via <code>rpath</code>):</p>
+<div class="fragment"><div class="line"># Example: Apple Silicon, shared</div>
+<div class="line">clang++ -std=c++20 main.cpp -I path/to/include -L path/to/libs/arm -lmantisbase -Wl,-rpath,path/to/libs/arm -lpq -luuid -ldl -lpthread -lm -o my_app</div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md141"></a>
 &lt;tt&gt;main.cpp&lt;/tt&gt;</h3>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="mantisbase_8h.html">mantisbase/mantisbase.h</a>&gt;</span></div>
@@ -160,7 +167,7 @@ Option B: manual (without CMake)</h3>
 <div class="line">    <span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a>(argc, argv);</div>
 <div class="line">    <span class="keywordflow">return</span> app-&gt;run();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassmb_1_1MantisBase_html_a39320e2aeb02263d4bc2252e1853854a"><div class="ttname"><a href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a></div><div class="ttdeci">static std::unique_ptr&lt; MantisBase &gt; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:62</div></div>
+<div class="ttc" id="aclassmb_1_1MantisBase_html_a39320e2aeb02263d4bc2252e1853854a"><div class="ttname"><a href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a></div><div class="ttdeci">static std::unique_ptr&lt; MantisBase &gt; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:65</div></div>
 <div class="ttc" id="amain_8cpp_html_a638b85ceffac097c2aa79b76ba8c055e"><div class="ttname"><a href="main_8cpp.html#a638b85ceffac097c2aa79b76ba8c055e">main</a></div><div class="ttdeci">int main(const int argc, char *argv[])</div><div class="ttdoc">MantisApp standalone entrypoint.</div><div class="ttdef"><b>Definition</b> main.cpp:16</div></div>
 <div class="ttc" id="amantisbase_8h_html"><div class="ttname"><a href="mantisbase_8h.html">mantisbase.h</a></div><div class="ttdoc">The main application for mantisbase.</div></div>
 </div><!-- fragment --><p><code>MantisBase::create()</code> returns a <code>std::unique_ptr&lt;MantisBase&gt;</code> that you own; <code>run()</code> starts the HTTP server (blocking). Lifecycle details live in the <a class="el" href="embedding_8md.html">Embedding Guide</a>.</p>
@@ -171,7 +178,7 @@ Troubleshooting</h2>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Symptom   </th><th class="markdownTableHeadNone">Cause / fix    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">&lsquo;MantisBase dev package does not support &rsquo;&lt;system&gt;'<code>\ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; You unzipped the wrong OS package — download the</code>-linux-cpp-dev<code>or</code>-windows-cpp-dev<code>zip matching your machine. \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowEven"&gt; &lt;td class="markdownTableBodyNone"&gt;</code>MantisBase shared library not found: '.../libs/&lt;arch&gt;/...'<code>\ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; No binary for your CPU in this package (e.g. 32-bit, or arm on Windows). Check</code>libs/<code>for shipped architectures, or [build from source](<a class="el" href="installation_8md.html">installation.md</a>). \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowOdd"&gt; &lt;td class="markdownTableBodyNone"&gt;</code>MantisBase requires libpq / libuuid&lt;tt&gt;(Linux) \ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; Installlibpq-dev<code>and</code>uuid-dev<code>(see Prerequisites). \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowEven"&gt; &lt;td class="markdownTableBodyNone"&gt; App builds but fails to start:</code>libmantisbase.so: cannot open shared object file<code>\ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; The loader can't find the</code>.so<code>— set</code>LD_LIBRARY_PATH<code>or link with</code>-Wl,-rpath,&lt;libs dir&gt;<code>. \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowOdd"&gt; &lt;td class="markdownTableBodyNone"&gt; App builds but fails to start on Windows (</code>0xc0000135<code>/ missing DLL) \ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; Copy</code>libmantisbase.dll<code>next to your</code>.exe<code>. \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowEven"&gt; &lt;td class="markdownTableBodyNone"&gt;</code>find_package<code>reports a version mismatch \ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; Request a compatible version (</code>find_package(MantisBase 0.4 REQUIRED)<code>); on</code>0.x` releases minor versions must match.   </td></tr>
+<td class="markdownTableBodyNone">&lsquo;MantisBase dev package does not support &rsquo;&lt;system&gt;'<code>\ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; You unzipped the wrong OS package — download the</code>-linux-cpp-dev<code>,</code>-windows-cpp-dev<code>or</code>-darwin-cpp-dev<code>zip matching your machine. \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowEven"&gt; &lt;td class="markdownTableBodyNone"&gt;</code>MantisBase shared library not found: '.../libs/&lt;arch&gt;/...'<code>\ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; No binary for your CPU in this package (e.g. 32-bit). Check</code>libs/<code>for shipped architectures, or [build from source](<a class="el" href="installation_8md.html">installation.md</a>). \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowOdd"&gt; &lt;td class="markdownTableBodyNone"&gt;</code>MantisBase requires libpq / libuuid<code>(Linux/macOS) \ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; Install</code>libpq-dev<code>and</code>uuid-dev<code>on Linux,</code>libpq<code>and</code>ossp-uuid<code>(Homebrew) on macOS (see Prerequisites). \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowEven"&gt; &lt;td class="markdownTableBodyNone"&gt; App builds but fails to start:</code>libmantisbase.so: cannot open shared object file<code>\ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; The loader can't find the</code>.so<code>— set</code>LD_LIBRARY_PATH<code>or link with</code>-Wl,-rpath,&lt;libs dir&gt;<code>. \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowOdd"&gt; &lt;td class="markdownTableBodyNone"&gt; App builds but fails to start on Windows (</code>0xc0000135<code>/ missing DLL) \ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; Copy</code>libmantisbase.dll<code>next to your</code>.exe<code>. \ilinebr &lt;/td&gt; &lt;/tr&gt; &lt;tr class="markdownTableRowEven"&gt; &lt;td class="markdownTableBodyNone"&gt;</code>find_package<code>reports a version mismatch \ilinebr &lt;/td&gt; &lt;td class="markdownTableBodyNone"&gt; Request a compatible version (</code>find_package(MantisBase 0.4 REQUIRED)<code>); on</code>0.x` releases minor versions must match.   </td></tr>
 </table>
 <hr  />
 <h2><a class="anchor" id="autotoc_md145"></a>

@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.6</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
    </div>
   </td>
  </tr>
@@ -125,146 +125,147 @@ $(document).ready(function(){initNavTree('entity__schema_8h_source.html',''); in
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classmb_1_1EntitySchema.html#aba597aa890e644b165e0a5d0b8e04f17">   60</a></span>        <a class="code hl_function" href="classmb_1_1EntitySchema.html#aba597aa890e644b165e0a5d0b8e04f17">EntitySchema</a>(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;);</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;operator=(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;);</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="comment">// Move operators ...</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classmb_1_1EntitySchema.html#a15fd2f97444d3cd69b193518f58d6ff7">   64</a></span>        <a class="code hl_function" href="classmb_1_1EntitySchema.html#a15fd2f97444d3cd69b193518f58d6ff7">EntitySchema</a>(<a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;&amp;) noexcept = default;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classmb_1_1EntitySchema.html#a6747a8bff3afa7dc08441208ea51d221">   65</a></span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;operator=(<a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;&amp;) noexcept = default;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classmb_1_1EntitySchema.html#a14dd82ab96e0112791d737b25934b1eb">   67</a></span>        ~<a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a>();</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordtype">bool</span> operator==(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;other) const;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        static <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> fromSchema(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;entity_schema);</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        static <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> fromEntity(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_class" href="classmb_1_1Entity.html">Entity</a> &amp;entity);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1Entity.html">Entity</a> toEntity() const;</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        <span class="comment">// ----------- SCHEMA METHODS ----------- //</span></div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> <span class="keywordtype">id</span>() const;</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> name() const;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setName(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;name);</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> type() const;</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setType(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;type);</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasApi() const;</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setHasApi(const <span class="keywordtype">bool</span> &amp;hasApi);</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        [[nodiscard]] <span class="keywordtype">bool</span> isSystem() const;</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setSystem(const <span class="keywordtype">bool</span> &amp;isSystem);</div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> listRule() const;</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setListRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;listRule);</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> getRule() const;</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setGetRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;getRule);</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> addRule() const;</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setAddRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;addRule);</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> updateRule() const;</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setUpdateRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;updateRule);</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> deleteRule() const;</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setDeleteRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;deleteRule);</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> </div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a>&gt; fields() const;</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;addField(const <a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;field);</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        <span class="keywordtype">bool</span> removeField(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_name);</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        <a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;field(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_name);</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        <a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;fieldById(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_id);</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasField(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_name) const;</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span> </div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasFieldById(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_id) const;</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> viewQuery() const;</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setViewQuery(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;viewQuery);</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        [[nodiscard]] const <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_struct" href="structmb_1_1IndexDefinition.html">IndexDefinition</a>&gt; &amp;indexes() const;</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;addIndex(const <a class="code hl_struct" href="structmb_1_1IndexDefinition.html">IndexDefinition</a> &amp;index);</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        <span class="keywordtype">bool</span> removeIndex(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;index_name);</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>        <span class="keywordtype">void</span> updateWith(const nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;new_data);</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <span class="comment">// ----------- SCHEMA CONVERSION ----------- //</span></div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> toJSON() const;</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> toDDL() const;</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&gt; indexDDL() const;</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span> </div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        static <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> toDefaultSqlValue(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;type, const nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;v);</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span> </div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> dump() const;</div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>        <span class="comment">// ----------- SCHEMA CRUD ----------- //</span></div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>        static nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> listTables(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;opts = nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>::<span class="keywordtype">object</span>());</div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span> </div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>        static nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> getTable(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;table_id);</div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span> </div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>        static nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> createTable(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;new_table);</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span> </div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>        static nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> updateTable(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;table_id, const nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;new_schema);</div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span> </div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>        static <span class="keywordtype">void</span> dropTable(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;original_table);</div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>        static <span class="keywordtype">void</span> dropTable(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;table_id);</div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span> </div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>        static <span class="keywordtype">bool</span> tableExists(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;table_name);</div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>        static <span class="keywordtype">bool</span> tableExists(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;table);</div>
-<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span> </div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>        static <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> genEntityId(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;entity_name);</div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span> </div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>        static <a class="code hl_namespace" href="namespacestd.html">std</a>::optional&lt;<a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&gt; validate(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;table_schema);</div>
-<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span> </div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::optional&lt;<a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&gt; validate() const;</div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span> </div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>        static <span class="keywordtype">bool</span> isValidEntityName(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&amp; name);</div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span> </div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>        static <span class="keywordtype">bool</span> isValidEntityType(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&amp; type);</div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span> </div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>        static const <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a>&gt; &amp;defaultBaseFieldsSchema();</div>
-<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span> </div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>        static const <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a>&gt; &amp;defaultAuthFieldsSchema();</div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span> </div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>    private:</div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>        static <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> getFieldType(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;type, <a class="code hl_namespace" href="namespacestd.html">std</a>::shared_ptr&lt;<a class="code hl_namespace" href="namespacesoci.html">soci</a>::session&gt; sql,</div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>                                        <a class="code hl_enumeration" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision = <a class="code hl_enumeration" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>::I32);</div>
-<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span> </div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>        <span class="keywordtype">void</span> addFieldsIfNotExist(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;type);</div>
-<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span> </div>
-<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> m_name;</div>
-<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> m_type;</div>
-<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> m_viewSqlQuery;</div>
-<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>        <span class="keywordtype">bool</span> m_isSystem = false;</div>
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>        <span class="keywordtype">bool</span> m_hasApi = true;</div>
-<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a>&gt; m_fields;</div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_struct" href="structmb_1_1IndexDefinition.html">IndexDefinition</a>&gt; m_indexes;</div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;</div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    };</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="comment">// Move operators (move ctor can copy the app ref; move assignment</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="comment">// keeps the bound app and moves the rest, mirroring copy assignment)</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classmb_1_1EntitySchema.html#a15fd2f97444d3cd69b193518f58d6ff7">   65</a></span>        <a class="code hl_function" href="classmb_1_1EntitySchema.html#a15fd2f97444d3cd69b193518f58d6ff7">EntitySchema</a>(<a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;&amp;) noexcept = default;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;operator=(<a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;&amp;) noexcept;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classmb_1_1EntitySchema.html#a14dd82ab96e0112791d737b25934b1eb">   68</a></span>        ~<a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a>();</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        <span class="keywordtype">bool</span> operator==(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;other) const;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        static <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> fromSchema(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;entity_schema);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        static <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> fromEntity(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_class" href="classmb_1_1Entity.html">Entity</a> &amp;entity);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1Entity.html">Entity</a> toEntity() const;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <span class="comment">// ----------- SCHEMA METHODS ----------- //</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> <span class="keywordtype">id</span>() const;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> name() const;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setName(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;name);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> type() const;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setType(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;type);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasApi() const;</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setHasApi(const <span class="keywordtype">bool</span> &amp;hasApi);</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        [[nodiscard]] <span class="keywordtype">bool</span> isSystem() const;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setSystem(const <span class="keywordtype">bool</span> &amp;isSystem);</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> listRule() const;</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setListRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;listRule);</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> getRule() const;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setGetRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;getRule);</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> addRule() const;</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setAddRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;addRule);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> updateRule() const;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setUpdateRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;updateRule);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> deleteRule() const;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setDeleteRule(const <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> &amp;deleteRule);</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a>&gt; fields() const;</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;addField(const <a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;field);</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        <span class="keywordtype">bool</span> removeField(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_name);</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        <a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;field(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_name);</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        <a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a> &amp;fieldById(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_id);</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasField(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_name) const;</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasFieldById(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;field_id) const;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> viewQuery() const;</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;setViewQuery(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;viewQuery);</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        [[nodiscard]] const <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_struct" href="structmb_1_1IndexDefinition.html">IndexDefinition</a>&gt; &amp;indexes() const;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;addIndex(const <a class="code hl_struct" href="structmb_1_1IndexDefinition.html">IndexDefinition</a> &amp;index);</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        <span class="keywordtype">bool</span> removeIndex(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;index_name);</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        <span class="keywordtype">void</span> updateWith(const nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;new_data);</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <span class="comment">// ----------- SCHEMA CONVERSION ----------- //</span></div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> toJSON() const;</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> toDDL() const;</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span> </div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&gt; indexDDL() const;</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        static <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> toDefaultSqlValue(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;type, const nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;v);</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> dump() const;</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span> </div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>        <span class="comment">// ----------- SCHEMA CRUD ----------- //</span></div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>        static nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> listTables(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;opts = nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>::<span class="keywordtype">object</span>());</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        static nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> getTable(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;table_id);</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>        static nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> createTable(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;new_table);</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span> </div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>        static nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> updateTable(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;table_id, const nlohmann::<a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;new_schema);</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span> </div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>        static <span class="keywordtype">void</span> dropTable(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;original_table);</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span> </div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>        static <span class="keywordtype">void</span> dropTable(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;table_id);</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>        static <span class="keywordtype">bool</span> tableExists(const <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app, const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;table_name);</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span> </div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>        static <span class="keywordtype">bool</span> tableExists(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;table);</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span> </div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        static <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> genEntityId(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;entity_name);</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span> </div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>        static <a class="code hl_namespace" href="namespacestd.html">std</a>::optional&lt;<a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&gt; validate(const <a class="code hl_class" href="classmb_1_1EntitySchema.html">EntitySchema</a> &amp;table_schema);</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span> </div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>        [[nodiscard]] <a class="code hl_namespace" href="namespacestd.html">std</a>::optional&lt;<a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&gt; validate() const;</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span> </div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>        static <span class="keywordtype">bool</span> isValidEntityName(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&amp; name);</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span> </div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>        static <span class="keywordtype">bool</span> isValidEntityType(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span>&amp; type);</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span> </div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>        static const <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a>&gt; &amp;defaultBaseFieldsSchema();</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span> </div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>        static const <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a>&gt; &amp;defaultAuthFieldsSchema();</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>    private:</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>        static <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> getFieldType(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;type, <a class="code hl_namespace" href="namespacestd.html">std</a>::shared_ptr&lt;<a class="code hl_namespace" href="namespacesoci.html">soci</a>::session&gt; sql,</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>                                        <a class="code hl_enumeration" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a> precision = <a class="code hl_enumeration" href="namespacemb.html#a780ec702fe75b294d0f0e2e08a9254df">IntPrecision</a>::I32);</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span> </div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>        <span class="keywordtype">void</span> addFieldsIfNotExist(const <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> &amp;type);</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span> </div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> m_name;</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> m_type;</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::<span class="keywordtype">string</span> m_viewSqlQuery;</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>        <span class="keywordtype">bool</span> m_isSystem = false;</div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        <span class="keywordtype">bool</span> m_hasApi = true;</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_class" href="classmb_1_1EntitySchemaField.html">EntitySchemaField</a>&gt; m_fields;</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <a class="code hl_namespace" href="namespacestd.html">std</a>::vector&lt;<a class="code hl_struct" href="structmb_1_1IndexDefinition.html">IndexDefinition</a>&gt; m_indexes;</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        <a class="code hl_class" href="classmb_1_1AccessRule.html">AccessRule</a> m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>    };</div>
 </div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>} <span class="comment">// mb</span></div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span> </div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span><span class="preprocessor">#endif </span><span class="comment">//MANTISBASE_ENTITY_SCHEMA_H</span></div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>} <span class="comment">// mb</span></div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span> </div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span><span class="preprocessor">#endif </span><span class="comment">//MANTISBASE_ENTITY_SCHEMA_H</span></div>
 <div class="ttc" id="aaccess__rules_8h_html"><div class="ttname"><a href="access__rules_8h.html">access_rules.h</a></div><div class="ttdoc">Access rule definition and shared evaluation for entity permissions.</div></div>
 <div class="ttc" id="aclassmb_1_1AccessRule_html"><div class="ttname"><a href="classmb_1_1AccessRule.html">mb::AccessRule</a></div><div class="ttdoc">Access control rule for entity permissions.</div><div class="ttdef"><b>Definition</b> access_rules.h:45</div></div>
 <div class="ttc" id="aclassmb_1_1EntitySchemaField_html"><div class="ttname"><a href="classmb_1_1EntitySchemaField.html">mb::EntitySchemaField</a></div><div class="ttdef"><b>Definition</b> entity_schema_field.h:34</div></div>

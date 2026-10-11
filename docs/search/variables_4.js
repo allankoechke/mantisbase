@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['filename_0',['filename',['../structmb_1_1FormDataItem.html#a21419c6dc6b7269eaf48798bbca29c33',1,'mb::FormDataItem']]]
+  ['filename_0',['filename',['../structmb_1_1MbFormDataItem.html#affb83fae33ec66b80fcc482a66604516',1,'mb::MbFormDataItem']]]
 ];

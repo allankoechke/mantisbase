@@ -18,7 +18,7 @@ var searchData=
   ['build_15',['As a Prebuilt Package (no source build)',['../docs_embedding.html#autotoc_md168',1,'']]],
   ['build_20and_20runtime_20switches_16',['Build and runtime switches',['../docs_scripting.html#autotoc_md306',1,'']]],
   ['build_20from_20source_17',['Build from Source',['../index.html#autotoc_md238',1,'']]],
-  ['buildaccessexprvars_18',['buildaccessexprvars',['../namespacemb.html#a6c2dcb3f695dd5a949294cd3c4f15153',1,'mb::buildAccessExprVars(const nlohmann::json &amp;auth, const std::string &amp;remote_addr, int remote_port, const std::string &amp;local_addr, int local_port, const nlohmann::json &amp;body=nlohmann::json::object())'],['../namespacemb.html#abf21ba1339ea77eaf96f1ce402c3c8d8',1,'mb::buildAccessExprVars(const MantisRequest &amp;req, const nlohmann::json &amp;auth)']]],
+  ['buildaccessexprvars_18',['buildaccessexprvars',['../namespacemb.html#a6c2dcb3f695dd5a949294cd3c4f15153',1,'mb::buildAccessExprVars(const nlohmann::json &amp;auth, const std::string &amp;remote_addr, int remote_port, const std::string &amp;local_addr, int local_port, const nlohmann::json &amp;body=nlohmann::json::object())'],['../namespacemb.html#a5d3826901b055f186010c4c39630036f',1,'mb::buildAccessExprVars(const MbRequest &amp;req, const nlohmann::json &amp;auth)']]],
   ['buildauthorizeurl_19',['buildAuthorizeUrl',['../classmb_1_1OAuthManager.html#a628847dbe7e2e4ca3fc60b4ef09a5b52',1,'mb::OAuthManager']]],
   ['building_20and_20running_20',['Building and Running',['../docs_docker.html#autotoc_md149',1,'']]],
   ['built_20binary_21',['Pre-built Binary',['../index.html#autotoc_md237',1,'']]]

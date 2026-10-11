@@ -1,7 +1,7 @@
 var http_8h =
 [
-    [ "mb::MantisRequest", "classmb_1_1MantisRequest.html", "classmb_1_1MantisRequest" ],
-    [ "mb::MantisResponse", "classmb_1_1MantisResponse.html", "classmb_1_1MantisResponse" ],
-    [ "mb::FormDataItem", "structmb_1_1FormDataItem.html", "structmb_1_1FormDataItem" ],
-    [ "mb::MantisContentReader", "classmb_1_1MantisContentReader.html", "classmb_1_1MantisContentReader" ]
+    [ "mb::MbRequest", "classmb_1_1MbRequest.html", "classmb_1_1MbRequest" ],
+    [ "mb::MbResponse", "classmb_1_1MbResponse.html", "classmb_1_1MbResponse" ],
+    [ "mb::MbFormDataItem", "structmb_1_1MbFormDataItem.html", "structmb_1_1MbFormDataItem" ],
+    [ "mb::MbContentReader", "classmb_1_1MbContentReader.html", "classmb_1_1MbContentReader" ]
 ];

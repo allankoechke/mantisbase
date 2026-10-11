@@ -12,14 +12,13 @@ var hierarchy =
       [ "mb::MantisException", "classmb_1_1MantisException.html", null ]
     ] ],
     [ "mb::Expr", "structmb_1_1Expr.html", null ],
-    [ "mb::FormDataItem", "structmb_1_1FormDataItem.html", null ],
     [ "mb::IMantisBase", "classmb_1_1IMantisBase.html", [
       [ "mb::ApiKeyManager", "classmb_1_1ApiKeyManager.html", null ],
       [ "mb::Entity", "classmb_1_1Entity.html", null ],
       [ "mb::EntitySchema", "classmb_1_1EntitySchema.html", null ],
       [ "mb::FilesMgr", "classmb_1_1FilesMgr.html", null ],
-      [ "mb::MantisRequest", "classmb_1_1MantisRequest.html", null ],
-      [ "mb::MantisResponse", "classmb_1_1MantisResponse.html", null ],
+      [ "mb::MbRequest", "classmb_1_1MbRequest.html", null ],
+      [ "mb::MbResponse", "classmb_1_1MbResponse.html", null ],
       [ "mb::OAuthManager", "classmb_1_1OAuthManager.html", null ],
       [ "mb::RealtimeDB", "classmb_1_1RealtimeDB.html", null ],
       [ "mb::Router", "classmb_1_1Router.html", null ],
@@ -33,7 +32,8 @@ var hierarchy =
       [ "mb::MantisLoggerImpl", "classmb_1_1MantisLoggerImpl.html", null ]
     ] ],
     [ "mb::MantisBase", "classmb_1_1MantisBase.html", null ],
-    [ "mb::MantisContentReader", "classmb_1_1MantisContentReader.html", null ],
+    [ "mb::MbContentReader", "classmb_1_1MbContentReader.html", null ],
+    [ "mb::MbFormDataItem", "structmb_1_1MbFormDataItem.html", null ],
     [ "mb::RealtimeAuthSnapshot", "structmb_1_1RealtimeAuthSnapshot.html", null ],
     [ "mb::RealtimeWsSession", "structmb_1_1RealtimeWsSession.html", null ],
     [ "mb::RouteHandler", "structmb_1_1RouteHandler.html", null ],
