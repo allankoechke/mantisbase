@@ -15,11 +15,11 @@ namespace mb {
     class MbRequest;
 
     /** @return `true` when @p auth represents an unauthenticated guest. */
-    MANTISBASE_API [[nodiscard]] bool isGuestAuth(const nlohmann::json &auth);
+    [[nodiscard]] MANTISBASE_API bool isGuestAuth(const nlohmann::json &auth);
     /** @return `true` when @p auth represents an `mb_admins` session. */
-    MANTISBASE_API [[nodiscard]] bool isAdminAuth(const nlohmann::json &auth);
+    [[nodiscard]] MANTISBASE_API bool isAdminAuth(const nlohmann::json &auth);
     /** @return `true` when @p auth represents a regular entity user session. */
-    MANTISBASE_API [[nodiscard]] bool isUserAuth(const nlohmann::json &auth);
+    [[nodiscard]] MANTISBASE_API bool isUserAuth(const nlohmann::json &auth);
 
     /** Outcome of @ref evaluateAccessRule for HTTP, SSE, and WebSocket checks. */
     enum class AccessEvalResult {
@@ -76,18 +76,18 @@ namespace mb {
     };
 
     /** Evaluate @p rule against @p ctx (auth, verification, optional request). */
-    MANTISBASE_API [[nodiscard]] AccessEvalResult evaluateAccessRule(const AccessRule &rule, const AccessEvalContext &ctx);
+    [[nodiscard]] MANTISBASE_API AccessEvalResult evaluateAccessRule(const AccessRule &rule, const AccessEvalContext &ctx);
 
     /** Build expression variables from an HTTP request and auth block (custom rules). */
-    MANTISBASE_API [[nodiscard]] nlohmann::json buildAccessExprVars(const MbRequest &req, const nlohmann::json &auth);
+    [[nodiscard]] MANTISBASE_API nlohmann::json buildAccessExprVars(const MbRequest &req, const nlohmann::json &auth);
 
     /** Build expression variables for non-HTTP contexts (SSE/WS, tests). */
-    MANTISBASE_API [[nodiscard]] nlohmann::json buildAccessExprVars(const nlohmann::json &auth, const std::string &remote_addr,
+    [[nodiscard]] MANTISBASE_API nlohmann::json buildAccessExprVars(const nlohmann::json &auth, const std::string &remote_addr,
                                                      int remote_port, const std::string &local_addr, int local_port,
                                                      const nlohmann::json &body = nlohmann::json::object());
 
     /** @return `{status, error}` for HTTP error responses. */
-    MANTISBASE_API [[nodiscard]] std::pair<int, std::string> accessEvalHttpError(AccessEvalResult result,
+    [[nodiscard]] MANTISBASE_API std::pair<int, std::string> accessEvalHttpError(AccessEvalResult result,
                                                                   const AccessRule &rule = AccessRule{});
 } // mb
 
