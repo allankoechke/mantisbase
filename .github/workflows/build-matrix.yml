@@ -45,16 +45,16 @@ jobs:
           - os: macos-15-intel
             c_compiler: clang
             cpp_compiler: clang++
-            platform: macos-x86_64
-            lib_platform: macos
+            platform: darwin-x86_64
+            lib_platform: darwin
             arch: x86_64
             arch_label: x86-64
             pkg_arch: x86
           - os: macos-latest
             c_compiler: clang
             cpp_compiler: clang++
-            platform: macos-aarch64
-            lib_platform: macos
+            platform: darwin-aarch64
+            lib_platform: darwin
             arch: aarch64
             arch_label: aarch64
             pkg_arch: arm
@@ -82,7 +82,7 @@ jobs:
           sudo apt-get install -y libpq-dev uuid-dev ninja-build
 
       - name: Install dependencies (macOS)
-        if: matrix.lib_platform == 'macos'
+        if: matrix.lib_platform == 'darwin'
         run: |
           # PostgreSQL backend is enabled on all UNIX (see cmake/add-soci.cmake);
           # brew libpq is keg-only, so expose it for find_package(PostgreSQL).
@@ -200,7 +200,7 @@ jobs:
             -S ${{ github.workspace }}
 
       - name: Configure CMake (macOS)
-        if: matrix.lib_platform == 'macos'
+        if: matrix.lib_platform == 'darwin'
         run: |
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -G Ninja \
@@ -229,7 +229,7 @@ jobs:
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
 
       - name: Check dev headers (Linux/macOS)
-        if: matrix.lib_platform == 'linux' || matrix.lib_platform == 'macos'
+        if: matrix.lib_platform == 'linux' || matrix.lib_platform == 'darwin'
         shell: bash
         run: |
           # Coalesce the dev-package header tree, then prove every public
@@ -317,7 +317,7 @@ jobs:
           (cd "$STAGING" && zip -r "../mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip" .)
 
       - name: Zip the build output (macOS)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'darwin'
         run: |
           cd ${{ github.workspace }}/build/bin
           rm -f mantisbase_tests
@@ -326,7 +326,7 @@ jobs:
           cp mantisbase "$STAGING/"
           cp "${{ github.workspace }}/LICENSE" "$STAGING/"
           cp "${{ github.workspace }}/mantisbase.d.ts" "$STAGING/"
-          cp "${{ github.workspace }}/.github/release/README-macos-binary.md" "$STAGING/README.md"
+          cp "${{ github.workspace }}/.github/release/README-darwin-binary.md" "$STAGING/README.md"
           mkdir -p zip
           (cd "$STAGING" && zip -r "../mantisbase_${{ github.ref_name }}_${{ matrix.platform }}.zip" .)
 
@@ -434,7 +434,7 @@ jobs:
         # Staged under lib-staging/darwin/ (not macos/) to match the dev-package
         # OS naming in cmake/package-dev.cmake. The Python wheels locate the
         # .dylib by filename, so they are unaffected by the folder name.
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'darwin'
         shell: bash
         run: |
           STAGING="lib-staging/darwin/libs/${{ matrix.pkg_arch }}"
@@ -443,21 +443,21 @@ jobs:
             "${STAGING}/"
 
       - name: Upload library artifact (macOS)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'darwin'
         uses: actions/upload-artifact@v4
         with:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-lib
           path: lib-staging/
 
       - name: Stage dev headers (macOS)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'darwin'
         shell: bash
         run: |
           cmake --install ${{ steps.strings.outputs.build-output-dir }} \
             --component mb-dev-headers --prefix headers-staging
 
       - name: Upload headers artifact (macOS)
-        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'macos'
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.lib_platform == 'darwin'
         uses: actions/upload-artifact@v4
         with:
           name: mantisbase_${{ github.ref_name }}_${{ matrix.platform }}-headers

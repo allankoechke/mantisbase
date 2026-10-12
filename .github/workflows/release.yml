@@ -45,7 +45,7 @@ jobs:
             -DMB_LIB_STAGING_DIR=${{ github.workspace }}/dev-staging \
             -DMB_LINUX_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_linux-x86_64-headers/include \
             -DMB_WINDOWS_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_windows-x86_64-headers/include \
-            -DMB_DARWIN_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_macos-x86_64-headers/include \
+            -DMB_DARWIN_HEADERS_DIR=${{ github.workspace }}/dev-headers/mantisbase_${{ github.ref_name }}_darwin-x86_64-headers/include \
             -DMB_OUTPUT_DIR=${{ github.workspace }}/dev-package \
             -P cmake/package-dev.cmake
           # NOTE: the x86_64 header tree is the canonical one per OS (generated
