@@ -213,6 +213,19 @@ namespace mb
         void setScriptsDir(const std::string& dir);
 
         /**
+         * @brief Retrieves the templates directory where email template files are stored
+         * used for sending confirmation/password reset emails.
+         *
+         * @return MantisApp scripts directory.
+         */
+        [[nodiscard]] std::string templatesDir() const;
+        /**
+         * @brief Update the templates directory for MantisBase.
+         * @param dir New templates directory.
+         */
+        void setTemplatesDir(const std::string& dir);
+
+        /**
          * @brief Retrieves the migrations directory path.
          * @return Migrations directory.
          */
@@ -287,6 +300,9 @@ namespace mb
         /** @return JWT, API key, and OAuth services. */
         [[nodiscard]] Auth& auth() const;
 
+        /** @return Mailer service. */
+        [[nodiscard]] MbMailer& mailer() const;
+
         /**
          * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
          * If table does not exist yet, return an emty object.
@@ -351,6 +367,7 @@ namespace mb
         [[nodiscard]] FilesMgr *duk_files() const;
         [[nodiscard]] Logger *duk_logs() const;
         [[nodiscard]] RealtimeDB *duk_rt() const;
+        [[nodiscard]] MbMailer *duk_mailer() const;
 #endif
 
     private:
@@ -408,6 +425,7 @@ namespace mb
         std::string m_dataDir;
         std::string m_scriptsDir;
         std::string m_migrationsDir;
+        std::string m_templatesDir;
         std::string m_dbType;
 
         // System uptime checkpoint
@@ -434,6 +452,7 @@ namespace mb
         std::unique_ptr<RealtimeDB> m_realtime;
         std::unique_ptr<Auth> m_auth;
         std::unique_ptr<Router> m_router;
+        std::unique_ptr<MbMailer> m_mailer;
         std::unique_ptr<KeyValStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
         mutable Snowflake<1534832906275L> m_snowflakeId{};

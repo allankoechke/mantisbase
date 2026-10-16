@@ -12,6 +12,8 @@
 #include <fstream>
 #include <memory>
 
+#include "mantisbase/core/email.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #include <shellapi.h>
@@ -221,6 +223,7 @@ namespace mb {
         m_database = std::make_unique<Database>(*this); // depends on log()
         m_realtime = std::make_unique<RealtimeDB>(*this); // depends on db()
         m_router = std::make_unique<Router>(*this); // depends on db() & http()
+        m_mailer = std::make_unique<MbMailer>(*this);
         m_kvStore = std::make_unique<KeyValStore>(*this); // depends on db(), router() & http()
         m_opts = std::make_unique<argparse::ArgumentParser>();
         m_files = std::make_unique<FilesMgr>(*this);
@@ -389,6 +392,15 @@ namespace mb {
         }
 
         return *m_auth;
+    }
+
+
+    MbMailer& MantisBase::mailer() const {
+        if (!isCreated()) {
+            throw MantisException(500, "Mailer is not created!");
+        }
+
+        return *m_mailer;
     }
 
     Entity MantisBase::entity(const std::string &entity_name) const {
@@ -619,6 +631,17 @@ namespace mb {
         m_scriptsDir = dir;
     }
 
+    std::string MantisBase::templatesDir() const {
+        return m_templatesDir;
+    }
+
+    void MantisBase::setTemplatesDir(const std::string &dir) {
+        if (dir.empty())
+            return;
+
+        m_templatesDir = dir;
+    }
+
     std::string MantisBase::migrationsDir() const {
         return m_migrationsDir;
     }
@@ -712,6 +735,10 @@ namespace mb {
 
     RealtimeDB *MantisBase::duk_rt() const {
         return m_realtime.get();
+    }
+
+    MbMailer *MantisBase::duk_mailer() const {
+        return m_mailer.get();
     }
 
     void MantisBase::loadScriptJs(const std::string &relativePath) const {

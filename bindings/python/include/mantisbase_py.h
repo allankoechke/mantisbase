@@ -1,0 +1,8 @@
+//
+// Created by codeart on 14/10/2026.
+//
+
+#ifndef MANTISBASE_MANTISBASE_PY_H
+#define MANTISBASE_MANTISBASE_PY_H
+
+#endif //MANTISBASE_MANTISBASE_PY_H

@@ -289,6 +289,10 @@ namespace mb {
                 .nargs(1)
                 .metavar("PATH")
                 .help("JavaScript scripts directory (default: ./scripts)");
+        program.add_argument("--templates-dir", "--templatesDir")
+                .nargs(1)
+                .metavar("PATH")
+                .help("Email templates directory (default: ./templates)");
         program.add_argument("--dev")
                 .flag()
                 .help("Enable verbose development logging (overridden by MB_LOG_LEVEL)");
@@ -410,6 +414,7 @@ namespace mb {
         const auto _pubDir = program.present<std::string>("--public-dir").value_or("public");
         const auto _scriptsDir = program.present<std::string>("--scripts-dir").value_or("scripts");
         const auto _migrationsDir = program.present<std::string>("--migrations-dir").value_or("migrations");
+        const auto _templatesDir = program.present<std::string>("--templates-dir").value_or("templates");
         const auto dev_flag = program.get<bool>("--dev");
 #ifdef MB_SCRIPTING_ENABLED
         m_scriptingDisabled = program.get<bool>("--disable-scripting");
@@ -437,6 +442,9 @@ namespace mb {
 
         const auto migrations_dir = dirFromPath(_migrationsDir);
         setMigrationsDir(migrations_dir.empty() ? dirFromPath("migrations") : migrations_dir);
+
+        const auto templates_dir = dirFromPath(_templatesDir);
+        setTemplatesDir(templates_dir.empty() ? dirFromPath("templates") : templates_dir);
 
         // Start logger database thread
         logger().initDb(dataDir());

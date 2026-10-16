@@ -118,6 +118,7 @@ set( MB_SOURCES
         src/core/sse_mgr.cpp
         src/core/http.cpp
         src/core/types.cpp
+        src/core/email.cpp
 
         include/mantisbase/utils/snowflake.hpp
 )

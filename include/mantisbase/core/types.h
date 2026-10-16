@@ -38,6 +38,12 @@ namespace mb {
     class ApiKeyManager;
     class OAuthManager;
 
+    // Email service
+    struct MbSmtpConfig;
+    struct MbEmailMsg;
+    struct MbRateLimitEntry;
+    class MbMailer;
+
     using json = nlohmann::json;
 
     /**
