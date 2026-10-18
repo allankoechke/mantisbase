@@ -119,6 +119,32 @@ namespace mb {
             config["app"]["client_max_body_size"] = ""; // no body limit
             drogon::app().loadConfigJson(config);
 
+            // Keep Drogon's upload spool dir out of the document root.
+            // loadConfigJson() above resets the upload path to the default
+            // "uploads", resolved against the document root set in
+            // generateMiscEndpoints(), i.e. <publicDir>/uploads. Drogon then
+            // pre-creates <uploadPath>/tmp/00..FF on run() and stages large
+            // request bodies there, which would otherwise litter public/ with
+            // 256 dirs and briefly expose in-flight bodies under a served path.
+            try {
+                const auto spool_dir = fs::temp_directory_path() / "mantisbase-uploads";
+                std::error_code ec;
+                fs::create_directories(spool_dir, ec);
+                if (!ec) {
+                    drogon::app().setUploadPath(spool_dir.string());
+                } else {
+                    logger().warn("Server",
+                                  fmt::format("Failed to create upload spool dir `{}`, "
+                                              "falling back to `<dataDir>/uploads`.", spool_dir.string()));
+                    drogon::app().setUploadPath((fs::path(mbApp().dataDir()) / "uploads").string());
+                }
+            } catch (const std::exception &e) {
+                logger().warn("Server",
+                              fmt::format("Failed to resolve system temp dir ({}), "
+                                          "falling back to `<dataDir>/uploads`.", e.what()));
+                drogon::app().setUploadPath((fs::path(mbApp().dataDir()) / "uploads").string());
+            }
+
             // Register hook to generate request IDs
             drogon::app().registerSyncAdvice(reqIdSyncAdvice());
 
@@ -326,6 +352,15 @@ namespace mb {
             },
             {drogon::Get});
 
+        // Get the svg file from the mantisbase admin files
+        router.redirect("/mantisbase.svg", "/mb/mantisbase.svg", 301);
+
+        // Check if favicon is provided in the public dir, if not, get the favicon from the mb admin dir
+        if (!fs::exists(fs::path(mbApp().publicDir()) / "favicon.ico")) {
+            router.redirect("/favicon.ico", "/mb/favicon.ico");
+        }
+
+        // Health check endpoint registration
         router.Get("/api/v1/health", healthCheckHandler());
 
         // /api/v1/sys/*
@@ -367,7 +402,7 @@ namespace mb {
                 const auto fs = cmrc::mantis::get_filesystem();
 
                 // Extract path after /mb
-                std::string full_path = req.getPath();
+                const std::string full_path = req.getPath();
                 std::string path;
                 if (full_path.size() > 3) {
                     path = full_path.substr(3); // strip "/mb"

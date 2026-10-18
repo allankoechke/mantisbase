@@ -6,7 +6,6 @@
 #include <chrono>
 #include <mutex>
 #include <vector>
-#include <stdexcept>
 
 #include "types.h"
 
@@ -19,9 +18,8 @@ namespace mb {
         std::string from_address;
         bool use_tls = true;
 
-        bool isValid() const;
-
-        bool isMock() const;
+        [[nodiscard]] bool isValid() const;
+        [[nodiscard]] bool isMock() const;
     };
 
     struct MbEmailMsg {
