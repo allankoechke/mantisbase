@@ -352,12 +352,12 @@ namespace mb {
             },
             {drogon::Get});
 
-        // Get the svg file from the mantisbase admin files
-        router.redirect("/mantisbase.svg", "/mb/mantisbase.svg", 301);
-
         // Check if favicon is provided in the public dir, if not, get the favicon from the mb admin dir
         if (!fs::exists(fs::path(mbApp().publicDir()) / "favicon.ico")) {
             router.redirect("/favicon.ico", "/mb/favicon.ico");
+
+            // Get the svg file from the mantisbase admin files
+            router.redirect("/mantisbase.svg", "/mb/mantisbase.svg", 301);
         }
 
         // Health check endpoint registration
