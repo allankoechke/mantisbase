@@ -28,7 +28,7 @@ namespace mb {
         m_pathParams = params;
     }
 
-    std::string MbRequest::getMethod() const {
+    std::string MbRequest::method() const {
         switch (m_req->method()) {
             case drogon::Get: return "GET";
             case drogon::Post: return "POST";
@@ -41,11 +41,11 @@ namespace mb {
         }
     }
 
-    std::string MbRequest::getPath() const { return m_req->path(); }
+    std::string MbRequest::path() const { return m_req->path(); }
 
-    std::string MbRequest::getBody() const { return std::string(m_req->body()); }
+    std::string MbRequest::body() const { return std::string(m_req->body()); }
 
-    std::string MbRequest::getRemoteAddr() const {
+    std::string MbRequest::remoteAddr() const {
         auto direct_ip = m_req->peerAddr().toIp();
 
         if (hasHeader("X-Forwarded-For")) {
@@ -62,7 +62,7 @@ namespace mb {
                 }
 
                 if (is_trusted) {
-                    auto forwarded = getHeaderValue("X-Forwarded-For", "", 0);
+                    auto forwarded = headerValue("X-Forwarded-For", "");
                     if (const auto first_comma = forwarded.find(',');
                         first_comma != std::string::npos) {
                         forwarded = forwarded.substr(0, first_comma);
@@ -85,49 +85,29 @@ namespace mb {
         return direct_ip;
     }
 
-    int MbRequest::getRemotePort() const { return m_req->peerAddr().toPort(); }
+    int MbRequest::remotePort() const { return m_req->peerAddr().toPort(); }
 
-    std::string MbRequest::getLocalAddr() const { return m_req->localAddr().toIp(); }
+    std::string MbRequest::localAddr() const { return m_req->localAddr().toIp(); }
 
-    int MbRequest::getLocalPort() const { return m_req->localAddr().toPort(); }
+    int MbRequest::localPort() const { return m_req->localAddr().toPort(); }
 
     bool MbRequest::hasHeader(const std::string &key) const {
         return !m_req->getHeader(key).empty();
     }
 
-    std::string MbRequest::getHeaderValue(const std::string &key,
-                                              const char *def, size_t id) const {
+    std::string MbRequest::headerValue(const std::string &key,
+                                              const std::string& def) const {
         auto val = m_req->getHeader(key);
         return val.empty() ? std::string(def) : val;
-    }
-
-    size_t MbRequest::getHeaderValueU64(const std::string &key, size_t def,
-                                            size_t id) const {
-        const auto val = m_req->getHeader(key);
-        if (val.empty()) return def;
-        try { return std::stoull(val); } catch (...) { return def; }
-    }
-
-    size_t MbRequest::getHeaderValueCount(const std::string &key) const {
-        return m_req->getHeader(key).empty() ? 0 : 1;
     }
 
     bool MbRequest::hasQueryParam(const std::string &key) const {
         return m_req->getOptionalParameter<std::string>(key).has_value();
     }
 
-    std::string MbRequest::getQueryParamValue(const std::string &key) const {
+    std::string MbRequest::queryParamValue(const std::string &key) const {
         auto val = m_req->getOptionalParameter<std::string>(key);
         return val.has_value() ? val.value() : "";
-    }
-
-    std::string MbRequest::getQueryParamValue(const std::string &key,
-                                                  const size_t id) const {
-        return getQueryParamValue(key);
-    }
-
-    size_t MbRequest::getQueryParamValueCount(const std::string &key) const {
-        return hasQueryParam(key) ? 1 : 0;
     }
 
     bool MbRequest::hasPathParams() const { return !m_pathParams.empty(); }
@@ -136,14 +116,10 @@ namespace mb {
         return m_pathParams.contains(key);
     }
 
-    std::string MbRequest::getPathParamValue(const std::string &key) const {
-        if (auto it = m_pathParams.find(key); it != m_pathParams.end())
+    std::string MbRequest::pathParamValue(const std::string &key) const {
+        if (const auto it = m_pathParams.find(key); it != m_pathParams.end())
             return it->second;
         return "";
-    }
-
-    size_t MbRequest::getPathParamValueCount(const std::string &key) const {
-        return m_pathParams.contains(key) ? 1 : 0;
     }
 
     bool MbRequest::isMultipartFormData() const {
@@ -155,33 +131,33 @@ namespace mb {
         return m_req->attributes()->find(key);
     }
 
-    std::string MbRequest::getBearerTokenAuth() const {
+    std::string MbRequest::bearerTokenAuth() const {
         if (hasHeader("Authorization")) {
-            const auto auth = getHeaderValue("Authorization", "", 0);
+            const auto auth = headerValue("Authorization", "");
             constexpr size_t bearer_prefix_len = 7; // "Bearer "
             return auth.size() > bearer_prefix_len ? auth.substr(bearer_prefix_len) : "";
         }
         return "";
     }
 
-    std::string MbRequest::getCookieValue(const std::string &key) const {
+    std::string MbRequest::cookieValue(const std::string &key) const {
         return m_req->getCookie(key);
     }
 
     std::string MbRequest::resolveAuthToken() const {
         if (hasHeader("Authorization")) {
-            const auto bearer = trim(getBearerTokenAuth());
+            const auto bearer = trim(bearerTokenAuth());
             if (!bearer.empty()) {
                 return bearer;
             }
         }
 
-        return trim(getCookieValue(kAuthTokenCookieName));
+        return trim(cookieValue(kAuthTokenCookieName));
     }
 
-    std::pair<nlohmann::json, std::string> MbRequest::getBodyAsJson() const {
+    std::pair<nlohmann::json, std::string> MbRequest::bodyAsJson() const {
         try {
-            const auto b = getBody();
+            const auto b = body();
             auto obj = b.empty() ? nlohmann::json::object() : nlohmann::json::parse(b);
             return {obj, ""};
         } catch (const std::exception &e) {
@@ -192,15 +168,15 @@ namespace mb {
     const drogon::HttpRequestPtr & MbRequest::drogonRequest() const { return m_req; }
 
     bool MbRequest::isGuestAuth() {
-        return mb::isGuestAuth(getOr<json>("auth", json::object()));
+        return mb::isGuestAuth(get<json>("auth", json::object()));
     }
 
     bool MbRequest::isAdminAuth() {
-        return mb::isAdminAuth(getOr<json>("auth", json::object()));
+        return mb::isAdminAuth(get<json>("auth", json::object()));
     }
 
     bool MbRequest::isUserAuth() {
-        return mb::isUserAuth(getOr<json>("auth", json::object()));
+        return mb::isUserAuth(get<json>("auth", json::object()));
     }
 
     const json &MbRequest::jsonBody() const {
@@ -272,7 +248,7 @@ namespace mb {
     }
 
     void MbRequest::readJSON() const {
-        std::string body = getBody();
+        std::string body = this->body();
         try {
             if (trim(body).empty()) m_unifiedJson = json::object();
             else m_unifiedJson = json::parse(body);
@@ -389,7 +365,7 @@ namespace mb {
                                 for (const auto &d: data)
                                     json_body[form_data.name].push_back(d);
                             } else {
-                                auto v = getValueFromType(type, form_data.content)["value"];
+                                auto v = valueFromType(type, form_data.content)["value"];
                                 json_body[form_data.name] = v;
                             }
                         } catch (const std::exception &) {
@@ -408,7 +384,7 @@ namespace mb {
         m_filesMetadata = json_files;
     }
 
-    void MbRequest::writeFiles(const std::string &entity_name) {
+    void MbRequest::writeFiles(const std::string &entity_name) const {
         ensureBodyParsed();
         if (!isMultipartFormData()) return;
 
@@ -465,7 +441,7 @@ namespace mb {
         return std::to_string(result);
     }
 
-    json MbRequest::getValueFromType(const std::string &type, const std::string &value) {
+    json MbRequest::valueFromType(const std::string &type, const std::string &value) {
         json obj;
         const auto content = trim(value);
         if (content.empty()) {

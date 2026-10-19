@@ -43,7 +43,7 @@ namespace mb {
         }
 
         std::string resolveSubscribeToken(MbRequest &req) {
-            const auto &[body, err] = req.getBodyAsJson();
+            const auto &[body, err] = req.bodyAsJson();
             if (err.empty() && body.contains("token") && body["token"].is_string()) {
                 const auto token = trim(body["token"].get<std::string>());
                 if (!token.empty()) {
@@ -99,7 +99,7 @@ namespace mb {
                     }
                 }
 
-                const auto requested_topics = topicsJsonToStrings(ma_req.getOr<json>("topics", json::array()));
+                const auto requested_topics = topicsJsonToStrings(ma_req.get<json>("topics", json::array()));
                 if (requested_topics.size() > kMaxTopicsPerSession) {
                     auto resp = drogon::HttpResponse::newHttpResponse();
                     resp->setStatusCode(drogon::k400BadRequest);
@@ -284,8 +284,8 @@ namespace mb {
 
     std::function<void(MbRequest &, MbResponse &)> SSEMgr::handleSSESessionUpdate() {
         return [](MbRequest &req, MbResponse &res) {
-            const auto topics = req.getOr<json>("topics", json::array());
-            const auto client_id = req.getOr<std::string>("client_id", std::string{});
+            const auto topics = req.get<json>("topics", json::array());
+            const auto client_id = req.get<std::string>("client_id", std::string{});
 
             auto &sse_mgr = req.mbApp().router().sseMgr();
 
@@ -357,7 +357,7 @@ namespace mb {
             try {
                 std::set<std::string> topics;
                 if (is_updating) {
-                    const auto &[body, err] = req.getBodyAsJson();
+                    const auto &[body, err] = req.bodyAsJson();
 
                     if (!err.empty()) {
                         res.sendJSON(400, {
@@ -415,7 +415,7 @@ namespace mb {
 
                     req.set("client_id", client_id);
                 } else if (req.hasQueryParam("topics")) {
-                    const std::string topics_param = req.getQueryParamValue("topics");
+                    const std::string topics_param = req.queryParamValue("topics");
                     std::istringstream ss(topics_param);
                     std::string topic;
 

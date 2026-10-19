@@ -402,7 +402,7 @@ namespace mb {
                 const auto fs = cmrc::mantis::get_filesystem();
 
                 // Extract path after /mb
-                const std::string full_path = req.getPath();
+                const std::string full_path = req.path();
                 std::string path;
                 if (full_path.size() > 3) {
                     path = full_path.substr(3); // strip "/mb"
@@ -438,7 +438,6 @@ namespace mb {
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
-                res.setReason(e.what());
                 req.mbApp().logger().critical("Admin Request Error",
                                               fmt::format("Error processing /admin request: {}", e.what()));
             }
@@ -447,8 +446,8 @@ namespace mb {
 
     std::function<void(MbRequest &, MbResponse &)> Router::fileServingHandler() {
         return [](MbRequest &req, MbResponse &res) {
-            const auto table_name = req.getPathParamValue("entity");
-            const auto file_name = req.getPathParamValue("file");
+            const auto table_name = req.pathParamValue("entity");
+            const auto file_name = req.pathParamValue("file");
 
             if (!EntitySchema::isValidEntityName(table_name)) {
                 res.sendJSON(400, {
@@ -478,8 +477,8 @@ namespace mb {
             }
 
             const auto entity = req.mbApp().entity(table_name);
-            const auto &auth = req.getOr<json>("auth", json::object());
-            const auto &verification = req.getOr<json>("verification", json::object());
+            const auto &auth = req.get<json>("auth", json::object());
+            const auto &verification = req.get<json>("verification", json::object());
             const auto rule = entity.getRule();
 
             if (!req.isAdminAuth()) {
@@ -582,12 +581,12 @@ namespace mb {
                 std::string end_date;
 
                 if (req.hasQueryParam("after")) {
-                    after = req.getQueryParamValue("after");
+                    after = req.queryParamValue("after");
                 }
 
                 if (req.hasQueryParam("limit")) {
                     try {
-                        limit = std::stoi(req.getQueryParamValue("limit"));
+                        limit = std::stoi(req.queryParamValue("limit"));
                         if (limit < 1) limit = 1;
                         if (limit > 1000) limit = 1000;
                     } catch (...) {
@@ -596,7 +595,7 @@ namespace mb {
                 }
 
                 if (req.hasQueryParam("level")) {
-                    level_filter = req.getQueryParamValue("level");
+                    level_filter = req.queryParamValue("level");
 
                     if (level_filter != "trace" && level_filter != "debug" &&
                         level_filter != "info" && level_filter != "warn" &&
@@ -606,7 +605,7 @@ namespace mb {
                 }
 
                 if (req.hasQueryParam("min_level")) {
-                    min_level_filter = req.getQueryParamValue("min_level");
+                    min_level_filter = req.queryParamValue("min_level");
 
                     if (min_level_filter != "trace" && min_level_filter != "debug" &&
                         min_level_filter != "info" && min_level_filter != "warn" &&
@@ -616,14 +615,14 @@ namespace mb {
                 }
 
                 if (req.hasQueryParam("search")) {
-                    search_filter = req.getQueryParamValue("search");
+                    search_filter = req.queryParamValue("search");
                 }
 
                 if (req.hasQueryParam("start_date")) {
-                    start_date = req.getQueryParamValue("start_date");
+                    start_date = req.queryParamValue("start_date");
                 }
                 if (req.hasQueryParam("end_date")) {
-                    end_date = req.getQueryParamValue("end_date");
+                    end_date = req.queryParamValue("end_date");
                 }
 
                 if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;

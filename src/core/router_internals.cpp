@@ -184,7 +184,7 @@ namespace mb {
         return [](MbRequest &req, const MbResponse &res) {
             try {
                 // Require admin authentication
-                const auto &verification = req.getOr<json>("verification", json::object());
+                const auto &verification = req.get<json>("verification", json::object());
 
                 if (verification.empty()) {
                     // Send auth error
@@ -233,7 +233,7 @@ namespace mb {
     std::function<void(MbRequest &, MbResponse &)> Router::handleAuthLogin() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(500, {
                                      {"status", 500},
@@ -254,7 +254,7 @@ namespace mb {
                     }
                 }
 
-                const auto entity_name = trim(req.getPathParamValue("entity_name"));
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
                 const auto entity = req.mbApp().entity(entity_name);
 
                 auto opt_user = entity.queryFromCols(body["identity"].get<std::string>(), {"id", "email"});
@@ -327,7 +327,7 @@ namespace mb {
     std::function<void(MbRequest &, MbResponse &)> Router::handleAdminLogin() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(500, {
                                      {"status", 500},
@@ -412,8 +412,8 @@ namespace mb {
     std::function<void(MbRequest &, MbResponse &)> Router::handleAuthRefresh() const {
         return [](MbRequest &req, const MbResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                auto auth = req.get<json>("auth", json::object());
+                auto verification = req.get<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(401, {
@@ -474,7 +474,7 @@ namespace mb {
     std::function<void(MbRequest &, MbResponse &)> Router::handleAuthLogout() {
         return [](MbRequest &req, const MbResponse &res) {
             try {
-                auto verification = req.getOr<json>("verification", json::object());
+                auto verification = req.get<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(401, {
@@ -529,8 +529,8 @@ namespace mb {
     std::function<void(MbRequest &, MbResponse &)> Router::handleSetupAdmin() {
         return [](MbRequest &req, const MbResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                auto auth = req.get<json>("auth", json::object());
+                auto verification = req.get<json>("verification", json::object());
                 if (verification.empty()) {
                     res.sendJSON(401, {
                                      {"data", json::object()},
@@ -574,7 +574,7 @@ namespace mb {
                 const auto entity = req.mbApp().entity("mb_service_acc");
                 const auto admin_entity = req.mbApp().entity("mb_admins");
 
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
 
                 if (!err.empty()) {
                     res.sendJSON(400, {

@@ -18,7 +18,7 @@ namespace mb {
     MbHandlerFn schemaGetOneHandler() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
+                const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
                     throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
 
@@ -76,7 +76,7 @@ namespace mb {
     MbHandlerFn schemaPostHandler() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(400, {
                                      {"data", json::object()},
@@ -121,13 +121,13 @@ namespace mb {
     MbHandlerFn schemaPatchHandler() {
         return [](MbRequest &req, MbResponse &res) {
             try {
-                const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
+                const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
                     throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
 
                 const auto schema_id = schemaIdFromPathParam(schema_id_or_name);
 
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(400, {
                                      {"data", json::object()},
@@ -163,7 +163,7 @@ namespace mb {
     MbHandlerFn schemaDeleteHandler() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
+                const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
                     throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
 

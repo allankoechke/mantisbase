@@ -9,9 +9,7 @@
 namespace mb {
     void registerResponseBindings(duk_context *ctx) {
         dukglue_register_method(ctx, &MbResponse::hasHeader, "hasHeader");
-        dukglue_register_method(ctx, &MbResponse::getHeaderValue, "getHeader");
-        dukglue_register_method(ctx, &MbResponse::getHeaderValueU64, "getHeaderU64");
-        dukglue_register_method(ctx, &MbResponse::getHeaderValueCount, "getHeaderCount");
+        dukglue_register_method(ctx, &MbResponse::headerValue, "header");
         dukglue_register_method(ctx, &MbResponse::setHeader, "setHeader");
 
         dukglue_register_method(ctx, &MbResponse::setRedirect, "redirect");
@@ -35,7 +33,7 @@ namespace mb {
         dukglue_register_method(ctx, &MbResponse::sendText, "text");
         dukglue_register_method(ctx, &MbResponse::sendEmpty, "empty");
 
-        dukglue_register_property(ctx, &MbResponse::getBody, &MbResponse::setBody, "body");
+        dukglue_register_property(ctx, &MbResponse::body, &MbResponse::setBody, "body");
     }
 }
 

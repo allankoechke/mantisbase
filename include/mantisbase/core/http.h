@@ -3,7 +3,7 @@
  * @brief HTTP request/response wrappers with unified body handling.
  *
  * @ref MantisRequest and @ref MantisResponse wrap Drogon types and expose MantisBase
- * conventions: per-request attributes via `set()`/`getOr()`, auth helpers, and JSON
+ * conventions: per-request attributes via `set()`/`get()`, auth helpers, and JSON
  * envelope responses via @ref MantisResponse::sendJSON.
  */
 
@@ -60,14 +60,14 @@ namespace mb {
      * @brief HTTP request wrapper bound to a @ref MantisBase instance.
      *
      * Per-request attributes (`auth`, `verification`, etc.) are stored on the
-     * underlying Drogon request via `set()` / `getOr()`, not a global context.
+     * underlying Drogon request via `set()` / `get()`, not a global context.
      * Use `mbApp()` (from @ref IMantisBase) to reach application services.
      */
     class MANTISBASE_API MbRequest: public IMantisBase {
         drogon::HttpRequestPtr m_req;
         std::unordered_map<std::string, std::string> m_pathParams;
 
-        /// Lazily-parsed, cached request body. getBodyAsJson() is called
+        /// Lazily-parsed, cached request body. bodyAsJson() is called
         /// several times per request (access-rule evaluation, then the
         /// handler), so the body is parsed once and reused.
         mutable std::optional<std::pair<nlohmann::json, std::string>> m_bodyJsonCache;
@@ -91,28 +91,23 @@ namespace mb {
         /** Replace all route path parameters. */
         void setPathParams(const std::unordered_map<std::string, std::string> &params);
 
-        [[nodiscard]] std::string getMethod() const;
-        [[nodiscard]] std::string getPath() const;
-        [[nodiscard]] std::string getBody() const;
-        [[nodiscard]] std::string getRemoteAddr() const;
-        [[nodiscard]] int getRemotePort() const;
-        [[nodiscard]] std::string getLocalAddr() const;
-        [[nodiscard]] int getLocalPort() const;
+        [[nodiscard]] std::string method() const;
+        [[nodiscard]] std::string path() const;
+        [[nodiscard]] std::string body() const;
+        [[nodiscard]] std::string remoteAddr() const;
+        [[nodiscard]] int remotePort() const;
+        [[nodiscard]] std::string localAddr() const;
+        [[nodiscard]] int localPort() const;
 
         [[nodiscard]] bool hasHeader(const std::string &key) const;
-        [[nodiscard]] std::string getHeaderValue(const std::string &key, const char *def = "", size_t id = 0) const;
-        [[nodiscard]] size_t getHeaderValueU64(const std::string &key, size_t def = 0, size_t id = 0) const;
-        [[nodiscard]] size_t getHeaderValueCount(const std::string &key) const;
+        [[nodiscard]] std::string headerValue(const std::string &key, const std::string& def = "") const;
 
         [[nodiscard]] bool hasQueryParam(const std::string &key) const;
-        [[nodiscard]] std::string getQueryParamValue(const std::string &key) const;
-        [[nodiscard]] std::string getQueryParamValue(const std::string &key, size_t id) const;
-        [[nodiscard]] size_t getQueryParamValueCount(const std::string &key) const;
+        [[nodiscard]] std::string queryParamValue(const std::string &key) const;
 
         [[nodiscard]] bool hasPathParams() const;
         [[nodiscard]] bool hasPathParam(const std::string &key) const;
-        [[nodiscard]] std::string getPathParamValue(const std::string &key) const;
-        [[nodiscard]] size_t getPathParamValueCount(const std::string &key) const;
+        [[nodiscard]] std::string pathParamValue(const std::string &key) const;
 
         /** @return `true` when `Content-Type` is `multipart/form-data`. */
         [[nodiscard]] bool isMultipartFormData() const;
@@ -124,9 +119,9 @@ namespace mb {
         [[nodiscard]] bool hasKey(const std::string &key) const;
 
         /** @return Bearer token from the Authorization header, or empty. */
-        [[nodiscard]] std::string getBearerTokenAuth() const;
+        [[nodiscard]] std::string bearerTokenAuth() const;
 
-        [[nodiscard]] std::string getCookieValue(const std::string &key) const;
+        [[nodiscard]] std::string cookieValue(const std::string &key) const;
 
         /** Bearer token if present, otherwise the auth cookie value. */
         [[nodiscard]] std::string resolveAuthToken() const;
@@ -135,7 +130,7 @@ namespace mb {
          * @brief Parse and cache the JSON request body.
          * @return `{body, error}` — error non-empty on parse failure.
          */
-        [[nodiscard]] std::pair<nlohmann::json, std::string> getBodyAsJson() const;
+        [[nodiscard]] std::pair<nlohmann::json, std::string> bodyAsJson() const;
 
         /** @return Underlying Drogon request pointer. */
         [[nodiscard]] const drogon::HttpRequestPtr& drogonRequest() const;
@@ -159,7 +154,7 @@ namespace mb {
          * malformed JSON. Multipart requests: empty until
          * parseFormDataToEntity() maps the form fields onto an entity.
          *
-         * For a non-throwing parse use getBodyAsJson().
+         * For a non-throwing parse use bodyAsJson().
          */
         [[nodiscard]] const json &jsonBody() const;
 
@@ -173,7 +168,7 @@ namespace mb {
         void parseFormDataToEntity(const Entity &entity) const;
 
         /** Persist uploaded files for `entity_name` using stored metadata (no-op for JSON). */
-        void writeFiles(const std::string &entity_name);
+        void writeFiles(const std::string &entity_name) const;
 
         /** Remove files written by @ref writeFiles on validation failure. */
         void undoWrittenFiles(const std::string &entity_name) const;
@@ -195,7 +190,7 @@ namespace mb {
 
         /** Get a per-request attribute, inserting `default_value` if missing. */
         template<typename T>
-        const T &getOr(const std::string &key, T default_value) {
+        const T &get(const std::string &key, T default_value) {
             if (!m_req->attributes()->find(key)) {
                 m_req->attributes()->insert(key, std::any(std::move(default_value)));
             }
@@ -206,7 +201,7 @@ namespace mb {
         void ensureBodyParsed() const;
         void readMultipart() const;
         void readJSON() const;
-        static json getValueFromType(const std::string &type, const std::string &value);
+        static json valueFromType(const std::string &type, const std::string &value);
     };
 
     /**
@@ -230,22 +225,15 @@ namespace mb {
         /** Set HTTP status code. */
         void setStatus(int s) const;
 
-        [[nodiscard]] std::string getVersion() const;
-        void setVersion(const std::string &b);
+        [[nodiscard]] std::string version() const;
 
-        [[nodiscard]] std::string getBody() const;
-        void setBody(const std::string &b);
-
-        [[nodiscard]] std::string getLocation() const;
-        void setLocation(const std::string &b);
-
-        [[nodiscard]] std::string getReason() const;
-        void setReason(const std::string &b);
+        [[nodiscard]] std::string body() const;
+        void setBody(const std::string &b); ///> NOTE: dukglue expects non-const function
+        [[nodiscard]] std::string location() const;
+        void setLocation(const std::string &b) const;
 
         [[nodiscard]] bool hasHeader(const std::string &key) const;
-        [[nodiscard]] std::string getHeaderValue(const std::string &key, const char *def = "", size_t id = 0) const;
-        [[nodiscard]] size_t getHeaderValueU64(const std::string &key, size_t def = 0, size_t id = 0) const;
-        [[nodiscard]] size_t getHeaderValueCount(const std::string &key) const;
+        [[nodiscard]] std::string headerValue(const std::string &key, const std::string& def = "") const;
 
         void setHeader(const std::string &key, const std::string &val) const;
 

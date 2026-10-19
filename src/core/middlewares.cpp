@@ -32,7 +32,7 @@ namespace mb {
         }
 
         std::optional<json> requireAuthenticatedUser(MbRequest &req, const MbResponse &res) {
-            const auto &verification = req.getOr<json>("verification", json::object());
+            const auto &verification = req.get<json>("verification", json::object());
 
             if (verification.empty()) {
                 res.sendJSON(401, {
@@ -57,7 +57,7 @@ namespace mb {
                 return std::nullopt;
             }
 
-            auto auth = req.getOr<json>("auth", json::object());
+            auto auth = req.get<json>("auth", json::object());
             if (auth["user"].is_null() || !auth["user"].is_object()) {
                 res.sendJSON(401, {
                                  {"data", json::object()},
@@ -74,8 +74,8 @@ namespace mb {
                                             const std::string &trace_msg) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
-                const auto &auth = req.getOr<json>("auth", json::object());
-                const auto method = req.getMethod();
+                const auto &auth = req.get<json>("auth", json::object());
+                const auto method = req.method();
 
                 if (!(method == "GET"
                       || method == "POST"
@@ -103,7 +103,7 @@ namespace mb {
                     return MbHandlerResponse::Unhandled;
                 }
 
-                const auto &verification = req.getOr<json>("verification", json::object());
+                const auto &verification = req.get<json>("verification", json::object());
                 const AccessEvalContext ctx{.auth = auth, .verification = verification, .req = &req};
                 const auto result = evaluateAccessRule(rule, ctx);
                 if (result == AccessEvalResult::Allow) {
@@ -213,7 +213,7 @@ namespace mb {
     MbMiddlewareFn hydrateContextData() {
         return [](MbRequest &req, MbResponse &) {
             // Get the auth var from the context, resort to empty object if it's not set.
-            auto auth = req.getOr<json>("auth", json::object());
+            auto auth = req.get<json>("auth", json::object());
 
             // Expand logged user if token is present and query user information if it exists
             if (auth.contains("token") && !auth["token"].is_null() && !auth["token"].empty()) {
@@ -259,9 +259,9 @@ namespace mb {
 
     MbMiddlewareFn resolveSchema() {
         return [](const MbRequest &req, const MbResponse &res) {
-            const auto schema_id_or_name = trim(req.getPathParamValue("schema_name_or_id"));
+            const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
             if (schema_id_or_name.empty()) {
-                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                 return MbHandlerResponse::Handled;
             }
 
@@ -281,7 +281,7 @@ namespace mb {
                 return MbHandlerResponse::Unhandled;
             } catch (const MantisException &e) {
                 if (e.code() == 404 || e.code() == 400) {
-                    res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                    res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                     return MbHandlerResponse::Handled;
                 }
 
@@ -297,20 +297,20 @@ namespace mb {
 
     MbMiddlewareFn resolveAuthEntity() {
         return [](const MbRequest &req, const MbResponse &res) {
-            const auto entity_name = trim(req.getPathParamValue("entity_name"));
+            const auto entity_name = trim(req.pathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
-                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                 return MbHandlerResponse::Handled;
             }
 
             if (!req.mbApp().hasEntity(entity_name)) {
-                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                 return MbHandlerResponse::Handled;
             }
 
             const auto entity = req.mbApp().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi() || entity.type() != "auth") {
-                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                 return MbHandlerResponse::Handled;
             }
 
@@ -320,20 +320,20 @@ namespace mb {
 
     MbMiddlewareFn resolveEntity() {
         return [](const MbRequest &req, const MbResponse &res) {
-            const auto entity_name = trim(req.getPathParamValue("entity_name"));
+            const auto entity_name = trim(req.pathParamValue("entity_name"));
             if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
-                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                 return MbHandlerResponse::Handled;
             }
 
             if (!req.mbApp().hasEntity(entity_name)) {
-                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                 return MbHandlerResponse::Handled;
             }
 
             const auto entity = req.mbApp().entity(entity_name);
             if (entity.isSystem() || !entity.hasApi()) {
-                res.sendJSON(404, entityRouteNotFoundResponse(req.getMethod(), req.getPath()));
+                res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                 return MbHandlerResponse::Handled;
             }
 
@@ -343,7 +343,7 @@ namespace mb {
 
     MbMiddlewareFn rejectViewMutations() {
         return [](const MbRequest &req, const MbResponse &res) {
-            const auto entity_name = trim(req.getPathParamValue("entity_name"));
+            const auto entity_name = trim(req.pathParamValue("entity_name"));
             const auto entity = req.mbApp().entity(entity_name);
             if (entity.type() == "view") {
                 res.sendJSON(405, {
@@ -351,7 +351,7 @@ namespace mb {
                                  {"data", json::object()},
                                  {
                                      "error",
-                                     std::format("Method `{}` is not allowed for view entity `{}`", req.getMethod(),
+                                     std::format("Method `{}` is not allowed for view entity `{}`", req.method(),
                                                  entity_name)
                                  }
                              });
@@ -365,7 +365,7 @@ namespace mb {
     MbMiddlewareFn hasEntityAccess() {
         std::string msg = MB_FUNC();
         return [msg](MbRequest &req, const MbResponse &res) {
-            const auto entity_name = trim(req.getPathParamValue("entity_name"));
+            const auto entity_name = trim(req.pathParamValue("entity_name"));
             return checkEntityAccess(req, res, entity_name, msg);
         };
     }
@@ -379,7 +379,7 @@ namespace mb {
 
     MbMiddlewareFn requireExprEval(const std::string &expr) {
         return [expr](MbRequest &req, const MbResponse &res) {
-            const auto &auth = req.getOr<json>("auth", json::object());
+            const auto &auth = req.get<json>("auth", json::object());
             const auto vars = buildAccessExprVars(req, auth);
 
             if (Expr::eval(expr, vars)) {
@@ -392,7 +392,7 @@ namespace mb {
 
     MbMiddlewareFn requireGuestOnly() {
         return [](MbRequest &req, const MbResponse &res) {
-            const auto &auth = req.getOr<json>("auth", json::object());
+            const auto &auth = req.get<json>("auth", json::object());
             if (req.isGuestAuth())
                 return MbHandlerResponse::Unhandled;
 
@@ -409,7 +409,7 @@ namespace mb {
         return [](MbRequest &req, const MbResponse &res) {
             try {
                 // Require admin authentication
-                const auto &verification = req.getOr<json>("verification", json::object());
+                const auto &verification = req.get<json>("verification", json::object());
 
                 if (verification.empty()) {
                     // Send auth error
@@ -425,7 +425,7 @@ namespace mb {
                                 verification["verified"].is_boolean() &&
                                 verification["verified"].get<bool>();
                 if (ok) {
-                    const auto &auth = req.getOr<json>("auth", json::object());
+                    const auto &auth = req.get<json>("auth", json::object());
                     // logEntry::trace("Ver User Auth: {}", auth.dump());
 
                     // Check if verified user object is valid, if not throw auth error
@@ -600,16 +600,16 @@ namespace mb {
 
                 if (use_user_id) {
                     // Try to get user ID from auth context
-                    const auto &auth = req.getOr<json>("auth", json::object());
+                    const auto &auth = req.get<json>("auth", json::object());
                     if (auth.contains("id") && !auth["id"].is_null()) {
                         identifier = auth["id"].get<std::string>();
                     } else {
                         // Fallback to IP if no user ID available
-                        identifier = req.getRemoteAddr();
+                        identifier = req.remoteAddr();
                     }
                 } else {
                     // Use IP address
-                    identifier = req.getRemoteAddr();
+                    identifier = req.remoteAddr();
                 }
 
                 if (identifier.empty()) {

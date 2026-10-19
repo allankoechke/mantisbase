@@ -61,42 +61,42 @@ TEST_F(HttpRequestTest, AttributeStorage) {
 
 TEST_F(HttpRequestTest, BearerTokenAuth) {
     auto req = makeRequest();
-    EXPECT_TRUE(req.getBearerTokenAuth().empty());
+    EXPECT_TRUE(req.bearerTokenAuth().empty());
 
     auto drogonReq = req.drogonRequest();
     drogonReq->addHeader("Authorization", "Bearer test-token-123");
     mb::MbRequest req2(mantis(), drogonReq);
-    EXPECT_EQ(req2.getBearerTokenAuth(), "test-token-123");
+    EXPECT_EQ(req2.bearerTokenAuth(), "test-token-123");
 
     drogonReq->removeHeader("Authorization");
     drogonReq->addHeader("Authorization", "Bearer");
     mb::MbRequest req3(mantis(), drogonReq);
-    EXPECT_TRUE(req3.getBearerTokenAuth().empty());
+    EXPECT_TRUE(req3.bearerTokenAuth().empty());
 }
 
 TEST_F(HttpRequestTest, GetBodyAsJson) {
     auto req = makeRequest();
-    auto [emptyBody, emptyErr] = req.getBodyAsJson();
+    auto [emptyBody, emptyErr] = req.bodyAsJson();
     EXPECT_TRUE(emptyErr.empty());
     EXPECT_TRUE(emptyBody.is_object());
 
     auto drogonReq = req.drogonRequest();
     drogonReq->setBody(R"({"name":"test"})");
     mb::MbRequest req2(mantis(), drogonReq);
-    auto [body, err] = req2.getBodyAsJson();
+    auto [body, err] = req2.bodyAsJson();
     EXPECT_TRUE(err.empty());
     EXPECT_EQ(body["name"], "test");
 
     drogonReq->setBody("{invalid json");
     mb::MbRequest req3(mantis(), drogonReq);
-    auto [badBody, badErr] = req3.getBodyAsJson();
+    auto [badBody, badErr] = req3.bodyAsJson();
     EXPECT_FALSE(badErr.empty());
     EXPECT_TRUE(badBody.is_object());
 }
 
 TEST_F(HttpRequestTest, GetRemoteAddrWithoutForwardedHeader) {
     const mb::MbRequest req = makeRequest("192.0.2.10");
-    EXPECT_EQ(req.getRemoteAddr(), "192.0.2.10");
+    EXPECT_EQ(req.remoteAddr(), "192.0.2.10");
 }
 
 TEST_F(HttpRequestTest, GetRemoteAddrIgnoresForwardedHeaderWhenTrustedProxiesUnset) {
@@ -106,7 +106,7 @@ TEST_F(HttpRequestTest, GetRemoteAddrIgnoresForwardedHeaderWhenTrustedProxiesUns
     drogonReq->addHeader("X-Forwarded-For", "203.0.113.1, 198.51.100.2");
     const mb::MbRequest req(mantis(), drogonReq);
 
-    EXPECT_EQ(req.getRemoteAddr(), "192.0.2.20");
+    EXPECT_EQ(req.remoteAddr(), "192.0.2.20");
 }
 
 TEST_F(HttpRequestTest, GetRemoteAddrIgnoresForwardedHeaderWhenPeerNotTrusted) {
@@ -116,7 +116,7 @@ TEST_F(HttpRequestTest, GetRemoteAddrIgnoresForwardedHeaderWhenPeerNotTrusted) {
     drogonReq->addHeader("X-Forwarded-For", "203.0.113.1");
     const mb::MbRequest req(mantis(), drogonReq);
 
-    EXPECT_EQ(req.getRemoteAddr(), "192.0.2.30");
+    EXPECT_EQ(req.remoteAddr(), "192.0.2.30");
 }
 
 TEST_F(HttpRequestTest, GetRemoteAddrUsesForwardedHeaderFromTrustedProxy) {
@@ -126,7 +126,7 @@ TEST_F(HttpRequestTest, GetRemoteAddrUsesForwardedHeaderFromTrustedProxy) {
     drogonReq->addHeader("X-Forwarded-For", "203.0.113.1, 198.51.100.2");
     const mb::MbRequest req(mantis(), drogonReq);
 
-    EXPECT_EQ(req.getRemoteAddr(), "203.0.113.1");
+    EXPECT_EQ(req.remoteAddr(), "203.0.113.1");
 }
 
 TEST_F(HttpRequestTest, GetRemoteAddrMatchesTrustedProxyFromCommaSeparatedList) {
@@ -136,7 +136,7 @@ TEST_F(HttpRequestTest, GetRemoteAddrMatchesTrustedProxyFromCommaSeparatedList) 
     drogonReq->addHeader("X-Forwarded-For", "203.0.113.5");
     const mb::MbRequest req(mantis(), drogonReq);
 
-    EXPECT_EQ(req.getRemoteAddr(), "203.0.113.5");
+    EXPECT_EQ(req.remoteAddr(), "203.0.113.5");
 }
 
 TEST_F(HttpRequestTest, GetRemoteAddrIgnoresInvalidForwardedHeaderFromTrustedProxy) {
@@ -146,7 +146,7 @@ TEST_F(HttpRequestTest, GetRemoteAddrIgnoresInvalidForwardedHeaderFromTrustedPro
     drogonReq->addHeader("X-Forwarded-For", "not-an-ip");
     const mb::MbRequest req(mantis(), drogonReq);
 
-    EXPECT_EQ(req.getRemoteAddr(), "10.0.0.1");
+    EXPECT_EQ(req.remoteAddr(), "10.0.0.1");
 }
 
 TEST_F(HttpRequestTest, AuthTypeHelpers) {

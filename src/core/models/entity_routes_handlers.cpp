@@ -10,7 +10,7 @@ namespace mb {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
 
-                const auto entity_id = trim(req.getPathParamValue("id"));
+                const auto entity_id = trim(req.pathParamValue("id"));
                 if (entity_id.empty())
                     throw MantisException(400, "Entity `id` is required!");
 
@@ -48,15 +48,15 @@ namespace mb {
                 const auto entity = req.mbApp().entity(entity_name);
 
                 int limit = req.hasQueryParam("limit")
-                                ? safe_stoi(req.getQueryParamValue("limit"), 50)
+                                ? safe_stoi(req.queryParamValue("limit"), 50)
                                 : 50;
 
                 std::string after = req.hasQueryParam("after")
-                                        ? req.getQueryParamValue("after")
+                                        ? req.queryParamValue("after")
                                         : "";
 
                 std::string filter = req.hasQueryParam("filter")
-                                         ? req.getQueryParamValue("filter")
+                                         ? req.queryParamValue("filter")
                                          : "";
 
                 nlohmann::json opts;
@@ -155,7 +155,7 @@ namespace mb {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
 
-                const auto entity_id = trim(req.getPathParamValue("id"));
+                const auto entity_id = trim(req.pathParamValue("id"));
                 if (entity_id.empty())
                     throw MantisException(400, "Entity `id` is required!");
 
@@ -204,7 +204,7 @@ namespace mb {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
 
-                const auto entity_id = trim(req.getPathParamValue("id"));
+                const auto entity_id = trim(req.pathParamValue("id"));
                 if (entity_id.empty())
                     throw MantisException(400, "Entity `id` is required!");
 
@@ -229,31 +229,31 @@ namespace mb {
 
     MbHandlerFn entityGetOneHandler() {
         return [](const MbRequest &req, const MbResponse &res) {
-            handleGetOne(req, res, trim(req.getPathParamValue("entity_name")));
+            handleGetOne(req, res, trim(req.pathParamValue("entity_name")));
         };
     }
 
     MbHandlerFn entityGetManyHandler() {
         return [](const MbRequest &req, const MbResponse &res) {
-            handleGetMany(req, res, trim(req.getPathParamValue("entity_name")));
+            handleGetMany(req, res, trim(req.pathParamValue("entity_name")));
         };
     }
 
     MbHandlerFn entityPostHandler() {
         return [](MbRequest &req, const MbResponse &res) {
-            handlePost(req, res, trim(req.getPathParamValue("entity_name")));
+            handlePost(req, res, trim(req.pathParamValue("entity_name")));
         };
     }
 
     MbHandlerFn entityPatchHandler() {
         return [](MbRequest &req, const MbResponse &res) {
-            handlePatch(req, res, trim(req.getPathParamValue("entity_name")));
+            handlePatch(req, res, trim(req.pathParamValue("entity_name")));
         };
     }
 
     MbHandlerFn entityDeleteHandler() {
         return [](const MbRequest &req, const MbResponse &res) {
-            handleDelete(req, res, trim(req.getPathParamValue("entity_name")));
+            handleDelete(req, res, trim(req.pathParamValue("entity_name")));
         };
     }
 

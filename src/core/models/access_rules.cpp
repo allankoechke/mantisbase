@@ -212,8 +212,8 @@ namespace mb {
     nlohmann::json buildAccessExprVars(const MbRequest &req, const nlohmann::json &auth) {
         nlohmann::json body = nlohmann::json::object();
         try {
-            if (req.getMethod() == "POST" && !req.getBody().empty()) {
-                const auto &[parsed, err] = req.getBodyAsJson();
+            if (req.method() == "POST" && !req.body().empty()) {
+                const auto &[parsed, err] = req.bodyAsJson();
                 if (err.empty()) {
                     body = parsed;
                 }
@@ -221,8 +221,8 @@ namespace mb {
         } catch (...) {
         }
 
-        return buildAccessExprVars(auth, req.getRemoteAddr(), static_cast<int>(req.getRemotePort()),
-                                   req.getLocalAddr(), static_cast<int>(req.getLocalPort()), body);
+        return buildAccessExprVars(auth, req.remoteAddr(), static_cast<int>(req.remotePort()),
+                                   req.localAddr(), static_cast<int>(req.localPort()), body);
     }
 
     nlohmann::json buildAccessExprVars(const nlohmann::json &auth, const std::string &remote_addr,

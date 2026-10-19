@@ -47,7 +47,7 @@ void register_request(const nb::module_& m) {
                 throw nb::value_error(e.what());
             }
         })
-        .def_prop_ro("method", &mb::MbRequest::getMethod)
+        .def_prop_ro("method", &mb::MbRequest::method)
         .def_prop_ro("path", &mb::MbRequest::getPath)
         .def_prop_ro("remote_addr", &mb::MbRequest::getRemoteAddr);
 }

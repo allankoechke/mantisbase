@@ -10,8 +10,8 @@ namespace mb {
         // Entity-scoped API key routes
         Post("/api/v1/auth/:entity_name/api-keys", [](MbRequest &req, const MbResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                auto auth = req.get<json>("auth", json::object());
+                auto verification = req.get<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(401, {{"status", 401}, {"data", json::object()}, {"error", "Authentication required"}});
@@ -19,9 +19,9 @@ namespace mb {
                 }
 
                 auto user_id = auth["id"].get<std::string>();
-                auto entity_name = trim(req.getPathParamValue("entity_name"));
+                auto entity_name = trim(req.pathParamValue("entity_name"));
 
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
                     return;
@@ -41,8 +41,8 @@ namespace mb {
 
         Get("/api/v1/auth/:entity_name/api-keys", [](MbRequest &req, const MbResponse &res) {
             try {
-                auto& auth = req.getOr<json>("auth", json::object());
-                auto& verification = req.getOr<json>("verification", json::object());
+                auto& auth = req.get<json>("auth", json::object());
+                auto& verification = req.get<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(401, {{"status", 401}, {"data", json::object()}, {"error", "Authentication required"}});
@@ -50,7 +50,7 @@ namespace mb {
                 }
 
                 const auto user_id = auth["id"].get<std::string>();
-                const auto entity_name = trim(req.getPathParamValue("entity_name"));
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
 
                 auto keys = req.mbApp().auth().apiKey().list(entity_name, user_id);
                 res.sendJSON(200, {{"status", 200}, {"data", keys}, {"error", ""}});
@@ -62,8 +62,8 @@ namespace mb {
 
         Delete("/api/v1/auth/:entity_name/api-keys/:id", [this](MbRequest &req, const MbResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                auto auth = req.get<json>("auth", json::object());
+                auto verification = req.get<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(401, {{"status", 401}, {"data", json::object()}, {"error", "Authentication required"}});
@@ -72,8 +72,8 @@ namespace mb {
 
                 const auto user_id = auth["id"].get<std::string>();
                 const auto auth_entity = auth["entity"].get<std::string>();
-                const auto entity_name = trim(req.getPathParamValue("entity_name"));
-                auto key_id = trim(req.getPathParamValue("id"));
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
+                auto key_id = trim(req.pathParamValue("id"));
 
                 const auto &api_keys = req.mbApp().auth().apiKey();
                 const bool revoked = auth_entity == "mb_admins"
@@ -96,10 +96,10 @@ namespace mb {
 
         Post("/api/v1/sys/api-keys", [](MbRequest &req, const MbResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
+                auto auth = req.get<json>("auth", json::object());
                 auto user_id = auth["id"].get<std::string>();
 
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
                     return;
@@ -129,7 +129,7 @@ namespace mb {
 
         Delete("/api/v1/sys/api-keys/:id", [](MbRequest &req, const MbResponse &res) {
             try {
-                auto key_id = trim(req.getPathParamValue("id"));
+                auto key_id = trim(req.pathParamValue("id"));
 
                 if (req.mbApp().auth().apiKey().revokeById(key_id)) {
                     res.sendJSON(200, {{"status", 200}, {"data", {{"deleted", true}}}, {"error", ""}});

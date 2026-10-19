@@ -311,7 +311,7 @@ namespace mb
             "/api/v1/sys/settings/config",
             [this](const MbRequest &req, const MbResponse &res)
             {
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty())
                 {
                     res.sendJSON(400, {
