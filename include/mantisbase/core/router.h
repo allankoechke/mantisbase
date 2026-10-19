@@ -57,18 +57,9 @@ namespace mb {
 
         void Get(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
-        void Post(const std::string &path, const MbHandlerWithContentReaderFn &handler,
-                  const MbMiddlewares &middlewares = {});
-
         void Post(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
-        void Patch(const std::string &path, const MbHandlerWithContentReaderFn &handler,
-                   const MbMiddlewares &middlewares = {});
-
         void Patch(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
-
-        void Put(const std::string &path, const MbHandlerWithContentReaderFn &handler,
-                   const MbMiddlewares &middlewares = {});
 
         void Put(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
@@ -151,11 +142,7 @@ namespace mb {
     private:
         void registerDrogonHandler(const std::string &method, const std::string &path) const;
 
-        void registerDrogonHandlerWithReader(const std::string &method, const std::string &path);
-
         static std::string convertPathToDrogon(const std::string &httplib_path);
-
-        static std::vector<std::string> extractParamNames(const std::string &httplib_path);
 
         void executeMiddlewareChain(MbRequest &req, MbResponse &res, const RouteHandler *route) const;
 

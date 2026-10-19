@@ -109,7 +109,6 @@ set( MB_SOURCES
         src/core/router_internals.cpp
         src/core/http_request.cpp
         src/core/http_response.cpp
-        src/core/http_content_reader.cpp
         src/core/models/access_rules.cpp
 
         src/core/realtime.cpp
@@ -246,7 +245,7 @@ include(cmake/add-semver.cmake)
 # Add Tests
 option(MB_BUILD_TESTS "Build MantisBase Tests" OFF)
 if (MB_BUILD_TESTS)
-    message("-- Enabling tests for MantisBase")
+    message("Enabling tests for MantisBase")
     enable_testing()
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif ()

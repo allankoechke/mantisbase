@@ -104,14 +104,14 @@ namespace mb {
             }
         }
 
-        void handlePost(const MbRequest &req, const MbResponse &res, MbContentReader &reader,
+        void handlePost(MbRequest &req, const MbResponse &res,
                         const std::string &entity_name) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
 
-                reader.parseFormDataToEntity(entity);
+                req.parseFormDataToEntity(entity);
 
-                if (const auto &val_err = Validators::validateRequestBody(entity, reader.jsonBody());
+                if (const auto &val_err = Validators::validateRequestBody(entity, req.jsonBody());
                     val_err.has_value()) {
                     res.sendJSON(400, {
                                      {"data", json::object()},
@@ -121,8 +121,8 @@ namespace mb {
                     return;
                 }
 
-                reader.writeFiles(entity_name);
-                auto record = entity.create(reader.jsonBody());
+                req.writeFiles(entity_name);
+                auto record = entity.create(req.jsonBody());
 
                 if (entity.type() == "auth" && record.contains("password")) {
                     record.erase("password");
@@ -134,14 +134,14 @@ namespace mb {
                                  {"status", 201}
                              });
             } catch (const MantisException &e) {
-                reader.undoWrittenFiles(entity_name);
+                req.undoWrittenFiles(entity_name);
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
-                reader.undoWrittenFiles(entity_name);
+                req.undoWrittenFiles(entity_name);
                 res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -150,7 +150,7 @@ namespace mb {
             }
         }
 
-        void handlePatch(MbRequest &req, MbResponse &res, MbContentReader &reader,
+        void handlePatch(MbRequest &req, const MbResponse &res,
                          const std::string &entity_name) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
@@ -159,9 +159,9 @@ namespace mb {
                 if (entity_id.empty())
                     throw MantisException(400, "Entity `id` is required!");
 
-                reader.parseFormDataToEntity(entity);
+                req.parseFormDataToEntity(entity);
 
-                if (const auto &val_err = Validators::validateUpdateRequestBody(entity, reader.jsonBody());
+                if (const auto &val_err = Validators::validateUpdateRequestBody(entity, req.jsonBody());
                     val_err.has_value()) {
                     res.sendJSON(400, {
                                      {"data", json::object()},
@@ -171,8 +171,8 @@ namespace mb {
                     return;
                 }
 
-                reader.writeFiles(entity_name);
-                auto record = entity.update(entity_id, reader.jsonBody());
+                req.writeFiles(entity_name);
+                auto record = entity.update(entity_id, req.jsonBody());
 
                 if (entity.type() == "auth" && record.contains("password")) {
                     record.erase("password");
@@ -184,14 +184,14 @@ namespace mb {
                                  {"status", 200}
                              });
             } catch (const MantisException &e) {
-                reader.undoWrittenFiles(entity_name);
+                req.undoWrittenFiles(entity_name);
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
-                reader.undoWrittenFiles(entity_name);
+                req.undoWrittenFiles(entity_name);
                 res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -239,15 +239,15 @@ namespace mb {
         };
     }
 
-    MbHandlerWithContentReaderFn entityPostHandler() {
-        return [](const MbRequest &req, const MbResponse &res, MbContentReader &reader) {
-            handlePost(req, res, reader, trim(req.getPathParamValue("entity_name")));
+    MbHandlerFn entityPostHandler() {
+        return [](MbRequest &req, const MbResponse &res) {
+            handlePost(req, res, trim(req.getPathParamValue("entity_name")));
         };
     }
 
-    MbHandlerWithContentReaderFn entityPatchHandler() {
-        return [](MbRequest &req, MbResponse &res, MbContentReader &reader) {
-            handlePatch(req, res, reader, trim(req.getPathParamValue("entity_name")));
+    MbHandlerFn entityPatchHandler() {
+        return [](MbRequest &req, const MbResponse &res) {
+            handlePatch(req, res, trim(req.getPathParamValue("entity_name")));
         };
     }
 
@@ -272,8 +272,8 @@ namespace mb {
                    },
                    {requireAdminAuth()});
         router.Post("/api/v1/sys/admins",
-                    [admin_entity](const MbRequest &req, const MbResponse &res, MbContentReader &reader) {
-                        handlePost(req, res, reader, admin_entity);
+                    [admin_entity](MbRequest &req, const MbResponse &res) {
+                        handlePost(req, res, admin_entity);
                     },
                     {
                         requireAdminAuth(),
@@ -281,8 +281,8 @@ namespace mb {
                         envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)
                     });
         router.Patch("/api/v1/sys/admins/:id",
-                     [admin_entity](MbRequest &req, MbResponse &res, MbContentReader &reader) {
-                         handlePatch(req, res, reader, admin_entity);
+                     [admin_entity](MbRequest &req, const MbResponse &res) {
+                         handlePatch(req, res, admin_entity);
                      },
                      {requireAdminAuth(), envGateMiddleware("MB_DISABLE_ADMIN_MUTATIONS", true)});
         router.Delete("/api/v1/sys/admins/:id",

@@ -36,22 +36,6 @@ namespace mb {
         return result;
     }
 
-    std::vector<std::string> Router::extractParamNames(const std::string &httplib_path) {
-        std::vector<std::string> names;
-        for (size_t i = 0; i < httplib_path.size(); ++i) {
-            if (httplib_path[i] == ':' && (i == 0 || httplib_path[i - 1] == '/')) {
-                std::string name;
-                ++i;
-                while (i < httplib_path.size() && httplib_path[i] != '/') {
-                    name += httplib_path[i];
-                    ++i;
-                }
-                names.push_back(name);
-            }
-        }
-        return names;
-    }
-
     void Router::executeMiddlewareChain(MbRequest &req, MbResponse &res, const RouteHandler *route) const {
         // Execute global pre-routing middlewares
         for (const auto &g_mw: m_preRoutingMiddlewares) {
@@ -65,9 +49,7 @@ namespace mb {
             }
 
             // Execute the handler
-            if (const auto func = std::get_if<MbHandlerFn>(&route->handler)) {
-                (*func)(req, res);
-            }
+            route->handler(req, res);
         }
 
         // Post routing
@@ -82,13 +64,6 @@ namespace mb {
         registerDrogonHandler("GET", path);
     }
 
-    void Router::Post(const std::string &path, const MbHandlerWithContentReaderFn &handler,
-                      const MbMiddlewares &middlewares) {
-        logger().debug("Route Created", fmt::format("POST {}", path));
-        m_routeRegistry.add("POST", path, handler, middlewares);
-        registerDrogonHandlerWithReader("POST", path);
-    }
-
     void Router::Post(const std::string &path, const MbHandlerFn &handler,
                       const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("POST {}", path));
@@ -96,25 +71,11 @@ namespace mb {
         registerDrogonHandler("POST", path);
     }
 
-    void Router::Patch(const std::string &path, const MbHandlerWithContentReaderFn &handler,
-                       const MbMiddlewares &middlewares) {
-        logger().debug("Route Created", fmt::format("PATCH {}", path));
-        m_routeRegistry.add("PATCH", path, handler, middlewares);
-        registerDrogonHandlerWithReader("PATCH", path);
-    }
-
     void Router::Patch(const std::string &path, const MbHandlerFn &handler,
                        const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("PATCH {}", path));
         m_routeRegistry.add("PATCH", path, handler, middlewares);
         registerDrogonHandler("PATCH", path);
-    }
-
-    void Router::Put(const std::string &path, const MbHandlerWithContentReaderFn &handler,
-                       const MbMiddlewares &middlewares) {
-        logger().debug("Route Created", fmt::format("PUT {}", path));
-        m_routeRegistry.add("PUT", path, handler, middlewares);
-        registerDrogonHandlerWithReader("PUT", path);
     }
 
     void Router::Put(const std::string &path, const MbHandlerFn &handler,
@@ -200,73 +161,6 @@ namespace mb {
             }
 
             executeMiddlewareChain(ma_req, ma_res, route);
-            callback(ma_res.drogonResponse());
-        };
-
-        drogon::app().registerHandler(drogon_path, std::move(handler), {drogon_method});
-    }
-
-    void Router::registerDrogonHandlerWithReader(const std::string &method, const std::string &path) {
-        const auto drogon_path = convertPathToDrogon(path);
-        const auto param_names = extractParamNames(path);
-        const auto drogon_method = toDrogonMethod(method);
-
-        auto handler = [this, method, path, param_names](
-            const drogon::HttpRequestPtr &req,
-            std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
-            MbRequest ma_req{mbApp(), req};
-            MbResponse ma_res{mbApp()};
-            MbContentReader ma_cr{ma_req};
-
-            // Extract path params
-            if (!param_names.empty()) {
-                auto actual_parts = splitString(std::string(req->path()), "/");
-                auto pattern_parts = splitString(path, "/");
-
-                for (size_t i = 0; i < pattern_parts.size() && i < actual_parts.size(); ++i) {
-                    if (!pattern_parts[i].empty() && pattern_parts[i][0] == ':') {
-                        ma_req.setPathParam(pattern_parts[i].substr(1), actual_parts[i]);
-                    }
-                }
-            }
-
-            const auto route = m_routeRegistry.find(method, path);
-            if (!route) {
-                ma_res.sendJSON(404, {
-                                    {"status", 404},
-                                    {"error", std::format("{} {} Route Not Found", method, path)},
-                                    {"data", json::object()}
-                                });
-                callback(ma_res.drogonResponse());
-                return;
-            }
-
-            // Execute global middlewares
-            for (const auto &g_mw: m_preRoutingMiddlewares) {
-                if (g_mw(ma_req, ma_res) == MbHandlerResponse::Handled) {
-                    callback(ma_res.drogonResponse());
-                    return;
-                }
-            }
-
-            // Execute route-specific middlewares
-            for (const auto &mw: route->middlewares) {
-                if (mw(ma_req, ma_res) == MbHandlerResponse::Handled) {
-                    callback(ma_res.drogonResponse());
-                    return;
-                }
-            }
-
-            // Execute handler with content reader
-            if (const auto func = std::get_if<MbHandlerWithContentReaderFn>(&route->handler)) {
-                (*func)(ma_req, ma_res, ma_cr);
-            }
-
-            // Post routing
-            for (const auto &p_mw: m_postRoutingMiddlewares) {
-                p_mw(ma_req, ma_res);
-            }
-
             callback(ma_res.drogonResponse());
         };
 

@@ -1,6 +1,6 @@
 /**
  * @file http.h
- * @brief HTTP request/response wrappers and multipart content reader.
+ * @brief HTTP request/response wrappers with unified body handling.
  *
  * @ref MantisRequest and @ref MantisResponse wrap Drogon types and expose MantisBase
  * conventions: per-request attributes via `set()`/`getOr()`, auth helpers, and JSON
@@ -22,11 +22,20 @@
 #include "../utils/utils.h"
 #include <fstream>
 #include <unordered_map>
+#include <vector>
 #include <drogon/HttpRequest.h>
 #include <drogon/HttpResponse.h>
 
 namespace mb {
     class MantisBase; // forward declaration; MbRequest holds a reference to it
+
+    /** Single field from a parsed `multipart/form-data` body. */
+    struct MANTISBASE_API MbFormDataItem {
+        std::string name;
+        std::string content;
+        std::string filename;
+        std::string content_type;
+    };
 
 #ifdef MB_SCRIPTING_ENABLED
     /** Duktape bindings for the JS `console` object in server scripts. */
@@ -62,6 +71,17 @@ namespace mb {
         /// several times per request (access-rule evaluation, then the
         /// handler), so the body is parsed once and reused.
         mutable std::optional<std::pair<nlohmann::json, std::string>> m_bodyJsonCache;
+
+        /// Unified body state: parsed once on first access via
+        /// ensureBodyParsed(), then reused by jsonBody()/formData()/
+        /// parseFormDataToEntity()/writeFiles().
+        mutable bool m_bodyParsed = false;
+        mutable std::vector<MbFormDataItem> m_formData;
+        /// JSON requests: parsed body. Multipart: empty until
+        /// parseFormDataToEntity() maps the form fields.
+        mutable json m_unifiedJson = json::object();
+        /// File field metadata keyed by form field name (multipart only).
+        mutable json m_filesMetadata = json::object();
 
     public:
         explicit MbRequest(const MantisBase& app, drogon::HttpRequestPtr _req);
@@ -130,12 +150,36 @@ namespace mb {
         [[nodiscard]] bool isUserAuth();
 
         /**
-         * @brief Parsed JSON body, or an empty object when absent or malformed.
+         * @brief Unified parsed request body (lazy, parsed once per request).
          *
-         * Convenience wrapper over getBodyAsJson() for callers -- notably the
-         * language bindings -- that want a value rather than a (value, error) pair.
+         * This is the single body entry point for `(req, res)` handlers on
+         * PUT/PATCH/POST, covering both JSON and multipart/file-upload bodies.
+         *
+         * JSON requests: the parsed body; throws `MantisException(400)` on
+         * malformed JSON. Multipart requests: empty until
+         * parseFormDataToEntity() maps the form fields onto an entity.
+         *
+         * For a non-throwing parse use getBodyAsJson().
          */
-        json jsonBody() const;
+        [[nodiscard]] const json &jsonBody() const;
+
+        /** Multipart parts (text + file fields). Empty for non-multipart bodies. */
+        [[nodiscard]] const std::vector<MbFormDataItem> &formData() const;
+
+        /** File field metadata keyed by form field name (after parseFormDataToEntity). */
+        [[nodiscard]] const json &filesMetadata() const;
+
+        /** Map parsed multipart form fields onto an entity for create/update (no-op for JSON). */
+        void parseFormDataToEntity(const Entity &entity) const;
+
+        /** Persist uploaded files for `entity_name` using stored metadata (no-op for JSON). */
+        void writeFiles(const std::string &entity_name);
+
+        /** Remove files written by @ref writeFiles on validation failure. */
+        void undoWrittenFiles(const std::string &entity_name) const;
+
+        /** Stable hash of multipart metadata for deduplication checks. */
+        static std::string hashMultipartMetadata(const MbFormDataItem &data);
 
         /** Store a per-request attribute on the underlying Drogon request. */
         template<typename T>
@@ -144,8 +188,8 @@ namespace mb {
         }
 
 #ifdef MB_SCRIPTING_ENABLED
-        DukValue get_duk(const std::string &key);
-        DukValue getOr_duk(const std::string &key, const DukValue &default_value);
+        DukValue get_duk(const std::string &key) const;
+        DukValue getOr_duk(const std::string &key, const DukValue &default_value) const;
         void set_duk(const std::string &key, const DukValue &value);
 #endif
 
@@ -159,6 +203,10 @@ namespace mb {
         }
 
     private:
+        void ensureBodyParsed() const;
+        void readMultipart() const;
+        void readJSON() const;
+        static json getValueFromType(const std::string &type, const std::string &value);
     };
 
     /**
@@ -238,59 +286,6 @@ namespace mb {
         static void registerDuktapeMethods();
     };
 
-    /** Single field from a parsed `multipart/form-data` body. */
-    struct MANTISBASE_API MbFormDataItem {
-        std::string name;
-        std::string content;
-        std::string filename;
-        std::string content_type;
-    };
-
-    /**
-     * @brief Lazy multipart/JSON body parser for content-reader route handlers.
-     *
-     * Parses once, then exposes form fields, file metadata, and typed entity binding.
-     */
-    class MANTISBASE_API MbContentReader {
-        const MbRequest &m_req;
-
-        std::vector<MbFormDataItem> m_formData;
-        json m_json{}, m_filesMetadata{};
-        bool m_parsed = false;
-
-    public:
-        explicit MbContentReader(const MbRequest &req);
-
-        /** @return `true` when the request body is multipart form data. */
-        [[nodiscard]] bool isMultipartFormData() const;
-
-        /** Parsed form fields (text and file parts). */
-        [[nodiscard]] const std::vector<MbFormDataItem> &formData() const;
-
-        /** File field metadata keyed by form field name. */
-        [[nodiscard]] const json &filesMetadata() const;
-
-        /** Parsed JSON body (empty object when not JSON). */
-        [[nodiscard]] const json &jsonBody() const;
-
-        /** Map parsed form/JSON fields onto an entity for create/update. */
-        void parseFormDataToEntity(const Entity &entity);
-
-        /** Persist uploaded files for `entity_name` using stored metadata. */
-        void writeFiles(const std::string& entity_name);
-
-        /** Remove files written by @ref writeFiles on validation failure. */
-        void undoWrittenFiles(const std::string& entity_name);
-
-        /** Stable hash of multipart metadata for deduplication checks. */
-        static std::string hashMultipartMetadata(const MbFormDataItem& data);
-
-    private:
-        void read();
-        void readMultipart();
-        void readJSON();
-        static json getValueFromType(const std::string& type, const std::string& value);
-    };
 } // mb
 
 #endif //MB_HTTP_H

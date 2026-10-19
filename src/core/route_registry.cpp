@@ -16,13 +16,6 @@ namespace mb {
         routes[{method, path}] = {.middlewares = middlewares, .handler = handler};
     }
 
-    void RouteRegistry::add(const std::string &method,
-                            const std::string &path,
-                            const MbHandlerWithContentReaderFn &handler,
-                            const MbMiddlewares &middlewares) {
-        routes[{method, path}] = {.middlewares = middlewares, .handler = handler};
-    }
-
     const RouteHandler *RouteRegistry::find(const std::string &method, const std::string &path) const {
         const auto it = routes.find({method, path});
         return it != routes.end() ? &it->second : nullptr;

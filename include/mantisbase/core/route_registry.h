@@ -12,7 +12,6 @@
 #include <unordered_map>
 #include <functional>
 #include <string>
-#include <variant>
 #include <vector>
 #include <nlohmann/json.hpp>
 
@@ -32,29 +31,21 @@ namespace mb
     struct MANTISBASE_API RouteHandler
     {
         std::vector<MbMiddlewareFn> middlewares;
-        std::variant<MbHandlerFn, MbHandlerWithContentReaderFn> handler;
+        MbHandlerFn handler;
     };
 
     /**
      * @brief Thread-local route registry backing the MantisBase router.
-     *
-     * Supports both plain and content-reader handler variants (multipart uploads).
      */
     class MANTISBASE_API RouteRegistry
     {
         std::unordered_map<MbRouteKey, RouteHandler, RouteKeyHash> routes;
 
     public:
-        /** Register a standard handler for `method` + `path`. */
+        /** Register a handler for `method` + `path`. */
         void add(const std::string& method,
                  const std::string& path,
                  const MbHandlerFn &handler,
-                 const MbMiddlewares& middlewares);
-
-        /** Register a handler that receives a @ref MantisContentReader. */
-        void add(const std::string& method,
-                 const std::string& path,
-                 const MbHandlerWithContentReaderFn &handler,
                  const MbMiddlewares& middlewares);
 
         /** @return Route handler metadata, or `nullptr` if not registered. */

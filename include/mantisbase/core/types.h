@@ -22,7 +22,6 @@ namespace mb {
     class MantisBase;
     class MbRequest;
     class MbResponse;
-    class MbContentReader;
     class Entity;
     class EntitySchema;
     class EntitySchemaField;
@@ -56,14 +55,13 @@ namespace mb {
 
     /**
      * @brief Standard route handler `(request, response)`.
+     *
+     * The single handler signature for all methods including PUT/PATCH/POST.
+     * Body handling (JSON and multipart/file uploads) is available directly
+     * on @ref MbRequest via `jsonBody()`, `formData()`, `filesMetadata()`,
+     * `parseFormDataToEntity()`, and `writeFiles()`.
      */
     using MbHandlerFn = std::function<void(MbRequest&, MbResponse&)>;
-
-    /**
-     * @brief Route handler with multipart/content reader `(request, response, reader)`.
-     */
-    using MbHandlerWithContentReaderFn = std::function<void(MbRequest&, MbResponse&,
-                                                                 MbContentReader&)>;
     using MbMiddlewareFn = std::function<MbHandlerResponse(MbRequest&, MbResponse&)>;
     using MbMiddlewares = std::vector<MbMiddlewareFn>;
     using MbMethod = std::string;
