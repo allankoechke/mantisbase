@@ -63,7 +63,7 @@ target_link_libraries(your_app PRIVATE mantisbase)
 
 `MantisBase::create()` returns a `std::unique_ptr<MantisBase>` that **you own**. There is no global `MantisBase::instance()` accessor. Hold the pointer in `main` (or your app object), pass `const MantisBase&` into your own code, and call `app->run()` to start the HTTP server.
 
-Services that run inside MantisBase (`Entity`, `Router`, `MantisRequest`, `ApiKeyManager`, `OAuthManager`, etc.) inherit `IMantisBase` and expose `mbApp()` when you only have a request or service reference.
+Services that run inside MantisBase (`Entity`, `Router`, `MbRequest`, `ApiKeyManager`, `OAuthManager`, etc.) inherit `IMantisBase` and expose `mbApp()` when you only have a request or service reference.
 
 ---
 
@@ -152,13 +152,13 @@ auto sql = app->db().session();
 Inside custom route handlers, use `req.mbApp()`:
 
 ```cpp
-router.Get("/api/v1/custom", [](mb::MantisRequest& req, mb::MantisResponse& res) {
+router.Get("/api/v1/custom", [](mb::MbRequest& req, mb::MbResponse& res) {
     auto count = req.mbApp().entity("posts").countRecords();
     res.sendJSON(200, {{"posts", count}});
 });
 ```
 
-Per-request data (`auth`, `verification`, etc.) is stored on `MantisRequest` via `set()` / `getOr()`, not a global singleton.
+Per-request data (`auth`, `verification`, etc.) is stored on `MbRequest` via `set()` / `get()`, not a global singleton.
 
 ---
 
@@ -213,19 +213,19 @@ int main()
     auto& router = app->router();
     
     // Simple GET endpoint
-    router.Get("/api/v2/custom", [](mb::MantisRequest& req, mb::MantisResponse& res) {
+    router.Get("/api/v2/custom", [](mb::MbRequest& req, mb::MbResponse& res) {
         res.sendJSON(200, {{"message", "Custom endpoint"}});
     });
     
     // POST endpoint with admin authentication
-    router.Post("/api/v2/admin/stats", [](mb::MantisRequest& req, mb::MantisResponse& res) {
+    router.Post("/api/v2/admin/stats", [](mb::MbRequest& req, mb::MbResponse& res) {
         mb::json stats = {{"users", 100}, {"posts", 500}};
         res.sendJSON(200, stats);
     }, {mb::requireAdminAuth()});
     
     // GET endpoint with entity authentication
-    router.Get("/api/v2/users/profile", [](mb::MantisRequest& req, mb::MantisResponse& res) {
-        auto auth = req.getOr<mb::json>("auth", mb::json::object());
+    router.Get("/api/v2/users/profile", [](mb::MbRequest& req, mb::MbResponse& res) {
+        auto auth = req.get<mb::json>("auth", mb::json::object());
         std::string userId = auth["id"];
         res.sendJSON(200, {{"user_id", userId}});
     }, {mb::requireEntityAuth("users")});
@@ -383,7 +383,7 @@ int main()
     auto app = mb::MantisBase::create(config);
     auto& router = app->router();
     
-    router.Get("/api/v1/hello", [](mb::MantisRequest& req, mb::MantisResponse& res) {
+    router.Get("/api/v1/hello", [](mb::MbRequest& req, mb::MbResponse& res) {
         res.sendJSON(200, {{"message", "Hello from embedded MantisBase!"}});
     });
     

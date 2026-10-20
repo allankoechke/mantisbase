@@ -164,7 +164,7 @@ app.router().addRoute("GET", "/test", function (req, res){
 
 To access the request metadata as well as set response metadata, the handler or middleware method passes in two arguments, the request object (shown as `req` above) and the response object (shown as `res` above).
 
-The `req` object maps to `MantisRequest` and `res` maps to `MantisResponse` class in C++.
+The `req` object maps to `MbRequest` and `res` maps to `MbResponse` class in C++.
 
 ### Middlewares
 Middlewares in Mantis carries the same function signature as the request handler with just one tiny difference. The middlewares return a `bool` type, indicating whether or not the middleware executed successfully. That is;
@@ -192,17 +192,14 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 > Note that, middlewares are executed from the first to the last in that order. That is,
 > `app.router().addRoute(...., middleware_1, middleware_2, function(req, res){ return true}, ...)` executing from `middleware_1` to `middleware_n` the finally invoking the handler.
 
-### MantisRequest Methods/Properties
+### MbRequest Methods/Properties
 - `req.hasHeader("Authorization")`: return true/false
 - `req.getHeader("Authorization", "", 0)`: Return Authorization value or default
-- `req.getHeaderCount("key")`: Count for header values given the header key 
 - `req.setHeader("Cow", "Cow Value")`
 - `req.hasQueryParam("key")`: return true/false
 - `req.getQueryParam("key")`: Return header value given the key
-- `req.getQueryParamCount("key")`: Return parameter value count
 - `req.hasPathParam("key")`: return true/false
 - `req.getPathParam("key")`: Return header value given the key
-- `req.getPathParamCount("key")`: Return parameter value count
 - `req.isMultipartFormData()`: Return true if request type is of Multipart/FormData
 - `req.body`: Get request body data
 - `req.method`: Get request method ('GET', 'POST', ...)
@@ -216,14 +213,13 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 - `req.get("key")`: Get a value from the context store given the `key`.
 - `req.getOr("key", "default value")`: Returns a value if `key` is in the context store else the default value.
 
-### MantisResponse Methods/Properties
+### MbResponse Methods/Properties
 - `res.hasHeader("Authorization")`: Check if a header `key` exists in the request header. Returns true or false.
 - `res.getHeader(<key>, <default>, <index>)`: Get header value for a given `key` in the header. All three parameters are required, `key` being the header of interest, `default` being the base value if header is not found and `index` being the 0-based index for the item to return if the header value has more than one value. i.e 
 ```js
-    const token = res.getHeader("Authorization", "", 0)
-    const type = res.getHeader("content-type", "text/plain", 0)
+    const token = res.getHeader("Authorization", "")
+    const type = res.getHeader("content-type", "text/plain")
 ```
-- `res.getHeaderCount("key")` -> Count for header values given the header key
 - `res.setHeader("Cow", "Cow Value")`
 - `res.redirect("http://some-url.com", 302)`
 > **Note:** `res.redirect(url, status)` redirects a single in-flight request from inside a handler. To redirect a whole path without writing a handler, use `app.router().redirect(from, to[, status[, methods]])` (see [Router](#router)).

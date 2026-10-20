@@ -172,44 +172,44 @@ When creating custom endpoints, you can specify middlewares as the third paramet
 
 ```cpp
 // Require admin authentication
-router.Get("/api/v1/admin/stats", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/admin/stats", [](MbRequest& req, MbResponse& res) {
     res.sendJSON(200, {{"stats", "data"}});
 }, {requireAdminAuth()});
 
 // Require authentication from specific entity
-router.Get("/api/v1/users/profile", [](MantisRequest& req, MantisResponse& res) {
-    auto auth = req.getOr<json>("auth", json::object());
+router.Get("/api/v1/users/profile", [](MbRequest& req, MbResponse& res) {
+    auto auth = req.get<json>("auth", json::object());
     std::string userId = auth["id"];
     // ... return user profile
 }, {requireEntityAuth("users")});
 
 // Allow admins OR users from specific entity
-router.Get("/api/v1/posts/draft", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/posts/draft", [](MbRequest& req, MbResponse& res) {
     // ... return draft posts
 }, {requireAdminOrEntityAuth("users")});
 
 // Guest-only endpoint (no authentication required)
-router.Get("/api/v1/public/info", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/public/info", [](MbRequest& req, MbResponse& res) {
     res.sendJSON(200, {{"info", "public data"}});
 }, {requireGuestOnly()});
 
 // Custom expression evaluation
-router.Get("/api/v1/restricted", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/restricted", [](MbRequest& req, MbResponse& res) {
     // ... handler
 }, {requireExprEval("auth.id != \"\" && auth.user.verified == true")});
 
 // Rate limiting by IP address (100 requests per minute)
-router.Get("/api/v1/data", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/data", [](MbRequest& req, MbResponse& res) {
     res.sendJSON(200, {{"data", "response"}});
 }, {rateLimit(100, 60, false)});
 
 // Rate limiting by user ID (10 requests per second)
-router.Post("/api/v1/upload", [](MantisRequest& req, MantisResponse& res) {
+router.Post("/api/v1/upload", [](MbRequest& req, MbResponse& res) {
     // ... handler
 }, {rateLimit(10, 1, true)});
 
 // Multiple middlewares (executed in order)
-router.Post("/api/v1/sensitive", [](MantisRequest& req, MantisResponse& res) {
+router.Post("/api/v1/sensitive", [](MbRequest& req, MbResponse& res) {
     // ... handler
 }, {
     requireAdminAuth(),
@@ -222,9 +222,9 @@ router.Post("/api/v1/sensitive", [](MantisRequest& req, MantisResponse& res) {
 After middlewares run, you can access authenticated user data from the request context:
 
 ```cpp
-router.Get("/api/v1/me", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/me", [](MbRequest& req, MbResponse& res) {
     // Get auth data from context (set by middlewares)
-    auto auth = req.getOr<json>("auth", json::object());
+    auto auth = req.get<json>("auth", json::object());
     
     if (auth["type"] == "guest") {
         res.sendJSON(401, {{"error", "Not authenticated"}});
@@ -435,10 +435,67 @@ When `has_more` is `false`, you have reached the last page.
 You can create custom API endpoints using the router:
 
 ```cpp
-router.Get("/api/v1/custom", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/custom", [](MbRequest& req, MbResponse& res) {
     res.sendJSON(200, {{"message", "Custom endpoint"}});
 }, {requireAdminAuth()});
 ```
+
+### Request bodies: JSON and file uploads
+
+PUT/PATCH/POST handlers share the single `(req, res)` signature. Both JSON
+and `multipart/form-data` bodies are read through `MbRequest` (parsed lazily,
+once per request):
+
+| Method | Behavior |
+|---|---|
+| `req.jsonBody()` | Unified parsed body. JSON requests return the parsed body and throw `MantisException(400)` on malformed JSON; multipart requests return an empty object until `parseFormDataToEntity()` maps the fields. |
+| `req.bodyAsJson()` | Non-throwing alternative returning a `{body, error}` pair. |
+| `req.isMultipartFormData()` | `true` when the body is `multipart/form-data`. |
+| `req.formData()` | Multipart parts (text and file fields: `name`, `content`, `filename`, `content_type`); empty for JSON bodies. |
+| `req.filesMetadata()` | File metadata keyed by form field name, available after `parseFormDataToEntity()`. |
+| `req.parseFormDataToEntity(entity)` | Map multipart fields onto an entity for create/update (no-op for JSON). |
+| `req.writeFiles(entity_name)` / `req.undoWrittenFiles(entity_name)` | Persist uploaded files / roll them back on failure (no-ops for JSON). |
+
+A custom endpoint accepting both JSON and file uploads:
+
+```cpp
+router.Post("/api/v1/documents", [](MbRequest& req, MbResponse& res) {
+    try {
+        const auto entity = req.mbApp().entity("documents");
+
+        req.parseFormDataToEntity(entity); // no-op for JSON bodies
+        const json &body = req.jsonBody(); // throws 400 on malformed JSON
+
+        if (const auto err = Validators::validateRequestBody(entity, body);
+            err.has_value()) {
+            res.sendJSON(400, {
+                {"error", err.value()},
+                {"status", 400},
+                {"data", json::object()}
+            });
+            return;
+        }
+
+        req.writeFiles("documents"); // no-op for JSON bodies
+        auto record = entity.create(body);
+        res.sendJSON(201, {
+            {"error", ""},
+            {"status", 201},
+            {"data", record}
+        });
+    } catch (const MantisException &e) {
+        req.undoWrittenFiles("documents");
+        res.sendJSON(e.code(), {
+            {"error", e.what()},
+            {"status", e.code()},
+            {"data", json::object()}
+        });
+    }
+});
+```
+
+Uploaded files are served at `GET /api/v1/files/<entity>/<filename>`.
+See [File Handling](files.md) for more details.
 
 ### Path redirects
 
@@ -571,7 +628,7 @@ When creating or updating schemas with foreign keys, MantisBase automatically va
 
 To remove a foreign key constraint, set `foreign_key` to `null`:
 
-```json
+```bash
 PATCH /api/v1/schemas/comments
 {
   "fields": [
