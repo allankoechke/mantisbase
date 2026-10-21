@@ -9,11 +9,11 @@
 
 namespace mb
 {
-    void ContextStore::dump()
+    void MbContextStore::dump()
     {
         for (const auto& [key, value] : data)
         {
-            const auto i = "ContextStore::Dump";
+            const auto i = "MbContextStore::Dump";
             if (value.type() == typeid(std::string))
             {
                 // LogOrigin::debug("Context Dump", fmt::format("{} - {}: {}", i, key, std::any_cast<std::string>(value)));
@@ -49,13 +49,13 @@ namespace mb
         }
     }
 
-    bool ContextStore::hasKey(const std::string& key) const
+    bool MbContextStore::hasKey(const std::string& key) const
     {
         return data.contains(key);
     }
 
 #ifdef MB_SCRIPTING_ENABLED
-    DukValue ContextStore::get_duk(const std::string& key)
+    DukValue MbContextStore::get_duk(const std::string& key)
     {
         const auto it = data.find(key);
 
@@ -66,7 +66,7 @@ namespace mb
         // Convert std::any to DukValue based on stored type
         const std::any& value = it->second;
 
-        const auto ctx = ScriptingEngine::active() ? ScriptingEngine::active()->ctx() : nullptr;
+        const auto ctx = MbScriptingEngine::active() ? MbScriptingEngine::active()->ctx() : nullptr;
         if (!ctx) {
             return {};
         }
@@ -108,7 +108,7 @@ namespace mb
         return DukValue::take_from_stack(ctx);
     }
 
-    DukValue ContextStore::getOr_duk(const std::string& key, DukValue default_value)
+    DukValue MbContextStore::getOr_duk(const std::string& key, DukValue default_value)
     {
         auto val = get_duk(key);
         if (val == DukValue{})
@@ -118,9 +118,9 @@ namespace mb
         return val;
     }
 
-    void ContextStore::set_duk(const std::string& key, const DukValue& value)
+    void MbContextStore::set_duk(const std::string& key, const DukValue& value)
     {
-        const auto ctx = ScriptingEngine::active() ? ScriptingEngine::active()->ctx() : nullptr;
+        const auto ctx = MbScriptingEngine::active() ? MbScriptingEngine::active()->ctx() : nullptr;
         if (!ctx) {
             return;
         }

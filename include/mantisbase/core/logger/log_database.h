@@ -32,17 +32,17 @@ namespace mb {
      * Provides methods to store logs in a separate SQLite database,
      * with automatic cleanup of logs older than the configured retention period.
      */
-    class MANTISBASE_API LogDatabase {
+    class MANTISBASE_API MbLogDatabase {
     public:
         /**
-         * @brief Construct LogDatabase instance.
+         * @brief Construct MbLogDatabase instance.
          */
-        explicit LogDatabase(const MantisBase& app);
+        explicit MbLogDatabase(const MantisBase& app);
 
         /**
          * @brief Destructor - stops cleanup thread and closes database.
          */
-        ~LogDatabase();
+        ~MbLogDatabase();
 
         /**
          * @brief Initialize database: create table and start cleanup thread.
@@ -53,8 +53,8 @@ namespace mb {
         /**
          * @brief Insert a log entry into the database.
          * @param level Log level (trace, debug, info, warn, critical)
-         * @param origin Component/system origin (System, Auth, Database, Entity, EntitySchema, etc.)
-         * @param message Short message (e.g., "Auth Failed", "Database Connected")
+         * @param origin Component/system origin (System, MbAuth, MbDatabase, MbEntity, MbEntitySchema, etc.)
+         * @param message Short message (e.g., "MbAuth Failed", "MbDatabase Connected")
          * @param details Long description of the message
          * @param data Optional JSON data associated with the log
          * @return true if insert successful, false otherwise

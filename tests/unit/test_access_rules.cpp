@@ -37,44 +37,44 @@ TEST(AuthTypeHelpers, GuestAdminUser) {
     EXPECT_TRUE(mb::isUserAuth({{"type", "user"}}));
 }
 
-TEST(AccessRule, DefaultConstructor) {
-    const mb::AccessRule rule;
+TEST(MbAccessRule, DefaultConstructor) {
+    const mb::MbAccessRule rule;
 
     EXPECT_EQ(rule.mode(), "");
     EXPECT_EQ(rule.expr(), "");
     EXPECT_EQ(rule.entity(), "");
 }
 
-TEST(AccessRule, AuthEntityFilter) {
-    const mb::AccessRule rule("auth", "", "users,editors");
+TEST(MbAccessRule, AuthEntityFilter) {
+    const mb::MbAccessRule rule("auth", "", "users,editors");
     EXPECT_EQ(rule.mode(), "auth");
     EXPECT_EQ(rule.entity(), "users,editors");
     EXPECT_TRUE(rule.matchesAuthEntity("users"));
     EXPECT_TRUE(rule.matchesAuthEntity("editors"));
     EXPECT_FALSE(rule.matchesAuthEntity("guests"));
 
-    const mb::AccessRule negRule("auth", "", "!guests");
+    const mb::MbAccessRule negRule("auth", "", "!guests");
     EXPECT_TRUE(negRule.matchesAuthEntity("users"));
     EXPECT_FALSE(negRule.matchesAuthEntity("guests"));
 }
 
-TEST(AccessRule, AuthEntityValidation) {
-    EXPECT_THROW(mb::AccessRule("auth", "", "bad name"), mb::MantisException);
-    EXPECT_THROW(mb::AccessRule("public", "", "users"), mb::MantisException);
+TEST(MbAccessRule, AuthEntityValidation) {
+    EXPECT_THROW(mb::MbAccessRule("auth", "", "bad name"), mb::MbException);
+    EXPECT_THROW(mb::MbAccessRule("public", "", "users"), mb::MbException);
 
-    mb::AccessRule rule("public");
-    EXPECT_THROW(rule.setEntity("users"), mb::MantisException);
+    mb::MbAccessRule rule("public");
+    EXPECT_THROW(rule.setEntity("users"), mb::MbException);
     rule.setMode("auth");
     EXPECT_NO_THROW(rule.setEntity("users"));
 }
 
-TEST(AccessRule, EntityJsonRoundTrip) {
+TEST(MbAccessRule, EntityJsonRoundTrip) {
     nlohmann::json j = {
         {"mode", "auth"},
         {"entity", "users,editors"}
     };
 
-    const auto rule = mb::AccessRule::fromJSON(j);
+    const auto rule = mb::MbAccessRule::fromJSON(j);
     EXPECT_EQ(rule.entity(), "users,editors");
 
     const auto out = rule.toJSON();
@@ -82,27 +82,27 @@ TEST(AccessRule, EntityJsonRoundTrip) {
     EXPECT_EQ(out["entity"], "users,editors");
     EXPECT_TRUE(out.contains("expr"));
 
-    const mb::AccessRule wildcard("auth");
+    const mb::MbAccessRule wildcard("auth");
     EXPECT_FALSE(wildcard.toJSON().contains("entity"));
 }
 
-TEST(AccessRule, FromJSONRejectsNonStringEntity) {
+TEST(MbAccessRule, FromJSONRejectsNonStringEntity) {
     nlohmann::json j = {
         {"mode", "auth"},
         {"entity", nlohmann::json::array({"users"})}
     };
-    EXPECT_THROW(mb::AccessRule::fromJSON(j), mb::MantisException);
+    EXPECT_THROW(mb::MbAccessRule::fromJSON(j), mb::MbException);
 }
 
-TEST(AccessRule, ConstructorWithParams) {
-    const mb::AccessRule rule("custom", "@auth.id != \"\"");
+TEST(MbAccessRule, ConstructorWithParams) {
+    const mb::MbAccessRule rule("custom", "@auth.id != \"\"");
 
     EXPECT_EQ(rule.mode(), "custom");
     EXPECT_EQ(rule.expr(), "@auth.id != \"\"");
 }
 
-TEST(AccessRule, SetModeAndExpr) {
-    mb::AccessRule rule;
+TEST(MbAccessRule, SetModeAndExpr) {
+    mb::MbAccessRule rule;
 
     rule.setMode("public");
     rule.setExpr("");
@@ -121,21 +121,21 @@ TEST(AccessRule, SetModeAndExpr) {
     EXPECT_EQ(rule.expr(), "@auth.entity == \"mb_admins\"");
 }
 
-TEST(AccessRule, ToJSON) {
-    const mb::AccessRule rule("custom", "@auth.id == '123'");
+TEST(MbAccessRule, ToJSON) {
+    const mb::MbAccessRule rule("custom", "@auth.id == '123'");
     auto json = rule.toJSON();
 
     EXPECT_EQ(json["mode"], "custom");
     EXPECT_EQ(json["expr"], "@auth.id == '123'");
 }
 
-TEST(AccessRule, FromJSON) {
+TEST(MbAccessRule, FromJSON) {
     nlohmann::json j = {
         {"mode", "public"},
         {"expr", ""}
     };
 
-    auto rule = mb::AccessRule::fromJSON(j);
+    auto rule = mb::MbAccessRule::fromJSON(j);
 
     EXPECT_EQ(rule.mode(), "public");
     EXPECT_EQ(rule.expr(), "");
@@ -145,69 +145,69 @@ TEST(AccessRule, FromJSON) {
         {"expr", "@auth.id != null"}
     };
 
-    rule = mb::AccessRule::fromJSON(j);
+    rule = mb::MbAccessRule::fromJSON(j);
     EXPECT_EQ(rule.mode(), "custom");
     EXPECT_EQ(rule.expr(), "@auth.id != null");
 }
 
-TEST(AccessRule, RoundTripJSON) {
-    mb::AccessRule original("custom", "@auth.entity == \"users\"");
+TEST(MbAccessRule, RoundTripJSON) {
+    mb::MbAccessRule original("custom", "@auth.entity == \"users\"");
 
     const auto json = original.toJSON();
-    const auto restored = mb::AccessRule::fromJSON(json);
+    const auto restored = mb::MbAccessRule::fromJSON(json);
 
     EXPECT_EQ(restored.mode(), original.mode());
     EXPECT_EQ(restored.expr(), original.expr());
 }
 
-TEST(AccessRule, DifferentModes) {
-    mb::AccessRule publicRule("public", "");
+TEST(MbAccessRule, DifferentModes) {
+    mb::MbAccessRule publicRule("public", "");
     EXPECT_EQ(publicRule.mode(), "public");
 
-    mb::AccessRule authRule("auth", "");
+    mb::MbAccessRule authRule("auth", "");
     EXPECT_EQ(authRule.mode(), "auth");
 
-    mb::AccessRule customRule("custom", "@auth.id == @req.body.user_id");
+    mb::MbAccessRule customRule("custom", "@auth.id == @req.body.user_id");
     EXPECT_EQ(customRule.mode(), "custom");
     EXPECT_EQ(customRule.expr(), "@auth.id == @req.body.user_id");
 
-    mb::AccessRule adminRule("", "");
+    mb::MbAccessRule adminRule("", "");
     EXPECT_EQ(adminRule.mode(), "");
     EXPECT_EQ(adminRule.expr(), "");
 }
 
 TEST(EvaluateAccessRule, AdminShortCircuits) {
-    const mb::AccessRule customRule("custom", "false");
-    const mb::AccessRule authRule("auth", "", "users");
+    const mb::MbAccessRule customRule("custom", "false");
+    const mb::MbAccessRule authRule("auth", "", "users");
 
-    mb::AccessEvalContext ctx{verifiedAdminAuth(), verifiedJson(), nullptr};
-    EXPECT_EQ(mb::evaluateAccessRule(customRule, ctx), mb::AccessEvalResult::Allow);
-    EXPECT_EQ(mb::evaluateAccessRule(authRule, ctx), mb::AccessEvalResult::Allow);
+    mb::MbAccessEvalContext ctx{verifiedAdminAuth(), verifiedJson(), nullptr};
+    EXPECT_EQ(mb::evaluateAccessRule(customRule, ctx), mb::MbAccessEvalResult::Allow);
+    EXPECT_EQ(mb::evaluateAccessRule(authRule, ctx), mb::MbAccessEvalResult::Allow);
 }
 
 TEST(EvaluateAccessRule, PublicAllowsGuest) {
-    const mb::AccessRule rule("public");
-    mb::AccessEvalContext ctx{nlohmann::json{{"type", "guest"}}, nlohmann::json::object(), nullptr};
-    EXPECT_EQ(mb::evaluateAccessRule(rule, ctx), mb::AccessEvalResult::Allow);
+    const mb::MbAccessRule rule("public");
+    mb::MbAccessEvalContext ctx{nlohmann::json{{"type", "guest"}}, nlohmann::json::object(), nullptr};
+    EXPECT_EQ(mb::evaluateAccessRule(rule, ctx), mb::MbAccessEvalResult::Allow);
 }
 
 TEST(EvaluateAccessRule, AuthEntityFilter) {
-    const mb::AccessRule rule("auth", "", "users");
-    mb::AccessEvalContext allowed{verifiedUserAuth("users"), verifiedJson(), nullptr};
-    mb::AccessEvalContext denied{verifiedUserAuth("editors"), verifiedJson(), nullptr};
+    const mb::MbAccessRule rule("auth", "", "users");
+    mb::MbAccessEvalContext allowed{verifiedUserAuth("users"), verifiedJson(), nullptr};
+    mb::MbAccessEvalContext denied{verifiedUserAuth("editors"), verifiedJson(), nullptr};
 
-    EXPECT_EQ(mb::evaluateAccessRule(rule, allowed), mb::AccessEvalResult::Allow);
-    EXPECT_EQ(mb::evaluateAccessRule(rule, denied), mb::AccessEvalResult::DenyForbidden);
+    EXPECT_EQ(mb::evaluateAccessRule(rule, allowed), mb::MbAccessEvalResult::Allow);
+    EXPECT_EQ(mb::evaluateAccessRule(rule, denied), mb::MbAccessEvalResult::DenyForbidden);
 }
 
 TEST(EvaluateAccessRule, AdminOnlyDeniesUser) {
-    const mb::AccessRule rule("");
-    mb::AccessEvalContext ctx{verifiedUserAuth("users"), verifiedJson(), nullptr};
-    EXPECT_EQ(mb::evaluateAccessRule(rule, ctx), mb::AccessEvalResult::DenyForbidden);
+    const mb::MbAccessRule rule("");
+    mb::MbAccessEvalContext ctx{verifiedUserAuth("users"), verifiedJson(), nullptr};
+    EXPECT_EQ(mb::evaluateAccessRule(rule, ctx), mb::MbAccessEvalResult::DenyForbidden);
 }
 
 TEST(EvaluateAccessRule, AuthRequiresVerification) {
-    const mb::AccessRule rule("auth");
-    mb::AccessEvalContext ctx{verifiedUserAuth("users"), nlohmann::json::object(), nullptr};
-    EXPECT_EQ(mb::evaluateAccessRule(rule, ctx), mb::AccessEvalResult::DenyUnauthenticated);
+    const mb::MbAccessRule rule("auth");
+    mb::MbAccessEvalContext ctx{verifiedUserAuth("users"), nlohmann::json::object(), nullptr};
+    EXPECT_EQ(mb::evaluateAccessRule(rule, ctx), mb::MbAccessEvalResult::DenyUnauthenticated);
 }

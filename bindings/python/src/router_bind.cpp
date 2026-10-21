@@ -6,9 +6,9 @@
 
 namespace nb = nanobind;
 
-using RegisterMethod = void(mb::Router::*)(const std::string&, const mb::MbHandlerFn&, const mb::MbMiddlewares&);
+using RegisterMethod = void(mb::MbRouter::*)(const std::string&, const mb::MbHandlerFn&, const mb::MbMiddlewares&);
 
-static void register_route(mb::Router& router, const std::string& path,
+static void register_route(mb::MbRouter& router, const std::string& path,
                            const nb::callable &handler, const RegisterMethod method) {
     nb::callable stored_handler(handler);
 
@@ -24,14 +24,14 @@ static void register_route(mb::Router& router, const std::string& path,
     (router.*method)(path, fn, {});
 }
 
-static nb::object make_route_method(mb::Router& router, const std::string& path,
+static nb::object make_route_method(mb::MbRouter& router, const std::string& path,
                                     nb::object handler_or_none, RegisterMethod method) {
     if (!handler_or_none.is_none()) {
         register_route(router, path, nb::callable(handler_or_none, nb::detail::borrow_t{}), method);
         return handler_or_none;
     }
 
-    mb::Router* router_ptr = &router;
+    mb::MbRouter* router_ptr = &router;
     return nb::cpp_function([router_ptr, path, method](nb::callable handler) -> nb::callable {
         register_route(*router_ptr, path, handler, method);
         return handler;
@@ -39,19 +39,19 @@ static nb::object make_route_method(mb::Router& router, const std::string& path,
 }
 
 void register_router(nb::module_& m) {
-    nb::class_<mb::Router>(m, "Router")
-        .def("get", [](mb::Router& self, const std::string& path, nb::object handler) {
-            return make_route_method(self, path, handler, &mb::Router::Get);
+    nb::class_<mb::MbRouter>(m, "MbRouter")
+        .def("get", [](mb::MbRouter& self, const std::string& path, nb::object handler) {
+            return make_route_method(self, path, handler, &mb::MbRouter::Get);
         }, nb::arg("path"), nb::arg("handler") = nb::none())
-        .def("post", [](mb::Router& self, const std::string& path, nb::object handler) {
+        .def("post", [](mb::MbRouter& self, const std::string& path, nb::object handler) {
             return make_route_method(self, path, handler,
-                static_cast<RegisterMethod>(&mb::Router::Post));
+                static_cast<RegisterMethod>(&mb::MbRouter::Post));
         }, nb::arg("path"), nb::arg("handler") = nb::none())
-        .def("patch", [](mb::Router& self, const std::string& path, nb::object handler) {
+        .def("patch", [](mb::MbRouter& self, const std::string& path, nb::object handler) {
             return make_route_method(self, path, handler,
-                static_cast<RegisterMethod>(&mb::Router::Patch));
+                static_cast<RegisterMethod>(&mb::MbRouter::Patch));
         }, nb::arg("path"), nb::arg("handler") = nb::none())
-        .def("delete", [](mb::Router& self, const std::string& path, nb::object handler) {
-            return make_route_method(self, path, handler, &mb::Router::Delete);
+        .def("delete", [](mb::MbRouter& self, const std::string& path, nb::object handler) {
+            return make_route_method(self, path, handler, &mb::MbRouter::Delete);
         }, nb::arg("path"), nb::arg("handler") = nb::none());
 }

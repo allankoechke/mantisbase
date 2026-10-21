@@ -9,7 +9,7 @@
 
 namespace mb {
     MbResponse::MbResponse(const MantisBase &app)
-        : IMantisBase(app),
+        : MbAppMixin(app),
           m_res(drogon::HttpResponse::newHttpResponse()) {
     }
 
@@ -138,7 +138,7 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
     void MbResponse::sendJson(const int statusCode, const DukValue &data) const {
-        auto *engine = ScriptingEngine::active();
+        auto *engine = MbScriptingEngine::active();
         if (!engine || !engine->ctx()) {
             send(statusCode, "{}", "application/json");
             return;
@@ -154,7 +154,7 @@ namespace mb {
     void MbResponse::registerDuktapeMethods() {
     }
 #else
-    void MantisResponse::registerDuktapeMethods() {
+    void MbResponse::registerDuktapeMethods() {
     }
 #endif
 }

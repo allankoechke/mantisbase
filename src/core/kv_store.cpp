@@ -57,9 +57,9 @@ namespace mb
         }
     }
 
-    KeyValStore::KeyValStore(MantisBase &app) : mApp(app) {}
+    MbKVStore::MbKVStore(MantisBase &app) : mApp(app) {}
 
-    bool KeyValStore::setupRoutes()
+    bool MbKVStore::setupRoutes()
     {
         try
         {
@@ -75,7 +75,7 @@ namespace mb
         return true;
     }
 
-    void KeyValStore::migrate()
+    void MbKVStore::migrate()
     {
         const auto sql = mApp.db().session();
         const auto id = configRowId();
@@ -100,12 +100,12 @@ namespace mb
         mApp.logger().info("Config Initialized", "Created default application settings.");
     }
 
-    json &KeyValStore::configs()
+    json &MbKVStore::configs()
     {
         return m_configs;
     }
 
-    json KeyValStore::getScriptingValue(const std::string &key) const
+    json MbKVStore::getScriptingValue(const std::string &key) const
     {
         if (m_configs.contains(key)) {
             return m_configs.at(key);
@@ -113,37 +113,37 @@ namespace mb
         return {};
     }
 
-    void KeyValStore::setScriptingValue(const std::string &key, const json &value)
+    void MbKVStore::setScriptingValue(const std::string &key, const json &value)
     {
         applyPatch(json{{key, value}});
     }
 
-    json KeyValStore::getScriptingConfigsCopy() const
+    json MbKVStore::getScriptingConfigsCopy() const
     {
         return m_configs;
     }
 
-    void KeyValStore::reloadScriptingConfigs()
+    void MbKVStore::reloadScriptingConfigs()
     {
         m_configs = loadFromDb();
     }
 
-    std::string KeyValStore::getScriptingJson(const std::string &key) const
+    std::string MbKVStore::getScriptingJson(const std::string &key) const
     {
         return getScriptingValue(key).dump();
     }
 
-    void KeyValStore::setScriptingJson(const std::string &key, const std::string &json_value)
+    void MbKVStore::setScriptingJson(const std::string &key, const std::string &json_value)
     {
         setScriptingValue(key, json::parse(json_value));
     }
 
-    std::string KeyValStore::configsScriptingJson() const
+    std::string MbKVStore::configsScriptingJson() const
     {
         return getScriptingConfigsCopy().dump();
     }
 
-    json KeyValStore::loadFromDb()
+    json MbKVStore::loadFromDb()
     {
         if (!m_configs.empty())
         {
@@ -163,7 +163,7 @@ namespace mb
         return json::object();
     }
 
-    json KeyValStore::redactForResponse(const json &configs)
+    json MbKVStore::redactForResponse(const json &configs)
     {
         auto data = configs;
         if (data.contains("smtp") && data["smtp"].is_object())
@@ -178,7 +178,7 @@ namespace mb
         return data;
     }
 
-    void KeyValStore::applyPatch(const json &body)
+    void MbKVStore::applyPatch(const json &body)
     {
         if (m_configs.empty())
         {
@@ -207,7 +207,7 @@ namespace mb
             const auto size = body.value("maxFileSize", kDefaultMaxFileSize);
             if (!body["maxFileSize"].is_number_integer() || size <= 0)
             {
-                throw MantisException(400, "maxFileSize must be a positive integer (bytes).");
+                throw MbException(400, "maxFileSize must be a positive integer (bytes).");
             }
             m_configs["maxFileSize"] = size;
         }
@@ -217,7 +217,7 @@ namespace mb
             const auto days = body.value("logRetentionDays", kDefaultLogRetentionDays);
             if (!body["logRetentionDays"].is_number_integer() || days <= 0)
             {
-                throw MantisException(400, "logRetentionDays must be a positive integer (days).");
+                throw MbException(400, "logRetentionDays must be a positive integer (days).");
             }
             m_configs["logRetentionDays"] = days;
         }
@@ -249,7 +249,7 @@ namespace mb
         {
             if (!body["corsAllowedOrigins"].is_array())
             {
-                throw MantisException(400, "corsAllowedOrigins must be an array of origin strings.");
+                throw MbException(400, "corsAllowedOrigins must be an array of origin strings.");
             }
 
             json validated = json::array();
@@ -257,13 +257,13 @@ namespace mb
             {
                 if (!item.is_string())
                 {
-                    throw MantisException(400, "corsAllowedOrigins must contain only strings.");
+                    throw MbException(400, "corsAllowedOrigins must contain only strings.");
                 }
 
                 const auto value = trim(item.get<std::string>());
                 if (value.empty())
                 {
-                    throw MantisException(400, "corsAllowedOrigins entries must be non-empty strings.");
+                    throw MbException(400, "corsAllowedOrigins entries must be non-empty strings.");
                 }
 
                 validated.push_back(value);
@@ -273,7 +273,7 @@ namespace mb
         }
     }
 
-    void KeyValStore::setupConfigRoutes()
+    void MbKVStore::setupConfigRoutes()
     {
         const MbMiddlewares adminAuth = {requireAdminAuth()};
         const MbMiddlewares patchMiddleware = {
@@ -345,7 +345,7 @@ namespace mb
                                      {"data", data}
                                  });
                 }
-                catch (const MantisException &e)
+                catch (const MbException &e)
                 {
                     res.sendJSON(e.code(), {
                                      {"status", e.code()},

@@ -16,12 +16,12 @@ bool mb::MbSmtpConfig::isMock() const {
     return host == "mock" || host == "localhost:0";
 }
 
-mb::MbMailer::MbMailer(const MantisBase &app) : IMantisBase(app) {
+mb::MbMailer::MbMailer(const MantisBase &app) : MbAppMixin(app) {
 }
 
 void mb::MbMailer::configure(const MbSmtpConfig &config) {
     if (!config.isValid()) {
-        throw MantisException(400, "Invalid SMTP configuration: host and from_address are required");
+        throw MbException(400, "Invalid SMTP configuration: host and from_address are required");
     }
     m_config = config;
     m_configured = true;
@@ -29,23 +29,23 @@ void mb::MbMailer::configure(const MbSmtpConfig &config) {
 
 bool mb::MbMailer::send(const MbEmailMsg &message) {
     if (!m_configured) {
-        throw MantisException(400, "Email service not configured. Set SMTP settings first.");
+        throw MbException(400, "Email service not configured. Set SMTP settings first.");
     }
 
     if (message.to.empty()) {
-        throw MantisException(400, "Recipient email address is required");
+        throw MbException(400, "Recipient email address is required");
     }
 
     if (message.subject.empty()) {
-        throw MantisException(400, "Email subject is required");
+        throw MbException(400, "Email subject is required");
     }
 
     if (message.body_html.empty() && message.body_text.empty()) {
-        throw MantisException(400, "Email body (HTML or text) is required");
+        throw MbException(400, "Email body (HTML or text) is required");
     }
 
     if (!checkRateLimit(message.to)) {
-        throw MantisException(429,
+        throw MbException(429,
                               std::format("Rate limit exceeded for {}. Maximum 3 emails per hour.", message.to));
     }
 
@@ -104,7 +104,7 @@ std::string mb::MbMailer::loadTemplate(const std::string &template_name,
                 app_it != variables.end() ? app_it->second : "MantisBase",
                 url_it != variables.end() ? url_it->second : "#");
         } else {
-            throw MantisException(404, "Unknown template: " + template_name);
+            throw MbException(404, "Unknown template: " + template_name);
         }
         return content;
     }

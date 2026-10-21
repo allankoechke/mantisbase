@@ -17,12 +17,12 @@
 
 namespace mb
 {
-    class MantisBase; // forward declaration; KeyValStore holds a reference to it
+    class MantisBase; // forward declaration; MbKVStore holds a reference to it
 
     /**
      * @brief Manages application settings
      */
-    class MANTISBASE_API KeyValStore
+    class MANTISBASE_API MbKVStore
     {
     public:
         /**
@@ -30,7 +30,7 @@ namespace mb
          * @param app Owning application (db + router access). Stored by
          *        reference and must outlive this store.
          */
-        explicit KeyValStore(MantisBase &app);
+        explicit MbKVStore(MantisBase &app);
 
         /**
          * @brief Initialize and set up routes for fetching settings data

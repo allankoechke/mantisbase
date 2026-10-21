@@ -2,9 +2,9 @@
  * @file http.h
  * @brief HTTP request/response wrappers with unified body handling.
  *
- * @ref MantisRequest and @ref MantisResponse wrap Drogon types and expose MantisBase
+ * @ref MbRequest and @ref MbResponse wrap Drogon types and expose MantisBase
  * conventions: per-request attributes via `set()`/`get()`, auth helpers, and JSON
- * envelope responses via @ref MantisResponse::sendJSON.
+ * envelope responses via @ref MbResponse::sendJSON.
  */
 
 #ifndef MB_HTTP_H
@@ -39,7 +39,7 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
     /** Duktape bindings for the JS `console` object in server scripts. */
-    class MANTISBASE_API DuktapeImpl {
+    class MANTISBASE_API MbDuktapeImpl {
     public:
         static duk_ret_t nativeConsoleInfo(duk_context *ctx);
         static duk_ret_t nativeConsoleTrace(duk_context *ctx);
@@ -47,7 +47,7 @@ namespace mb {
     };
 
     /** Fire Duktape lifecycle hooks for server start and record mutations. */
-    class MANTISBASE_API ScriptingHooks {
+    class MANTISBASE_API MbScriptingHooks {
     public:
         static void fireOnServerStart(duk_context *ctx);
         static void fireOnServerShutdown(duk_context *ctx);
@@ -61,9 +61,9 @@ namespace mb {
      *
      * Per-request attributes (`auth`, `verification`, etc.) are stored on the
      * underlying Drogon request via `set()` / `get()`, not a global context.
-     * Use `mbApp()` (from @ref IMantisBase) to reach application services.
+     * Use `mbApp()` (from @ref MbAppMixin) to reach application services.
      */
-    class MANTISBASE_API MbRequest: public IMantisBase {
+    class MANTISBASE_API MbRequest: public MbAppMixin {
         drogon::HttpRequestPtr m_req;
         std::unordered_map<std::string, std::string> m_pathParams;
 
@@ -150,7 +150,7 @@ namespace mb {
          * This is the single body entry point for `(req, res)` handlers on
          * PUT/PATCH/POST, covering both JSON and multipart/file-upload bodies.
          *
-         * JSON requests: the parsed body; throws `MantisException(400)` on
+         * JSON requests: the parsed body; throws `MbException(400)` on
          * malformed JSON. Multipart requests: empty until
          * parseFormDataToEntity() maps the form fields onto an entity.
          *
@@ -165,7 +165,7 @@ namespace mb {
         [[nodiscard]] const json &filesMetadata() const;
 
         /** Map parsed multipart form fields onto an entity for create/update (no-op for JSON). */
-        void parseFormDataToEntity(const Entity &entity) const;
+        void parseFormDataToEntity(const MbEntity &entity) const;
 
         /** Persist uploaded files for `entity_name` using stored metadata (no-op for JSON). */
         void writeFiles(const std::string &entity_name) const;
@@ -210,7 +210,7 @@ namespace mb {
      * Constructed by the router for each request; use `sendJSON()`, `send()`,
      * or header helpers to build the outgoing response.
      */
-    class MANTISBASE_API MbResponse: public IMantisBase {
+    class MANTISBASE_API MbResponse: public MbAppMixin {
         drogon::HttpResponsePtr m_res;
 
     public:

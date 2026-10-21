@@ -265,7 +265,7 @@ TEST_F(IntegrationMigrateTest, DumpAndRestoreRoundTrip) {
     ASSERT_TRUE(res_b != nullptr);
     EXPECT_EQ(res_b->status, 201);
 
-    // Dump schemas via EntitySchema::listTables and write to file
+    // Dump schemas via MbEntitySchema::listTables and write to file
     auto list_res = client->Get("/api/v1/schemas", headers);
     ASSERT_TRUE(list_res != nullptr);
     EXPECT_EQ(list_res->status, 200);
@@ -313,16 +313,16 @@ TEST_F(IntegrationMigrateTest, DumpAndRestoreRoundTrip) {
     auto get_b = client->Get("/api/v1/schemas/migrate_test_b", headers);
     EXPECT_EQ(get_b->status, 404);
 
-    // Restore from dump using EntitySchema::fromSchema + createTable
+    // Restore from dump using MbEntitySchema::fromSchema + createTable
     for (const auto &entry : dumped) {
         const auto &schema = entry["schema"];
         const auto name = schema.value("name", "");
 
-        auto eSchema = mb::EntitySchema::fromSchema(mantis(), schema);
+        auto eSchema = mb::MbEntitySchema::fromSchema(mantis(), schema);
         auto err = eSchema.validate();
         ASSERT_FALSE(err.has_value()) << "Validation failed for " << name << ": " << err.value_or("");
 
-        mb::EntitySchema::createTable(eSchema);
+        mb::MbEntitySchema::createTable(eSchema);
     }
 
     // Verify entities exist again and are queryable
@@ -364,8 +364,8 @@ TEST_F(IntegrationMigrateTest, RestoreSkipsExistingEntities) {
     EXPECT_EQ(res->status, 201);
 
     // Try to create the same entity again — should fail with 500 (table exists)
-    auto eSchema = mb::EntitySchema::fromSchema(mantis(), schema_a);
-    EXPECT_TRUE(mb::EntitySchema::tableExists(mantis(), "migrate_test_a"));
+    auto eSchema = mb::MbEntitySchema::fromSchema(mantis(), schema_a);
+    EXPECT_TRUE(mb::MbEntitySchema::tableExists(mantis(), "migrate_test_a"));
 
     // Verify the entity is still accessible (wasn't corrupted)
     auto get_res = client->Get("/api/v1/schemas/migrate_test_a", headers);

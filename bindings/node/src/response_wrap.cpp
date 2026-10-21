@@ -38,7 +38,7 @@ static json NapiToJson(Napi::Value val) {
 }
 
 Napi::Function ResponseWrap::GetClass(Napi::Env env) {
-    auto func = DefineClass(env, "MantisResponse", {
+    auto func = DefineClass(env, "MbResponse", {
         InstanceMethod<&ResponseWrap::JsonMethod>("json"),
         InstanceMethod<&ResponseWrap::Html>("html"),
         InstanceMethod<&ResponseWrap::Text>("text"),
@@ -57,12 +57,12 @@ ResponseWrap::ResponseWrap(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<ResponseWrap>(info) {
 
     if (info.Length() > 0 && info[0].IsExternal()) {
-        m_res = info[0].As<Napi::External<mb::MantisResponse>>().Data();
+        m_res = info[0].As<Napi::External<mb::MbResponse>>().Data();
     }
 }
 
-Napi::Object ResponseWrap::NewInstance(Napi::Env env, mb::MantisResponse* res) {
-    return s_constructor.New({Napi::External<mb::MantisResponse>::New(env, res)});
+Napi::Object ResponseWrap::NewInstance(Napi::Env env, mb::MbResponse* res) {
+    return s_constructor.New({Napi::External<mb::MbResponse>::New(env, res)});
 }
 
 Napi::Value ResponseWrap::JsonMethod(const Napi::CallbackInfo& info) {

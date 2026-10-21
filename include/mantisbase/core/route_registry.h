@@ -2,7 +2,7 @@
  * @file route_registry.h
  * @brief In-memory HTTP route table keyed by method and path.
  *
- * Used by @ref Router to register MantisBase handlers and middleware chains before
+ * Used by @ref MbRouter to register MantisBase handlers and middleware chains before
  * they are mirrored into Drogon's native routing layer.
  */
 
@@ -22,13 +22,13 @@
 namespace mb
 {
     /** Hash functor for @ref RouteKey (`method`, `path`) pairs. */
-    struct RouteKeyHash
+    struct MbRouteKeyHash
     {
         size_t operator()(const MbRouteKey& k) const;
     };
 
     /** Handler plus ordered middleware chain for a single route. */
-    struct MANTISBASE_API RouteHandler
+    struct MANTISBASE_API MbRouteHandler
     {
         std::vector<MbMiddlewareFn> middlewares;
         MbHandlerFn handler;
@@ -37,9 +37,9 @@ namespace mb
     /**
      * @brief Thread-local route registry backing the MantisBase router.
      */
-    class MANTISBASE_API RouteRegistry
+    class MANTISBASE_API MbRouteRegistry
     {
-        std::unordered_map<MbRouteKey, RouteHandler, RouteKeyHash> routes;
+        std::unordered_map<MbRouteKey, MbRouteHandler, MbRouteKeyHash> routes;
 
     public:
         /** Register a handler for `method` + `path`. */
@@ -49,7 +49,7 @@ namespace mb
                  const MbMiddlewares& middlewares);
 
         /** @return Route handler metadata, or `nullptr` if not registered. */
-        const RouteHandler* find(const std::string& method, const std::string& path) const;
+        const MbRouteHandler* find(const std::string& method, const std::string& path) const;
 
         /**
          * @brief Remove a route from the registry.

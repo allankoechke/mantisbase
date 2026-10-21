@@ -1,6 +1,6 @@
 # File uploads
 
-Entity with `file` field — upload via multipart/form-data.
+MbEntity with `file` field — upload via multipart/form-data.
 
 ## Apply schema
 

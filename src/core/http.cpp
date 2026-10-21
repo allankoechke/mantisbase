@@ -10,7 +10,7 @@
 #include <regex>
 
 namespace mb {
-    std::string Router::convertPathToDrogon(const std::string &httplib_path) {
+    std::string MbRouter::convertPathToDrogon(const std::string &httplib_path) {
         // Convert httplib path params /:param to Drogon format /{param}
         // Also handle regex patterns like R"(/mb(/.*)?)" -> /mb/{1}
         std::string result;
@@ -36,7 +36,7 @@ namespace mb {
         return result;
     }
 
-    void Router::executeMiddlewareChain(MbRequest &req, MbResponse &res, const RouteHandler *route) const {
+    void MbRouter::executeMiddlewareChain(MbRequest &req, MbResponse &res, const MbRouteHandler *route) const {
         // Execute global pre-routing middlewares
         for (const auto &g_mw: m_preRoutingMiddlewares) {
             if (g_mw(req, res) == MbHandlerResponse::Handled) return;
@@ -58,40 +58,40 @@ namespace mb {
         }
     }
 
-    void Router::Get(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares) {
+    void MbRouter::Get(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("GET {}", path));
         m_routeRegistry.add("GET", path, handler, middlewares);
         registerDrogonHandler("GET", path);
     }
 
-    void Router::Post(const std::string &path, const MbHandlerFn &handler,
+    void MbRouter::Post(const std::string &path, const MbHandlerFn &handler,
                       const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("POST {}", path));
         m_routeRegistry.add("POST", path, handler, middlewares);
         registerDrogonHandler("POST", path);
     }
 
-    void Router::Patch(const std::string &path, const MbHandlerFn &handler,
+    void MbRouter::Patch(const std::string &path, const MbHandlerFn &handler,
                        const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("PATCH {}", path));
         m_routeRegistry.add("PATCH", path, handler, middlewares);
         registerDrogonHandler("PATCH", path);
     }
 
-    void Router::Put(const std::string &path, const MbHandlerFn &handler,
+    void MbRouter::Put(const std::string &path, const MbHandlerFn &handler,
                        const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("PUT {}", path));
         m_routeRegistry.add("PUT", path, handler, middlewares);
         registerDrogonHandler("PUT", path);
     }
 
-    void Router::Delete(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares) {
+    void MbRouter::Delete(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares) {
         logger().debug("Route Created", fmt::format("DELETE {}", path));
         m_routeRegistry.add("DELETE", path, handler, middlewares);
         registerDrogonHandler("DELETE", path);
     }
 
-    void Router::redirect(const std::string &initialPath, const std::string &destinationPath, int redirectStatus,
+    void MbRouter::redirect(const std::string &initialPath, const std::string &destinationPath, int redirectStatus,
                           const std::vector<std::string> &constraints) const {
         logger().debug("Route Redirect Created", fmt::format("Redirect from {} to {}", initialPath, destinationPath));
 
@@ -103,7 +103,7 @@ namespace mb {
         };
 
         // Get constraint array
-        const auto http_constraints = Router::validateConstraints(constraints);
+        const auto http_constraints = MbRouter::validateConstraints(constraints);
 
         // Register new path
         drogon::app().registerHandler(initialPath, std::move(_cb), http_constraints);
@@ -119,7 +119,7 @@ namespace mb {
         return drogon::Get;
     }
 
-    void Router::registerDrogonHandler(const std::string &method, const std::string &path) const {
+    void MbRouter::registerDrogonHandler(const std::string &method, const std::string &path) const {
         const auto drogon_path = convertPathToDrogon(path);
         const auto drogon_method = toDrogonMethod(method);
 

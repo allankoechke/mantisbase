@@ -37,7 +37,7 @@ docker run -p 7070:8080 \
 
 By default, container restarts will clear all data. To persist data, mount volumes to the following directories:
 
-- `/mb/data` - Database files, logs, and uploaded files
+- `/mb/data` - MbDatabase files, logs, and uploaded files
 - `/mb/public` - Static files to serve
 - `/mb/scripts` - JavaScript extension scripts (entry point: `index.mantis.js`)
 
@@ -92,8 +92,8 @@ You can configure MantisBase using environment variables or by mounting a config
 | `MB_DISABLE_ADMIN_ON_FIRST_BOOT` | Set to `1` to skip creating admin on first boot | `0` |
 | `MB_DISABLE_RATE_LIMIT` | Set to `1` to disable rate limiting. **Only honoured in `--dev` mode**; ignored otherwise | (enabled) |
 | `MB_LOG_LEVEL` | Logging verbosity: `trace`, `debug`, `info`, `warn`, `critical` | `info` |
-| `MB_DATABASE_TYPE` | Database type: `sqlite3`, `postgresql` | `sqlite3` |
-| `MB_DATABASE_URL` | Database connection string (for PostgreSQL) | — |
+| `MB_DATABASE_TYPE` | MbDatabase type: `sqlite3`, `postgresql` | `sqlite3` |
+| `MB_DATABASE_URL` | MbDatabase connection string (for PostgreSQL) | — |
 | `MB_SKIP_ADMIN_SETUP` | Set to `1` to skip the first-boot admin setup prompt | `0` |
 | `MB_DEFAULT_ADMIN_EMAIL` | Admin email for `admins --add` when no positional args given | — |
 | `MB_DEFAULT_ADMIN_PASSWORD` | Admin password for `admins --add` when no positional args given | — |
@@ -105,7 +105,7 @@ You can configure MantisBase using environment variables or by mounting a config
 | `MB_DISABLE_ADMIN_MUTATIONS` | Set to `true`, `1`, `on`, or `yes` to block admin account create/update/delete via the API (returns **503**). Unset or any other value: edits allowed. | unset (edits allowed) |
 | `MB_DISABLE_CONFIG_MUTATIONS` | Set to `true`, `1`, `on`, or `yes` to block `PATCH /api/v1/sys/settings/config` (returns **503**) | unset (edits allowed) |
 
-Database connection is configured via command-line arguments or JSON config (e.g. `--db postgresql --db_url "..."`).
+MbDatabase connection is configured via command-line arguments or JSON config (e.g. `--db postgresql --db_url "..."`).
 
 ---
 

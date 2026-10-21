@@ -20,7 +20,7 @@ TEST(RealtimeSession, TryUpgradeGuestToAuthed) {
     };
     incoming.verification = {{"verified", true}, {"error", ""}};
 
-    EXPECT_EQ(mb::tryUpgradeAuth(session, incoming), mb::AuthUpgradeResult::Applied);
+    EXPECT_EQ(mb::tryUpgradeAuth(session, incoming), mb::MbAuthUpgradeResult::Applied);
     EXPECT_TRUE(mb::isAuthenticatedSnapshot(session));
 }
 
@@ -35,7 +35,7 @@ TEST(RealtimeSession, TryUpgradeDeniesDowngrade) {
     session.verification = {{"verified", true}, {"error", ""}};
 
     const auto guest = mb::makeGuestAuthSnapshot();
-    EXPECT_EQ(mb::tryUpgradeAuth(session, guest), mb::AuthUpgradeResult::DeniedDowngrade);
+    EXPECT_EQ(mb::tryUpgradeAuth(session, guest), mb::MbAuthUpgradeResult::DeniedDowngrade);
 }
 
 TEST(RealtimeSession, TryUpgradeDeniesUserSwitch) {
@@ -57,7 +57,7 @@ TEST(RealtimeSession, TryUpgradeDeniesUserSwitch) {
     };
     incoming.verification = {{"verified", true}, {"error", ""}};
 
-    EXPECT_EQ(mb::tryUpgradeAuth(session, incoming), mb::AuthUpgradeResult::DeniedSwitch);
+    EXPECT_EQ(mb::tryUpgradeAuth(session, incoming), mb::MbAuthUpgradeResult::DeniedSwitch);
 }
 
 TEST(RealtimeSession, GenerateClientIdUsesPrefix) {

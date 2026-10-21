@@ -1,6 +1,6 @@
 /**
  * @file entity_schema_field.h
- * @brief Entity schema field definition and validation.
+ * @brief MbEntity schema field definition and validation.
  *
  * Represents a single field in a database table schema with type,
  * constraints, and validation rules.
@@ -31,18 +31,18 @@ namespace mb {
         static IndexDefinition fromJSON(const nlohmann::json &j);
     };
 
-    class MANTISBASE_API EntitySchemaField {
+    class MANTISBASE_API MbEntitySchemaField {
     public:
-        EntitySchemaField(std::string field_name, std::string field_type);
+        MbEntitySchemaField(std::string field_name, std::string field_type);
 
         /**
          * @brief Construct field from JSON schema object.
          * @param field_schema JSON object with field definition
          */
-        explicit EntitySchemaField(const nlohmann::json &field_schema);
+        explicit MbEntitySchemaField(const nlohmann::json &field_schema);
 
-        EntitySchemaField(const EntitySchemaField &other);
-        bool operator==(const EntitySchemaField &other) const;
+        MbEntitySchemaField(const MbEntitySchemaField &other);
+        bool operator==(const MbEntitySchemaField &other) const;
 
         // ----------------- STATIC GLOBAL METHODS ---------------------- //
 
@@ -74,7 +74,7 @@ namespace mb {
          * @param name New field name
          * @return Reference to self for chaining
          */
-        EntitySchemaField &setName(const std::string &name);
+        MbEntitySchemaField &setName(const std::string &name);
 
         /**
          * @brief Get field type.
@@ -83,15 +83,15 @@ namespace mb {
         [[nodiscard]] std::string type() const;
 
         /** Set field type (fluent). @return Reference to self. */
-        EntitySchemaField &setType(const std::string &type);
+        MbEntitySchemaField &setType(const std::string &type);
 
         /** @return Int storage precision for `int`-typed fields. */
-        [[nodiscard]] IntPrecision intPrecision() const;
+        [[nodiscard]] MbIntPrecision intPrecision() const;
 
-        EntitySchemaField &setIntPrecision(IntPrecision precision);
+        MbEntitySchemaField &setIntPrecision(MbIntPrecision precision);
 
         /** Set precision from string token (`i32`, `u64`, …). */
-        EntitySchemaField &setPrecision(const std::string &precision);
+        MbEntitySchemaField &setPrecision(const std::string &precision);
 
         /**
          * @brief Check if field is required.
@@ -104,7 +104,7 @@ namespace mb {
          * @param required Required flag
          * @return Reference to self for chaining
          */
-        EntitySchemaField &setRequired(bool required);
+        MbEntitySchemaField &setRequired(bool required);
 
         /**
          * @brief Check if field is primary key.
@@ -117,7 +117,7 @@ namespace mb {
          * @param pk Primary key flag
          * @return Reference to self for chaining
          */
-        EntitySchemaField &setIsPrimaryKey(bool pk);
+        MbEntitySchemaField &setIsPrimaryKey(bool pk);
 
         /**
          * @brief Check if field is system field.
@@ -130,7 +130,7 @@ namespace mb {
          * @param system System field flag
          * @return Reference to self for chaining
          */
-        EntitySchemaField &setIsSystem(bool system);
+        MbEntitySchemaField &setIsSystem(bool system);
 
         /**
          * @brief Check if field has unique constraint.
@@ -143,7 +143,7 @@ namespace mb {
          * @param unique Unique flag
          * @return Reference to self for chaining
          */
-        EntitySchemaField &setIsUnique(bool unique);
+        MbEntitySchemaField &setIsUnique(bool unique);
 
         /**
          * @brief Check if field is a foreign key.
@@ -183,7 +183,7 @@ namespace mb {
          * @param onDelete Delete policy (defaults to "RESTRICT")
          * @return Reference to self for chaining
          */
-        EntitySchemaField &setForeignKey(const std::string &table, 
+        MbEntitySchemaField &setForeignKey(const std::string &table, 
                                          const std::string &column = "id",
                                          const std::string &onUpdate = "RESTRICT",
                                          const std::string &onDelete = "RESTRICT");
@@ -192,7 +192,7 @@ namespace mb {
          * @brief Remove foreign key constraint (fluent interface).
          * @return Reference to self for chaining
          */
-        EntitySchemaField &removeForeignKey();
+        MbEntitySchemaField &removeForeignKey();
 
         /**
          * @brief Get all field constraints.
@@ -212,7 +212,7 @@ namespace mb {
          * @param opts JSON object with constraint values
          * @return Reference to self for chaining
          */
-        EntitySchemaField &setConstraints(const nlohmann::json &opts);
+        MbEntitySchemaField &setConstraints(const nlohmann::json &opts);
 
         // ----------------- SCHEMA FIELD OPS ---------------------- //
         /**
@@ -220,7 +220,7 @@ namespace mb {
          * @param field_schema JSON object with field updates
          * @return Reference to self for chaining
          */
-        EntitySchemaField &updateWith(const nlohmann::json &field_schema);
+        MbEntitySchemaField &updateWith(const nlohmann::json &field_schema);
 
         /**
          * @brief Convert field to JSON representation.
@@ -238,7 +238,7 @@ namespace mb {
         [[nodiscard]] static soci::db_type toSociType(const std::string &type);
 
         /** Map int type + precision to SOCI db_type. */
-        [[nodiscard]] static soci::db_type toSociType(const std::string &type, IntPrecision precision);
+        [[nodiscard]] static soci::db_type toSociType(const std::string &type, MbIntPrecision precision);
 
         /**
          * @brief Validate field definition.
@@ -271,7 +271,7 @@ namespace mb {
 
     private:
         std::string m_id, m_name, m_type;
-        IntPrecision m_intPrecision = IntPrecision::I32;
+        MbIntPrecision m_intPrecision = MbIntPrecision::I32;
         bool m_required = false, m_primaryKey = false, m_isSystem = false, m_isUnique = false;
         nlohmann::json m_constraints{}, m_foreignKey{};
     };

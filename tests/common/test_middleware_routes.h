@@ -8,7 +8,7 @@
 
 namespace TestFixture {
 
-inline void registerMiddlewareTestRoutes(mb::Router &router) {
+inline void registerMiddlewareTestRoutes(mb::MbRouter &router) {
     static bool registered = false;
     if (registered) {
         return;

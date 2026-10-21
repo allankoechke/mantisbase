@@ -142,7 +142,7 @@ MantisBase uses multi-layered path traversal prevention on all file operations. 
 
 ### Serving Files
 
-`GET /api/v1/files/:entity/:file` enforces the entity's **get** access rule using the same evaluation order as entity endpoints (admin short-circuit, then mode/entity filter). Files on a non-public entity require a verified token; admin-only rules require `auth.type == "admin"`. Auth rules may include an `entity` filter to restrict which auth entity can fetch files.
+`GET /api/v1/files/:entity/:file` enforces the entity's **get** access rule using the same evaluation order as entity endpoints (admin short-circuit, then mode/entity filter). Files on a non-public entity require a verified token; admin-only rules require `auth.type == "admin"`. MbAuth rules may include an `entity` filter to restrict which auth entity can fetch files.
 
 ### Remaining Limitations
 

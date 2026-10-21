@@ -6,9 +6,9 @@
 #include "../../../include/mantisbase/core/models/entity_schema_field.h"
 
 namespace mb {
-    const std::vector<EntitySchemaField> &EntitySchema::defaultBaseFieldsSchema() {
+    const std::vector<MbEntitySchemaField> &MbEntitySchema::defaultBaseFieldsSchema() {
         static const std::vector _base_field_schema = {
-            EntitySchemaField{
+            MbEntitySchemaField{
                 {
                     {"name", "id"},
                     {"type", "string"},
@@ -26,7 +26,7 @@ namespace mb {
                     },
                 }
             },
-            EntitySchemaField{
+            MbEntitySchemaField{
                 {
                     {"name", "created"},
                     {"type", "date"},
@@ -44,7 +44,7 @@ namespace mb {
                     },
                 }
             },
-            EntitySchemaField{
+            MbEntitySchemaField{
                 {
                     {"name", "updated"},
                     {"type", "date"},
@@ -66,9 +66,9 @@ namespace mb {
         return _base_field_schema;
     }
 
-    const std::vector<EntitySchemaField> &EntitySchema::defaultAuthFieldsSchema() {
+    const std::vector<MbEntitySchemaField> &MbEntitySchema::defaultAuthFieldsSchema() {
         static const std::vector _auth_field_schema = {
-            EntitySchemaField{
+            MbEntitySchemaField{
                     {
                         {"name", "id"},
                         {"type", "string"},
@@ -86,7 +86,7 @@ namespace mb {
                         },
                     }
             },
-            EntitySchemaField{
+            MbEntitySchemaField{
                     {
                         {"name", "created"},
                         {"type", "date"},
@@ -104,7 +104,7 @@ namespace mb {
                         },
                     }
             },
-            EntitySchemaField{
+            MbEntitySchemaField{
                     {
                         {"name", "updated"},
                         {"type", "date"},
@@ -122,7 +122,7 @@ namespace mb {
                         },
                     }
             },
-            EntitySchemaField{
+            MbEntitySchemaField{
                 {
                     //User NAME
                     {"name", "name"},
@@ -141,7 +141,7 @@ namespace mb {
                     },
                 }
             },
-            EntitySchemaField{
+            MbEntitySchemaField{
                 {
                     // User EMAIL
                     {"name", "email"},
@@ -160,7 +160,7 @@ namespace mb {
                     },
                 }
             },
-            EntitySchemaField{
+            MbEntitySchemaField{
                 {
                     {"name", "password"},
                     {"type", "string"},
@@ -178,7 +178,7 @@ namespace mb {
                     },
                 }
             },
-            EntitySchemaField{
+            MbEntitySchemaField{
                 {
                     {"name", "avatar_url"},
                     {"type", "string"},
@@ -200,19 +200,19 @@ namespace mb {
         return _auth_field_schema;
     }
 
-    const std::vector<std::string> &EntitySchemaField::defaultBaseFields() {
+    const std::vector<std::string> &MbEntitySchemaField::defaultBaseFields() {
         static const std::vector<std::string> _base_fields = {"id", "created", "updated"};
         return _base_fields;
     }
 
-    const std::vector<std::string> &EntitySchemaField::defaultAuthFields() {
+    const std::vector<std::string> &MbEntitySchemaField::defaultAuthFields() {
         static const std::vector<std::string> _auth_fields = {
             "id", "created", "updated", "name", "email", "password", "avatar_url"
         };
         return _auth_fields;
     }
 
-    const std::vector<std::string> &EntitySchemaField::defaultEntityFieldTypes() {
+    const std::vector<std::string> &MbEntitySchemaField::defaultEntityFieldTypes() {
         static const std::vector<std::string> _fieldTypes = {
             "string", "double", "date", "int",
             "json", "bool", "file", "files"

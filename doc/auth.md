@@ -292,7 +292,7 @@ Authorization: Bearer mb_sk_<secret>
 
 The middleware resolves the key, hydrates the user record, and sets the same `auth` / `verification` request attributes as a JWT login.
 
-### Entity user endpoints
+### MbEntity user endpoints
 
 Requires an authenticated session for the same auth entity (JWT from login).
 
@@ -426,7 +426,7 @@ After authentication middleware runs, each request carries an `auth` object:
 |-------|--------|-------------|
 | `type` | `guest`, `user`, `admin` | Role derived from the auth entity (`mb_admins` → `admin`) |
 | `mode` | `none`, `api`, `jwt` | How the credential was presented |
-| `entity` | string | Auth entity table name |
+| `entity` | string | MbAuth entity table name |
 | `id` | string | Authenticated user id |
 | `user` | object | Hydrated user record (password omitted) |
 

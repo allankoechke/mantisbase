@@ -23,7 +23,7 @@ namespace mb {
      * Files are stored on disk in entity-specific directories, with filenames saved to the database.
      *
      * Security features:
-     * - Entity name validation to prevent SQL injection
+     * - MbEntity name validation to prevent SQL injection
      * - Path canonicalization to prevent directory traversal attacks
      * - Automatic sanitization of filenames
      *
@@ -46,18 +46,18 @@ namespace mb {
      * }
      * @endcode
      */
-    class MANTISBASE_API FilesMgr : public IMantisBase {
+    class MANTISBASE_API MbFilesMgr : public MbAppMixin {
     public:
-        explicit FilesMgr(const MantisBase &app);
+        explicit MbFilesMgr(const MantisBase &app);
 
         /**
          * @brief Create a directory for the given entity.
          *
          * Validates the entity name and creates the directory if it doesn't exist.
-         * Throws MantisException if entity name is invalid.
+         * Throws MbException if entity name is invalid.
          *
-         * @param entity_name Entity/table name (must be valid alphanumeric + underscore)
-         * @throws MantisException if entity name is invalid
+         * @param entity_name MbEntity/table name (must be valid alphanumeric + underscore)
+         * @throws MbException if entity name is invalid
          */
         void createDir(const std::string &entity_name) const;
 
@@ -69,14 +69,14 @@ namespace mb {
          *
          * @param old_entity_name Current entity name
          * @param new_entity_name New entity name
-         * @throws MantisException if either entity name is invalid
+         * @throws MbException if either entity name is invalid
          */
         void renameDir(const std::string &old_entity_name, const std::string &new_entity_name) const;
 
         /**
          * @brief Delete an entity directory and all its contents.
          *
-         * @param entity_name Entity/table name
+         * @param entity_name MbEntity/table name
          */
         void deleteDir(const std::string &entity_name) const;
 
@@ -86,10 +86,10 @@ namespace mb {
          * Returns the absolute path to the entity's file directory. Validates entity name
          * and checks for path traversal attacks before returning the path.
          *
-         * @param entity_name Entity/table name (must be valid)
+         * @param entity_name MbEntity/table name (must be valid)
          * @param create_if_missing If true, creates the directory if it doesn't exist
          * @return Absolute path string to the entity's file directory
-         * @throws MantisException if entity name is invalid or path traversal is detected
+         * @throws MbException if entity name is invalid or path traversal is detected
          */
         [[nodiscard]] std::string dirPath(const std::string &entity_name, bool create_if_missing = false) const;
 
@@ -99,10 +99,10 @@ namespace mb {
          * Constructs and canonicalizes the file path, ensuring it's within the entity's
          * directory to prevent path traversal attacks. Validates entity name and filename.
          *
-         * @param entity_name Entity/table name (must be valid)
+         * @param entity_name MbEntity/table name (must be valid)
          * @param filename File name (must not be empty)
          * @return Absolute canonical path string to the file
-         * @throws MantisException if entity name is invalid, filename is empty, or path traversal is detected
+         * @throws MbException if entity name is invalid, filename is empty, or path traversal is detected
          */
         [[nodiscard]] std::string filePath(const std::string &entity_name, const std::string &filename) const;
 
@@ -112,10 +112,10 @@ namespace mb {
          * Returns the file path if the file exists on disk, otherwise returns std::nullopt.
          * Validates entity name before checking file existence.
          *
-         * @param entity_name Entity/table name
+         * @param entity_name MbEntity/table name
          * @param filename File name
          * @return Absolute file path if file exists, std::nullopt otherwise
-         * @throws MantisException if entity name is invalid
+         * @throws MbException if entity name is invalid
          */
         std::optional<std::string> getFilePath(const std::string &entity_name, const std::string &filename);
 
@@ -127,7 +127,7 @@ namespace mb {
         /**
          * @brief Remove a file from an entity's directory.
          *
-         * @param entity_name Entity/table name
+         * @param entity_name MbEntity/table name
          * @param filename File name to remove
          * @return true if file was successfully removed, false otherwise
          */
@@ -136,7 +136,7 @@ namespace mb {
         /**
          * @brief Remove multiple files from an entity's directory.
          *
-         * @param entity_name Entity/table name
+         * @param entity_name MbEntity/table name
          * @param files Vector of file names to remove
          */
         void removeFiles(const std::string &entity_name, const std::vector<std::string> &files) const;
@@ -144,7 +144,7 @@ namespace mb {
         /**
          * @brief Check if a file exists in an entity's directory.
          *
-         * @param entity_name Entity/table name
+         * @param entity_name MbEntity/table name
          * @param filename File name to check
          * @return true if file exists, false otherwise
          */
@@ -158,7 +158,7 @@ namespace mb {
          *
          * @param path Path to canonicalize and validate
          * @return Canonical path if valid
-         * @throws MantisException if path traversal is detected (400 status)
+         * @throws MbException if path traversal is detected (400 status)
          */
         [[nodiscard]] fs::path getCanonicalPath(const fs::path &path) const;
 

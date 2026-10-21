@@ -38,7 +38,7 @@ namespace mb {
                 res.sendJSON(401, {
                                  {"data", json::object()},
                                  {"status", 401},
-                                 {"error", "Auth required to access this resource!"}
+                                 {"error", "MbAuth required to access this resource!"}
                              });
                 return std::nullopt;
             }
@@ -62,7 +62,7 @@ namespace mb {
                 res.sendJSON(401, {
                                  {"data", json::object()},
                                  {"status", 401},
-                                 {"error", "Auth user not found!"}
+                                 {"error", "MbAuth user not found!"}
                              });
                 return std::nullopt;
             }
@@ -89,7 +89,7 @@ namespace mb {
                     return MbHandlerResponse::Handled;
                 }
 
-                const AccessRule rule = method == "GET"
+                const MbAccessRule rule = method == "GET"
                                             ? (req.hasPathParam("id")
                                                    ? entity.getRule()
                                                    : entity.listRule())
@@ -104,14 +104,14 @@ namespace mb {
                 }
 
                 const auto &verification = req.get<json>("verification", json::object());
-                const AccessEvalContext ctx{.auth = auth, .verification = verification, .req = &req};
+                const MbAccessEvalContext ctx{.auth = auth, .verification = verification, .req = &req};
                 const auto result = evaluateAccessRule(rule, ctx);
-                if (result == AccessEvalResult::Allow) {
+                if (result == MbAccessEvalResult::Allow) {
                     return MbHandlerResponse::Unhandled;
                 }
 
                 const auto [status, error] = accessEvalHttpError(result, rule);
-                if (result == AccessEvalResult::DenyUnauthenticated && !verification.empty() &&
+                if (result == MbAccessEvalResult::DenyUnauthenticated && !verification.empty() &&
                     verification.contains("error") && verification["error"].is_string() &&
                     !verification["error"].get<std::string>().empty()) {
                     res.sendJSON(status, {
@@ -160,7 +160,7 @@ namespace mb {
                         auth["mode"] = "api";
 
                         // API key authentication
-                        const auto key_hash = ApiKeyManager::hashApiKey(token);
+                        const auto key_hash = MbApiKeyMgr::hashApiKey(token);
                         auto key_info = req.mbApp().auth().apiKey().lookupByHash(key_hash);
 
                         if (key_info.has_value()) {
@@ -205,7 +205,7 @@ namespace mb {
                 return MbHandlerResponse::Unhandled;
             } catch (const std::exception &e) {
                 std::cout << "Failed to get access token: " << e.what() << std::endl;
-                throw MantisException(500, "An internal error occurred.");
+                throw MbException(500, "An internal error occurred.");
             }
         };
     }
@@ -268,18 +268,18 @@ namespace mb {
             try {
                 const auto schema_id = schema_id_or_name.starts_with("mbt_")
                                            ? schema_id_or_name
-                                           : (EntitySchema::isValidEntityName(schema_id_or_name)
-                                                  ? EntitySchema::genEntityId(schema_id_or_name)
-                                                  : throw MantisException(400, "Invalid entity name/id"));
+                                           : (MbEntitySchema::isValidEntityName(schema_id_or_name)
+                                                  ? MbEntitySchema::genEntityId(schema_id_or_name)
+                                                  : throw MbException(400, "Invalid entity name/id"));
 
                 if (!schema_id_or_name.starts_with("mbt_") &&
                     req.mbApp().hasEntity(schema_id_or_name)) {
                     return MbHandlerResponse::Unhandled;
                 }
 
-                EntitySchema::getTable(req.mbApp(), schema_id);
+                MbEntitySchema::getTable(req.mbApp(), schema_id);
                 return MbHandlerResponse::Unhandled;
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 if (e.code() == 404 || e.code() == 400) {
                     res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                     return MbHandlerResponse::Handled;
@@ -298,7 +298,7 @@ namespace mb {
     MbMiddlewareFn resolveAuthEntity() {
         return [](const MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.pathParamValue("entity_name"));
-            if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
+            if (entity_name.empty() || !MbEntitySchema::isValidEntityName(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                 return MbHandlerResponse::Handled;
             }
@@ -321,7 +321,7 @@ namespace mb {
     MbMiddlewareFn resolveEntity() {
         return [](const MbRequest &req, const MbResponse &res) {
             const auto entity_name = trim(req.pathParamValue("entity_name"));
-            if (entity_name.empty() || !EntitySchema::isValidEntityName(entity_name)) {
+            if (entity_name.empty() || !MbEntitySchema::isValidEntityName(entity_name)) {
                 res.sendJSON(404, entityRouteNotFoundResponse(req.method(), req.path()));
                 return MbHandlerResponse::Handled;
             }
@@ -416,7 +416,7 @@ namespace mb {
                     res.sendJSON(401, {
                                      {"data", json::object()},
                                      {"status", 401},
-                                     {"error", "Auth required to access this resource!"}
+                                     {"error", "MbAuth required to access this resource!"}
                                  });
                     return MbHandlerResponse::Handled;
                 }
@@ -426,19 +426,19 @@ namespace mb {
                                 verification["verified"].get<bool>();
                 if (ok) {
                     const auto &auth = req.get<json>("auth", json::object());
-                    // logEntry::trace("Ver User Auth: {}", auth.dump());
+                    // logEntry::trace("Ver User MbAuth: {}", auth.dump());
 
                     // Check if verified user object is valid, if not throw auth error
                     if (auth["user"].is_null() || !auth["user"].is_object()) {
                         res.sendJSON(401, {
                                          {"data", json::object()},
                                          {"status", 401},
-                                         {"error", "Auth user not found!"}
+                                         {"error", "MbAuth user not found!"}
                                      });
                         return MbHandlerResponse::Handled;
                     }
 
-                    // logEntry::trace("Auth: {}", auth.dump());
+                    // logEntry::trace("MbAuth: {}", auth.dump());
                     // Ensure the auth user was for admin table
                     if (auth["entity"].get<std::string>() == "mb_admins") {
                         return MbHandlerResponse::Unhandled;
@@ -462,7 +462,7 @@ namespace mb {
                              });
                 return MbHandlerResponse::Handled;
             } catch (std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Admin Authentication Error",
+                req.mbApp().logger().critical("MbAuth", "Admin Authentication Error",
                                               fmt::format("Error authenticating as admin: {}", e.what()));
                 // Send auth error
                 res.sendJSON(500, {
@@ -544,7 +544,7 @@ namespace mb {
                 res.sendJSON(403, {
                                  {"status", 403},
                                  {"data", json::object()},
-                                 {"error", std::format("Auth required from entity `{}`.", entity_name)}
+                                 {"error", std::format("MbAuth required from entity `{}`.", entity_name)}
                              });
                 return MbHandlerResponse::Handled;
             }

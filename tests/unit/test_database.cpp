@@ -22,7 +22,7 @@ TEST_F(DatabaseTest, CheckSystemSchemaMigrated) {
     EXPECT_TRUE(admin_entity.hasApi());
     EXPECT_TRUE(admin_entity.isSystem());
 
-    mb::EntitySchema admin_schema = mb::EntitySchema::fromEntity(mApp, admin_entity);
+    mb::MbEntitySchema admin_schema = mb::MbEntitySchema::fromEntity(mApp, admin_entity);
 
     EXPECT_TRUE(admin_schema.hasField("id"));
     EXPECT_EQ(admin_schema.field("id").type(), "string");
@@ -49,7 +49,7 @@ TEST_F(DatabaseTest, EntityOperations) {
     const auto &mApp = mantis();
 
     EXPECT_NO_THROW(auto _ = mApp.entity("mb_admins"));
-    EXPECT_THROW(auto _ = mApp.entity("mb_tables"), mb::MantisException);
+    EXPECT_THROW(auto _ = mApp.entity("mb_tables"), mb::MbException);
 
     const auto admin_entity = mApp.entity("mb_admins");
     EXPECT_TRUE(admin_entity.isSystem());

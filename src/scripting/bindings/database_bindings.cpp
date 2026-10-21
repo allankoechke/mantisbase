@@ -9,9 +9,9 @@
 
 namespace mb {
     void registerDatabaseBindings(duk_context *ctx) {
-        dukglue_register_property(ctx, &Database::isConnected, nullptr, "connected");
-        dukglue_register_method(ctx, &Database::session, "session");
-        dukglue_register_method_varargs(ctx, &Database::query, "query");
+        dukglue_register_property(ctx, &MbDatabase::isConnected, nullptr, "connected");
+        dukglue_register_method(ctx, &MbDatabase::session, "session");
+        dukglue_register_method_varargs(ctx, &MbDatabase::query, "query");
 
         dukglue_register_method(ctx, &soci::session::close, "close");
         dukglue_register_method(ctx, &soci::session::reconnect, "reconnect");

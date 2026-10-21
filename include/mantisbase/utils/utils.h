@@ -133,7 +133,7 @@ namespace mb {
      *
      * @param ident Candidate identifier.
      * @return The identifier unchanged if valid.
-     * @throws MantisException(400) if the identifier is not a valid SQL identifier.
+     * @throws MbException(400) if the identifier is not a valid SQL identifier.
      */
     MANTISBASE_API std::string sqlIdentifier(const std::string &ident);
 
@@ -305,7 +305,7 @@ namespace mb {
      * hashes the `password` value with the salt then compares the two hashes if they match.
      *
      * @param password User password input.
-     * @param stored_hash Database stored hashed user password.
+     * @param stored_hash MbDatabase stored hashed user password.
      * @return boolean indicating whether the verification was successful or not.
      */
     MANTISBASE_API bool verifyPassword(const std::string &password, const std::string &stored_hash);

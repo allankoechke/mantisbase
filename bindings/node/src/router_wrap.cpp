@@ -7,7 +7,7 @@
 Napi::FunctionReference RouterWrap::s_constructor;
 
 Napi::Function RouterWrap::GetClass(Napi::Env env) {
-    auto func = DefineClass(env, "Router", {
+    auto func = DefineClass(env, "MbRouter", {
         InstanceMethod<&RouterWrap::Get>("get"),
         InstanceMethod<&RouterWrap::Post>("post"),
         InstanceMethod<&RouterWrap::Patch>("patch"),
@@ -24,7 +24,7 @@ RouterWrap::RouterWrap(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<RouterWrap>(info) {
 
     if (info.Length() > 0 && info[0].IsExternal()) {
-        m_router = info[0].As<Napi::External<mb::Router>>().Data();
+        m_router = info[0].As<Napi::External<mb::MbRouter>>().Data();
     }
 }
 
@@ -35,13 +35,13 @@ RouterWrap::~RouterWrap() {
     m_tsfns.clear();
 }
 
-Napi::Object RouterWrap::NewInstance(Napi::Env env, mb::Router* router) {
-    Napi::Object obj = s_constructor.New({Napi::External<mb::Router>::New(env, router)});
+Napi::Object RouterWrap::NewInstance(Napi::Env env, mb::MbRouter* router) {
+    Napi::Object obj = s_constructor.New({Napi::External<mb::MbRouter>::New(env, router)});
     return obj;
 }
 
 void RouterWrap::RegisterRoute(const Napi::CallbackInfo& info,
-    void(mb::Router::*method)(const std::string&, const mb::HandlerFn&, const mb::Middlewares&)) {
+    void(mb::MbRouter::*method)(const std::string&, const mb::HandlerFn&, const mb::Middlewares&)) {
 
     Napi::Env env = info.Env();
 
@@ -52,7 +52,7 @@ void RouterWrap::RegisterRoute(const Napi::CallbackInfo& info,
     }
 
     if (!m_router) {
-        Napi::Error::New(env, "Router not initialized").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "MbRouter not initialized").ThrowAsJavaScriptException();
         return;
     }
 
@@ -64,7 +64,7 @@ void RouterWrap::RegisterRoute(const Napi::CallbackInfo& info,
 
     m_tsfns.push_back(tsfn);
 
-    mb::HandlerFn handlerFn = [tsfn](mb::MantisRequest& req, mb::MantisResponse& res) mutable {
+    mb::HandlerFn handlerFn = [tsfn](mb::MbRequest& req, mb::MbResponse& res) mutable {
         auto donePtr = std::make_shared<std::promise<void>>();
         auto future = donePtr->get_future();
 
@@ -122,21 +122,21 @@ void RouterWrap::RegisterRoute(const Napi::CallbackInfo& info,
 }
 
 Napi::Value RouterWrap::Get(const Napi::CallbackInfo& info) {
-    RegisterRoute(info, &mb::Router::Get);
+    RegisterRoute(info, &mb::MbRouter::Get);
     return info.Env().Undefined();
 }
 
 Napi::Value RouterWrap::Post(const Napi::CallbackInfo& info) {
-    RegisterRoute(info, static_cast<void(mb::Router::*)(const std::string&, const mb::HandlerFn&, const mb::Middlewares&)>(&mb::Router::Post));
+    RegisterRoute(info, static_cast<void(mb::MbRouter::*)(const std::string&, const mb::HandlerFn&, const mb::Middlewares&)>(&mb::MbRouter::Post));
     return info.Env().Undefined();
 }
 
 Napi::Value RouterWrap::Patch(const Napi::CallbackInfo& info) {
-    RegisterRoute(info, static_cast<void(mb::Router::*)(const std::string&, const mb::HandlerFn&, const mb::Middlewares&)>(&mb::Router::Patch));
+    RegisterRoute(info, static_cast<void(mb::MbRouter::*)(const std::string&, const mb::HandlerFn&, const mb::Middlewares&)>(&mb::MbRouter::Patch));
     return info.Env().Undefined();
 }
 
 Napi::Value RouterWrap::Delete(const Napi::CallbackInfo& info) {
-    RegisterRoute(info, &mb::Router::Delete);
+    RegisterRoute(info, &mb::MbRouter::Delete);
     return info.Env().Undefined();
 }

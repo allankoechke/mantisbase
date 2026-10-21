@@ -5,23 +5,23 @@
 #include "../../include/mantisbase/core/http.h"
 
 namespace mb {
-    size_t RouteKeyHash::operator()(const MbRouteKey &k) const {
+    size_t MbRouteKeyHash::operator()(const MbRouteKey &k) const {
         return std::hash<std::string>()(k.first + "#" + k.second);
     }
 
-    void RouteRegistry::add(const std::string &method,
+    void MbRouteRegistry::add(const std::string &method,
                             const std::string &path,
                             const MbHandlerFn &handler,
                             const MbMiddlewares &middlewares) {
         routes[{method, path}] = {.middlewares = middlewares, .handler = handler};
     }
 
-    const RouteHandler *RouteRegistry::find(const std::string &method, const std::string &path) const {
+    const MbRouteHandler *MbRouteRegistry::find(const std::string &method, const std::string &path) const {
         const auto it = routes.find({method, path});
         return it != routes.end() ? &it->second : nullptr;
     }
 
-    json RouteRegistry::remove(const std::string &method, const std::string &path) {
+    json MbRouteRegistry::remove(const std::string &method, const std::string &path) {
         json res;
         res["error"] = "";
 

@@ -31,19 +31,19 @@ protected:
 
 TEST_F(FilesSecurityTest, EntityNameValidation) {
     // Valid entity names
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("valid_name"));
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("valid_name_123"));
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("a"));
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("a1b2c3"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("valid_name"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("valid_name_123"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("a"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("a1b2c3"));
 
     // Invalid entity names
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName("invalid-name"));  // Hyphen
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName("invalid name"));  // Space
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName("invalid.name")); // Dot
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName(""));              // Empty
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName("name/with/slashes")); // Slashes
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName("../parent"));     // Path traversal attempt
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName("name_with_too_many_characters_abcdefghijklmnopqrstuvwxyz1234567890")); // Too long
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName("invalid-name"));  // Hyphen
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName("invalid name"));  // Space
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName("invalid.name")); // Dot
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName(""));              // Empty
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName("name/with/slashes")); // Slashes
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName("../parent"));     // Path traversal attempt
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName("name_with_too_many_characters_abcdefghijklmnopqrstuvwxyz1234567890")); // Too long
 }
 
 TEST_F(FilesSecurityTest, FilenameSanitization) {
@@ -79,8 +79,8 @@ TEST_F(FilesSecurityTest, PathTraversalPrevention) {
     // For unit tests, we need to test the logic differently
     
     // Test that "../" in entity name is rejected
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName("../parent"));
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName("entity/../parent"));
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName("../parent"));
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName("entity/../parent"));
     
     // Test that ".." in filename is handled by sanitizeFilename
     std::string traversal_filename = "../../etc/passwd";
@@ -114,31 +114,31 @@ TEST_F(FilesSecurityTest, InvalidCharDetection) {
 TEST_F(FilesSecurityTest, EntityNameLengthLimit) {
     // Test maximum length (64 characters)
     std::string max_length_name(64, 'a');
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName(max_length_name));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName(max_length_name));
     
     // Test exceeding maximum length
     std::string too_long_name(65, 'a');
-    EXPECT_FALSE(mb::EntitySchema::isValidEntityName(too_long_name));
+    EXPECT_FALSE(mb::MbEntitySchema::isValidEntityName(too_long_name));
 }
 
 TEST_F(FilesSecurityTest, EntityNameEdgeCases) {
     // Single character
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("a"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("a"));
     
     // Only numbers
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("123"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("123"));
     
     // Only underscores
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("___"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("___"));
     
     // Mixed valid characters
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("a1_b2_c3"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("a1_b2_c3"));
     
     // Starting with number
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("1entity"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("1entity"));
     
     // Starting with underscore
-    EXPECT_TRUE(mb::EntitySchema::isValidEntityName("_entity"));
+    EXPECT_TRUE(mb::MbEntitySchema::isValidEntityName("_entity"));
 }
 
 TEST_F(FilesSecurityTest, FilenameSanitizationUniqueness) {

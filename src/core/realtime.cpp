@@ -6,10 +6,10 @@
 #include <soci/soci.h>
 #include "soci/sqlite3/soci-sqlite3.h"
 
-mb::RealtimeDB::RealtimeDB(const MantisBase &app)
-    : IMantisBase(app) {}
+mb::MbRealtimeDB::MbRealtimeDB(const MantisBase &app)
+    : MbAppMixin(app) {}
 
-bool mb::RealtimeDB::init() const {
+bool mb::MbRealtimeDB::init() const {
     try {
         const auto &sql = mbApp().db().session();
 
@@ -59,15 +59,15 @@ bool mb::RealtimeDB::init() const {
 
         return true;
     } catch (std::exception &e) {
-        mbApp().logger().critical("Database", e.what());
+        mbApp().logger().critical("MbDatabase", e.what());
     }
 
     return false;
 }
 
-void mb::RealtimeDB::addDbHooks(const std::string &entity_name) const {
+void mb::MbRealtimeDB::addDbHooks(const std::string &entity_name) const {
     if (!mbApp().hasEntity(entity_name)) {
-        throw MantisException(400,
+        throw MbException(400,
                               std::format("Expected a valid existing entity name, but `{}` was given instead.",
                                           entity_name));
     }
@@ -77,13 +77,13 @@ void mb::RealtimeDB::addDbHooks(const std::string &entity_name) const {
     addDbHooks(entity);
 }
 
-void mb::RealtimeDB::addDbHooks(const Entity &entity) const {
+void mb::MbRealtimeDB::addDbHooks(const MbEntity &entity) const {
     // Get session instance
     const auto &sql = mbApp().db().session();
     addDbHooks(entity, sql);
 }
 
-void mb::RealtimeDB::addDbHooks(const Entity &entity, const std::shared_ptr<soci::session> &sess) {
+void mb::MbRealtimeDB::addDbHooks(const MbEntity &entity, const std::shared_ptr<soci::session> &sess) {
     entity.mbApp().logger().debug("Realtime Mgr", std::format("Creating Db Hooks on `{}`", entity.name()));
 
     // Validate up front: the entity name is interpolated into trigger DDL below.
@@ -150,18 +150,18 @@ void mb::RealtimeDB::addDbHooks(const Entity &entity, const std::shared_ptr<soci
 #endif
 
     else
-        throw MantisException(400,
-                              std::format("Realtime Mgr: Database Hooks not implemented for db type `{}`", db_type));
+        throw MbException(400,
+                              std::format("Realtime Mgr: MbDatabase Hooks not implemented for db type `{}`", db_type));
 }
 
-void mb::RealtimeDB::dropDbHooks(const std::string &entity_name) const {
+void mb::MbRealtimeDB::dropDbHooks(const std::string &entity_name) const {
     const auto& sql = mbApp().db().session();
     dropDbHooks(entity_name, sql);
 }
 
-void mb::RealtimeDB::dropDbHooks(const std::string &entity_name, const std::shared_ptr<soci::session> &sess) {
-    if (!EntitySchema::isValidEntityName(entity_name)) {
-        throw MantisException(400, "Invalid Entity name.");
+void mb::MbRealtimeDB::dropDbHooks(const std::string &entity_name, const std::shared_ptr<soci::session> &sess) {
+    if (!MbEntitySchema::isValidEntityName(entity_name)) {
+        throw MbException(400, "Invalid MbEntity name.");
     }
 
     if (const auto db_type = sess->get_backend_name(); db_type == "sqlite3") {
@@ -184,25 +184,25 @@ void mb::RealtimeDB::dropDbHooks(const std::string &entity_name, const std::shar
 #endif
 
     else
-        throw MantisException(400,
+        throw MbException(400,
                               std::format("Realtime Mgr: Dropping database hooks not implemented for db type `{}`",
                                           db_type));
 }
 
-void mb::RealtimeDB::runWorker(const RtCallback &callback) {
+void mb::MbRealtimeDB::runWorker(const RtCallback &callback) {
     if (!m_rtDbWorker) {
-        m_rtDbWorker = std::make_unique<RtDbWorker>(mbApp());
+        m_rtDbWorker = std::make_unique<MbRtDbWorker>(mbApp());
         m_rtDbWorker->addCallback(callback);
     }
 }
 
-void mb::RealtimeDB::stopWorker() const {
+void mb::MbRealtimeDB::stopWorker() const {
     if (m_rtDbWorker) {
         m_rtDbWorker->stopWorker();
     }
 }
 
-void mb::RealtimeDB::notifyChange() const {
+void mb::MbRealtimeDB::notifyChange() const {
     // No-op until the worker is started (e.g. during bootstrap or when the
     // server isn't serving). The worker signals itself; this is the push from
     // the write path.
@@ -212,7 +212,7 @@ void mb::RealtimeDB::notifyChange() const {
 }
 
 #if MB_HAS_POSTGRESQL
-void mb::RealtimeDB::createNotifyFunction(const MantisBase& app, soci::session &sql) {
+void mb::MbRealtimeDB::createNotifyFunction(const MantisBase& app, soci::session &sql) {
     sql << R"(
             CREATE OR REPLACE FUNCTION mb_notify_changes()
             RETURNS TRIGGER AS $$
@@ -267,7 +267,7 @@ void mb::RealtimeDB::createNotifyFunction(const MantisBase& app, soci::session &
 }
 #endif
 
-std::string mb::RealtimeDB::buildTriggerObject(const Entity &entity, const std::string &action) {
+std::string mb::MbRealtimeDB::buildTriggerObject(const MbEntity &entity, const std::string &action) {
     std::stringstream ss;
     ss << "json_object(";
     bool first = true;
@@ -287,12 +287,12 @@ std::string mb::RealtimeDB::buildTriggerObject(const Entity &entity, const std::
     return ss.str();
 }
 
-mb::RtDbWorker::RtDbWorker(const MantisBase &app)
+mb::MbRtDbWorker::MbRtDbWorker(const MantisBase &app)
     : mApp(app), m_running(true) {
     m_db_type = mApp.dbType();
     if (m_db_type == "sqlite3") {
         if (!initSQLite())
-            throw MantisException(500, "Worker: SQLite db instantiation failed!");
+            throw MbException(500, "Worker: SQLite db instantiation failed!");
 
         mApp.logger().debug("SQLite RTdb",
                        std::format("DB Connection should be active: {}", (isDbRunning() ? "true" : "false")));
@@ -301,25 +301,25 @@ mb::RtDbWorker::RtDbWorker(const MantisBase &app)
 #if MB_HAS_POSTGRESQL
     else if (m_db_type == "postgresql") {
         if (!initPSQL())
-            throw MantisException(500, "Worker: PostgreSQL db instantiation failed!");
+            throw MbException(500, "Worker: PostgreSQL db instantiation failed!");
 
         mApp.logger().debug("PSQL RTdb",
                        std::format("DB Connection should be active: {}", (isDbRunning() ? "true" : "false")));
     }
 #endif
     else {
-        throw MantisException(500, std::format("Worker: Database type `{}` is not supported!", m_db_type));
+        throw MbException(500, std::format("Worker: MbDatabase type `{}` is not supported!", m_db_type));
     }
 
     // Setup the thread only after database has been fully initialized
-    th = std::thread(&RtDbWorker::run, this);
+    th = std::thread(&MbRtDbWorker::run, this);
 }
 
-mb::RtDbWorker::~RtDbWorker() {
+mb::MbRtDbWorker::~MbRtDbWorker() {
     stopWorker();
 }
 
-bool mb::RtDbWorker::isDbRunning() const {
+bool mb::MbRtDbWorker::isDbRunning() const {
     if (m_db_type == "sqlite3") return sql_ro && sql_ro->is_connected();
 #if MB_HAS_POSTGRESQL
     if (m_db_type == "postgresql")
@@ -328,11 +328,11 @@ bool mb::RtDbWorker::isDbRunning() const {
     return false;
 }
 
-void mb::RtDbWorker::addCallback(const RtCallback &cb) {
+void mb::MbRtDbWorker::addCallback(const RtCallback &cb) {
     m_callback = cb;
 }
 
-void mb::RtDbWorker::stopWorker() {
+void mb::MbRtDbWorker::stopWorker() {
     m_running.store(false);
     cv.notify_all();
 
@@ -353,9 +353,9 @@ void mb::RtDbWorker::stopWorker() {
 #endif
 }
 
-void mb::RtDbWorker::run() {
+void mb::MbRtDbWorker::run() {
     if (!isDbRunning()) {
-        throw MantisException(500, "Worker: Database is not running!");
+        throw MbException(500, "Worker: MbDatabase is not running!");
     }
 
     if (m_db_type == "sqlite3")
@@ -370,7 +370,7 @@ void mb::RtDbWorker::run() {
         mApp.logger().critical("RTDb Worker", std::format("Unsupported database type `{}`", m_db_type));
 }
 
-void mb::RtDbWorker::runSQlite() {
+void mb::MbRtDbWorker::runSQlite() {
     // Push-based delivery: sleep until the write path signals a change (see
     // notify()), with a periodic fallback tick as a safety net for writes made
     // outside the CRUD layer (e.g. scripting or migrations). This replaces the
@@ -460,7 +460,7 @@ void mb::RtDbWorker::runSQlite() {
         pruneChangeLog(last_id);
 }
 
-void mb::RtDbWorker::notify() {
+void mb::MbRtDbWorker::notify() {
     {
         std::lock_guard lock(mtx);
         m_notified = true;
@@ -468,7 +468,7 @@ void mb::RtDbWorker::notify() {
     cv.notify_one();
 }
 
-void mb::RtDbWorker::pruneChangeLog(const int up_to_id) {
+void mb::MbRtDbWorker::pruneChangeLog(const int up_to_id) {
     // The poller connection (sql_ro) is read-only, so acquire a writable
     // session from the main pool for the delete. The pk index on `id` makes
     // this a cheap range delete, and WAL lets it run alongside the poller.
@@ -482,7 +482,7 @@ void mb::RtDbWorker::pruneChangeLog(const int up_to_id) {
 }
 
 #if MB_HAS_POSTGRESQL
-void mb::RtDbWorker::runPostgreSQL() {
+void mb::MbRtDbWorker::runPostgreSQL() {
     const auto sleep_for = std::chrono::milliseconds(500);
 
     while (m_running.load()) {
@@ -565,7 +565,7 @@ void mb::RtDbWorker::runPostgreSQL() {
 }
 #endif
 
-bool mb::RtDbWorker::initSQLite() {
+bool mb::MbRtDbWorker::initSQLite() {
     // Connect to main db
     auto audit_db_path = joinPaths(mApp.dataDir(), "mantis.db").string();
 
@@ -594,7 +594,7 @@ bool mb::RtDbWorker::initSQLite() {
 }
 
 #if MB_HAS_POSTGRESQL
-bool mb::RtDbWorker::initPSQL() {
+bool mb::MbRtDbWorker::initPSQL() {
     const auto &conn_str = mApp.db().connectionStr();
     // Create PSQL object ...
     psql = std::unique_ptr<PGconn, decltype(&PQfinish)>(PQconnectdb(conn_str.c_str()), &PQfinish);

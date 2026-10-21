@@ -32,15 +32,15 @@ namespace mb {
                 try {
                     const auto parsed = json::parse(trimmed);
                     if (!parsed.is_object()) {
-                        throw MantisException(400, "Filter must be a JSON object.");
+                        throw MbException(400, "Filter must be a JSON object.");
                     }
                     return parsed;
                 } catch (const json::parse_error &) {
-                    throw MantisException(400, "Invalid filter JSON.");
+                    throw MbException(400, "Invalid filter JSON.");
                 }
             }
 
-            throw MantisException(400, "Invalid filter parameter.");
+            throw MbException(400, "Invalid filter parameter.");
         }
 
         void bindFilterValue(soci::values &vals, const std::string &field, const json &value,
@@ -64,13 +64,13 @@ namespace mb {
             } else if (field_type == "json") {
                 vals.set(field, value);
             } else {
-                throw MantisException(400,
+                throw MbException(400,
                                       std::format("Filtering by `{}` (type `{}`) is not supported.", field,
                                                     field_type));
             }
         }
 
-        std::string buildFilterWhere(const Entity &entity, const json &filter_obj, const std::string &after,
+        std::string buildFilterWhere(const MbEntity &entity, const json &filter_obj, const std::string &after,
                                      soci::values &binds) {
             std::vector<std::string> conditions;
 
@@ -82,7 +82,7 @@ namespace mb {
             for (const auto &[field, value]: filter_obj.items()) {
                 const auto field_def = entity.field(field);
                 if (!field_def.has_value()) {
-                    throw MantisException(400, std::format("Unknown filter field `{}`.", field));
+                    throw MbException(400, std::format("Unknown filter field `{}`.", field));
                 }
 
                 if (value.is_null()) {
@@ -112,8 +112,8 @@ namespace mb {
     // CRUD OPS                                                                    //
     // --------------------------------------------------------------------------- //
 
-    Record Entity::create(const json &record, const json &opts) const {
-        // Database session & transaction instance
+    Record MbEntity::create(const json &record, const json &opts) const {
+        // MbDatabase session & transaction instance
         const auto &sql = mbApp().db().session();
         soci::transaction tr(*sql);
 
@@ -191,12 +191,12 @@ namespace mb {
             return added_row;
         } catch (...) {
             // Handles anything else
-            // logEntry::critical("Error executing Entity::create()");
+            // logEntry::critical("Error executing MbEntity::create()");
             throw; // rethrow unknown exception
         }
     }
 
-    EntityListPage Entity::listPage(const json &opts) const {
+    EntityListPage MbEntity::listPage(const json &opts) const {
         const auto &sql = mbApp().db().session();
         int limit = 50;
         std::string after;
@@ -243,11 +243,11 @@ namespace mb {
         return page;
     }
 
-    Records Entity::list(const json &opts) const {
+    Records MbEntity::list(const json &opts) const {
         return listPage(opts).items;
     }
 
-    std::optional<Record> Entity::read(const std::string &id, const json &opts) const {
+    std::optional<Record> MbEntity::read(const std::string &id, const json &opts) const {
         // Get a soci::session from the pool
         const auto sql = mbApp().db().session();
 
@@ -272,8 +272,8 @@ namespace mb {
         return record;
     }
 
-    Record Entity::update(const std::string &id, const json &data, const json &opts) const {
-        // Database session & transaction instance
+    Record MbEntity::update(const std::string &id, const json &data, const json &opts) const {
+        // MbDatabase session & transaction instance
         auto sql = mbApp().db().session();
         soci::transaction tr(*sql);
 
@@ -320,7 +320,7 @@ namespace mb {
             }
 
             if (columns.empty())
-                throw MantisException(
+                throw MbException(
                     400, data.empty()
                              ? "No column data provided for updating."
                              : "No matching column in schema to update."
@@ -417,17 +417,17 @@ namespace mb {
             mbApp().notifyScriptRecordUpdated(name(), new_record.value("id", std::string{}));
 #endif
             return new_record;
-        } catch (const MantisException &) {
+        } catch (const MbException &) {
             throw;
         } catch (const std::exception &e) {
-            throw MantisException(500, e.what());
+            throw MbException(500, e.what());
         }
     }
 
-    void Entity::remove(const std::string &id) const {
+    void MbEntity::remove(const std::string &id) const {
         // Views should not reach here
         if (type() == "view")
-            throw std::invalid_argument("Remove is not implemented for Entity of `view` type!");
+            throw std::invalid_argument("Remove is not implemented for MbEntity of `view` type!");
 
         const auto &sql = mbApp().db().session();
         soci::transaction tr(*sql);
@@ -438,7 +438,7 @@ namespace mb {
         *sql << sqlStr, soci::use(id), soci::into(row);
 
         if (!sql->got_data()) {
-            throw MantisException(404, std::format("Resource not found for given id `{}`", id));
+            throw MbException(404, std::format("Resource not found for given id `{}`", id));
         }
 
         // Remove from DB
@@ -477,7 +477,7 @@ namespace mb {
     // UTILS OPS                                                                   //
     // --------------------------------------------------------------------------- //
 
-    int Entity::countRecords(const json &filter) const {
+    int MbEntity::countRecords(const json &filter) const {
         try {
             const auto sql = mbApp().db().session();
             const json opts = filter.empty() ? json::object() : json{{"filter", filter}};
@@ -490,14 +490,14 @@ namespace mb {
             *sql << std::format("SELECT COUNT(*) FROM {}{}", sqlIdentifier(name()), where_clause),
                 soci::use(binds), soci::into(count);
             return count;
-        } catch (const MantisException &) {
+        } catch (const MbException &) {
             throw;
         } catch (std::exception &e) {
-            throw MantisException(500, e.what());
+            throw MbException(500, e.what());
         }
     }
 
-    bool Entity::isEmpty() const {
+    bool MbEntity::isEmpty() const {
         try {
             const auto &sql = mbApp().db().session();
             int dummy = 0;
@@ -506,11 +506,11 @@ namespace mb {
                     soci::into(dummy, ind);
             return ind == soci::i_null;
         } catch (const std::exception &e) {
-            throw MantisException(500, e.what());
+            throw MbException(500, e.what());
         }
     }
 
-    std::optional<json> Entity::queryFromCols(const std::string &value, const std::vector<std::string> &columns) const {
+    std::optional<json> MbEntity::queryFromCols(const std::string &value, const std::vector<std::string> &columns) const {
         // Get a session object
         const auto sql = mbApp().db().session();
 
@@ -520,14 +520,14 @@ namespace mb {
             if (hasField(col_name).has_value()) {
                 valid_columns.push_back(col_name);
             } else {
-                mbApp().logger().warn("Entity", "Invalid Column",
+                mbApp().logger().warn("MbEntity", "Invalid Column",
                                       fmt::format("Invalid column name '{}' in queryFromCols for entity '{}'", col_name,
                                                   name()));
             }
         }
 
         if (valid_columns.empty()) {
-            throw MantisException(400, "No valid columns provided");
+            throw MbException(400, "No valid columns provided");
         }
 
         // Build dynamic WHERE clause
@@ -552,7 +552,7 @@ namespace mb {
         return std::nullopt;
     }
 
-    bool Entity::recordExists(const std::string &id) const {
+    bool MbEntity::recordExists(const std::string &id) const {
         try {
             std::string _nid;
             const auto sql = mbApp().db().session();
@@ -560,7 +560,7 @@ namespace mb {
                     soci::use(id), soci::into(_nid);
             return sql->got_data();
         } catch (soci::soci_error &e) {
-            mbApp().logger().trace("Entity", "Record Exists Error", e.what());
+            mbApp().logger().trace("MbEntity", "Record Exists Error", e.what());
             return false;
         }
     }

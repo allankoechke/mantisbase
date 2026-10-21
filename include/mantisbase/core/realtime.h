@@ -36,8 +36,8 @@ namespace soci {
 namespace mb {
     // Forward declarations
     class MantisBase;
-    class Entity;
-    class RtDbWorker;
+    class MbEntity;
+    class MbRtDbWorker;
 
     using json = nlohmann::json;
 
@@ -49,10 +49,10 @@ namespace mb {
      * Initializes DB-specific hooks (triggers for PostgreSQL, polling for SQLite)
      * and runs a worker that invokes the registered callback with change events.
      */
-    class MANTISBASE_API RealtimeDB: public IMantisBase {
+    class MANTISBASE_API MbRealtimeDB: public MbAppMixin {
     public:
         /** @param app Owning application (used for db access/config). Stored by reference. */
-        explicit RealtimeDB(const MantisBase &app);
+        explicit MbRealtimeDB(const MantisBase &app);
 
         /** Initialize realtime for the current database backend. Must be called after DB is ready. */
         [[nodiscard]] bool init() const;
@@ -61,10 +61,10 @@ namespace mb {
         void addDbHooks(const std::string &entity_name) const;
 
         /** Register change hooks for an entity. */
-        void addDbHooks(const Entity &entity) const;
+        void addDbHooks(const MbEntity &entity) const;
 
         /** Register change hooks for an entity on a given session (static, for schema creation). */
-        static void addDbHooks(const Entity &entity, const std::shared_ptr<soci::session> &sess);
+        static void addDbHooks(const MbEntity &entity, const std::shared_ptr<soci::session> &sess);
 
         /** Remove change hooks for an entity by name. */
         void dropDbHooks(const std::string &entity_name) const;
@@ -91,18 +91,18 @@ namespace mb {
         static void createNotifyFunction(const MantisBase& app, soci::session &sql);
 #endif
 
-        static std::string buildTriggerObject(const Entity &entity, const std::string &action /*"NEW" or "OLD"*/);
+        static std::string buildTriggerObject(const MbEntity &entity, const std::string &action /*"NEW" or "OLD"*/);
 
-        std::unique_ptr<RtDbWorker> m_rtDbWorker;
+        std::unique_ptr<MbRtDbWorker> m_rtDbWorker;
     };
 
     /** Internal worker that polls (SQLite) or listens (PostgreSQL) for DB changes. */
-    class RtDbWorker {
+    class MbRtDbWorker {
     public:
         /** @param app Owning application (used for db access/config). Stored by reference. */
-        explicit RtDbWorker(const MantisBase &app);
+        explicit MbRtDbWorker(const MantisBase &app);
 
-        ~RtDbWorker();
+        ~MbRtDbWorker();
 
         [[nodiscard]] bool isDbRunning() const;
 

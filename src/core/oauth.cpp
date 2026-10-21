@@ -9,10 +9,10 @@
 #include <jwt-cpp/traits/nlohmann-json/defaults.h>
 
 namespace mb {
-    OAuthManager::OAuthManager(const MantisBase &app) : IMantisBase(app) {
+    MbOAuthMgr::MbOAuthMgr(const MantisBase &app) : MbAppMixin(app) {
     }
 
-    std::string OAuthManager::getEncryptionKey() const {
+    std::string MbOAuthMgr::getEncryptionKey() const {
         auto key = getEnvOrDefault("MB_OAUTH_ENCRYPTION_KEY", "");
         if (key.empty()) {
             throw std::runtime_error(
@@ -26,7 +26,7 @@ namespace mb {
         return key.substr(0, 32);
     }
 
-    json OAuthManager::buildAuthorizeUrl(const std::string &entity_name,
+    json MbOAuthMgr::buildAuthorizeUrl(const std::string &entity_name,
                                          const std::string &provider_name,
                                          const std::string &redirect_uri) const {
         const auto &sql = mbApp().db().session();
@@ -68,7 +68,7 @@ namespace mb {
                 auto oidc = discoverOIDC(discovery_url);
                 authorize_endpoint = oidc.value("authorization_endpoint", "");
             } catch (...) {
-                mbApp().logger().warn("Auth", "OIDC Discovery Failed",
+                mbApp().logger().warn("MbAuth", "OIDC Discovery Failed",
                                       "Failed to discover OIDC for provider " + provider_name);
             }
         }
@@ -101,7 +101,7 @@ namespace mb {
         };
     }
 
-    json OAuthManager::handleCallback(const std::string &entity_name,
+    json MbOAuthMgr::handleCallback(const std::string &entity_name,
                                       const std::string &provider_name,
                                       const std::string &code,
                                       const std::string &state) const {
@@ -125,7 +125,7 @@ namespace mb {
         auto redirect_uri = state_row.get<std::string>(4);
 
         if (stored_entity != entity_name) {
-            throw std::runtime_error("Entity name mismatch in OAuth state");
+            throw std::runtime_error("MbEntity name mismatch in OAuth state");
         }
 
         // Delete used state
@@ -250,7 +250,7 @@ namespace mb {
         };
     }
 
-    json OAuthManager::linkAccount(const std::string &entity_name,
+    json MbOAuthMgr::linkAccount(const std::string &entity_name,
                                    const std::string &user_id,
                                    const std::string &provider_name,
                                    const std::string &code,
@@ -259,7 +259,7 @@ namespace mb {
         return result;
     }
 
-    bool OAuthManager::unlinkAccount(const std::string &entity_name,
+    bool MbOAuthMgr::unlinkAccount(const std::string &entity_name,
                                      const std::string &user_id,
                                      const std::string &provider_name) const {
         const auto &sql = mbApp().db().session();
@@ -273,7 +273,7 @@ namespace mb {
         return affected > 0;
     }
 
-    json OAuthManager::getLinkedAccounts(const std::string &entity_name,
+    json MbOAuthMgr::getLinkedAccounts(const std::string &entity_name,
                                          const std::string &user_id) const {
         const auto &sql = mbApp().db().session();
         const soci::rowset<soci::row> rows = (sql->prepare <<
@@ -295,7 +295,7 @@ namespace mb {
         return result;
     }
 
-    json OAuthManager::getProviders(const std::string &entity_name) {
+    json MbOAuthMgr::getProviders(const std::string &entity_name) {
         const auto &sql = mbApp().db().session();
         const soci::rowset<soci::row> rows = (sql->prepare <<
                                               "SELECT p.id, p.name, p.scopes, p.is_preset, ec.enabled "
@@ -317,7 +317,7 @@ namespace mb {
         return result;
     }
 
-    json OAuthManager::addProvider(const json &provider_data) const {
+    json MbOAuthMgr::addProvider(const json &provider_data) const {
         const auto &sql = mbApp().db().session();
         auto id = generateTimeBasedId();
         auto name = provider_data.at("name").get<std::string>();
@@ -345,7 +345,7 @@ namespace mb {
         };
     }
 
-    json OAuthManager::updateProvider(const std::string &provider_id, const json &updates) const {
+    json MbOAuthMgr::updateProvider(const std::string &provider_id, const json &updates) const {
         const auto &sql = mbApp().db().session();
 
         if (updates.contains("client_id")) {
@@ -377,7 +377,7 @@ namespace mb {
         return {{"id", provider_id}, {"updated", true}};
     }
 
-    bool OAuthManager::removeProvider(const std::string &provider_id) const {
+    bool MbOAuthMgr::removeProvider(const std::string &provider_id) const {
         const auto &sql = mbApp().db().session();
 
         // Only allow removing non-preset providers
@@ -396,7 +396,7 @@ namespace mb {
         return affected > 0;
     }
 
-    json OAuthManager::listProviders() const {
+    json MbOAuthMgr::listProviders() const {
         const auto &sql = mbApp().db().session();
         const soci::rowset<soci::row> rows = (sql->prepare <<
                                               "SELECT id, name, client_id, discovery_url, scopes, is_preset, enabled "
@@ -417,7 +417,7 @@ namespace mb {
         return result;
     }
 
-    json OAuthManager::enableProviderForEntity(const std::string &entity_name,
+    json MbOAuthMgr::enableProviderForEntity(const std::string &entity_name,
                                                const std::string &provider_id) const {
         const auto &sql = mbApp().db().session();
         auto id = generateTimeBasedId();
@@ -441,7 +441,7 @@ namespace mb {
         return {{"entity_name", entity_name}, {"provider_id", provider_id}, {"enabled", true}};
     }
 
-    bool OAuthManager::disableProviderForEntity(const std::string &entity_name,
+    bool MbOAuthMgr::disableProviderForEntity(const std::string &entity_name,
                                                 const std::string &provider_id) const {
         const auto &sql = mbApp().db().session();
         *sql << "UPDATE mb_entity_oauth_config SET enabled = 0 "
@@ -452,7 +452,7 @@ namespace mb {
         return affected > 0;
     }
 
-    json OAuthManager::discoverOIDC(const std::string &discovery_url) {
+    json MbOAuthMgr::discoverOIDC(const std::string &discovery_url) {
         // Use Drogon's HttpClient synchronously
         const auto client = drogon::HttpClient::newHttpClient(discovery_url);
         const auto req = drogon::HttpRequest::newHttpRequest();
@@ -467,7 +467,7 @@ namespace mb {
         return json::parse(std::string(resp->body()));
     }
 
-    json OAuthManager::exchangeCode(const std::string &token_endpoint,
+    json MbOAuthMgr::exchangeCode(const std::string &token_endpoint,
                                     const std::string &code,
                                     const std::string &redirect_uri,
                                     const std::string &client_id,

@@ -26,7 +26,7 @@ description: >-
 }
 ```
 
-## Entity types
+## MbEntity types
 
 | type | Purpose |
 |------|---------|
@@ -38,7 +38,7 @@ description: >-
 
 `string`, `int`, `double`, `bool`, `date`, `json`, `file`, `files`, `relation`
 
-## Validators (constraints)
+## MbValidators (constraints)
 
 ```json
 {"name": "email", "type": "string", "constraints": {"validator": "@email"}}
@@ -74,7 +74,7 @@ Migration JSON = same schema format. Rollback (`--down`) not implemented.
 ## Examples
 
 - Blog: [`examples/01-blog/schemas/posts.json`](../../examples/01-blog/schemas/posts.json)
-- Auth users: [`examples/02-auth-users/schemas/users.json`](../../examples/02-auth-users/schemas/users.json)
+- MbAuth users: [`examples/02-auth-users/schemas/users.json`](../../examples/02-auth-users/schemas/users.json)
 - Migrations: [`examples/migrations/`](../../examples/migrations/)
 
 ## Docs

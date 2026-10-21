@@ -22,37 +22,37 @@ namespace mb {
     using json = nlohmann::json;
 
     // Forward declaration
-    class LogDatabase;
+    class MbLogDatabase;
 
     /**
      * @brief Log severity levels mirrored in spdlog and the log database.
      */
-    typedef enum class LogLevel : uint8_t {
+    typedef enum class MbLogLevel : uint8_t {
         TRACE = 0,
         DEBUG,
         INFO,
         WARN,
         CRITICAL
-    } LogLevel;
+    } MbLogLevel;
 
     /**
      * A wrapper class around the `spdlog's` logging functions.
      * For more info, check docs here: @see https://github.com/gabime/spdlog
      */
-    class MANTISBASE_API Logger {
-        std::unique_ptr<LogDatabase> m_logsDb;
+    class MANTISBASE_API MbLogger {
+        std::unique_ptr<MbLogDatabase> m_logsDb;
         const MantisBase &mApp;
 
     public:
-        explicit Logger(const MantisBase &app);
+        explicit MbLogger(const MantisBase &app);
 
-        static void setLogLevel(const LogLevel &level = LogLevel::INFO);
+        static void setLogLevel(const MbLogLevel &level = MbLogLevel::INFO);
 
         /**
          * @brief Get the log database instance (for API access).
-         * @return Pointer to LogDatabase instance, or nullptr if not initialized
+         * @return Pointer to MbLogDatabase instance, or nullptr if not initialized
          */
-        [[nodiscard]] LogDatabase &logsDb() const;
+        [[nodiscard]] MbLogDatabase &logsDb() const;
 
         /**
          * @brief Initialize database connection.
@@ -60,8 +60,8 @@ namespace mb {
         void initDb(const std::string &data_dir = "") const;
 
         // Logging methods with structured format:
-        // - origin: Component/system origin (System, Auth, Database, Entity, EntitySchema, etc.)
-        // - message: Short message (e.g., "Auth Failed", "Database Connected")
+        // - origin: Component/system origin (System, MbAuth, MbDatabase, MbEntity, MbEntitySchema, etc.)
+        // - message: Short message (e.g., "MbAuth Failed", "MbDatabase Connected")
         // - details: Long description of the message
         // - data: Optional JSON object/array with additional data
         void trace(const std::string &origin,

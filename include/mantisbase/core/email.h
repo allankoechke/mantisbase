@@ -34,7 +34,7 @@ namespace mb {
         std::vector<std::chrono::steady_clock::time_point> timestamps;
     };
 
-    class MbMailer : public IMantisBase {
+    class MbMailer : public MbAppMixin {
     public:
         explicit MbMailer(const MantisBase &app);
 

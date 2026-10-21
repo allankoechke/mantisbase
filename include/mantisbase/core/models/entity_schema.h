@@ -1,6 +1,6 @@
 /**
  * @file entity_schema.h
- * @brief Entity schema builder and management class.
+ * @brief MbEntity schema builder and management class.
  *
  * Provides methods to define, validate, and manage database table schemas
  * including fields, access rules, and DDL generation.
@@ -22,20 +22,20 @@ namespace mb {
     /**
      * @brief Builder class for creating and managing database table schemas.
      *
-     * EntitySchema provides a fluent interface for defining table structures,
+     * MbEntitySchema provides a fluent interface for defining table structures,
      * fields, access rules, and converting to/from JSON and DDL.
      *
      * @code
      * auto app = MantisBase::create();
-     * EntitySchema schema(*app, "users", "base");
-     * schema.addField(EntitySchemaField("name", "string").setRequired(true));
-     * schema.addField(EntitySchemaField("email", "string").setIsUnique(true));
-     * schema.setListRule(AccessRule("auth", "", "users"));
+     * MbEntitySchema schema(*app, "users", "base");
+     * schema.addField(MbEntitySchemaField("name", "string").setRequired(true));
+     * schema.addField(MbEntitySchemaField("email", "string").setIsUnique(true));
+     * schema.setListRule(MbAccessRule("auth", "", "users"));
      *
-     * Entity entity = schema.toEntity();
+     * MbEntity entity = schema.toEntity();
      * @endcode
      */
-    class MANTISBASE_API EntitySchema: public IMantisBase {
+    class MANTISBASE_API MbEntitySchema: public MbAppMixin {
     public:
         /**
          * @brief Construct an empty schema bound to its application.
@@ -46,55 +46,55 @@ namespace mb {
          *
          * @param app Owning application. Stored non-owning; must outlive the schema.
          */
-        explicit EntitySchema(const MantisBase &app);
+        explicit MbEntitySchema(const MantisBase &app);
 
         /**
          * @brief Construct schema with name and type, bound to its application.
          * @param app Owning application (see the app-only constructor).
          * @param entity_name Table name
-         * @param entity_type Entity type ("base", "auth", or "view"), defaults to "base"
+         * @param entity_type MbEntity type ("base", "auth", or "view"), defaults to "base"
          */
-        EntitySchema(const MantisBase &app, const std::string &entity_name, const std::string &entity_type = "base");
+        MbEntitySchema(const MantisBase &app, const std::string &entity_name, const std::string &entity_type = "base");
 
         // Allow copy constructors & assignment ops for easy cloning
-        EntitySchema(const EntitySchema &);
-        EntitySchema &operator=(const EntitySchema &);
+        MbEntitySchema(const MbEntitySchema &);
+        MbEntitySchema &operator=(const MbEntitySchema &);
 
         // Move operators (move ctor can copy the app ref; move assignment
         // keeps the bound app and moves the rest, mirroring copy assignment)
-        EntitySchema(EntitySchema &&) noexcept = default;
-        EntitySchema &operator=(EntitySchema &&) noexcept;
+        MbEntitySchema(MbEntitySchema &&) noexcept = default;
+        MbEntitySchema &operator=(MbEntitySchema &&) noexcept;
 
-        ~EntitySchema();
+        ~MbEntitySchema();
 
         /**
          * @brief Compare two schemas for equality.
          * @param other Schema to compare with
          * @return true if schemas are equal
          */
-        bool operator==(const EntitySchema &other) const;
+        bool operator==(const MbEntitySchema &other) const;
 
         /**
          * @brief Create schema from JSON object, bound to an application.
          * @param app Owning application (db access for DDL/validation).
          * @param entity_schema JSON schema object
-         * @return EntitySchema instance
+         * @return MbEntitySchema instance
          */
-        static EntitySchema fromSchema(const MantisBase &app, const json &entity_schema);
+        static MbEntitySchema fromSchema(const MantisBase &app, const json &entity_schema);
 
         /**
-         * @brief Create schema from existing Entity, bound to an application.
+         * @brief Create schema from existing MbEntity, bound to an application.
          * @param app A const ref to MantisBase running instance
-         * @param entity Entity to convert from
-         * @return EntitySchema instance
+         * @param entity MbEntity to convert from
+         * @return MbEntitySchema instance
          */
-        static EntitySchema fromEntity(const MantisBase &app, const Entity &entity);
+        static MbEntitySchema fromEntity(const MantisBase &app, const MbEntity &entity);
         
         /**
-         * @brief Convert schema to Entity for database operations.
-         * @return Entity instance
+         * @brief Convert schema to MbEntity for database operations.
+         * @return MbEntity instance
          */
-        [[nodiscard]] Entity toEntity() const;
+        [[nodiscard]] MbEntity toEntity() const;
 
         // ----------- SCHEMA METHODS ----------- //
         /**
@@ -114,20 +114,20 @@ namespace mb {
          * @param name New table name
          * @return Reference to self for chaining
          */
-        EntitySchema &setName(const std::string &name);
+        MbEntitySchema &setName(const std::string &name);
 
         /**
          * @brief Get entity type.
-         * @return Entity type ("base", "auth", or "view")
+         * @return MbEntity type ("base", "auth", or "view")
          */
         [[nodiscard]] std::string type() const;
 
         /**
          * @brief Set entity type (fluent interface).
-         * @param type Entity type
+         * @param type MbEntity type
          * @return Reference to self for chaining
          */
-        EntitySchema &setType(const std::string &type);
+        MbEntitySchema &setType(const std::string &type);
 
         /**
          * @brief Check if API endpoints are enabled.
@@ -140,7 +140,7 @@ namespace mb {
          * @param hasApi API enabled flag
          * @return Reference to self for chaining
          */
-        EntitySchema &setHasApi(const bool &hasApi);
+        MbEntitySchema &setHasApi(const bool &hasApi);
 
         /**
          * @brief Check if this is a system table.
@@ -153,45 +153,45 @@ namespace mb {
          * @param isSystem System table flag
          * @return Reference to self for chaining
          */
-        EntitySchema &setSystem(const bool &isSystem);
+        MbEntitySchema &setSystem(const bool &isSystem);
 
         /** @return List (collection) access rule for this schema. */
-        [[nodiscard]] AccessRule listRule() const;
+        [[nodiscard]] MbAccessRule listRule() const;
 
-        EntitySchema &setListRule(const AccessRule &listRule);
+        MbEntitySchema &setListRule(const MbAccessRule &listRule);
 
         /** @return Get (single-record) access rule. */
-        [[nodiscard]] AccessRule getRule() const;
+        [[nodiscard]] MbAccessRule getRule() const;
 
-        EntitySchema &setGetRule(const AccessRule &getRule);
+        MbEntitySchema &setGetRule(const MbAccessRule &getRule);
 
         /** @return Create access rule. */
-        [[nodiscard]] AccessRule addRule() const;
+        [[nodiscard]] MbAccessRule addRule() const;
 
-        EntitySchema &setAddRule(const AccessRule &addRule);
+        MbEntitySchema &setAddRule(const MbAccessRule &addRule);
 
         /** @return Update access rule. */
-        [[nodiscard]] AccessRule updateRule() const;
+        [[nodiscard]] MbAccessRule updateRule() const;
 
-        EntitySchema &setUpdateRule(const AccessRule &updateRule);
+        MbEntitySchema &setUpdateRule(const MbAccessRule &updateRule);
 
         /** @return Delete access rule. */
-        [[nodiscard]] AccessRule deleteRule() const;
+        [[nodiscard]] MbAccessRule deleteRule() const;
 
-        EntitySchema &setDeleteRule(const AccessRule &deleteRule);
+        MbEntitySchema &setDeleteRule(const MbAccessRule &deleteRule);
 
         /**
          * @brief Get all field definitions.
-         * @return Vector of EntitySchemaField objects
+         * @return Vector of MbEntitySchemaField objects
          */
-        [[nodiscard]] std::vector<EntitySchemaField> fields() const;
+        [[nodiscard]] std::vector<MbEntitySchemaField> fields() const;
 
         /**
          * @brief Add a field to the schema (fluent interface).
          * @param field Field to add
          * @return Reference to self for chaining
          */
-        EntitySchema &addField(const EntitySchemaField &field);
+        MbEntitySchema &addField(const MbEntitySchemaField &field);
 
         /**
          * @brief Remove a field by name.
@@ -203,18 +203,18 @@ namespace mb {
         /**
          * @brief Get field by name (mutable reference).
          * @param field_name Field name to lookup
-         * @return Reference to EntitySchemaField
+         * @return Reference to MbEntitySchemaField
          * @throws std::runtime_error if field not found
          */
-        EntitySchemaField &field(const std::string &field_name);
+        MbEntitySchemaField &field(const std::string &field_name);
 
         /**
          * @brief Get field by ID (mutable reference).
          * @param field_id Field ID to lookup
-         * @return Reference to EntitySchemaField
+         * @return Reference to MbEntitySchemaField
          * @throws std::runtime_error if field not found
          */
-        EntitySchemaField &fieldById(const std::string &field_id);
+        MbEntitySchemaField &fieldById(const std::string &field_id);
 
         /**
          * @brief Check if field exists by name.
@@ -233,12 +233,12 @@ namespace mb {
         /** @return SQL SELECT for view-type entities. */
         [[nodiscard]] std::string viewQuery() const;
 
-        EntitySchema &setViewQuery(const std::string &viewQuery);
+        MbEntitySchema &setViewQuery(const std::string &viewQuery);
 
         /** @return Index definitions declared on this schema. */
         [[nodiscard]] const std::vector<IndexDefinition> &indexes() const;
 
-        EntitySchema &addIndex(const IndexDefinition &index);
+        MbEntitySchema &addIndex(const IndexDefinition &index);
 
         bool removeIndex(const std::string &index_name);
 
@@ -300,7 +300,7 @@ namespace mb {
          * @param new_table Schema to create
          * @return JSON object with created table data
          */
-        static nlohmann::json createTable(const EntitySchema &new_table);
+        static nlohmann::json createTable(const MbEntitySchema &new_table);
 
         /**
          * @brief Update existing table schema in database.
@@ -315,7 +315,7 @@ namespace mb {
          * @brief Drop table from database.
          * @param original_table Schema of table to drop
          */
-        static void dropTable(const EntitySchema &original_table);
+        static void dropTable(const MbEntitySchema &original_table);
 
         /**
          * @brief Drop table by ID from database.
@@ -337,11 +337,11 @@ namespace mb {
          * @param table Schema to check
          * @return true if table exists
          */
-        static bool tableExists(const EntitySchema &table);
+        static bool tableExists(const MbEntitySchema &table);
 
         /**
          * @brief Generate unique entity ID from name.
-         * @param entity_name Entity name
+         * @param entity_name MbEntity name
          * @return Generated ID string
          */
         static std::string genEntityId(const std::string &entity_name);
@@ -351,7 +351,7 @@ namespace mb {
          * @param table_schema Schema to validate
          * @return Optional error message if validation fails
          */
-        static std::optional<std::string> validate(const EntitySchema &table_schema);
+        static std::optional<std::string> validate(const MbEntitySchema &table_schema);
 
         /**
          * @brief Validate this schema instance.
@@ -372,14 +372,14 @@ namespace mb {
         static bool isValidEntityType(const std::string& type);
 
         /** @return Default field objects injected into `base` entity schemas. */
-        static const std::vector<EntitySchemaField> &defaultBaseFieldsSchema();
+        static const std::vector<MbEntitySchemaField> &defaultBaseFieldsSchema();
 
         /** @return Default field objects injected into `auth` entity schemas. */
-        static const std::vector<EntitySchemaField> &defaultAuthFieldsSchema();
+        static const std::vector<MbEntitySchemaField> &defaultAuthFieldsSchema();
 
     private:
         static std::string getFieldType(const std::string &type, std::shared_ptr<soci::session> sql,
-                                        IntPrecision precision = IntPrecision::I32);
+                                        MbIntPrecision precision = MbIntPrecision::I32);
 
         void addFieldsIfNotExist(const std::string &type);
 
@@ -388,9 +388,9 @@ namespace mb {
         std::string m_viewSqlQuery;
         bool m_isSystem = false;
         bool m_hasApi = true;
-        std::vector<EntitySchemaField> m_fields;
+        std::vector<MbEntitySchemaField> m_fields;
         std::vector<IndexDefinition> m_indexes;
-        AccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
+        MbAccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;
     };
 } // mb
 

@@ -63,7 +63,7 @@ target_link_libraries(your_app PRIVATE mantisbase)
 
 `MantisBase::create()` returns a `std::unique_ptr<MantisBase>` that **you own**. There is no global `MantisBase::instance()` accessor. Hold the pointer in `main` (or your app object), pass `const MantisBase&` into your own code, and call `app->run()` to start the HTTP server.
 
-Services that run inside MantisBase (`Entity`, `Router`, `MbRequest`, `ApiKeyManager`, `OAuthManager`, etc.) inherit `IMantisBase` and expose `mbApp()` when you only have a request or service reference.
+Services that run inside MantisBase (`MbEntity`, `MbRouter`, `MbRequest`, `MbApiKeyMgr`, `MbOAuthMgr`, etc.) inherit `MbAppMixin` and expose `mbApp()` when you only have a request or service reference.
 
 ---
 
@@ -242,7 +242,7 @@ int main()
 
 ---
 
-## Accessing Database
+## Accessing MbDatabase
 
 You can access the database directly for custom operations:
 

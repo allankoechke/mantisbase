@@ -1,6 +1,6 @@
 /**
  * @file types.h
- * @brief Core type aliases, handler signatures, and the IMantisBase DI mixin.
+ * @brief Core type aliases, handler signatures, and the MbAppMixin DI mixin.
  *
  * Defines the function types used throughout routing (@ref HandlerFn, @ref MiddlewareFn)
  * and the non-owning @ref MantisBase reference mixin inherited by request/response wrappers
@@ -22,20 +22,20 @@ namespace mb {
     class MantisBase;
     class MbRequest;
     class MbResponse;
-    class Entity;
-    class EntitySchema;
-    class EntitySchemaField;
+    class MbEntity;
+    class MbEntitySchema;
+    class MbEntitySchemaField;
 
     namespace fs = std::filesystem;
 
-    class KeyValStore;
-    class Database;
-    class Logger;
-    class Router;
-    class FilesMgr;
-    class Auth;
-    class ApiKeyManager;
-    class OAuthManager;
+    class MbKVStore;
+    class MbDatabase;
+    class MbLogger;
+    class MbRouter;
+    class MbFilesMgr;
+    class MbAuth;
+    class MbApiKeyMgr;
+    class MbOAuthMgr;
 
     // Email service
     struct MbSmtpConfig;
@@ -75,7 +75,7 @@ namespace mb {
     /**
      * @brief Non-owning access to the active @ref MantisBase from DI-aware types.
      *
-     * `Entity`, `Router`, `MbRequest`, `ApiKeyManager`, `OAuthManager`, and
+     * `MbEntity`, `MbRouter`, `MbRequest`, `MbApiKeyMgr`, `MbOAuthMgr`, and
      * other framework types inherit this mixin so handlers and services can call
      * `mbApp()` instead of a removed global singleton.
      *
@@ -86,26 +86,26 @@ namespace mb {
      * });
      * @endcode
      */
-    class MANTISBASE_API IMantisBase {
+    class MANTISBASE_API MbAppMixin {
         const MantisBase& m_app; ///< Const ref to the parent MantisBase instance //
 
     public:
         //! Constrictor for instantiating this interface
-        explicit IMantisBase(const MantisBase& app);
+        explicit MbAppMixin(const MantisBase& app);
 
         // Move constructor & op
-        IMantisBase(IMantisBase&&) = default;
-        IMantisBase& operator=(IMantisBase&&) = delete;
+        MbAppMixin(MbAppMixin&&) = default;
+        MbAppMixin& operator=(MbAppMixin&&) = delete;
 
         // Copy constructor & op
-        IMantisBase(const IMantisBase&) = default;
-        IMantisBase& operator=(const IMantisBase&) = delete;
+        MbAppMixin(const MbAppMixin&) = default;
+        MbAppMixin& operator=(const MbAppMixin&) = delete;
 
         //! Application that owns this service or request context.
         [[nodiscard]] const MantisBase &mbApp() const;
 
         //! @return Application logger via @ref MantisBase::logger
-        [[nodiscard]] const Logger& logger() const;
+        [[nodiscard]] const MbLogger& logger() const;
     };
 
 #define REQUEST_HANDLED MbHandlerResponse::Handled;

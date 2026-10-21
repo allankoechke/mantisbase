@@ -7,68 +7,68 @@
 #include <limits>
 
 namespace mb {
-    IntPrecision defaultIntPrecision() {
-        return IntPrecision::I32;
+    MbIntPrecision defaultIntPrecision() {
+        return MbIntPrecision::I32;
     }
 
-    bool isUnsignedIntPrecision(const IntPrecision precision) {
+    bool isUnsignedIntPrecision(const MbIntPrecision precision) {
         switch (precision) {
-            case IntPrecision::U8:
-            case IntPrecision::U16:
-            case IntPrecision::U32:
-            case IntPrecision::U64:
+            case MbIntPrecision::U8:
+            case MbIntPrecision::U16:
+            case MbIntPrecision::U32:
+            case MbIntPrecision::U64:
                 return true;
             default:
                 return false;
         }
     }
 
-    std::string intPrecisionToString(const IntPrecision precision) {
+    std::string intPrecisionToString(const MbIntPrecision precision) {
         switch (precision) {
-            case IntPrecision::I8: return "i8";
-            case IntPrecision::I16: return "i16";
-            case IntPrecision::I32: return "i32";
-            case IntPrecision::I64: return "i64";
-            case IntPrecision::U8: return "u8";
-            case IntPrecision::U16: return "u16";
-            case IntPrecision::U32: return "u32";
-            case IntPrecision::U64: return "u64";
+            case MbIntPrecision::I8: return "i8";
+            case MbIntPrecision::I16: return "i16";
+            case MbIntPrecision::I32: return "i32";
+            case MbIntPrecision::I64: return "i64";
+            case MbIntPrecision::U8: return "u8";
+            case MbIntPrecision::U16: return "u16";
+            case MbIntPrecision::U32: return "u32";
+            case MbIntPrecision::U64: return "u64";
         }
         return "i32";
     }
 
-    IntPrecision intPrecisionFromString(const std::string &token) {
+    MbIntPrecision intPrecisionFromString(const std::string &token) {
         auto normalized = trim(token);
         toLowerCase(normalized);
-        if (normalized == "i8") return IntPrecision::I8;
-        if (normalized == "i16") return IntPrecision::I16;
-        if (normalized == "i32") return IntPrecision::I32;
-        if (normalized == "i64") return IntPrecision::I64;
-        if (normalized == "u8") return IntPrecision::U8;
-        if (normalized == "u16") return IntPrecision::U16;
-        if (normalized == "u32") return IntPrecision::U32;
-        if (normalized == "u64") return IntPrecision::U64;
-        throw MantisException(400,
+        if (normalized == "i8") return MbIntPrecision::I8;
+        if (normalized == "i16") return MbIntPrecision::I16;
+        if (normalized == "i32") return MbIntPrecision::I32;
+        if (normalized == "i64") return MbIntPrecision::I64;
+        if (normalized == "u8") return MbIntPrecision::U8;
+        if (normalized == "u16") return MbIntPrecision::U16;
+        if (normalized == "u32") return MbIntPrecision::U32;
+        if (normalized == "u64") return MbIntPrecision::U64;
+        throw MbException(400,
                               "Invalid precision `" + token + "`. Must be one of: "
                               "i8, i16, i32, i64, u8, u16, u32, u64.");
     }
 
     namespace {
-        IntPrecision legacyBitWidthToPrecision(const int bits) {
+        MbIntPrecision legacyBitWidthToPrecision(const int bits) {
             switch (bits) {
-                case 8: return IntPrecision::I8;
-                case 16: return IntPrecision::I16;
-                case 64: return IntPrecision::I64;
-                case 32: return IntPrecision::I32;
+                case 8: return MbIntPrecision::I8;
+                case 16: return MbIntPrecision::I16;
+                case 64: return MbIntPrecision::I64;
+                case 32: return MbIntPrecision::I32;
                 default:
-                    throw MantisException(400,
+                    throw MbException(400,
                                           "Invalid legacy precision `" + std::to_string(bits)
                                           + "`. Must be 8, 16, 32, or 64, or use i8/u8 tokens.");
             }
         }
     }
 
-    IntPrecision intPrecisionFromField(const nlohmann::json &field) {
+    MbIntPrecision intPrecisionFromField(const nlohmann::json &field) {
         if (!field.contains("precision")) {
             return defaultIntPrecision();
         }
@@ -81,43 +81,43 @@ namespace mb {
             return legacyBitWidthToPrecision(precision.get<int>());
         }
 
-        throw MantisException(400,
+        throw MbException(400,
                               "Expected a string precision token (i8, u32, ...) or legacy integer bit width.");
     }
 
-    soci::db_type intPrecisionToSociType(const IntPrecision precision) {
+    soci::db_type intPrecisionToSociType(const MbIntPrecision precision) {
         switch (precision) {
-            case IntPrecision::I8: return soci::db_int8;
-            case IntPrecision::I16: return soci::db_int16;
-            case IntPrecision::I32: return soci::db_int32;
-            case IntPrecision::I64: return soci::db_int64;
-            case IntPrecision::U8: return soci::db_uint8;
-            case IntPrecision::U16: return soci::db_uint16;
-            case IntPrecision::U32: return soci::db_uint32;
-            case IntPrecision::U64: return soci::db_uint64;
+            case MbIntPrecision::I8: return soci::db_int8;
+            case MbIntPrecision::I16: return soci::db_int16;
+            case MbIntPrecision::I32: return soci::db_int32;
+            case MbIntPrecision::I64: return soci::db_int64;
+            case MbIntPrecision::U8: return soci::db_uint8;
+            case MbIntPrecision::U16: return soci::db_uint16;
+            case MbIntPrecision::U32: return soci::db_uint32;
+            case MbIntPrecision::U64: return soci::db_uint64;
         }
         return soci::db_int32;
     }
 
-    std::pair<int64_t, int64_t> intPrecisionSignedRange(const IntPrecision precision) {
+    std::pair<int64_t, int64_t> intPrecisionSignedRange(const MbIntPrecision precision) {
         switch (precision) {
-            case IntPrecision::I8: return {std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()};
-            case IntPrecision::I16: return {std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()};
-            case IntPrecision::I32: return {std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()};
-            case IntPrecision::I64: return {std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()};
+            case MbIntPrecision::I8: return {std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()};
+            case MbIntPrecision::I16: return {std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()};
+            case MbIntPrecision::I32: return {std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()};
+            case MbIntPrecision::I64: return {std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()};
             default:
-                throw MantisException(500, "Signed range requested for unsigned precision.");
+                throw MbException(500, "Signed range requested for unsigned precision.");
         }
     }
 
-    std::pair<uint64_t, uint64_t> intPrecisionUnsignedRange(const IntPrecision precision) {
+    std::pair<uint64_t, uint64_t> intPrecisionUnsignedRange(const MbIntPrecision precision) {
         switch (precision) {
-            case IntPrecision::U8: return {0, std::numeric_limits<uint8_t>::max()};
-            case IntPrecision::U16: return {0, std::numeric_limits<uint16_t>::max()};
-            case IntPrecision::U32: return {0, std::numeric_limits<uint32_t>::max()};
-            case IntPrecision::U64: return {0, std::numeric_limits<uint64_t>::max()};
+            case MbIntPrecision::U8: return {0, std::numeric_limits<uint8_t>::max()};
+            case MbIntPrecision::U16: return {0, std::numeric_limits<uint16_t>::max()};
+            case MbIntPrecision::U32: return {0, std::numeric_limits<uint32_t>::max()};
+            case MbIntPrecision::U64: return {0, std::numeric_limits<uint64_t>::max()};
             default:
-                throw MantisException(500, "Unsigned range requested for signed precision.");
+                throw MbException(500, "Unsigned range requested for signed precision.");
         }
     }
 
@@ -125,7 +125,7 @@ namespace mb {
         try {
             (void)intPrecisionFromString(token);
             return std::nullopt;
-        } catch (const MantisException &e) {
+        } catch (const MbException &e) {
             return e.what();
         }
     }
@@ -153,7 +153,7 @@ namespace mb {
         }
     }
 
-    std::optional<std::string> validateIntFieldValue(const nlohmann::json &value, const IntPrecision precision) {
+    std::optional<std::string> validateIntFieldValue(const nlohmann::json &value, const MbIntPrecision precision) {
         if (value.is_null()) {
             return std::nullopt;
         }
@@ -260,20 +260,20 @@ namespace mb {
     }
 
     void bindIntFieldValue(soci::values &vals, const std::string &field_name, const nlohmann::json &value,
-                           const IntPrecision precision) {
+                           const MbIntPrecision precision) {
         if (isUnsignedIntPrecision(precision)) {
             const auto parsed = jsonToUnsignedInt(value).value_or(0);
             switch (precision) {
-                case IntPrecision::U8:
+                case MbIntPrecision::U8:
                     vals.set(field_name, static_cast<uint8_t>(parsed));
                     break;
-                case IntPrecision::U16:
+                case MbIntPrecision::U16:
                     vals.set(field_name, static_cast<uint16_t>(parsed));
                     break;
-                case IntPrecision::U32:
+                case MbIntPrecision::U32:
                     vals.set(field_name, static_cast<uint32_t>(parsed));
                     break;
-                case IntPrecision::U64:
+                case MbIntPrecision::U64:
                     vals.set(field_name, parsed);
                     break;
                 default:
@@ -284,16 +284,16 @@ namespace mb {
 
         const auto parsed = jsonToSignedInt(value).value_or(0);
         switch (precision) {
-            case IntPrecision::I8:
+            case MbIntPrecision::I8:
                 vals.set(field_name, static_cast<int8_t>(parsed));
                 break;
-            case IntPrecision::I16:
+            case MbIntPrecision::I16:
                 vals.set(field_name, static_cast<int16_t>(parsed));
                 break;
-            case IntPrecision::I32:
+            case MbIntPrecision::I32:
                 vals.set(field_name, static_cast<int32_t>(parsed));
                 break;
-            case IntPrecision::I64:
+            case MbIntPrecision::I64:
                 vals.set(field_name, parsed);
                 break;
             default:
@@ -301,16 +301,16 @@ namespace mb {
         }
     }
 
-    nlohmann::json readIntFieldValue(const soci::row &row, const size_t index, const IntPrecision precision) {
+    nlohmann::json readIntFieldValue(const soci::row &row, const size_t index, const MbIntPrecision precision) {
         switch (precision) {
-            case IntPrecision::I8: return row.get<int8_t>(index);
-            case IntPrecision::I16: return row.get<int16_t>(index);
-            case IntPrecision::I32: return row.get<int32_t>(index);
-            case IntPrecision::I64: return row.get<int64_t>(index);
-            case IntPrecision::U8: return row.get<uint8_t>(index);
-            case IntPrecision::U16: return row.get<uint16_t>(index);
-            case IntPrecision::U32: return row.get<uint32_t>(index);
-            case IntPrecision::U64: return row.get<uint64_t>(index);
+            case MbIntPrecision::I8: return row.get<int8_t>(index);
+            case MbIntPrecision::I16: return row.get<int16_t>(index);
+            case MbIntPrecision::I32: return row.get<int32_t>(index);
+            case MbIntPrecision::I64: return row.get<int64_t>(index);
+            case MbIntPrecision::U8: return row.get<uint8_t>(index);
+            case MbIntPrecision::U16: return row.get<uint16_t>(index);
+            case MbIntPrecision::U32: return row.get<uint32_t>(index);
+            case MbIntPrecision::U64: return row.get<uint64_t>(index);
         }
         return row.get<int32_t>(index);
     }

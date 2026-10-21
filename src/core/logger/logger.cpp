@@ -7,7 +7,7 @@
 #include "mantisbase/mantisbase.h"
 #include "spdlog/sinks/ansicolor_sink.h"
 
-void mb::Logger::setLogLevel(const LogLevel &level) {
+void mb::MbLogger::setLogLevel(const MbLogLevel &level) {
     const auto set_spdlog_level = [&](const spdlog::level::level_enum lvl) {
         const auto logger = spdlog::get("mantis_logger");
         logger->set_level(lvl);
@@ -19,26 +19,26 @@ void mb::Logger::setLogLevel(const LogLevel &level) {
     };
 
     switch (level) {
-        case LogLevel::TRACE:
+        case MbLogLevel::TRACE:
             set_spdlog_level(spdlog::level::trace);
             break;
-        case LogLevel::DEBUG:
+        case MbLogLevel::DEBUG:
             set_spdlog_level(spdlog::level::debug);
             break;
-        case LogLevel::INFO:
+        case MbLogLevel::INFO:
             set_spdlog_level(spdlog::level::info);
             break;
-        case LogLevel::WARN:
+        case MbLogLevel::WARN:
             set_spdlog_level(spdlog::level::warn);
             break;
-        case LogLevel::CRITICAL:
+        case MbLogLevel::CRITICAL:
             set_spdlog_level(spdlog::level::critical);
             break;
     }
 }
 
-mb::Logger::Logger(const MantisBase &app)
-    : m_logsDb(std::make_unique<LogDatabase>(app)), mApp(app) {
+mb::MbLogger::MbLogger(const MantisBase &app)
+    : m_logsDb(std::make_unique<MbLogDatabase>(app)), mApp(app) {
     // Enable Multi Sinks
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_level(spdlog::level::info);
@@ -51,23 +51,23 @@ mb::Logger::Logger(const MantisBase &app)
     spdlog::set_default_logger(logger);
 }
 
-mb::LogDatabase &mb::Logger::logsDb() const {
+mb::MbLogDatabase &mb::MbLogger::logsDb() const {
     return *m_logsDb;
 }
 
-void mb::Logger::initDb(const std::string &data_dir) const {
+void mb::MbLogger::initDb(const std::string &data_dir) const {
     if (mApp.logs().logsDb().init(data_dir))
         isDbInitialized.store(true);
 }
 
-void mb::Logger::logToDatabase(const std::string &level, const std::string &origin, const std::string &message,
+void mb::MbLogger::logToDatabase(const std::string &level, const std::string &origin, const std::string &message,
                                const std::string &details, const json &data) const {
     if (isDbInitialized.load()) {
         mApp.logs().logsDb().insertLog(level, origin, message, details, data);
     }
 }
 
-void mb::Logger::trace(const std::string &origin,
+void mb::MbLogger::trace(const std::string &origin,
                        const std::string &message,
                        const std::string &details,
                        const json &data) const {
@@ -90,7 +90,7 @@ void mb::Logger::trace(const std::string &origin,
     logToDatabase("trace", origin, message, details, data);
 }
 
-void mb::Logger::info(const std::string &origin,
+void mb::MbLogger::info(const std::string &origin,
                       const std::string &message,
                       const std::string &details,
                       const json &data) const {
@@ -113,7 +113,7 @@ void mb::Logger::info(const std::string &origin,
     logToDatabase("info", origin, message, details, data);
 }
 
-void mb::Logger::debug(const std::string &origin,
+void mb::MbLogger::debug(const std::string &origin,
                        const std::string &message,
                        const std::string &details,
                        const json &data) const {
@@ -136,7 +136,7 @@ void mb::Logger::debug(const std::string &origin,
     logToDatabase("debug", origin, message, details, data);
 }
 
-void mb::Logger::warn(const std::string &origin,
+void mb::MbLogger::warn(const std::string &origin,
                       const std::string &message,
                       const std::string &details,
                       const json &data) const {
@@ -159,7 +159,7 @@ void mb::Logger::warn(const std::string &origin,
     logToDatabase("warn", origin, message, details, data);
 }
 
-void mb::Logger::critical(const std::string &origin,
+void mb::MbLogger::critical(const std::string &origin,
                           const std::string &message,
                           const std::string &details,
                           const json &data) const {
@@ -183,23 +183,23 @@ void mb::Logger::critical(const std::string &origin,
 }
 
 #ifdef MB_SCRIPTING_ENABLED
-void mb::Logger::jsInfo(const std::string &message) const {
+void mb::MbLogger::jsInfo(const std::string &message) const {
     info("Scripting", message);
 }
 
-void mb::Logger::jsWarn(const std::string &message) const {
+void mb::MbLogger::jsWarn(const std::string &message) const {
     warn("Scripting", message);
 }
 
-void mb::Logger::jsError(const std::string &message) const {
+void mb::MbLogger::jsError(const std::string &message) const {
     critical("Scripting", message);
 }
 
-void mb::Logger::jsDebug(const std::string &message) const {
+void mb::MbLogger::jsDebug(const std::string &message) const {
     debug("Scripting", message);
 }
 
-void mb::Logger::jsTrace(const std::string &message) const {
+void mb::MbLogger::jsTrace(const std::string &message) const {
     trace("Scripting", message);
 }
 #endif

@@ -38,26 +38,26 @@ namespace mb
      *     std::string userId = result["id"];
      * }
      *
-     * // API keys and OAuth live on the same Auth instance:
+     * // API keys and OAuth live on the same MbAuth instance:
      * auth.apiKey().create("users", "user123", "Mobile app");
      * auth.oauth().buildAuthorizeUrl("users", "google", redirect_uri);
      * @endcode
      */
-    class MANTISBASE_API Auth
+    class MANTISBASE_API MbAuth
     {
         const MantisBase& mApp;
-        std::unique_ptr<OAuthManager> m_oauth;
-        std::unique_ptr<ApiKeyManager> m_apiKeyManager;
+        std::unique_ptr<MbOAuthMgr> m_oauth;
+        std::unique_ptr<MbApiKeyMgr> m_apiKeyManager;
 
     public:
         /** Construct auth services bound to @p app (OAuth + API keys). */
-        explicit Auth(const MantisBase& app);
+        explicit MbAuth(const MantisBase& app);
 
         /** @return OAuth manager for provider configuration and login flows. */
-        [[nodiscard]] OAuthManager& oauth() const;
+        [[nodiscard]] MbOAuthMgr& oauth() const;
 
         /** @return API key manager for programmatic credentials. */
-        [[nodiscard]] ApiKeyManager& apiKey() const;
+        [[nodiscard]] MbApiKeyMgr& apiKey() const;
 
         /**
          * @brief Create JWT token with custom claims.

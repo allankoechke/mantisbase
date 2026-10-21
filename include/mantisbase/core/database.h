@@ -1,6 +1,6 @@
 /**
  * @file database.h
- * @brief Database connection, pooling, and system table migration.
+ * @brief MbDatabase connection, pooling, and system table migration.
  *
  * Handles database connections, connection pooling, and provides
  * session management for executing queries. Supports SQLite (default)
@@ -28,7 +28,7 @@ namespace mb {
     using json = nlohmann::json;
 
     /**
-     * @brief Database connection and session management.
+     * @brief MbDatabase connection and session management.
      *
      * Handles database connections, connection pooling, and provides
      * session management for executing queries. Supports SQLite (default)
@@ -36,26 +36,26 @@ namespace mb {
      *
      * @code
      * auto app = MantisBase::create();
-     * Database& db = app->db();
+     * MbDatabase& db = app->db();
      * db.connect("dbname=mantis user=postgres password=pass");
      * auto session = db.session();
      * *session << "SELECT * FROM users", soci::into(rows);
      * @endcode
      */
-    class MANTISBASE_API Database {
+    class MANTISBASE_API MbDatabase {
     public:
         /**
          * @brief Construct database instance bound to an application.
          * @param app The owning application; used for config (pool size, db
          *        type, data dir, dev mode). Stored by reference and must
-         *        outlive this Database.
+         *        outlive this MbDatabase.
          */
-        explicit Database(const MantisBase &app);
+        explicit MbDatabase(const MantisBase &app);
 
         /**
          * @brief Destructor (disconnects from database).
          */
-        ~Database();
+        ~MbDatabase();
 
         /**
          * @brief Connect to database and initialize connection pool.
@@ -121,10 +121,10 @@ namespace mb {
     };
 
     /**
-     * @brief Logger implementation for soci, allowing us to override the default logging behaviour
+     * @brief MbLogger implementation for soci, allowing us to override the default logging behaviour
      * with our own custom logger.
      */
-    class MantisLoggerImpl : public soci::logger_impl {
+    class MbLoggerImpl : public soci::logger_impl {
     public:
         /**
          * @brief Called before query is executed by soci, we can log the query here.
@@ -138,10 +138,10 @@ namespace mb {
     private:
         /**
          * @brief Obtain a pointer to the logger implementation
-         * @return Logger implementation pointer
+         * @return MbLogger implementation pointer
          */
         logger_impl *do_clone() const override {
-            return new MantisLoggerImpl();
+            return new MbLoggerImpl();
         }
     };
 } // mb

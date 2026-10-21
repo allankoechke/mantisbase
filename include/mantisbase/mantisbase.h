@@ -22,7 +22,7 @@
 #include "utils/snowflake.hpp"
 #ifdef MB_SCRIPTING_ENABLED
 #include <dukglue/dukglue.h>
-namespace mb { class ScriptingEngine; }
+namespace mb { class MbScriptingEngine; }
 #endif
 
 #include "core/types.h"
@@ -30,7 +30,7 @@ namespace mb { class ScriptingEngine; }
 
 namespace mb
 {
-    class RealtimeDB;
+    class MbRealtimeDB;
     /**
      * @brief MantisBase entry point.
      *
@@ -46,8 +46,8 @@ namespace mb
      * @note `create()` returns a `std::unique_ptr<MantisBase>` that you own.
      * Pass a `const MantisBase&` (or capture it in lambdas) to reach services
      * such as `auth()`, `entity()`, and `db()`. Types that participate in
-     * request handling (`MantisRequest`, `Entity`, `Router`, `ApiKeyManager`,
-     * etc.) inherit @ref IMantisBase and expose `mbApp()` for the same access.
+     * request handling (`MbRequest`, `MbEntity`, `MbRouter`, `MbApiKeyMgr`,
+     * etc.) inherit @ref MbAppMixin and expose `mbApp()` for the same access.
      * There is no global `instance()` accessor.
      */
     class MANTISBASE_API MantisBase
@@ -274,46 +274,46 @@ namespace mb
         static int appPatchVersion();
 
         /// Get the database unit object
-        [[nodiscard]] Database& db() const;
+        [[nodiscard]] MbDatabase& db() const;
 
         /** @return Command-line argument parser populated during @ref create. */
         [[nodiscard]] argparse::ArgumentParser& cmd() const;
 
         /** @return HTTP router (route registration, schema cache, SSE manager). */
-        [[nodiscard]] Router& router() const;
+        [[nodiscard]] MbRouter& router() const;
 
         /** @return Application settings key-value store (`/api/v1/sys/settings`). */
-        [[nodiscard]] KeyValStore& settings() const;
+        [[nodiscard]] MbKVStore& settings() const;
 
-        /** @return Logger (alias of @ref logger). */
-        [[nodiscard]] Logger& logs() const;
+        /** @return MbLogger (alias of @ref logger). */
+        [[nodiscard]] MbLogger& logs() const;
 
         /** @return Realtime change-detection worker (SQLite/PostgreSQL → SSE/WS). */
-        [[nodiscard]] RealtimeDB& rt() const;
+        [[nodiscard]] MbRealtimeDB& rt() const;
 
         /** @return File asset manager for entity upload fields. */
-        [[nodiscard]] FilesMgr& files() const;
+        [[nodiscard]] MbFilesMgr& files() const;
 
         /** @return Structured application logger. */
-        [[nodiscard]] Logger& logger() const;
+        [[nodiscard]] MbLogger& logger() const;
 
         /** @return JWT, API key, and OAuth services. */
-        [[nodiscard]] Auth& auth() const;
+        [[nodiscard]] MbAuth& auth() const;
 
         /** @return Mailer service. */
         [[nodiscard]] MbMailer& mailer() const;
 
         /**
-         * @brief Fetch a table schema encapsulated by an `Entity` object from given the table name.
+         * @brief Fetch a table schema encapsulated by an `MbEntity` object from given the table name.
          * If table does not exist yet, return an emty object.
          *
          * @param entity_name Name of the table of interest
-         * @return Entity object for the selected table
+         * @return MbEntity object for the selected table
          */
-        [[nodiscard]] Entity entity(const std::string& entity_name) const;
+        [[nodiscard]] MbEntity entity(const std::string& entity_name) const;
 
         /**
-         * @brief Check if table schema encapsulated by an `Entity` object from given the table name exists.
+         * @brief Check if table schema encapsulated by an `MbEntity` object from given the table name exists.
          * If table does not exist yet, return false.
          *
          * @param entity_name Name of the table of interest
@@ -360,13 +360,13 @@ namespace mb
         std::string jwtSecretKey_JSWrapper() const { return jwtSecretKey(); }
         void quit_JSWrapper(int code, const std::string &msg);
 
-        [[nodiscard]] Database *duk_db() const;
-        [[nodiscard]] Router *duk_router() const;
-        [[nodiscard]] KeyValStore *duk_settings() const;
-        [[nodiscard]] Auth *duk_auth() const;
-        [[nodiscard]] FilesMgr *duk_files() const;
-        [[nodiscard]] Logger *duk_logs() const;
-        [[nodiscard]] RealtimeDB *duk_rt() const;
+        [[nodiscard]] MbDatabase *duk_db() const;
+        [[nodiscard]] MbRouter *duk_router() const;
+        [[nodiscard]] MbKVStore *duk_settings() const;
+        [[nodiscard]] MbAuth *duk_auth() const;
+        [[nodiscard]] MbFilesMgr *duk_files() const;
+        [[nodiscard]] MbLogger *duk_logs() const;
+        [[nodiscard]] MbRealtimeDB *duk_rt() const;
         [[nodiscard]] MbMailer *duk_mailer() const;
 #endif
 
@@ -446,18 +446,18 @@ namespace mb
         bool m_skipAdminSetup = false;
         bool m_scriptingDisabled = false;
 
-        std::unique_ptr<Logger> m_logger;
-        std::unique_ptr<Database> m_database;
-        std::unique_ptr<FilesMgr> m_files;
-        std::unique_ptr<RealtimeDB> m_realtime;
-        std::unique_ptr<Auth> m_auth;
-        std::unique_ptr<Router> m_router;
+        std::unique_ptr<MbLogger> m_logger;
+        std::unique_ptr<MbDatabase> m_database;
+        std::unique_ptr<MbFilesMgr> m_files;
+        std::unique_ptr<MbRealtimeDB> m_realtime;
+        std::unique_ptr<MbAuth> m_auth;
+        std::unique_ptr<MbRouter> m_router;
         std::unique_ptr<MbMailer> m_mailer;
-        std::unique_ptr<KeyValStore> m_kvStore;
+        std::unique_ptr<MbKVStore> m_kvStore;
         std::unique_ptr<argparse::ArgumentParser> m_opts;
         mutable Snowflake<1534832906275L> m_snowflakeId{};
 #ifdef MB_SCRIPTING_ENABLED
-        std::unique_ptr<ScriptingEngine> m_scripting;
+        std::unique_ptr<MbScriptingEngine> m_scripting;
 #endif
     };
 }

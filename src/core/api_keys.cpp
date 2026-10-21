@@ -4,10 +4,10 @@
 #include "mantisbase/utils/utils.h"
 
 namespace mb {
-    ApiKeyManager::ApiKeyManager(const MantisBase &app) : IMantisBase(app) {
+    MbApiKeyMgr::MbApiKeyMgr(const MantisBase &app) : MbAppMixin(app) {
     }
 
-    ApiKeyResult ApiKeyManager::generateApiKey() {
+    ApiKeyResult MbApiKeyMgr::generateApiKey() {
         const auto random_hex = generateSecureRandom(32);
         const std::string raw_key = "mb_sk_" + random_hex;
         const std::string key_hash = hashApiKey(raw_key);
@@ -16,11 +16,11 @@ namespace mb {
         return {.id = id, .key = raw_key, .key_hash = key_hash};
     }
 
-    std::string ApiKeyManager::hashApiKey(const std::string &raw_key) {
+    std::string MbApiKeyMgr::hashApiKey(const std::string &raw_key) {
         return sha256Hex(raw_key);
     }
 
-    json ApiKeyManager::create(const std::string &entity_name, const std::string &user_id,
+    json MbApiKeyMgr::create(const std::string &entity_name, const std::string &user_id,
                                const std::string &label, const json &permissions,
                                const std::string &expires_at) const {
         auto [id, key, key_hash] = generateApiKey();
@@ -55,7 +55,7 @@ namespace mb {
         };
     }
 
-    json ApiKeyManager::list(const std::string &entity_name, const std::string &user_id) const {
+    json MbApiKeyMgr::list(const std::string &entity_name, const std::string &user_id) const {
         const auto &sql = mbApp().db().session();
         const soci::rowset<soci::row> rows = user_id.empty()
                                                  ? (sql->prepare <<
@@ -83,7 +83,7 @@ namespace mb {
         return result;
     }
 
-    bool ApiKeyManager::revoke(const std::string &key_id, const std::string &entity_name,
+    bool MbApiKeyMgr::revoke(const std::string &key_id, const std::string &entity_name,
                                const std::string &user_id) const {
         const auto &sql = mbApp().db().session();
         if (user_id.empty()) {
@@ -99,7 +99,7 @@ namespace mb {
         return affected > 0;
     }
 
-    bool ApiKeyManager::revokeById(const std::string &key_id) const {
+    bool MbApiKeyMgr::revokeById(const std::string &key_id) const {
         const auto &sql = mbApp().db().session();
         *sql << "DELETE FROM mb_api_keys WHERE id = :id", soci::use(key_id);
 
@@ -108,7 +108,7 @@ namespace mb {
         return affected > 0;
     }
 
-    std::optional<json> ApiKeyManager::lookupByHash(const std::string &key_hash) const {
+    std::optional<json> MbApiKeyMgr::lookupByHash(const std::string &key_hash) const {
         const auto &sql = mbApp().db().session();
         soci::row row;
         *sql << "SELECT id, entity_name, user_id, label, permissions, last_used, created, expires_at "
@@ -144,16 +144,16 @@ namespace mb {
         return result;
     }
 
-    json ApiKeyManager::listAdmin() const {
+    json MbApiKeyMgr::listAdmin() const {
         return list("mb_admins", "");
     }
 
-    json ApiKeyManager::createAdmin(const std::string &user_id, const std::string &label,
+    json MbApiKeyMgr::createAdmin(const std::string &user_id, const std::string &label,
                                     const json &permissions, const std::string &expires_at) const {
         return create("mb_admins", user_id, label, permissions, expires_at);
     }
 
-    bool ApiKeyManager::revokeAdmin(const std::string &key_id) const {
+    bool MbApiKeyMgr::revokeAdmin(const std::string &key_id) const {
         return revokeById(key_id);
     }
 } // mb

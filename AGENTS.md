@@ -16,7 +16,7 @@ Project skills in `.cursor/skills/` guide AI-assisted backend building:
 | Skill | Use for |
 |-------|---------|
 | `mantisbase-vibecode` | End-to-end workflow |
-| `mantisbase-schemas` | Entity schemas, FK, migrations |
+| `mantisbase-schemas` | MbEntity schemas, FK, migrations |
 | `mantisbase-auth` | Login, tokens, API keys |
 | `mantisbase-access-rules` | Permissions and 401/403 debugging |
 | `mantisbase-realtime-files` | SSE and file uploads |
@@ -26,7 +26,7 @@ Project skills in `.cursor/skills/` guide AI-assisted backend building:
 - API base: `/api/v1/`
 - Schemas: `POST /api/v1/schemas` (admin)
 - Entities: `/api/v1/entities/{name}`
-- Auth: `/api/v1/auth/{entity}/login`
+- MbAuth: `/api/v1/auth/{entity}/login`
 
 ## Documentation
 

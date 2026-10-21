@@ -13,7 +13,7 @@ namespace mb {
                             return std::isalnum(c) || c == '_';
                         });
         if (!ok)
-            throw MantisException(400, std::format("Invalid SQL identifier `{}`", ident));
+            throw MbException(400, std::format("Invalid SQL identifier `{}`", ident));
         return ident;
     }
 
@@ -213,7 +213,7 @@ namespace mb {
         std::string ext = p.has_extension() ? p.extension().string() : std::string{};
 
         if (!ext.empty() && !isAllowedFileExtension(ext)) {
-            throw MantisException(415, std::format("File extension `{}` is not allowed.", ext));
+            throw MbException(415, std::format("File extension `{}` is not allowed.", ext));
         }
 
         sanitizeInPlace(stem);

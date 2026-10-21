@@ -63,7 +63,7 @@ The dashboard lets you create entities, manage records and schemas, configure ac
 
 ![MantisBase Admin Dashboard](assets/mantisbase-admin.png)
 
-### 3. Create Your First Entity
+### 3. Create Your First MbEntity
 
 **Using the Admin Dashboard (recommended):** navigate to Schemas, click New, and fill in the name, fields, and access rules.
 
@@ -189,7 +189,7 @@ Set `MB_JWT_SECRET` in production. See [CLI Reference](cmd.md) for all options.
 ## Next Steps
 
 1. [API Reference](api.md) — All endpoints, schema management, realtime SSE and WebSocket
-2. [Authentication API](auth.md) — Auth endpoints, API keys, OAuth
+2. [Authentication API](auth.md) — MbAuth endpoints, API keys, OAuth
 3. [Access Rules](rules.md) — Permission system
 4. [File Handling](files.md) — Upload, serve, and delete files
 5. [Embedding Guide](embedding.md) — Use MantisBase as a C++ library
@@ -203,7 +203,7 @@ Set `MB_JWT_SECRET` in production. See [CLI Reference](cmd.md) for all options.
 - [Installation Guide](installation.md) — Detailed installation instructions
 - [CLI Reference](cmd.md) — All command-line options
 - [API Reference](api.md) — Complete API documentation
-- [Authentication API](auth.md) — Auth endpoints and usage
+- [Authentication API](auth.md) — MbAuth endpoints and usage
 - [Access Rules](rules.md) — Permission system guide
 - [Embedding Guide](embedding.md) — Use as a C++ library
 - [File Handling](files.md) — File upload and serving

@@ -8,7 +8,7 @@ public:
     static Napi::Function GetClass(Napi::Env env);
     RequestWrap(const Napi::CallbackInfo& info);
 
-    static Napi::Object NewInstance(Napi::Env env, mb::MantisRequest* req);
+    static Napi::Object NewInstance(Napi::Env env, mb::MbRequest* req);
 
 private:
     Napi::Value PathParam(const Napi::CallbackInfo& info);
@@ -20,7 +20,7 @@ private:
     Napi::Value GetPath(const Napi::CallbackInfo& info);
     Napi::Value GetRemoteAddr(const Napi::CallbackInfo& info);
 
-    mb::MantisRequest* m_req = nullptr;
+    mb::MbRequest* m_req = nullptr;
 
     static Napi::FunctionReference s_constructor;
 };

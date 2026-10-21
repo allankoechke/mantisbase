@@ -29,7 +29,7 @@ namespace mb {
             while (std::getline(ss, part, ',')) {
                 const auto trimmed = trimCopy(part);
                 if (trimmed.empty()) {
-                    throw MantisException(400, "Invalid entity filter: empty token in comma-separated list!");
+                    throw MbException(400, "Invalid entity filter: empty token in comma-separated list!");
                 }
                 tokens.push_back(trimmed);
             }
@@ -79,7 +79,7 @@ namespace mb {
                auth["type"].get<std::string>() == "user";
     }
 
-    void AccessRule::validateEntityFilter(const std::string &entity) {
+    void MbAccessRule::validateEntityFilter(const std::string &entity) {
         if (entity.empty()) {
             return;
         }
@@ -90,29 +90,29 @@ namespace mb {
             if (name.starts_with("!")) {
                 name = name.substr(1);
                 if (name.empty()) {
-                    throw MantisException(400, "Invalid entity filter: negation requires an entity name!");
+                    throw MbException(400, "Invalid entity filter: negation requires an entity name!");
                 }
             }
             if (!isValidEntityNameToken(name)) {
-                throw MantisException(400, "Invalid entity filter token `" + token +
+                throw MbException(400, "Invalid entity filter token `" + token +
                                                "`, expected entity name matching [A-Za-z0-9_]{1,64}!");
             }
         }
     }
 
-    void AccessRule::validateEntityFilterForMode(const std::string &mode, const std::string &entity) {
+    void MbAccessRule::validateEntityFilterForMode(const std::string &mode, const std::string &entity) {
         if (entity.empty()) {
             return;
         }
         if (mode != "auth") {
-            throw MantisException(400, "The `entity` field is only allowed when rule mode is `auth`!");
+            throw MbException(400, "The `entity` field is only allowed when rule mode is `auth`!");
         }
         validateEntityFilter(entity);
     }
 
-    AccessRule::AccessRule(const std::string &mode, const std::string &expr, const std::string &entity) {
+    MbAccessRule::MbAccessRule(const std::string &mode, const std::string &expr, const std::string &entity) {
         if (!(mode == "public" || mode == "auth" || mode == "custom" || mode.empty())) {
-            throw MantisException(400, "Expected rule to be `public`, `auth` or `custom` only!");
+            throw MbException(400, "Expected rule to be `public`, `auth` or `custom` only!");
         }
 
         validateEntityFilterForMode(mode, entity);
@@ -122,7 +122,7 @@ namespace mb {
         m_entity = mode == "auth" ? entity : "";
     }
 
-    nlohmann::json AccessRule::toJSON() const {
+    nlohmann::json MbAccessRule::toJSON() const {
         nlohmann::json j = {
             {"mode", m_mode},
             {"expr", m_mode == "custom" ? m_expr : ""}
@@ -133,26 +133,26 @@ namespace mb {
         return j;
     }
 
-    AccessRule AccessRule::fromJSON(const nlohmann::json &j) {
+    MbAccessRule MbAccessRule::fromJSON(const nlohmann::json &j) {
         const auto mode = j.is_null() ? "" : j.contains("mode") ? j["mode"].get<std::string>() : "";
         const auto expr = j.is_null() ? "" : j.contains("expr") ? j["expr"].get<std::string>() : "";
 
         std::string entity;
         if (!j.is_null() && j.contains("entity")) {
             if (!j["entity"].is_string()) {
-                throw MantisException(400, "Expected rule `entity` to be a comma-separated string!");
+                throw MbException(400, "Expected rule `entity` to be a comma-separated string!");
             }
             entity = j["entity"].get<std::string>();
         }
 
-        return AccessRule{mode, expr, entity};
+        return MbAccessRule{mode, expr, entity};
     }
 
-    std::string AccessRule::mode() const { return m_mode; }
+    std::string MbAccessRule::mode() const { return m_mode; }
 
-    void AccessRule::setMode(const std::string &_mode) {
+    void MbAccessRule::setMode(const std::string &_mode) {
         if (!(_mode == "public" || _mode == "auth" || _mode == "custom" || _mode.empty())) {
-            throw MantisException(400, "Expected rule to be empty, `public`, `auth` or `custom` only!");
+            throw MbException(400, "Expected rule to be empty, `public`, `auth` or `custom` only!");
         }
 
         if (_mode != "auth") {
@@ -162,20 +162,20 @@ namespace mb {
         m_mode = _mode;
     }
 
-    std::string AccessRule::expr() const { return m_expr; }
+    std::string MbAccessRule::expr() const { return m_expr; }
 
-    void AccessRule::setExpr(const std::string &_expr) {
+    void MbAccessRule::setExpr(const std::string &_expr) {
         m_expr = _expr;
     }
 
-    std::string AccessRule::entity() const { return m_entity; }
+    std::string MbAccessRule::entity() const { return m_entity; }
 
-    void AccessRule::setEntity(const std::string &_entity) {
+    void MbAccessRule::setEntity(const std::string &_entity) {
         validateEntityFilterForMode(m_mode, _entity);
         m_entity = _entity;
     }
 
-    bool AccessRule::matchesAuthEntity(const std::string &userEntity) const {
+    bool MbAccessRule::matchesAuthEntity(const std::string &userEntity) const {
         if (m_entity.empty()) {
             return true;
         }
@@ -241,39 +241,39 @@ namespace mb {
         return vars;
     }
 
-    AccessEvalResult evaluateAccessRule(const AccessRule &rule, const AccessEvalContext &ctx) {
+    MbAccessEvalResult evaluateAccessRule(const MbAccessRule &rule, const MbAccessEvalContext &ctx) {
         if (isAdminAuth(ctx.auth)) {
-            return AccessEvalResult::Allow;
+            return MbAccessEvalResult::Allow;
         }
 
         if (rule.mode() == "public") {
-            return AccessEvalResult::Allow;
+            return MbAccessEvalResult::Allow;
         }
 
         if (rule.mode().empty()) {
             if (ctx.verification.empty() || !verificationVerified(ctx.verification)) {
-                return AccessEvalResult::DenyUnauthenticated;
+                return MbAccessEvalResult::DenyUnauthenticated;
             }
             if (!hasAuthUser(ctx.auth)) {
-                return AccessEvalResult::DenyUnauthenticated;
+                return MbAccessEvalResult::DenyUnauthenticated;
             }
-            return AccessEvalResult::DenyForbidden;
+            return MbAccessEvalResult::DenyForbidden;
         }
 
         if (rule.mode() == "auth") {
             if (ctx.verification.empty() || !verificationVerified(ctx.verification)) {
-                return AccessEvalResult::DenyUnauthenticated;
+                return MbAccessEvalResult::DenyUnauthenticated;
             }
             if (!hasAuthUser(ctx.auth)) {
-                return AccessEvalResult::DenyUnauthenticated;
+                return MbAccessEvalResult::DenyUnauthenticated;
             }
             if (!isUserAuth(ctx.auth) && !isAdminAuth(ctx.auth)) {
-                return AccessEvalResult::DenyUnauthenticated;
+                return MbAccessEvalResult::DenyUnauthenticated;
             }
             if (!rule.matchesAuthEntity(authEntityName(ctx.auth))) {
-                return AccessEvalResult::DenyForbidden;
+                return MbAccessEvalResult::DenyForbidden;
             }
-            return AccessEvalResult::Allow;
+            return MbAccessEvalResult::Allow;
         }
 
         if (rule.mode() == "custom") {
@@ -285,24 +285,24 @@ namespace mb {
             }
 
             if (Expr::eval(rule.expr(), vars)) {
-                return AccessEvalResult::Allow;
+                return MbAccessEvalResult::Allow;
             }
-            return AccessEvalResult::DenyForbidden;
+            return MbAccessEvalResult::DenyForbidden;
         }
 
-        return AccessEvalResult::DenyUnknownRule;
+        return MbAccessEvalResult::DenyUnknownRule;
     }
 
-    std::pair<int, std::string> accessEvalHttpError(const AccessEvalResult result, const AccessRule &rule) {
+    std::pair<int, std::string> accessEvalHttpError(const MbAccessEvalResult result, const MbAccessRule &rule) {
         switch (result) {
-            case AccessEvalResult::Allow:
+            case MbAccessEvalResult::Allow:
                 return {200, ""};
-            case AccessEvalResult::DenyUnauthenticated:
+            case MbAccessEvalResult::DenyUnauthenticated:
                 if (rule.mode().empty()) {
                     return {401, "Admin auth required to access this resource!"};
                 }
-                return {401, "Auth required to access this resource!"};
-            case AccessEvalResult::DenyForbidden:
+                return {401, "MbAuth required to access this resource!"};
+            case MbAccessEvalResult::DenyForbidden:
                 if (rule.mode().empty()) {
                     return {403, "Admin auth required to access this resource."};
                 }
@@ -310,7 +310,7 @@ namespace mb {
                     return {403, "Access denied!"};
                 }
                 return {403, "Access denied!"};
-            case AccessEvalResult::DenyUnknownRule:
+            case MbAccessEvalResult::DenyUnknownRule:
                 return {403, "Access denied, entity access rule unknown."};
         }
         return {403, "Access denied!"};

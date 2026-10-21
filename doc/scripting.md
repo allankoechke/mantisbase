@@ -54,7 +54,7 @@ Additionally, some methods are exposed on the `app` object:
 - `app.rt()`: Realtime change notifications (`notifyChange`).
 - `app.loadScript(path)`: Load an additional script relative to `scriptsDir`.
 
-## Database
+## MbDatabase
 The `DatabaseUnit` object returned from the `app.db()` method exposes the following methods and properties:
 ```js
 const db = app.db() // Get db unit instance
@@ -94,7 +94,7 @@ const sess = db.session() // Lease a session for executing db actions
 - `sess.getBackendName`
 - `sess.emptyBlob`
 
-## Router
+## MbRouter
 The router instance allows binding handlers and optional middlewares to given routes from JavaScript.
 - `app.router().addRoute(method, path, handler, [middlewares])`: Create a route for a given HTTP method, on a given *path* with the given handler function with optional middleware functions.
 - `app.router().get(path, handler, [middlewares])`: Shorthand for `addRoute("GET", ...)`.
@@ -194,8 +194,7 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 
 ### MbRequest Methods/Properties
 - `req.hasHeader("Authorization")`: return true/false
-- `req.getHeader("Authorization", "", 0)`: Return Authorization value or default
-- `req.setHeader("Cow", "Cow Value")`
+- `req.getHeader("Authorization", "")`: Return Authorization value or default
 - `req.hasQueryParam("key")`: return true/false
 - `req.getQueryParam("key")`: Return header value given the key
 - `req.hasPathParam("key")`: return true/false
@@ -215,14 +214,14 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 
 ### MbResponse Methods/Properties
 - `res.hasHeader("Authorization")`: Check if a header `key` exists in the request header. Returns true or false.
-- `res.getHeader(<key>, <default>, <index>)`: Get header value for a given `key` in the header. All three parameters are required, `key` being the header of interest, `default` being the base value if header is not found and `index` being the 0-based index for the item to return if the header value has more than one value. i.e 
+- `res.header(key, default)`: Get header value for a given `key`, or `default` when missing. i.e 
 ```js
-    const token = res.getHeader("Authorization", "")
-    const type = res.getHeader("content-type", "text/plain")
+    const token = res.header("Authorization", "")
+    const type = res.header("content-type", "text/plain")
 ```
 - `res.setHeader("Cow", "Cow Value")`
 - `res.redirect("http://some-url.com", 302)`
-> **Note:** `res.redirect(url, status)` redirects a single in-flight request from inside a handler. To redirect a whole path without writing a handler, use `app.router().redirect(from, to[, status[, methods]])` (see [Router](#router)).
+> **Note:** `res.redirect(url, status)` redirects a single in-flight request from inside a handler. To redirect a whole path without writing a handler, use `app.router().redirect(from, to[, status[, methods]])` (see [MbRouter](#router)).
 - `res.setContent(content, content_type)`: i.e. `res.setContent("<html>...</html>", "text/html")`
 - `res.setFileContent("/foo/file_path")`
 - `res.send(200, "some data here", "text/plain")`
@@ -232,10 +231,6 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 - `res.empty(204)`
 - `res.body = "Some Data"`
 - `res.body` -> returns `Some Data`
-- `res.status` (get or set status data)
-- `res.version` (get or set version value)
-- `res.location` (get or set redirect location value)
-- `res.reason` (get or set reason value)
 
 ## Middlewares (C++ factories)
 

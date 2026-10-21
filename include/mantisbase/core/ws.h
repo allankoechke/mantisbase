@@ -34,13 +34,13 @@ namespace mb {
     /**
      * @brief Tracks WebSocket connections, topic indexes, and broadcasts change events.
      *
-     * Thread-safe. One instance is owned by @ref SSEMgr and shares the SSE cleanup loop
+     * Thread-safe. One instance is owned by @ref MbSSEMgr and shares the SSE cleanup loop
      * via @ref cleanupStaleConnections.
      */
-    class MANTISBASE_API WSMgr {
+    class MANTISBASE_API MbWSMgr {
     public:
-        explicit WSMgr(const MantisBase&);
-        ~WSMgr() = default;
+        explicit MbWSMgr(const MantisBase&);
+        ~MbWSMgr() = default;
 
         /** Register a new connection and its session snapshot. Closes with 1008 if at capacity. */
         void addConnection(const drogon::WebSocketConnectionPtr &conn,
@@ -94,12 +94,12 @@ namespace mb {
      *
      * Registered at `WS /api/v1/realtime/ws`. Disabled when `MB_DISABLE_REALTIME_WS` is truthy.
      */
-    class RealtimeWSController : public drogon::WebSocketController<RealtimeWSController, false> {
+    class MbRealtimeWSController : public drogon::WebSocketController<MbRealtimeWSController, false> {
     private:
         const MantisBase& m_app;
 
     public:
-        explicit RealtimeWSController(const MantisBase& app) : m_app(app) {}
+        explicit MbRealtimeWSController(const MantisBase& app) : m_app(app) {}
 
         /** Handle subscribe, unsubscribe, ping, and auth-upgrade messages. */
         void handleNewMessage(const drogon::WebSocketConnectionPtr &,

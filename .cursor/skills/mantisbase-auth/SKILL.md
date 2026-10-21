@@ -5,9 +5,9 @@ description: >-
   API keys. Use when adding user accounts or securing API calls.
 ---
 
-# MantisBase Auth
+# MantisBase MbAuth
 
-## Auth entity schema
+## MbAuth entity schema
 
 ```json
 {

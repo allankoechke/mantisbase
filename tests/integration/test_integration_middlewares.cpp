@@ -112,7 +112,7 @@ TEST_F(IntegrationMiddlewareTest, RequireEntityAuthDeniesAdmin) {
                             {{"Authorization", "Bearer " + adminToken}});
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 403);
-    EXPECT_EQ(parseBody(*res)["error"].get<std::string>(), "Auth required from entity `test_users`.");
+    EXPECT_EQ(parseBody(*res)["error"].get<std::string>(), "MbAuth required from entity `test_users`.");
 }
 
 TEST_F(IntegrationMiddlewareTest, RequireAdminOrEntityAuthRequiresToken) {

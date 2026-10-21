@@ -32,7 +32,7 @@ namespace mb {
         }
     }
 
-    const std::function<drogon::HttpResponsePtr(const drogon::HttpRequestPtr &)> Router::reqIdSyncAdvice() {
+    const std::function<drogon::HttpResponsePtr(const drogon::HttpRequestPtr &)> MbRouter::reqIdSyncAdvice() {
         return [this](const drogon::HttpRequestPtr &req) {
             // Generate and store request ID in attributes
             std::string requestId = fmt::format("req_{}", m_sfId.nextID());
@@ -44,7 +44,7 @@ namespace mb {
     }
 
     std::function<void(const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)>
-    Router::loggerPreSendingAdvice() const {
+    MbRouter::loggerPreSendingAdvice() const {
         return [this](const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp) {
             const auto start = req->creationDate();
             const auto end = trantor::Date::now();
@@ -68,7 +68,7 @@ namespace mb {
         };
     }
 
-    void Router::reloadCorsOrigins() const {
+    void MbRouter::reloadCorsOrigins() const {
         const auto origins = std::make_shared<std::set<std::string> >();
 
         const auto &cfg = mbApp().settings().configs();
@@ -101,13 +101,13 @@ namespace mb {
         logger().info("CORS", fmt::format("Loaded {} allowed origin(s)", origins->size()));
     }
 
-    bool Router::isOriginAllowed(const std::string &origin) const {
+    bool MbRouter::isOriginAllowed(const std::string &origin) const {
         std::shared_lock<std::shared_mutex> lock(m_corsOriginsMutex);
         const auto allowed = m_corsAllowedOrigins;
         return allowed && allowed->contains(origin);
     }
 
-    void Router::applyCorsHeaders(const drogon::HttpRequestPtr &req,
+    void MbRouter::applyCorsHeaders(const drogon::HttpRequestPtr &req,
                                   const drogon::HttpResponsePtr &resp) const {
         const auto &origin = req->getHeader("Origin");
         if (origin.empty() || !isOriginAllowed(origin)) {
@@ -122,7 +122,7 @@ namespace mb {
                        drogon::AdviceCallback &&,
                        drogon::AdviceChainCallback &&
     )>
-    Router::corsPreRoutingAdvice() {
+    MbRouter::corsPreRoutingAdvice() {
         return [this](const drogon::HttpRequestPtr &req,
                       drogon::AdviceCallback &&callback,
                       drogon::AdviceChainCallback &&chainCallback) {
@@ -162,7 +162,7 @@ namespace mb {
 
     std::function<void(const drogon::HttpRequestPtr &,
                        const drogon::HttpResponsePtr &resp)>
-    Router::corsPreSendingAdvice() const {
+    MbRouter::corsPreSendingAdvice() const {
         return [this](const drogon::HttpRequestPtr &req,
                       const drogon::HttpResponsePtr &resp) {
             applyCorsHeaders(req, resp);
@@ -172,7 +172,7 @@ namespace mb {
         };
     }
 
-    drogon::HttpResponsePtr Router::default404Response() {
+    drogon::HttpResponsePtr MbRouter::default404Response() {
         static auto notFoundResp = drogon::HttpResponse::newHttpResponse();
         notFoundResp->setStatusCode(drogon::k404NotFound);
         notFoundResp->setContentTypeString("application/json");
@@ -180,7 +180,7 @@ namespace mb {
         return notFoundResp;
     }
 
-    std::function<void(MbRequest &, MbResponse &)> Router::handleAuthVerify() {
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthVerify() {
         return [](MbRequest &req, const MbResponse &res) {
             try {
                 // Require admin authentication
@@ -217,8 +217,8 @@ namespace mb {
                                  {"error", err_str}
                              });
             } catch (std::exception &e) {
-                req.mbApp().logger().critical("Auth",
-                                              "Auth verification error",
+                req.mbApp().logger().critical("MbAuth",
+                                              "MbAuth verification error",
                                               e.what());
                 // Send verify error
                 res.sendJSON(500, {
@@ -230,7 +230,7 @@ namespace mb {
         };
     }
 
-    std::function<void(MbRequest &, MbResponse &)> Router::handleAuthLogin() {
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthLogin() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
                 const auto &[body, err] = req.bodyAsJson();
@@ -293,7 +293,7 @@ namespace mb {
                                  });
                     auto _body = body;
                     _body.erase("password");
-                    req.mbApp().logger().warn("Auth", "User Not Found",
+                    req.mbApp().logger().warn("MbAuth", "User Not Found",
                                               fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
                     return;
                 }
@@ -307,14 +307,14 @@ namespace mb {
                                  {"data", {{"token", token}, {"user", user}}},
                                  {"error", ""}
                              });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Login Error", fmt::format("Login error: {}", e.what()));
+                req.mbApp().logger().critical("MbAuth", "Login Error", fmt::format("Login error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
@@ -324,7 +324,7 @@ namespace mb {
         };
     }
 
-    std::function<void(MbRequest &, MbResponse &)> Router::handleAdminLogin() {
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAdminLogin() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
                 const auto &[body, err] = req.bodyAsJson();
@@ -377,7 +377,7 @@ namespace mb {
                                  });
                     auto _body = body;
                     _body.erase("password");
-                    req.mbApp().logger().warn("Auth", "Admin User Not Found",
+                    req.mbApp().logger().warn("MbAuth", "Admin User Not Found",
                                               fmt::format("No user found matching given data: \n\t- {}", _body.dump()));
                     return;
                 }
@@ -391,14 +391,14 @@ namespace mb {
                                  {"data", {{"token", token}, {"user", user}}},
                                  {"error", ""}
                              });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Admin Login Error",
+                req.mbApp().logger().critical("MbAuth", "Admin Login Error",
                                               fmt::format("Admin login error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
@@ -409,7 +409,7 @@ namespace mb {
         };
     }
 
-    std::function<void(MbRequest &, MbResponse &)> Router::handleAuthRefresh() const {
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthRefresh() const {
         return [](MbRequest &req, const MbResponse &res) {
             try {
                 auto auth = req.get<json>("auth", json::object());
@@ -453,14 +453,14 @@ namespace mb {
                                  {"data", {{"token", new_token}, {"user", user}}},
                                  {"error", ""}
                              });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Token Refresh Error",
+                req.mbApp().logger().critical("MbAuth", "Token Refresh Error",
                                               fmt::format("Token refresh error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
@@ -471,7 +471,7 @@ namespace mb {
         };
     }
 
-    std::function<void(MbRequest &, MbResponse &)> Router::handleAuthLogout() {
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthLogout() {
         return [](MbRequest &req, const MbResponse &res) {
             try {
                 auto verification = req.get<json>("verification", json::object());
@@ -509,14 +509,14 @@ namespace mb {
                                      {"data", nullptr},
                                      {"error", "Failed to delete session"}
                                  });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Logout Error", fmt::format("Logout error: {}", e.what()));
+                req.mbApp().logger().critical("MbAuth", "Logout Error", fmt::format("Logout error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},
@@ -526,7 +526,7 @@ namespace mb {
         };
     }
 
-    std::function<void(MbRequest &, MbResponse &)> Router::handleSetupAdmin() {
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleSetupAdmin() {
         return [](MbRequest &req, const MbResponse &res) {
             try {
                 auto auth = req.get<json>("auth", json::object());
@@ -535,7 +535,7 @@ namespace mb {
                     res.sendJSON(401, {
                                      {"data", json::object()},
                                      {"status", 401},
-                                     {"error", "Auth required to access this resource!"}
+                                     {"error", "MbAuth required to access this resource!"}
                                  });
                     return;
                 }
@@ -585,7 +585,7 @@ namespace mb {
                     return;
                 }
 
-                if (const auto v_err = Validators::validateRequestBody(admin_entity, body);
+                if (const auto v_err = MbValidators::validateRequestBody(admin_entity, body);
                     v_err.has_value()) {
                     req.mbApp().logger().critical("Request Validation Error",
                                                   fmt::format("Error validating request body\n\t- {}", v_err.value()));
@@ -601,14 +601,14 @@ namespace mb {
                 res.sendJSON(201, admin_user);
 
                 entity.remove(auth["id"].get<std::string>());
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"data", json::object()},
                                  {"error", e.what()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Auth", "Admin Setup Error",
+                req.mbApp().logger().critical("MbAuth", "Admin Setup Error",
                                               fmt::format("Admin setup error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"status", 500},

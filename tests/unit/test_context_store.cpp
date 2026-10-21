@@ -2,8 +2,8 @@
 #include "mantisbase/core/context_store.h"
 #include <string>
 
-TEST(ContextStore, BasicOperations) {
-    mb::ContextStore ctx;
+TEST(MbContextStore, BasicOperations) {
+    mb::MbContextStore ctx;
     
     // Test set and get
     ctx.set<std::string>("key1", "value1");
@@ -23,8 +23,8 @@ TEST(ContextStore, BasicOperations) {
     EXPECT_EQ(*val3.value(), true);
 }
 
-TEST(ContextStore, HasKey) {
-    mb::ContextStore ctx;
+TEST(MbContextStore, HasKey) {
+    mb::MbContextStore ctx;
     
     EXPECT_FALSE(ctx.hasKey("nonexistent"));
     
@@ -33,11 +33,11 @@ TEST(ContextStore, HasKey) {
     EXPECT_FALSE(ctx.hasKey("nonexistent"));
 }
 
-TEST(ContextStore, GetOr) {
-    mb::ContextStore ctx;
+TEST(MbContextStore, GetOr) {
+    mb::MbContextStore ctx;
     
     // Get with default when key doesn't exist
-    auto& val1 = ctx.getOr<std::string>("missing", "default");
+    auto& val1 = ctx.get<std::string>("missing", "default");
     EXPECT_EQ(val1, "default");
     
     // Now the key should exist
@@ -45,26 +45,26 @@ TEST(ContextStore, GetOr) {
     
     // Get existing value
     ctx.set<std::string>("exists", "actual");
-    auto& val2 = ctx.getOr<std::string>("exists", "default");
+    auto& val2 = ctx.get<std::string>("exists", "default");
     EXPECT_EQ(val2, "actual");
 }
 
-TEST(ContextStore, GetOrWithDifferentTypes) {
-    mb::ContextStore ctx;
+TEST(MbContextStore, GetOrWithDifferentTypes) {
+    mb::MbContextStore ctx;
     
-    auto& intVal = ctx.getOr<int>("int_key", 100);
+    auto& intVal = ctx.get<int>("int_key", 100);
     EXPECT_EQ(intVal, 100);
     
-    auto& boolVal = ctx.getOr<bool>("bool_key", false);
+    auto& boolVal = ctx.get<bool>("bool_key", false);
     EXPECT_FALSE(boolVal);
     
     ctx.set<bool>("bool_key", true);
-    auto& boolVal2 = ctx.getOr<bool>("bool_key", false);
+    auto& boolVal2 = ctx.get<bool>("bool_key", false);
     EXPECT_TRUE(boolVal2);
 }
 
-TEST(ContextStore, OverwriteValue) {
-    mb::ContextStore ctx;
+TEST(MbContextStore, OverwriteValue) {
+    mb::MbContextStore ctx;
     
     ctx.set<std::string>("key", "original");
     auto val1 = ctx.get<std::string>("key");
@@ -75,8 +75,8 @@ TEST(ContextStore, OverwriteValue) {
     EXPECT_EQ(*val2.value(), "updated");
 }
 
-TEST(ContextStore, GetNonexistentKey) {
-    mb::ContextStore ctx;
+TEST(MbContextStore, GetNonexistentKey) {
+    mb::MbContextStore ctx;
     
     auto val = ctx.get<std::string>("nonexistent");
     EXPECT_FALSE(val.has_value());

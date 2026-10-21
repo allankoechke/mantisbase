@@ -29,7 +29,7 @@ static Napi::Value JsonToNapi(Napi::Env env, const json& j) {
 }
 
 Napi::Function RequestWrap::GetClass(Napi::Env env) {
-    auto func = DefineClass(env, "MantisRequest", {
+    auto func = DefineClass(env, "MbRequest", {
         InstanceMethod<&RequestWrap::PathParam>("pathParam"),
         InstanceMethod<&RequestWrap::QueryParam>("queryParam"),
         InstanceMethod<&RequestWrap::Header>("header"),
@@ -50,12 +50,12 @@ RequestWrap::RequestWrap(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<RequestWrap>(info) {
 
     if (info.Length() > 0 && info[0].IsExternal()) {
-        m_req = info[0].As<Napi::External<mb::MantisRequest>>().Data();
+        m_req = info[0].As<Napi::External<mb::MbRequest>>().Data();
     }
 }
 
-Napi::Object RequestWrap::NewInstance(Napi::Env env, mb::MantisRequest* req) {
-    return s_constructor.New({Napi::External<mb::MantisRequest>::New(env, req)});
+Napi::Object RequestWrap::NewInstance(Napi::Env env, mb::MbRequest* req) {
+    return s_constructor.New({Napi::External<mb::MbRequest>::New(env, req)});
 }
 
 Napi::Value RequestWrap::PathParam(const Napi::CallbackInfo& info) {

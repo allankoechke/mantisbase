@@ -24,8 +24,8 @@ These options can appear before the subcommand:
 | `--scripts-dir <path>` | `--scriptsDir` | JavaScript extensions directory | `./scripts` | — |
 | `--disable-scripting` | `--no-scripting` | Skip JavaScript VM init and script load at runtime | off | `MB_SCRIPTING_DISABLED=1` |
 | `--dev` | | Enable verbose development logging | off | `MB_LOG_LEVEL` |
-| `--db <type>` | | Database type (`sqlite3`, `postgresql`, `mysql`) | `sqlite3` | `MB_DATABASE_TYPE` |
-| `--db_url <url>` | | Database connection string | *(empty)* | `MB_DATABASE_URL` |
+| `--db <type>` | | MbDatabase type (`sqlite3`, `postgresql`, `mysql`) | `sqlite3` | `MB_DATABASE_TYPE` |
+| `--db_url <url>` | | MbDatabase connection string | *(empty)* | `MB_DATABASE_URL` |
 
 When an environment variable is set, it overrides the matching CLI option. For logging, `MB_LOG_LEVEL` (`trace`, `debug`, `info`, `warn`, `critical`) overrides `--dev`.
 
@@ -43,7 +43,7 @@ mantisbase serve [--host=<host>] [--port=<port>] [--pool-size=<int>] [--skip-adm
 |--------|-------------|---------|
 | `--host` | Bind address | `0.0.0.0` |
 | `--port` | Listen port | `7070` |
-| `--pool-size` | Database connection pool size (`--poolSize`) | `4` (sqlite3), `10` (postgresql) |
+| `--pool-size` | MbDatabase connection pool size (`--poolSize`) | `4` (sqlite3), `10` (postgresql) |
 | `--skip-admin-setup` | Skip first-boot admin browser setup | off |
 
 `MB_SKIP_ADMIN_SETUP=1` also skips admin setup (even without the flag).

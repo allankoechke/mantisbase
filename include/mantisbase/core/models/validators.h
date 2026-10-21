@@ -24,7 +24,7 @@ namespace mb {
      *
      * Each check returns `std::nullopt` on success or an error message string.
      */
-    class MANTISBASE_API Validators {
+    class MANTISBASE_API MbValidators {
     public:
         /** Look up a built-in validator preset definition by key. */
         static std::optional<json> findPreset(const std::string &key);
@@ -62,10 +62,10 @@ namespace mb {
         static std::optional<std::string> validateTableSchema(const json &entity_schema);
 
         /** Validate a create (POST) body against an entity schema. */
-        static std::optional<std::string> validateRequestBody(const Entity &entity, const json &body);
+        static std::optional<std::string> validateRequestBody(const MbEntity &entity, const json &body);
 
         /** Validate a partial update (PATCH) body against an entity schema. */
-        static std::optional<std::string> validateUpdateRequestBody(const Entity &entity, const json &body);
+        static std::optional<std::string> validateUpdateRequestBody(const MbEntity &entity, const json &body);
 
     private:
         static std::unordered_map<std::string, json> presets;

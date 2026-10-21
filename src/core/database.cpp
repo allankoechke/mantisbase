@@ -18,12 +18,12 @@
 #endif
 
 namespace mb {
-    Database::Database(const MantisBase &app) : m_connPool(nullptr), mbApp(app) {
+    MbDatabase::MbDatabase(const MantisBase &app) : m_connPool(nullptr), mbApp(app) {
     }
 
-    Database::~Database() { disconnect(); }
+    MbDatabase::~MbDatabase() { disconnect(); }
 
-    bool Database::connect(const std::string &conn_str) {
+    bool MbDatabase::connect(const std::string &conn_str) {
         // If pool size is invalid, just return
         if (mbApp.poolSize() <= 0)
             throw std::runtime_error("Session pool size must be greater than 0");
@@ -56,13 +56,13 @@ namespace mb {
             auto pool_size = static_cast<size_t>(mbApp.poolSize());
             // Populate the pools with db connections
             for (std::size_t i = 0; i < pool_size; ++i) {
-                mbApp.logger().trace("Database", "Session Creation",
+                mbApp.logger().trace("MbDatabase", "Session Creation",
                                    fmt::format("Creating db session for index `{}/{}`", i, pool_size));
 
                 if (db_type == "sqlite3") {
                     soci::session &sql = m_connPool->at(i);
                     sql.open(soci::sqlite3, m_connStr);
-                    sql.set_logger(new MantisLoggerImpl()); // Set custom query logger
+                    sql.set_logger(new MbLoggerImpl()); // Set custom query logger
 
                     // Log SQL insert values in DevMode only!
                     if (mbApp.isDevMode())
@@ -82,7 +82,7 @@ namespace mb {
 
                     soci::session &sql = m_connPool->at(i);
                     sql.open(soci::postgresql, m_connStr);
-                    sql.set_logger(new MantisLoggerImpl()); // Set custom query logger
+                    sql.set_logger(new MbLoggerImpl()); // Set custom query logger
 
                     // Log SQL insert values in DevMode only!
                     if (mbApp.isDevMode())
@@ -90,36 +90,36 @@ namespace mb {
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
 #else
-                    mbApp.logger().warn("Database", "PostgreSQL Not Implemented",
-                                      "Database Connection for `PostgreSQL` has not been implemented yet!");
+                    mbApp.logger().warn("MbDatabase", "PostgreSQL Not Implemented",
+                                      "MbDatabase Connection for `PostgreSQL` has not been implemented yet!");
                     return false;
 #endif
                 } else if (db_type == "mysql") {
 #if MB_HAS_MYSQL
                     soci::session &sql = m_connPool->at(i);
                     sql.open(soci::mysql, m_connStr);
-                    sql.set_logger(new MantisLoggerImpl());
+                    sql.set_logger(new MbLoggerImpl());
 
                     if (mbApp.isDevMode())
                         sql.set_query_context_logging_mode(soci::log_context::always);
                     else
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
 #else
-                    mbApp.logger().warn("Database", "MySQL Not Available",
+                    mbApp.logger().warn("MbDatabase", "MySQL Not Available",
                                       "MySQL support was not enabled at build time. Rebuild with -DMB_DB_MYSQL=ON");
                     return false;
 #endif
                 } else {
-                    mbApp.logger().warn("Database", "Database Type Not Implemented",
-                                      fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));
+                    mbApp.logger().warn("MbDatabase", "MbDatabase Type Not Implemented",
+                                      fmt::format("MbDatabase Connection to `{}` Not Implemented Yet!", conn_str));
                     return false;
                 }
             }
         } catch (const std::exception &e) {
-            mbApp.logger().critical("Database", "Connection Error", fmt::format("Database Connection error: {}", e.what()));
+            mbApp.logger().critical("MbDatabase", "Connection Error", fmt::format("MbDatabase Connection error: {}", e.what()));
             return false;
         } catch (...) {
-            mbApp.logger().critical("Database", "Connection Error", "Database Connection error: Unknown Error");
+            mbApp.logger().critical("MbDatabase", "Connection Error", "MbDatabase Connection error: Unknown Error");
             return false;
         }
 
@@ -128,9 +128,9 @@ namespace mb {
         return true;
     }
 
-    const std::string & Database::connectionStr() const { return m_connStr; }
+    const std::string & MbDatabase::connectionStr() const { return m_connStr; }
 
-    void Database::disconnect() {
+    void MbDatabase::disconnect() {
         // Make disconnect() safe to call multiple times and handle null/invalid states
         if (!m_connPool) {
             // Already disconnected or never connected, nothing to do
@@ -148,17 +148,17 @@ namespace mb {
             try {
                 if (soci::session &sess = m_connPool->at(i); sess.is_connected()) {
                     sess.close();
-                    mbApp.logger().debug("Database", "Session Shutdown",
+                    mbApp.logger().debug("MbDatabase", "Session Shutdown",
                                        fmt::format("DB Shutdown: Closing soci::session object  {} of {} connections",
                                                    i + 1, pool_size));
                 } else {
-                    mbApp.logger().debug("Database", "Session Shutdown", fmt::format(
+                    mbApp.logger().debug("MbDatabase", "Session Shutdown", fmt::format(
                                            "DB Shutdown: soci::session object at index `{}` of {} connections is not connected.",
                                            i + 1, pool_size));
                 }
             } catch (const soci::soci_error &e) {
-                mbApp.logger().critical("Database", "Disconnection Error",
-                                      fmt::format("Database disconnection soci::error at index `{}`: {}", i, e.what()));
+                mbApp.logger().critical("MbDatabase", "Disconnection Error",
+                                      fmt::format("MbDatabase disconnection soci::error at index `{}`: {}", i, e.what()));
             } catch (...) {
                 // Ignore other errors during session close
             }
@@ -167,16 +167,16 @@ namespace mb {
         // Reset the connection pool
         m_connPool.reset();
 
-        mbApp.logger().debug("Database", "Shutdown Complete", "DB Shutdown: Session disconnection completed.");
+        mbApp.logger().debug("MbDatabase", "Shutdown Complete", "DB Shutdown: Session disconnection completed.");
     }
 
-    bool Database::createSysTables() const {
+    bool MbDatabase::createSysTables() const {
         const auto sql = session();
         soci::transaction tr{*sql};
 
         try {
             // Create admin table, for managing and auth for admin accounts
-            EntitySchema admin_schema{mbApp, "mb_admins", "auth"};
+            MbEntitySchema admin_schema{mbApp, "mb_admins", "auth"};
             admin_schema.removeField("name");
             admin_schema.setSystem(true);
             *sql << admin_schema.toDDL();
@@ -184,23 +184,23 @@ namespace mb {
             // Internal use for service accounts
             // Use `base` type to avoid login via /api/auth/*
             // Used for `id` to track given tokens for single use only
-            EntitySchema service_schema{mbApp, "mb_service_acc", "base"};
+            MbEntitySchema service_schema{mbApp, "mb_service_acc", "base"};
             service_schema.setSystem(true);
             service_schema.setHasApi(false);
             *sql << service_schema.toDDL();
 
             // Create and manage other db tables, keeping track of access rules, schema, etc.!
-            EntitySchema tables_schema{mbApp, "mb_tables", "base"};
+            MbEntitySchema tables_schema{mbApp, "mb_tables", "base"};
             tables_schema.setSystem(true);
-            tables_schema.addField(EntitySchemaField({
+            tables_schema.addField(MbEntitySchemaField({
                 {"name", "schema"}, {"type", "json"}, {"required", true}, {"system", true}
             }));
             *sql << tables_schema.toDDL();
 
             // A Key - Value settings store, where the key is hashed as the table id
-            EntitySchema store_schema{mbApp, "mb_store", "base"};
+            MbEntitySchema store_schema{mbApp, "mb_store", "base"};
             store_schema.setSystem(true);
-            store_schema.addField(EntitySchemaField({
+            store_schema.addField(MbEntitySchemaField({
                 {"name", "value"}, {"type", "json"}, {"required", true}, {"system", true}
             }));
             *sql << store_schema.toDDL();
@@ -242,7 +242,7 @@ namespace mb {
                     "enabled INTEGER NOT NULL DEFAULT 1"
                     ")";
 
-            // Entity-specific OAuth configuration
+            // MbEntity-specific OAuth configuration
             *sql << "CREATE TABLE IF NOT EXISTS mb_entity_oauth_config ("
                     "id TEXT PRIMARY KEY, "
                     "entity_name TEXT NOT NULL, "
@@ -285,13 +285,13 @@ namespace mb {
             return true;
         } catch (std::exception &e) {
             tr.rollback();
-            mbApp.logger().critical("Database", "System Tables Creation Failed",
+            mbApp.logger().critical("MbDatabase", "System Tables Creation Failed",
                                   fmt::format("Create System Tables Failed: {}", e.what()));
             return false;
         }
     }
 
-    void Database::seedOAuthPresets(soci::session &sql) {
+    void MbDatabase::seedOAuthPresets(soci::session &sql) {
         struct Preset {
             std::string name;
             std::string discovery_url;
@@ -336,22 +336,22 @@ namespace mb {
         }
     }
 
-    std::shared_ptr<soci::session> Database::session() const {
+    std::shared_ptr<soci::session> MbDatabase::session() const {
         return std::make_shared<soci::session>(*m_connPool);
     }
 
-    soci::connection_pool &Database::connectionPool() const {
+    soci::connection_pool &MbDatabase::connectionPool() const {
         return *m_connPool;
     }
 
-    bool Database::isConnected() const {
+    bool MbDatabase::isConnected() const {
         if (!m_connPool) return false;
 
         const auto sql = session();
         return sql->is_connected();
     }
 
-    void Database::writeCheckpoint() const {
+    void MbDatabase::writeCheckpoint() const {
         // Make writeCheckpoint() safe to call during shutdown
         if (!m_connPool) {
             // No connection pool, nothing to checkpoint
@@ -367,8 +367,8 @@ namespace mb {
                         *sql << "PRAGMA wal_checkpoint(TRUNCATE)";
                     }
                 } catch (std::exception &e) {
-                    mbApp.logger().critical("Database", "SOCI Connection Error",
-                                          fmt::format("Database Connection SOCI::Error: {}", e.what()));
+                    mbApp.logger().critical("MbDatabase", "SOCI Connection Error",
+                                          fmt::format("MbDatabase Connection SOCI::Error: {}", e.what()));
                 }
             }
         } catch (...) {
@@ -421,12 +421,12 @@ namespace mb {
         }
     }
 
-    duk_ret_t Database::query(duk_context *ctx) const {
+    duk_ret_t MbDatabase::query(duk_context *ctx) const {
         // Get number of arguments
         const int nargs = duk_get_top(ctx);
 
         if (nargs < 1) {
-            mbApp.logger().critical("Database", "Invalid Arguments", "[JS] Expected at least 1 argument (query string)");
+            mbApp.logger().critical("MbDatabase", "Invalid Arguments", "[JS] Expected at least 1 argument (query string)");
             duk_error(ctx, DUK_ERR_TYPE_ERROR, "Expected at least 1 argument (query string)");
             return DUK_RET_TYPE_ERROR;
         }
@@ -440,7 +440,7 @@ namespace mb {
         try {
             for (int i = 1; i < nargs; i++) {
                 if (!duk_is_object(ctx, i)) {
-                    mbApp.logger().critical("Database", "Invalid Arguments", "[JS] Arguments after query must be objects.");
+                    mbApp.logger().critical("MbDatabase", "Invalid Arguments", "[JS] Arguments after query must be objects.");
                     duk_error(ctx, DUK_ERR_TYPE_ERROR, "Arguments after query must be objects");
                     return DUK_RET_TYPE_ERROR;
                 }
@@ -459,56 +459,56 @@ namespace mb {
                     // Parse into nlohmann::json
                     json_obj = nlohmann::json::parse(json_str);
                 } catch (const std::exception &e) {
-                    mbApp.logger().critical("Database", "Parsing Exception", fmt::format("[JS] Parsing exception: {}", e.what()));
+                    mbApp.logger().critical("MbDatabase", "Parsing Exception", fmt::format("[JS] Parsing exception: {}", e.what()));
                 } catch (const char *e) {
-                    mbApp.logger().critical("Database", "Parsing Exception", "[JS] Unknown Parsing exception");
+                    mbApp.logger().critical("MbDatabase", "Parsing Exception", "[JS] Unknown Parsing exception");
                 }
-                mbApp.logger().trace("Database", "Parsing Complete", fmt::format("After Parsing, object? `{}`", json_obj.dump()));
+                mbApp.logger().trace("MbDatabase", "Parsing Complete", fmt::format("After Parsing, object? `{}`", json_obj.dump()));
 
                 for (auto &[key, value]: json_obj.items()) {
                     if (value.is_string()) {
                         auto str_val = value.get<std::string>();
-                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Str Value: `{}` - `{}`", key, str_val));
+                        mbApp.logger().trace("MbDatabase", "Value Binding", fmt::format("[JS] Str Value: `{}` - `{}`", key, str_val));
                         vals.set(key, str_val);
-                        mbApp.logger().trace("Database", "Value Binding", "[JS] After Set Value");
-                        mbApp.logger().trace("Database", "Value Binding",
+                        mbApp.logger().trace("MbDatabase", "Value Binding", "[JS] After Set Value");
+                        mbApp.logger().trace("MbDatabase", "Value Binding",
                                            fmt::format("[JS] After Set Value To: `{}`", vals.get<std::string>(key)));
                     } else if (value.is_number_integer()) {
                         int int_val = value.get<int>();
-                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Int Value: `{}`", int_val));
+                        mbApp.logger().trace("MbDatabase", "Value Binding", fmt::format("[JS] Int Value: `{}`", int_val));
                         vals.set(key, int_val);
                     } else if (value.is_number_float()) {
                         double double_val = value.get<double>();
-                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Double Value: `{}`", double_val));
+                        mbApp.logger().trace("MbDatabase", "Value Binding", fmt::format("[JS] Double Value: `{}`", double_val));
                         vals.set(key, double_val);
                     } else if (value.is_boolean()) {
                         bool bool_val = value.get<bool>();
-                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] Bool Value: `{}`", bool_val));
+                        mbApp.logger().trace("MbDatabase", "Value Binding", fmt::format("[JS] Bool Value: `{}`", bool_val));
                         vals.set(key, bool_val);
                     } else if (value.is_null()) {
                         std::optional<int> val;
-                        mbApp.logger().trace("Database", "Value Binding", "[JS] Null Value: `null`");
+                        mbApp.logger().trace("MbDatabase", "Value Binding", "[JS] Null Value: `null`");
                         vals.set(key, val, soci::i_null);
                     } else if (value.is_object() || value.is_array()) {
-                        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] JSON Value: `{}`", value.dump()));
+                        mbApp.logger().trace("MbDatabase", "Value Binding", fmt::format("[JS] JSON Value: `{}`", value.dump()));
                         vals.set(key, value);
                     } else {
                         auto err = std::format("Could not cast type at {} to DB supported types.", (i - 1));
-                        mbApp.logger().critical("Database", "Value Casting Error", fmt::format("[JS] Casting Value > {}", err));
+                        mbApp.logger().critical("MbDatabase", "Value Casting Error", fmt::format("[JS] Casting Value > {}", err));
                         duk_error(ctx, DUK_ERR_TYPE_ERROR, err.c_str());
                         return DUK_RET_TYPE_ERROR;
                     }
                 }
             }
         } catch (const std::exception &e) {
-            mbApp.logger().critical("Database", "Binding Values Failed",
+            mbApp.logger().critical("MbDatabase", "Binding Values Failed",
                                   fmt::format("[JS] Getting Binding Values Failed: Why? {}", e.what()));
         }
 
         // Get SQL Session
         auto sql = session();
 
-        mbApp.logger().trace("Database", "Value Binding", fmt::format("[JS] soci::value binding? {}", nargs - 1));
+        mbApp.logger().trace("MbDatabase", "Value Binding", fmt::format("[JS] soci::value binding? {}", nargs - 1));
 
         // Execute SQL Statement
         soci::row data_row;
@@ -523,7 +523,7 @@ namespace mb {
             results.push_back(obj);
         }
 
-        mbApp.logger().trace("Database", "Query Results", fmt::format("[JS] Results: {}", results.dump()));
+        mbApp.logger().trace("MbDatabase", "Query Results", fmt::format("[JS] Results: {}", results.dump()));
 
         if (results.empty()) {
             // Return null

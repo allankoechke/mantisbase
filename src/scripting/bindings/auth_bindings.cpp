@@ -8,11 +8,11 @@
 
 namespace mb {
     void registerAuthBindings(duk_context *ctx) {
-        dukglue_register_method(ctx, &Auth::createTokenJson, "createToken");
-        dukglue_register_method(ctx, &Auth::verifyTokenJson, "verifyToken");
-        dukglue_register_method(ctx, &Auth::deleteSession, "deleteSession");
-        dukglue_register_method(ctx, &Auth::refreshSessionJson, "refreshSession");
-        dukglue_register_method(ctx, &Auth::sessionTimeoutSeconds, "sessionTimeoutSeconds");
+        dukglue_register_method(ctx, &MbAuth::createTokenJson, "createToken");
+        dukglue_register_method(ctx, &MbAuth::verifyTokenJson, "verifyToken");
+        dukglue_register_method(ctx, &MbAuth::deleteSession, "deleteSession");
+        dukglue_register_method(ctx, &MbAuth::refreshSessionJson, "refreshSession");
+        dukglue_register_method(ctx, &MbAuth::sessionTimeoutSeconds, "sessionTimeoutSeconds");
     }
 }
 

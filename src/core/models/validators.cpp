@@ -17,7 +17,7 @@
 #include <soci/soci.h>
 
 namespace mb {
-    std::unordered_map<std::string, json> Validators::presets = {
+    std::unordered_map<std::string, json> MbValidators::presets = {
         {
             "email", json{
                 {"regex", R"(^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$)"},
@@ -41,7 +41,7 @@ namespace mb {
         }
     };
 
-    std::optional<json> Validators::findPreset(const std::string &key) {
+    std::optional<json> MbValidators::findPreset(const std::string &key) {
         if (key.empty()) return std::nullopt;
 
         const auto n_key = key.starts_with('@') ? key.substr(1) : key;
@@ -53,27 +53,27 @@ namespace mb {
     }
 
     // TODO check for empty body fields before checking if they satisfy constraints
-    std::optional<std::string> Validators::validatePreset(const std::string &key, const std::string &value) {
+    std::optional<std::string> MbValidators::validatePreset(const std::string &key, const std::string &value) {
         if (key.empty())
-            throw MantisException(500, "Validator key can't be empty!");
+            throw MbException(500, "Validator key can't be empty!");
 
         const auto v = findPreset(key).value_or(json::object());
         if (v.empty())
-            throw MantisException(500, "Validator key is not available!");
+            throw MbException(500, "Validator key is not available!");
 
         // Since we have a regex string, lets validate it and return if it fails ...
         const auto &reg = v["regex"].get<std::string>();
         const auto &err = v["error"].get<std::string>();
 
         if (const std::regex r_pattern(reg); !std::regex_match(value, r_pattern)) {
-            throw MantisException(500, err);
+            throw MbException(500, err);
         }
 
         // If we reach here, then, all was validated correctly!
         return std::nullopt;
     }
 
-    std::optional<std::string> Validators::intPrecisionValueCheck(const json &field, const json &body) {
+    std::optional<std::string> MbValidators::intPrecisionValueCheck(const json &field, const json &body) {
         if (field.at("type").get<std::string>() != "int") {
             return std::nullopt;
         }
@@ -86,7 +86,7 @@ namespace mb {
         return validateIntFieldValue(body.at(field_name), intPrecisionFromField(field));
     }
 
-    std::optional<std::string> Validators::minimumConstraintCheck(const json &field, const json &body) {
+    std::optional<std::string> MbValidators::minimumConstraintCheck(const json &field, const json &body) {
         if (!field["constraints"]["min_value"].is_null()) {
             const auto &min_value = field["constraints"]["min_value"].get<double>();
             const auto &field_name = field["name"].get<std::string>();
@@ -138,7 +138,7 @@ namespace mb {
         return std::nullopt;
     }
 
-    std::optional<std::string> Validators::maximumConstraintCheck(const json &field, const json &body) {
+    std::optional<std::string> MbValidators::maximumConstraintCheck(const json &field, const json &body) {
         if (!field["constraints"]["max_value"].is_null()) {
             const auto max_value = field["constraints"]["max_value"].get<double>();
             const auto &field_name = field["name"].get<std::string>();
@@ -190,7 +190,7 @@ namespace mb {
         return std::nullopt;
     }
 
-    std::optional<std::string> Validators::requiredConstraintCheck(const json &field, const json &body) {
+    std::optional<std::string> MbValidators::requiredConstraintCheck(const json &field, const json &body) {
         try {
             // Get the required flag and the field name
             const auto &required = field.value("required", false);
@@ -209,14 +209,14 @@ namespace mb {
         }
     }
 
-    std::optional<std::string> Validators::validatorConstraintCheck(const json &field, const json &body) {
+    std::optional<std::string> MbValidators::validatorConstraintCheck(const json &field, const json &body) {
         if (field["constraints"]["validator"].is_string()) {
             const auto &pattern = field["constraints"]["validator"].get<std::string>();
             const auto &field_name = field["name"].get<std::string>();
             const auto &field_type = field["type"].get<std::string>();
 
             // Check if we have a regex or typed validator from our store
-            const auto opt = Validators::findPreset(pattern);
+            const auto opt = MbValidators::findPreset(pattern);
             if (opt.has_value() && field_type == "string") {
                 // Since we have a regex string, lets validate it and return if it fails ...
                 const auto &reg = opt.value()["regex"].get<std::string>();
@@ -232,7 +232,7 @@ namespace mb {
         return std::nullopt;
     }
 
-    std::optional<std::string> Validators::foreignKeyConstraintCheck(const MantisBase& app, const json &field, const json &body) {
+    std::optional<std::string> MbValidators::foreignKeyConstraintCheck(const MantisBase& app, const json &field, const json &body) {
         // Check if field has a foreign key constraint
         if (!field.contains("foreign_key") || field["foreign_key"].is_null()) {
             return std::nullopt;
@@ -281,7 +281,7 @@ namespace mb {
         return std::nullopt;
     }
 
-    std::optional<std::string> Validators::viewTypeSQLCheck(const json &body) {
+    std::optional<std::string> MbValidators::viewTypeSQLCheck(const json &body) {
         if (!body.contains("view_query") || body["view_query"].is_null() || trim(body["view_query"].get<std::string>()).
             empty()) {
             return "View tables require a valid SQL View query!";
@@ -316,7 +316,7 @@ namespace mb {
         return std::nullopt;
     }
 
-    std::optional<std::string> Validators::validateTableSchema(const json &entity_schema) {
+    std::optional<std::string> MbValidators::validateTableSchema(const json &entity_schema) {
         if (!entity_schema.contains("name")
             || entity_schema["name"].is_null()
             || trim(entity_schema.value("name", "")).empty()) {
@@ -352,7 +352,7 @@ namespace mb {
                                        field["type"].get<std::string>(), field["name"].get<std::string>());
                 }
 
-                if (!EntitySchemaField::isValidFieldType(trim(field["type"].get<std::string>()))) {
+                if (!MbEntitySchemaField::isValidFieldType(trim(field["type"].get<std::string>()))) {
                     return std::format("Field type `{}` for `{}` is not recognized!",
                                        field["type"].get<std::string>(), field["name"].get<std::string>());
                 }
@@ -361,7 +361,7 @@ namespace mb {
                     if (field.contains("precision") && !field.at("precision").is_null()) {
                         try {
                             (void)intPrecisionFromField(field);
-                        } catch (const MantisException &e) {
+                        } catch (const MbException &e) {
                             return std::format("Field `{}`: {}", field["name"].get<std::string>(), e.what());
                         }
                     }
@@ -376,7 +376,7 @@ namespace mb {
         return std::nullopt;
     }
 
-    std::optional<std::string> Validators::validateRequestBody(const Entity &entity, const json &body) {
+    std::optional<std::string> MbValidators::validateRequestBody(const MbEntity &entity, const json &body) {
         // If the table type is of view type, check that the SQL is passed in ...
         if (entity.type() == "view") {
             if (const auto err = viewTypeSQLCheck(body); err.has_value()) return err;
@@ -413,7 +413,7 @@ namespace mb {
         return std::nullopt;
     }
 
-    std::optional<std::string> Validators::validateUpdateRequestBody(const Entity &entity, const json &body) {
+    std::optional<std::string> MbValidators::validateUpdateRequestBody(const MbEntity &entity, const json &body) {
         // If the table type is of view type, check that the SQL is passed in ...
         if (entity.type() == "view") {
             if (const auto err = viewTypeSQLCheck(body); err.has_value()) return err;

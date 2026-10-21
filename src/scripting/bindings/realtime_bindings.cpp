@@ -9,8 +9,8 @@
 
 namespace mb {
     void registerRealtimeBindings(duk_context *ctx) {
-        dukglue_register_method(ctx, &RealtimeDB::notifyChange, "notifyChange");
-        dukglue_register_method(ctx, &Router::broadcastChangeJson, "broadcastChange");
+        dukglue_register_method(ctx, &MbRealtimeDB::notifyChange, "notifyChange");
+        dukglue_register_method(ctx, &MbRouter::broadcastChangeJson, "broadcastChange");
     }
 }
 

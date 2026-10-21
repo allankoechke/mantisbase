@@ -12,7 +12,7 @@ namespace mb {
 
                 const auto entity_id = trim(req.pathParamValue("id"));
                 if (entity_id.empty())
-                    throw MantisException(400, "Entity `id` is required!");
+                    throw MbException(400, "MbEntity `id` is required!");
 
                 if (const auto record = entity.read(entity_id); record.has_value()) {
                     res.sendJSON(200, {
@@ -27,14 +27,14 @@ namespace mb {
                                      {"status", 404}
                                  });
                 }
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Entity", "Handler Error", fmt::format("Entity handler error: {}", e.what()));
+                req.mbApp().logger().critical("MbEntity", "Handler Error", fmt::format("MbEntity handler error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", "An internal error occurred."},
@@ -88,14 +88,14 @@ namespace mb {
                                  {"error", ""},
                                  {"status", 200}
                              });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Entity", "Handler Error", fmt::format("Entity handler error: {}", e.what()));
+                req.mbApp().logger().critical("MbEntity", "Handler Error", fmt::format("MbEntity handler error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", "An internal error occurred."},
@@ -111,7 +111,7 @@ namespace mb {
 
                 req.parseFormDataToEntity(entity);
 
-                if (const auto &val_err = Validators::validateRequestBody(entity, req.jsonBody());
+                if (const auto &val_err = MbValidators::validateRequestBody(entity, req.jsonBody());
                     val_err.has_value()) {
                     res.sendJSON(400, {
                                      {"data", json::object()},
@@ -133,7 +133,7 @@ namespace mb {
                                  {"error", ""},
                                  {"status", 201}
                              });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 req.undoWrittenFiles(entity_name);
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
@@ -157,11 +157,11 @@ namespace mb {
 
                 const auto entity_id = trim(req.pathParamValue("id"));
                 if (entity_id.empty())
-                    throw MantisException(400, "Entity `id` is required!");
+                    throw MbException(400, "MbEntity `id` is required!");
 
                 req.parseFormDataToEntity(entity);
 
-                if (const auto &val_err = Validators::validateUpdateRequestBody(entity, req.jsonBody());
+                if (const auto &val_err = MbValidators::validateUpdateRequestBody(entity, req.jsonBody());
                     val_err.has_value()) {
                     res.sendJSON(400, {
                                      {"data", json::object()},
@@ -183,7 +183,7 @@ namespace mb {
                                  {"error", ""},
                                  {"status", 200}
                              });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 req.undoWrittenFiles(entity_name);
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
@@ -206,18 +206,18 @@ namespace mb {
 
                 const auto entity_id = trim(req.pathParamValue("id"));
                 if (entity_id.empty())
-                    throw MantisException(400, "Entity `id` is required!");
+                    throw MbException(400, "MbEntity `id` is required!");
 
                 entity.remove(entity_id);
                 res.sendEmpty();
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("Entity", "Handler Error", fmt::format("Entity handler error: {}", e.what()));
+                req.mbApp().logger().critical("MbEntity", "Handler Error", fmt::format("MbEntity handler error: {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
                                  {"error", "An internal error occurred."},

@@ -70,7 +70,7 @@ That's it — you have a full backend with auth, realtime, and file uploads in u
 | Embeddable in C++ | ✅ | ❌ | ❌ | ❌ |
 | Realtime (SSE) | ✅ | ✅ | ✅ | ✅ |
 | Admin dashboard | ✅ | ✅ | ✅ | ✅ |
-| Auth & access rules | ✅ | ✅ | ✅ | ✅ |
+| MbAuth & access rules | ✅ | ✅ | ✅ | ✅ |
 | File uploads | ✅ | ✅ | ✅ | ✅ |
 | Open source | MIT | MIT | Apache 2.0 | ❌ |
 
@@ -79,7 +79,7 @@ That's it — you have a full backend with auth, realtime, and file uploads in u
 ## Features
 
 - **Auto-generated REST APIs** — create a table, get CRUD endpoints instantly → [API Reference](doc/api.md)
-- **Built-in authentication** — JWT-based auth with login, refresh, logout, and token verify → [Auth API](doc/auth.md)
+- **Built-in authentication** — JWT-based auth with login, refresh, logout, and token verify → [MbAuth API](doc/auth.md)
 - **Access control rules** — public, auth, or custom expression-based permissions → [Access Rules](doc/rules.md)
 - **Realtime updates** — SSE streams for live database changes (SQLite & PostgreSQL) → [API Reference](doc/api.md)
 - **Admin dashboard** — web UI for managing schemas, records, users, and files → [Quick Start](doc/QuickStart.md)
@@ -134,7 +134,7 @@ Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Referen
 | [C++ Dev Package](doc/cpp-dev-package.md) | Prebuilt shared library + headers for your own app |
 | [CLI Reference](doc/cmd.md) | Command-line options and flags |
 | [API Reference](doc/api.md) | REST endpoints, schemas, and realtime SSE |
-| [Authentication](doc/auth.md) | Auth endpoints and JWT flow |
+| [Authentication](doc/auth.md) | MbAuth endpoints and JWT flow |
 | [Access Rules](doc/rules.md) | Permission system and expressions |
 | [Docker](doc/docker.md) | Container deployment |
 | [File Handling](doc/files.md) | Upload and serve files |

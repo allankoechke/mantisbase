@@ -4,7 +4,7 @@
 #include "mantisbase/mantisbase.h"
 
 namespace mb {
-    void Router::registerOAuthRoutes() {
+    void MbRouter::registerOAuthRoutes() {
         const MbMiddlewares authEntityMiddleware = {resolveAuthEntity()};
 
         // User-facing OAuth routes

@@ -2,7 +2,7 @@
  * @file crypto_utils.h
  * @brief Cryptographic helpers for OAuth PKCE, API keys, and token encryption.
  *
- * Wraps WolfSSL-backed primitives used by @ref OAuthManager and related auth flows.
+ * Wraps WolfSSL-backed primitives used by @ref MbOAuthMgr and related auth flows.
  */
 
 #ifndef MANTISBASE_CRYPTO_UTILS_H

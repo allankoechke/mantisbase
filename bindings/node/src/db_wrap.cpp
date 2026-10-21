@@ -121,7 +121,7 @@ static json SociRowToJson(const soci::row& row) {
 
 class DbQueryWorker : public Napi::AsyncWorker {
 public:
-    DbQueryWorker(Napi::Env env, mb::Database* db,
+    DbQueryWorker(Napi::Env env, mb::MbDatabase* db,
                   std::string sql, soci::values binds, bool hasBinds,
                   Napi::Promise::Deferred deferred)
         : Napi::AsyncWorker(env)
@@ -166,7 +166,7 @@ public:
     }
 
 private:
-    mb::Database* m_db;
+    mb::MbDatabase* m_db;
     std::string m_sql;
     soci::values m_binds;
     bool m_hasBinds;
@@ -175,7 +175,7 @@ private:
 };
 
 Napi::Function DbWrap::GetClass(Napi::Env env) {
-    auto func = DefineClass(env, "Database", {
+    auto func = DefineClass(env, "MbDatabase", {
         InstanceMethod<&DbWrap::Query>("query"),
         InstanceAccessor<&DbWrap::IsConnected>("connected"),
     });
@@ -190,12 +190,12 @@ DbWrap::DbWrap(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<DbWrap>(info) {
 
     if (info.Length() > 0 && info[0].IsExternal()) {
-        m_db = info[0].As<Napi::External<mb::Database>>().Data();
+        m_db = info[0].As<Napi::External<mb::MbDatabase>>().Data();
     }
 }
 
-Napi::Object DbWrap::NewInstance(Napi::Env env, mb::Database* db) {
-    return s_constructor.New({Napi::External<mb::Database>::New(env, db)});
+Napi::Object DbWrap::NewInstance(Napi::Env env, mb::MbDatabase* db) {
+    return s_constructor.New({Napi::External<mb::MbDatabase>::New(env, db)});
 }
 
 Napi::Value DbWrap::Query(const Napi::CallbackInfo& info) {

@@ -13,10 +13,10 @@
  * @see doc/scripting.md for the full scripting guide.
  */
 
-/** HTTP methods accepted by `Router.addRoute`. */
+/** HTTP methods accepted by `MbRouter.addRoute`. */
 type MbHttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
-/** 3xx status codes accepted by `Router.redirect` / `MbResponse.redirect`. */
+/** 3xx status codes accepted by `MbRouter.redirect` / `MbResponse.redirect`. */
 type MbRedirectStatus = 300 | 301 | 302 | 303 | 304 | 307 | 308;
 
 /** Route handler: receives the request and response objects. */
@@ -135,23 +135,15 @@ interface MbRequest {
     /** `true` when the `Authorization`-style header `key` exists. */
     hasHeader(key: string): boolean;
     /** Header value for `key`, or `def` when missing. */
-    getHeader(key: string, def?: string, index?: number): string;
-    /** Header value for `key` as a uint64, or `def` when missing/unparsable. */
-    getHeaderU64(key: string, def?: number, index?: number): number;
-    /** Number of values for header `key`. */
-    getHeaderCount(key: string): number;
+    getHeader(key: string, def?: string): string;
     /** `true` when query param `key` exists. */
     hasQueryParam(key: string): boolean;
     /** First query param value for `key`. */
     getQueryParam(key: string): string;
-    /** Number of values for query param `key`. */
-    getQueryParamCount(key: string): number;
     /** `true` when route path param `key` exists (e.g. `:id`). */
     hasPathParam(key: string): boolean;
     /** Route path param value for `key`. */
     getPathParam(key: string): string;
-    /** Number of values for path param `key`. */
-    getPathParamCount(key: string): number;
     /** `true` when the request body is `multipart/form-data`. */
     isMultipartFormData(): boolean;
 
@@ -173,11 +165,7 @@ interface MbResponse {
     /** `true` when response header `key` exists. */
     hasHeader(key: string): boolean;
     /** Response header value for `key`, or `def` when missing. */
-    getHeader(key: string, def?: string, index?: number): string;
-    /** Response header value for `key` as a uint64. */
-    getHeaderU64(key: string, def?: number, index?: number): number;
-    /** Number of values for response header `key`. */
-    getHeaderCount(key: string): number;
+    header(key: string, def?: string): string;
     /** Set response header `key` to `value`. */
     setHeader(key: string, value: string): void;
     /**

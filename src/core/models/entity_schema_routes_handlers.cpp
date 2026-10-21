@@ -8,10 +8,10 @@ namespace mb {
             if (schema_id_or_name.starts_with("mbt_"))
                 return schema_id_or_name;
 
-            if (!EntitySchema::isValidEntityName(schema_id_or_name))
-                throw MantisException(400, "Invalid entity name/id");
+            if (!MbEntitySchema::isValidEntityName(schema_id_or_name))
+                throw MbException(400, "Invalid entity name/id");
 
-            return EntitySchema::genEntityId(schema_id_or_name);
+            return MbEntitySchema::genEntityId(schema_id_or_name);
         }
     }
 
@@ -20,17 +20,17 @@ namespace mb {
             try {
                 const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
-                    throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
+                    throw MbException(400, "MbEntitySchema `id` or `name` is required on the route!");
 
                 const auto schema_id = schemaIdFromPathParam(schema_id_or_name);
-                const auto record = EntitySchema::getTable(req.mbApp(), schema_id);
+                const auto record = MbEntitySchema::getTable(req.mbApp(), schema_id);
 
                 res.sendJSON(200, {
                                  {"data", record},
                                  {"error", ""},
                                  {"status", 200}
                              });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -50,13 +50,13 @@ namespace mb {
     MbHandlerFn schemaGetManyHandler() {
         return [](MbRequest &req, MbResponse &res) {
             try {
-                const auto tables = EntitySchema::listTables(req.mbApp());
+                const auto tables = MbEntitySchema::listTables(req.mbApp());
                 res.sendJSON(200, {
                                  {"data", tables},
                                  {"error", ""},
                                  {"status", 200}
                              });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -86,20 +86,20 @@ namespace mb {
                     return;
                 }
 
-                auto eSchema = EntitySchema::fromSchema(req.mbApp(), body);
+                auto eSchema = MbEntitySchema::fromSchema(req.mbApp(), body);
                 auto _ = eSchema.dump();
 
                 if (const auto val_err = eSchema.validate(); val_err.has_value())
-                    throw MantisException(400, val_err.value());
+                    throw MbException(400, val_err.value());
 
-                auto _schema = EntitySchema::createTable(eSchema);
+                auto _schema = MbEntitySchema::createTable(eSchema);
                 res.sendJSON(201, {
                                  {"data", _schema},
                                  {"error", ""},
                                  {"status", 201}
                              });
-            } catch (const MantisException &e) {
-                req.mbApp().logger().critical("EntitySchema", "Schema Creation Error",
+            } catch (const MbException &e) {
+                req.mbApp().logger().critical("MbEntitySchema", "Schema Creation Error",
                                               fmt::format("Error creating entity schema\n\t— {}", e.what()));
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
@@ -107,7 +107,7 @@ namespace mb {
                                  {"status", e.code()}
                              });
             } catch (const std::exception &e) {
-                req.mbApp().logger().critical("EntitySchema", "Schema Creation Error",
+                req.mbApp().logger().critical("MbEntitySchema", "Schema Creation Error",
                                               fmt::format("Error creating entity schema\n\t— {}", e.what()));
                 res.sendJSON(500, {
                                  {"data", json::object()},
@@ -123,7 +123,7 @@ namespace mb {
             try {
                 const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
-                    throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
+                    throw MbException(400, "MbEntitySchema `id` or `name` is required on the route!");
 
                 const auto schema_id = schemaIdFromPathParam(schema_id_or_name);
 
@@ -137,13 +137,13 @@ namespace mb {
                     return;
                 }
 
-                auto _schema = EntitySchema::updateTable(req.mbApp(), schema_id, body);
+                auto _schema = MbEntitySchema::updateTable(req.mbApp(), schema_id, body);
                 res.sendJSON(200, {
                                  {"data", _schema},
                                  {"error", ""},
                                  {"status", 200}
                              });
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"data", json::object()},
                                  {"error", e.what()},
@@ -165,12 +165,12 @@ namespace mb {
             try {
                 const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
-                    throw MantisException(400, "EntitySchema `id` or `name` is required on the route!");
+                    throw MbException(400, "MbEntitySchema `id` or `name` is required on the route!");
 
                 const auto schema_id = schemaIdFromPathParam(schema_id_or_name);
-                EntitySchema::dropTable(req.mbApp(), schema_id);
+                MbEntitySchema::dropTable(req.mbApp(), schema_id);
                 res.sendEmpty();
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 res.sendJSON(e.code(), {
                                  {"status", e.code()},
                                  {"error", e.what()},

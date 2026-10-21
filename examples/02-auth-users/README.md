@@ -1,6 +1,6 @@
-# Auth users
+# MbAuth users
 
-Auth-type entity with registration, login, token refresh, and logout.
+MbAuth-type entity with registration, login, token refresh, and logout.
 
 ## Apply schema
 

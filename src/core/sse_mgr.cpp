@@ -55,14 +55,14 @@ namespace mb {
         }
     } // namespace
 
-    SSEMgr::SSEMgr(const MantisBase &app)
-        : IMantisBase(app),
-          m_wsMgr(std::make_unique<WSMgr>(app)) {
+    MbSSEMgr::MbSSEMgr(const MantisBase &app)
+        : MbAppMixin(app),
+          m_wsMgr(std::make_unique<MbWSMgr>(app)) {
     }
 
-    SSEMgr::~SSEMgr() { stop(); }
+    MbSSEMgr::~MbSSEMgr() { stop(); }
 
-    void SSEMgr::createRoutes() {
+    void MbSSEMgr::createRoutes() {
         auto &router = mbApp().router();
 
         auto sseGetMiddlewares = std::make_shared<std::vector<MbMiddlewareFn>>(
@@ -148,11 +148,11 @@ namespace mb {
                     handleSSESessionUpdate(),
                     {validateSubTopics(true)});
 
-        RealtimeWSController::initPathRouting();
-        drogon::app().registerController(std::make_shared<RealtimeWSController>(mbApp()));
+        MbRealtimeWSController::initPathRouting();
+        drogon::app().registerController(std::make_shared<MbRealtimeWSController>(mbApp()));
     }
 
-    std::string SSEMgr::createSession(const std::set<std::string> &initial_topics,
+    std::string MbSSEMgr::createSession(const std::set<std::string> &initial_topics,
                                       drogon::ResponseStreamPtr stream,
                                       RealtimeAuthSnapshot auth) {
         std::lock_guard lock(m_sessions_mutex);
@@ -163,7 +163,7 @@ namespace mb {
         }
 
         const std::string client_id = generateRealtimeClientId("rt_sse");
-        auto session = std::make_shared<SSESession>(client_id, initial_topics, std::move(stream), std::move(auth));
+        auto session = std::make_shared<MbSSESession>(client_id, initial_topics, std::move(stream), std::move(auth));
         m_sessions[client_id] = session;
 
         logger().info("SSE Manager",
@@ -172,16 +172,16 @@ namespace mb {
         return client_id;
     }
 
-    std::shared_ptr<SSESession> SSEMgr::fetchSession(const std::string &client_id) {
+    std::shared_ptr<MbSSESession> MbSSEMgr::fetchSession(const std::string &client_id) {
         std::lock_guard<std::mutex> lock(m_sessions_mutex);
         if (const auto it = m_sessions.find(client_id); it != m_sessions.end()) {
             return it->second;
         }
 
-        throw MantisException(404, "Session not found!");
+        throw MbException(404, "Session not found!");
     }
 
-    void SSEMgr::removeSession(const std::string &client_id) {
+    void MbSSEMgr::removeSession(const std::string &client_id) {
         std::lock_guard<std::mutex> lock(m_sessions_mutex);
         if (const auto it = m_sessions.find(client_id); it != m_sessions.end()) {
             it->second->close();
@@ -193,14 +193,14 @@ namespace mb {
         }
     }
 
-    void SSEMgr::updateActivity(const std::string &client_id) {
+    void MbSSEMgr::updateActivity(const std::string &client_id) {
         std::lock_guard<std::mutex> lock(m_sessions_mutex);
         if (const auto it = m_sessions.find(client_id); it != m_sessions.end()) {
             it->second->updateActivity();
         }
     }
 
-    std::shared_ptr<SSESession> SSEMgr::getSession(const std::string &client_id) {
+    std::shared_ptr<MbSSESession> MbSSEMgr::getSession(const std::string &client_id) {
         std::lock_guard<std::mutex> lock(m_sessions_mutex);
 
         if (const auto it = m_sessions.find(client_id); it != m_sessions.end()) {
@@ -209,7 +209,7 @@ namespace mb {
         return nullptr;
     }
 
-    void SSEMgr::broadcastChange(const json &change_event) {
+    void MbSSEMgr::broadcastChange(const json &change_event) {
         try {
             {
                 std::lock_guard lock(m_sessions_mutex);
@@ -244,16 +244,16 @@ namespace mb {
         }
     }
 
-    size_t SSEMgr::getSessionCount() {
+    size_t MbSSEMgr::getSessionCount() {
         std::lock_guard lock(m_sessions_mutex);
         return m_sessions.size();
     }
 
-    WSMgr &SSEMgr::wsMgr() const {
+    MbWSMgr &MbSSEMgr::wsMgr() const {
         return *m_wsMgr;
     }
 
-    void SSEMgr::start() {
+    void MbSSEMgr::start() {
         mbApp().rt().runWorker([this](const json &items) {
             for (const auto &data_item : items) broadcastChange(data_item);
         });
@@ -269,7 +269,7 @@ namespace mb {
         });
     }
 
-    void SSEMgr::stop() {
+    void MbSSEMgr::stop() {
         mbApp().rt().stopWorker();
 
         m_running.store(false);
@@ -280,9 +280,9 @@ namespace mb {
         }
     }
 
-    bool SSEMgr::isRunning() const { return m_running.load(); }
+    bool MbSSEMgr::isRunning() const { return m_running.load(); }
 
-    std::function<void(MbRequest &, MbResponse &)> SSEMgr::handleSSESessionUpdate() {
+    std::function<void(MbRequest &, MbResponse &)> MbSSEMgr::handleSSESessionUpdate() {
         return [](MbRequest &req, MbResponse &res) {
             const auto topics = req.get<json>("topics", json::array());
             const auto client_id = req.get<std::string>("client_id", std::string{});
@@ -313,7 +313,7 @@ namespace mb {
             auto session_auth = session->authSnapshot();
             const auto upgrade = tryUpgradeAuth(session_auth, incoming_auth);
 
-            if (upgrade == AuthUpgradeResult::DeniedDowngrade) {
+            if (upgrade == MbAuthUpgradeResult::DeniedDowngrade) {
                 res.sendJSON(403, {
                     {"error", "Cannot downgrade authenticated realtime session to guest"},
                     {"data", json::object()},
@@ -322,7 +322,7 @@ namespace mb {
                 return;
             }
 
-            if (upgrade == AuthUpgradeResult::DeniedSwitch) {
+            if (upgrade == MbAuthUpgradeResult::DeniedSwitch) {
                 res.sendJSON(403, {
                     {"error", "Cannot switch authenticated user on an existing realtime session"},
                     {"data", json::object()},
@@ -331,7 +331,7 @@ namespace mb {
                 return;
             }
 
-            if (upgrade == AuthUpgradeResult::Applied) {
+            if (upgrade == MbAuthUpgradeResult::Applied) {
                 session->setAuthSnapshot(session_auth);
             }
 
@@ -351,7 +351,7 @@ namespace mb {
         };
     }
 
-    std::function<mb::MbHandlerResponse(MbRequest &, MbResponse &)> SSEMgr::validateSubTopics(
+    std::function<mb::MbHandlerResponse(MbRequest &, MbResponse &)> MbSSEMgr::validateSubTopics(
         bool is_updating) {
         return [is_updating](MbRequest &req, const MbResponse &res) {
             try {
@@ -463,7 +463,7 @@ namespace mb {
         };
     }
 
-    void SSEMgr::cleanupIdleSessions() {
+    void MbSSEMgr::cleanupIdleSessions() {
         const auto now = std::chrono::steady_clock::now();
         std::vector<std::string> stale_sessions;
 

@@ -5,7 +5,7 @@
 #include "../../include/mantisbase/utils/uuidv7.h"
 #include "../../include/mantisbase/utils/utils.h"
 
-mb::SSESession::SSESession(
+mb::MbSSESession::MbSSESession(
     std::string client_id,
     const std::set<std::string> &topics,
     drogon::ResponseStreamPtr stream,
@@ -19,7 +19,7 @@ mb::SSESession::SSESession(
       m_auth(std::move(auth)) {
 }
 
-bool mb::SSESession::sendEvent(const std::string &eventType, const json &data) {
+bool mb::MbSSESession::sendEvent(const std::string &eventType, const json &data) {
     if (!m_isActive || !m_stream)
         return false;
 
@@ -36,7 +36,7 @@ bool mb::SSESession::sendEvent(const std::string &eventType, const json &data) {
     return true;
 }
 
-bool mb::SSESession::isInterestedIn(const json &change_event) const {
+bool mb::MbSSESession::isInterestedIn(const json &change_event) const {
     const std::string event_table = change_event["entity"].get<std::string>();
     const std::string event_row_id = change_event["row_id"].get<std::string>();
 
@@ -54,7 +54,7 @@ bool mb::SSESession::isInterestedIn(const json &change_event) const {
     return false;
 }
 
-mb::json mb::SSESession::formatEvent(const json &change_event) const {
+mb::json mb::MbSSESession::formatEvent(const json &change_event) const {
     auto table = change_event["entity"].get<std::string>();
     auto row_id = change_event["row_id"].get<std::string>();
     auto operation = change_event["type"].get<std::string>();
@@ -85,20 +85,20 @@ mb::json mb::SSESession::formatEvent(const json &change_event) const {
     };
 }
 
-void mb::SSESession::updateActivity() {
+void mb::MbSSESession::updateActivity() {
     m_lastActivity = std::chrono::steady_clock::now();
 }
 
-void mb::SSESession::updateTopics(const std::set<std::string> &topics) {
+void mb::MbSSESession::updateTopics(const std::set<std::string> &topics) {
     std::lock_guard<std::mutex> lock(m_topicsMutex);
     m_topics = topics;
 }
 
-std::chrono::steady_clock::time_point mb::SSESession::getLastActivity() const { return m_lastActivity; }
+std::chrono::steady_clock::time_point mb::MbSSESession::getLastActivity() const { return m_lastActivity; }
 
-std::chrono::steady_clock::time_point mb::SSESession::getConnectedAt() const { return m_connectedAt; }
+std::chrono::steady_clock::time_point mb::MbSSESession::getConnectedAt() const { return m_connectedAt; }
 
-void mb::SSESession::close() {
+void mb::MbSSESession::close() {
     m_isActive = false;
     if (m_stream) {
         m_stream->close();
@@ -106,25 +106,25 @@ void mb::SSESession::close() {
     }
 }
 
-bool mb::SSESession::isActive() const { return m_isActive; }
+bool mb::MbSSESession::isActive() const { return m_isActive; }
 
-const std::string &mb::SSESession::getClientID() const { return m_clientID; }
+const std::string &mb::MbSSESession::getClientID() const { return m_clientID; }
 
-std::set<std::string> mb::SSESession::getTopics() const {
+std::set<std::string> mb::MbSSESession::getTopics() const {
     std::lock_guard<std::mutex> lock(m_topicsMutex);
     return m_topics;
 }
 
-void mb::SSESession::setTopics(const std::set<std::string> &topics) {
+void mb::MbSSESession::setTopics(const std::set<std::string> &topics) {
     std::lock_guard<std::mutex> lock(m_topicsMutex);
     m_topics = topics;
     updateActivity();
 }
 
-mb::RealtimeAuthSnapshot &mb::SSESession::authSnapshot() { return m_auth; }
+mb::RealtimeAuthSnapshot &mb::MbSSESession::authSnapshot() { return m_auth; }
 
-const mb::RealtimeAuthSnapshot &mb::SSESession::authSnapshot() const { return m_auth; }
+const mb::RealtimeAuthSnapshot &mb::MbSSESession::authSnapshot() const { return m_auth; }
 
-void mb::SSESession::setAuthSnapshot(mb::RealtimeAuthSnapshot auth) {
+void mb::MbSSESession::setAuthSnapshot(mb::RealtimeAuthSnapshot auth) {
     m_auth = std::move(auth);
 }

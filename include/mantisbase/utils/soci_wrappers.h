@@ -87,7 +87,7 @@ namespace mb {
     }
 
     /** Resolve int precision for a column by matching field name in schema metadata. */
-    MANTISBASE_API inline IntPrecision getColumnIntPrecision(const std::string &column_name, const std::vector<json> &fields) {
+    MANTISBASE_API inline MbIntPrecision getColumnIntPrecision(const std::string &column_name, const std::vector<json> &fields) {
         for (const auto &field: fields) {
             if (field.value("name", "") == column_name) {
                 return intPrecisionFromField(field);
@@ -126,7 +126,7 @@ namespace mb {
             const auto colType = getColumnType(colName, entity_fields);
 
             // Check column type is valid type
-            if (colType.empty() || !EntitySchemaField::isValidFieldType(colType)) // Or not in expected types
+            if (colType.empty() || !MbEntitySchemaField::isValidFieldType(colType)) // Or not in expected types
             {
                 // Throw an error for unknown types
                 throw std::runtime_error(std::format("Unknown column type `{}` for column `{}`", colType, colName));

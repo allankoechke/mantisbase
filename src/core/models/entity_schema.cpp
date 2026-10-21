@@ -6,25 +6,25 @@
 #include <utility>
 
 namespace mb {
-    EntitySchema::EntitySchema(const MantisBase &app) : IMantisBase(app) {}
+    MbEntitySchema::MbEntitySchema(const MantisBase &app) : MbAppMixin(app) {}
 
-    EntitySchema::EntitySchema(const MantisBase &app, const std::string &entity_name, const std::string &entity_type)
-        : IMantisBase(app) {
+    MbEntitySchema::MbEntitySchema(const MantisBase &app, const std::string &entity_name, const std::string &entity_type)
+        : MbAppMixin(app) {
         // Ensure name is valid
-        if (!EntitySchema::isValidEntityName(entity_name)) {
-            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", entity_name);
+        if (!MbEntitySchema::isValidEntityName(entity_name)) {
+            throw MbException(400, "Invalid entity name, expected alphanumeric + _ only!", entity_name);
         }
 
-        if (!EntitySchema::isValidEntityType(entity_type)) {
-            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", entity_type);
+        if (!MbEntitySchema::isValidEntityType(entity_type)) {
+            throw MbException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", entity_type);
         }
 
         setName(entity_name).setType(entity_type);
     }
 
-    EntitySchema::EntitySchema(const EntitySchema &other) = default;
+    MbEntitySchema::MbEntitySchema(const MbEntitySchema &other) = default;
 
-    EntitySchema &EntitySchema::operator=(const EntitySchema &other) {
+    MbEntitySchema &MbEntitySchema::operator=(const MbEntitySchema &other) {
         if (this != &other) {
             m_name = other.m_name;
             m_type = other.m_type;
@@ -42,7 +42,7 @@ namespace mb {
         return *this;
     }
 
-    EntitySchema &EntitySchema::operator=(EntitySchema &&other) noexcept {
+    MbEntitySchema &MbEntitySchema::operator=(MbEntitySchema &&other) noexcept {
         if (this != &other) {
             m_name = std::move(other.m_name);
             m_type = std::move(other.m_type);
@@ -60,34 +60,34 @@ namespace mb {
         return *this;
     }
 
-    EntitySchema::~EntitySchema() = default;
+    MbEntitySchema::~MbEntitySchema() = default;
 
-    bool EntitySchema::operator==(const EntitySchema &other) const {
+    bool MbEntitySchema::operator==(const MbEntitySchema &other) const {
         return toJSON() == other.toJSON();
     }
 
-    EntitySchema EntitySchema::fromSchema(const MantisBase &app, const json &entity_schema) {
+    MbEntitySchema MbEntitySchema::fromSchema(const MantisBase &app, const json &entity_schema) {
 
-        EntitySchema eSchema(app);
+        MbEntitySchema eSchema(app);
 
-        app.logger().trace("EntitySchema", "Schema Creation", fmt::format("Creating Entity Schema from JSON"), entity_schema);
+        app.logger().trace("MbEntitySchema", "Schema Creation", fmt::format("Creating MbEntity Schema from JSON"), entity_schema);
 
         if (!entity_schema.contains("name") || !entity_schema["name"].is_string() || entity_schema["name"].empty())
-            throw MantisException(400, "Missing required entity `name` in schema!", entity_schema.dump());
+            throw MbException(400, "Missing required entity `name` in schema!", entity_schema.dump());
 
         if (!entity_schema.contains("type") || !entity_schema["type"].is_string() || entity_schema["type"].empty())
-            throw MantisException(400, "Missing required entity `type` in schema!", entity_schema.dump());
+            throw MbException(400, "Missing required entity `type` in schema!", entity_schema.dump());
 
         const auto _name = entity_schema.at("name").get<std::string>();
         const auto _type = entity_schema.at("type").get<std::string>();
 
         // Ensure name is valid
-        if (!EntitySchema::isValidEntityName(_name)) {
-            throw MantisException(400, "Invalid entity name, expected alphanumeric + _ only!", _name);
+        if (!MbEntitySchema::isValidEntityName(_name)) {
+            throw MbException(400, "Invalid entity name, expected alphanumeric + _ only!", _name);
         }
 
-        if (!EntitySchema::isValidEntityType(_type)) {
-            throw MantisException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", _type);
+        if (!MbEntitySchema::isValidEntityType(_type)) {
+            throw MbException(400, "Invalid entity type, expected `base`, `auth` or `view` only!", _type);
         }
 
         eSchema.setName(_name);
@@ -103,19 +103,19 @@ namespace mb {
             auto rules = entity_schema["rules"];
 
             if (rules.contains("list"))
-                eSchema.setListRule(AccessRule::fromJSON(rules["list"]));
+                eSchema.setListRule(MbAccessRule::fromJSON(rules["list"]));
 
             if (rules.contains("get"))
-                eSchema.setGetRule(AccessRule::fromJSON(rules["get"]));
+                eSchema.setGetRule(MbAccessRule::fromJSON(rules["get"]));
 
             if (rules.contains("add"))
-                eSchema.setAddRule(AccessRule::fromJSON(rules["add"]));
+                eSchema.setAddRule(MbAccessRule::fromJSON(rules["add"]));
 
             if (rules.contains("update"))
-                eSchema.setUpdateRule(AccessRule::fromJSON(rules["update"]));
+                eSchema.setUpdateRule(MbAccessRule::fromJSON(rules["update"]));
 
             if (rules.contains("delete"))
-                eSchema.setDeleteRule(AccessRule::fromJSON(rules["delete"]));
+                eSchema.setDeleteRule(MbAccessRule::fromJSON(rules["delete"]));
         }
 
         // 'auth' and 'base' types have 'fields' key ...
@@ -127,7 +127,7 @@ namespace mb {
                 auto field_name = field["name"].get<std::string>();
                 if (!eSchema.hasField(field_name)) {
                     // logEntry::trace("Adding entity field: {}", field.dump());
-                    eSchema.addField(EntitySchemaField(field));
+                    eSchema.addField(MbEntitySchemaField(field));
                 } else {
                     eSchema.field(field_name).updateWith(field);
                 }
@@ -149,8 +149,8 @@ namespace mb {
         return eSchema;
     }
 
-    EntitySchema EntitySchema::fromEntity(const MantisBase &app, const Entity &entity) {
-        EntitySchema eSchema(app);
+    MbEntitySchema MbEntitySchema::fromEntity(const MantisBase &app, const MbEntity &entity) {
+        MbEntitySchema eSchema(app);
 
         // Default schema fields
         eSchema.setName(entity.name());
@@ -172,7 +172,7 @@ namespace mb {
         if (entity.type() != "view") {
             eSchema.fields().reserve(entity.fields().size());
             for (const auto &field: entity.fields()) {
-                eSchema.addField(EntitySchemaField(field));
+                eSchema.addField(MbEntitySchemaField(field));
             }
         }
 
@@ -196,29 +196,29 @@ namespace mb {
         return eSchema;
     }
 
-    Entity EntitySchema::toEntity() const {
-        return Entity{mbApp(), toJSON()};
+    MbEntity MbEntitySchema::toEntity() const {
+        return MbEntity{mbApp(), toJSON()};
     }
 
-    std::string EntitySchema::id() const {
-        if (m_name.empty()) throw MantisException(400, "Expected table name is empty!");
-        return EntitySchema::genEntityId(m_name);
+    std::string MbEntitySchema::id() const {
+        if (m_name.empty()) throw MbException(400, "Expected table name is empty!");
+        return MbEntitySchema::genEntityId(m_name);
     }
 
-    EntitySchemaField &EntitySchema::field(const std::string &field_name) {
-        if (field_name.empty()) throw MantisException(500, "Empty field name provided.");
+    MbEntitySchemaField &MbEntitySchema::field(const std::string &field_name) {
+        if (field_name.empty()) throw MbException(500, "Empty field name provided.");
 
         const auto it = std::ranges::find_if(m_fields, [field_name](const auto &field) {
             return field_name == field.name();
         });
 
         if (it == m_fields.end())
-            throw MantisException(404, "Field not found for name `" + field_name + "`");
+            throw MbException(404, "Field not found for name `" + field_name + "`");
 
         return *it;
     }
 
-    EntitySchemaField &EntitySchema::fieldById(const std::string &field_id) {
+    MbEntitySchemaField &MbEntitySchema::fieldById(const std::string &field_id) {
         if (field_id.empty()) throw std::invalid_argument("Empty field id.");
 
         const auto it = std::ranges::find_if(m_fields, [field_id](const auto &field) {
@@ -231,7 +231,7 @@ namespace mb {
         return *it;
     }
 
-    std::string EntitySchema::viewQuery() const {
+    std::string MbEntitySchema::viewQuery() const {
         return m_viewSqlQuery;
     }
 
@@ -262,28 +262,28 @@ namespace mb {
         return true;
     }
 
-    EntitySchema &EntitySchema::setViewQuery(const std::string &viewQuery) {
+    MbEntitySchema &MbEntitySchema::setViewQuery(const std::string &viewQuery) {
         if (viewQuery.empty()) throw std::invalid_argument("Empty view query statement.");
         if (!isValidViewQuery(viewQuery))
-            throw MantisException(400, "Invalid view query: must be a SELECT statement with no DDL/DML keywords or semicolons.");
+            throw MbException(400, "Invalid view query: must be a SELECT statement with no DDL/DML keywords or semicolons.");
         m_viewSqlQuery = viewQuery;
         return *this;
     }
 
-    const std::vector<IndexDefinition> &EntitySchema::indexes() const {
+    const std::vector<IndexDefinition> &MbEntitySchema::indexes() const {
         return m_indexes;
     }
 
-    EntitySchema &EntitySchema::addIndex(const IndexDefinition &index) {
+    MbEntitySchema &MbEntitySchema::addIndex(const IndexDefinition &index) {
         if (index.name.empty())
-            throw MantisException(400, "Index name is required.");
+            throw MbException(400, "Index name is required.");
         if (index.columns.empty())
-            throw MantisException(400, "Index must have at least one column.");
+            throw MbException(400, "Index must have at least one column.");
         m_indexes.push_back(index);
         return *this;
     }
 
-    bool EntitySchema::removeIndex(const std::string &index_name) {
+    bool MbEntitySchema::removeIndex(const std::string &index_name) {
         auto it = std::ranges::find_if(m_indexes, [&](const IndexDefinition &idx) {
             return idx.name == index_name;
         });
@@ -292,12 +292,12 @@ namespace mb {
         return true;
     }
 
-    void EntitySchema::updateWith(const nlohmann::json &new_data) {
+    void MbEntitySchema::updateWith(const nlohmann::json &new_data) {
         if (new_data.empty()) return;
 
         if (new_data.contains("name")) {
             if (!new_data["name"].is_string() || new_data["name"].empty()) {
-                throw MantisException(400, "Expected name to be a valid string.");
+                throw MbException(400, "Expected name to be a valid string.");
             }
 
             setName(new_data["name"].get<std::string>());
@@ -305,7 +305,7 @@ namespace mb {
 
         if (new_data.contains("type")) {
             if (!new_data["type"].is_string() || new_data["type"].empty()) {
-                throw MantisException(400, "Expected `type` to be a valid string.");
+                throw MbException(400, "Expected `type` to be a valid string.");
             }
 
             setType(new_data["type"].get<std::string>());
@@ -313,7 +313,7 @@ namespace mb {
 
         if (new_data.contains("system")) {
             if (!new_data["system"].is_boolean()) {
-                throw MantisException(400, "Expected `system` to be a bool.");
+                throw MbException(400, "Expected `system` to be a bool.");
             }
 
             setSystem(new_data.at("system").get<bool>());
@@ -321,7 +321,7 @@ namespace mb {
 
         if (new_data.contains("has_api")) {
             if (!new_data["has_api"].is_boolean()) {
-                throw MantisException(400, "Expected `has_api` to be a bool.");
+                throw MbException(400, "Expected `has_api` to be a bool.");
             }
 
             setHasApi(new_data.at("has_api").get<bool>());
@@ -331,20 +331,20 @@ namespace mb {
             auto rules = new_data["rules"];
 
             if (rules.contains("list")) {
-                setListRule(AccessRule::fromJSON(rules["list"]));
+                setListRule(MbAccessRule::fromJSON(rules["list"]));
             }
 
             if (rules.contains("get"))
-                setGetRule(AccessRule::fromJSON(rules["get"]));
+                setGetRule(MbAccessRule::fromJSON(rules["get"]));
 
             if (rules.contains("add"))
-                setAddRule(AccessRule::fromJSON(rules["add"]));
+                setAddRule(MbAccessRule::fromJSON(rules["add"]));
 
             if (rules.contains("update"))
-                setUpdateRule(AccessRule::fromJSON(rules["update"]));
+                setUpdateRule(MbAccessRule::fromJSON(rules["update"]));
 
             if (rules.contains("delete"))
-                setDeleteRule(AccessRule::fromJSON(rules["delete"]));
+                setDeleteRule(MbAccessRule::fromJSON(rules["delete"]));
         }
 
         // 'auth' and 'base' types have 'fields' key ...
@@ -359,7 +359,7 @@ namespace mb {
                                     : "";
 
                 if (name.empty() && id.empty())
-                    throw MantisException(
+                    throw MbException(
                         400, "At least field `id` or `name` should be provided for each field entry.");
 
                 if (!id.empty() && hasFieldById(id)) {
@@ -374,14 +374,14 @@ namespace mb {
                             continue;
                         }
 
-                        throw MantisException(
+                        throw MbException(
                             400, "Field `op` expected `remove` or `delete` value but found `" + op + "`");
                     }
 
                     f.updateWith(field);
                 } else if (!name.empty() && hasField(name)) {
                     // try updating via name
-                    auto &f = EntitySchema::field(name);
+                    auto &f = MbEntitySchema::field(name);
 
                     // Check if op is set to delete/remove
                     if (field.contains("op") && field["op"].is_string() && !field["op"].empty()) {
@@ -414,16 +414,16 @@ namespace mb {
         }
     }
 
-    std::string EntitySchema::name() const { return m_name; }
+    std::string MbEntitySchema::name() const { return m_name; }
 
-    EntitySchema &EntitySchema::setName(const std::string &name) {
+    MbEntitySchema &MbEntitySchema::setName(const std::string &name) {
         m_name = name;
         return *this;
     }
 
-    std::string EntitySchema::type() const { return m_type; }
+    std::string MbEntitySchema::type() const { return m_type; }
 
-    EntitySchema &EntitySchema::setType(const std::string &type) {
+    MbEntitySchema &MbEntitySchema::setType(const std::string &type) {
         if (!(type == "base" || type == "auth" || type == "view"))
             throw std::invalid_argument("Type should either be `base`, `auth` or `view` only.");
 
@@ -442,60 +442,60 @@ namespace mb {
         return *this;
     }
 
-    bool EntitySchema::hasApi() const { return m_hasApi; }
+    bool MbEntitySchema::hasApi() const { return m_hasApi; }
 
-    EntitySchema &EntitySchema::setHasApi(const bool &hasApi) {
+    MbEntitySchema &MbEntitySchema::setHasApi(const bool &hasApi) {
         m_hasApi = hasApi;
         return *this;
     }
 
-    bool EntitySchema::isSystem() const { return m_isSystem; }
+    bool MbEntitySchema::isSystem() const { return m_isSystem; }
 
-    EntitySchema &EntitySchema::setSystem(const bool &isSystem) {
+    MbEntitySchema &MbEntitySchema::setSystem(const bool &isSystem) {
         m_isSystem = isSystem;
         return *this;
     }
 
-    AccessRule EntitySchema::listRule() const { return m_listRule; }
+    MbAccessRule MbEntitySchema::listRule() const { return m_listRule; }
 
-    EntitySchema &EntitySchema::setListRule(const AccessRule &listRule) {
+    MbEntitySchema &MbEntitySchema::setListRule(const MbAccessRule &listRule) {
         m_listRule = listRule;
         return *this;
     }
 
-    AccessRule EntitySchema::getRule() const { return m_getRule; }
+    MbAccessRule MbEntitySchema::getRule() const { return m_getRule; }
 
-    EntitySchema &EntitySchema::setGetRule(const AccessRule &getRule) {
+    MbEntitySchema &MbEntitySchema::setGetRule(const MbAccessRule &getRule) {
         m_getRule = getRule;
         return *this;
     }
 
-    AccessRule EntitySchema::addRule() const { return m_addRule; }
+    MbAccessRule MbEntitySchema::addRule() const { return m_addRule; }
 
-    EntitySchema &EntitySchema::setAddRule(const AccessRule &addRule) {
+    MbEntitySchema &MbEntitySchema::setAddRule(const MbAccessRule &addRule) {
         m_addRule = addRule;
         return *this;
     }
 
-    AccessRule EntitySchema::updateRule() const { return m_updateRule; }
+    MbAccessRule MbEntitySchema::updateRule() const { return m_updateRule; }
 
-    EntitySchema &EntitySchema::setUpdateRule(const AccessRule &updateRule) {
+    MbEntitySchema &MbEntitySchema::setUpdateRule(const MbAccessRule &updateRule) {
         m_updateRule = updateRule;
         return *this;
     }
 
-    AccessRule EntitySchema::deleteRule() const { return m_deleteRule; }
+    MbAccessRule MbEntitySchema::deleteRule() const { return m_deleteRule; }
 
-    EntitySchema &EntitySchema::setDeleteRule(const AccessRule &deleteRule) {
+    MbEntitySchema &MbEntitySchema::setDeleteRule(const MbAccessRule &deleteRule) {
         m_deleteRule = deleteRule;
         return *this;
     }
 
-    std::vector<EntitySchemaField> EntitySchema::fields() const { return m_fields; }
+    std::vector<MbEntitySchemaField> MbEntitySchema::fields() const { return m_fields; }
 
-    EntitySchema &EntitySchema::addField(const EntitySchemaField &field) {
+    MbEntitySchema &MbEntitySchema::addField(const MbEntitySchemaField &field) {
         if (const auto err = field.validate(); err.has_value()) {
-            throw MantisException(400, std::format("Field validation failed for entity schema with message: {}",
+            throw MbException(400, std::format("Field validation failed for entity schema with message: {}",
                                                    err.value()));
         }
 
@@ -503,19 +503,19 @@ namespace mb {
         return *this;
     }
 
-    bool EntitySchema::removeField(const std::string &field_name) {
+    bool MbEntitySchema::removeField(const std::string &field_name) {
         // If the field does not exist yet, return false
         if (!hasField(field_name)) return false;
 
         std::erase_if(
             m_fields,
-            [&](const EntitySchemaField &field) { return field.name() == field_name; }
+            [&](const MbEntitySchemaField &field) { return field.name() == field_name; }
         );
 
         return true;
     }
 
-    nlohmann::json EntitySchema::toJSON() const {
+    nlohmann::json MbEntitySchema::toJSON() const {
         json j;
         j["id"] = id();
         j["name"] = m_name;
@@ -550,7 +550,7 @@ namespace mb {
         return j;
     }
 
-    std::string EntitySchema::toDDL() const {
+    std::string MbEntitySchema::toDDL() const {
         const auto sql = mbApp().db().session();
         const auto db_type = sql->get_backend()->get_backend_name();
 
@@ -609,7 +609,7 @@ namespace mb {
         return ddl.str();
     }
 
-    std::vector<std::string> EntitySchema::indexDDL() const {
+    std::vector<std::string> MbEntitySchema::indexDDL() const {
         std::vector<std::string> stmts;
         for (const auto &idx : m_indexes) {
             std::ostringstream ddl;
@@ -626,24 +626,24 @@ namespace mb {
         return stmts;
     }
 
-    bool EntitySchema::hasField(const std::string &field_name) const {
+    bool MbEntitySchema::hasField(const std::string &field_name) const {
         if (m_type == "view") return false;
 
-        return std::ranges::find_if(m_fields, [field_name](const EntitySchemaField &field) {
+        return std::ranges::find_if(m_fields, [field_name](const MbEntitySchemaField &field) {
             return field.name() == field_name;
         }) != m_fields.end();
     }
 
-    bool EntitySchema::hasFieldById(const std::string &field_id) const {
+    bool MbEntitySchema::hasFieldById(const std::string &field_id) const {
         if (field_id.empty()) return false;
         if (m_type == "view") return false;
 
-        return std::ranges::find_if(m_fields, [field_id](const EntitySchemaField &field) {
+        return std::ranges::find_if(m_fields, [field_id](const MbEntitySchemaField &field) {
             return field.id() == field_id;
         }) != m_fields.end();
     }
 
-    std::string EntitySchema::toDefaultSqlValue(const std::string &type, const nlohmann::json &v) {
+    std::string MbEntitySchema::toDefaultSqlValue(const std::string &type, const nlohmann::json &v) {
         if (type.empty())
             throw std::invalid_argument("Required field type can't be empty!");
 
@@ -707,7 +707,7 @@ namespace mb {
         throw std::runtime_error("Unsupported field type `" + type + "`");
     }
 
-    std::string EntitySchema::dump() const {
+    std::string MbEntitySchema::dump() const {
         auto str = std::format(
             "\n\tid: {}\n\tName: {}\n\tType: {}\n\tIs System? {}\n\tHas API? {}\n\tRules:\n\t\t- list: {}\n\t\t- get: {}\n\t\t- add: {}\n\t\t- update: {}\n\t\t- delete: {}",
             id(),
@@ -741,13 +741,13 @@ namespace mb {
         return str;
     }
 
-    std::string EntitySchema::genEntityId(const std::string &entity_name) {
+    std::string MbEntitySchema::genEntityId(const std::string &entity_name) {
         return "mbt_" + std::to_string(std::hash<std::string>{}(entity_name));
     }
 
-    std::optional<std::string> EntitySchema::validate(const EntitySchema &table_schema) {
+    std::optional<std::string> MbEntitySchema::validate(const MbEntitySchema &table_schema) {
         if (table_schema.name().empty())
-            return "Entity schema name is empty!";
+            return "MbEntity schema name is empty!";
 
         if (!(table_schema.type() == "base" || table_schema.type() == "view" || table_schema.type() == "auth")) {
             return "Expected entity type to be either `base`, `auth` or `view`!";
@@ -755,7 +755,7 @@ namespace mb {
 
         if (table_schema.type() == "view") {
             if (trim(table_schema.viewQuery()).empty())
-                return "Entity schema view query is empty!";
+                return "MbEntity schema view query is empty!";
             // TODO check if query is a valid SQL view query
         } else {
             // First validate each field
@@ -773,12 +773,12 @@ namespace mb {
                     if (tableExists(table_schema.mbApp(), refEntity)) {
                         // Check if referenced field exists in the referenced entity
                         try {
-                            const auto refEntityData = getTable(table_schema.mbApp(), EntitySchema::genEntityId(refEntity));
+                            const auto refEntityData = getTable(table_schema.mbApp(), MbEntitySchema::genEntityId(refEntity));
                             if (!refEntityData.contains("schema")) {
                                 return "Invalid schema data for referenced entity: `" + refEntity + "`";
                             }
 
-                            EntitySchema refEntitySchema = EntitySchema::fromSchema(table_schema.mbApp(), refEntityData["schema"]);
+                            MbEntitySchema refEntitySchema = MbEntitySchema::fromSchema(table_schema.mbApp(), refEntityData["schema"]);
 
                             if (!refEntitySchema.hasField(refField)) {
                                 return "Foreign key references non-existent field `" + refField +
@@ -794,21 +794,21 @@ namespace mb {
                                 !(field.type() == "string" && refFieldSchema.type() == "string")) {
                                 // Allow string types to reference string types, but warn about type mismatches
                                 // The database will enforce this more strictly
-                                table_schema.logger().warn("EntitySchema", "Foreign Key Type Mismatch", fmt::format(
+                                table_schema.logger().warn("MbEntitySchema", "Foreign Key Type Mismatch", fmt::format(
                                                                 "Foreign key field `{}` type `{}` may not match referenced field `{}` type `{}` in entity `{}`",
                                                                 field.name(), field.type(), refField,
                                                                 refFieldSchema.type(), refEntity));
                             }
-                        } catch (const MantisException &e) {
+                        } catch (const MbException &e) {
                             // If entity exists but we can't get its schema, that's an error
                             return "Error validating foreign key reference: " + std::string(e.what());
                         } catch (const std::exception &e) {
                             return "Error validating foreign key reference: " + std::string(e.what());
                         }
                     } else {
-                        // Entity doesn't exist yet - this might be okay if entities are being created in sequence
+                        // MbEntity doesn't exist yet - this might be okay if entities are being created in sequence
                         // The database will enforce the constraint when the DDL is executed
-                        table_schema.logger().warn("EntitySchema", "Foreign Key Reference Missing", fmt::format(
+                        table_schema.logger().warn("MbEntitySchema", "Foreign Key Reference Missing", fmt::format(
                                                         "Foreign key references entity `{}` which does not exist yet. "
                                                         "Ensure the referenced entity is created before this entity.",
                                                         refEntity));
@@ -818,17 +818,17 @@ namespace mb {
 
             // Check that base fields are present
             if (table_schema.type() == "base") {
-                for (const auto &field_name: EntitySchemaField::defaultBaseFields()) {
+                for (const auto &field_name: MbEntitySchemaField::defaultBaseFields()) {
                     if (!table_schema.hasField(field_name))
-                        return "Entity schema does not have field: `" + field_name + "` required for `" + table_schema.
+                        return "MbEntity schema does not have field: `" + field_name + "` required for `" + table_schema.
                                type() + "` types.";
                 }
             }
 
             if (table_schema.type() == "auth") {
-                for (const auto &field_name: EntitySchemaField::defaultAuthFields()) {
+                for (const auto &field_name: MbEntitySchemaField::defaultAuthFields()) {
                     if (!table_schema.hasField(field_name))
-                        return "Entity schema does not have field: `" + field_name + "` required for `" + table_schema.
+                        return "MbEntity schema does not have field: `" + field_name + "` required for `" + table_schema.
                                type() + "` types.";
                 }
             }
@@ -837,26 +837,26 @@ namespace mb {
         return std::nullopt;
     }
 
-    std::optional<std::string> EntitySchema::validate() const {
+    std::optional<std::string> MbEntitySchema::validate() const {
         return validate(*this);
     }
 
-    bool EntitySchema::isValidEntityType(const std::string &type) {
+    bool MbEntitySchema::isValidEntityType(const std::string &type) {
         if (type == "base" || type == "view" || type == "auth") {
             return true;
         }
         return false;
     }
 
-    bool EntitySchema::isValidEntityName(const std::string &name) {
+    bool MbEntitySchema::isValidEntityName(const std::string &name) {
         if (name.empty() || name.length() > 64) return false;
         return std::ranges::all_of(name, [](const char c) {
             return std::isalnum(c) || c == '_';
         });
     }
 
-    std::string EntitySchema::getFieldType(const std::string &type, std::shared_ptr<soci::session> sql,
-                                           const IntPrecision precision) {
+    std::string MbEntitySchema::getFieldType(const std::string &type, std::shared_ptr<soci::session> sql,
+                                           const MbIntPrecision precision) {
         const auto db_type = sql->get_backend()->get_backend_name();
 
         if (db_type == "sqlite3" && type == "date") {
@@ -864,7 +864,7 @@ namespace mb {
         }
 
         if (db_type == "postgresql" && type == "int"
-            && (precision == IntPrecision::I8 || precision == IntPrecision::U8)) {
+            && (precision == MbIntPrecision::I8 || precision == MbIntPrecision::U8)) {
             return sql->get_backend()->create_column_type(soci::db_int16, 0, 0);
         }
 
@@ -872,24 +872,24 @@ namespace mb {
             return sql->get_backend()->create_column_type(soci::db_uint16, 0, 0);
         }
 
-        return sql->get_backend()->create_column_type(EntitySchemaField::toSociType(type, precision), 0, 0);
+        return sql->get_backend()->create_column_type(MbEntitySchemaField::toSociType(type, precision), 0, 0);
     }
 
-    void EntitySchema::addFieldsIfNotExist(const std::string &type) {
+    void MbEntitySchema::addFieldsIfNotExist(const std::string &type) {
         if (type == "base") {
-            for (const auto &field: EntitySchema::defaultBaseFieldsSchema()) {
+            for (const auto &field: MbEntitySchema::defaultBaseFieldsSchema()) {
                 if (!hasField(field.name())) {
                     addField(field);
                 }
             }
         } else if (type == "auth") {
-            for (const auto &field: EntitySchema::defaultAuthFieldsSchema()) {
+            for (const auto &field: MbEntitySchema::defaultAuthFieldsSchema()) {
                 if (!hasField(field.name())) {
                     addField(field);
                 }
             }
         } else {
-            throw MantisException(500, "Operation not supported for `view` types.");
+            throw MbException(500, "Operation not supported for `view` types.");
         }
     }
 } // mb

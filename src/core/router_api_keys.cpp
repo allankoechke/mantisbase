@@ -4,10 +4,10 @@
 #include "mantisbase/mantisbase.h"
 
 namespace mb {
-    void Router::registerApiKeyRoutes() {
+    void MbRouter::registerApiKeyRoutes() {
         const MbMiddlewares authEntityMiddleware = {resolveAuthEntity()};
 
-        // Entity-scoped API key routes
+        // MbEntity-scoped API key routes
         Post("/api/v1/auth/:entity_name/api-keys", [](MbRequest &req, const MbResponse &res) {
             try {
                 auto auth = req.get<json>("auth", json::object());

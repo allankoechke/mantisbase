@@ -6,7 +6,7 @@ MantisBase migration files are **entity schema JSON** applied in sorted filename
 
 1. Place numbered `*.json` files in a directory (e.g. `001_users.json`, `002_posts.json`).
 2. Run `mantisbase --migrations-dir=./migrations migrate apply --up`.
-3. Each file is validated and passed to `EntitySchema::createTable`.
+3. Each file is validated and passed to `MbEntitySchema::createTable`.
 
 > **Note:** `migrate apply --down` (rollback) is not yet implemented.
 

@@ -121,7 +121,7 @@ namespace mb {
         snap.token = token;
 
         if (token.starts_with("mb_sk_")) {
-            const auto key_hash = ApiKeyManager::hashApiKey(token);
+            const auto key_hash = MbApiKeyMgr::hashApiKey(token);
             auto key_info = app.auth().apiKey().lookupByHash(key_hash);
             if (!key_info.has_value()) {
                 return makeGuestAuthSnapshot();
@@ -187,9 +187,9 @@ namespace mb {
             try {
                 const auto entity = app.entity(entity_name);
                 const auto rule = record_id.empty() ? entity.listRule() : entity.getRule();
-                AccessEvalContext ctx{snap.auth, snap.verification, nullptr};
+                MbAccessEvalContext ctx{snap.auth, snap.verification, nullptr};
                 const auto eval = evaluateAccessRule(rule, ctx);
-                if (eval == AccessEvalResult::Allow) {
+                if (eval == MbAccessEvalResult::Allow) {
                     result.granted.push_back(topic);
                     continue;
                 }
@@ -198,9 +198,9 @@ namespace mb {
                 std::string message = error;
                 if (rule.mode().empty()) {
                     message = std::format("Admin auth required to access record(s) in `{}` entity.", entity_name);
-                } else if (eval == AccessEvalResult::DenyUnknownRule) {
+                } else if (eval == MbAccessEvalResult::DenyUnknownRule) {
                     message = std::format("Access denied, entity `{}` access rule unknown.", entity_name);
-                } else if (eval == AccessEvalResult::DenyUnauthenticated &&
+                } else if (eval == MbAccessEvalResult::DenyUnauthenticated &&
                            snap.verification.contains("error") && snap.verification["error"].is_string() &&
                            !snap.verification["error"].get<std::string>().empty()) {
                     message = snap.verification["error"].get<std::string>();
@@ -223,32 +223,32 @@ namespace mb {
         return result;
     }
 
-    AuthUpgradeResult tryUpgradeAuth(RealtimeAuthSnapshot &session, const RealtimeAuthSnapshot &incoming) {
+    MbAuthUpgradeResult tryUpgradeAuth(RealtimeAuthSnapshot &session, const RealtimeAuthSnapshot &incoming) {
         const bool session_authed = isAuthenticatedSnapshot(session);
         const bool incoming_authed = isAuthenticatedSnapshot(incoming);
 
         if (!session_authed && !incoming_authed) {
-            return AuthUpgradeResult::Unchanged;
+            return MbAuthUpgradeResult::Unchanged;
         }
 
         if (session_authed && !incoming_authed) {
-            return AuthUpgradeResult::DeniedDowngrade;
+            return MbAuthUpgradeResult::DeniedDowngrade;
         }
 
         if (!session_authed && incoming_authed) {
             session = incoming;
-            return AuthUpgradeResult::Applied;
+            return MbAuthUpgradeResult::Applied;
         }
 
         const auto [session_entity, session_id] = authIdentity(session);
         const auto [incoming_entity, incoming_id] = authIdentity(incoming);
 
         if (session_entity != incoming_entity || session_id != incoming_id) {
-            return AuthUpgradeResult::DeniedSwitch;
+            return MbAuthUpgradeResult::DeniedSwitch;
         }
 
         session = incoming;
-        return AuthUpgradeResult::Applied;
+        return MbAuthUpgradeResult::Applied;
     }
 
     std::string generateRealtimeClientId(const std::string_view prefix) {
@@ -273,7 +273,7 @@ namespace mb {
         }
 
         if (snap.token.starts_with("mb_sk_")) {
-            const auto key_hash = ApiKeyManager::hashApiKey(snap.token);
+            const auto key_hash = MbApiKeyMgr::hashApiKey(snap.token);
             return !app.auth().apiKey().lookupByHash(key_hash).has_value();
         }
 

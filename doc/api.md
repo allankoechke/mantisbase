@@ -38,8 +38,8 @@ All REST endpoints live under `/api/v1/` and are grouped by namespace:
 
 | Prefix | Description |
 |--------|-------------|
-| `/api/v1/auth/` | Entity user authentication: token verify (`/verify`), plus per-entity login, refresh, logout, API keys, and OAuth |
-| `/api/v1/entities/` | Entity record CRUD |
+| `/api/v1/auth/` | MbEntity user authentication: token verify (`/verify`), plus per-entity login, refresh, logout, API keys, and OAuth |
+| `/api/v1/entities/` | MbEntity record CRUD |
 | `/api/v1/schemas/` | Schema management (admin only) |
 | `/api/v1/files/` | Uploaded file serving |
 | `/api/v1/health` | Server health check |
@@ -53,7 +53,7 @@ All REST endpoints live under `/api/v1/` and are grouped by namespace:
 
 ---
 
-## Entity Endpoints
+## MbEntity Endpoints
 
 MantisBase automatically exposes CRUD endpoints for each entity (table or view):
 
@@ -65,7 +65,7 @@ MantisBase automatically exposes CRUD endpoints for each entity (table or view):
 | PATCH  | `/api/v1/entities/<entity>/:id`       | Update partial fields |
 | DELETE | `/api/v1/entities/<entity>/:id`       | Delete a record       |
 
-Auth-type entity responses never include the `password` field in list, get, or realtime change payloads.
+MbAuth-type entity responses never include the `password` field in list, get, or realtime change payloads.
 
 ### Example Requests
 
@@ -258,7 +258,7 @@ Schema management endpoints allow you to create, read, update, and delete entity
 
 ### Example: Create a Schema
 
-**Base Entity (Standard Table):**
+**Base MbEntity (Standard Table):**
 
 ```bash
 curl -X POST http://localhost:7070/api/v1/schemas \
@@ -282,7 +282,7 @@ curl -X POST http://localhost:7070/api/v1/schemas \
   }'
 ```
 
-**View Entity (SQL View):**
+**View MbEntity (SQL View):**
 
 ```bash
 curl -X POST http://localhost:7070/api/v1/schemas \
@@ -299,7 +299,7 @@ curl -X POST http://localhost:7070/api/v1/schemas \
   }'
 ```
 
-**Auth Entity (Authentication Table):**
+**MbAuth MbEntity (Authentication Table):**
 
 ```bash
 curl -X POST http://localhost:7070/api/v1/schemas \
@@ -322,7 +322,7 @@ curl -X POST http://localhost:7070/api/v1/schemas \
   }'
 ```
 
-### Entity Types
+### MbEntity Types
 
 MantisBase supports three entity types:
 
@@ -332,9 +332,9 @@ MantisBase supports three entity types:
 | `auth` | Authentication entity | Yes | Includes password, email, and user management fields automatically |
 | `view` | SQL view (read-only) | No | Requires `view_query` instead of fields |
 
-### Entity Name Validation
+### MbEntity Name Validation
 
-Entity names must follow these rules:
+MbEntity names must follow these rules:
 - **Alphanumeric and underscores only** - Only letters, numbers, and `_` characters allowed
 - **Maximum 64 characters** - Names cannot exceed 64 characters
 - **Not empty** - Names must contain at least one character
@@ -389,7 +389,7 @@ curl -X PATCH http://localhost:7070/api/v1/schemas/posts \
 
 ## Query Parameters
 
-Entity list endpoints use cursor-based pagination ordered by record `id` (ascending):
+MbEntity list endpoints use cursor-based pagination ordered by record `id` (ascending):
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -448,7 +448,7 @@ once per request):
 
 | Method | Behavior |
 |---|---|
-| `req.jsonBody()` | Unified parsed body. JSON requests return the parsed body and throw `MantisException(400)` on malformed JSON; multipart requests return an empty object until `parseFormDataToEntity()` maps the fields. |
+| `req.jsonBody()` | Unified parsed body. JSON requests return the parsed body and throw `MbException(400)` on malformed JSON; multipart requests return an empty object until `parseFormDataToEntity()` maps the fields. |
 | `req.bodyAsJson()` | Non-throwing alternative returning a `{body, error}` pair. |
 | `req.isMultipartFormData()` | `true` when the body is `multipart/form-data`. |
 | `req.formData()` | Multipart parts (text and file fields: `name`, `content`, `filename`, `content_type`); empty for JSON bodies. |
@@ -466,7 +466,7 @@ router.Post("/api/v1/documents", [](MbRequest& req, MbResponse& res) {
         req.parseFormDataToEntity(entity); // no-op for JSON bodies
         const json &body = req.jsonBody(); // throws 400 on malformed JSON
 
-        if (const auto err = Validators::validateRequestBody(entity, body);
+        if (const auto err = MbValidators::validateRequestBody(entity, body);
             err.has_value()) {
             res.sendJSON(400, {
                 {"error", err.value()},
@@ -483,7 +483,7 @@ router.Post("/api/v1/documents", [](MbRequest& req, MbResponse& res) {
             {"status", 201},
             {"data", record}
         });
-    } catch (const MantisException &e) {
+    } catch (const MbException &e) {
         req.undoWrittenFiles("documents");
         res.sendJSON(e.code(), {
             {"error", e.what()},
@@ -571,7 +571,7 @@ Both `on_update` and `on_delete` support the following policies:
 
 When creating or updating schemas with foreign keys, MantisBase automatically validates:
 
-1. **Referenced Entity Exists** - The entity referenced by `foreign_key.entity` must exist
+1. **Referenced MbEntity Exists** - The entity referenced by `foreign_key.entity` must exist
 2. **Referenced Field Exists** - The field specified in `foreign_key.field` must exist in the referenced entity
 3. **Type Compatibility** - Field types should be compatible (warnings issued for mismatches)
 
@@ -864,7 +864,7 @@ MantisBase provides **realtime database change notifications** over **Server-Sen
 
 ### Authentication
 
-Realtime connections accept optional credentials via `?token=` (overrides header) or `Authorization: Bearer <token>`. Invalid or expired tokens at connect time are treated as **guest**. Auth can be upgraded on subscribe (POST or WS `subscribe` message) but cannot be downgraded or switched to another user.
+Realtime connections accept optional credentials via `?token=` (overrides header) or `Authorization: Bearer <token>`. Invalid or expired tokens at connect time are treated as **guest**. MbAuth can be upgraded on subscribe (POST or WS `subscribe` message) but cannot be downgraded or switched to another user.
 
 Session IDs use the prefixes `rt_sse_...` and `rt_ws_...`.
 
@@ -924,7 +924,7 @@ Sets the topic list for an existing SSE session (replaces prior subscriptions). 
 }
 ```
 
-Auth downgrade or switching to another user returns **403**.
+MbAuth downgrade or switching to another user returns **403**.
 
 **Example**
 
@@ -970,7 +970,7 @@ curl -X POST http://localhost:7070/api/v1/realtime \
 | Field | Type | Description |
 |-------|------|-------------|
 | `action` | string | One of `insert`, `update`, `delete`. |
-| `entity` | string | Entity (table) name. |
+| `entity` | string | MbEntity (table) name. |
 | `row_id` | string | ID of the affected row. |
 | `topic` | string | Topic that matched (entity or `entity:row_id`). |
 | `timestamp` | number | Unix timestamp of the change. |
@@ -1090,7 +1090,7 @@ The `subscribed` acknowledgement lists granted topics and denied failures:
 
 ### Change events
 
-Database changes are delivered in the same format as SSE `change` events:
+MbDatabase changes are delivered in the same format as SSE `change` events:
 
 ```json
 {
@@ -1113,7 +1113,7 @@ The MantisBase Admin Dashboard is a comprehensive web-based interface accessible
 
 ### Dashboard Features
 
-#### Entity Management
+#### MbEntity Management
 - **Browse Entities** - View all entities (tables) in your database
 - **View Records** - Browse, search, and filter records in any entity
 - **Create Records** - Add new records through intuitive forms
@@ -1125,7 +1125,7 @@ The MantisBase Admin Dashboard is a comprehensive web-based interface accessible
 - **Field Management** - Add, edit, and remove fields with type selection
 - **Access Rules Configuration** - Set up access control rules with a user-friendly interface
 - **Foreign Key Setup** - Configure relationships between entities
-- **View Entity Support** - Create and manage SQL view entities
+- **View MbEntity Support** - Create and manage SQL view entities
 
 #### Data Exploration
 - **Search & Filter** - Quickly find records with built-in search

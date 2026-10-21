@@ -9,7 +9,7 @@ Copy-paste schemas, migrations, HTTP scripts, and scripting samples for common u
 | Example | What it demonstrates |
 |---------|---------------------|
 | [01-blog](01-blog/) | Basic entity schema + CRUD |
-| [02-auth-users](02-auth-users/) | Auth entity, login, refresh, protected writes |
+| [02-auth-users](02-auth-users/) | MbAuth entity, login, refresh, protected writes |
 | [03-ecommerce](03-ecommerce/) | Multiple entities with foreign keys and validators |
 | [04-access-rules](04-access-rules/) | public / auth / custom rule modes |
 | [05-realtime](05-realtime/) | SSE subscription and live updates |

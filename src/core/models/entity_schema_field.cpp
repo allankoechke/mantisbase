@@ -20,12 +20,12 @@ namespace mb {
         return idx;
     }
 
-    EntitySchemaField::EntitySchemaField(std::string field_name, std::string field_type)
+    MbEntitySchemaField::MbEntitySchemaField(std::string field_name, std::string field_type)
         : m_name(std::move(field_name)),
           m_type(std::move(field_type)),
           m_constraints(defaultConstraints()) {
         if (!isValidFieldName(m_name))
-            throw MantisException(400, "Invalid field name: expected 1-64 alphanumeric or underscore characters.");
+            throw MbException(400, "Invalid field name: expected 1-64 alphanumeric or underscore characters.");
         if (m_name == "password") {
             m_constraints["validator"] = "@password";
             m_constraints["min_value"] = 8;
@@ -35,34 +35,34 @@ namespace mb {
         }
     }
 
-    EntitySchemaField::EntitySchemaField(const nlohmann::json &field_schema)
+    MbEntitySchemaField::MbEntitySchemaField(const nlohmann::json &field_schema)
         : m_constraints(defaultConstraints()) {
         if (!field_schema.contains("name") || !field_schema["name"].is_string() || field_schema["name"].empty())
-            throw MantisException(400, "Field name is required!");
+            throw MbException(400, "Field name is required!");
 
         if (!field_schema.contains("type") || !field_schema["type"].is_string() || field_schema["type"].empty())
-            throw MantisException(400, "Field type is required!");
+            throw MbException(400, "Field type is required!");
 
         updateWith(field_schema);
     }
 
-    EntitySchemaField::EntitySchemaField(const EntitySchemaField &other) = default;
+    MbEntitySchemaField::MbEntitySchemaField(const MbEntitySchemaField &other) = default;
 
-    bool EntitySchemaField::operator==(const EntitySchemaField &other) const {
+    bool MbEntitySchemaField::operator==(const MbEntitySchemaField &other) const {
         return toJSON() == other.toJSON();
     }
 
-    EntitySchemaField &EntitySchemaField::updateWith(const nlohmann::json &field_schema) {
+    MbEntitySchemaField &MbEntitySchemaField::updateWith(const nlohmann::json &field_schema) {
         if (field_schema.contains("name")) {
             if (!field_schema["name"].is_string() || field_schema["name"].empty())
-                throw MantisException(400, "Invalid field name provided!");
+                throw MbException(400, "Invalid field name provided!");
 
             setName(field_schema["name"].get<std::string>());
         }
 
         if (field_schema.contains("type")) {
             if (!field_schema["type"].is_string() || field_schema["type"].empty())
-                throw MantisException(400, "Invalid field name provided!");
+                throw MbException(400, "Invalid field name provided!");
 
             setType(field_schema["type"].get<std::string>());
         }
@@ -73,14 +73,14 @@ namespace mb {
             } else if (field_schema["precision"].is_number_integer()) {
                 setIntPrecision(intPrecisionFromField(field_schema));
             } else {
-                throw MantisException(400,
+                throw MbException(400,
                                       "Expected a string precision token (i8, u32, ...) or legacy integer bit width.");
             }
         }
 
         if (field_schema.contains("required")) {
             if (!field_schema["required"].is_boolean())
-                throw MantisException(400, "Expected a bool for field property `required`.");
+                throw MbException(400, "Expected a bool for field property `required`.");
 
             setRequired(field_schema["required"].get<bool>());
         }
@@ -88,7 +88,7 @@ namespace mb {
         // Primary Key Flag
         if (field_schema.contains("primary_key")) {
             if (!field_schema["primary_key"].is_boolean())
-                throw MantisException(400, "Expected a bool for field property `primary_key`.");
+                throw MbException(400, "Expected a bool for field property `primary_key`.");
 
             setIsPrimaryKey(field_schema["primary_key"].get<bool>());
         }
@@ -96,7 +96,7 @@ namespace mb {
         // System Flag
         if (field_schema.contains("system")) {
             if (!field_schema["system"].is_boolean())
-                throw MantisException(400, "Expected a bool for field property `system`.");
+                throw MbException(400, "Expected a bool for field property `system`.");
 
             setIsSystem(field_schema["system"].get<bool>());
         }
@@ -104,7 +104,7 @@ namespace mb {
         // Unique Flag
         if (field_schema.contains("unique")) {
             if (!field_schema["unique"].is_boolean())
-                throw MantisException(400, "Expected a bool for field property `unique`.");
+                throw MbException(400, "Expected a bool for field property `unique`.");
 
             setIsUnique(field_schema["unique"].get<bool>());
         }
@@ -112,7 +112,7 @@ namespace mb {
         // Constraints Object
         if (field_schema.contains("constraints")) {
             if (!(field_schema["constraints"].is_object() || field_schema["constraints"].is_null()))
-                throw MantisException(400, "Expected an object or null for `constraint` property.");
+                throw MbException(400, "Expected an object or null for `constraint` property.");
 
             setConstraints(field_schema["constraints"].get<nlohmann::json>());
         }
@@ -124,11 +124,11 @@ namespace mb {
                 removeForeignKey();
             } else {
                 if (!field_schema["foreign_key"].is_object())
-                    throw MantisException(400, "Expected an object for `foreign_key` property.");
+                    throw MbException(400, "Expected an object for `foreign_key` property.");
 
                 const auto &fk = field_schema["foreign_key"];
                 if (!fk.contains("entity") || !fk["entity"].is_string() || fk["entity"].get<std::string>().empty())
-                    throw MantisException(400, "Foreign key `entity` is required and must be a non-empty string.");
+                    throw MbException(400, "Foreign key `entity` is required and must be a non-empty string.");
 
                 const std::string fkTable = fk["entity"].get<std::string>();
                 const std::string fkColumn = fk.contains("field") && fk["field"].is_string()
@@ -148,132 +148,132 @@ namespace mb {
         return *this;
     }
 
-    std::string EntitySchemaField::id() const {
-        return EntitySchemaField::genFieldId(m_name);
+    std::string MbEntitySchemaField::id() const {
+        return MbEntitySchemaField::genFieldId(m_name);
     }
 
-    std::string EntitySchemaField::name() const {
+    std::string MbEntitySchemaField::name() const {
         return m_name;
     }
 
-    bool EntitySchemaField::isValidFieldName(const std::string &name) {
+    bool MbEntitySchemaField::isValidFieldName(const std::string &name) {
         if (name.empty() || name.length() > 64) return false;
         return std::ranges::all_of(name, [](const unsigned char c) {
             return std::isalnum(c) || c == '_';
         });
     }
 
-    EntitySchemaField &EntitySchemaField::setName(const std::string &name) {
+    MbEntitySchemaField &MbEntitySchemaField::setName(const std::string &name) {
         auto trimmed = trim(name);
         if (!isValidFieldName(trimmed))
-            throw MantisException(400, "Invalid field name: expected 1-64 alphanumeric or underscore characters.");
+            throw MbException(400, "Invalid field name: expected 1-64 alphanumeric or underscore characters.");
 
         m_name = trimmed;
         return *this;
     }
 
-    std::string EntitySchemaField::type() const {
+    std::string MbEntitySchemaField::type() const {
         return m_type;
     }
 
-    EntitySchemaField &EntitySchemaField::setType(const std::string &type) {
+    MbEntitySchemaField &MbEntitySchemaField::setType(const std::string &type) {
         if (type.empty())
-            throw MantisException(400, "Field type is required, none provided!");
+            throw MbException(400, "Field type is required, none provided!");
 
         if (!isValidFieldType(type))
-            throw MantisException(400, "Unsupported field type `" + type + "`");
+            throw MbException(400, "Unsupported field type `" + type + "`");
 
         m_type = type;
         return *this;
     }
 
-    IntPrecision EntitySchemaField::intPrecision() const {
+    MbIntPrecision MbEntitySchemaField::intPrecision() const {
         return m_intPrecision;
     }
 
-    EntitySchemaField &EntitySchemaField::setIntPrecision(const IntPrecision precision) {
+    MbEntitySchemaField &MbEntitySchemaField::setIntPrecision(const MbIntPrecision precision) {
         m_intPrecision = precision;
         return *this;
     }
 
-    EntitySchemaField &EntitySchemaField::setPrecision(const std::string &precision) {
+    MbEntitySchemaField &MbEntitySchemaField::setPrecision(const std::string &precision) {
         m_intPrecision = intPrecisionFromString(precision);
         return *this;
     }
 
-    bool EntitySchemaField::required() const {
+    bool MbEntitySchemaField::required() const {
         return m_required;
     }
 
-    EntitySchemaField &EntitySchemaField::setRequired(const bool required) {
+    MbEntitySchemaField &MbEntitySchemaField::setRequired(const bool required) {
         m_required = required;
         return *this;
     }
 
-    bool EntitySchemaField::isPrimaryKey() const {
+    bool MbEntitySchemaField::isPrimaryKey() const {
         return m_primaryKey;
     }
 
-    EntitySchemaField &EntitySchemaField::setIsPrimaryKey(const bool pk) {
+    MbEntitySchemaField &MbEntitySchemaField::setIsPrimaryKey(const bool pk) {
         m_primaryKey = pk;
         return *this;
     }
 
-    bool EntitySchemaField::isSystem() const {
+    bool MbEntitySchemaField::isSystem() const {
         return m_isSystem;
     }
 
-    EntitySchemaField &EntitySchemaField::setIsSystem(const bool system) {
+    MbEntitySchemaField &MbEntitySchemaField::setIsSystem(const bool system) {
         m_isSystem = system;
         return *this;
     }
 
-    bool EntitySchemaField::isUnique() const {
+    bool MbEntitySchemaField::isUnique() const {
         return m_isUnique;
     }
 
-    EntitySchemaField &EntitySchemaField::setIsUnique(const bool unique) {
+    MbEntitySchemaField &MbEntitySchemaField::setIsUnique(const bool unique) {
         m_isUnique = unique;
         return *this;
     }
 
-    bool EntitySchemaField::isForeignKey() const {
+    bool MbEntitySchemaField::isForeignKey() const {
         return !m_foreignKey.empty()
         && m_foreignKey.contains("entity")
         && m_foreignKey["entity"].is_string()
         && !m_foreignKey["entity"].get<std::string>().empty();
     }
 
-    std::string EntitySchemaField::foreignKeyTable() const {
+    std::string MbEntitySchemaField::foreignKeyTable() const {
         return m_foreignKey.contains("entity") ? m_foreignKey["entity"].get<std::string>() : "";
     }
 
-    std::string EntitySchemaField::foreignKeyColumn() const {
+    std::string MbEntitySchemaField::foreignKeyColumn() const {
         return m_foreignKey.contains("field") ? m_foreignKey["field"].get<std::string>() : "";
     }
 
-    std::string EntitySchemaField::foreignKeyOnUpdate() const {
+    std::string MbEntitySchemaField::foreignKeyOnUpdate() const {
         return m_foreignKey.contains("on_update") ? m_foreignKey["on_update"].get<std::string>() : "";
     }
 
-    std::string EntitySchemaField::foreignKeyOnDelete() const {
+    std::string MbEntitySchemaField::foreignKeyOnDelete() const {
         return m_foreignKey.contains("on_delete") ? m_foreignKey["on_delete"].get<std::string>() : "";
     }
 
-    EntitySchemaField &EntitySchemaField::setForeignKey(const std::string &table,
+    MbEntitySchemaField &MbEntitySchemaField::setForeignKey(const std::string &table,
                                                         const std::string &column,
                                                         const std::string &onUpdate,
                                                         const std::string &onDelete) {
         if (table.empty()) {
-            throw MantisException(400, "Foreign key reference table cannot be empty!");
+            throw MbException(400, "Foreign key reference table cannot be empty!");
         }
 
         if (!isValidFieldName(table))
-            throw MantisException(400, "Invalid foreign key reference table name: expected alphanumeric + _ only.");
+            throw MbException(400, "Invalid foreign key reference table name: expected alphanumeric + _ only.");
 
         std::string resolvedColumn = column.empty() ? "id" : column;
         if (!isValidFieldName(resolvedColumn))
-            throw MantisException(400, "Invalid foreign key reference column name: expected alphanumeric + _ only.");
+            throw MbException(400, "Invalid foreign key reference column name: expected alphanumeric + _ only.");
 
         // Validate update/delete policies
         const std::vector<std::string> validPolicies = {
@@ -287,12 +287,12 @@ namespace mb {
         toUpperCase(upperDelete);
 
         if (std::ranges::find(validPolicies, upperUpdate) == validPolicies.end()) {
-            throw MantisException(400, "Invalid foreign key update policy: " + onUpdate +
+            throw MbException(400, "Invalid foreign key update policy: " + onUpdate +
                                        ". Must be one of: CASCADE, SET NULL, RESTRICT, NO ACTION, SET DEFAULT");
         }
 
         if (std::ranges::find(validPolicies, upperDelete) == validPolicies.end()) {
-            throw MantisException(400, "Invalid foreign key delete policy: " + onDelete +
+            throw MbException(400, "Invalid foreign key delete policy: " + onDelete +
                                        ". Must be one of: CASCADE, SET NULL, RESTRICT, NO ACTION, SET DEFAULT");
         }
 
@@ -304,24 +304,24 @@ namespace mb {
         return *this;
     }
 
-    EntitySchemaField &EntitySchemaField::removeForeignKey() {
+    MbEntitySchemaField &MbEntitySchemaField::removeForeignKey() {
         m_foreignKey = nullptr; // Reset the object
         return *this;
     }
 
-    nlohmann::json EntitySchemaField::constraints() const {
+    nlohmann::json MbEntitySchemaField::constraints() const {
         return m_constraints;
     }
 
-    nlohmann::json EntitySchemaField::constraint(const std::string &key) const {
+    nlohmann::json MbEntitySchemaField::constraint(const std::string &key) const {
         if (!m_constraints.contains(key)) {
-            throw MantisException(404, "No constraint found for key `" + key + "`");
+            throw MbException(404, "No constraint found for key `" + key + "`");
         }
 
         return m_constraints[key];
     }
 
-    EntitySchemaField &EntitySchemaField::setConstraints(const nlohmann::json &opts) {
+    MbEntitySchemaField &MbEntitySchemaField::setConstraints(const nlohmann::json &opts) {
         nlohmann::json constraints = m_constraints.empty() || m_constraints.is_null()
                                          ? defaultConstraints()
                                          : m_constraints;
@@ -348,7 +348,7 @@ namespace mb {
         return *this;
     }
 
-    nlohmann::json EntitySchemaField::toJSON() const {
+    nlohmann::json MbEntitySchemaField::toJSON() const {
         nlohmann::json json_obj = {
             {"id", genFieldId(m_name)},
             {"name", m_name},
@@ -371,17 +371,17 @@ namespace mb {
         return json_obj;
     }
 
-    soci::db_type EntitySchemaField::toSociType() const {
-        return EntitySchemaField::toSociType(m_type, m_intPrecision);
+    soci::db_type MbEntitySchemaField::toSociType() const {
+        return MbEntitySchemaField::toSociType(m_type, m_intPrecision);
     }
 
-    soci::db_type EntitySchemaField::toSociType(const std::string &type) {
+    soci::db_type MbEntitySchemaField::toSociType(const std::string &type) {
         return toSociType(type, defaultIntPrecision());
     }
 
-    soci::db_type EntitySchemaField::toSociType(const std::string &type, const IntPrecision precision) {
+    soci::db_type MbEntitySchemaField::toSociType(const std::string &type, const MbIntPrecision precision) {
         if (trim(type).empty())
-            throw MantisException(400, "Field type is required, none provided!");
+            throw MbException(400, "Field type is required, none provided!");
 
         if (type == "double")
             return soci::db_double;
@@ -394,13 +394,13 @@ namespace mb {
         if (type == "json" || type == "string" || type == "file" || type == "files")
             return soci::db_string;
 
-        throw MantisException(400, "Unsupported field type `" + type + "`");
+        throw MbException(400, "Unsupported field type `" + type + "`");
     }
 
-    std::optional<std::string> EntitySchemaField::validate() const {
-        if (m_name.empty()) return "Entity field name is empty";
+    std::optional<std::string> MbEntitySchemaField::validate() const {
+        if (m_name.empty()) return "MbEntity field name is empty";
         if (!isValidFieldName(m_name)) return "Invalid field name: expected 1-64 alphanumeric or underscore characters.";
-        if (m_type.empty()) return "Entity field type is empty";
+        if (m_type.empty()) return "MbEntity field type is empty";
 
         if (m_type == "int") {
             if (const auto err = validateIntConstraintBounds(toJSON()); err.has_value()) {
@@ -411,16 +411,16 @@ namespace mb {
         return std::nullopt;
     }
 
-    bool EntitySchemaField::isValidFieldType(const std::string &type) {
+    bool MbEntitySchemaField::isValidFieldType(const std::string &type) {
         const auto it = std::ranges::find(defaultEntityFieldTypes(), type);
         return it != defaultEntityFieldTypes().end();
     }
 
-    std::string EntitySchemaField::genFieldId(const std::string &id) {
+    std::string MbEntitySchemaField::genFieldId(const std::string &id) {
         return "mbf_" + std::to_string(std::hash<std::string>{}(id));
     }
 
-    const nlohmann::json &EntitySchemaField::defaultConstraints() {
+    const nlohmann::json &MbEntitySchemaField::defaultConstraints() {
         static const nlohmann::json default_constraints = {
             {"min_value", nullptr},
             {"max_value", nullptr},

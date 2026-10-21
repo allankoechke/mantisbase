@@ -13,7 +13,7 @@ MantisBase is a self-hosted C++ BaaS: define JSON schemas → get instant REST A
 
 1. **Pick a starting example** from [`examples/`](../../examples/README.md):
    - Blog CRUD → `examples/01-blog/`
-   - Auth users → `examples/02-auth-users/`
+   - MbAuth users → `examples/02-auth-users/`
    - E-commerce FK → `examples/03-ecommerce/`
 2. **Start server**: `./mantisbase serve` or Docker (`doc/docker.md`).
 3. **Create admin** at `/mb` or `./mantisbase admins --add admin@example.com <password>`.

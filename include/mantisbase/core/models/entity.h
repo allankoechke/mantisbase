@@ -1,6 +1,6 @@
 /**
  * @file entity.h
- * @brief Entity class for database table operations and CRUD functionality.
+ * @brief MbEntity class for database table operations and CRUD functionality.
  *
  * Represents a database table/entity with schema information and provides
  * methods for creating, reading, updating, and deleting records.
@@ -18,7 +18,7 @@
 #include "access_rules.h"
 
 namespace mb {
-    class MantisBase; // forward declaration; Entity holds a non-owning pointer to it
+    class MantisBase; // forward declaration; MbEntity holds a non-owning pointer to it
 
     using Record = nlohmann::json;  ///< Single database record as JSON object
     using Records = std::vector<Record>;  ///< Collection of database records
@@ -37,48 +37,48 @@ namespace mb {
     /**
      * @brief Represents a database table/entity with schema and CRUD operations.
      *
-     * Entity provides methods to interact with database tables including
+     * MbEntity provides methods to interact with database tables including
      * creating, reading, updating, and deleting records. It encapsulates
      * schema information and access rules.
      *
      * @code
      * auto app = MantisBase::create();
      * json schema = {{"name", "users"}, {"type", "base"}, {"fields", json::array()}};
-     * Entity entity(*app, schema);
+     * MbEntity entity(*app, schema);
      *
      * // Or by name after the schema exists in the database:
-     * Entity users = app->entity("users");
+     * MbEntity users = app->entity("users");
      * @endcode
      */
-    class MANTISBASE_API Entity: public IMantisBase {
+    class MANTISBASE_API MbEntity: public MbAppMixin {
     public:
         /**
          * @brief Construct entity from schema JSON object, bound to its app.
          *
-         * The app is injected at construction so every Entity is always bound to
+         * The app is injected at construction so every MbEntity is always bound to
          * the services (database, realtime) its CRUD operations need — there is
          * no separate bind step to forget. Copies carry the binding.
          *
          * @param app Owning application. Stored non-owning; must outlive the entity.
          * @param schema JSON object containing table schema (name, type, fields, rules, etc.)
          */
-        Entity(const MantisBase &app, const nlohmann::json &schema);
+        MbEntity(const MantisBase &app, const nlohmann::json &schema);
 
         /**
          * @brief Construct entity with name and type, bound to its app.
          * @param app Owning application (see the schema constructor).
          * @param name Table name
-         * @param type Entity type ("base", "auth", or "view")
+         * @param type MbEntity type ("base", "auth", or "view")
          */
-        Entity(const MantisBase &app, const std::string &name, const std::string &type);
+        MbEntity(const MantisBase &app, const std::string &name, const std::string &type);
 
-        Entity(const Entity&) = default; // default copy constructor
-        Entity(Entity&&) = default; // default move constructor
+        MbEntity(const MbEntity&) = default; // default copy constructor
+        MbEntity(MbEntity&&) = default; // default move constructor
 
         // --------------- DB TABLE OPS ------------------ //
         /**
          * @brief Get entity unique identifier.
-         * @return Entity ID string
+         * @return MbEntity ID string
          */
         [[nodiscard]] std::string id() const;
 
@@ -90,7 +90,7 @@ namespace mb {
 
         /**
          * @brief Get entity type ("base", "auth", or "view").
-         * @return Entity type string
+         * @return MbEntity type string
          */
         [[nodiscard]] std::string type() const;
 
@@ -109,7 +109,7 @@ namespace mb {
         /**
          * @brief Get SQL query for view type entities.
          * @return View SQL query string
-         * @throws MantisException if entity is not a view type
+         * @throws MbException if entity is not a view type
          */
         [[nodiscard]] std::string viewQuery() const;
 
@@ -141,33 +141,33 @@ namespace mb {
 
         /**
          * @brief Get list access rule (for GET /api/v1/entities/{table}).
-         * @return AccessRule for listing records
+         * @return MbAccessRule for listing records
          */
-        [[nodiscard]] AccessRule listRule() const;
+        [[nodiscard]] MbAccessRule listRule() const;
 
         /**
          * @brief Get read access rule (for GET /api/v1/entities/{table}/:id).
-         * @return AccessRule for reading a record
+         * @return MbAccessRule for reading a record
          */
-        [[nodiscard]] AccessRule getRule() const;
+        [[nodiscard]] MbAccessRule getRule() const;
 
         /**
          * @brief Get create access rule (for POST /api/v1/entities/{table}).
-         * @return AccessRule for creating records
+         * @return MbAccessRule for creating records
          */
-        [[nodiscard]] AccessRule addRule() const;
+        [[nodiscard]] MbAccessRule addRule() const;
 
         /**
          * @brief Get update access rule (for PATCH /api/v1/entities/{table}/:id).
-         * @return AccessRule for updating records
+         * @return MbAccessRule for updating records
          */
-        [[nodiscard]] AccessRule updateRule() const;
+        [[nodiscard]] MbAccessRule updateRule() const;
 
         /**
          * @brief Get delete access rule (for DELETE /api/v1/entities/{table}/:id).
-         * @return AccessRule for deleting records
+         * @return MbAccessRule for deleting records
          */
-        [[nodiscard]] AccessRule deleteRule() const;
+        [[nodiscard]] MbAccessRule deleteRule() const;
 
         // --------------- DB CRUD OPS ------------------ //
         /**
@@ -272,7 +272,7 @@ namespace mb {
 
     private:
 
-        /// Immutable schema shared across copies. An Entity is never mutated
+        /// Immutable schema shared across copies. An MbEntity is never mutated
         /// after construction, so copies (returned from the cache on every
         /// request) only bump a refcount instead of deep-copying the JSON, and
         /// the pointed-to schema is safe to read concurrently from multiple

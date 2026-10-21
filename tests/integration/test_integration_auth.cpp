@@ -21,7 +21,7 @@ protected:
 
     void createUserEntity() {
         if (adminToken.empty()) {
-            throw mb::MantisException(500, "Empty token");
+            throw mb::MbException(500, "Empty token");
             return;
         }
 

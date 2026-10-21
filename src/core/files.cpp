@@ -12,18 +12,18 @@
 namespace mb {
     namespace fs = std::filesystem;
 
-    FilesMgr::FilesMgr(const MantisBase &app)
-        : IMantisBase(app) {
+    MbFilesMgr::MbFilesMgr(const MantisBase &app)
+        : MbAppMixin(app) {
     }
 
-    void FilesMgr::createDir(const std::string &entity_name) const {
-        if (!EntitySchema::isValidEntityName(entity_name)) {
-            throw MantisException(500, "Invalid Entity Name",
-                                  std::format("Provided Entity Name: `{}`", entity_name));
+    void MbFilesMgr::createDir(const std::string &entity_name) const {
+        if (!MbEntitySchema::isValidEntityName(entity_name)) {
+            throw MbException(500, "Invalid MbEntity Name",
+                                  std::format("Provided MbEntity Name: `{}`", entity_name));
         }
 
         if (entity_name.empty()) {
-            logger().warn("Empty Entity Name", "Attempting to create directory but entity name is empty!");
+            logger().warn("Empty MbEntity Name", "Attempting to create directory but entity name is empty!");
             return;
         }
 
@@ -33,17 +33,17 @@ namespace mb {
         }
     }
 
-    void FilesMgr::renameDir(const std::string &old_entity_name, const std::string &new_entity_name) const {
+    void MbFilesMgr::renameDir(const std::string &old_entity_name, const std::string &new_entity_name) const {
         if (old_entity_name == new_entity_name) return;
 
-        if (!EntitySchema::isValidEntityName(old_entity_name)) {
-            throw MantisException(500, "Invalid Entity Name",
+        if (!MbEntitySchema::isValidEntityName(old_entity_name)) {
+            throw MbException(500, "Invalid MbEntity Name",
                                   std::format("Old entity name `{}` is not a valid SQL table name format!",
                                               old_entity_name));
         }
 
-        if (!EntitySchema::isValidEntityName(new_entity_name)) {
-            throw MantisException(500, "Invalid Entity Name",
+        if (!MbEntitySchema::isValidEntityName(new_entity_name)) {
+            throw MbException(500, "Invalid MbEntity Name",
                                   std::format("New entity name `{}` is not a valid SQL table name format!",
                                               new_entity_name));
         }
@@ -59,16 +59,16 @@ namespace mb {
             createDir(new_entity_name);
     }
 
-    void FilesMgr::deleteDir(const std::string &entity_name) const {
+    void MbFilesMgr::deleteDir(const std::string &entity_name) const {
         logger().trace("Directory Deletion", fmt::format("Dropping dir files/{}/* started.", entity_name));
         fs::remove_all(dirPath(entity_name));
         logger().trace("Directory Deletion", fmt::format("Dropping dir files/{}/* completed.", entity_name));
     }
 
-    std::optional<std::string> FilesMgr::getFilePath(const std::string &entity_name, const std::string &filename) {
-        if (!EntitySchema::isValidEntityName(entity_name)) {
-            throw MantisException(500, "Invalid Entity Name",
-                                  std::format("Entity name `{}` is not a valid SQL table name format!", entity_name));
+    std::optional<std::string> MbFilesMgr::getFilePath(const std::string &entity_name, const std::string &filename) {
+        if (!MbEntitySchema::isValidEntityName(entity_name)) {
+            throw MbException(500, "Invalid MbEntity Name",
+                                  std::format("MbEntity name `{}` is not a valid SQL table name format!", entity_name));
         }
 
         // Check if file exists, if so, return the path, else, return std::nullopt
@@ -80,7 +80,7 @@ namespace mb {
     }
 
 #ifdef MB_SCRIPTING_ENABLED
-    std::string FilesMgr::getFilePathString(const std::string &entity_name, const std::string &filename) {
+    std::string MbFilesMgr::getFilePathString(const std::string &entity_name, const std::string &filename) {
         if (const auto path = getFilePath(entity_name, filename)) {
             return *path;
         }
@@ -88,12 +88,12 @@ namespace mb {
     }
 #endif
 
-    std::string FilesMgr::dirPath(const std::string &entity_name, const bool create_if_missing) const {
+    std::string MbFilesMgr::dirPath(const std::string &entity_name, const bool create_if_missing) const {
         // Create entity file directory
         const auto path = filesBaseDir() / entity_name;
 
-        if (!EntitySchema::isValidEntityName(entity_name)) {
-            throw MantisException(400, "Invalid entity name `{}`.", entity_name);
+        if (!MbEntitySchema::isValidEntityName(entity_name)) {
+            throw MbException(400, "Invalid entity name `{}`.", entity_name);
         }
 
         // Ensure base directory exists before canonicalization
@@ -103,8 +103,8 @@ namespace mb {
         }
 
         if (!isCanonicalPath(path)) {
-            throw MantisException(500, "Path transversal detected.",
-                                  std::format("Entity name `{}` results in path transversal.", entity_name));
+            throw MbException(500, "Path transversal detected.",
+                                  std::format("MbEntity name `{}` results in path transversal.", entity_name));
         }
 
         if (!fs::exists(path) && create_if_missing) {
@@ -114,15 +114,15 @@ namespace mb {
         return path.string();
     }
 
-    std::string FilesMgr::filePath(const std::string &entity_name, const std::string &filename) const {
-        if (!EntitySchema::isValidEntityName(entity_name)) {
-            throw MantisException(500, "Invalid Entity Name",
-                                  std::format("Entity name `{}` is not a valid SQL table name format!", entity_name));
+    std::string MbFilesMgr::filePath(const std::string &entity_name, const std::string &filename) const {
+        if (!MbEntitySchema::isValidEntityName(entity_name)) {
+            throw MbException(500, "Invalid MbEntity Name",
+                                  std::format("MbEntity name `{}` is not a valid SQL table name format!", entity_name));
         }
 
         // TODO add proper filename check?
         if (filename.empty()) {
-            throw MantisException(500, "Invalid File Name",
+            throw MbException(500, "Invalid File Name",
                                   std::format("File name `{}` is empty or invalid!", filename));
         }
 
@@ -130,7 +130,7 @@ namespace mb {
         return c_path.string();
     }
 
-    bool FilesMgr::removeFile(const std::string &entity_name, const std::string &filename) const {
+    bool MbFilesMgr::removeFile(const std::string &entity_name, const std::string &filename) const {
         try {
             // Remove the file, only if it exists
             if (const auto path = filePath(entity_name, filename); fs::exists(path)) {
@@ -148,14 +148,14 @@ namespace mb {
         return false;
     }
 
-    void FilesMgr::removeFiles(const std::string &entity_name, const std::vector<std::string> &files) const {
+    void MbFilesMgr::removeFiles(const std::string &entity_name, const std::vector<std::string> &files) const {
         for (const auto &file: files) {
             // Removing may throw an error, let the caller handle
             auto _ = removeFile(entity_name, file);
         }
     }
 
-    bool FilesMgr::fileExists(const std::string &entity_name, const std::string &filename) const {
+    bool MbFilesMgr::fileExists(const std::string &entity_name, const std::string &filename) const {
         try {
             const auto path = filePath(entity_name, filename);
             return fs::exists(path);
@@ -165,7 +165,7 @@ namespace mb {
         }
     }
 
-    fs::path FilesMgr::getCanonicalPath(const fs::path &path) const {
+    fs::path MbFilesMgr::getCanonicalPath(const fs::path &path) const {
         // Ensure base directory exists
         const auto base_dir = filesBaseDir();
         if (!fs::exists(base_dir)) {
@@ -177,7 +177,7 @@ namespace mb {
         std::error_code ec;
         const auto canonical_path = fs::weakly_canonical(path, ec);
         if (ec) {
-            throw MantisException(400, "Failed to resolve path: {}", ec.message());
+            throw MbException(400, "Failed to resolve path: {}", ec.message());
         }
 
         const auto canonical_base = fs::canonical(base_dir); // Base should exist now
@@ -187,7 +187,7 @@ namespace mb {
 
         // If relative path calculation failed or path is outside base, it's traversal
         if (ec || relative.empty() || relative.string().find("..") != std::string::npos) {
-            throw MantisException(400, "Path traversal detected");
+            throw MbException(400, "Path traversal detected");
         }
 
         // Additional check: ensure the path string starts with base path
@@ -196,21 +196,21 @@ namespace mb {
 
         if (path_str.length() < base_str.length() ||
             path_str.substr(0, base_str.length()) != base_str) {
-            throw MantisException(400, "Path traversal detected");
+            throw MbException(400, "Path traversal detected");
         }
 
         // Ensure the next character (if any) is a path separator or path ends there
         if (path_str.length() > base_str.length()) {
             const char next_char = path_str[base_str.length()];
             if (next_char != fs::path::preferred_separator && next_char != '/') {
-                throw MantisException(400, "Path traversal detected");
+                throw MbException(400, "Path traversal detected");
             }
         }
 
         return canonical_path;
     }
 
-    bool FilesMgr::isCanonicalPath(const fs::path &path) const {
+    bool MbFilesMgr::isCanonicalPath(const fs::path &path) const {
         // Ensure base directory exists
         const auto base_dir = filesBaseDir();
         if (!fs::exists(base_dir)) {
@@ -253,7 +253,7 @@ namespace mb {
         return true;
     }
 
-    fs::path FilesMgr::filesBaseDir() const {
+    fs::path MbFilesMgr::filesBaseDir() const {
         return fs::path(mbApp().dataDir()) / "files";
     }
 } // mantis

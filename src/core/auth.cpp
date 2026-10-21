@@ -6,17 +6,17 @@
 #include <jwt-cpp/traits/nlohmann-json/defaults.h>
 
 namespace mb {
-    Auth::Auth(const MantisBase &app)
+    MbAuth::MbAuth(const MantisBase &app)
         : mApp(app),
-          m_oauth(std::make_unique<OAuthManager>(app)),
-          m_apiKeyManager(std::make_unique<ApiKeyManager>(app)) {
+          m_oauth(std::make_unique<MbOAuthMgr>(app)),
+          m_apiKeyManager(std::make_unique<MbApiKeyMgr>(app)) {
     }
 
-    OAuthManager & Auth::oauth() const { return *m_oauth; }
+    MbOAuthMgr & MbAuth::oauth() const { return *m_oauth; }
 
-    ApiKeyManager & Auth::apiKey() const { return *m_apiKeyManager; }
+    MbApiKeyMgr & MbAuth::apiKey() const { return *m_apiKeyManager; }
 
-    int Auth::sessionTimeoutSeconds(const std::string &entity_name, const int timeout) const {
+    int MbAuth::sessionTimeoutSeconds(const std::string &entity_name, const int timeout) const {
         if (timeout > 0) {
             return timeout;
         }
@@ -27,7 +27,7 @@ namespace mb {
                    : config.value("sessionTimeout", 24 * 60 * 60);
     }
 
-    std::string Auth::createToken(const json &claims_params, const int timeout) const {
+    std::string MbAuth::createToken(const json &claims_params, const int timeout) const {
         const auto secretKey = mApp.jwtSecretKey();
         if (claims_params.empty() || !claims_params.contains("id") || !claims_params.contains("entity")) {
             throw std::invalid_argument("Missing `id` and/or `entity` fields in token claims.");
@@ -91,7 +91,7 @@ namespace mb {
         return token;
     }
 
-    json Auth::verifyToken(const std::string &token) const {
+    json MbAuth::verifyToken(const std::string &token) const {
         json result;
         result["claims"] = json::object();
         result["error"] = "";
@@ -162,7 +162,7 @@ namespace mb {
         }
     }
 
-    bool Auth::deleteSession(const std::string &session_id) const {
+    bool MbAuth::deleteSession(const std::string &session_id) const {
         try {
             const auto &sql = mApp.db().session();
             *sql << "DELETE FROM mb_sessions WHERE id = :id", soci::use(session_id);
@@ -174,7 +174,7 @@ namespace mb {
         }
     }
 
-    json Auth::refreshSession(const std::string &old_session_id, const std::string &entity_name,
+    json MbAuth::refreshSession(const std::string &old_session_id, const std::string &entity_name,
                               const std::string &user_id) {
         const auto &sql = mApp.db().session();
         auto now = getCurrentTimestampUTC();
@@ -200,15 +200,15 @@ namespace mb {
     }
 
 #ifdef MB_SCRIPTING_ENABLED
-    std::string Auth::createTokenJson(const std::string &claims_json, const int timeout) const {
+    std::string MbAuth::createTokenJson(const std::string &claims_json, const int timeout) const {
         return createToken(json::parse(claims_json), timeout);
     }
 
-    std::string Auth::verifyTokenJson(const std::string &token) const {
+    std::string MbAuth::verifyTokenJson(const std::string &token) const {
         return verifyToken(token).dump();
     }
 
-    std::string Auth::refreshSessionJson(const std::string &old_session_id,
+    std::string MbAuth::refreshSessionJson(const std::string &old_session_id,
                                          const std::string &entity_name,
                                          const std::string &user_id) {
         return refreshSession(old_session_id, entity_name, user_id).dump();

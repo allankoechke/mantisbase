@@ -16,7 +16,7 @@
 
 namespace mb {
     MbRequest::MbRequest(const MantisBase &app, drogon::HttpRequestPtr _req)
-        : IMantisBase(app),
+        : MbAppMixin(app),
           m_req(std::move(_req)) {
     }
 
@@ -253,11 +253,11 @@ namespace mb {
             if (trim(body).empty()) m_unifiedJson = json::object();
             else m_unifiedJson = json::parse(body);
         } catch (const std::exception &) {
-            throw MantisException(400, "Invalid JSON in request body.");
+            throw MbException(400, "Invalid JSON in request body.");
         }
     }
 
-    void MbRequest::parseFormDataToEntity(const Entity &entity) const {
+    void MbRequest::parseFormDataToEntity(const MbEntity &entity) const {
         ensureBodyParsed();
         if (!isMultipartFormData()) {
             return;
@@ -269,30 +269,30 @@ namespace mb {
         for (const auto &form_data: m_formData) {
             if (!form_data.filename.empty()) {
                 if (uploads_disabled) {
-                    throw MantisException(503, "File uploads are disabled.");
+                    throw MbException(503, "File uploads are disabled.");
                 }
 
                 if (!entity.hasField(form_data.name)) {
-                    throw MantisException(
+                    throw MbException(
                         400,
                         fmt::format("Unknown field `{}` for file type upload!", form_data.name)
                     );
                 }
 
-                const auto e_field = EntitySchemaField(entity.field(form_data.name).value());
+                const auto e_field = MbEntitySchemaField(entity.field(form_data.name).value());
 
                 if (!(e_field.type() == "file" || e_field.type() == "files")) {
-                    throw MantisException(
+                    throw MbException(
                         400,
                         fmt::format("Field `{}` is not of type `file` or `files`!", form_data.name)
                     );
                 }
 
-                // `maxFileSize` is stored in bytes (see KeyValStore defaults).
+                // `maxFileSize` is stored in bytes (see MbKVStore defaults).
                 const auto max_file_size = mbApp().settings().configs()
                                                 .value("maxFileSize", 10 * 1024 * 1024);
                 if (max_file_size > 0 && form_data.content.size() > static_cast<size_t>(max_file_size)) {
-                    throw MantisException(
+                    throw MbException(
                         413,
                         fmt::format("File `{}` exceeds the maximum allowed size of {} bytes.",
                                     form_data.filename, max_file_size)
@@ -303,7 +303,7 @@ namespace mb {
                 const std::string ext = upload_path.has_extension()
                     ? upload_path.extension().string() : std::string{};
                 if (!ext.empty() && !isAllowedFileExtension(ext)) {
-                    throw MantisException(
+                    throw MbException(
                         415,
                         fmt::format("File extension `{}` is not allowed.", ext)
                     );
@@ -332,7 +332,7 @@ namespace mb {
                         json_body[form_data.name].push_back(new_filename);
                         json_files[form_data.name].push_back(file_record);
                     } catch (const std::exception &) {
-                        throw MantisException(
+                        throw MbException(
                             500,
                             "Error parsing file upload data."
                         );
@@ -342,7 +342,7 @@ namespace mb {
                 try {
                     auto e_field_opt = entity.field(form_data.name);
                     if (e_field_opt.has_value()) {
-                        auto schema_field = EntitySchemaField(e_field_opt.value());
+                        auto schema_field = MbEntitySchemaField(e_field_opt.value());
 
                         try {
                             const auto &type = schema_field.type();
@@ -352,7 +352,7 @@ namespace mb {
                                                 ? nullptr
                                                 : json::parse(form_data.content);
                                 if (!data.is_array() && !data.is_null()) {
-                                    throw MantisException(400, fmt::format(
+                                    throw MbException(400, fmt::format(
                                                               "Error parsing field `{}`, expected an array!",
                                                               form_data.name));
                                 }
@@ -369,13 +369,13 @@ namespace mb {
                                 json_body[form_data.name] = v;
                             }
                         } catch (const std::exception &) {
-                            throw MantisException(500, "Error processing form data.");
+                            throw MbException(500, "Error processing form data.");
                         }
                     }
-                } catch (const MantisException &) {
+                } catch (const MbException &) {
                     throw;
                 } catch (const std::exception &) {
-                    throw MantisException(500, "Error processing form data.");
+                    throw MbException(500, "Error processing form data.");
                 }
             }
         }
@@ -400,7 +400,7 @@ namespace mb {
             });
 
             if (it == file_list.end()) {
-                throw MantisException(500, "Error writing files, hash mismatch!");
+                throw MbException(500, "Error writing files, hash mismatch!");
             }
 
             const auto &file_record = *it;
@@ -410,7 +410,7 @@ namespace mb {
                 ofs.close();
             } else {
                 undoWrittenFiles(entity_name);
-                throw MantisException(500, "Failed to open `" + formData.filename + "` file for writing.");
+                throw MbException(500, "Failed to open `" + formData.filename + "` file for writing.");
             }
         }
     }
@@ -462,7 +462,7 @@ namespace mb {
 #ifdef MB_SCRIPTING_ENABLED
     namespace {
         duk_context *scriptingCtx() {
-            if (const auto *engine = ScriptingEngine::active()) {
+            if (const auto *engine = MbScriptingEngine::active()) {
                 return engine->ctx();
             }
             return nullptr;
@@ -566,7 +566,7 @@ namespace mb {
         }
     }
 #else
-    void MantisRequest::registerDuktapeMethods() {
+    void MbRequest::registerDuktapeMethods() {
     }
 #endif
 } // namespace mb

@@ -8,9 +8,9 @@ namespace mb {
 
     static constexpr size_t kMaxWSConnections = 1024;
 
-    WSMgr::WSMgr(const MantisBase& app) : m_app(app) {}
+    MbWSMgr::MbWSMgr(const MantisBase& app) : m_app(app) {}
 
-    void WSMgr::addConnection(const drogon::WebSocketConnectionPtr &conn,
+    void MbWSMgr::addConnection(const drogon::WebSocketConnectionPtr &conn,
                                 RealtimeWsSession session) {
         std::lock_guard lock(m_mutex);
         if (m_sessions.size() >= kMaxWSConnections) {
@@ -22,7 +22,7 @@ namespace mb {
         m_connTopics[conn] = {};
     }
 
-    void WSMgr::removeConnection(const drogon::WebSocketConnectionPtr &conn) {
+    void MbWSMgr::removeConnection(const drogon::WebSocketConnectionPtr &conn) {
         std::lock_guard lock(m_mutex);
         if (auto it = m_connTopics.find(conn); it != m_connTopics.end()) {
             removeTopicsFromIndexes(conn, it->second);
@@ -31,7 +31,7 @@ namespace mb {
         m_sessions.erase(conn);
     }
 
-    void WSMgr::removeTopicsFromIndexes(const drogon::WebSocketConnectionPtr &conn,
+    void MbWSMgr::removeTopicsFromIndexes(const drogon::WebSocketConnectionPtr &conn,
                                         const std::set<std::string> &topics) {
         for (const auto &topic : topics) {
             if (auto tit = m_topicConns.find(topic); tit != m_topicConns.end()) {
@@ -43,7 +43,7 @@ namespace mb {
         }
     }
 
-    void WSMgr::setTopics(const drogon::WebSocketConnectionPtr &conn,
+    void MbWSMgr::setTopics(const drogon::WebSocketConnectionPtr &conn,
                           const std::vector<std::string> &topics) {
         std::lock_guard lock(m_mutex);
         auto &connTopics = m_connTopics[conn];
@@ -61,7 +61,7 @@ namespace mb {
         }
     }
 
-    void WSMgr::unsubscribe(const drogon::WebSocketConnectionPtr &conn,
+    void MbWSMgr::unsubscribe(const drogon::WebSocketConnectionPtr &conn,
                              const std::vector<std::string> &topics) {
         std::lock_guard lock(m_mutex);
         if (auto it = m_connTopics.find(conn); it != m_connTopics.end()) {
@@ -82,7 +82,7 @@ namespace mb {
         }
     }
 
-    void WSMgr::broadcastChange(const json &change_event) {
+    void MbWSMgr::broadcastChange(const json &change_event) {
         std::lock_guard lock(m_mutex);
         auto formatted = formatEvent(change_event);
         auto msg = formatted.dump();
@@ -94,12 +94,12 @@ namespace mb {
         }
     }
 
-    size_t WSMgr::connectionCount() {
+    size_t MbWSMgr::connectionCount() {
         std::lock_guard lock(m_mutex);
         return m_sessions.size();
     }
 
-    RealtimeWsSession *WSMgr::getSession(const drogon::WebSocketConnectionPtr &conn) {
+    RealtimeWsSession *MbWSMgr::getSession(const drogon::WebSocketConnectionPtr &conn) {
         std::lock_guard lock(m_mutex);
         if (auto it = m_sessions.find(conn); it != m_sessions.end()) {
             return &it->second;
@@ -107,7 +107,7 @@ namespace mb {
         return nullptr;
     }
 
-    void WSMgr::cleanupStaleConnections(const MantisBase &app,
+    void MbWSMgr::cleanupStaleConnections(const MantisBase &app,
                                         const std::chrono::steady_clock::time_point now) {
         struct StaleConn {
             drogon::WebSocketConnectionPtr conn;
@@ -153,7 +153,7 @@ namespace mb {
         }
     }
 
-    bool WSMgr::isInterestedIn(const std::set<std::string> &topics,
+    bool MbWSMgr::isInterestedIn(const std::set<std::string> &topics,
                                 const json &change_event) const {
         const auto entity = change_event["entity"].get<std::string>();
         const auto row_id = change_event["row_id"].get<std::string>();
@@ -167,7 +167,7 @@ namespace mb {
         return false;
     }
 
-    json WSMgr::formatEvent(const json &change_event) const {
+    json MbWSMgr::formatEvent(const json &change_event) const {
         auto entity = change_event["entity"].get<std::string>();
         auto row_id = change_event["row_id"].get<std::string>();
         auto operation = change_event["type"].get<std::string>();
@@ -232,14 +232,14 @@ namespace mb {
             auto session_auth = session.auth;
             const auto upgrade = tryUpgradeAuth(session_auth, incoming_auth);
 
-            if (upgrade == AuthUpgradeResult::DeniedDowngrade ||
-                upgrade == AuthUpgradeResult::DeniedSwitch) {
-                json err = {{"type", "error"}, {"message", "Auth upgrade denied"}};
+            if (upgrade == MbAuthUpgradeResult::DeniedDowngrade ||
+                upgrade == MbAuthUpgradeResult::DeniedSwitch) {
+                json err = {{"type", "error"}, {"message", "MbAuth upgrade denied"}};
                 conn->send(err.dump());
                 return;
             }
 
-            if (upgrade == AuthUpgradeResult::Applied) {
+            if (upgrade == MbAuthUpgradeResult::Applied) {
                 session.auth = session_auth;
             }
 
@@ -269,7 +269,7 @@ namespace mb {
         }
     }
 
-    void RealtimeWSController::handleNewConnection(
+    void MbRealtimeWSController::handleNewConnection(
         const drogon::HttpRequestPtr &req,
         const drogon::WebSocketConnectionPtr &conn) {
 
@@ -300,7 +300,7 @@ namespace mb {
         conn->send(welcome.dump());
     }
 
-    void RealtimeWSController::handleNewMessage(
+    void MbRealtimeWSController::handleNewMessage(
         const drogon::WebSocketConnectionPtr &conn,
         std::string &&message,
         const drogon::WebSocketMessageType &type) {
@@ -337,7 +337,7 @@ namespace mb {
         }
     }
 
-    void RealtimeWSController::handleConnectionClosed(
+    void MbRealtimeWSController::handleConnectionClosed(
         const drogon::WebSocketConnectionPtr &conn) {
 
         m_app.logger().info("WebSocket", "WS connection closed");

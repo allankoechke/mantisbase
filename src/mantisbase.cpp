@@ -30,7 +30,7 @@ namespace mb {
         : m_dbType("sqlite3"),
           m_startTime(std::chrono::steady_clock::now()) {
         std::cout << "mantisbase v" << appVersion() << std::endl << std::endl;
-        m_logger = std::make_unique<Logger>(*this);
+        m_logger = std::make_unique<MbLogger>(*this);
         m_snowflakeId.init(1, 1);
     }
 
@@ -220,14 +220,14 @@ namespace mb {
             quit(-1, "Failed to create database directories!");
 
         // Create instance objects
-        m_database = std::make_unique<Database>(*this); // depends on log()
-        m_realtime = std::make_unique<RealtimeDB>(*this); // depends on db()
-        m_router = std::make_unique<Router>(*this); // depends on db() & http()
+        m_database = std::make_unique<MbDatabase>(*this); // depends on log()
+        m_realtime = std::make_unique<MbRealtimeDB>(*this); // depends on db()
+        m_router = std::make_unique<MbRouter>(*this); // depends on db() & http()
         m_mailer = std::make_unique<MbMailer>(*this);
-        m_kvStore = std::make_unique<KeyValStore>(*this); // depends on db(), router() & http()
+        m_kvStore = std::make_unique<MbKVStore>(*this); // depends on db(), router() & http()
         m_opts = std::make_unique<argparse::ArgumentParser>();
-        m_files = std::make_unique<FilesMgr>(*this);
-        m_auth = std::make_unique<Auth>(*this);
+        m_files = std::make_unique<MbFilesMgr>(*this);
+        m_auth = std::make_unique<MbAuth>(*this);
     }
 
     int MantisBase::quit(const int &exitCode, const std::string &reason) {
@@ -248,7 +248,7 @@ namespace mb {
 
         logger().trace("Core", "Closing Units");
         try {
-            // Reset Auth object
+            // Reset MbAuth object
             if (m_auth) m_auth.reset();
 
             // Reset files manager
@@ -264,7 +264,7 @@ namespace mb {
             if (m_router) {
                 m_router->close();
                 m_router.reset();
-                logger().trace("Router", "Router stopped");
+                logger().trace("MbRouter", "MbRouter stopped");
             }
 
             // Reset realtime db & worker
@@ -288,7 +288,7 @@ namespace mb {
         m_isCreated.store(false);
 
         // Mark logger instance as destroyed
-        Logger::isDbInitialized.store(false);
+        MbLogger::isDbInitialized.store(false);
         logger().debug("Core", "Shutdown Complete");
     }
 
@@ -334,9 +334,9 @@ namespace mb {
         return 0;
     }
 
-    Database &MantisBase::db() const {
+    MbDatabase &MantisBase::db() const {
         if (!isCreated()) {
-            throw MantisException(500, "DB is not created!");
+            throw MbException(500, "DB is not created!");
         }
 
         return *m_database;
@@ -346,49 +346,49 @@ namespace mb {
         return *m_opts;
     }
 
-    Router &MantisBase::router() const {
+    MbRouter &MantisBase::router() const {
         if (!isCreated()) {
-            throw MantisException(500, "Router is not created!");
+            throw MbException(500, "MbRouter is not created!");
         }
 
         return *m_router;
     }
 
-    KeyValStore &MantisBase::settings() const {
+    MbKVStore &MantisBase::settings() const {
         if (!isCreated()) {
-            throw MantisException(500, "KV Store is not created!");
+            throw MbException(500, "KV Store is not created!");
         }
 
         return *m_kvStore;
     }
 
-    Logger &MantisBase::logs() const {
+    MbLogger &MantisBase::logs() const {
         return *m_logger;
     }
 
-    RealtimeDB &MantisBase::rt() const {
+    MbRealtimeDB &MantisBase::rt() const {
         if (!isCreated()) {
-            throw MantisException(500, "Rt Db is not created!");
+            throw MbException(500, "Rt Db is not created!");
         }
 
         return *m_realtime;
     }
 
-    FilesMgr &MantisBase::files() const {
+    MbFilesMgr &MantisBase::files() const {
         if (!isCreated()) {
-            throw MantisException(500, "File Mgr is not created!");
+            throw MbException(500, "File Mgr is not created!");
         }
 
         return *m_files;
     }
 
-    Logger &MantisBase::logger() const {
+    MbLogger &MantisBase::logger() const {
         return *m_logger;
     }
 
-    Auth &MantisBase::auth() const {
+    MbAuth &MantisBase::auth() const {
         if (!isCreated()) {
-            throw MantisException(500, "Auth Mgr is not created!");
+            throw MbException(500, "MbAuth Mgr is not created!");
         }
 
         return *m_auth;
@@ -397,15 +397,15 @@ namespace mb {
 
     MbMailer& MantisBase::mailer() const {
         if (!isCreated()) {
-            throw MantisException(500, "Mailer is not created!");
+            throw MbException(500, "Mailer is not created!");
         }
 
         return *m_mailer;
     }
 
-    Entity MantisBase::entity(const std::string &entity_name) const {
-        if (!EntitySchema::isValidEntityName(entity_name))
-            throw MantisException(400,
+    MbEntity MantisBase::entity(const std::string &entity_name) const {
+        if (!MbEntitySchema::isValidEntityName(entity_name))
+            throw MbException(400,
                                   std::format("Invalid entity name `{}` provided.", entity_name));
 
         // Get schema cache from db, check if we have this data, return data if available
@@ -520,7 +520,7 @@ namespace mb {
             return;
         }
 
-        throw MantisException(500, "Expected database type of either `sqlite3` or `postgresql` but got {}", dbType);
+        throw MbException(500, "Expected database type of either `sqlite3` or `postgresql` but got {}", dbType);
     }
 
     std::string MantisBase::jwtSecretKey() const {
@@ -536,7 +536,7 @@ namespace mb {
         if (isDevMode())
             return "mb-insecure-dev-secret-do-not-use-in-production";
 
-        throw MantisException(500, "MB_JWT_SECRET env var is not configured");
+        throw MbException(500, "MB_JWT_SECRET env var is not configured");
     }
 
     std::string MantisBase::snowflakeId() const {
@@ -683,7 +683,7 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
     void MantisBase::initJSEngine() {
-        m_scripting = std::make_unique<ScriptingEngine>(*this);
+        m_scripting = std::make_unique<MbScriptingEngine>(*this);
         m_scripting->init();
     }
 
@@ -709,31 +709,31 @@ namespace mb {
         quit(code, msg);
     }
 
-    Database *MantisBase::duk_db() const {
+    MbDatabase *MantisBase::duk_db() const {
         return m_database.get();
     }
 
-    Router *MantisBase::duk_router() const {
+    MbRouter *MantisBase::duk_router() const {
         return m_router.get();
     }
 
-    KeyValStore *MantisBase::duk_settings() const {
+    MbKVStore *MantisBase::duk_settings() const {
         return m_kvStore.get();
     }
 
-    Auth *MantisBase::duk_auth() const {
+    MbAuth *MantisBase::duk_auth() const {
         return m_auth.get();
     }
 
-    FilesMgr *MantisBase::duk_files() const {
+    MbFilesMgr *MantisBase::duk_files() const {
         return m_files.get();
     }
 
-    Logger *MantisBase::duk_logs() const {
+    MbLogger *MantisBase::duk_logs() const {
         return m_logger.get();
     }
 
-    RealtimeDB *MantisBase::duk_rt() const {
+    MbRealtimeDB *MantisBase::duk_rt() const {
         return m_realtime.get();
     }
 

@@ -8,11 +8,11 @@
 
 namespace mb {
     void registerLogsBindings(duk_context *ctx) {
-        dukglue_register_method(ctx, &Logger::jsInfo, "info");
-        dukglue_register_method(ctx, &Logger::jsWarn, "warn");
-        dukglue_register_method(ctx, &Logger::jsError, "error");
-        dukglue_register_method(ctx, &Logger::jsDebug, "debug");
-        dukglue_register_method(ctx, &Logger::jsTrace, "trace");
+        dukglue_register_method(ctx, &MbLogger::jsInfo, "info");
+        dukglue_register_method(ctx, &MbLogger::jsWarn, "warn");
+        dukglue_register_method(ctx, &MbLogger::jsError, "error");
+        dukglue_register_method(ctx, &MbLogger::jsDebug, "debug");
+        dukglue_register_method(ctx, &MbLogger::jsTrace, "trace");
     }
 }
 
