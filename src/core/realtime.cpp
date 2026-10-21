@@ -151,7 +151,7 @@ void mb::MbRealtimeDB::addDbHooks(const MbEntity &entity, const std::shared_ptr<
 
     else
         throw MbException(400,
-                              std::format("Realtime Mgr: MbDatabase Hooks not implemented for db type `{}`", db_type));
+                              std::format("Realtime Mgr: Database Hooks not implemented for db type `{}`", db_type));
 }
 
 void mb::MbRealtimeDB::dropDbHooks(const std::string &entity_name) const {
@@ -161,7 +161,7 @@ void mb::MbRealtimeDB::dropDbHooks(const std::string &entity_name) const {
 
 void mb::MbRealtimeDB::dropDbHooks(const std::string &entity_name, const std::shared_ptr<soci::session> &sess) {
     if (!MbEntitySchema::isValidEntityName(entity_name)) {
-        throw MbException(400, "Invalid MbEntity name.");
+        throw MbException(400, "Invalid Entity name.");
     }
 
     if (const auto db_type = sess->get_backend_name(); db_type == "sqlite3") {
@@ -308,7 +308,7 @@ mb::MbRtDbWorker::MbRtDbWorker(const MantisBase &app)
     }
 #endif
     else {
-        throw MbException(500, std::format("Worker: MbDatabase type `{}` is not supported!", m_db_type));
+        throw MbException(500, std::format("Worker: Database type `{}` is not supported!", m_db_type));
     }
 
     // Setup the thread only after database has been fully initialized
@@ -355,7 +355,7 @@ void mb::MbRtDbWorker::stopWorker() {
 
 void mb::MbRtDbWorker::run() {
     if (!isDbRunning()) {
-        throw MbException(500, "Worker: MbDatabase is not running!");
+        throw MbException(500, "Worker: Database is not running!");
     }
 
     if (m_db_type == "sqlite3")

@@ -234,7 +234,7 @@ namespace mb {
 
             if (upgrade == MbAuthUpgradeResult::DeniedDowngrade ||
                 upgrade == MbAuthUpgradeResult::DeniedSwitch) {
-                json err = {{"type", "error"}, {"message", "MbAuth upgrade denied"}};
+                json err = {{"type", "error"}, {"message", "Auth upgrade denied"}};
                 conn->send(err.dump());
                 return;
             }

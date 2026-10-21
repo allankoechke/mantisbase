@@ -398,9 +398,9 @@ namespace mb {
     }
 
     std::optional<std::string> MbEntitySchemaField::validate() const {
-        if (m_name.empty()) return "MbEntity field name is empty";
+        if (m_name.empty()) return "Entity field name is empty";
         if (!isValidFieldName(m_name)) return "Invalid field name: expected 1-64 alphanumeric or underscore characters.";
-        if (m_type.empty()) return "MbEntity field type is empty";
+        if (m_type.empty()) return "Entity field type is empty";
 
         if (m_type == "int") {
             if (const auto err = validateIntConstraintBounds(toJSON()); err.has_value()) {

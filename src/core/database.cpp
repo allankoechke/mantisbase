@@ -91,7 +91,7 @@ namespace mb {
                         sql.set_query_context_logging_mode(soci::log_context::on_error);
 #else
                     mbApp.logger().warn("MbDatabase", "PostgreSQL Not Implemented",
-                                      "MbDatabase Connection for `PostgreSQL` has not been implemented yet!");
+                                      "Database Connection for `PostgreSQL` has not been implemented yet!");
                     return false;
 #endif
                 } else if (db_type == "mysql") {
@@ -111,7 +111,7 @@ namespace mb {
 #endif
                 } else {
                     mbApp.logger().warn("MbDatabase", "MbDatabase Type Not Implemented",
-                                      fmt::format("MbDatabase Connection to `{}` Not Implemented Yet!", conn_str));
+                                      fmt::format("Database Connection to `{}` Not Implemented Yet!", conn_str));
                     return false;
                 }
             }
@@ -158,7 +158,7 @@ namespace mb {
                 }
             } catch (const soci::soci_error &e) {
                 mbApp.logger().critical("MbDatabase", "Disconnection Error",
-                                      fmt::format("MbDatabase disconnection soci::error at index `{}`: {}", i, e.what()));
+                                      fmt::format("Database disconnection soci::error at index `{}`: {}", i, e.what()));
             } catch (...) {
                 // Ignore other errors during session close
             }
@@ -368,7 +368,7 @@ namespace mb {
                     }
                 } catch (std::exception &e) {
                     mbApp.logger().critical("MbDatabase", "SOCI Connection Error",
-                                          fmt::format("MbDatabase Connection SOCI::Error: {}", e.what()));
+                                          fmt::format("Database Connection SOCI::Error: {}", e.what()));
                 }
             }
         } catch (...) {

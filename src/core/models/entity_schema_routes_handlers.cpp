@@ -20,7 +20,7 @@ namespace mb {
             try {
                 const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
-                    throw MbException(400, "MbEntitySchema `id` or `name` is required on the route!");
+                    throw MbException(400, "EntitySchema `id` or `name` is required on the route!");
 
                 const auto schema_id = schemaIdFromPathParam(schema_id_or_name);
                 const auto record = MbEntitySchema::getTable(req.mbApp(), schema_id);
@@ -123,7 +123,7 @@ namespace mb {
             try {
                 const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
-                    throw MbException(400, "MbEntitySchema `id` or `name` is required on the route!");
+                    throw MbException(400, "EntitySchema `id` or `name` is required on the route!");
 
                 const auto schema_id = schemaIdFromPathParam(schema_id_or_name);
 
@@ -165,7 +165,7 @@ namespace mb {
             try {
                 const auto schema_id_or_name = trim(req.pathParamValue("schema_name_or_id"));
                 if (schema_id_or_name.empty())
-                    throw MbException(400, "MbEntitySchema `id` or `name` is required on the route!");
+                    throw MbException(400, "EntitySchema `id` or `name` is required on the route!");
 
                 const auto schema_id = schemaIdFromPathParam(schema_id_or_name);
                 MbEntitySchema::dropTable(req.mbApp(), schema_id);

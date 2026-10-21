@@ -231,7 +231,7 @@ namespace mb {
         // unused, kept for API completeness.
         std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
-            throw MbException(404, "MbEntity schema for " + table_name + " was not found!");
+            throw MbException(404, "Entity schema for " + table_name + " was not found!");
         }
 
         return m_entityMap.at(table_name).schema();
@@ -245,7 +245,7 @@ namespace mb {
     MbEntity MbRouter::schemaCacheEntity(const std::string &table_name) const {
         std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
-            throw MbException(404, "MbEntity schema for `" + table_name + "` was not found!");
+            throw MbException(404, "Entity schema for `" + table_name + "` was not found!");
         }
 
         // Returns a copy, so it stays valid after the lock is released.
@@ -288,7 +288,7 @@ namespace mb {
 
     void MbRouter::removeSchemaCacheLocked(const std::string &entity_name) const {
         if (!m_entityMap.contains(entity_name)) {
-            throw MbException(404, "Could not find MbEntitySchema for " + entity_name);
+            throw MbException(404, "Could not find EntitySchema for " + entity_name);
         }
 
         m_entityMap.erase(entity_name);
@@ -469,7 +469,7 @@ namespace mb {
 
             if (!req.mbApp().hasEntity(table_name)) {
                 res.sendJSON(404, {
-                    {"error", "MbEntity not found."},
+                    {"error", "Entity not found."},
                     {"status", 404},
                     {"data", json::object()}
                 });

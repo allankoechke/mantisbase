@@ -42,7 +42,7 @@ namespace mb {
             if (normalized == "psql" || normalized == "postgresql" || normalized == "postgres")
                 return "postgresql";
 
-            throw MbException(500, std::format("Backend MbDatabase `{}` is unsupported!", db));
+            throw MbException(500, std::format("Backend Database `{}` is unsupported!", db));
         }
 
         std::string resolveDbUrl(const std::optional<std::string> &cli_url) {
@@ -304,11 +304,11 @@ namespace mb {
         program.add_argument("--db")
                 .nargs(1)
                 .metavar("TYPE")
-                .help("MbDatabase type: sqlite3, postgresql, mysql (overridden by MB_DATABASE_TYPE)");
+                .help("Database type: sqlite3, postgresql, mysql (overridden by MB_DATABASE_TYPE)");
         program.add_argument("--db-url")
                 .nargs(1)
                 .metavar("URL")
-                .help("MbDatabase connection URL (overridden by MB_DATABASE_URL)");
+                .help("Database connection URL (overridden by MB_DATABASE_URL)");
 
         argparse::ArgumentParser serve_command("serve");
         serve_command.add_description("Start the HTTP server");
@@ -324,7 +324,7 @@ namespace mb {
                 .help("Skip first-boot admin browser setup (also MB_SKIP_ADMIN_SETUP=1)");
         serve_command.add_argument("--pool-size", "--poolSize")
                 .scan<'i', int>()
-                .help("MbDatabase connection pool size (default: 4 for sqlite3, 10 for postgresql)");
+                .help("Database connection pool size (default: 4 for sqlite3, 10 for postgresql)");
 
         // `mantisbase admin` subcommand
         argparse::ArgumentParser admins_command("admins");
@@ -464,18 +464,18 @@ namespace mb {
 
         // Check if database is connected
         if (!m_database->connect(conn_string)) {
-            quit(500, "MbDatabase connection failed, exiting!");
+            quit(500, "Database connection failed, exiting!");
         }
 
         //Check that system tables were created
         if (!m_database->createSysTables()) {
-            quit(500, "MbDatabase migration failed, exiting!");
+            quit(500, "Database migration failed, exiting!");
         }
 
         // Check that database connection was established
         if (!m_database->isConnected()) {
             logger().critical("MbDatabase", "MbDatabase Not Opened", "MbDatabase was not opened!");
-            quit(500, "MbDatabase opening failed!");
+            quit(500, "Database opening failed!");
         }
 
         // Check that realtime database was started

@@ -348,7 +348,7 @@ namespace mb {
 
     MbRouter &MantisBase::router() const {
         if (!isCreated()) {
-            throw MbException(500, "MbRouter is not created!");
+            throw MbException(500, "Router is not created!");
         }
 
         return *m_router;
@@ -388,7 +388,7 @@ namespace mb {
 
     MbAuth &MantisBase::auth() const {
         if (!isCreated()) {
-            throw MbException(500, "MbAuth Mgr is not created!");
+            throw MbException(500, "Auth Mgr is not created!");
         }
 
         return *m_auth;

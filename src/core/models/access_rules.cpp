@@ -301,7 +301,7 @@ namespace mb {
                 if (rule.mode().empty()) {
                     return {401, "Admin auth required to access this resource!"};
                 }
-                return {401, "MbAuth required to access this resource!"};
+                return {401, "Auth required to access this resource!"};
             case MbAccessEvalResult::DenyForbidden:
                 if (rule.mode().empty()) {
                     return {403, "Admin auth required to access this resource."};

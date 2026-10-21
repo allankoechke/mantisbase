@@ -12,7 +12,7 @@ namespace mb {
 
                 const auto entity_id = trim(req.pathParamValue("id"));
                 if (entity_id.empty())
-                    throw MbException(400, "MbEntity `id` is required!");
+                    throw MbException(400, "Entity `id` is required!");
 
                 if (const auto record = entity.read(entity_id); record.has_value()) {
                     res.sendJSON(200, {
@@ -157,7 +157,7 @@ namespace mb {
 
                 const auto entity_id = trim(req.pathParamValue("id"));
                 if (entity_id.empty())
-                    throw MbException(400, "MbEntity `id` is required!");
+                    throw MbException(400, "Entity `id` is required!");
 
                 req.parseFormDataToEntity(entity);
 
@@ -206,7 +206,7 @@ namespace mb {
 
                 const auto entity_id = trim(req.pathParamValue("id"));
                 if (entity_id.empty())
-                    throw MbException(400, "MbEntity `id` is required!");
+                    throw MbException(400, "Entity `id` is required!");
 
                 entity.remove(entity_id);
                 res.sendEmpty();

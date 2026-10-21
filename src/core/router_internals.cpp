@@ -535,7 +535,7 @@ namespace mb {
                     res.sendJSON(401, {
                                      {"data", json::object()},
                                      {"status", 401},
-                                     {"error", "MbAuth required to access this resource!"}
+                                     {"error", "Auth required to access this resource!"}
                                  });
                     return;
                 }

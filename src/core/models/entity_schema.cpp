@@ -747,7 +747,7 @@ namespace mb {
 
     std::optional<std::string> MbEntitySchema::validate(const MbEntitySchema &table_schema) {
         if (table_schema.name().empty())
-            return "MbEntity schema name is empty!";
+            return "Entity schema name is empty!";
 
         if (!(table_schema.type() == "base" || table_schema.type() == "view" || table_schema.type() == "auth")) {
             return "Expected entity type to be either `base`, `auth` or `view`!";
@@ -755,7 +755,7 @@ namespace mb {
 
         if (table_schema.type() == "view") {
             if (trim(table_schema.viewQuery()).empty())
-                return "MbEntity schema view query is empty!";
+                return "Entity schema view query is empty!";
             // TODO check if query is a valid SQL view query
         } else {
             // First validate each field
@@ -820,7 +820,7 @@ namespace mb {
             if (table_schema.type() == "base") {
                 for (const auto &field_name: MbEntitySchemaField::defaultBaseFields()) {
                     if (!table_schema.hasField(field_name))
-                        return "MbEntity schema does not have field: `" + field_name + "` required for `" + table_schema.
+                        return "Entity schema does not have field: `" + field_name + "` required for `" + table_schema.
                                type() + "` types.";
                 }
             }
@@ -828,7 +828,7 @@ namespace mb {
             if (table_schema.type() == "auth") {
                 for (const auto &field_name: MbEntitySchemaField::defaultAuthFields()) {
                     if (!table_schema.hasField(field_name))
-                        return "MbEntity schema does not have field: `" + field_name + "` required for `" + table_schema.
+                        return "Entity schema does not have field: `" + field_name + "` required for `" + table_schema.
                                type() + "` types.";
                 }
             }

@@ -125,7 +125,7 @@ namespace mb {
         auto redirect_uri = state_row.get<std::string>(4);
 
         if (stored_entity != entity_name) {
-            throw std::runtime_error("MbEntity name mismatch in OAuth state");
+            throw std::runtime_error("Entity name mismatch in OAuth state");
         }
 
         // Delete used state

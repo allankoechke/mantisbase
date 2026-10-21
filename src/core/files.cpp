@@ -18,8 +18,8 @@ namespace mb {
 
     void MbFilesMgr::createDir(const std::string &entity_name) const {
         if (!MbEntitySchema::isValidEntityName(entity_name)) {
-            throw MbException(500, "Invalid MbEntity Name",
-                                  std::format("Provided MbEntity Name: `{}`", entity_name));
+            throw MbException(500, "Invalid Entity Name",
+                                  std::format("Provided Entity Name: `{}`", entity_name));
         }
 
         if (entity_name.empty()) {
@@ -37,13 +37,13 @@ namespace mb {
         if (old_entity_name == new_entity_name) return;
 
         if (!MbEntitySchema::isValidEntityName(old_entity_name)) {
-            throw MbException(500, "Invalid MbEntity Name",
+            throw MbException(500, "Invalid Entity Name",
                                   std::format("Old entity name `{}` is not a valid SQL table name format!",
                                               old_entity_name));
         }
 
         if (!MbEntitySchema::isValidEntityName(new_entity_name)) {
-            throw MbException(500, "Invalid MbEntity Name",
+            throw MbException(500, "Invalid Entity Name",
                                   std::format("New entity name `{}` is not a valid SQL table name format!",
                                               new_entity_name));
         }
@@ -67,8 +67,8 @@ namespace mb {
 
     std::optional<std::string> MbFilesMgr::getFilePath(const std::string &entity_name, const std::string &filename) {
         if (!MbEntitySchema::isValidEntityName(entity_name)) {
-            throw MbException(500, "Invalid MbEntity Name",
-                                  std::format("MbEntity name `{}` is not a valid SQL table name format!", entity_name));
+            throw MbException(500, "Invalid Entity Name",
+                                  std::format("Entity name `{}` is not a valid SQL table name format!", entity_name));
         }
 
         // Check if file exists, if so, return the path, else, return std::nullopt
@@ -104,7 +104,7 @@ namespace mb {
 
         if (!isCanonicalPath(path)) {
             throw MbException(500, "Path transversal detected.",
-                                  std::format("MbEntity name `{}` results in path transversal.", entity_name));
+                                  std::format("Entity name `{}` results in path transversal.", entity_name));
         }
 
         if (!fs::exists(path) && create_if_missing) {
@@ -116,8 +116,8 @@ namespace mb {
 
     std::string MbFilesMgr::filePath(const std::string &entity_name, const std::string &filename) const {
         if (!MbEntitySchema::isValidEntityName(entity_name)) {
-            throw MbException(500, "Invalid MbEntity Name",
-                                  std::format("MbEntity name `{}` is not a valid SQL table name format!", entity_name));
+            throw MbException(500, "Invalid Entity Name",
+                                  std::format("Entity name `{}` is not a valid SQL table name format!", entity_name));
         }
 
         // TODO add proper filename check?

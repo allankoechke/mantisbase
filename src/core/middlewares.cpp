@@ -38,7 +38,7 @@ namespace mb {
                 res.sendJSON(401, {
                                  {"data", json::object()},
                                  {"status", 401},
-                                 {"error", "MbAuth required to access this resource!"}
+                                 {"error", "Auth required to access this resource!"}
                              });
                 return std::nullopt;
             }
@@ -62,7 +62,7 @@ namespace mb {
                 res.sendJSON(401, {
                                  {"data", json::object()},
                                  {"status", 401},
-                                 {"error", "MbAuth user not found!"}
+                                 {"error", "Auth user not found!"}
                              });
                 return std::nullopt;
             }
@@ -416,7 +416,7 @@ namespace mb {
                     res.sendJSON(401, {
                                      {"data", json::object()},
                                      {"status", 401},
-                                     {"error", "MbAuth required to access this resource!"}
+                                     {"error", "Auth required to access this resource!"}
                                  });
                     return MbHandlerResponse::Handled;
                 }
@@ -433,7 +433,7 @@ namespace mb {
                         res.sendJSON(401, {
                                          {"data", json::object()},
                                          {"status", 401},
-                                         {"error", "MbAuth user not found!"}
+                                         {"error", "Auth user not found!"}
                                      });
                         return MbHandlerResponse::Handled;
                     }
@@ -544,7 +544,7 @@ namespace mb {
                 res.sendJSON(403, {
                                  {"status", 403},
                                  {"data", json::object()},
-                                 {"error", std::format("MbAuth required from entity `{}`.", entity_name)}
+                                 {"error", std::format("Auth required from entity `{}`.", entity_name)}
                              });
                 return MbHandlerResponse::Handled;
             }

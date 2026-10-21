@@ -427,7 +427,7 @@ namespace mb {
     void MbEntity::remove(const std::string &id) const {
         // Views should not reach here
         if (type() == "view")
-            throw std::invalid_argument("Remove is not implemented for MbEntity of `view` type!");
+            throw std::invalid_argument("Remove is not implemented for Entity of `view` type!");
 
         const auto &sql = mbApp().db().session();
         soci::transaction tr(*sql);

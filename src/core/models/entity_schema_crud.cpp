@@ -148,7 +148,7 @@ namespace mb {
                     soci::use(table_id), soci::into(old_schema), soci::into(created_tm);
 
             if (!sql->got_data()) {
-                throw MbException(404, "MbEntity resource for given name/id was not found!");
+                throw MbException(404, "Entity resource for given name/id was not found!");
             }
 
             MbEntitySchema old_entity = MbEntitySchema::fromSchema(app, old_schema); // Old table data
@@ -334,7 +334,7 @@ namespace mb {
                                         soci::use(table), soci::use(column), soci::use(column);
                             }
                         } else {
-                            throw MbException(500, "MbDatabase type not supported.");
+                            throw MbException(500, "Database type not supported.");
                         }
                     }
 
@@ -769,7 +769,7 @@ namespace mb {
                     soci::use(table_id), soci::into(schema);
 
             if (!sql->got_data()) {
-                throw MbException(404, "MbEntitySchema with given id `" + table_id + "` was not found!");
+                throw MbException(404, "EntitySchema with given id `" + table_id + "` was not found!");
             }
 
             const auto entity_name = schema.at("name").get<std::string>();
