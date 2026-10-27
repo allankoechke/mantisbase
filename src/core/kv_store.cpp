@@ -7,6 +7,7 @@
 #include "../../include/mantisbase/core/types.h"
 #include "../../include/mantisbase/core/middlewares.h"
 #include "../../include/mantisbase/core/router.h"
+#include "../../include/mantisbase/core/email.h"
 
 #include <soci/soci.h>
 
@@ -86,6 +87,7 @@ namespace mb
         {
             m_configs = settings;
             mApp.logger().trace("Config Loaded", "Application settings loaded from database.");
+            mApp.mailer().applySettings(m_configs);
             return;
         }
 
@@ -97,6 +99,7 @@ namespace mb
             soci::use(id), soci::use(settings), soci::use(created_tm), soci::use(created_tm);
 
         m_configs = settings;
+        mApp.mailer().applySettings(m_configs);
         mApp.logger().info("Config Initialized", "Created default application settings.");
     }
 
@@ -243,6 +246,8 @@ namespace mb
                 }
                 smtp[key] = value;
             }
+
+            mApp.mailer().applySettings(m_configs);
         }
 
         if (body.contains("corsAllowedOrigins"))
