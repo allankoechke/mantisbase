@@ -47,12 +47,34 @@ Additionally, some methods are exposed on the `app` object:
 - `app.quit(exitCode, reason)`: Close the application gracefully with a _exitCode_ and a _reason_.
 - `app.db()`: Get the database unit instance.
 - `app.router()`: Get the router unit instance.
-- `app.settings()`: Key/value app configuration (`get`, `set`, `configs`, `reload`).
+- `app.settings()`: Key/value app configuration (`get`, `set`, `configs`, `reload`). `set` persists and applies immediately. `get("smtp")` and `configs()` return `smtp.password` as `"********"` when a password is stored. `reload` re-reads the database and reapplies SMTP (and CORS) from that record.
 - `app.auth()`: JWT and session helpers (`createToken`, `verifyToken`, `deleteSession`, `refreshSession`, `sessionTimeoutSeconds`).
 - `app.files()`: File path helpers for entity uploads (`dirPath`, `filePath`, `getFilePath`, `removeFile`).
 - `app.logs()`: Structured logging (`info`, `warn`, `error`, `debug`, `trace`).
 - `app.rt()`: Realtime change notifications (`notifyChange`).
 - `app.loadScript(path)`: Load an additional script relative to `scriptsDir`.
+
+### Settings
+
+`app.settings()` reads and writes the same configuration record as the admin dashboard (**Settings** at `/mb/settings`) and `PATCH /api/v1/sys/settings/config`. SMTP changes take effect on the mailer immediately. See [SMTP](api.md#smtp) for field names, TLS modes, and the password mask.
+
+```js
+app.settings().set("smtp", JSON.stringify({
+    host: "smtp.example.com",
+    port: 587,
+    user: "mailer",
+    password: "s3cret",
+    from: "app@example.com",
+    tls: true
+}));
+
+const smtp = JSON.parse(app.settings().get("smtp"));
+// smtp.password is "********" when a password is stored.
+// Pass that mask, or omit password, to keep the stored secret.
+// Pass "" to clear it.
+```
+
+`MB_DISABLE_CONFIG_MUTATIONS` blocks dashboard and PATCH writes. `app.settings().set` still persists, because the script runs inside the server.
 
 ## MbDatabase
 The `DatabaseUnit` object returned from the `app.db()` method exposes the following methods and properties:

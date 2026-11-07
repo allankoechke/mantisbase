@@ -107,6 +107,8 @@ You can configure MantisBase using environment variables or by mounting a config
 
 MbDatabase connection is configured via command-line arguments or JSON config (e.g. `--db postgresql --db_url "..."`).
 
+SMTP credentials are not an environment variable. Set them in the admin dashboard at `/mb/settings`, with `PATCH /api/v1/sys/settings/config`, or from a startup script with `app.settings().set("smtp", ...)`. See [SMTP](api.md#smtp). `MB_DISABLE_CONFIG_MUTATIONS` blocks the dashboard and the PATCH endpoint only.
+
 ---
 
 ## Accessing the API

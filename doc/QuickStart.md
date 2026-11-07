@@ -59,7 +59,7 @@ See [Installation Guide](installation.md) for more details.
 
 Open `http://localhost:7070/mb` and log in with your admin credentials.
 
-The dashboard lets you create entities, manage records and schemas, configure access rules, and upload files — all without writing API calls.
+The dashboard lets you create entities, manage records and schemas, configure access rules, upload files, and set SMTP credentials under Settings — all without writing API calls.
 
 ![MantisBase Admin Dashboard](assets/mantisbase-admin.png)
 

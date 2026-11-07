@@ -54,6 +54,8 @@ mantisbase serve [--host=<host>] [--port=<port>] [--pool-size=<int>] [--skip-adm
 
 See [REST API Reference — CORS](api.md#cross-origin-resource-sharing-cors) for runtime updates via settings PATCH.
 
+SMTP credentials are not an environment variable. Set them in the admin dashboard at `/mb/settings`, with `PATCH /api/v1/sys/settings/config`, or from a startup script with `app.settings().set("smtp", ...)`. The mailer picks up the change immediately. See [REST API Reference — SMTP](api.md#smtp).
+
 **Example:**
 
 ```bash

@@ -223,13 +223,21 @@ interface MbDbSession {
 
 /** Key/value app configuration unit returned by `app.settings()`. */
 interface MbSettings {
-    /** Read a setting as a JSON-encoded string. */
+    /**
+     * Read a setting as a JSON-encoded string.
+     * `smtp.password` is `"********"` when a password is stored.
+     */
     get(key: string): string;
-    /** Write a setting (value as a JSON-encoded string). */
+    /**
+     * Write a setting (value as a JSON-encoded string), persist it, and apply it.
+     * SMTP updates take effect on the mailer immediately.
+     * Pass `"********"` for `smtp.password`, or omit it, to keep the stored password.
+     * Pass `""` to clear it.
+     */
     set(key: string, jsonValue: string): void;
-    /** All configs as a JSON-encoded string (secrets redacted). */
+    /** All configs as a JSON-encoded string. `smtp.password` is redacted to `"********"`. */
     configs(): string;
-    /** Reload configs from the database. */
+    /** Reload configs from the database and apply them (mailer and CORS). */
     reload(): void;
 }
 

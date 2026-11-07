@@ -689,7 +689,54 @@ The settings object contains the following fields:
 | `jwtEnableSetAudience` | boolean | `false` | Set JWT audience from `siteDomain` |
 | `smtp` | object | see below | Outbound mail configuration |
 
-SMTP object fields: `host`, `port` (default 587), `user`, `password`, `from`, `tls`. On GET, a non-empty password is returned as `"********"`. On PATCH, send `"********"` for `smtp.password` to keep the existing value.
+#### SMTP
+
+SMTP credentials are stored in the `smtp` object of application settings. There is no SMTP environment variable. Any of these writes the same record and applies it to the mailer immediately (no restart):
+
+1. **Admin dashboard** — sign in at `/mb`, open **Settings** (`/mb/settings`), and fill in the SMTP section (Host, Port, Username, Password, From Address, Use TLS).
+2. **REST** — `PATCH /api/v1/sys/settings/config` with an `smtp` object (admin authentication required).
+3. **Startup script** — `app.settings().set("smtp", JSON.stringify({...}))`. See [Scripting](scripting.md).
+
+`MB_DISABLE_CONFIG_MUTATIONS` blocks the dashboard save and the PATCH endpoint (**503**). A script running inside the server can still call `app.settings().set`.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `host` | string | `""` | SMTP server hostname. Empty host disables sending. `mock` and `localhost:0` capture messages in-process and do not connect (tests). |
+| `port` | integer | `587` | SMTP port, 1–65535 |
+| `user` | string | `""` | AUTH username. Leave empty to skip authentication |
+| `password` | string | `""` | AUTH password |
+| `from` | string | `""` | Envelope and header From address. Required, together with `host`, before the mailer will send |
+| `tls` | boolean | `true` | Encrypt the session. See below |
+
+TLS modes:
+
+- `tls: true` and port **465** — implicit TLS
+- `tls: true` and any other port (typically **587**) — STARTTLS. Authentication is refused if the server does not advertise STARTTLS
+- `tls: false` — cleartext
+
+Password handling is the same for the dashboard, PATCH, and `app.settings().set`:
+
+- **GET** and `app.settings().get("smtp")` / `configs()` return a non-empty password as `"********"`. An empty password stays `""`.
+- Sending `"********"`, or omitting `password`, keeps the stored password.
+- Sending `""` clears the stored password.
+- Any other string replaces it.
+
+The dashboard password box is filled with that mask when a password is already stored. Leave the mask as it is, or clear the box, to keep the current password. Type a new value to replace it. The dashboard cannot clear a stored password; send `"password": ""` through the API or a script to remove it. A password that is literally eight asterisks cannot be stored, because that string means "keep the current value".
+
+Example (admin auth required):
+
+```json
+{
+  "smtp": {
+    "host": "smtp.example.com",
+    "port": 587,
+    "user": "mailer",
+    "password": "s3cret",
+    "from": "app@example.com",
+    "tls": true
+  }
+}
+```
 
 The GET response also includes `mantisVersion` (the running server version).
 
@@ -1141,7 +1188,7 @@ The MantisBase Admin Dashboard is a comprehensive web-based interface accessible
 #### System Management
 - **Logs Viewer** - Access system logs directly from the dashboard
 - **Health Status** - Monitor system health
-- **Configuration** - View and manage system settings
+- **Configuration** - View and manage system settings, including SMTP credentials at `/mb/settings`
 
 ### Accessing the Dashboard
 

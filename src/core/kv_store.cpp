@@ -110,25 +110,33 @@ namespace mb
 
     json MbKVStore::getScriptingValue(const std::string &key) const
     {
-        if (m_configs.contains(key)) {
-            return m_configs.at(key);
+        if (!m_configs.contains(key))
+            return {};
+        if (key == "smtp" && m_configs.at(key).is_object())
+        {
+            const auto redacted = redactForResponse(json{{"smtp", m_configs.at(key)}});
+            return redacted["smtp"];
         }
-        return {};
+        return m_configs.at(key);
     }
 
     void MbKVStore::setScriptingValue(const std::string &key, const json &value)
     {
         applyPatch(json{{key, value}});
+        persistConfigs();
+        mApp.router().reloadCorsOrigins();
     }
 
     json MbKVStore::getScriptingConfigsCopy() const
     {
-        return m_configs;
+        return redactForResponse(m_configs);
     }
 
     void MbKVStore::reloadScriptingConfigs()
     {
-        m_configs = loadFromDb();
+        m_configs = readStoreRow();
+        mApp.mailer().applySettings(m_configs);
+        mApp.router().reloadCorsOrigins();
     }
 
     std::string MbKVStore::getScriptingJson(const std::string &key) const
@@ -146,24 +154,34 @@ namespace mb
         return getScriptingConfigsCopy().dump();
     }
 
-    json MbKVStore::loadFromDb()
+    json MbKVStore::readStoreRow()
     {
-        if (!m_configs.empty())
-        {
-            return m_configs;
-        }
-
         const auto sql = mApp.db().session();
         const auto id = configRowId();
         json settings;
         *sql << "SELECT value FROM mb_store WHERE id = :id LIMIT 1", soci::use(id), soci::into(settings);
         if (sql->got_data())
-        {
-            m_configs = settings;
             return settings;
-        }
-
         return json::object();
+    }
+
+    void MbKVStore::persistConfigs()
+    {
+        const auto sql = mApp.db().session();
+        const std::time_t updated_t = time(nullptr);
+        const std::tm updated_tm = toUtcTime(updated_t);
+        const auto id = configRowId();
+        *sql << "UPDATE mb_store SET value = :value, updated = :updated WHERE id = :id",
+            soci::use(m_configs), soci::use(updated_tm), soci::use(id);
+    }
+
+    json MbKVStore::loadFromDb()
+    {
+        if (!m_configs.empty())
+            return m_configs;
+
+        m_configs = readStoreRow();
+        return m_configs;
     }
 
     json MbKVStore::redactForResponse(const json &configs)
@@ -330,15 +348,7 @@ namespace mb
                 try
                 {
                     applyPatch(body);
-
-                    const auto& sql = mApp.db().session();
-                    const std::time_t updated_t = time(nullptr);
-                    const std::tm updated_tm = toUtcTime(updated_t);
-                    const auto id = configRowId();
-
-                    *sql << "UPDATE mb_store SET value = :value, updated = :updated WHERE id = :id",
-                        soci::use(m_configs), soci::use(updated_tm), soci::use(id);
-
+                    persistConfigs();
                     mApp.router().reloadCorsOrigins();
 
                     auto data = redactForResponse(m_configs);

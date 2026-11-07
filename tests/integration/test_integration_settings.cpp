@@ -178,6 +178,95 @@ TEST_F(IntegrationSettingsTest, SchemaMutationsBlockedWhenDisabled)
     EXPECT_EQ(enableRes->status, 200);
 }
 
+TEST_F(IntegrationSettingsTest, SmtpCredentialsApplyFromApiAndScripting)
+{
+    struct RestoreSmtp
+    {
+        mb::MantisBase &app;
+        ~RestoreSmtp()
+        {
+            try
+            {
+                app.settings().setScriptingValue("smtp", {
+                    {"host", ""},
+                    {"port", 587},
+                    {"user", ""},
+                    {"password", ""},
+                    {"from", ""},
+                    {"tls", true}
+                });
+            }
+            catch (...)
+            {
+            }
+        }
+    } restore{mantis()};
+
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    nlohmann::json patch = {
+        {"smtp", {
+            {"host", "mock"},
+            {"port", 587},
+            {"user", "mailer"},
+            {"password", "s3cret"},
+            {"from", "app@example.com"},
+            {"tls", true}
+        }}
+    };
+
+    auto patchRes = client->Patch("/api/v1/sys/settings/config", headers, patch.dump(), "application/json");
+    ASSERT_TRUE(patchRes != nullptr);
+    ASSERT_EQ(patchRes->status, 200);
+    EXPECT_EQ(parseBody(*patchRes)["data"]["smtp"]["password"].get<std::string>(), "********");
+
+    auto getRes = client->Get("/api/v1/sys/settings/config", headers);
+    ASSERT_TRUE(getRes != nullptr);
+    ASSERT_EQ(getRes->status, 200);
+    EXPECT_EQ(parseBody(*getRes)["data"]["smtp"]["password"].get<std::string>(), "********");
+
+    const auto &mailer = mantis().mailer();
+    ASSERT_TRUE(mailer.isConfigured());
+    EXPECT_EQ(mailer.config().host, "mock");
+    EXPECT_EQ(mailer.config().password, "s3cret");
+    EXPECT_EQ(mailer.config().from_address, "app@example.com");
+    EXPECT_TRUE(mailer.config().use_tls);
+
+    nlohmann::json keep = {
+        {"smtp", {
+            {"host", "mock"},
+            {"port", 2525},
+            {"password", "********"}
+        }}
+    };
+    auto keepRes = client->Patch("/api/v1/sys/settings/config", headers, keep.dump(), "application/json");
+    ASSERT_TRUE(keepRes != nullptr);
+    ASSERT_EQ(keepRes->status, 200);
+    EXPECT_EQ(mailer.config().port, 2525);
+    EXPECT_EQ(mailer.config().password, "s3cret");
+
+    nlohmann::json omit = {{"smtp", {{"user", "mailer"}}}};
+    auto omitRes = client->Patch("/api/v1/sys/settings/config", headers, omit.dump(), "application/json");
+    ASSERT_TRUE(omitRes != nullptr);
+    ASSERT_EQ(omitRes->status, 200);
+    EXPECT_EQ(mailer.config().password, "s3cret");
+
+    mantis().settings().setScriptingValue("smtp", {
+        {"host", "mock"},
+        {"port", 587},
+        {"user", "mailer"},
+        {"password", "other"},
+        {"from", "app@example.com"},
+        {"tls", true}
+    });
+    EXPECT_EQ(mailer.config().password, "other");
+    EXPECT_EQ(mantis().settings().getScriptingValue("smtp")["password"].get<std::string>(), "********");
+
+    mantis().settings().reloadScriptingConfigs();
+    EXPECT_TRUE(mailer.isConfigured());
+    EXPECT_EQ(mailer.config().password, "other");
+    EXPECT_EQ(mailer.config().host, "mock");
+}
+
 TEST_F(IntegrationSettingsGateTest, PatchAllowedWhenGateOpen)
 {
     TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};

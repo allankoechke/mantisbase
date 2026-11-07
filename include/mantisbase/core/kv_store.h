@@ -50,16 +50,23 @@ namespace mb
          */
         json& configs();
 
-        /** Read a top-level config key (scripting). Returns null json when missing. */
+        /**
+         * Read a top-level config key (scripting). Returns null json when missing.
+         * `smtp.password` is returned as `"********"` when a password is stored.
+         */
         [[nodiscard]] json getScriptingValue(const std::string &key) const;
 
-        /** Patch a top-level config key and persist (scripting). */
+        /**
+         * Patch a top-level config key, persist it, and apply it.
+         * SMTP updates take effect on the mailer immediately.
+         * Pass `"********"` for `smtp.password` to keep the stored password.
+         */
         void setScriptingValue(const std::string &key, const json &value);
 
-        /** Return a copy of current configs (scripting). */
+        /** Return a copy of current configs (scripting). SMTP passwords are redacted. */
         [[nodiscard]] json getScriptingConfigsCopy() const;
 
-        /** Reload configs from the database. */
+        /** Reload configs from the database and apply them to the mailer. */
         void reloadScriptingConfigs();
 
         [[nodiscard]] std::string getScriptingJson(const std::string &key) const;
@@ -70,6 +77,8 @@ namespace mb
         void setupConfigRoutes();
 
         json loadFromDb();
+        json readStoreRow();
+        void persistConfigs();
         static json redactForResponse(const json &configs) ;
         void applyPatch(const json &body);
 
