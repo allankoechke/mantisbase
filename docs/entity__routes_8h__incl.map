@@ -1,6 +1,6 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/models/entity_routes.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/models/entity_routes.h">
 <area shape="rect" id="Node000001" title="Unified entity CRUD route handlers and registration." alt="" coords="243,5,477,60"/>
-<area shape="rect" id="Node000002" href="$types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="319,108,401,133"/>
+<area shape="rect" id="Node000002" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="319,108,401,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="363,60,363,94,357,94,357,60"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="5,181,152,207"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="319,135,138,181,137,175,318,130"/>

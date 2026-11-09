@@ -1,4 +1,4 @@
 var entity__schema_8h =
 [
-    [ "mb::EntitySchema", "classmb_1_1EntitySchema.html", "classmb_1_1EntitySchema" ]
+    [ "mb::MbEntitySchema", "classmb_1_1MbEntitySchema.html", "classmb_1_1MbEntitySchema" ]
 ];

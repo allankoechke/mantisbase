@@ -1,14 +1,19 @@
 var searchData=
 [
-  ['undowrittenfiles_0',['undoWrittenFiles',['../classmb_1_1MbContentReader.html#a73c90a046c3dfa71ed6f715608909543',1,'mb::MbContentReader']]],
-  ['unlinkaccount_1',['unlinkAccount',['../classmb_1_1OAuthManager.html#ad98b4fd5ad377dcd509c355476ebd65e',1,'mb::OAuthManager']]],
-  ['unsubscribe_2',['unsubscribe',['../classmb_1_1WSMgr.html#a97b2566950ad51a3b2484fdc2f189794',1,'mb::WSMgr']]],
-  ['update_3',['update',['../classmb_1_1Entity.html#a3b3def9702c7fbcf709881fab5db51ed',1,'mb::Entity']]],
-  ['updateactivity_4',['updateactivity',['../classmb_1_1SSESession.html#a5a1953434f0afeb4ec3c52b6bd268c20',1,'mb::SSESession::updateActivity()'],['../classmb_1_1SSEMgr.html#a99b6e87145b437cc0eaed0307c671dda',1,'mb::SSEMgr::updateActivity()']]],
-  ['updateprovider_5',['updateProvider',['../classmb_1_1OAuthManager.html#a681e6aa90575cb7ecdecda1936a05e79',1,'mb::OAuthManager']]],
-  ['updaterule_6',['updaterule',['../classmb_1_1Entity.html#a46c3c33bb152351d9406d43e8364a523',1,'mb::Entity::updateRule()'],['../classmb_1_1EntitySchema.html#a00a4ca54fb5d39e5b4bf1cee88925bfe',1,'mb::EntitySchema::updateRule()']]],
-  ['updateschemacache_7',['updateSchemaCache',['../classmb_1_1Router.html#a96586f2f56403f521066f6f399fb18ec',1,'mb::Router']]],
-  ['updatetable_8',['updateTable',['../classmb_1_1EntitySchema.html#a3130375f5978f473007c68ced0d4683e',1,'mb::EntitySchema']]],
-  ['updatetopics_9',['updateTopics',['../classmb_1_1SSESession.html#a61f6e4a16233c4ea0969000adc7782c9',1,'mb::SSESession']]],
-  ['updatewith_10',['updatewith',['../classmb_1_1EntitySchema.html#a7b6ab04661cd18975799570a87c317e6',1,'mb::EntitySchema::updateWith()'],['../classmb_1_1EntitySchemaField.html#a9653e2d92473a8ef41953fbf5ccaabce',1,'mb::EntitySchemaField::updateWith()']]]
+  ['validate_0',['validate',['../classmb_1_1MbEntitySchema.html#a2a41653edb28817cd65e32667f4e92d0',1,'mb::MbEntitySchema::validate()'],['../classmb_1_1MbEntitySchemaField.html#a129352e4db43b93d265d075b99319af5',1,'mb::MbEntitySchemaField::validate()'],['../classmb_1_1MbEntitySchema.html#ab157760eadb0ecd5acaa017601e88d51',1,'mb::MbEntitySchema::validate()']]],
+  ['validateintconstraintbounds_1',['validateIntConstraintBounds',['../namespacemb.html#aeee48d117ecdb58563be7bc289fc4771',1,'mb']]],
+  ['validateintfieldvalue_2',['validateIntFieldValue',['../namespacemb.html#a3fc6a107977ecc0848e0498b93b39c0f',1,'mb']]],
+  ['validateintprecisiontoken_3',['validateIntPrecisionToken',['../namespacemb.html#a396aa186b5e8e30715cfe5342f9b2111',1,'mb']]],
+  ['validatepreset_4',['validatePreset',['../classmb_1_1MbValidators.html#a475c34121eb926a01e83b6bce68e4250',1,'mb::MbValidators']]],
+  ['validaterequestbody_5',['validateRequestBody',['../classmb_1_1MbValidators.html#ae0d7cce1e8683379fa5d6ec5b9fc0b0c',1,'mb::MbValidators']]],
+  ['validatetableschema_6',['validateTableSchema',['../classmb_1_1MbValidators.html#a083a3f09e2210c3b0f640f721f67ce7f',1,'mb::MbValidators']]],
+  ['validateupdaterequestbody_7',['validateUpdateRequestBody',['../classmb_1_1MbValidators.html#a8d09c308d6dc2371b9e1cb97501d079d',1,'mb::MbValidators']]],
+  ['validatorconstraintcheck_8',['validatorConstraintCheck',['../classmb_1_1MbValidators.html#a7eaf680eb08811bf7aa2bd1a83deb526',1,'mb::MbValidators']]],
+  ['verificationemailhtml_9',['verificationEmailHtml',['../classmb_1_1MbMailer.html#a72150d2d96818d83656e1cc5d253c662',1,'mb::MbMailer']]],
+  ['verificationemailtext_10',['verificationEmailText',['../classmb_1_1MbMailer.html#af0de0cf8c2c1bc5566198d77ead69807',1,'mb::MbMailer']]],
+  ['verifypassword_11',['verifyPassword',['../namespacemb.html#aa3085c18b75188b1e46d16c21ab2e58b',1,'mb']]],
+  ['verifytoken_12',['verifyToken',['../classmb_1_1MbAuth.html#aa005dec4e835b7da99a5ba1feb8fb0b6',1,'mb::MbAuth']]],
+  ['version_13',['version',['../classmb_1_1MbResponse.html#ae351540bde2374753a2e6841a859b415',1,'mb::MbResponse']]],
+  ['viewquery_14',['viewquery',['../classmb_1_1MbEntitySchema.html#ad276e0839e1dadd0c0984c2c7d1fa17b',1,'mb::MbEntitySchema::viewQuery()'],['../classmb_1_1MbEntity.html#a93a748d074e07673c97501549497c342',1,'mb::MbEntity::viewQuery()']]],
+  ['viewtypesqlcheck_15',['viewTypeSQLCheck',['../classmb_1_1MbValidators.html#afeffdaeee8e6664a304c8fc1a5587b4d',1,'mb::MbValidators']]]
 ];

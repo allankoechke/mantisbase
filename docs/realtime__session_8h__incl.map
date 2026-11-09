@@ -14,7 +14,7 @@
 <area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="369,52,649,103,648,108,369,58"/>
 <area shape="rect" id="Node000008" title=" " alt="" coords="283,181,429,207"/>
 <area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="266,59,284,94,306,132,337,170,333,173,302,135,279,97,261,61"/>
-<area shape="rect" id="Node000009" href="$types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="315,108,498,133"/>
+<area shape="rect" id="Node000009" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="315,108,498,133"/>
 <area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="301,58,375,99,373,104,298,62"/>
 <area shape="poly" id="edge11_Node000009_Node000004" title=" " alt="" coords="365,136,184,184,183,179,363,131"/>
 <area shape="poly" id="edge12_Node000009_Node000006" title=" " alt="" coords="379,136,270,179,268,174,377,131"/>

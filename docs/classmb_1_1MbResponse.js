@@ -2,17 +2,13 @@ var classmb_1_1MbResponse =
 [
     [ "MbResponse", "classmb_1_1MbResponse.html#a4af80a2345ff5e5cc373396cd21d996e", null ],
     [ "~MbResponse", "classmb_1_1MbResponse.html#a504cb3236292e5d6caf9d461c0d81e9e", null ],
+    [ "body", "classmb_1_1MbResponse.html#acaec54fa43e36ac731faf20ef387ece8", null ],
     [ "clearAuthTokenCookie", "classmb_1_1MbResponse.html#af9d8336e8d369af6d2070789fe6b6f9d", null ],
     [ "drogonResponse", "classmb_1_1MbResponse.html#a0c9f7c22644a6e5a687603078ce9b937", null ],
-    [ "getBody", "classmb_1_1MbResponse.html#a400bac18dbdde44975452ffe3dd8ea7d", null ],
-    [ "getHeaderValue", "classmb_1_1MbResponse.html#ac34bcb218fbd9682ab3c603a06663d51", null ],
-    [ "getHeaderValueCount", "classmb_1_1MbResponse.html#acef3348b7db275759d1b53007767598d", null ],
-    [ "getHeaderValueU64", "classmb_1_1MbResponse.html#a94acc4c898cba1dcea71823776332bb9", null ],
-    [ "getLocation", "classmb_1_1MbResponse.html#a924854ebba930ee3930ed331da55ff59", null ],
-    [ "getReason", "classmb_1_1MbResponse.html#af2d41bd49bd02898a736bd178d160f5e", null ],
     [ "getStatus", "classmb_1_1MbResponse.html#ae572d3df1681b862e7c7469d3bea07c8", null ],
-    [ "getVersion", "classmb_1_1MbResponse.html#aa18dd83e75a4427037971ced4a553768", null ],
     [ "hasHeader", "classmb_1_1MbResponse.html#a4f4d09fecd39b9f925a200ba11a8c52d", null ],
+    [ "headerValue", "classmb_1_1MbResponse.html#a297af635f9ffd8a43ecd1d0b64e14a8f", null ],
+    [ "location", "classmb_1_1MbResponse.html#a7210e41b2ffe2a14871f676e24f13112", null ],
     [ "send", "classmb_1_1MbResponse.html#a2d731f2d9a5fc5aad5fb05d3c460c149", null ],
     [ "sendEmpty", "classmb_1_1MbResponse.html#a518fa59a9cb8f0d138058f89600f0506", null ],
     [ "sendHtml", "classmb_1_1MbResponse.html#a5edd555f8fc59aad8399988b87579080", null ],
@@ -26,9 +22,8 @@ var classmb_1_1MbResponse =
     [ "setFileContent", "classmb_1_1MbResponse.html#a46a738ac72fb7b0be05d7df16959a24f", null ],
     [ "setFileContent", "classmb_1_1MbResponse.html#aeb7e088dc024abb10d701360468a7b79", null ],
     [ "setHeader", "classmb_1_1MbResponse.html#a84f2a77b82c2cfc70d71b96a8af9ad17", null ],
-    [ "setLocation", "classmb_1_1MbResponse.html#a034c55b64b34c117fff8c6244a0fc59d", null ],
-    [ "setReason", "classmb_1_1MbResponse.html#a0c71ad0afa50504e1f3df664c34273d0", null ],
+    [ "setLocation", "classmb_1_1MbResponse.html#a76a1cf440d9b3c9a16094a126ee7f5f6", null ],
     [ "setRedirect", "classmb_1_1MbResponse.html#a084696b40da4621bdff87d955879b59a", null ],
     [ "setStatus", "classmb_1_1MbResponse.html#ad5cdb290248bf55f1f423230e3ae05ea", null ],
-    [ "setVersion", "classmb_1_1MbResponse.html#ac40e0cb40bcb73eaa47dcde519e0bb59", null ]
+    [ "version", "classmb_1_1MbResponse.html#ae351540bde2374753a2e6841a859b415", null ]
 ];

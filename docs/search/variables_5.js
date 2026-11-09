@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['granted_0',['granted',['../structmb_1_1TopicAccessResult.html#a927557b82d06eaca1b2ba24e00d72d85',1,'mb::TopicAccessResult']]]
+  ['filename_0',['filename',['../structmb_1_1MbFormDataItem.html#affb83fae33ec66b80fcc482a66604516',1,'mb::MbFormDataItem']]],
+  ['from_5faddress_1',['from_address',['../structmb_1_1MbSmtpConfig.html#a4fd18b05da180a1e34720c0cdc63f88a',1,'mb::MbSmtpConfig']]]
 ];

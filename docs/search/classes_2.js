@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['database_0',['Database',['../classmb_1_1Database.html',1,'mb']]]
+  ['indexdefinition_0',['IndexDefinition',['../structmb_1_1IndexDefinition.html',1,'mb']]]
 ];

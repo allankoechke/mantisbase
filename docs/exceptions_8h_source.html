@@ -110,17 +110,17 @@ $(document).ready(function(){initNavTree('exceptions_8h_source.html',''); initRe
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a> {</div>
 <div class="foldopen" id="foldopen00023" data-start="{" data-end="};">
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classmb_1_1MantisException.html">   23</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1MantisException.html">MantisException</a> final : <span class="keyword">public</span> std::exception {</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classmb_1_1MbException.html">   23</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1MbException.html">MbException</a> final : <span class="keyword">public</span> std::exception {</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <a class="code hl_class" href="classmb_1_1MantisException.html">MantisException</a>(<span class="keywordtype">int</span> _code, std::string _msg);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <a class="code hl_class" href="classmb_1_1MbException.html">MbException</a>(<span class="keywordtype">int</span> _code, std::string _msg);</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <a class="code hl_class" href="classmb_1_1MantisException.html">MantisException</a>(<span class="keywordtype">int</span> _code, std::string _msg, std::string _desc);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <a class="code hl_class" href="classmb_1_1MbException.html">MbException</a>(<span class="keywordtype">int</span> _code, std::string _msg, std::string _desc);</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        [[nodiscard]] <span class="keyword">const</span> <span class="keywordtype">char</span>* what() <span class="keyword">const</span> <span class="keyword">noexcept</span> <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        [[nodiscard]] <span class="keyword">const</span> <span class="keywordtype">char</span>* desc() <span class="keyword">const</span> <span class="keyword">noexcept</span>;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        [[nodiscard]] <span class="keywordtype">int</span> code() <span class="keyword">const</span> <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        [[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_variable" href="smtp__client_8cpp.html#a45a5b7c00a796a23f01673cef1dbe0a9">code</a>() <span class="keyword">const</span> <span class="keyword">noexcept</span>;</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keyword">private</span>:</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordtype">int</span> m_code = -1;</div>
@@ -130,10 +130,11 @@ $(document).ready(function(){initNavTree('exceptions_8h_source.html',''); initRe
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>} <span class="comment">// mb</span></div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#endif </span><span class="comment">//MANTISBASE_EXCEPTIONS_H</span></div>
-<div class="ttc" id="aclassmb_1_1MantisException_html"><div class="ttname"><a href="classmb_1_1MantisException.html">mb::MantisException</a></div><div class="ttdoc">Application exception carrying an HTTP status code and messages.</div><div class="ttdef"><b>Definition</b> exceptions.h:23</div></div>
+<div class="ttc" id="aclassmb_1_1MbException_html"><div class="ttname"><a href="classmb_1_1MbException.html">mb::MbException</a></div><div class="ttdoc">Application exception carrying an HTTP status code and messages.</div><div class="ttdef"><b>Definition</b> exceptions.h:23</div></div>
 <div class="ttc" id="aexport_8h_html_ad67b3f9a509bd18bd030486e98d14e34"><div class="ttname"><a href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a></div><div class="ttdeci">#define MANTISBASE_API</div><div class="ttdef"><b>Definition</b> export.h:25</div></div>
 <div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdef"><b>Definition</b> api_keys.h:32</div></div>
-<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the IMantisBase DI mixin.</div></div>
+<div class="ttc" id="asmtp__client_8cpp_html_a45a5b7c00a796a23f01673cef1dbe0a9"><div class="ttname"><a href="smtp__client_8cpp.html#a45a5b7c00a796a23f01673cef1dbe0a9">code</a></div><div class="ttdeci">int code</div><div class="ttdef"><b>Definition</b> smtp_client.cpp:208</div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the MbAppMixin DI mixin.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

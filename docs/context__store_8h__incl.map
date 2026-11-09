@@ -4,7 +4,7 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="615,39,434,51,332,62,234,78,145,99,73,126,46,142,25,160,12,179,8,200,8,290,12,311,25,330,46,346,73,362,145,387,233,406,330,420,428,429,598,438,598,443,428,435,330,425,232,411,144,392,71,366,43,351,21,333,8,313,3,291,3,200,7,177,21,156,42,138,71,121,143,94,233,72,332,57,433,46,615,34"/>
 <area shape="rect" id="Node000003" href="$utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="679,108,785,133"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="735,60,735,94,729,94,729,60"/>
-<area shape="rect" id="Node000021" href="$types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="906,357,1089,383"/>
+<area shape="rect" id="Node000021" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="906,357,1089,383"/>
 <area shape="poly" id="edge36_Node000001_Node000021" title=" " alt="" coords="849,44,917,60,987,86,1021,104,1052,125,1080,151,1104,180,1114,203,1114,228,1107,252,1095,275,1061,318,1025,351,1021,347,1057,314,1091,272,1103,250,1109,227,1108,204,1099,183,1076,154,1049,130,1018,109,985,91,916,65,848,49"/>
 <area shape="poly" id="edge10_Node000003_Node000002" title=" " alt="" coords="742,132,754,154,764,181,766,201,764,222,746,304,716,384,700,419,695,417,711,382,741,303,759,221,761,201,759,182,749,156,737,135"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="783,431,841,456"/>

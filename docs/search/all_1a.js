@@ -1,18 +1,18 @@
 var searchData=
 [
-  ['warn_0',['warn',['../classmb_1_1Logger.html#ab6340a6bbcb38645b8c6711700d654f7',1,'mb::Logger::warn()'],['../namespacemb.html#a45b395bbdb082a2a10815855bad98c81a32bd8a1db2275458673903bdb84cb277',1,'mb::WARN']]],
-  ['websocket_20realtime_20api_1',['WebSocket Realtime API',['../docs_rest_api.html#autotoc_md65',1,'']]],
-  ['welcome_20message_2',['Welcome message',['../docs_rest_api.html#autotoc_md68',1,'']]],
-  ['what_3',['what',['../classmb_1_1MantisException.html#abe2cf6964063bedc9be612e7ec5365ce',1,'mb::MantisException']]],
-  ['what_20you_20get_4',['What you get',['../docs_cpp_dev.html#autotoc_md134',1,'']]],
-  ['why_20embed_20mantisbase_5',['Why Embed MantisBase?',['../docs_embedding.html#autotoc_md163',1,'']]],
-  ['with_20entities_6',['Working with Entities',['../docs_embedding.html#autotoc_md186',1,'']]],
-  ['with_20files_7',['Creating Records with Files',['../docs_file.html#autotoc_md200',1,'']]],
-  ['with_20postgresql_8',['Example: Full Setup with PostgreSQL',['../docs_docker.html#autotoc_md161',1,'']]],
-  ['without_20cmake_9',['Option B: manual (without CMake)',['../docs_cpp_dev.html#autotoc_md140',1,'']]],
-  ['working_20with_20entities_10',['Working with Entities',['../docs_embedding.html#autotoc_md186',1,'']]],
-  ['writefiles_11',['writeFiles',['../classmb_1_1MbContentReader.html#a3d0ce8ef9694f7e88459256b814d3c5b',1,'mb::MbContentReader']]],
+  ['warn_0',['warn',['../classmb_1_1MbLogger.html#a3246a6e0ec8082879da5333909484ae0',1,'mb::MbLogger::warn()'],['../namespacemb.html#a9ff2e5ee4e235526221d8beb47edf607a32bd8a1db2275458673903bdb84cb277',1,'mb::WARN']]],
+  ['websocket_20realtime_20api_1',['WebSocket Realtime API',['../docs_rest_api.html#autotoc_md68',1,'']]],
+  ['welcome_20message_2',['Welcome message',['../docs_rest_api.html#autotoc_md71',1,'']]],
+  ['what_3',['what',['../classmb_1_1MbException.html#ac14a60e57913862c698afb431fcc7e24',1,'mb::MbException']]],
+  ['what_20you_20get_4',['What you get',['../docs_cpp_dev.html#autotoc_md137',1,'']]],
+  ['why_20embed_20mantisbase_5',['Why Embed MantisBase?',['../docs_embedding.html#autotoc_md166',1,'']]],
+  ['with_20entities_6',['Working with Entities',['../docs_embedding.html#autotoc_md189',1,'']]],
+  ['with_20files_7',['Creating Records with Files',['../docs_file.html#autotoc_md203',1,'']]],
+  ['with_20postgresql_8',['Example: Full Setup with PostgreSQL',['../docs_docker.html#autotoc_md164',1,'']]],
+  ['without_20cmake_9',['Option B: manual (without CMake)',['../docs_cpp_dev.html#autotoc_md143',1,'']]],
+  ['working_20with_20entities_10',['Working with Entities',['../docs_embedding.html#autotoc_md189',1,'']]],
+  ['writefiles_11',['writeFiles',['../classmb_1_1MbRequest.html#aa5ae61f3544e2b1a78868ded67ddf5a9',1,'mb::MbRequest']]],
   ['ws_2eh_12',['ws.h',['../ws_8h.html',1,'']]],
-  ['ws_5fpath_5fadd_13',['WS_PATH_ADD',['../classmb_1_1RealtimeWSController.html#a3e7a845fe22d2f2cc911a441c04ddc0b',1,'mb::RealtimeWSController']]],
-  ['wsmgr_14',['wsmgr',['../classmb_1_1SSEMgr.html#ab7b226977b7aa94d87a73d70f83fa4c2',1,'mb::SSEMgr::wsMgr()'],['../classmb_1_1WSMgr.html#a0df2cd464fa11e1cc5cb055cdbb1c1cc',1,'mb::WSMgr::WSMgr()'],['../classmb_1_1WSMgr.html',1,'mb::WSMgr']]]
+  ['ws_5fpath_5fadd_13',['WS_PATH_ADD',['../classmb_1_1MbRealtimeWSController.html#a32373401a21b4cd7c3781a8b4cc04b26',1,'mb::MbRealtimeWSController']]],
+  ['wsmgr_14',['wsMgr',['../classmb_1_1MbSSEMgr.html#abe20ad138013b47ea29e700bf83fbb5d',1,'mb::MbSSEMgr']]]
 ];

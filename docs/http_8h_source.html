@@ -116,234 +116,207 @@ $(document).ready(function(){initNavTree('http_8h_source.html',''); initResizabl
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;../utils/utils.h&quot;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;fstream&gt;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;drogon/HttpRequest.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;drogon/HttpResponse.h&gt;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a> {</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keyword">class </span>MantisBase; <span class="comment">// forward declaration; MbRequest holds a reference to it</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> DuktapeImpl {</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <span class="keyword">static</span> duk_ret_t nativeConsoleInfo(duk_context *ctx);</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        <span class="keyword">static</span> duk_ret_t nativeConsoleTrace(duk_context *ctx);</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keyword">static</span> duk_ret_t nativeConsoleTable(duk_context *ctx);</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;drogon/HttpRequest.h&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;drogon/HttpResponse.h&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a> {</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keyword">class </span>MantisBase; <span class="comment">// forward declaration; MbRequest holds a reference to it</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="};">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html">   33</a></span>    <span class="keyword">struct </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_struct" href="structmb_1_1MbFormDataItem.html">MbFormDataItem</a> {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html#a8c8166e8b31c01b021bf4d9e45300ebf">   34</a></span>        std::string <a class="code hl_variable" href="structmb_1_1MbFormDataItem.html#a8c8166e8b31c01b021bf4d9e45300ebf">name</a>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html#a2ddfa5498912cfcc3e13153cd1a8aa34">   35</a></span>        std::string <a class="code hl_variable" href="structmb_1_1MbFormDataItem.html#a2ddfa5498912cfcc3e13153cd1a8aa34">content</a>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html#affb83fae33ec66b80fcc482a66604516">   36</a></span>        std::string <a class="code hl_variable" href="structmb_1_1MbFormDataItem.html#affb83fae33ec66b80fcc482a66604516">filename</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html#a5670ebb89f76633ede9ea53df3b45126">   37</a></span>        std::string <a class="code hl_variable" href="structmb_1_1MbFormDataItem.html#a5670ebb89f76633ede9ea53df3b45126">content_type</a>;</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    };</div>
+</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> ScriptingHooks {</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> fireOnServerStart(duk_context *ctx);</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> fireOnServerShutdown(duk_context *ctx);</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> fireOnRecordCreated(duk_context *ctx, <span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId);</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> fireOnRecordUpdated(duk_context *ctx, <span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> MbDuktapeImpl {</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keyword">static</span> duk_ret_t nativeConsoleInfo(duk_context *<a class="code hl_variable" href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a>);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keyword">static</span> duk_ret_t nativeConsoleTrace(duk_context *<a class="code hl_variable" href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a>);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keyword">static</span> duk_ret_t nativeConsoleTable(duk_context *<a class="code hl_variable" href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a>);</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    };</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="foldopen" id="foldopen00057" data-start="{" data-end="};">
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classmb_1_1MbRequest.html">   57</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1MbRequest.html">MbRequest</a>: <span class="keyword">public</span> <a class="code hl_class" href="classmb_1_1IMantisBase.html">IMantisBase</a> {</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        drogon::HttpRequestPtr m_req;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        std::unordered_map&lt;std::string, std::string&gt; m_pathParams;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="keyword">mutable</span> std::optional&lt;std::pair&lt;nlohmann::json, std::string&gt;&gt; m_bodyJsonCache;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keyword">explicit</span> <a class="code hl_class" href="classmb_1_1MbRequest.html">MbRequest</a>(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a>&amp; app, drogon::HttpRequestPtr _req);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordtype">void</span> setPathParam(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> std::string &amp;value);</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keywordtype">void</span> setPathParams(<span class="keyword">const</span> std::unordered_map&lt;std::string, std::string&gt; &amp;params);</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        [[nodiscard]] std::string getMethod() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        [[nodiscard]] std::string getPath() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        [[nodiscard]] std::string getBody() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        [[nodiscard]] std::string getRemoteAddr() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        [[nodiscard]] <span class="keywordtype">int</span> getRemotePort() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        [[nodiscard]] std::string getLocalAddr() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        [[nodiscard]] <span class="keywordtype">int</span> getLocalPort() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasHeader(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        [[nodiscard]] std::string getHeaderValue(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> <span class="keywordtype">char</span> *def = <span class="stringliteral">&quot;&quot;</span>, <span class="keywordtype">size_t</span> <span class="keywordtype">id</span> = 0) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        [[nodiscard]] <span class="keywordtype">size_t</span> getHeaderValueU64(<span class="keyword">const</span> std::string &amp;key, <span class="keywordtype">size_t</span> def = 0, <span class="keywordtype">size_t</span> <span class="keywordtype">id</span> = 0) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        [[nodiscard]] <span class="keywordtype">size_t</span> getHeaderValueCount(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasQueryParam(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        [[nodiscard]] std::string getQueryParamValue(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        [[nodiscard]] std::string getQueryParamValue(<span class="keyword">const</span> std::string &amp;key, <span class="keywordtype">size_t</span> <span class="keywordtype">id</span>) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        [[nodiscard]] <span class="keywordtype">size_t</span> getQueryParamValueCount(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasPathParams() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasPathParam(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        [[nodiscard]] std::string getPathParamValue(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        [[nodiscard]] <span class="keywordtype">size_t</span> getPathParamValueCount(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        [[nodiscard]] <span class="keywordtype">bool</span> isMultipartFormData() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="classmb_1_1MbRequest.html#a538ba026f4978cad4cf25e2c92af960d">  101</a></span>        <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1MbRequest.html#a538ba026f4978cad4cf25e2c92af960d">registerDuktapeMethods</a>();</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasKey(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        [[nodiscard]] std::string getBearerTokenAuth() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        [[nodiscard]] std::string getCookieValue(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        [[nodiscard]] std::string resolveAuthToken() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        [[nodiscard]] std::pair&lt;nlohmann::json, std::string&gt; getBodyAsJson() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>        [[nodiscard]] <span class="keyword">const</span> drogon::HttpRequestPtr&amp; drogonRequest() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="namespacemb.html#a60bac1ca414c3efdc014dc205550fb4e">isGuestAuth</a>();</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> MbScriptingHooks {</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> fireOnServerStart(duk_context *<a class="code hl_variable" href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a>);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> fireOnServerShutdown(duk_context *<a class="code hl_variable" href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a>);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> fireOnRecordCreated(duk_context *<a class="code hl_variable" href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a>, <span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> fireOnRecordUpdated(duk_context *<a class="code hl_variable" href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a>, <span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    };</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="foldopen" id="foldopen00066" data-start="{" data-end="};">
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classmb_1_1MbRequest.html">   66</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1MbRequest.html">MbRequest</a>: <span class="keyword">public</span> <a class="code hl_class" href="classmb_1_1MbAppMixin.html">MbAppMixin</a> {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        drogon::HttpRequestPtr m_req;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        std::unordered_map&lt;std::string, std::string&gt; m_pathParams;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <span class="keyword">mutable</span> std::optional&lt;std::pair&lt;nlohmann::json, std::string&gt;&gt; m_bodyJsonCache;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="keyword">mutable</span> <span class="keywordtype">bool</span> m_bodyParsed = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <span class="keyword">mutable</span> std::vector&lt;MbFormDataItem&gt; m_formData;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keyword">mutable</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> m_unifiedJson = json::object();</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        <span class="keyword">mutable</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> m_filesMetadata = json::object();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <span class="keyword">explicit</span> <a class="code hl_class" href="classmb_1_1MbRequest.html">MbRequest</a>(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a>&amp; app, drogon::HttpRequestPtr _req);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <span class="keywordtype">void</span> setPathParam(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> std::string &amp;value);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        <span class="keywordtype">void</span> setPathParams(<span class="keyword">const</span> std::unordered_map&lt;std::string, std::string&gt; &amp;params);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        [[nodiscard]] std::string method() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        [[nodiscard]] std::string path() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        [[nodiscard]] std::string <a class="code hl_variable" href="smtp__client_8cpp.html#a22ffc871c8cdced782372446356096a5">body</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        [[nodiscard]] std::string remoteAddr() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        [[nodiscard]] <span class="keywordtype">int</span> remotePort() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        [[nodiscard]] std::string localAddr() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        [[nodiscard]] <span class="keywordtype">int</span> localPort() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasHeader(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        [[nodiscard]] std::string headerValue(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> std::string&amp; def = <span class="stringliteral">&quot;&quot;</span>) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasQueryParam(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        [[nodiscard]] std::string queryParamValue(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasPathParams() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasPathParam(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        [[nodiscard]] std::string pathParamValue(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        [[nodiscard]] <span class="keywordtype">bool</span> isMultipartFormData() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> registerDuktapeMethods();</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasKey(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        [[nodiscard]] std::string bearerTokenAuth() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        [[nodiscard]] std::string cookieValue(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="namespacemb.html#a89c9a4043ad8ff8dd18dd3f13a782a7c">isAdminAuth</a>();</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        [[nodiscard]] std::string resolveAuthToken() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="namespacemb.html#a38c5ed23527c1c39c1f15aed27d0649c">isUserAuth</a>();</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> jsonBody() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00142" data-start="{" data-end="}">
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="classmb_1_1MbRequest.html#aee05e5438de07b1408ada195003b9d2c">  142</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1MbRequest.html#aee05e5438de07b1408ada195003b9d2c">set</a>(<span class="keyword">const</span> std::string &amp;key, T value) {</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>            m_req-&gt;attributes()-&gt;insert(key, value);</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        }</div>
-</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        DukValue get_duk(<span class="keyword">const</span> std::string &amp;key);</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        DukValue getOr_duk(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> DukValue &amp;default_value);</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keywordtype">void</span> set_duk(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> DukValue &amp;value);</div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00154" data-start="{" data-end="}">
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno"><a class="line" href="classmb_1_1MbRequest.html#a779dba7f76d645f8ff911cb03c37a79a">  154</a></span>        <span class="keyword">const</span> T &amp;<a class="code hl_function" href="classmb_1_1MbRequest.html#a779dba7f76d645f8ff911cb03c37a79a">getOr</a>(<span class="keyword">const</span> std::string &amp;key, T default_value) {</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>            <span class="keywordflow">if</span> (!m_req-&gt;attributes()-&gt;find(key)) {</div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>                m_req-&gt;attributes()-&gt;insert(key, std::any(std::move(default_value)));</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>            }</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>            <span class="keywordflow">return</span> m_req-&gt;attributes()-&gt;get&lt;T&gt;(key);</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        }</div>
-</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        [[nodiscard]] std::pair&lt;nlohmann::json, std::string&gt; bodyAsJson() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        [[nodiscard]] <span class="keyword">const</span> drogon::HttpRequestPtr&amp; drogonRequest() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="namespacemb.html#a60bac1ca414c3efdc014dc205550fb4e">isGuestAuth</a>();</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="namespacemb.html#a89c9a4043ad8ff8dd18dd3f13a782a7c">isAdminAuth</a>();</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="namespacemb.html#a38c5ed23527c1c39c1f15aed27d0649c">isUserAuth</a>();</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        [[nodiscard]] <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;jsonBody() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    };</div>
-</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        [[nodiscard]] <span class="keyword">const</span> std::vector&lt;MbFormDataItem&gt; &amp;formData() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
-<div class="foldopen" id="foldopen00170" data-start="{" data-end="};">
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="classmb_1_1MbResponse.html">  170</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1MbResponse.html">MbResponse</a>: <span class="keyword">public</span> <a class="code hl_class" href="classmb_1_1IMantisBase.html">IMantisBase</a> {</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>        drogon::HttpResponsePtr m_res;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        [[nodiscard]] <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;filesMetadata() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        <span class="keywordtype">void</span> parseFormDataToEntity(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MbEntity.html">MbEntity</a> &amp;entity) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>        <span class="keywordtype">void</span> writeFiles(<span class="keyword">const</span> std::string &amp;entity_name) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        <span class="keyword">explicit</span> <a class="code hl_class" href="classmb_1_1MbResponse.html">MbResponse</a>(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a>&amp; app);</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        <span class="keywordtype">void</span> undoWrittenFiles(<span class="keyword">const</span> std::string &amp;entity_name) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="classmb_1_1MbResponse.html#a504cb3236292e5d6caf9d461c0d81e9e">  176</a></span>        <a class="code hl_function" href="classmb_1_1MbResponse.html#a504cb3236292e5d6caf9d461c0d81e9e">~MbResponse</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        [[nodiscard]] <span class="keyword">const</span> drogon::HttpResponsePtr&amp; drogonResponse() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        [[nodiscard]] <span class="keywordtype">int</span> getStatus() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>        <span class="keywordtype">void</span> setStatus(<span class="keywordtype">int</span> s) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <span class="keyword">static</span> std::string hashMultipartMetadata(<span class="keyword">const</span> <a class="code hl_struct" href="structmb_1_1MbFormDataItem.html">MbFormDataItem</a> &amp;data);</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00181" data-start="{" data-end="}">
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno"><a class="line" href="classmb_1_1MbRequest.html#aee05e5438de07b1408ada195003b9d2c">  181</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1MbRequest.html#aee05e5438de07b1408ada195003b9d2c">set</a>(<span class="keyword">const</span> std::string &amp;key, T value) {</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>            m_req-&gt;attributes()-&gt;insert(key, value);</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>        }</div>
+</div>
 <div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        [[nodiscard]] std::string getVersion() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        <span class="keywordtype">void</span> setVersion(<span class="keyword">const</span> std::string &amp;b);</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        [[nodiscard]] std::string getBody() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        <span class="keywordtype">void</span> setBody(<span class="keyword">const</span> std::string &amp;b);</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        DukValue get_duk(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>        DukValue getOr_duk(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> DukValue &amp;default_value) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        <span class="keywordtype">void</span> set_duk(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> DukValue &amp;value);</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>        [[nodiscard]] std::string getLocation() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <span class="keywordtype">void</span> setLocation(<span class="keyword">const</span> std::string &amp;b);</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        [[nodiscard]] std::string getReason() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        <span class="keywordtype">void</span> setReason(<span class="keyword">const</span> std::string &amp;b);</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasHeader(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        [[nodiscard]] std::string getHeaderValue(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> <span class="keywordtype">char</span> *def = <span class="stringliteral">&quot;&quot;</span>, <span class="keywordtype">size_t</span> <span class="keywordtype">id</span> = 0) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        [[nodiscard]] <span class="keywordtype">size_t</span> getHeaderValueU64(<span class="keyword">const</span> std::string &amp;key, <span class="keywordtype">size_t</span> def = 0, <span class="keywordtype">size_t</span> <span class="keywordtype">id</span> = 0) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        [[nodiscard]] <span class="keywordtype">size_t</span> getHeaderValueCount(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keywordtype">void</span> setHeader(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> std::string &amp;val) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        <span class="keywordtype">void</span> setAuthTokenCookie(<span class="keyword">const</span> std::string &amp;token, <span class="keywordtype">int</span> max_age_seconds) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        <span class="keywordtype">void</span> clearAuthTokenCookie() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        <span class="keywordtype">void</span> setRedirect(<span class="keyword">const</span> std::string &amp;url, <span class="keywordtype">int</span> status = 302) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        <span class="keywordtype">void</span> setContent(<span class="keyword">const</span> <span class="keywordtype">char</span> *s, <span class="keywordtype">size_t</span> n, <span class="keyword">const</span> std::string &amp;content_type) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <span class="keywordtype">void</span> setContent(<span class="keyword">const</span> std::string &amp;s, <span class="keyword">const</span> std::string &amp;content_type) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        <span class="keywordtype">void</span> setContent(std::string &amp;&amp;s, <span class="keyword">const</span> std::string &amp;content_type) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span> </div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        <span class="keywordtype">void</span> setFileContent(<span class="keyword">const</span> std::string &amp;path, <span class="keyword">const</span> std::string &amp;content_type) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        <span class="keywordtype">void</span> setFileContent(<span class="keyword">const</span> std::string &amp;path) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00193" data-start="{" data-end="}">
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="classmb_1_1MbRequest.html#a8259c781b99fc410009e7d0bc60003aa">  193</a></span>        <span class="keyword">const</span> T &amp;<a class="code hl_function" href="classmb_1_1MbRequest.html#a8259c781b99fc410009e7d0bc60003aa">get</a>(<span class="keyword">const</span> std::string &amp;key, T default_value) {</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>            <span class="keywordflow">if</span> (!m_req-&gt;attributes()-&gt;find(key)) {</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>                m_req-&gt;attributes()-&gt;insert(key, std::any(std::move(default_value)));</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>            }</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>            <span class="keywordflow">return</span> m_req-&gt;attributes()-&gt;get&lt;T&gt;(key);</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        }</div>
+</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span> </div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        <span class="keywordtype">void</span> ensureBodyParsed() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keywordtype">void</span> readMultipart() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        <span class="keywordtype">void</span> readJSON() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <span class="keyword">static</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> valueFromType(<span class="keyword">const</span> std::string &amp;type, <span class="keyword">const</span> std::string &amp;value);</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    };</div>
+</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> </div>
+<div class="foldopen" id="foldopen00213" data-start="{" data-end="};">
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="classmb_1_1MbResponse.html">  213</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1MbResponse.html">MbResponse</a>: <span class="keyword">public</span> <a class="code hl_class" href="classmb_1_1MbAppMixin.html">MbAppMixin</a> {</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        drogon::HttpResponsePtr m_res;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        <span class="keyword">explicit</span> <a class="code hl_class" href="classmb_1_1MbResponse.html">MbResponse</a>(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a>&amp; app);</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno"><a class="line" href="classmb_1_1MbResponse.html#a504cb3236292e5d6caf9d461c0d81e9e">  219</a></span>        <a class="code hl_function" href="classmb_1_1MbResponse.html#a504cb3236292e5d6caf9d461c0d81e9e">~MbResponse</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        <span class="keywordtype">void</span> send(<span class="keywordtype">int</span> statusCode, <span class="keyword">const</span> std::string &amp;data = <span class="stringliteral">&quot;&quot;</span>, <span class="keyword">const</span> std::string &amp;content_type = <span class="stringliteral">&quot;text/plain&quot;</span>) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        [[nodiscard]] <span class="keyword">const</span> drogon::HttpResponsePtr&amp; drogonResponse() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        <span class="keywordtype">void</span> sendJSON(<span class="keywordtype">int</span> statusCode = 200, <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data = json::object()) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        <span class="keywordtype">void</span> sendJson(<span class="keywordtype">int</span> statusCode, <span class="keyword">const</span> DukValue &amp;data) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        <span class="keywordtype">void</span> sendText(<span class="keywordtype">int</span> statusCode = 200, <span class="keyword">const</span> std::string &amp;data = <span class="stringliteral">&quot;&quot;</span>) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordtype">void</span> sendHtml(<span class="keywordtype">int</span> statusCode = 200, <span class="keyword">const</span> std::string &amp;data = <span class="stringliteral">&quot;&quot;</span>) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keywordtype">void</span> sendEmpty(<span class="keywordtype">int</span> statusCode = 204) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno"><a class="line" href="classmb_1_1MbResponse.html#a304b02937c9510d0ba358bfb6616b432">  238</a></span>        <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1MbResponse.html#a304b02937c9510d0ba358bfb6616b432">registerDuktapeMethods</a>();</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    };</div>
-</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
-<div class="foldopen" id="foldopen00242" data-start="{" data-end="};">
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html">  242</a></span>    <span class="keyword">struct </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_struct" href="structmb_1_1MbFormDataItem.html">MbFormDataItem</a> {</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html#a8c8166e8b31c01b021bf4d9e45300ebf">  243</a></span>        std::string <a class="code hl_variable" href="structmb_1_1MbFormDataItem.html#a8c8166e8b31c01b021bf4d9e45300ebf">name</a>;</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html#a2ddfa5498912cfcc3e13153cd1a8aa34">  244</a></span>        std::string <a class="code hl_variable" href="structmb_1_1MbFormDataItem.html#a2ddfa5498912cfcc3e13153cd1a8aa34">content</a>;</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html#affb83fae33ec66b80fcc482a66604516">  245</a></span>        std::string <a class="code hl_variable" href="structmb_1_1MbFormDataItem.html#affb83fae33ec66b80fcc482a66604516">filename</a>;</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno"><a class="line" href="structmb_1_1MbFormDataItem.html#a5670ebb89f76633ede9ea53df3b45126">  246</a></span>        std::string <a class="code hl_variable" href="structmb_1_1MbFormDataItem.html#a5670ebb89f76633ede9ea53df3b45126">content_type</a>;</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    };</div>
-</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
-<div class="foldopen" id="foldopen00254" data-start="{" data-end="};">
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno"><a class="line" href="classmb_1_1MbContentReader.html">  254</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1MbContentReader.html">MbContentReader</a> {</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MbRequest.html">MbRequest</a> &amp;m_req;</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        [[nodiscard]] <span class="keywordtype">int</span> getStatus() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="keywordtype">void</span> setStatus(<span class="keywordtype">int</span> s) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        [[nodiscard]] std::string version() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        [[nodiscard]] std::string <a class="code hl_variable" href="smtp__client_8cpp.html#a22ffc871c8cdced782372446356096a5">body</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        <span class="keywordtype">void</span> setBody(<span class="keyword">const</span> std::string &amp;b); </div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        [[nodiscard]] std::string location() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordtype">void</span> setLocation(<span class="keyword">const</span> std::string &amp;b) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasHeader(<span class="keyword">const</span> std::string &amp;key) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        [[nodiscard]] std::string headerValue(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> std::string&amp; def = <span class="stringliteral">&quot;&quot;</span>) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        <span class="keywordtype">void</span> setHeader(<span class="keyword">const</span> std::string &amp;key, <span class="keyword">const</span> std::string &amp;val) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        <span class="keywordtype">void</span> setAuthTokenCookie(<span class="keyword">const</span> std::string &amp;token, <span class="keywordtype">int</span> max_age_seconds) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        <span class="keywordtype">void</span> clearAuthTokenCookie() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        <span class="keywordtype">void</span> setRedirect(<span class="keyword">const</span> std::string &amp;url, <span class="keywordtype">int</span> <a class="code hl_variable" href="smtp__client_8cpp.html#a6404daae205101cd7b62e5b35ec8c0f8">status</a> = 302) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        <span class="keywordtype">void</span> setContent(<span class="keyword">const</span> <span class="keywordtype">char</span> *s, <span class="keywordtype">size_t</span> n, <span class="keyword">const</span> std::string &amp;content_type) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <span class="keywordtype">void</span> setContent(<span class="keyword">const</span> std::string &amp;s, <span class="keyword">const</span> std::string &amp;content_type) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <span class="keywordtype">void</span> setContent(std::string &amp;&amp;s, <span class="keyword">const</span> std::string &amp;content_type) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        <span class="keywordtype">void</span> setFileContent(<span class="keyword">const</span> std::string &amp;path, <span class="keyword">const</span> std::string &amp;content_type) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordtype">void</span> setFileContent(<span class="keyword">const</span> std::string &amp;path) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        std::vector&lt;MbFormDataItem&gt; m_formData;</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> m_json{}, m_filesMetadata{};</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        <span class="keywordtype">bool</span> m_parsed = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span> </div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        <span class="keyword">explicit</span> <a class="code hl_class" href="classmb_1_1MbContentReader.html">MbContentReader</a>(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1MbRequest.html">MbRequest</a> &amp;req);</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span> </div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        [[nodiscard]] <span class="keywordtype">bool</span> isMultipartFormData() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>        [[nodiscard]] <span class="keyword">const</span> std::vector&lt;MbFormDataItem&gt; &amp;formData() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>        [[nodiscard]] <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;filesMetadata() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        <span class="keywordtype">void</span> send(<span class="keywordtype">int</span> statusCode, <span class="keyword">const</span> std::string &amp;data = <span class="stringliteral">&quot;&quot;</span>, <span class="keyword">const</span> std::string &amp;content_type = <span class="stringliteral">&quot;text/plain&quot;</span>) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span> </div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        <span class="keywordtype">void</span> sendJSON(<span class="keywordtype">int</span> statusCode = 200, <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;data = json::object()) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        <span class="keywordtype">void</span> sendJson(<span class="keywordtype">int</span> statusCode, <span class="keyword">const</span> DukValue &amp;data) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        <span class="keywordtype">void</span> sendText(<span class="keywordtype">int</span> statusCode = 200, <span class="keyword">const</span> std::string &amp;data = <span class="stringliteral">&quot;&quot;</span>) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>        <span class="keywordtype">void</span> sendHtml(<span class="keywordtype">int</span> statusCode = 200, <span class="keyword">const</span> std::string &amp;data = <span class="stringliteral">&quot;&quot;</span>) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>        <span class="keywordtype">void</span> sendEmpty(<span class="keywordtype">int</span> statusCode = 204) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        [[nodiscard]] <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;jsonBody() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        <span class="keywordtype">void</span> parseFormDataToEntity(<span class="keyword">const</span> <a class="code hl_class" href="classmb_1_1Entity.html">Entity</a> &amp;entity);</div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>        <span class="keywordtype">void</span> writeFiles(<span class="keyword">const</span> std::string&amp; entity_name);</div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>        <span class="keywordtype">void</span> undoWrittenFiles(<span class="keyword">const</span> std::string&amp; entity_name);</div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>        <span class="keyword">static</span> std::string hashMultipartMetadata(<span class="keyword">const</span> <a class="code hl_struct" href="structmb_1_1MbFormDataItem.html">MbFormDataItem</a>&amp; data);</div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>        <span class="keywordtype">void</span> read();</div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>        <span class="keywordtype">void</span> readMultipart();</div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>        <span class="keywordtype">void</span> readJSON();</div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        <span class="keyword">static</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> getValueFromType(<span class="keyword">const</span> std::string&amp; type, <span class="keyword">const</span> std::string&amp; value);</div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    };</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> registerDuktapeMethods();</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    };</div>
 </div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>} <span class="comment">// mb</span></div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span><span class="preprocessor">#endif </span><span class="comment">//MB_HTTP_H</span></div>
-<div class="ttc" id="aclassmb_1_1Entity_html"><div class="ttname"><a href="classmb_1_1Entity.html">mb::Entity</a></div><div class="ttdoc">Represents a database table/entity with schema and CRUD operations.</div><div class="ttdef"><b>Definition</b> entity.h:53</div></div>
-<div class="ttc" id="aclassmb_1_1IMantisBase_html"><div class="ttname"><a href="classmb_1_1IMantisBase.html">mb::IMantisBase</a></div><div class="ttdoc">Non-owning access to the active MantisBase from DI-aware types.</div><div class="ttdef"><b>Definition</b> types.h:85</div></div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>} <span class="comment">// mb</span></div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="preprocessor">#endif </span><span class="comment">//MB_HTTP_H</span></div>
 <div class="ttc" id="aclassmb_1_1MantisBase_html"><div class="ttname"><a href="classmb_1_1MantisBase.html">mb::MantisBase</a></div><div class="ttdoc">MantisBase entry point.</div><div class="ttdef"><b>Definition</b> mantisbase.h:54</div></div>
-<div class="ttc" id="aclassmb_1_1MbContentReader_html"><div class="ttname"><a href="classmb_1_1MbContentReader.html">mb::MbContentReader</a></div><div class="ttdoc">Lazy multipart/JSON body parser for content-reader route handlers.</div><div class="ttdef"><b>Definition</b> http.h:254</div></div>
-<div class="ttc" id="aclassmb_1_1MbRequest_html"><div class="ttname"><a href="classmb_1_1MbRequest.html">mb::MbRequest</a></div><div class="ttdoc">HTTP request wrapper bound to a MantisBase instance.</div><div class="ttdef"><b>Definition</b> http.h:57</div></div>
-<div class="ttc" id="aclassmb_1_1MbRequest_html_a538ba026f4978cad4cf25e2c92af960d"><div class="ttname"><a href="classmb_1_1MbRequest.html#a538ba026f4978cad4cf25e2c92af960d">mb::MbRequest::registerDuktapeMethods</a></div><div class="ttdeci">static void registerDuktapeMethods()</div></div>
-<div class="ttc" id="aclassmb_1_1MbRequest_html_a779dba7f76d645f8ff911cb03c37a79a"><div class="ttname"><a href="classmb_1_1MbRequest.html#a779dba7f76d645f8ff911cb03c37a79a">mb::MbRequest::getOr</a></div><div class="ttdeci">const T &amp; getOr(const std::string &amp;key, T default_value)</div><div class="ttdef"><b>Definition</b> http.h:154</div></div>
-<div class="ttc" id="aclassmb_1_1MbRequest_html_aee05e5438de07b1408ada195003b9d2c"><div class="ttname"><a href="classmb_1_1MbRequest.html#aee05e5438de07b1408ada195003b9d2c">mb::MbRequest::set</a></div><div class="ttdeci">void set(const std::string &amp;key, T value)</div><div class="ttdef"><b>Definition</b> http.h:142</div></div>
-<div class="ttc" id="aclassmb_1_1MbResponse_html"><div class="ttname"><a href="classmb_1_1MbResponse.html">mb::MbResponse</a></div><div class="ttdoc">HTTP response wrapper bound to a MantisBase instance.</div><div class="ttdef"><b>Definition</b> http.h:170</div></div>
-<div class="ttc" id="aclassmb_1_1MbResponse_html_a304b02937c9510d0ba358bfb6616b432"><div class="ttname"><a href="classmb_1_1MbResponse.html#a304b02937c9510d0ba358bfb6616b432">mb::MbResponse::registerDuktapeMethods</a></div><div class="ttdeci">static void registerDuktapeMethods()</div></div>
+<div class="ttc" id="aclassmb_1_1MbAppMixin_html"><div class="ttname"><a href="classmb_1_1MbAppMixin.html">mb::MbAppMixin</a></div><div class="ttdoc">Non-owning access to the active MantisBase from DI-aware types.</div><div class="ttdef"><b>Definition</b> types.h:89</div></div>
+<div class="ttc" id="aclassmb_1_1MbEntity_html"><div class="ttname"><a href="classmb_1_1MbEntity.html">mb::MbEntity</a></div><div class="ttdoc">Represents a database table/entity with schema and CRUD operations.</div><div class="ttdef"><b>Definition</b> entity.h:53</div></div>
+<div class="ttc" id="aclassmb_1_1MbRequest_html"><div class="ttname"><a href="classmb_1_1MbRequest.html">mb::MbRequest</a></div><div class="ttdoc">HTTP request wrapper bound to a MantisBase instance.</div><div class="ttdef"><b>Definition</b> http.h:66</div></div>
+<div class="ttc" id="aclassmb_1_1MbRequest_html_a8259c781b99fc410009e7d0bc60003aa"><div class="ttname"><a href="classmb_1_1MbRequest.html#a8259c781b99fc410009e7d0bc60003aa">mb::MbRequest::get</a></div><div class="ttdeci">const T &amp; get(const std::string &amp;key, T default_value)</div><div class="ttdef"><b>Definition</b> http.h:193</div></div>
+<div class="ttc" id="aclassmb_1_1MbRequest_html_aee05e5438de07b1408ada195003b9d2c"><div class="ttname"><a href="classmb_1_1MbRequest.html#aee05e5438de07b1408ada195003b9d2c">mb::MbRequest::set</a></div><div class="ttdeci">void set(const std::string &amp;key, T value)</div><div class="ttdef"><b>Definition</b> http.h:181</div></div>
+<div class="ttc" id="aclassmb_1_1MbResponse_html"><div class="ttname"><a href="classmb_1_1MbResponse.html">mb::MbResponse</a></div><div class="ttdoc">HTTP response wrapper bound to a MantisBase instance.</div><div class="ttdef"><b>Definition</b> http.h:213</div></div>
 <div class="ttc" id="aclassmb_1_1MbResponse_html_a504cb3236292e5d6caf9d461c0d81e9e"><div class="ttname"><a href="classmb_1_1MbResponse.html#a504cb3236292e5d6caf9d461c0d81e9e">mb::MbResponse::~MbResponse</a></div><div class="ttdeci">~MbResponse()=default</div></div>
 <div class="ttc" id="acontext__store_8h_html"><div class="ttname"><a href="context__store_8h.html">context_store.h</a></div><div class="ttdoc">Generic key-value context store for scripting and internal utilities.</div></div>
-<div class="ttc" id="aentity_8h_html"><div class="ttname"><a href="entity_8h.html">entity.h</a></div><div class="ttdoc">Entity class for database table operations and CRUD functionality.</div></div>
+<div class="ttc" id="aentity_8h_html"><div class="ttname"><a href="entity_8h.html">entity.h</a></div><div class="ttdoc">MbEntity class for database table operations and CRUD functionality.</div></div>
 <div class="ttc" id="aexceptions_8h_html"><div class="ttname"><a href="exceptions_8h.html">exceptions.h</a></div><div class="ttdoc">Custom exception class for MantisBase errors.</div></div>
 <div class="ttc" id="aexport_8h_html_ad67b3f9a509bd18bd030486e98d14e34"><div class="ttname"><a href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a></div><div class="ttdeci">#define MANTISBASE_API</div><div class="ttdef"><b>Definition</b> export.h:25</div></div>
 <div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdef"><b>Definition</b> api_keys.h:32</div></div>
@@ -351,12 +324,15 @@ $(document).ready(function(){initNavTree('http_8h_source.html',''); initResizabl
 <div class="ttc" id="anamespacemb_html_a60bac1ca414c3efdc014dc205550fb4e"><div class="ttname"><a href="namespacemb.html#a60bac1ca414c3efdc014dc205550fb4e">mb::isGuestAuth</a></div><div class="ttdeci">MANTISBASE_API bool isGuestAuth(const nlohmann::json &amp;auth)</div><div class="ttdef"><b>Definition</b> access_rules.cpp:62</div></div>
 <div class="ttc" id="anamespacemb_html_a89c9a4043ad8ff8dd18dd3f13a782a7c"><div class="ttname"><a href="namespacemb.html#a89c9a4043ad8ff8dd18dd3f13a782a7c">mb::isAdminAuth</a></div><div class="ttdeci">MANTISBASE_API bool isAdminAuth(const nlohmann::json &amp;auth)</div><div class="ttdef"><b>Definition</b> access_rules.cpp:72</div></div>
 <div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
-<div class="ttc" id="astructmb_1_1MbFormDataItem_html"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html">mb::MbFormDataItem</a></div><div class="ttdef"><b>Definition</b> http.h:242</div></div>
-<div class="ttc" id="astructmb_1_1MbFormDataItem_html_a2ddfa5498912cfcc3e13153cd1a8aa34"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html#a2ddfa5498912cfcc3e13153cd1a8aa34">mb::MbFormDataItem::content</a></div><div class="ttdeci">std::string content</div><div class="ttdef"><b>Definition</b> http.h:244</div></div>
-<div class="ttc" id="astructmb_1_1MbFormDataItem_html_a5670ebb89f76633ede9ea53df3b45126"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html#a5670ebb89f76633ede9ea53df3b45126">mb::MbFormDataItem::content_type</a></div><div class="ttdeci">std::string content_type</div><div class="ttdef"><b>Definition</b> http.h:246</div></div>
-<div class="ttc" id="astructmb_1_1MbFormDataItem_html_a8c8166e8b31c01b021bf4d9e45300ebf"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html#a8c8166e8b31c01b021bf4d9e45300ebf">mb::MbFormDataItem::name</a></div><div class="ttdeci">std::string name</div><div class="ttdef"><b>Definition</b> http.h:243</div></div>
-<div class="ttc" id="astructmb_1_1MbFormDataItem_html_affb83fae33ec66b80fcc482a66604516"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html#affb83fae33ec66b80fcc482a66604516">mb::MbFormDataItem::filename</a></div><div class="ttdeci">std::string filename</div><div class="ttdef"><b>Definition</b> http.h:245</div></div>
-<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the IMantisBase DI mixin.</div></div>
+<div class="ttc" id="asmtp__client_8cpp_html_a22ffc871c8cdced782372446356096a5"><div class="ttname"><a href="smtp__client_8cpp.html#a22ffc871c8cdced782372446356096a5">body</a></div><div class="ttdeci">std::string body</div><div class="ttdef"><b>Definition</b> smtp_client.cpp:209</div></div>
+<div class="ttc" id="asmtp__client_8cpp_html_a2e67f3a4bca448ee7dc845d3741f9a10"><div class="ttname"><a href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a></div><div class="ttdeci">WOLFSSL_CTX * ctx</div><div class="ttdef"><b>Definition</b> smtp_client.cpp:47</div></div>
+<div class="ttc" id="asmtp__client_8cpp_html_a6404daae205101cd7b62e5b35ec8c0f8"><div class="ttname"><a href="smtp__client_8cpp.html#a6404daae205101cd7b62e5b35ec8c0f8">status</a></div><div class="ttdeci">ReplyParse status</div><div class="ttdef"><b>Definition</b> smtp_client.cpp:269</div></div>
+<div class="ttc" id="astructmb_1_1MbFormDataItem_html"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html">mb::MbFormDataItem</a></div><div class="ttdef"><b>Definition</b> http.h:33</div></div>
+<div class="ttc" id="astructmb_1_1MbFormDataItem_html_a2ddfa5498912cfcc3e13153cd1a8aa34"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html#a2ddfa5498912cfcc3e13153cd1a8aa34">mb::MbFormDataItem::content</a></div><div class="ttdeci">std::string content</div><div class="ttdef"><b>Definition</b> http.h:35</div></div>
+<div class="ttc" id="astructmb_1_1MbFormDataItem_html_a5670ebb89f76633ede9ea53df3b45126"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html#a5670ebb89f76633ede9ea53df3b45126">mb::MbFormDataItem::content_type</a></div><div class="ttdeci">std::string content_type</div><div class="ttdef"><b>Definition</b> http.h:37</div></div>
+<div class="ttc" id="astructmb_1_1MbFormDataItem_html_a8c8166e8b31c01b021bf4d9e45300ebf"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html#a8c8166e8b31c01b021bf4d9e45300ebf">mb::MbFormDataItem::name</a></div><div class="ttdeci">std::string name</div><div class="ttdef"><b>Definition</b> http.h:34</div></div>
+<div class="ttc" id="astructmb_1_1MbFormDataItem_html_affb83fae33ec66b80fcc482a66604516"><div class="ttname"><a href="structmb_1_1MbFormDataItem.html#affb83fae33ec66b80fcc482a66604516">mb::MbFormDataItem::filename</a></div><div class="ttdeci">std::string filename</div><div class="ttdef"><b>Definition</b> http.h:36</div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the MbAppMixin DI mixin.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

@@ -6,7 +6,7 @@
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,62,118,102,115,98,172,58"/>
 <area shape="rect" id="Node000004" href="$api__keys_8h.html" title="Programmatic and REST&#45;backed API key management." alt="" coords="270,108,361,133"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="244,58,292,97,289,101,241,62"/>
-<area shape="rect" id="Node000007" href="$types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="371,181,442,207"/>
+<area shape="rect" id="Node000007" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="371,181,442,207"/>
 <area shape="poly" id="edge19_Node000001_Node000007" title=" " alt="" coords="301,58,340,78,375,106,394,136,404,167,399,168,389,138,371,110,337,83,298,63"/>
 <area shape="rect" id="Node000012" href="$oauth_8h.html" title="OAuth 2.0 / OIDC provider configuration and user login flows." alt="" coords="175,108,246,133"/>
 <area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="213,60,213,94,208,94,208,60"/>

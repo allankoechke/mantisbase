@@ -1,8 +1,12 @@
 var searchData=
 [
-  ['warn_0',['warn',['../classmb_1_1Logger.html#ab6340a6bbcb38645b8c6711700d654f7',1,'mb::Logger']]],
-  ['what_1',['what',['../classmb_1_1MantisException.html#abe2cf6964063bedc9be612e7ec5365ce',1,'mb::MantisException']]],
-  ['writefiles_2',['writeFiles',['../classmb_1_1MbContentReader.html#a3d0ce8ef9694f7e88459256b814d3c5b',1,'mb::MbContentReader']]],
-  ['ws_5fpath_5fadd_3',['WS_PATH_ADD',['../classmb_1_1RealtimeWSController.html#a3e7a845fe22d2f2cc911a441c04ddc0b',1,'mb::RealtimeWSController']]],
-  ['wsmgr_4',['wsmgr',['../classmb_1_1WSMgr.html#a0df2cd464fa11e1cc5cb055cdbb1c1cc',1,'mb::WSMgr::WSMgr()'],['../classmb_1_1SSEMgr.html#ab7b226977b7aa94d87a73d70f83fa4c2',1,'mb::SSEMgr::wsMgr()']]]
+  ['_7emantisbase_0',['~MantisBase',['../classmb_1_1MantisBase.html#a06f63814a1bf1526c0bfefa32d3d16f0',1,'mb::MantisBase']]],
+  ['_7embdatabase_1',['~MbDatabase',['../classmb_1_1MbDatabase.html#a3629d59f5d8daa3a6b90049c46ffc774',1,'mb::MbDatabase']]],
+  ['_7embentityschema_2',['~MbEntitySchema',['../classmb_1_1MbEntitySchema.html#a99917f3d03323ccb6365329f67ef883c',1,'mb::MbEntitySchema']]],
+  ['_7emblogdatabase_3',['~MbLogDatabase',['../classmb_1_1MbLogDatabase.html#afdd28f0aac305d536eba8e0ee15c8f45',1,'mb::MbLogDatabase']]],
+  ['_7embresponse_4',['~MbResponse',['../classmb_1_1MbResponse.html#a504cb3236292e5d6caf9d461c0d81e9e',1,'mb::MbResponse']]],
+  ['_7embrouter_5',['~MbRouter',['../classmb_1_1MbRouter.html#a1df13ac5439a999680e826b57eeed21b',1,'mb::MbRouter']]],
+  ['_7embrtdbworker_6',['~MbRtDbWorker',['../classmb_1_1MbRtDbWorker.html#af8b70117720b0534ed47d544acd56ad8',1,'mb::MbRtDbWorker']]],
+  ['_7embssemgr_7',['~MbSSEMgr',['../classmb_1_1MbSSEMgr.html#a427e5721cf39d9d96bea7b320481f4c4',1,'mb::MbSSEMgr']]],
+  ['_7embwsmgr_8',['~MbWSMgr',['../classmb_1_1MbWSMgr.html#a818d31d207c4d42800e955b75a274fb5',1,'mb::MbWSMgr']]]
 ];

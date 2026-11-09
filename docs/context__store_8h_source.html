@@ -117,19 +117,19 @@ $(document).ready(function(){initNavTree('context__store_8h_source.html',''); in
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> = nlohmann::json;</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 <div class="foldopen" id="foldopen00061" data-start="{" data-end="};">
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classmb_1_1ContextStore.html">   61</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1ContextStore.html">ContextStore</a></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classmb_1_1MbContextStore.html">   61</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1MbContextStore.html">MbContextStore</a></div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    {</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        std::unordered_map&lt;std::string, std::any&gt; data;</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classmb_1_1ContextStore.html#af72a2f9cc741baf2a6d02d380ecae805">   66</a></span>        <a class="code hl_function" href="classmb_1_1ContextStore.html#af72a2f9cc741baf2a6d02d380ecae805">ContextStore</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classmb_1_1MbContextStore.html#ac61ac6ef16c5693fb53aabc0945e572c">   66</a></span>        <a class="code hl_function" href="classmb_1_1MbContextStore.html#ac61ac6ef16c5693fb53aabc0945e572c">MbContextStore</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordtype">void</span> dump();</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordtype">bool</span> hasKey(<span class="keyword">const</span> std::string&amp; key) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00087" data-start="{" data-end="}">
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="classmb_1_1ContextStore.html#abf98fe301e99f96a6e7cec99aea0f400">   87</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1ContextStore.html#abf98fe301e99f96a6e7cec99aea0f400">set</a>(<span class="keyword">const</span> std::string&amp; key, T value)</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="classmb_1_1MbContextStore.html#a08bcb56ff5388813c12b5d1c2689d4ff">   87</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classmb_1_1MbContextStore.html#a08bcb56ff5388813c12b5d1c2689d4ff">set</a>(<span class="keyword">const</span> std::string&amp; key, T value)</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        {</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>            data[key] = std::move(value);</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        }</div>
@@ -137,50 +137,48 @@ $(document).ready(function(){initNavTree('context__store_8h_source.html',''); in
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classmb_1_1ContextStore.html#afc3f6f5f2897979f6ee43b28b883cbe0">  100</a></span>        std::optional&lt;T*&gt; <a class="code hl_function" href="classmb_1_1ContextStore.html#afc3f6f5f2897979f6ee43b28b883cbe0">get</a>(<span class="keyword">const</span> std::string&amp; key)</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classmb_1_1MbContextStore.html#a57e6511aec82ba045cbb909ecc30f918">  100</a></span>        std::optional&lt;T*&gt; <a class="code hl_function" href="classmb_1_1MbContextStore.html#a57e6511aec82ba045cbb909ecc30f918">get</a>(<span class="keyword">const</span> std::string&amp; key)</div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        {</div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>            <span class="keyword">const</span> <span class="keyword">auto</span> it = data.find(key);</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>            <span class="keywordflow">if</span> (it != data.end())</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                <span class="keywordflow">return</span> std::any_cast&lt;T&gt;(&amp;it-&gt;second);</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            <span class="keywordflow">return</span> std::nullopt;</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        }</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>            <span class="keywordflow">if</span> (it != data.end()) <span class="keywordflow">return</span> std::any_cast&lt;T&gt;(&amp;it-&gt;second);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>            <span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        }</div>
 </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00118" data-start="{" data-end="}">
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="classmb_1_1ContextStore.html#aa77275ed339fe00137073d7c77fee7aa">  118</a></span>        T&amp; <a class="code hl_function" href="classmb_1_1ContextStore.html#aa77275ed339fe00137073d7c77fee7aa">getOr</a>(<span class="keyword">const</span> std::string&amp; key, T default_value)</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        {</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>            <span class="keywordflow">if</span> (<span class="keyword">const</span> <span class="keyword">auto</span> it = data.find(key); it == data.end())</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            {</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>                data[key] = std::move(default_value);</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>            }</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>            <span class="keywordflow">return</span> std::any_cast&lt;T&amp;&gt;(data.at(key));</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        }</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00116" data-start="{" data-end="}">
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="classmb_1_1MbContextStore.html#a9621c6d623f8eb1de040368ac0102032">  116</a></span>        T&amp; <a class="code hl_function" href="classmb_1_1MbContextStore.html#a9621c6d623f8eb1de040368ac0102032">get</a>(<span class="keyword">const</span> std::string&amp; key, T default_value)</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        {</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>            <span class="keywordflow">if</span> (<span class="keyword">const</span> <span class="keyword">auto</span> it = data.find(key); it == data.end())</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>            {</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                data[key] = std::move(default_value);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            }</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>            <span class="keywordflow">return</span> std::any_cast&lt;T&amp;&gt;(data.at(key));</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        }</div>
 </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        DukValue get_duk(<span class="keyword">const</span> std::string&amp; key);</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        DukValue getOr_duk(<span class="keyword">const</span> std::string&amp; key, DukValue default_value);</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <span class="keywordtype">void</span> set_duk(<span class="keyword">const</span> std::string&amp; key, <span class="keyword">const</span> DukValue&amp; value);</div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    };</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        DukValue get_duk(<span class="keyword">const</span> std::string&amp; key);</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        DukValue getOr_duk(<span class="keyword">const</span> std::string&amp; key, DukValue default_value);</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keywordtype">void</span> set_duk(<span class="keyword">const</span> std::string&amp; key, <span class="keyword">const</span> DukValue&amp; value);</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    };</div>
 </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>} <span class="comment">// mb</span></div>
 <div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>} <span class="comment">// mb</span></div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="preprocessor">#endif </span><span class="comment">//MANTISAPP_CONTEXTSTORE_H</span></div>
-<div class="ttc" id="aclassmb_1_1ContextStore_html"><div class="ttname"><a href="classmb_1_1ContextStore.html">mb::ContextStore</a></div><div class="ttdef"><b>Definition</b> context_store.h:62</div></div>
-<div class="ttc" id="aclassmb_1_1ContextStore_html_aa77275ed339fe00137073d7c77fee7aa"><div class="ttname"><a href="classmb_1_1ContextStore.html#aa77275ed339fe00137073d7c77fee7aa">mb::ContextStore::getOr</a></div><div class="ttdeci">T &amp; getOr(const std::string &amp;key, T default_value)</div><div class="ttdoc">Get context value given the key.</div><div class="ttdef"><b>Definition</b> context_store.h:118</div></div>
-<div class="ttc" id="aclassmb_1_1ContextStore_html_abf98fe301e99f96a6e7cec99aea0f400"><div class="ttname"><a href="classmb_1_1ContextStore.html#abf98fe301e99f96a6e7cec99aea0f400">mb::ContextStore::set</a></div><div class="ttdeci">void set(const std::string &amp;key, T value)</div><div class="ttdoc">Store a key-value data in the context.</div><div class="ttdef"><b>Definition</b> context_store.h:87</div></div>
-<div class="ttc" id="aclassmb_1_1ContextStore_html_af72a2f9cc741baf2a6d02d380ecae805"><div class="ttname"><a href="classmb_1_1ContextStore.html#af72a2f9cc741baf2a6d02d380ecae805">mb::ContextStore::ContextStore</a></div><div class="ttdeci">ContextStore()=default</div></div>
-<div class="ttc" id="aclassmb_1_1ContextStore_html_afc3f6f5f2897979f6ee43b28b883cbe0"><div class="ttname"><a href="classmb_1_1ContextStore.html#afc3f6f5f2897979f6ee43b28b883cbe0">mb::ContextStore::get</a></div><div class="ttdeci">std::optional&lt; T * &gt; get(const std::string &amp;key)</div><div class="ttdoc">Get context value given the key.</div><div class="ttdef"><b>Definition</b> context_store.h:100</div></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="preprocessor">#endif </span><span class="comment">//MANTISAPP_CONTEXTSTORE_H</span></div>
+<div class="ttc" id="aclassmb_1_1MbContextStore_html"><div class="ttname"><a href="classmb_1_1MbContextStore.html">mb::MbContextStore</a></div><div class="ttdef"><b>Definition</b> context_store.h:62</div></div>
+<div class="ttc" id="aclassmb_1_1MbContextStore_html_a08bcb56ff5388813c12b5d1c2689d4ff"><div class="ttname"><a href="classmb_1_1MbContextStore.html#a08bcb56ff5388813c12b5d1c2689d4ff">mb::MbContextStore::set</a></div><div class="ttdeci">void set(const std::string &amp;key, T value)</div><div class="ttdoc">Store a key-value data in the context.</div><div class="ttdef"><b>Definition</b> context_store.h:87</div></div>
+<div class="ttc" id="aclassmb_1_1MbContextStore_html_a57e6511aec82ba045cbb909ecc30f918"><div class="ttname"><a href="classmb_1_1MbContextStore.html#a57e6511aec82ba045cbb909ecc30f918">mb::MbContextStore::get</a></div><div class="ttdeci">std::optional&lt; T * &gt; get(const std::string &amp;key)</div><div class="ttdoc">Get context value given the key.</div><div class="ttdef"><b>Definition</b> context_store.h:100</div></div>
+<div class="ttc" id="aclassmb_1_1MbContextStore_html_a9621c6d623f8eb1de040368ac0102032"><div class="ttname"><a href="classmb_1_1MbContextStore.html#a9621c6d623f8eb1de040368ac0102032">mb::MbContextStore::get</a></div><div class="ttdeci">T &amp; get(const std::string &amp;key, T default_value)</div><div class="ttdoc">Get context value given the key.</div><div class="ttdef"><b>Definition</b> context_store.h:116</div></div>
+<div class="ttc" id="aclassmb_1_1MbContextStore_html_ac61ac6ef16c5693fb53aabc0945e572c"><div class="ttname"><a href="classmb_1_1MbContextStore.html#ac61ac6ef16c5693fb53aabc0945e572c">mb::MbContextStore::MbContextStore</a></div><div class="ttdeci">MbContextStore()=default</div></div>
 <div class="ttc" id="aexport_8h_html_ad67b3f9a509bd18bd030486e98d14e34"><div class="ttname"><a href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a></div><div class="ttdeci">#define MANTISBASE_API</div><div class="ttdef"><b>Definition</b> export.h:25</div></div>
 <div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdef"><b>Definition</b> api_keys.h:32</div></div>
 <div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
-<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the IMantisBase DI mixin.</div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the MbAppMixin DI mixin.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

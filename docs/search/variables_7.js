@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['id_0',['id',['../structmb_1_1ApiKeyResult.html#addab4ce9ef184684fc0da174d0ea748e',1,'mb::ApiKeyResult']]],
-  ['isdbinitialized_1',['isDbInitialized',['../classmb_1_1Logger.html#a671cf40b34813c49f6e162a112533aaa',1,'mb::Logger']]],
-  ['items_2',['items',['../structmb_1_1EntityListPage.html#a845450cf6e0ed97a76ddbb87e6732cd4',1,'mb::EntityListPage']]]
+  ['handler_0',['handler',['../structmb_1_1MbRouteHandler.html#ad8762a15dea4212d57a58ade7a534814',1,'mb::MbRouteHandler']]],
+  ['has_5fmore_1',['has_more',['../structmb_1_1EntityListPage.html#aa367a146631c39c490215960ed426e6d',1,'mb::EntityListPage']]],
+  ['host_2',['host',['../structmb_1_1MbSmtpConfig.html#a12da935bdf3608bc1fc7443faaad7fb9',1,'mb::MbSmtpConfig']]]
 ];

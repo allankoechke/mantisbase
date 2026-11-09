@@ -115,7 +115,7 @@ $(document).ready(function(){initNavTree('mantisbase_8h_source.html',''); initRe
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;utils/snowflake.hpp&quot;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;dukglue/dukglue.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a> { <span class="keyword">class </span>ScriptingEngine; }</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a> { <span class="keyword">class </span>MbScriptingEngine; }</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="types_8h.html">core/types.h</a>&quot;</span></div>
@@ -123,7 +123,7 @@ $(document).ready(function(){initNavTree('mantisbase_8h_source.html',''); initRe
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemb.html">mb</a></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>{</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">class </span>RealtimeDB;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">class </span>MbRealtimeDB;</div>
 <div class="foldopen" id="foldopen00053" data-start="{" data-end="};">
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classmb_1_1MantisBase.html">   53</a></span>    <span class="keyword">class </span><a class="code hl_define" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> <a class="code hl_class" href="classmb_1_1MantisBase.html">MantisBase</a></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    {</div>
@@ -164,171 +164,182 @@ $(document).ready(function(){initNavTree('mantisbase_8h_source.html',''); initRe
 <div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        [[nodiscard]] std::string scriptsDir() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        <span class="keywordtype">void</span> setScriptsDir(<span class="keyword">const</span> std::string&amp; dir);</div>
 <div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        [[nodiscard]] std::string migrationsDir() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        <span class="keywordtype">void</span> setMigrationsDir(<span class="keyword">const</span> std::string&amp; dir);</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        [[nodiscard]] <span class="keywordtype">bool</span> skipAdminSetup() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <span class="keywordtype">void</span> setSkipAdminSetup(<span class="keywordtype">bool</span> skip);</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span> </div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        [[nodiscard]] std::string dbType() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        <span class="keywordtype">void</span> setDbType(<span class="keyword">const</span> std::string&amp; dbType);</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        [[nodiscard]] std::string jwtSecretKey() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        std::string snowflakeId() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keyword">static</span> std::string appVersion();</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        <span class="keyword">static</span> <span class="keywordtype">int</span> appMajorVersion();</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        <span class="keyword">static</span> <span class="keywordtype">int</span> appMinorVersion();</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        <span class="keyword">static</span> <span class="keywordtype">int</span> appPatchVersion();</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1Database.html">Database</a>&amp; db() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span> </div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        [[nodiscard]] argparse::ArgumentParser&amp; cmd() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1Router.html">Router</a>&amp; router() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1KeyValStore.html">KeyValStore</a>&amp; settings() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1Logger.html">Logger</a>&amp; logs() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1RealtimeDB.html">RealtimeDB</a>&amp; rt() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span> </div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1FilesMgr.html">FilesMgr</a>&amp; files() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span> </div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1Logger.html">Logger</a>&amp; logger() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span> </div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1Auth.html">Auth</a>&amp; auth() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1Entity.html">Entity</a> entity(<span class="keyword">const</span> std::string&amp; entity_name) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasEntity(<span class="keyword">const</span> std::string&amp; entity_name) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>        [[nodiscard]] duk_context* ctx() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span> </div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        [[nodiscard]] std::string templatesDir() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="keywordtype">void</span> setTemplatesDir(<span class="keyword">const</span> std::string&amp; dir);</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        [[nodiscard]] std::string migrationsDir() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <span class="keywordtype">void</span> setMigrationsDir(<span class="keyword">const</span> std::string&amp; dir);</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span> </div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        [[nodiscard]] <span class="keywordtype">bool</span> skipAdminSetup() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        <span class="keywordtype">void</span> setSkipAdminSetup(<span class="keywordtype">bool</span> skip);</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>        [[nodiscard]] std::string dbType() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        <span class="keywordtype">void</span> setDbType(<span class="keyword">const</span> std::string&amp; dbType);</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        [[nodiscard]] std::string jwtSecretKey() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span> </div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        std::string snowflakeId() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span> </div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>        <span class="keyword">static</span> std::string appVersion();</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        <span class="keyword">static</span> <span class="keywordtype">int</span> appMajorVersion();</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        <span class="keyword">static</span> <span class="keywordtype">int</span> appMinorVersion();</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        <span class="keyword">static</span> <span class="keywordtype">int</span> appPatchVersion();</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbDatabase.html">MbDatabase</a>&amp; db() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>        [[nodiscard]] argparse::ArgumentParser&amp; cmd() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbRouter.html">MbRouter</a>&amp; router() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbKVStore.html">MbKVStore</a>&amp; settings() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbLogger.html">MbLogger</a>&amp; logs() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbRealtimeDB.html">MbRealtimeDB</a>&amp; rt() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span> </div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbFilesMgr.html">MbFilesMgr</a>&amp; files() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span> </div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbLogger.html">MbLogger</a>&amp; logger() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span> </div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbAuth.html">MbAuth</a>&amp; auth() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span> </div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbMailer.html">MbMailer</a>&amp; mailer() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span> </div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>        [[nodiscard]] <a class="code hl_class" href="classmb_1_1MbEntity.html">MbEntity</a> entity(<span class="keyword">const</span> std::string&amp; entity_name) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span> </div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>        <span class="keywordtype">void</span> openBrowserOnStart() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>        [[nodiscard]] std::chrono::time_point&lt;std::chrono::steady_clock&gt; startTime() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>        [[nodiscard]] <span class="keywordtype">bool</span> hasEntity(<span class="keyword">const</span> std::string&amp; entity_name) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>        [[nodiscard]] duk_context* <a class="code hl_variable" href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span> </div>
-<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>        [[nodiscard]] <span class="keywordtype">bool</span> isDevMode() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span> </div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno"><a class="line" href="classmb_1_1MantisBase.html#a7b8d5c3c2644ce3137e069ddc35d0d13">  334</a></span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1MantisBase.html#a7b8d5c3c2644ce3137e069ddc35d0d13">isScriptingDisabled</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span> </div>
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>        <span class="keywordtype">void</span> notifyScriptRecordCreated(<span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>        <span class="keywordtype">void</span> notifyScriptRecordUpdated(<span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span> </div>
-<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>        <span class="keywordtype">void</span> loadScriptJs(<span class="keyword">const</span> std::string &amp;relativePath) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span> </div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        std::string version_JSWrapper()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> appVersion(); }</div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>        std::string jwtSecretKey_JSWrapper()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> jwtSecretKey(); }</div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>        <span class="keywordtype">void</span> quit_JSWrapper(<span class="keywordtype">int</span> code, <span class="keyword">const</span> std::string &amp;msg);</div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span> </div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        [[nodiscard]] Database *duk_db() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>        [[nodiscard]] Router *duk_router() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>        [[nodiscard]] KeyValStore *duk_settings() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>        [[nodiscard]] Auth *duk_auth() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>        [[nodiscard]] FilesMgr *duk_files() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>        [[nodiscard]] Logger *duk_logs() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>        [[nodiscard]] RealtimeDB *duk_rt() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span> </div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>        <span class="keywordtype">void</span> openBrowserOnStart() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span> </div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>        [[nodiscard]] std::chrono::time_point&lt;std::chrono::steady_clock&gt; startTime() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span> </div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        [[nodiscard]] <span class="keywordtype">bool</span> isDevMode() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span> </div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno"><a class="line" href="classmb_1_1MantisBase.html#a7b8d5c3c2644ce3137e069ddc35d0d13">  350</a></span>        [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classmb_1_1MantisBase.html#a7b8d5c3c2644ce3137e069ddc35d0d13">isScriptingDisabled</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span> </div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>        <span class="keywordtype">void</span> notifyScriptRecordCreated(<span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>        <span class="keywordtype">void</span> notifyScriptRecordUpdated(<span class="keyword">const</span> std::string &amp;entity, <span class="keyword">const</span> std::string &amp;recordId) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span> </div>
-<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>        <span class="comment">// Factory-only construction via create().</span></div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>        MantisBase();</div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span> </div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>        <span class="keywordtype">void</span> init(<span class="keywordtype">int</span> argc = 0, <span class="keywordtype">char</span>* argv[] = {});</div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span> </div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>        <span class="comment">// Private members</span></div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>        <span class="keywordtype">void</span> parseArgs(); </div>
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>        <span class="keywordtype">void</span> init_units(); </div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span> </div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>        [[nodiscard]]</div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>        <span class="keywordtype">bool</span> ensureDirsAreCreated() <span class="keyword">const</span>; </div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span> </div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>        [[nodiscard]] <span class="keywordtype">bool</span> isCreated() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span> </div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>        <span class="keywordtype">void</span> initJSEngine();</div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
-<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>        <span class="keywordtype">void</span> loadStartScript() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>        <span class="keywordtype">void</span> loadScriptJs(<span class="keyword">const</span> std::string &amp;relativePath) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span> </div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>        std::string version_JSWrapper()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> appVersion(); }</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>        std::string jwtSecretKey_JSWrapper()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> jwtSecretKey(); }</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>        <span class="keywordtype">void</span> quit_JSWrapper(<span class="keywordtype">int</span> <a class="code hl_variable" href="smtp__client_8cpp.html#a45a5b7c00a796a23f01673cef1dbe0a9">code</a>, <span class="keyword">const</span> std::string &amp;msg);</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span> </div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>        [[nodiscard]] MbDatabase *duk_db() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>        [[nodiscard]] MbRouter *duk_router() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>        [[nodiscard]] MbKVStore *duk_settings() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>        [[nodiscard]] MbAuth *duk_auth() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>        [[nodiscard]] MbFilesMgr *duk_files() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>        [[nodiscard]] MbLogger *duk_logs() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>        [[nodiscard]] MbRealtimeDB *duk_rt() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>        [[nodiscard]] MbMailer *duk_mailer() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span> </div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>        <span class="comment">// Factory-only construction via create().</span></div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>        MantisBase();</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span> </div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>        <span class="keywordtype">void</span> init(<span class="keywordtype">int</span> argc = 0, <span class="keywordtype">char</span>* argv[] = {});</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span> </div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>        <span class="comment">// Private members</span></div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>        <span class="keywordtype">void</span> parseArgs(); </div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>        <span class="keywordtype">void</span> init_units(); </div>
 <div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span> </div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        <span class="keywordtype">void</span> loadAndExecuteScript(<span class="keyword">const</span> std::string&amp; filePath) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span> </div>
-<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>        <span class="keywordtype">void</span> loadScript(<span class="keyword">const</span> std::string&amp; relativePath) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span> </div>
-<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>        <span class="comment">// Store commandline args passed in, to be used in the init phase.</span></div>
-<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>        std::vector&lt;std::string&gt; m_cmdArgs;</div>
-<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span> </div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>        <span class="comment">// Hold state if the instance has be initialized already!</span></div>
-<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>        std::atomic&lt;bool&gt; m_isCreated = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span> </div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>        std::string m_publicDir;</div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>        std::string m_dataDir;</div>
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>        std::string m_scriptsDir;</div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>        std::string m_migrationsDir;</div>
-<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>        std::string m_dbType;</div>
-<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span> </div>
-<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>        <span class="comment">// System uptime checkpoint</span></div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>        std::chrono::time_point&lt;std::chrono::steady_clock&gt; m_startTime;</div>
-<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span> </div>
-<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>        <span class="keywordtype">int</span> m_port = 7070;</div>
-<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>        std::string m_host = <span class="stringliteral">&quot;127.0.0.1&quot;</span>;</div>
-<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span> </div>
-<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>        <span class="comment">// For snowflake ID generation</span></div>
-<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>        uint8_t m_zoneId = 0;</div>
-<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>        uint8_t m_shardNo = 0;</div>
-<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span> </div>
-<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>        <span class="comment">//</span></div>
-<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>        <span class="keywordtype">int</span> m_poolSize = 2;</div>
-<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>        <span class="keywordtype">bool</span> m_toStartServer = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>        <span class="keywordtype">bool</span> m_launchAdminPanel = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>        <span class="keywordtype">bool</span> m_isDevMode = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>        <span class="keywordtype">bool</span> m_skipAdminSetup = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>        <span class="keywordtype">bool</span> m_scriptingDisabled = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>        [[nodiscard]]</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>        <span class="keywordtype">bool</span> ensureDirsAreCreated() <span class="keyword">const</span>; </div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span> </div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>        [[nodiscard]] <span class="keywordtype">bool</span> isCreated() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span> </div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        <span class="keywordtype">void</span> initJSEngine();</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span> </div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>        <span class="keywordtype">void</span> loadStartScript() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span> </div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>        <span class="keywordtype">void</span> loadAndExecuteScript(<span class="keyword">const</span> std::string&amp; filePath) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span> </div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>        <span class="keywordtype">void</span> loadScript(<span class="keyword">const</span> std::string&amp; relativePath) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span> </div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>        <span class="comment">// Store commandline args passed in, to be used in the init phase.</span></div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>        std::vector&lt;std::string&gt; m_cmdArgs;</div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span> </div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>        <span class="comment">// Hold state if the instance has be initialized already!</span></div>
+<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>        std::atomic&lt;bool&gt; m_isCreated = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span> </div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>        std::string m_publicDir;</div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>        std::string m_dataDir;</div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>        std::string m_scriptsDir;</div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>        std::string m_migrationsDir;</div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>        std::string m_templatesDir;</div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>        std::string m_dbType;</div>
 <div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span> </div>
-<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>        std::unique_ptr&lt;Logger&gt; m_logger;</div>
-<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>        std::unique_ptr&lt;Database&gt; m_database;</div>
-<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span>        std::unique_ptr&lt;FilesMgr&gt; m_files;</div>
-<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>        std::unique_ptr&lt;RealtimeDB&gt; m_realtime;</div>
-<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>        std::unique_ptr&lt;Auth&gt; m_auth;</div>
-<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>        std::unique_ptr&lt;Router&gt; m_router;</div>
-<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>        std::unique_ptr&lt;KeyValStore&gt; m_kvStore;</div>
-<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>        std::unique_ptr&lt;argparse::ArgumentParser&gt; m_opts;</div>
-<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>        <span class="keyword">mutable</span> Snowflake&lt;1534832906275L&gt; m_snowflakeId{};</div>
-<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>        std::unique_ptr&lt;ScriptingEngine&gt; m_scripting;</div>
-<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>    };</div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>        <span class="comment">// System uptime checkpoint</span></div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>        std::chrono::time_point&lt;std::chrono::steady_clock&gt; m_startTime;</div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span> </div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>        <span class="keywordtype">int</span> m_port = 7070;</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>        std::string m_host = <span class="stringliteral">&quot;127.0.0.1&quot;</span>;</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span> </div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>        <span class="comment">// For snowflake ID generation</span></div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>        uint8_t m_zoneId = 0;</div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>        uint8_t m_shardNo = 0;</div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span> </div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>        <span class="comment">//</span></div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>        <span class="keywordtype">int</span> m_poolSize = 2;</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>        <span class="keywordtype">bool</span> m_toStartServer = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>        <span class="keywordtype">bool</span> m_launchAdminPanel = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>        <span class="keywordtype">bool</span> m_isDevMode = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span>        <span class="keywordtype">bool</span> m_skipAdminSetup = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>        <span class="keywordtype">bool</span> m_scriptingDisabled = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span> </div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span>        std::unique_ptr&lt;MbLogger&gt; m_logger;</div>
+<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span>        std::unique_ptr&lt;MbDatabase&gt; m_database;</div>
+<div class="line"><a id="l00451" name="l00451"></a><span class="lineno">  451</span>        std::unique_ptr&lt;MbFilesMgr&gt; m_files;</div>
+<div class="line"><a id="l00452" name="l00452"></a><span class="lineno">  452</span>        std::unique_ptr&lt;MbRealtimeDB&gt; m_realtime;</div>
+<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>        std::unique_ptr&lt;MbAuth&gt; m_auth;</div>
+<div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span>        std::unique_ptr&lt;MbRouter&gt; m_router;</div>
+<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>        std::unique_ptr&lt;MbMailer&gt; m_mailer;</div>
+<div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>        std::unique_ptr&lt;MbKVStore&gt; m_kvStore;</div>
+<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>        std::unique_ptr&lt;argparse::ArgumentParser&gt; m_opts;</div>
+<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>        <span class="keyword">mutable</span> Snowflake&lt;1534832906275L&gt; m_snowflakeId{};</div>
+<div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>        std::unique_ptr&lt;MbScriptingEngine&gt; m_scripting;</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>    };</div>
 </div>
-<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>}</div>
-<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span> </div>
-<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span><span class="preprocessor">#endif </span><span class="comment">//MANTISBASE_APP_H</span></div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>}</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span> </div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span><span class="preprocessor">#endif </span><span class="comment">//MANTISBASE_APP_H</span></div>
 <div class="ttc" id="aauth_8h_html"><div class="ttname"><a href="auth_8h.html">auth.h</a></div><div class="ttdoc">JWT session management and entry point for API keys and OAuth.</div></div>
-<div class="ttc" id="aclassmb_1_1Auth_html"><div class="ttname"><a href="classmb_1_1Auth.html">mb::Auth</a></div><div class="ttdoc">JWT token creation and verification utilities.</div><div class="ttdef"><b>Definition</b> auth.h:47</div></div>
-<div class="ttc" id="aclassmb_1_1Database_html"><div class="ttname"><a href="classmb_1_1Database.html">mb::Database</a></div><div class="ttdoc">Database connection and session management.</div><div class="ttdef"><b>Definition</b> database.h:45</div></div>
-<div class="ttc" id="aclassmb_1_1Entity_html"><div class="ttname"><a href="classmb_1_1Entity.html">mb::Entity</a></div><div class="ttdoc">Represents a database table/entity with schema and CRUD operations.</div><div class="ttdef"><b>Definition</b> entity.h:53</div></div>
-<div class="ttc" id="aclassmb_1_1FilesMgr_html"><div class="ttname"><a href="classmb_1_1FilesMgr.html">mb::FilesMgr</a></div><div class="ttdoc">File management for entity file assets.</div><div class="ttdef"><b>Definition</b> files.h:49</div></div>
-<div class="ttc" id="aclassmb_1_1KeyValStore_html"><div class="ttname"><a href="classmb_1_1KeyValStore.html">mb::KeyValStore</a></div><div class="ttdoc">Manages application settings.</div><div class="ttdef"><b>Definition</b> kv_store.h:26</div></div>
-<div class="ttc" id="aclassmb_1_1Logger_html"><div class="ttname"><a href="classmb_1_1Logger.html">mb::Logger</a></div><div class="ttdef"><b>Definition</b> logger.h:42</div></div>
 <div class="ttc" id="aclassmb_1_1MantisBase_html"><div class="ttname"><a href="classmb_1_1MantisBase.html">mb::MantisBase</a></div><div class="ttdoc">MantisBase entry point.</div><div class="ttdef"><b>Definition</b> mantisbase.h:54</div></div>
 <div class="ttc" id="aclassmb_1_1MantisBase_html_a3b139657d6ac5b0ea339d1944c526e26"><div class="ttname"><a href="classmb_1_1MantisBase.html#a3b139657d6ac5b0ea339d1944c526e26">mb::MantisBase::MantisBase</a></div><div class="ttdeci">MantisBase(const MantisBase &amp;)=delete</div></div>
 <div class="ttc" id="aclassmb_1_1MantisBase_html_a73d92079ffb633ecc9ad16108311062d"><div class="ttname"><a href="classmb_1_1MantisBase.html#a73d92079ffb633ecc9ad16108311062d">mb::MantisBase::operator=</a></div><div class="ttdeci">MantisBase &amp; operator=(const MantisBase &amp;)=delete</div></div>
 <div class="ttc" id="aclassmb_1_1MantisBase_html_a7b8d5c3c2644ce3137e069ddc35d0d13"><div class="ttname"><a href="classmb_1_1MantisBase.html#a7b8d5c3c2644ce3137e069ddc35d0d13">mb::MantisBase::isScriptingDisabled</a></div><div class="ttdeci">bool isScriptingDisabled() const</div></div>
 <div class="ttc" id="aclassmb_1_1MantisBase_html_a95a5adac09556a9771e554e732fa9a2e"><div class="ttname"><a href="classmb_1_1MantisBase.html#a95a5adac09556a9771e554e732fa9a2e">mb::MantisBase::MantisBase</a></div><div class="ttdeci">MantisBase(MantisBase &amp;&amp;)=delete</div></div>
 <div class="ttc" id="aclassmb_1_1MantisBase_html_ac17cea059446e81e375a9293656b28a2"><div class="ttname"><a href="classmb_1_1MantisBase.html#ac17cea059446e81e375a9293656b28a2">mb::MantisBase::operator=</a></div><div class="ttdeci">MantisBase &amp; operator=(MantisBase &amp;&amp;)=delete</div></div>
-<div class="ttc" id="aclassmb_1_1RealtimeDB_html"><div class="ttname"><a href="classmb_1_1RealtimeDB.html">mb::RealtimeDB</a></div><div class="ttdef"><b>Definition</b> realtime.h:52</div></div>
-<div class="ttc" id="aclassmb_1_1Router_html"><div class="ttname"><a href="classmb_1_1Router.html">mb::Router</a></div><div class="ttdoc">Central HTTP router and schema cache for a MantisBase instance.</div><div class="ttdef"><b>Definition</b> router.h:40</div></div>
+<div class="ttc" id="aclassmb_1_1MbAuth_html"><div class="ttname"><a href="classmb_1_1MbAuth.html">mb::MbAuth</a></div><div class="ttdoc">JWT token creation and verification utilities.</div><div class="ttdef"><b>Definition</b> auth.h:47</div></div>
+<div class="ttc" id="aclassmb_1_1MbDatabase_html"><div class="ttname"><a href="classmb_1_1MbDatabase.html">mb::MbDatabase</a></div><div class="ttdoc">MbDatabase connection and session management.</div><div class="ttdef"><b>Definition</b> database.h:45</div></div>
+<div class="ttc" id="aclassmb_1_1MbEntity_html"><div class="ttname"><a href="classmb_1_1MbEntity.html">mb::MbEntity</a></div><div class="ttdoc">Represents a database table/entity with schema and CRUD operations.</div><div class="ttdef"><b>Definition</b> entity.h:53</div></div>
+<div class="ttc" id="aclassmb_1_1MbFilesMgr_html"><div class="ttname"><a href="classmb_1_1MbFilesMgr.html">mb::MbFilesMgr</a></div><div class="ttdoc">File management for entity file assets.</div><div class="ttdef"><b>Definition</b> files.h:49</div></div>
+<div class="ttc" id="aclassmb_1_1MbKVStore_html"><div class="ttname"><a href="classmb_1_1MbKVStore.html">mb::MbKVStore</a></div><div class="ttdoc">Manages application settings.</div><div class="ttdef"><b>Definition</b> kv_store.h:26</div></div>
+<div class="ttc" id="aclassmb_1_1MbLogger_html"><div class="ttname"><a href="classmb_1_1MbLogger.html">mb::MbLogger</a></div><div class="ttdef"><b>Definition</b> logger.h:42</div></div>
+<div class="ttc" id="aclassmb_1_1MbMailer_html"><div class="ttname"><a href="classmb_1_1MbMailer.html">mb::MbMailer</a></div><div class="ttdef"><b>Definition</b> email.h:46</div></div>
+<div class="ttc" id="aclassmb_1_1MbRealtimeDB_html"><div class="ttname"><a href="classmb_1_1MbRealtimeDB.html">mb::MbRealtimeDB</a></div><div class="ttdef"><b>Definition</b> realtime.h:52</div></div>
+<div class="ttc" id="aclassmb_1_1MbRouter_html"><div class="ttname"><a href="classmb_1_1MbRouter.html">mb::MbRouter</a></div><div class="ttdoc">Central HTTP router and schema cache for a MantisBase instance.</div><div class="ttdef"><b>Definition</b> router.h:40</div></div>
 <div class="ttc" id="aexport_8h_html"><div class="ttname"><a href="export_8h.html">export.h</a></div><div class="ttdoc">DLL/shared-library symbol visibility macros for MantisBase.</div></div>
 <div class="ttc" id="aexport_8h_html_ad67b3f9a509bd18bd030486e98d14e34"><div class="ttname"><a href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a></div><div class="ttdeci">#define MANTISBASE_API</div><div class="ttdef"><b>Definition</b> export.h:25</div></div>
 <div class="ttc" id="akv__store_8h_html"><div class="ttname"><a href="kv__store_8h.html">kv_store.h</a></div><div class="ttdoc">Key-value store for application settings.</div></div>
 <div class="ttc" id="anamespacemb_html"><div class="ttname"><a href="namespacemb.html">mb</a></div><div class="ttdef"><b>Definition</b> api_keys.h:32</div></div>
 <div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
-<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the IMantisBase DI mixin.</div></div>
+<div class="ttc" id="asmtp__client_8cpp_html_a2e67f3a4bca448ee7dc845d3741f9a10"><div class="ttname"><a href="smtp__client_8cpp.html#a2e67f3a4bca448ee7dc845d3741f9a10">ctx</a></div><div class="ttdeci">WOLFSSL_CTX * ctx</div><div class="ttdef"><b>Definition</b> smtp_client.cpp:47</div></div>
+<div class="ttc" id="asmtp__client_8cpp_html_a45a5b7c00a796a23f01673cef1dbe0a9"><div class="ttname"><a href="smtp__client_8cpp.html#a45a5b7c00a796a23f01673cef1dbe0a9">code</a></div><div class="ttdeci">int code</div><div class="ttdef"><b>Definition</b> smtp_client.cpp:208</div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div><div class="ttdoc">Core type aliases, handler signatures, and the MbAppMixin DI mixin.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

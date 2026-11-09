@@ -12,7 +12,7 @@
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="492,61,487,106,479,129,464,150,434,164,379,179,251,207,250,202,378,174,433,159,461,146,474,127,482,104,487,60"/>
 <area shape="rect" id="Node000007" href="$log__database_8h.html" title="SQLite database manager for application logs." alt="" coords="526,115,647,141"/>
 <area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="518,58,566,104,562,107,514,62"/>
-<area shape="rect" id="Node000013" href="$types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="899,203,1082,229"/>
+<area shape="rect" id="Node000013" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="899,203,1082,229"/>
 <area shape="poly" id="edge33_Node000001_Node000013" title=" " alt="" coords="561,58,947,196,945,201,560,63"/>
 <area shape="rect" id="Node000018" href="$utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="1097,115,1215,141"/>
 <area shape="poly" id="edge21_Node000001_Node000018" title=" " alt="" coords="605,49,1083,115,1082,120,605,54"/>

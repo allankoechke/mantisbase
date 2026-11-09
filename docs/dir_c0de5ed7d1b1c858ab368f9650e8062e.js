@@ -6,6 +6,7 @@ var dir_c0de5ed7d1b1c858ab368f9650e8062e =
     [ "auth.h", "auth_8h.html", "auth_8h" ],
     [ "context_store.h", "context__store_8h.html", "context__store_8h" ],
     [ "database.h", "database_8h.html", "database_8h" ],
+    [ "email.h", "email_8h.html", "email_8h" ],
     [ "exceptions.h", "exceptions_8h.html", "exceptions_8h" ],
     [ "expr_evaluator.h", "expr__evaluator_8h.html", "expr__evaluator_8h" ],
     [ "files.h", "files_8h.html", "files_8h" ],
@@ -17,6 +18,7 @@ var dir_c0de5ed7d1b1c858ab368f9650e8062e =
     [ "realtime_session.h", "realtime__session_8h.html", "realtime__session_8h" ],
     [ "route_registry.h", "route__registry_8h.html", "route__registry_8h" ],
     [ "router.h", "router_8h.html", "router_8h" ],
+    [ "smtp_client.h", "smtp__client_8h.html", "smtp__client_8h" ],
     [ "sse.h", "sse_8h.html", "sse_8h" ],
     [ "types.h", "types_8h.html", "types_8h" ],
     [ "ws.h", "ws_8h.html", "ws_8h" ]

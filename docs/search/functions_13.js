@@ -1,21 +1,14 @@
 var searchData=
 [
-  ['tableexists_0',['tableexists',['../classmb_1_1EntitySchema.html#a7763e733e91eaad68bc12f36b6af4773',1,'mb::EntitySchema::tableExists(const EntitySchema &amp;table)'],['../classmb_1_1EntitySchema.html#a86faf74d0816709de48d17226cfe56f5',1,'mb::EntitySchema::tableExists(const MantisBase &amp;app, const std::string &amp;table_name)']]],
-  ['tmtostr_1',['tmToStr',['../namespacemb.html#a71ef440b705eab6ad8dfd505e6e62664',1,'mb']]],
-  ['to_5fhex_5flower_2',['to_hex_lower',['../namespacemb.html#afbdb50841a708d1561b194591ac68784',1,'mb']]],
-  ['toddl_3',['toDDL',['../classmb_1_1EntitySchema.html#aa8066e7d302e42a6a687049dc15f3cef',1,'mb::EntitySchema']]],
-  ['todefaultsqlvalue_4',['toDefaultSqlValue',['../classmb_1_1EntitySchema.html#a8bfcfdcf710418eb6fcdfad7f85fb658',1,'mb::EntitySchema']]],
-  ['toentity_5',['toEntity',['../classmb_1_1EntitySchema.html#ab9c9717265d32e90a0073468c8c7c4b0',1,'mb::EntitySchema']]],
-  ['tojson_6',['tojson',['../classmb_1_1AccessRule.html#a2c3716680c87caea5d06c7901238bf1e',1,'mb::AccessRule::toJSON()'],['../classmb_1_1EntitySchema.html#a1db33a7e0128a4aaf662f0b61269dae0',1,'mb::EntitySchema::toJSON()'],['../structmb_1_1IndexDefinition.html#aaea8bd4a60868546b3b928fc43b54018',1,'mb::IndexDefinition::toJSON()'],['../classmb_1_1EntitySchemaField.html#a008e06878a341a387e92c0c1d4e1c98d',1,'mb::EntitySchemaField::toJSON()']]],
-  ['tolocaltime_7',['toLocalTime',['../namespacemb.html#a2d71c0500dcfed8ef033eb8fbeb13e65',1,'mb']]],
-  ['tolowercase_8',['toLowerCase',['../namespacemb.html#a610ae91c5e525b5899cf9445107360e9',1,'mb']]],
-  ['tosocitype_9',['tosocitype',['../classmb_1_1EntitySchemaField.html#ae46b8ec1b2fb571932579cbafd49be17',1,'mb::EntitySchemaField::toSociType(const std::string &amp;type, IntPrecision precision)'],['../classmb_1_1EntitySchemaField.html#a3c551f4b233f737b9185c6973ddcfb0b',1,'mb::EntitySchemaField::toSociType(const std::string &amp;type)'],['../classmb_1_1EntitySchemaField.html#ae6c5bb64dba8d05147f2858e62613da6',1,'mb::EntitySchemaField::toSociType() const']]],
-  ['touchwssession_10',['touchWsSession',['../namespacemb.html#a80e7b76a5023b74babc342a83d288284',1,'mb']]],
-  ['touppercase_11',['toUpperCase',['../namespacemb.html#abe6b794953335d0601b9fe55af49027f',1,'mb']]],
-  ['toutctime_12',['toUtcTime',['../namespacemb.html#ae4d3d9830d695badbaa82fec75d2be94',1,'mb']]],
-  ['trace_13',['trace',['../classmb_1_1Logger.html#a527c23ded09fa2c747beaeb97d2420c6',1,'mb::Logger']]],
-  ['trim_14',['trim',['../namespacemb.html#a409c1fc8483d2c71f13abd04598f4db2',1,'mb']]],
-  ['tryparsejsonstr_15',['tryParseJsonStr',['../namespacemb.html#a407f3d861f56cbc663381da99b2cc4ed',1,'mb']]],
-  ['tryupgradeauth_16',['tryUpgradeAuth',['../namespacemb.html#a76825a4666535adab4efbe5bfb7ac454',1,'mb']]],
-  ['type_17',['type',['../classmb_1_1EntitySchemaField.html#a638b6d84ac73fc4c75492b902a43923a',1,'mb::EntitySchemaField::type()'],['../classmb_1_1EntitySchema.html#ab34abb1145d1b45e9ee261d055722b8b',1,'mb::EntitySchema::type()'],['../classmb_1_1Entity.html#a3d1fc7eab6f53ba13ab62a35310f452b',1,'mb::Entity::type()']]]
+  ['undowrittenfiles_0',['undoWrittenFiles',['../classmb_1_1MbRequest.html#a1b2143a5d791f658ccebb0d821cb6d7e',1,'mb::MbRequest']]],
+  ['unlinkaccount_1',['unlinkAccount',['../classmb_1_1MbOAuthMgr.html#ae8e2e1d06e0707e996f3a06bdea83db9',1,'mb::MbOAuthMgr']]],
+  ['unsubscribe_2',['unsubscribe',['../classmb_1_1MbWSMgr.html#a3b7b35e2e35eb7d023b277c2d52572fe',1,'mb::MbWSMgr']]],
+  ['update_3',['update',['../classmb_1_1MbEntity.html#a96cfcdfee1c85cdc2c45780cc880e62d',1,'mb::MbEntity']]],
+  ['updateactivity_4',['updateactivity',['../classmb_1_1MbSSESession.html#a6f4c0ea93477186dc1921bef9420832c',1,'mb::MbSSESession::updateActivity()'],['../classmb_1_1MbSSEMgr.html#a94904724545c9598a7efae5c157e2c51',1,'mb::MbSSEMgr::updateActivity()']]],
+  ['updateprovider_5',['updateProvider',['../classmb_1_1MbOAuthMgr.html#a836798e9dce73871e5c53088c05a9a08',1,'mb::MbOAuthMgr']]],
+  ['updaterule_6',['updaterule',['../classmb_1_1MbEntity.html#aa7b0e902f31b6036c57cbaf535e5d744',1,'mb::MbEntity::updateRule()'],['../classmb_1_1MbEntitySchema.html#ac5cb0cae1e6f5dc03098d49f4792fe56',1,'mb::MbEntitySchema::updateRule()']]],
+  ['updateschemacache_7',['updateSchemaCache',['../classmb_1_1MbRouter.html#ad9d4119ffcf6d330c27227b024ff7954',1,'mb::MbRouter']]],
+  ['updatetable_8',['updateTable',['../classmb_1_1MbEntitySchema.html#ad279e79bd34d040e81f173f259e3e1a0',1,'mb::MbEntitySchema']]],
+  ['updatetopics_9',['updateTopics',['../classmb_1_1MbSSESession.html#a2583d4e1cdbfac1cf36defd0011b06b0',1,'mb::MbSSESession']]],
+  ['updatewith_10',['updatewith',['../classmb_1_1MbEntitySchema.html#a64d1760c0d146ab1674f48d3403bd487',1,'mb::MbEntitySchema::updateWith()'],['../classmb_1_1MbEntitySchemaField.html#aa3bcbfe2db39c6cd57b5fdb098afcdd6',1,'mb::MbEntitySchemaField::updateWith()']]]
 ];

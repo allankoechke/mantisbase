@@ -1,0 +1,5 @@
+<map id="mb::MbRouter" name="mb::MbRouter">
+<area shape="rect" id="Node000001" title="Central HTTP router and schema cache for a MantisBase instance." alt="" coords="14,79,129,104"/>
+<area shape="rect" id="Node000002" href="$classmb_1_1MbAppMixin.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="5,5,137,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,44,74,79,69,79,69,44"/>
+</map>

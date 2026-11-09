@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['expires_5fat_0',['expires_at',['../structmb_1_1RealtimeAuthSnapshot.html#ab308822fbc91a71cb9ac528eee9fd7bc',1,'mb::RealtimeAuthSnapshot']]]
+  ['denied_0',['denied',['../structmb_1_1TopicAccessResult.html#a808fea14ce61aabd8f253877d8e48d05',1,'mb::TopicAccessResult']]]
 ];

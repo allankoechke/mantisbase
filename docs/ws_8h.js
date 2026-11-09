@@ -1,5 +1,5 @@
 var ws_8h =
 [
-    [ "mb::WSMgr", "classmb_1_1WSMgr.html", "classmb_1_1WSMgr" ],
-    [ "mb::RealtimeWSController", "classmb_1_1RealtimeWSController.html", "classmb_1_1RealtimeWSController" ]
+    [ "mb::MbWSMgr", "classmb_1_1MbWSMgr.html", "classmb_1_1MbWSMgr" ],
+    [ "mb::MbRealtimeWSController", "classmb_1_1MbRealtimeWSController.html", "classmb_1_1MbRealtimeWSController" ]
 ];

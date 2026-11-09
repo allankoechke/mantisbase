@@ -29,16 +29,16 @@ var NAVTREE =
     [ "REST API Reference Guide", "docs_rest_api.html", null ],
     [ "Authentication API", "docs_auth_api.html", null ],
     [ "Command Line Usage", "docs_cli.html", [
-      [ "mantisbase CLI Reference", "docs_cli.html#autotoc_md117", [
-        [ "Global Options", "docs_cli.html#autotoc_md119", null ],
-        [ "serve", "docs_cli.html#autotoc_md121", null ],
-        [ "admins", "docs_cli.html#autotoc_md123", null ],
-        [ "schema", "docs_cli.html#autotoc_md125", null ],
-        [ "migrate", "docs_cli.html#autotoc_md127", [
-          [ "apply", "docs_cli.html#autotoc_md128", null ],
-          [ "schema", "docs_cli.html#autotoc_md129", null ]
+      [ "mantisbase CLI Reference", "docs_cli.html#autotoc_md120", [
+        [ "Global Options", "docs_cli.html#autotoc_md122", null ],
+        [ "serve", "docs_cli.html#autotoc_md124", null ],
+        [ "admins", "docs_cli.html#autotoc_md126", null ],
+        [ "schema", "docs_cli.html#autotoc_md128", null ],
+        [ "migrate", "docs_cli.html#autotoc_md130", [
+          [ "apply", "docs_cli.html#autotoc_md131", null ],
+          [ "schema", "docs_cli.html#autotoc_md132", null ]
         ] ],
-        [ "See Also", "docs_cli.html#autotoc_md131", null ]
+        [ "See Also", "docs_cli.html#autotoc_md134", null ]
       ] ]
     ] ],
     [ "C++ Dev Package", "docs_cpp_dev.html", null ],
@@ -74,6 +74,7 @@ var NAVTREE =
       [ "File Members", "globals.html", [
         [ "All", "globals.html", null ],
         [ "Functions", "globals_func.html", null ],
+        [ "Variables", "globals_vars.html", null ],
         [ "Macros", "globals_defs.html", null ]
       ] ]
     ] ]
@@ -83,12 +84,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "access__rules_8cpp.html",
-"classmb_1_1EntitySchema.html#aa8066e7d302e42a6a687049dc15f3cef",
-"classmb_1_1MantisBase.html#a7020dfe16c1f842ea6d0bd60dbc97b4c",
-"classmb_1_1RealtimeDB.html#a1752e25861b4ff5163fa8448098ecac7",
-"docs_cli.html#autotoc_md125",
-"namespacemb.html#a2d71c0500dcfed8ef033eb8fbeb13e65",
-"structmb_1_1ApiKeyResult.html#a9989fa2ad2943a1793fa9af9ae8df39b"
+"classmb_1_1MbEntity.html#a19ed01954fd60115c21020568c0da2b5",
+"classmb_1_1MbFilesMgr.html#abcc1b1a4064ea7668603e2147ea7e920",
+"classmb_1_1MbResponse.html#a5edd555f8fc59aad8399988b87579080",
+"docs_cli.html#autotoc_md134",
+"namespacemb.html#a2a30159f6036133cae7e5a8a4d85cbb9",
+"structmb_1_1ApiKeyResult.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -161,6 +161,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa8b6e850493fb1a0cb7bce9712974327" id="r_aa8b6e850493fb1a0cb7bce9712974327"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#aa8b6e850493fb1a0cb7bce9712974327">setScriptsDir</a> (const std::string &amp;dir)</td></tr>
 <tr class="memdesc:aa8b6e850493fb1a0cb7bce9712974327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the scripts directory for MantisApp.  <br /></td></tr>
 <tr class="separator:aa8b6e850493fb1a0cb7bce9712974327"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02d131e0e7fc60776c15ab4a798e6926" id="r_a02d131e0e7fc60776c15ab4a798e6926"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a02d131e0e7fc60776c15ab4a798e6926">templatesDir</a> () const</td></tr>
+<tr class="memdesc:a02d131e0e7fc60776c15ab4a798e6926"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the templates directory where email template files are stored used for sending confirmation/password reset emails.  <br /></td></tr>
+<tr class="separator:a02d131e0e7fc60776c15ab4a798e6926"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05c32eb9002c0edb7f5a1507c6ef9547" id="r_a05c32eb9002c0edb7f5a1507c6ef9547"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a05c32eb9002c0edb7f5a1507c6ef9547">setTemplatesDir</a> (const std::string &amp;dir)</td></tr>
+<tr class="memdesc:a05c32eb9002c0edb7f5a1507c6ef9547"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the templates directory for <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>.  <br /></td></tr>
+<tr class="separator:a05c32eb9002c0edb7f5a1507c6ef9547"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a298e5dc7929388e131b19eab611b4043" id="r_a298e5dc7929388e131b19eab611b4043"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a298e5dc7929388e131b19eab611b4043">migrationsDir</a> () const</td></tr>
 <tr class="memdesc:a298e5dc7929388e131b19eab611b4043"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the migrations directory path.  <br /></td></tr>
 <tr class="separator:a298e5dc7929388e131b19eab611b4043"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -182,30 +188,32 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3076db65ddea48694928652ecb232ad6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9cf7d3137d0d709329f7f81827f11078" id="r_a9cf7d3137d0d709329f7f81827f11078"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a9cf7d3137d0d709329f7f81827f11078">snowflakeId</a> () const</td></tr>
 <tr class="separator:a9cf7d3137d0d709329f7f81827f11078"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf263b88b0d221f9bc539714668b7d4b" id="r_acf263b88b0d221f9bc539714668b7d4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Database.html">Database</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#acf263b88b0d221f9bc539714668b7d4b">db</a> () const</td></tr>
-<tr class="memdesc:acf263b88b0d221f9bc539714668b7d4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the database unit object.  <br /></td></tr>
-<tr class="separator:acf263b88b0d221f9bc539714668b7d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9e0f3532c6dad852db85ea385610ab8" id="r_ac9e0f3532c6dad852db85ea385610ab8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbDatabase.html">MbDatabase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#ac9e0f3532c6dad852db85ea385610ab8">db</a> () const</td></tr>
+<tr class="memdesc:ac9e0f3532c6dad852db85ea385610ab8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the database unit object.  <br /></td></tr>
+<tr class="separator:ac9e0f3532c6dad852db85ea385610ab8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c9f41a91559fa8fa1ef7c08641e4c57" id="r_a1c9f41a91559fa8fa1ef7c08641e4c57"><td class="memItemLeft" align="right" valign="top">argparse::ArgumentParser &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a1c9f41a91559fa8fa1ef7c08641e4c57">cmd</a> () const</td></tr>
 <tr class="separator:a1c9f41a91559fa8fa1ef7c08641e4c57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa93f1df96bfd253eebeb4ccda53cb29" id="r_aaa93f1df96bfd253eebeb4ccda53cb29"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Router.html">Router</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#aaa93f1df96bfd253eebeb4ccda53cb29">router</a> () const</td></tr>
-<tr class="separator:aaa93f1df96bfd253eebeb4ccda53cb29"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ccd43ffc1a92afadb6b01f23a5681dc" id="r_a4ccd43ffc1a92afadb6b01f23a5681dc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1KeyValStore.html">KeyValStore</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a4ccd43ffc1a92afadb6b01f23a5681dc">settings</a> () const</td></tr>
-<tr class="separator:a4ccd43ffc1a92afadb6b01f23a5681dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88d15e3b53782c25098fa6eee95db4fd" id="r_a88d15e3b53782c25098fa6eee95db4fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a88d15e3b53782c25098fa6eee95db4fd">logs</a> () const</td></tr>
-<tr class="separator:a88d15e3b53782c25098fa6eee95db4fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a470ee74c61556ca8105993f8df49dac1" id="r_a470ee74c61556ca8105993f8df49dac1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1RealtimeDB.html">RealtimeDB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a470ee74c61556ca8105993f8df49dac1">rt</a> () const</td></tr>
-<tr class="separator:a470ee74c61556ca8105993f8df49dac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a766ac5f075b31a4b748f53fbbd9872db" id="r_a766ac5f075b31a4b748f53fbbd9872db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1FilesMgr.html">FilesMgr</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a766ac5f075b31a4b748f53fbbd9872db">files</a> () const</td></tr>
-<tr class="separator:a766ac5f075b31a4b748f53fbbd9872db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8d95de5b1456d77f0a7487f9d24e0f8" id="r_ac8d95de5b1456d77f0a7487f9d24e0f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Logger.html">Logger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#ac8d95de5b1456d77f0a7487f9d24e0f8">logger</a> () const</td></tr>
-<tr class="separator:ac8d95de5b1456d77f0a7487f9d24e0f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2416771f6717000a219a462f1f673fc9" id="r_a2416771f6717000a219a462f1f673fc9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Auth.html">Auth</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a2416771f6717000a219a462f1f673fc9">auth</a> () const</td></tr>
-<tr class="separator:a2416771f6717000a219a462f1f673fc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1043575a422c2c536b1022593bb977d2" id="r_a1043575a422c2c536b1022593bb977d2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1Entity.html">Entity</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a1043575a422c2c536b1022593bb977d2">entity</a> (const std::string &amp;entity_name) const</td></tr>
-<tr class="memdesc:a1043575a422c2c536b1022593bb977d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch a table schema encapsulated by an <code><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a></code> object from given the table name. If table does not exist yet, return an emty object.  <br /></td></tr>
-<tr class="separator:a1043575a422c2c536b1022593bb977d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03d29b48be918d5257955342edbd433c" id="r_a03d29b48be918d5257955342edbd433c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbRouter.html">MbRouter</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a03d29b48be918d5257955342edbd433c">router</a> () const</td></tr>
+<tr class="separator:a03d29b48be918d5257955342edbd433c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01425132bf297f1a56d30ab6b6217d27" id="r_a01425132bf297f1a56d30ab6b6217d27"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbKVStore.html">MbKVStore</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a01425132bf297f1a56d30ab6b6217d27">settings</a> () const</td></tr>
+<tr class="separator:a01425132bf297f1a56d30ab6b6217d27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada0fd2fae8f0faff23ff69234e8cb3db" id="r_ada0fd2fae8f0faff23ff69234e8cb3db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbLogger.html">MbLogger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#ada0fd2fae8f0faff23ff69234e8cb3db">logs</a> () const</td></tr>
+<tr class="separator:ada0fd2fae8f0faff23ff69234e8cb3db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3787f93a258531e63b166ebda6141a00" id="r_a3787f93a258531e63b166ebda6141a00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbRealtimeDB.html">MbRealtimeDB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a3787f93a258531e63b166ebda6141a00">rt</a> () const</td></tr>
+<tr class="separator:a3787f93a258531e63b166ebda6141a00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29183b51b571439d0707cc82fe7203cd" id="r_a29183b51b571439d0707cc82fe7203cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbFilesMgr.html">MbFilesMgr</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a29183b51b571439d0707cc82fe7203cd">files</a> () const</td></tr>
+<tr class="separator:a29183b51b571439d0707cc82fe7203cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a923f683b8d475adfa29a350f1b722ee2" id="r_a923f683b8d475adfa29a350f1b722ee2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbLogger.html">MbLogger</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a923f683b8d475adfa29a350f1b722ee2">logger</a> () const</td></tr>
+<tr class="separator:a923f683b8d475adfa29a350f1b722ee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2988918ab42ee20d96d464d9dc3b377" id="r_ac2988918ab42ee20d96d464d9dc3b377"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbAuth.html">MbAuth</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#ac2988918ab42ee20d96d464d9dc3b377">auth</a> () const</td></tr>
+<tr class="separator:ac2988918ab42ee20d96d464d9dc3b377"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af39b0c3cff42ec52f2f1b5326ea4d97c" id="r_af39b0c3cff42ec52f2f1b5326ea4d97c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbMailer.html">MbMailer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#af39b0c3cff42ec52f2f1b5326ea4d97c">mailer</a> () const</td></tr>
+<tr class="separator:af39b0c3cff42ec52f2f1b5326ea4d97c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a611a16767dd1f88c19a1508ddaab2c85" id="r_a611a16767dd1f88c19a1508ddaab2c85"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbEntity.html">MbEntity</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a611a16767dd1f88c19a1508ddaab2c85">entity</a> (const std::string &amp;entity_name) const</td></tr>
+<tr class="memdesc:a611a16767dd1f88c19a1508ddaab2c85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch a table schema encapsulated by an <code><a class="el" href="classmb_1_1MbEntity.html" title="Represents a database table/entity with schema and CRUD operations.">MbEntity</a></code> object from given the table name. If table does not exist yet, return an emty object.  <br /></td></tr>
+<tr class="separator:a611a16767dd1f88c19a1508ddaab2c85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ee293d71f01befec02f0673df35ff7c" id="r_a1ee293d71f01befec02f0673df35ff7c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#a1ee293d71f01befec02f0673df35ff7c">hasEntity</a> (const std::string &amp;entity_name) const</td></tr>
-<tr class="memdesc:a1ee293d71f01befec02f0673df35ff7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if table schema encapsulated by an <code><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a></code> object from given the table name exists. If table does not exist yet, return false.  <br /></td></tr>
+<tr class="memdesc:a1ee293d71f01befec02f0673df35ff7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if table schema encapsulated by an <code><a class="el" href="classmb_1_1MbEntity.html" title="Represents a database table/entity with schema and CRUD operations.">MbEntity</a></code> object from given the table name exists. If table does not exist yet, return false.  <br /></td></tr>
 <tr class="separator:a1ee293d71f01befec02f0673df35ff7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa68eac2d23ffcdc15365f511fabd4b4" id="r_afa68eac2d23ffcdc15365f511fabd4b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MantisBase.html#afa68eac2d23ffcdc15365f511fabd4b4">openBrowserOnStart</a> () const</td></tr>
 <tr class="memdesc:afa68eac2d23ffcdc15365f511fabd4b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the duktape context.  <br /></td></tr>
@@ -251,7 +259,7 @@ RouterMgr for a high level routing methods.</dd></dl>
 RouterMgr for more details.</dd></dl>
 </li>
 <li>ValidatorMgr: A validation store using regex, <dl class="section see"><dt>See also</dt><dd>Validator for more details.</dd></dl>
-<dl class="section note"><dt>Note</dt><dd><code><a class="el" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a" title="Create class instance given cmd args passed in.">create()</a></code> returns a <code>std::unique_ptr&lt;<a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>&gt;</code> that you own. Pass a <code>const <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>&amp;</code> (or capture it in lambdas) to reach services such as <code><a class="el" href="classmb_1_1MantisBase.html#a2416771f6717000a219a462f1f673fc9">auth()</a></code>, <code><a class="el" href="classmb_1_1MantisBase.html#a1043575a422c2c536b1022593bb977d2" title="Fetch a table schema encapsulated by an Entity object from given the table name. If table does not ex...">entity()</a></code>, and <code><a class="el" href="classmb_1_1MantisBase.html#acf263b88b0d221f9bc539714668b7d4b" title="Get the database unit object.">db()</a></code>. Types that participate in request handling (<code>MantisRequest</code>, <code><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a></code>, <code><a class="el" href="classmb_1_1Router.html" title="Central HTTP router and schema cache for a MantisBase instance.">Router</a></code>, <code><a class="el" href="classmb_1_1ApiKeyManager.html" title="Create, list, revoke, and resolve API keys for entity users and admins.">ApiKeyManager</a></code>, etc.) inherit <a class="el" href="classmb_1_1IMantisBase.html">IMantisBase</a> and expose <code>mbApp()</code> for the same access. There is no global <code>instance()</code> accessor. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd><code><a class="el" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a" title="Create class instance given cmd args passed in.">create()</a></code> returns a <code>std::unique_ptr&lt;<a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>&gt;</code> that you own. Pass a <code>const <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>&amp;</code> (or capture it in lambdas) to reach services such as <code><a class="el" href="classmb_1_1MantisBase.html#ac2988918ab42ee20d96d464d9dc3b377">auth()</a></code>, <code><a class="el" href="classmb_1_1MantisBase.html#a611a16767dd1f88c19a1508ddaab2c85" title="Fetch a table schema encapsulated by an MbEntity object from given the table name....">entity()</a></code>, and <code><a class="el" href="classmb_1_1MantisBase.html#ac9e0f3532c6dad852db85ea385610ab8" title="Get the database unit object.">db()</a></code>. Types that participate in request handling (<code><a class="el" href="classmb_1_1MbRequest.html" title="HTTP request wrapper bound to a MantisBase instance.">MbRequest</a></code>, <code><a class="el" href="classmb_1_1MbEntity.html" title="Represents a database table/entity with schema and CRUD operations.">MbEntity</a></code>, <code><a class="el" href="classmb_1_1MbRouter.html" title="Central HTTP router and schema cache for a MantisBase instance.">MbRouter</a></code>, <code><a class="el" href="classmb_1_1MbApiKeyMgr.html" title="Create, list, revoke, and resolve API keys for entity users and admins.">MbApiKeyMgr</a></code>, etc.) inherit <a class="el" href="classmb_1_1MbAppMixin.html">MbAppMixin</a> and expose <code>mbApp()</code> for the same access. There is no global <code>instance()</code> accessor. </dd></dl>
 </li>
 </ul>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -429,14 +437,14 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="a2416771f6717000a219a462f1f673fc9" name="a2416771f6717000a219a462f1f673fc9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2416771f6717000a219a462f1f673fc9">&#9670;&#160;</a></span>auth()</h2>
+<a id="ac2988918ab42ee20d96d464d9dc3b377" name="ac2988918ab42ee20d96d464d9dc3b377"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2988918ab42ee20d96d464d9dc3b377">&#9670;&#160;</a></span>auth()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1Auth.html">Auth</a> &amp; mb::MantisBase::auth </td>
+          <td class="memname"><a class="el" href="classmb_1_1MbAuth.html">MbAuth</a> &amp; mb::MantisBase::auth </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -529,7 +537,7 @@ RouterMgr for more details.</dd></dl>
 <div class="line"><span class="keyword">auto</span> app = <a class="code hl_function" href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">MantisBase::create</a>(cfg);</div>
 <div class="line"><span class="keyword">auto</span> token = app-&gt;auth().createToken({{<span class="stringliteral">&quot;id&quot;</span>, <span class="stringliteral">&quot;u1&quot;</span>}, {<span class="stringliteral">&quot;table&quot;</span>, <span class="stringliteral">&quot;users&quot;</span>}});</div>
 <div class="line"><span class="keywordflow">return</span> app-&gt;run();</div>
-<div class="ttc" id="aclassmb_1_1MantisBase_html_a39320e2aeb02263d4bc2252e1853854a"><div class="ttname"><a href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a></div><div class="ttdeci">static std::unique_ptr&lt; MantisBase &gt; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:65</div></div>
+<div class="ttc" id="aclassmb_1_1MantisBase_html_a39320e2aeb02263d4bc2252e1853854a"><div class="ttname"><a href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a></div><div class="ttdeci">static std::unique_ptr&lt; MantisBase &gt; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:67</div></div>
 <div class="ttc" id="anamespacemb_html_afff330d3a64f28304acd2ec11dd1f71d"><div class="ttname"><a href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">mb::json</a></div><div class="ttdeci">nlohmann::json json</div><div class="ttdoc">Shorten JSON namespace.</div><div class="ttdef"><b>Definition</b> api_keys.h:33</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -608,14 +616,14 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="acf263b88b0d221f9bc539714668b7d4b" name="acf263b88b0d221f9bc539714668b7d4b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf263b88b0d221f9bc539714668b7d4b">&#9670;&#160;</a></span>db()</h2>
+<a id="ac9e0f3532c6dad852db85ea385610ab8" name="ac9e0f3532c6dad852db85ea385610ab8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9e0f3532c6dad852db85ea385610ab8">&#9670;&#160;</a></span>db()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1Database.html">Database</a> &amp; mb::MantisBase::db </td>
+          <td class="memname"><a class="el" href="classmb_1_1MbDatabase.html">MbDatabase</a> &amp; mb::MantisBase::db </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -647,14 +655,14 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="a1043575a422c2c536b1022593bb977d2" name="a1043575a422c2c536b1022593bb977d2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1043575a422c2c536b1022593bb977d2">&#9670;&#160;</a></span>entity()</h2>
+<a id="a611a16767dd1f88c19a1508ddaab2c85" name="a611a16767dd1f88c19a1508ddaab2c85"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a611a16767dd1f88c19a1508ddaab2c85">&#9670;&#160;</a></span>entity()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1Entity.html">Entity</a> mb::MantisBase::entity </td>
+          <td class="memname"><a class="el" href="classmb_1_1MbEntity.html">MbEntity</a> mb::MantisBase::entity </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>entity_name</em></td><td>)</td>
@@ -663,25 +671,25 @@ RouterMgr for more details.</dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>Fetch a table schema encapsulated by an <code><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a></code> object from given the table name. If table does not exist yet, return an emty object. </p>
+<p>Fetch a table schema encapsulated by an <code><a class="el" href="classmb_1_1MbEntity.html" title="Represents a database table/entity with schema and CRUD operations.">MbEntity</a></code> object from given the table name. If table does not exist yet, return an emty object. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">entity_name</td><td>Name of the table of interest </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a> object for the selected table </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classmb_1_1MbEntity.html" title="Represents a database table/entity with schema and CRUD operations.">MbEntity</a> object for the selected table </dd></dl>
 
 </div>
 </div>
-<a id="a766ac5f075b31a4b748f53fbbd9872db" name="a766ac5f075b31a4b748f53fbbd9872db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a766ac5f075b31a4b748f53fbbd9872db">&#9670;&#160;</a></span>files()</h2>
+<a id="a29183b51b571439d0707cc82fe7203cd" name="a29183b51b571439d0707cc82fe7203cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29183b51b571439d0707cc82fe7203cd">&#9670;&#160;</a></span>files()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1FilesMgr.html">FilesMgr</a> &amp; mb::MantisBase::files </td>
+          <td class="memname"><a class="el" href="classmb_1_1MbFilesMgr.html">MbFilesMgr</a> &amp; mb::MantisBase::files </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -708,7 +716,7 @@ RouterMgr for more details.</dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>Check if table schema encapsulated by an <code><a class="el" href="classmb_1_1Entity.html" title="Represents a database table/entity with schema and CRUD operations.">Entity</a></code> object from given the table name exists. If table does not exist yet, return false. </p>
+<p>Check if table schema encapsulated by an <code><a class="el" href="classmb_1_1MbEntity.html" title="Represents a database table/entity with schema and CRUD operations.">MbEntity</a></code> object from given the table name exists. If table does not exist yet, return false. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">entity_name</td><td>Name of the table of interest </td></tr>
@@ -795,14 +803,14 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="ac8d95de5b1456d77f0a7487f9d24e0f8" name="ac8d95de5b1456d77f0a7487f9d24e0f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac8d95de5b1456d77f0a7487f9d24e0f8">&#9670;&#160;</a></span>logger()</h2>
+<a id="a923f683b8d475adfa29a350f1b722ee2" name="a923f683b8d475adfa29a350f1b722ee2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a923f683b8d475adfa29a350f1b722ee2">&#9670;&#160;</a></span>logger()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1Logger.html">Logger</a> &amp; mb::MantisBase::logger </td>
+          <td class="memname"><a class="el" href="classmb_1_1MbLogger.html">MbLogger</a> &amp; mb::MantisBase::logger </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -813,21 +821,39 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="a88d15e3b53782c25098fa6eee95db4fd" name="a88d15e3b53782c25098fa6eee95db4fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88d15e3b53782c25098fa6eee95db4fd">&#9670;&#160;</a></span>logs()</h2>
+<a id="ada0fd2fae8f0faff23ff69234e8cb3db" name="ada0fd2fae8f0faff23ff69234e8cb3db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada0fd2fae8f0faff23ff69234e8cb3db">&#9670;&#160;</a></span>logs()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1Logger.html">Logger</a> &amp; mb::MantisBase::logs </td>
+          <td class="memname"><a class="el" href="classmb_1_1MbLogger.html">MbLogger</a> &amp; mb::MantisBase::logs </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classmb_1_1Logger.html">Logger</a> (alias of <a class="el" href="classmb_1_1MantisBase.html#ac8d95de5b1456d77f0a7487f9d24e0f8">logger</a>). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classmb_1_1MbLogger.html">MbLogger</a> (alias of <a class="el" href="classmb_1_1MantisBase.html#a923f683b8d475adfa29a350f1b722ee2">logger</a>). </dd></dl>
+
+</div>
+</div>
+<a id="af39b0c3cff42ec52f2f1b5326ea4d97c" name="af39b0c3cff42ec52f2f1b5326ea4d97c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af39b0c3cff42ec52f2f1b5326ea4d97c">&#9670;&#160;</a></span>mailer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1MbMailer.html">MbMailer</a> &amp; mb::MantisBase::mailer </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Mailer service. </dd></dl>
 
 </div>
 </div>
@@ -1024,14 +1050,14 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="aaa93f1df96bfd253eebeb4ccda53cb29" name="aaa93f1df96bfd253eebeb4ccda53cb29"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa93f1df96bfd253eebeb4ccda53cb29">&#9670;&#160;</a></span>router()</h2>
+<a id="a03d29b48be918d5257955342edbd433c" name="a03d29b48be918d5257955342edbd433c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03d29b48be918d5257955342edbd433c">&#9670;&#160;</a></span>router()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1Router.html">Router</a> &amp; mb::MantisBase::router </td>
+          <td class="memname"><a class="el" href="classmb_1_1MbRouter.html">MbRouter</a> &amp; mb::MantisBase::router </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1042,14 +1068,14 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="a470ee74c61556ca8105993f8df49dac1" name="a470ee74c61556ca8105993f8df49dac1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a470ee74c61556ca8105993f8df49dac1">&#9670;&#160;</a></span>rt()</h2>
+<a id="a3787f93a258531e63b166ebda6141a00" name="a3787f93a258531e63b166ebda6141a00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3787f93a258531e63b166ebda6141a00">&#9670;&#160;</a></span>rt()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1RealtimeDB.html">RealtimeDB</a> &amp; mb::MantisBase::rt </td>
+          <td class="memname"><a class="el" href="classmb_1_1MbRealtimeDB.html">MbRealtimeDB</a> &amp; mb::MantisBase::rt </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1319,14 +1345,40 @@ RouterMgr for more details.</dd></dl>
 
 </div>
 </div>
-<a id="a4ccd43ffc1a92afadb6b01f23a5681dc" name="a4ccd43ffc1a92afadb6b01f23a5681dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ccd43ffc1a92afadb6b01f23a5681dc">&#9670;&#160;</a></span>settings()</h2>
+<a id="a05c32eb9002c0edb7f5a1507c6ef9547" name="a05c32eb9002c0edb7f5a1507c6ef9547"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05c32eb9002c0edb7f5a1507c6ef9547">&#9670;&#160;</a></span>setTemplatesDir()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmb_1_1KeyValStore.html">KeyValStore</a> &amp; mb::MantisBase::settings </td>
+          <td class="memname">void mb::MantisBase::setTemplatesDir </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>dir</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Update the templates directory for <a class="el" href="classmb_1_1MantisBase.html" title="MantisBase entry point.">MantisBase</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dir</td><td>New templates directory. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a01425132bf297f1a56d30ab6b6217d27" name="a01425132bf297f1a56d30ab6b6217d27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01425132bf297f1a56d30ab6b6217d27">&#9670;&#160;</a></span>settings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1MbKVStore.html">MbKVStore</a> &amp; mb::MantisBase::settings </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1390,6 +1442,26 @@ RouterMgr for more details.</dd></dl>
 
 <p>Get the server start time in std::chrono:: </p>
 <dl class="section return"><dt>Returns</dt><dd>Server start time </dd></dl>
+
+</div>
+</div>
+<a id="a02d131e0e7fc60776c15ab4a798e6926" name="a02d131e0e7fc60776c15ab4a798e6926"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02d131e0e7fc60776c15ab4a798e6926">&#9670;&#160;</a></span>templatesDir()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::MantisBase::templatesDir </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the templates directory where email template files are stored used for sending confirmation/password reset emails. </p>
+<dl class="section return"><dt>Returns</dt><dd>MantisApp scripts directory. </dd></dl>
 
 </div>
 </div>

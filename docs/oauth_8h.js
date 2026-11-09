@@ -1,4 +1,4 @@
 var oauth_8h =
 [
-    [ "mb::OAuthManager", "classmb_1_1OAuthManager.html", "classmb_1_1OAuthManager" ]
+    [ "mb::MbOAuthMgr", "classmb_1_1MbOAuthMgr.html", "classmb_1_1MbOAuthMgr" ]
 ];

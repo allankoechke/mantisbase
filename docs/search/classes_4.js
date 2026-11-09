@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['filesmgr_0',['FilesMgr',['../classmb_1_1FilesMgr.html',1,'mb']]]
+  ['realtimeauthsnapshot_0',['RealtimeAuthSnapshot',['../structmb_1_1RealtimeAuthSnapshot.html',1,'mb']]],
+  ['realtimewssession_1',['RealtimeWsSession',['../structmb_1_1RealtimeWsSession.html',1,'mb']]]
 ];

@@ -1,5 +1,5 @@
 var sse_8h =
 [
-    [ "mb::SSESession", "classmb_1_1SSESession.html", "classmb_1_1SSESession" ],
-    [ "mb::SSEMgr", "classmb_1_1SSEMgr.html", "classmb_1_1SSEMgr" ]
+    [ "mb::MbSSESession", "classmb_1_1MbSSESession.html", "classmb_1_1MbSSESession" ],
+    [ "mb::MbSSEMgr", "classmb_1_1MbSSEMgr.html", "classmb_1_1MbSSEMgr" ]
 ];

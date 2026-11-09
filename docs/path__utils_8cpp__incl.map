@@ -20,7 +20,7 @@
 <area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="957,131,731,134,591,141,447,154,307,173,183,201,129,218,84,238,47,260,20,286,11,301,8,316,10,330,17,344,42,370,74,395,101,411,130,424,190,442,188,447,128,429,99,416,71,400,38,374,13,347,5,331,3,316,6,299,16,282,44,256,81,233,128,213,181,196,306,168,446,149,591,136,731,129,957,126"/>
 <area shape="rect" id="Node000011" href="$logger_8h.html" title="Structured logging wrapper around spdlog with optional SQLite persistence." alt="" coords="426,203,589,229"/>
 <area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="957,145,586,204,585,198,956,139"/>
-<area shape="rect" id="Node000021" href="$types_8h.html" title="Core type aliases, handler signatures, and the IMantisBase DI mixin." alt="" coords="736,372,919,397"/>
+<area shape="rect" id="Node000021" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="736,372,919,397"/>
 <area shape="poly" id="edge33_Node000002_Node000021" title=" " alt="" coords="1006,150,972,171,940,198,906,239,878,283,840,361,835,358,873,281,902,236,936,194,969,167,1003,146"/>
 <area shape="rect" id="Node000025" title=" " alt="" coords="1575,196,1723,236"/>
 <area shape="poly" id="edge34_Node000002_Node000025" title=" " alt="" coords="1131,135,1324,158,1561,193,1561,198,1323,163,1130,141"/>

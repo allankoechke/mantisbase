@@ -8,5 +8,5 @@ var realtime__session_8cpp =
     [ "resolveRealtimeAuth", "realtime__session_8cpp.html#af8dd5995ffd0f4ef35c9fd85eabd7cfb", null ],
     [ "resolveRealtimeToken", "realtime__session_8cpp.html#ae3d330dc89f3e4aa4ca7205b02feecaf", null ],
     [ "touchWsSession", "realtime__session_8cpp.html#a80e7b76a5023b74babc342a83d288284", null ],
-    [ "tryUpgradeAuth", "realtime__session_8cpp.html#a76825a4666535adab4efbe5bfb7ac454", null ]
+    [ "tryUpgradeAuth", "realtime__session_8cpp.html#a273e7d6effa8e1b17c59111c32f969b3", null ]
 ];
