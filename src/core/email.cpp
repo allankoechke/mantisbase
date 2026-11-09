@@ -225,38 +225,38 @@ namespace {
         const std::string boundary = "mb-" + mb::generateShortId(24);
         std::ostringstream msg;
         msg << "Date: " << rfc5322Date() << "\r\n"
-            << "From: " << addressHeader(from) << "\r\n"
-            << "To: " << addressHeader(message.to) << "\r\n"
-            << "Subject: " << encodeHeader(message.subject) << "\r\n"
-            << "Message-ID: <" << mb::generateShortId(16) << "@mantisbase.local>\r\n"
-            << "MIME-Version: 1.0\r\n";
+                << "From: " << addressHeader(from) << "\r\n"
+                << "To: " << addressHeader(message.to) << "\r\n"
+                << "Subject: " << encodeHeader(message.subject) << "\r\n"
+                << "Message-ID: <" << mb::generateShortId(16) << "@mantisbase.local>\r\n"
+                << "MIME-Version: 1.0\r\n";
 
         const bool hasText = !message.body_text.empty();
         const bool hasHtml = !message.body_html.empty();
         if (hasText && hasHtml) {
             msg << "Content-Type: multipart/alternative; boundary=\"" << boundary << "\"\r\n"
-                << "\r\n"
-                << "--" << boundary << "\r\n"
-                << "Content-Type: text/plain; charset=utf-8\r\n"
-                << "Content-Transfer-Encoding: 8bit\r\n"
-                << "\r\n"
-                << dotStuff(toCrlf(message.body_text))
-                << "--" << boundary << "\r\n"
-                << "Content-Type: text/html; charset=utf-8\r\n"
-                << "Content-Transfer-Encoding: 8bit\r\n"
-                << "\r\n"
-                << dotStuff(toCrlf(message.body_html))
-                << "--" << boundary << "--\r\n";
+                    << "\r\n"
+                    << "--" << boundary << "\r\n"
+                    << "Content-Type: text/plain; charset=utf-8\r\n"
+                    << "Content-Transfer-Encoding: 8bit\r\n"
+                    << "\r\n"
+                    << dotStuff(toCrlf(message.body_text))
+                    << "--" << boundary << "\r\n"
+                    << "Content-Type: text/html; charset=utf-8\r\n"
+                    << "Content-Transfer-Encoding: 8bit\r\n"
+                    << "\r\n"
+                    << dotStuff(toCrlf(message.body_html))
+                    << "--" << boundary << "--\r\n";
         } else if (hasHtml) {
             msg << "Content-Type: text/html; charset=utf-8\r\n"
-                << "Content-Transfer-Encoding: 8bit\r\n"
-                << "\r\n"
-                << dotStuff(toCrlf(message.body_html));
+                    << "Content-Transfer-Encoding: 8bit\r\n"
+                    << "\r\n"
+                    << dotStuff(toCrlf(message.body_html));
         } else {
             msg << "Content-Type: text/plain; charset=utf-8\r\n"
-                << "Content-Transfer-Encoding: 8bit\r\n"
-                << "\r\n"
-                << dotStuff(toCrlf(message.body_text));
+                    << "Content-Transfer-Encoding: 8bit\r\n"
+                    << "\r\n"
+                    << dotStuff(toCrlf(message.body_text));
         }
 
         std::string payload = msg.str();
@@ -304,7 +304,8 @@ bool mb::MbMailer::send(const MbEmailMsg &message) {
     }
 
     logger().debug("Mailer", "Email sent",
-                   std::format("To: {} Subject: {}", message.to, message.subject));
+                   std::format("\n\tTo: {} \n\tSubject: {}",
+                               hideEmail(message.to), message.subject));
     return true;
 }
 
@@ -448,6 +449,25 @@ std::string mb::MbMailer::passwordResetEmailText(const std::string &app_name, co
             << "This link expires in 1 hour.\n"
             << "If you didn't request a password reset, you can safely ignore this email.\n";
     return text.str();
+}
+
+std::string mb::MbMailer::hideEmail(const std::string &email) {
+    const auto at = email.find('@');
+
+    if (at == std::string::npos || at == 0) {
+        return "***";
+    }
+
+    const std::string username = email.substr(0, at);
+    const std::string domain = email.substr(at);
+
+    if (username.size() <= 2) {
+        return username[0] + std::string(username.size() - 1, '*') + domain;
+    }
+
+    return username.substr(0, 2) +
+           std::string(username.size() - 2, '*') +
+           domain;
 }
 
 const mb::MbSmtpConfig &mb::MbMailer::config() const { return m_config; }

@@ -102,6 +102,14 @@ namespace mb {
                                                      const std::string &reset_url);
 
     private:
+        /**
+         * Take user email and hide some chars for logging
+         *
+         * @param email User email to hide
+         * @return Partial email for log publishing
+         */
+        static std::string hideEmail(const std::string &email);
+
         MbSmtpConfig m_config;
         bool m_configured = false;
 
