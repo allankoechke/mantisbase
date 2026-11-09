@@ -668,6 +668,7 @@ Requires **admin authentication** for all settings endpoints.
 |--------|----------|-------------|
 | GET | `/api/v1/sys/settings/config` | Get application settings |
 | PATCH | `/api/v1/sys/settings/config` | Update application settings |
+| POST | `/api/v1/sys/settings/smtp/test` | Send an SMTP test message |
 
 PATCH returns **503** when `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value. A successful PATCH reloads the CORS allowlist immediately (no server restart required).
 
@@ -737,6 +738,37 @@ Example (admin auth required):
   }
 }
 ```
+
+#### Test a saved SMTP configuration
+
+`POST /api/v1/sys/settings/smtp/test` sends a message whose subject and body are `Hey, it works!` to the address in the body. Admin authentication is required. The call uses the SMTP settings already stored; it does not change them, and `MB_DISABLE_CONFIG_MUTATIONS` does not block it.
+
+```json
+{ "email": "you@example.com" }
+```
+
+Success:
+
+```json
+{
+  "status": 200,
+  "error": "",
+  "data": {
+    "to": "you@example.com",
+    "subject": "MantisBase: Hey, it works!",
+    "message": "If you are seeing this, the SMTP Settings are OK!"
+  }
+}
+```
+
+Failures use the same envelope, with `data` as `{}`:
+
+| Status | When |
+|--------|------|
+| **400** | `email` is missing, not a string, or not an address. SMTP is not configured (`host` and `from` are required). |
+| **401** | Missing or invalid admin credentials |
+| **429** | That recipient already received 3 messages in the last hour |
+| **502** | The SMTP server rejected the message or could not be reached |
 
 The GET response also includes `mantisVersion` (the running server version).
 

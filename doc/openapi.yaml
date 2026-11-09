@@ -1324,6 +1324,71 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiEnvelope"
 
+  /sys/settings/smtp/test:
+    post:
+      tags: [System]
+      summary: Send an SMTP test message
+      description: |
+        Sends a message whose subject and body are `Hey, it works!` to `email`,
+        using the SMTP settings already stored. Does not change those settings.
+        Not blocked by `MB_DISABLE_CONFIG_MUTATIONS`.
+
+        **400** when `email` is missing or invalid, or when SMTP is not configured.
+        **429** when that recipient has already received 3 messages in the last hour.
+        **502** when the SMTP server rejects the message or cannot be reached.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: you@example.com
+      responses:
+        "200":
+          description: Test message accepted by the mailer
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          to:
+                            type: string
+                            example: you@example.com
+                          subject:
+                            type: string
+                            example: MantisBase: Hey, it works!
+                          message:
+                            type: string
+                            example: If you are seeing this, the SMTP Settings are OK!
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          description: SMTP delivery failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
   /sys/api-keys:
     get:
       tags: [System]

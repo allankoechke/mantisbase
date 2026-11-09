@@ -378,5 +378,63 @@ namespace mb
                 }
             },
             patchMiddleware);
+
+        mApp.router().Post(
+            "/api/v1/sys/settings/smtp/test",
+            [this](const MbRequest &req, const MbResponse &res)
+            {
+                const auto &[body, err] = req.bodyAsJson();
+                if (!err.empty())
+                {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"error", err},
+                                     {"data", json::object()}
+                                 });
+                    return;
+                }
+
+                if (!body.contains("email") || !body["email"].is_string())
+                {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"error", "email is required"},
+                                     {"data", json::object()}
+                                 });
+                    return;
+                }
+
+                const auto email = trim(body["email"].get<std::string>());
+                try
+                {
+                    mApp.mailer().sendTest(email);
+                    res.sendJSON(200, {
+                                     {"status", 200},
+                                     {"error", ""},
+                                     {"data", {
+                                         {"to", email},
+                                         {"subject", "MantisBase: Hey, it works!"},
+                                         {"message", "If you are seeing this, the SMTP Settings are OK!"}
+                                     }}
+                                 });
+                }
+                catch (const MbException &e)
+                {
+                    res.sendJSON(e.code(), {
+                                     {"status", e.code()},
+                                     {"error", e.what()},
+                                     {"data", json::object()}
+                                 });
+                }
+                catch (const std::exception &e)
+                {
+                    res.sendJSON(500, {
+                                     {"status", 500},
+                                     {"error", e.what()},
+                                     {"data", json::object()}
+                                 });
+                }
+            },
+            adminAuth);
     }
 } // mb

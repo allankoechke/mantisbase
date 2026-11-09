@@ -2,6 +2,7 @@
 #define MANTISBASE_EMAIL_H
 
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <chrono>
 #include <mutex>
@@ -65,6 +66,16 @@ namespace mb {
          * Throws MbException on validation errors, rate limits, or delivery failure.
          */
         bool send(const MbEmailMsg &message);
+
+        /**
+         * Send a fixed "Hey, it works!" message to `to`.
+         * Throws MbException when SMTP is not configured, the address is invalid,
+         * the rate limit is exceeded, or delivery fails.
+         */
+        bool sendTest(const std::string &to);
+
+        /** Subject and body used by sendTest(). */
+        static constexpr std::string_view kTestMessage{"MantisBase: Hey, it works!"};
 
         std::string loadTemplate(const std::string &template_name,
                                   const std::unordered_map<std::string, std::string> &variables) const;

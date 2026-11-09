@@ -291,6 +291,47 @@ TEST_F(EmailTest, ApplySettingsLeavesMailerUnconfiguredWithoutHost) {
     EXPECT_FALSE(mantis().mailer().isConfigured());
 }
 
+TEST_F(EmailTest, SendTestRequiresConfiguration) {
+    try {
+        mantis().mailer().sendTest("user@example.com");
+        FAIL() << "expected unconfigured mailer to reject the test message";
+    } catch (const mb::MbException &ex) {
+        EXPECT_EQ(ex.code(), 400);
+        EXPECT_NE(std::string(ex.what()).find("not configured"), std::string::npos);
+    }
+}
+
+TEST_F(EmailTest, SendTestRejectsAddressWithoutAt) {
+    mb::MbSmtpConfig cfg;
+    cfg.host = "mock";
+    cfg.from_address = "app@example.com";
+    mantis().mailer().configure(cfg);
+
+    try {
+        mantis().mailer().sendTest("not-an-email");
+        FAIL() << "expected an address without @ to be rejected";
+    } catch (const mb::MbException &ex) {
+        EXPECT_EQ(ex.code(), 400);
+    }
+    EXPECT_TRUE(mantis().mailer().sentMessages().empty());
+}
+
+TEST_F(EmailTest, SendTestCapturesFixedMessage) {
+    mb::MbSmtpConfig cfg;
+    cfg.host = "mock";
+    cfg.port = 587;
+    cfg.from_address = "app@example.com";
+    cfg.use_tls = false;
+    mantis().mailer().configure(cfg);
+
+    EXPECT_TRUE(mantis().mailer().sendTest("  user@example.com  "));
+    ASSERT_EQ(mantis().mailer().sentMessages().size(), 1u);
+    const auto &sent = mantis().mailer().sentMessages().front();
+    EXPECT_EQ(sent.to, "user@example.com");
+    EXPECT_EQ(sent.subject, "MantisBase: Hey, it works!");
+    EXPECT_EQ(sent.body_text, "If you are seeing this, the SMTP Settings are OK!");
+}
+
 TEST_F(EmailTest, MockTransportCapturesMessage) {
     mb::MbSmtpConfig cfg;
     cfg.host = "mock";

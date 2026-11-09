@@ -308,6 +308,19 @@ bool mb::MbMailer::send(const MbEmailMsg &message) {
     return true;
 }
 
+bool mb::MbMailer::sendTest(const std::string &to) {
+    const auto recipient = trim(to);
+    if (recipient.empty() || recipient.front() == '@' || recipient.back() == '@'
+        || recipient.find('@') == std::string::npos)
+        throw MbException(400, "Invalid email address");
+
+    MbEmailMsg message;
+    message.to = recipient;
+    message.subject = std::string(kTestMessage);
+    message.body_text = "If you are seeing this, the SMTP Settings are OK!";
+    return send(message);
+}
+
 std::string mb::MbMailer::loadTemplate(const std::string &template_name,
                                        const std::unordered_map<std::string, std::string> &variables) const {
     std::string content;
