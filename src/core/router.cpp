@@ -301,6 +301,8 @@ namespace mb {
         // Verify that the logged in user is valid or still
         Get("/api/v1/auth/verify", handleAuthVerify(), {rateLimit(5, 60, false)});
         Post("/api/v1/auth/:entity_name/login", handleAuthLogin(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/otp/request", handleAuthOtpRequest(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/otp/login", handleAuthOtpLogin(), authLoginMiddleware);
         Post("/api/v1/auth/:entity_name/refresh", handleAuthRefresh(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/logout", handleAuthLogout(), authEntityMiddleware);
     }

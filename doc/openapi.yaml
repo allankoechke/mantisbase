@@ -139,6 +139,89 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
+  /auth/{entity_name}/otp/request:
+    post:
+      tags: [Auth]
+      summary: Email a one-time sign-in code
+      description: |
+        Sends a 6-digit sign-in code to an auth-entity account. SMTP must be configured;
+        otherwise the response is 400 `Email service not configured. Set SMTP settings first.`
+        The code expires after 10 minutes and allows 5 attempts. A delivered code replaces any
+        earlier code for that account. Unknown emails return `data.sent: true` and send no mail.
+        Rate-limited to 5 requests/minute per IP, and outbound mail is limited to 3 messages/hour
+        per recipient.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpRequest"
+      responses:
+        "200":
+          description: Request accepted. A code is emailed only when the account exists.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/OtpSentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          description: SMTP delivery failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/otp/login:
+    post:
+      tags: [Auth]
+      summary: Sign in with an emailed code
+      description: |
+        Exchange the 6-digit code from the sign-in email for a JWT. The code is single-use.
+        A wrong, expired, or exhausted code returns 401. Passwordless accounts can use this route.
+        Rate-limited to 5 attempts/minute per IP.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpLoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
   /auth/{entity_name}/refresh:
     post:
       tags: [Auth]
@@ -1805,6 +1888,36 @@ components:
         password:
           type: string
           format: password
+
+    OtpRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+    OtpLoginRequest:
+      type: object
+      required: [email, otp]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        otp:
+          type: string
+          description: 6-digit sign-in code from the email
+          example: "483920"
+
+    OtpSentResponse:
+      type: object
+      required: [sent]
+      properties:
+        sent:
+          type: boolean
+          example: true
 
     AuthTokenResponse:
       type: object

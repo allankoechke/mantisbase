@@ -35,6 +35,8 @@ If the entity is missing or does not meet these requirements, the route returns 
 |--------|----------|-------------|
 | GET | `/api/v1/auth/verify` | Check whether the current JWT or API key is still valid |
 | POST | `/api/v1/auth/<entity>/login` | Authenticate user and get token |
+| POST | `/api/v1/auth/<entity>/otp/request` | Email a one-time sign-in code |
+| POST | `/api/v1/auth/<entity>/otp/login` | Sign in with an emailed code |
 | POST | `/api/v1/auth/<entity>/refresh` | Refresh an existing token |
 | POST | `/api/v1/auth/<entity>/logout` | Logout (invalidate token) |
 
@@ -123,6 +125,92 @@ curl -X POST http://localhost:7070/api/v1/auth/users/login \
   -d '{
     "identity": "019b292a-e145-7000-813b-c9f528364a2b",
     "password": "userpassword"
+  }'
+```
+
+---
+
+## Email sign-in code
+
+Sign in with an email address and a one-time code. No password is required. This also works for accounts that have no password, such as OAuth-only users.
+
+SMTP must already be configured under application settings. If it is not, the request returns **400**:
+
+```json
+{
+  "status": 400,
+  "data": {},
+  "error": "Email service not configured. Set SMTP settings first."
+}
+```
+
+The code is 6 digits, expires after **10 minutes**, and allows **5** attempts. Requesting a new code replaces the previous one after the email is sent. Each code can be used once.
+
+> ⚠️ **Rate limiting**: Both OTP routes use the same limit as password login (**5 attempts per minute per IP**). Outbound mail is also limited to **3 messages per hour** for each recipient.
+
+### Request a code
+
+**Endpoint:** `POST /api/v1/auth/<entity>/otp/request`
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response (Success - 200):**
+```json
+{
+  "status": 200,
+  "data": {
+    "sent": true
+  },
+  "error": ""
+}
+```
+
+The response is the same when no account uses that email, and no message is sent in that case. Delivery errors are returned only when a message was attempted.
+
+**Example:**
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/otp/request \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+```
+
+### Sign in with the code
+
+**Endpoint:** `POST /api/v1/auth/<entity>/otp/login`
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "otp": "483920"
+}
+```
+
+**Response (Success - 200):** Same shape as [password login](#login): `data.token`, `data.user`, and an HttpOnly `mb_token` cookie.
+
+**Response (Error - 401):**
+```json
+{
+  "status": 401,
+  "data": {},
+  "error": "Invalid or expired sign-in code."
+}
+```
+
+A code that is not 6 digits returns **400** with `"Sign-in code must be a 6-digit number."`
+
+**Example:**
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/otp/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "otp": "483920"
   }'
 ```
 
@@ -436,4 +524,4 @@ Admin users (`type: admin`) short-circuit all entity access rules. See [Access R
 
 ## Summary
 
-The authentication API provides JWT login, token verification (`GET /api/v1/auth/verify`), long-lived API keys (`mb_sk_...`), and OAuth for auth-type entities. All credential types use `Authorization: Bearer ...` and are validated before entity access rules run. Admin-only routes under `/api/v1/sys/` manage providers and system API keys.
+The authentication API provides JWT login (password or email one-time code), token verification (`GET /api/v1/auth/verify`), long-lived API keys (`mb_sk_...`), and OAuth for auth-type entities. All credential types use `Authorization: Bearer ...` and are validated before entity access rules run. Admin-only routes under `/api/v1/sys/` manage providers and system API keys.

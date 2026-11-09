@@ -36,12 +36,21 @@ Example: [`examples/02-auth-users/`](../../examples/02-auth-users/).
 |--------|--------|------|
 | Register | POST | `/api/v1/entities/{entity}` |
 | Login | POST | `/api/v1/auth/{entity}/login` |
+| Request OTP | POST | `/api/v1/auth/{entity}/otp/request` |
+| OTP login | POST | `/api/v1/auth/{entity}/otp/login` |
 | Refresh | POST | `/api/v1/auth/{entity}/refresh` |
 | Logout | POST | `/api/v1/auth/{entity}/logout` |
 | Verify | GET | `/api/v1/auth/verify` |
 | Admin login | POST | `/api/v1/sys/admins/login` |
 
 Login body: `{"identity": "user@example.com", "password": "..."}`
+
+Email OTP (SMTP must be configured, otherwise **400** `Email service not configured. Set SMTP settings first.`):
+
+1. `POST /api/v1/auth/{entity}/otp/request` with `{"email": "user@example.com"}` → `data.sent: true` and a 6-digit code by email (unknown emails return the same body and send nothing).
+2. `POST /api/v1/auth/{entity}/otp/login` with `{"email": "user@example.com", "otp": "483920"}`.
+
+The code expires in 10 minutes, allows 5 attempts, and is single-use. A wrong or expired code returns **401**.
 
 Response: `data.token` (JWT).
 

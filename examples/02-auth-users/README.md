@@ -34,6 +34,23 @@ The script registers a user, logs in, verifies the token, refreshes it, and logs
 | Refresh with valid token | 200 |
 | Refresh with invalid token | 401 |
 | Logout | 200 |
+| OTP request without SMTP | 400 |
+| OTP request for a known email (SMTP configured) | 200 (`data.sent` is true) |
+| OTP login with the emailed code | 200 (returns `data.token`) |
+| OTP login with a wrong code | 401 |
+
+## Email sign-in code
+
+SMTP must be configured in admin settings. Otherwise `otp/request` returns 400.
+
+```bash
+export BASE_URL=http://localhost:7070
+export EMAIL=demo@example.com
+./http/otp-login.sh
+
+# After the code arrives:
+OTP=483920 ./http/otp-login.sh
+```
 
 ## Cookie auth
 

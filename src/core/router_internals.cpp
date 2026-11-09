@@ -324,6 +324,111 @@ namespace mb {
         };
     }
 
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthOtpRequest() {
+        return [](const MbRequest &req, const MbResponse &res) {
+            try {
+                const auto &[body, err] = req.bodyAsJson();
+                if (!err.empty()) {
+                    res.sendJSON(500, {
+                                     {"status", 500},
+                                     {"data", json::object()},
+                                     {"error", err}
+                                 });
+                    return;
+                }
+
+                if (!body.contains("email") || !body["email"].is_string() ||
+                    trim(body["email"].get<std::string>()).empty()) {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"data", json::object()},
+                                     {"error", "Expected `email` key in the request body."}
+                                 });
+                    return;
+                }
+
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
+                const auto result = req.mbApp().auth().requestLoginOtp(
+                    entity_name, body["email"].get<std::string>());
+                res.sendJSON(200, {
+                                 {"status", 200},
+                                 {"data", result},
+                                 {"error", ""}
+                             });
+            } catch (const MbException &e) {
+                res.sendJSON(e.code(), {
+                                 {"status", e.code()},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             });
+            } catch (const std::exception &e) {
+                req.mbApp().logger().critical("MbAuth", "OTP Request Error",
+                                              fmt::format("Sign-in code request error: {}", e.what()));
+                res.sendJSON(500, {
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", "An internal error occurred."}
+                             });
+            }
+        };
+    }
+
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthOtpLogin() {
+        return [](const MbRequest &req, const MbResponse &res) {
+            try {
+                const auto &[body, err] = req.bodyAsJson();
+                if (!err.empty()) {
+                    res.sendJSON(500, {
+                                     {"status", 500},
+                                     {"data", json::object()},
+                                     {"error", err}
+                                 });
+                    return;
+                }
+
+                for (const auto &key: std::vector<std::string>{"email", "otp"}) {
+                    if (!body.contains(key) || !body[key].is_string() ||
+                        trim(body[key].get<std::string>()).empty()) {
+                        res.sendJSON(400, {
+                                         {"status", 400},
+                                         {"data", json::object()},
+                                         {"error", "Expected `" + key + "` key in the request body."}
+                                     });
+                        return;
+                    }
+                }
+
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
+                const auto result = req.mbApp().auth().loginWithOtp(
+                    entity_name,
+                    body["email"].get<std::string>(),
+                    body["otp"].get<std::string>());
+
+                const auto token = result.at("token").get<std::string>();
+                res.setAuthTokenCookie(token, req.mbApp().auth().sessionTimeoutSeconds(entity_name));
+                res.sendJSON(200, {
+                                 {"status", 200},
+                                 {"data", result},
+                                 {"error", ""}
+                             });
+            } catch (const MbException &e) {
+                res.sendJSON(e.code(), {
+                                 {"status", e.code()},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             });
+            } catch (const std::exception &e) {
+                req.mbApp().logger().critical("MbAuth", "OTP Login Error",
+                                              fmt::format("Sign-in code login error: {}", e.what()));
+                res.sendJSON(500, {
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", "An internal error occurred."}
+                             });
+            }
+        };
+    }
+
     std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAdminLogin() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {

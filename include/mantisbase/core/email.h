@@ -77,6 +77,11 @@ namespace mb {
         /** Subject and body used by sendTest(). */
         static constexpr std::string_view kTestMessage{"MantisBase: Hey, it works!"};
 
+        /** Returned by send() and sign-in code requests when SMTP is not configured. */
+        static constexpr std::string_view kNotConfiguredMessage{
+            "Email service not configured. Set SMTP settings first."
+        };
+
         std::string loadTemplate(const std::string &template_name,
                                   const std::unordered_map<std::string, std::string> &variables) const;
 
@@ -100,6 +105,14 @@ namespace mb {
 
         static std::string passwordResetEmailText(const std::string &app_name,
                                                      const std::string &reset_url);
+
+        static std::string loginOtpEmailHtml(const std::string &app_name,
+                                              const std::string &code,
+                                              int expires_minutes);
+
+        static std::string loginOtpEmailText(const std::string &app_name,
+                                              const std::string &code,
+                                              int expires_minutes);
 
     private:
         /**

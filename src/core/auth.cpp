@@ -1,8 +1,22 @@
 #include "../../../include/mantisbase/core/auth.h"
 #include "../../include/mantisbase/mantisbase.h"
+#include "../../include/mantisbase/core/email.h"
+#include "../../include/mantisbase/core/exceptions.h"
 #include "../../include/mantisbase/utils/crypto_utils.h"
+#include "../../include/mantisbase/utils/utils.h"
 
+#include <soci/soci.h>
+
+#include <algorithm>
+#include <cctype>
+#include <chrono>
+#include <cstdint>
 #include <cstring>
+#include <ctime>
+#include <format>
+#include <limits>
+#include <optional>
+#include <unordered_map>
 #include <jwt-cpp/traits/nlohmann-json/defaults.h>
 
 namespace mb {
@@ -196,6 +210,256 @@ namespace mb {
 
         return {
             {"token", token}
+        };
+    }
+
+    namespace {
+        constexpr int kLoginOtpTtlSeconds = 10 * 60;
+        constexpr int kLoginOtpMaxAttempts = 5;
+
+        struct OtpAccount {
+            std::string id;
+            std::string email;
+        };
+
+        std::string normalizeEmail(const std::string &raw) {
+            auto email = trim(raw);
+            toLowerCase(email);
+            return email;
+        }
+
+        bool looksLikeEmail(const std::string &email) {
+            if (email.empty() || email.front() == '@' || email.back() == '@')
+                return false;
+            const auto at = email.find('@');
+            if (at == std::string::npos || email.find('@', at + 1) != std::string::npos)
+                return false;
+            return email.find_first_of(" \t\r\n") == std::string::npos;
+        }
+
+        bool isSixDigitCode(const std::string &otp) {
+            return otp.size() == 6 &&
+                   std::all_of(otp.begin(), otp.end(), [](const unsigned char c) { return std::isdigit(c) != 0; });
+        }
+
+        std::string timestampAfterSeconds(const int seconds) {
+            const auto when = std::chrono::system_clock::now() + std::chrono::seconds(seconds);
+            const auto tt = std::chrono::system_clock::to_time_t(when);
+            const std::tm utc = toUtcTime(tt);
+            char buffer[20];
+            if (std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &utc) == 0)
+                return getCurrentTimestampUTC();
+            return buffer;
+        }
+
+        std::string generateLoginCode() {
+            constexpr std::uint32_t span = 1000000;
+            constexpr std::uint32_t limit =
+                    (std::numeric_limits<std::uint32_t>::max() / span) * span;
+            for (;;) {
+                const auto hex = generateSecureRandom(4);
+                const auto value = static_cast<std::uint32_t>(std::stoul(hex, nullptr, 16));
+                if (value < limit)
+                    return std::format("{:06}", value % span);
+            }
+        }
+
+        const std::string &otpTimingHash() {
+            static const std::string hash = hashPassword("mantisbase-otp-timing");
+            return hash;
+        }
+
+        void burnOtpTiming(const std::string &otp) {
+            try {
+                (void) verifyPassword(otp, otpTimingHash());
+            } catch (const std::exception &) {
+            }
+        }
+
+        std::string appDisplayName(const MantisBase &app) {
+            const auto &config = app.settings().configs();
+            std::string name = "MantisBase";
+            if (config.contains("orgName") && config["orgName"].is_string())
+                name = trim(config["orgName"].get<std::string>());
+            if (name.empty())
+                name = "MantisBase";
+
+            std::string clean;
+            clean.reserve(name.size());
+            for (const unsigned char c : name) {
+                if (c == '\r' || c == '\n' || c == '\0')
+                    clean.push_back(' ');
+                else
+                    clean.push_back(static_cast<char>(c));
+            }
+            return clean;
+        }
+
+        void purgeExpiredOtps(soci::session &sql) {
+            const auto now = getCurrentTimestampUTC();
+            sql << "DELETE FROM mb_login_otps WHERE expires_at <= :now", soci::use(now);
+        }
+
+        std::optional<OtpAccount> findAccountByEmail(const MantisBase &app,
+                                                      const std::string &entity_name,
+                                                      const std::string &email) {
+            const auto entity = app.entity(entity_name);
+            if (!entity.hasField("email").has_value())
+                throw MbException(400, "This account cannot sign in with email.");
+
+            const auto sql = app.db().session();
+            soci::row row;
+            const auto query = std::format(
+                "SELECT id, email FROM {} WHERE email IS NOT NULL AND LOWER(email) = LOWER(:email) LIMIT 1",
+                sqlIdentifier(entity.name()));
+            *sql << query, soci::use(email), soci::into(row);
+            if (!sql->got_data())
+                return std::nullopt;
+
+            OtpAccount account;
+            account.id = row.get<std::string>(0);
+            account.email = trim(row.get<std::string>(1));
+            if (account.id.empty() || account.email.empty())
+                return std::nullopt;
+            return account;
+        }
+
+        [[noreturn]] void rejectLoginCode(const MantisBase &app, const std::string &entity_name) {
+            app.logger().warn("MbAuth", "Sign-in code rejected", entity_name);
+            throw MbException(401, "Invalid or expired sign-in code.");
+        }
+    } // namespace
+
+    json MbAuth::requestLoginOtp(const std::string &entity_name, const std::string &email) const {
+        if (!mApp.mailer().isConfigured())
+            throw MbException(400, std::string(MbMailer::kNotConfiguredMessage));
+
+        const auto address = normalizeEmail(email);
+        if (!looksLikeEmail(address))
+            throw MbException(400, "Invalid email address");
+
+        const auto account = findAccountByEmail(mApp, entity_name, address);
+        if (!account.has_value())
+            return {{"sent", true}};
+
+        auto email_key = account->email;
+        toLowerCase(email_key);
+
+        const auto id = generateTimeBasedId();
+        const auto code = generateLoginCode();
+        const auto code_hash = hashPassword(code);
+        const auto expires_at = timestampAfterSeconds(kLoginOtpTtlSeconds);
+        const auto now = getCurrentTimestampUTC();
+        const auto minutes = std::to_string(kLoginOtpTtlSeconds / 60);
+        const auto app_name = appDisplayName(mApp);
+
+        const auto sql = mApp.db().session();
+        purgeExpiredOtps(*sql);
+        {
+            soci::transaction tr(*sql);
+            *sql << "INSERT INTO mb_login_otps "
+                    "(id, entity_name, user_id, email, code_hash, expires_at, attempts, created) "
+                    "VALUES (:id, :entity, :uid, :email, :hash, :exp, 0, :now)",
+                    soci::use(id), soci::use(entity_name), soci::use(account->id),
+                    soci::use(email_key), soci::use(code_hash), soci::use(expires_at), soci::use(now);
+            tr.commit();
+        }
+
+        MbEmailMsg message;
+        message.to = account->email;
+        message.subject = std::format("Your {} sign-in code", app_name);
+        const std::unordered_map<std::string, std::string> vars = {
+            {"app_name", app_name},
+            {"otp", code},
+            {"expires_minutes", minutes}
+        };
+        message.body_text = mApp.mailer().loadTemplate("login_otp.txt", vars);
+        message.body_html = mApp.mailer().loadTemplate("login_otp.html", vars);
+
+        try {
+            if (!mApp.mailer().send(message))
+                throw MbException(502, "Failed to send the sign-in code.");
+        } catch (...) {
+            try {
+                *sql << "DELETE FROM mb_login_otps WHERE id = :id", soci::use(id);
+            } catch (const std::exception &) {
+            }
+            throw;
+        }
+
+        // A failed send leaves any previous code in place. After a successful send,
+        // only the code that was just delivered remains valid.
+        *sql << "DELETE FROM mb_login_otps WHERE entity_name = :entity AND user_id = :uid AND id != :id",
+                soci::use(entity_name), soci::use(account->id), soci::use(id);
+
+        return {{"sent", true}};
+    }
+
+    json MbAuth::loginWithOtp(const std::string &entity_name,
+                              const std::string &email,
+                              const std::string &otp) const {
+        const auto address = normalizeEmail(email);
+        if (!looksLikeEmail(address))
+            throw MbException(400, "Invalid email address");
+
+        const auto code = trim(otp);
+        if (!isSixDigitCode(code))
+            throw MbException(400, "Sign-in code must be a 6-digit number.");
+
+        const auto sql = mApp.db().session();
+        purgeExpiredOtps(*sql);
+
+        std::string id;
+        std::string user_id;
+        std::string code_hash;
+        int attempts = 0;
+        const auto now = getCurrentTimestampUTC();
+        *sql << "SELECT id, user_id, code_hash, attempts FROM mb_login_otps "
+                "WHERE entity_name = :entity AND email = :email AND expires_at > :now "
+                "ORDER BY created DESC, id DESC LIMIT 1",
+                soci::use(entity_name), soci::use(address), soci::use(now),
+                soci::into(id), soci::into(user_id), soci::into(code_hash), soci::into(attempts);
+
+        if (!sql->got_data() || id.empty() || code_hash.empty()) {
+            burnOtpTiming(code);
+            rejectLoginCode(mApp, entity_name);
+        }
+
+        if (attempts >= kLoginOtpMaxAttempts) {
+            *sql << "DELETE FROM mb_login_otps WHERE id = :id", soci::use(id);
+            burnOtpTiming(code);
+            rejectLoginCode(mApp, entity_name);
+        }
+
+        *sql << "UPDATE mb_login_otps SET attempts = attempts + 1 WHERE id = :id", soci::use(id);
+
+        bool matched = false;
+        try {
+            matched = verifyPassword(code, code_hash);
+        } catch (const std::exception &) {
+            matched = false;
+        }
+
+        if (!matched) {
+            if (attempts + 1 >= kLoginOtpMaxAttempts)
+                *sql << "DELETE FROM mb_login_otps WHERE id = :id", soci::use(id);
+            rejectLoginCode(mApp, entity_name);
+        }
+
+        *sql << "DELETE FROM mb_login_otps WHERE entity_name = :entity AND user_id = :uid",
+                soci::use(entity_name), soci::use(user_id);
+
+        const auto entity = mApp.entity(entity_name);
+        auto user_opt = entity.read(user_id);
+        if (!user_opt.has_value())
+            rejectLoginCode(mApp, entity_name);
+
+        auto user = std::move(user_opt.value());
+        user.erase("password");
+        const auto token = createToken({{"id", user_id}, {"entity", entity_name}});
+        return {
+            {"token", token},
+            {"user", user}
         };
     }
 

@@ -262,6 +262,19 @@ namespace mb {
                     "expires_at TEXT NOT NULL"
                     ")";
 
+            // One-time email sign-in codes. code_hash is a password hash, never the code itself.
+            *sql << "CREATE TABLE IF NOT EXISTS mb_login_otps ("
+                    "id TEXT PRIMARY KEY, "
+                    "entity_name TEXT NOT NULL, "
+                    "user_id TEXT NOT NULL, "
+                    "email TEXT NOT NULL, "
+                    "code_hash TEXT NOT NULL, "
+                    "expires_at TEXT NOT NULL, "
+                    "attempts INTEGER NOT NULL DEFAULT 0, "
+                    "created TEXT NOT NULL"
+                    ")";
+            *sql << "CREATE INDEX IF NOT EXISTS idx_login_otps_lookup ON mb_login_otps(entity_name, email)";
+
             // OAuth linked accounts
             *sql << "CREATE TABLE IF NOT EXISTS mb_oauth_accounts ("
                     "id TEXT PRIMARY KEY, "

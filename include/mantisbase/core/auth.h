@@ -1,6 +1,6 @@
 /**
  * @file auth.h
- * @brief JWT session management and entry point for API keys and OAuth.
+ * @brief JWT session management and entry point for API keys, OAuth, and email OTP login.
  *
  * Created by allan on 07/06/2025.
  */
@@ -89,6 +89,39 @@ namespace mb
          */
         json refreshSession(const std::string& old_session_id, const std::string& entity_name,
                                    const std::string& user_id);
+
+        /**
+         * @brief Email a one-time sign-in code for an auth-entity account.
+         *
+         * The code expires after 10 minutes and allows 5 attempts. A successfully
+         * delivered code replaces any earlier code for that account. When the
+         * address is valid, unknown emails return `{ "sent": true }` and no message
+         * is sent. A message is delivered only when an account with that email exists.
+         *
+         * @param entity_name Auth entity table name.
+         * @param email Account email address.
+         * @return JSON object `{ "sent": true }`.
+         * @throws MbException 400 when SMTP is not configured or the address is invalid.
+         * @throws MbException when delivery fails (rate limit or SMTP error).
+         */
+        [[nodiscard]] json requestLoginOtp(const std::string &entity_name, const std::string &email) const;
+
+        /**
+         * @brief Exchange a one-time sign-in code for a session token.
+         *
+         * Passwordless accounts (for example OAuth-only users) can sign in this way.
+         * The code is single-use.
+         *
+         * @param entity_name Auth entity table name.
+         * @param email Account email address.
+         * @param otp 6-digit code from the sign-in email.
+         * @return JSON with `token` and `user` (password omitted).
+         * @throws MbException 400 when the email or code is not in the expected shape.
+         * @throws MbException 401 when the code is wrong, expired, used, or exhausted.
+         */
+        [[nodiscard]] json loginWithOtp(const std::string &entity_name,
+                                        const std::string &email,
+                                        const std::string &otp) const;
 
 #ifdef MB_SCRIPTING_ENABLED
         [[nodiscard]] std::string createTokenJson(const std::string &claims_json, int timeout = -1) const;

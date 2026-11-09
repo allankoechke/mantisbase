@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
+#include <regex>
 #include "../common/test_fixture.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
@@ -338,4 +339,166 @@ TEST_F(IntegrationAuthTest, AuthEntityFilterDeniesNonMatchingEntity) {
 
     client->Delete("/api/v1/schemas/editor_posts", adminHeaders);
     client->Delete("/api/v1/schemas/editors_only", adminHeaders);
+}
+
+namespace {
+
+std::string codeFromEmail(const std::string &body) {
+    static const std::regex re(R"(\b(\d{6})\b)");
+    std::smatch match;
+    if (std::regex_search(body, match, re))
+        return match[1].str();
+    return {};
+}
+
+class MockSmtp {
+public:
+    explicit MockSmtp(mb::MantisBase &app) : app_(app) {
+        app_.mailer().clearSentMessages();
+        app_.mailer().clearRateLimits();
+    }
+
+    ~MockSmtp() {
+        try {
+            app_.mailer().clearSentMessages();
+            app_.mailer().clearRateLimits();
+            app_.settings().setScriptingValue("smtp", {
+                                                   {"host", ""},
+                                                   {"port", 587},
+                                                   {"user", ""},
+                                                   {"password", ""},
+                                                   {"from", ""},
+                                                   {"tls", true}
+                                               });
+        } catch (...) {
+        }
+    }
+
+    void enable() {
+        app_.settings().setScriptingValue("smtp", {
+                                               {"host", "mock"},
+                                               {"port", 587},
+                                               {"user", "mailer"},
+                                               {"password", "s3cret"},
+                                               {"from", "app@example.com"},
+                                               {"tls", true}
+                                           });
+        app_.mailer().clearSentMessages();
+        app_.mailer().clearRateLimits();
+    }
+
+private:
+    mb::MantisBase &app_;
+};
+
+std::string requestCode(TestHttp::Client &client, mb::MantisBase &app, const std::string &email) {
+    app.mailer().clearSentMessages();
+    app.mailer().clearRateLimits();
+    const nlohmann::json body = {{"email", email}};
+    auto res = client.Post("/api/v1/auth/test_users/otp/request", body.dump(), "application/json");
+    EXPECT_TRUE(res != nullptr);
+    EXPECT_EQ(res->status, 200);
+    EXPECT_EQ(app.mailer().sentMessages().size(), 1u);
+    if (app.mailer().sentMessages().empty())
+        return {};
+    const auto code = codeFromEmail(app.mailer().sentMessages().front().body_text);
+    EXPECT_EQ(code.size(), 6u);
+    EXPECT_EQ(nlohmann::json::parse(res->body).dump().find(code), std::string::npos);
+    return code;
+}
+
+} // namespace
+
+TEST_F(IntegrationAuthTest, OtpRequestRequiresSmtp) {
+    MockSmtp smtp(mantis());
+    EXPECT_FALSE(mantis().mailer().isConfigured());
+
+    const nlohmann::json body = {{"email", "testuser@example.com"}};
+    auto res = client->Post("/api/v1/auth/test_users/otp/request", body.dump(), "application/json");
+    ASSERT_TRUE(res != nullptr);
+    EXPECT_EQ(res->status, 400);
+    const auto response = nlohmann::json::parse(res->body);
+    EXPECT_NE(response["error"].get<std::string>().find("not configured"), std::string::npos);
+    EXPECT_TRUE(response["data"].empty());
+    EXPECT_TRUE(mantis().mailer().sentMessages().empty());
+
+    auto missing = client->Post("/api/v1/auth/test_users/otp/request", "{}", "application/json");
+    ASSERT_TRUE(missing != nullptr);
+    EXPECT_EQ(missing->status, 400);
+
+    auto notAuth = client->Post("/api/v1/auth/mb_admins/otp/request", body.dump(), "application/json");
+    ASSERT_TRUE(notAuth != nullptr);
+    EXPECT_EQ(notAuth->status, 404);
+}
+
+TEST_F(IntegrationAuthTest, OtpLoginWithEmailedCode) {
+    MockSmtp smtp(mantis());
+    smtp.enable();
+    ASSERT_TRUE(mantis().mailer().isConfigured());
+
+    const nlohmann::json unknown = {{"email", "nobody@example.com"}};
+    auto missing = client->Post("/api/v1/auth/test_users/otp/request", unknown.dump(), "application/json");
+    ASSERT_TRUE(missing != nullptr);
+    EXPECT_EQ(missing->status, 200);
+    EXPECT_TRUE(nlohmann::json::parse(missing->body)["data"]["sent"].get<bool>());
+    EXPECT_TRUE(mantis().mailer().sentMessages().empty());
+
+    auto invalid = client->Post("/api/v1/auth/test_users/otp/request",
+                                nlohmann::json{{"email", "not-an-email"}}.dump(),
+                                "application/json");
+    ASSERT_TRUE(invalid != nullptr);
+    EXPECT_EQ(invalid->status, 400);
+    EXPECT_EQ(nlohmann::json::parse(invalid->body)["error"].get<std::string>(), "Invalid email address");
+
+    const auto code = requestCode(*client, mantis(), "TestUser@Example.com");
+    ASSERT_EQ(code.size(), 6u);
+
+    nlohmann::json login = {{"email", "testuser@example.com"}, {"otp", " " + code + " "}};
+    auto loginRes = client->Post("/api/v1/auth/test_users/otp/login", login.dump(), "application/json");
+    ASSERT_TRUE(loginRes != nullptr);
+    ASSERT_EQ(loginRes->status, 200);
+    const auto loginBody = nlohmann::json::parse(loginRes->body);
+    const auto token = loginBody["data"]["token"].get<std::string>();
+    EXPECT_FALSE(token.empty());
+    EXPECT_EQ(loginBody["data"]["user"]["email"].get<std::string>(), "testuser@example.com");
+    EXPECT_FALSE(loginBody["data"]["user"].contains("password"));
+
+    TestHttp::Headers headers = {{"Authorization", "Bearer " + token}};
+    auto verifyRes = client->Get("/api/v1/auth/verify", headers);
+    ASSERT_TRUE(verifyRes != nullptr);
+    EXPECT_EQ(verifyRes->status, 200);
+
+    auto reuse = client->Post("/api/v1/auth/test_users/otp/login",
+                              nlohmann::json{{"email", "testuser@example.com"}, {"otp", code}}.dump(),
+                              "application/json");
+    ASSERT_TRUE(reuse != nullptr);
+    EXPECT_EQ(reuse->status, 401);
+}
+
+TEST_F(IntegrationAuthTest, OtpLoginRejectsWrongCode) {
+    MockSmtp smtp(mantis());
+    smtp.enable();
+
+    const auto code = requestCode(*client, mantis(), "testuser@example.com");
+    ASSERT_EQ(code.size(), 6u);
+
+    auto malformed = client->Post("/api/v1/auth/test_users/otp/login",
+                                  nlohmann::json{{"email", "testuser@example.com"}, {"otp", "12"}}.dump(),
+                                  "application/json");
+    ASSERT_TRUE(malformed != nullptr);
+    EXPECT_EQ(malformed->status, 400);
+
+    for (int i = 0; i < 5; ++i) {
+        auto wrong = client->Post("/api/v1/auth/test_users/otp/login",
+                                  nlohmann::json{{"email", "testuser@example.com"}, {"otp", "000000"}}.dump(),
+                                  "application/json");
+        ASSERT_TRUE(wrong != nullptr);
+        EXPECT_EQ(wrong->status, 401);
+    }
+
+    auto exhausted = client->Post("/api/v1/auth/test_users/otp/login",
+                                  nlohmann::json{{"email", "testuser@example.com"}, {"otp", code}}.dump(),
+                                  "application/json");
+    ASSERT_TRUE(exhausted != nullptr);
+    EXPECT_EQ(exhausted->status, 401);
 }

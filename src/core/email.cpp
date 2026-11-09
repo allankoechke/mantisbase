@@ -115,6 +115,22 @@ namespace {
             throw mb::MbException(400, label + " contains an invalid character");
     }
 
+    std::string htmlEscape(const std::string &value) {
+        std::string out;
+        out.reserve(value.size());
+        for (const unsigned char c : value) {
+            switch (c) {
+                case '&': out += "&amp;"; break;
+                case '<': out += "&lt;"; break;
+                case '>': out += "&gt;"; break;
+                case '"': out += "&quot;"; break;
+                case '\'': out += "&#39;"; break;
+                default: out.push_back(static_cast<char>(c)); break;
+            }
+        }
+        return out;
+    }
+
     std::string envelopeAddress(const std::string &raw) {
         std::string addr = raw;
         const auto lt = raw.find('<');
@@ -269,7 +285,7 @@ namespace {
 
 bool mb::MbMailer::send(const MbEmailMsg &message) {
     if (!m_configured)
-        throw MbException(400, "Email service not configured. Set SMTP settings first.");
+        throw MbException(400, std::string(kNotConfiguredMessage));
     if (message.to.empty())
         throw MbException(400, "Recipient email address is required");
     if (message.subject.empty())
@@ -359,6 +375,23 @@ std::string mb::MbMailer::loadTemplate(const std::string &template_name,
             content = passwordResetEmailText(
                 app_it != variables.end() ? app_it->second : "MantisBase",
                 url_it != variables.end() ? url_it->second : "#");
+        } else if (template_name == "login_otp.html" || template_name == "login_otp.txt") {
+            auto app_it = variables.find("app_name");
+            auto otp_it = variables.find("otp");
+            auto exp_it = variables.find("expires_minutes");
+            int minutes = 10;
+            if (exp_it != variables.end()) {
+                try {
+                    minutes = std::stoi(exp_it->second);
+                } catch (const std::exception &) {
+                    minutes = 10;
+                }
+            }
+            const auto app_name = app_it != variables.end() ? app_it->second : "MantisBase";
+            const auto code = otp_it != variables.end() ? otp_it->second : "";
+            content = template_name == "login_otp.html"
+                          ? loginOtpEmailHtml(app_name, code, minutes)
+                          : loginOtpEmailText(app_name, code, minutes);
         } else {
             throw MbException(404, "Unknown template: " + template_name);
         }
@@ -448,6 +481,35 @@ std::string mb::MbMailer::passwordResetEmailText(const std::string &app_name, co
             << reset_url << "\n\n"
             << "This link expires in 1 hour.\n"
             << "If you didn't request a password reset, you can safely ignore this email.\n";
+    return text.str();
+}
+
+std::string mb::MbMailer::loginOtpEmailHtml(const std::string &app_name,
+                                              const std::string &code,
+                                              const int expires_minutes) {
+    const auto safe_app = htmlEscape(app_name);
+    const auto safe_code = htmlEscape(code);
+    std::ostringstream html;
+    html << "<!DOCTYPE html>\n"
+            << "<html><head><meta charset=\"utf-8\"></head>\n"
+            << "<body style=\"font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">\n"
+            << "<h2>Sign in to " << safe_app << "</h2>\n"
+            << "<p>Enter this code to sign in. It expires in " << expires_minutes << " minutes.</p>\n"
+            << "<p style=\"font-size: 32px; font-weight: 700; letter-spacing: 0.3em;\">" << safe_code << "</p>\n"
+            << "<p style=\"color: #6B7280; font-size: 14px;\">If you didn't try to sign in, you can ignore this email.</p>\n"
+            << "</body></html>";
+    return html.str();
+}
+
+std::string mb::MbMailer::loginOtpEmailText(const std::string &app_name,
+                                              const std::string &code,
+                                              const int expires_minutes) {
+    std::ostringstream text;
+    text << "Sign in to " << app_name << "\n\n"
+            << "Your sign-in code is:\n\n"
+            << code << "\n\n"
+            << "This code expires in " << expires_minutes << " minutes.\n"
+            << "If you didn't try to sign in, you can ignore this email.\n";
     return text.str();
 }
 
