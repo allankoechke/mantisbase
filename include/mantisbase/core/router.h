@@ -192,6 +192,8 @@ namespace mb {
 
         std::function<void(MbRequest &, MbResponse &)> handleAuthLogin();
 
+        std::function<void(MbRequest &, MbResponse &)> handleAuthMethods();
+
         std::function<void(MbRequest &, MbResponse &)> handleAuthOtpRequest();
 
         std::function<void(MbRequest &, MbResponse &)> handleAuthOtpLogin();

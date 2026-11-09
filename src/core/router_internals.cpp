@@ -7,6 +7,7 @@
 #include "drogon/drogon_callbacks.h"
 
 #include <sstream>
+#include <string_view>
 
 namespace mb {
     namespace {
@@ -21,6 +22,19 @@ namespace mb {
                 if (!trimmed.empty()) origins.push_back(trimmed);
             }
             return origins;
+        }
+
+        bool rejectDisabledAuthMethod(const MbRequest &req, const MbResponse &res, const std::string_view method) {
+            const auto entity_name = trim(req.pathParamValue("entity_name"));
+            const auto reason = req.mbApp().entity(entity_name).authMethodDisabledReason(method);
+            if (reason.empty())
+                return false;
+            res.sendJSON(403, {
+                             {"status", 403},
+                             {"data", json::object()},
+                             {"error", reason}
+                         });
+            return true;
         }
 
         bool isOriginAllowed(const std::string &origin, const std::vector<std::string> &allowed) {
@@ -233,6 +247,9 @@ namespace mb {
     std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthLogin() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
+                if (rejectDisabledAuthMethod(req, res, "password"))
+                    return;
+
                 const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(500, {
@@ -324,9 +341,40 @@ namespace mb {
         };
     }
 
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthMethods() {
+        return [](const MbRequest &req, const MbResponse &res) {
+            try {
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
+                const auto methods = req.mbApp().entity(entity_name).authMethods().toJSON();
+                res.sendJSON(200, {
+                                 {"status", 200},
+                                 {"data", methods},
+                                 {"error", ""}
+                             });
+            } catch (const MbException &e) {
+                res.sendJSON(e.code(), {
+                                 {"status", e.code()},
+                                 {"data", json::object()},
+                                 {"error", e.what()}
+                             });
+            } catch (const std::exception &e) {
+                req.mbApp().logger().critical("MbAuth", "Auth Methods Error",
+                                              fmt::format("Auth methods error: {}", e.what()));
+                res.sendJSON(500, {
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", "An internal error occurred."}
+                             });
+            }
+        };
+    }
+
     std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthOtpRequest() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
+                if (rejectDisabledAuthMethod(req, res, "otp"))
+                    return;
+
                 const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(500, {
@@ -376,6 +424,9 @@ namespace mb {
     std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthOtpLogin() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {
+                if (rejectDisabledAuthMethod(req, res, "otp"))
+                    return;
+
                 const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(500, {

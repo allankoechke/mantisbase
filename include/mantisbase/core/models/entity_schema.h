@@ -16,6 +16,7 @@
 #include "entity.h"
 #include "entity_schema_field.h"
 #include "access_rules.h"
+#include "auth_methods.h"
 #include "mantisbase/core/types.h"
 
 namespace mb {
@@ -141,6 +142,12 @@ namespace mb {
          * @return Reference to self for chaining
          */
         MbEntitySchema &setHasApi(const bool &hasApi);
+
+        /** @return Login methods stored for an auth entity. */
+        [[nodiscard]] MbAuthMethods authMethods() const;
+
+        /** Replace the stored login methods. Included in JSON only for auth entities. */
+        MbEntitySchema &setAuthMethods(const MbAuthMethods &methods);
 
         /**
          * @brief Check if this is a system table.
@@ -388,6 +395,7 @@ namespace mb {
         std::string m_viewSqlQuery;
         bool m_isSystem = false;
         bool m_hasApi = true;
+        MbAuthMethods m_authMethods;
         std::vector<MbEntitySchemaField> m_fields;
         std::vector<IndexDefinition> m_indexes;
         MbAccessRule m_listRule, m_getRule, m_addRule, m_updateRule, m_deleteRule;

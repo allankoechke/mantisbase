@@ -136,15 +136,48 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
+        "403":
+          description: Password login is disabled for this entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
         "500":
           $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/methods:
+    get:
+      tags: [Auth]
+      summary: List enabled login methods
+      description: |
+        Public read of the entity's login methods. Password login defaults to enabled.
+        Email OTP and OAuth default to disabled. Changing the flags is an admin schema update.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      responses:
+        "200":
+          description: Login methods
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthMethods"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /auth/{entity_name}/otp/request:
     post:
       tags: [Auth]
       summary: Email a one-time sign-in code
       description: |
-        Sends a 6-digit sign-in code to an auth-entity account. SMTP must be configured;
+        Sends a 6-digit sign-in code to an auth-entity account. The entity's `auth.otp`
+        flag must be enabled (admin schema update); otherwise the response is 403.
+        SMTP must be configured;
         otherwise the response is 400 `Email service not configured. Set SMTP settings first.`
         The code expires after 10 minutes and allows 5 attempts. A delivered code replaces any
         earlier code for that account. Unknown emails return `data.sent: true` and send no mail.
@@ -173,6 +206,12 @@ paths:
                         $ref: "#/components/schemas/OtpSentResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "403":
+          description: Email sign-in codes are disabled for this entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
         "429":
           $ref: "#/components/responses/TooManyRequests"
         "502":
@@ -189,7 +228,8 @@ paths:
       tags: [Auth]
       summary: Sign in with an emailed code
       description: |
-        Exchange the 6-digit code from the sign-in email for a JWT. The code is single-use.
+        Exchange the 6-digit code from the sign-in email for a JWT. Requires `auth.otp` on the entity.
+        The code is single-use.
         A wrong, expired, or exhausted code returns 401. Passwordless accounts can use this route.
         Rate-limited to 5 attempts/minute per IP.
       security: []
@@ -217,6 +257,12 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Email sign-in codes are disabled for this entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
         "429":
           $ref: "#/components/responses/TooManyRequests"
         "500":
@@ -2064,6 +2110,8 @@ components:
         type:
           type: string
           enum: [base, auth, view]
+        auth:
+          $ref: "#/components/schemas/AuthMethods"
         fields:
           type: array
           items:
@@ -2098,6 +2146,8 @@ components:
         type:
           type: string
           enum: [base, auth, view]
+        auth:
+          $ref: "#/components/schemas/AuthMethods"
         fields:
           type: array
           items:
@@ -2125,9 +2175,30 @@ components:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/AccessRule"
+        auth:
+          $ref: "#/components/schemas/AuthMethods"
         view_query:
           type: string
           description: Must be a single SELECT with no semicolons or DDL/DML keywords.
+
+    AuthMethods:
+      type: object
+      description: >
+        Login methods for an auth entity. Admins change these with PATCH /schemas/{name}.
+        Password defaults to true. OTP and OAuth default to false.
+      properties:
+        password:
+          type: boolean
+          description: Email and password login.
+          default: true
+        otp:
+          type: boolean
+          description: Email one-time-code login.
+          default: false
+        oauth:
+          type: boolean
+          description: OAuth login.
+          default: false
 
     AppSettings:
       type: object

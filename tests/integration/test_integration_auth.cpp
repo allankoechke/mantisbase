@@ -391,6 +391,15 @@ private:
     mb::MantisBase &app_;
 };
 
+void setAuthMethod(TestHttp::Client &client, const std::string &adminToken,
+                   const std::string &method, bool enabled) {
+    const TestHttp::Headers headers = {{"Authorization", "Bearer " + adminToken}};
+    const nlohmann::json patch = {{"auth", {{method, enabled}}}};
+    auto res = client.Patch("/api/v1/schemas/test_users", headers, patch.dump(), "application/json");
+    ASSERT_TRUE(res != nullptr);
+    ASSERT_EQ(res->status, 200) << res->body;
+}
+
 std::string requestCode(TestHttp::Client &client, mb::MantisBase &app, const std::string &email) {
     app.mailer().clearSentMessages();
     app.mailer().clearRateLimits();
@@ -409,11 +418,93 @@ std::string requestCode(TestHttp::Client &client, mb::MantisBase &app, const std
 
 } // namespace
 
+TEST_F(IntegrationAuthTest, AuthMethodsDefaultToPasswordOnly) {
+    auto methodsRes = client->Get("/api/v1/auth/test_users/methods");
+    ASSERT_TRUE(methodsRes != nullptr);
+    ASSERT_EQ(methodsRes->status, 200);
+    const auto methods = nlohmann::json::parse(methodsRes->body)["data"];
+    EXPECT_TRUE(methods["password"].get<bool>());
+    EXPECT_FALSE(methods["otp"].get<bool>());
+    EXPECT_FALSE(methods["oauth"].get<bool>());
+
+    const TestHttp::Headers admin = {{"Authorization", "Bearer " + adminToken}};
+    auto schemaRes = client->Get("/api/v1/schemas/test_users", admin);
+    ASSERT_TRUE(schemaRes != nullptr);
+    ASSERT_EQ(schemaRes->status, 200);
+    const auto stored = nlohmann::json::parse(schemaRes->body)["data"]["schema"]["auth"];
+    EXPECT_TRUE(stored["password"].get<bool>());
+    EXPECT_FALSE(stored["otp"].get<bool>());
+    EXPECT_FALSE(stored["oauth"].get<bool>());
+
+    nlohmann::json login = {
+        {"identity", "testuser@example.com"},
+        {"password", TestConfig::getTestPassword()}
+    };
+    auto loginRes = client->Post("/api/v1/auth/test_users/login", login.dump(), "application/json");
+    ASSERT_TRUE(loginRes != nullptr);
+    ASSERT_EQ(loginRes->status, 200);
+    const auto userToken = nlohmann::json::parse(loginRes->body)["data"]["token"].get<std::string>();
+
+    const nlohmann::json enableOtp = {{"auth", {{"otp", true}}}};
+    const TestHttp::Headers user = {{"Authorization", "Bearer " + userToken}};
+    auto denied = client->Patch("/api/v1/schemas/test_users", user, enableOtp.dump(), "application/json");
+    ASSERT_TRUE(denied != nullptr);
+    EXPECT_EQ(denied->status, 403);
+
+    auto anonymous = client->Patch("/api/v1/schemas/test_users", {}, enableOtp.dump(), "application/json");
+    ASSERT_TRUE(anonymous != nullptr);
+    EXPECT_EQ(anonymous->status, 401);
+
+    setAuthMethod(*client, adminToken, "password", false);
+    auto blocked = client->Post("/api/v1/auth/test_users/login", login.dump(), "application/json");
+    ASSERT_TRUE(blocked != nullptr);
+    EXPECT_EQ(blocked->status, 403);
+    EXPECT_NE(nlohmann::json::parse(blocked->body)["error"].get<std::string>().find("disabled"),
+              std::string::npos);
+
+    auto oauthOff = client->Get("/api/v1/auth/test_users/oauth/authorize/google");
+    ASSERT_TRUE(oauthOff != nullptr);
+    EXPECT_EQ(oauthOff->status, 403);
+
+    setAuthMethod(*client, adminToken, "oauth", true);
+    auto oauthOn = client->Get("/api/v1/auth/test_users/oauth/authorize/google");
+    ASSERT_TRUE(oauthOn != nullptr);
+    EXPECT_NE(oauthOn->status, 403);
+
+    setAuthMethod(*client, adminToken, "otp", true);
+    auto after = client->Get("/api/v1/auth/test_users/methods");
+    ASSERT_TRUE(after != nullptr);
+    const auto updated = nlohmann::json::parse(after->body)["data"];
+    EXPECT_FALSE(updated["password"].get<bool>());
+    EXPECT_TRUE(updated["otp"].get<bool>());
+    EXPECT_TRUE(updated["oauth"].get<bool>());
+
+    const TestHttp::Headers adminHeaders = {{"Authorization", "Bearer " + adminToken}};
+    const nlohmann::json baseSchema = {
+        {"name", "test_plain"},
+        {"type", "base"},
+        {"fields", nlohmann::json::array({{{"name", "title"}, {"type", "string"}}})}
+    };
+    auto created = client->Post("/api/v1/schemas", adminHeaders, baseSchema.dump(), "application/json");
+    ASSERT_TRUE(created != nullptr);
+    ASSERT_EQ(created->status, 201);
+    auto rejected = client->Patch("/api/v1/schemas/test_plain", adminHeaders, enableOtp.dump(), "application/json");
+    ASSERT_TRUE(rejected != nullptr);
+    EXPECT_EQ(rejected->status, 400);
+    client->Delete("/api/v1/schemas/test_plain", adminHeaders);
+}
+
 TEST_F(IntegrationAuthTest, OtpRequestRequiresSmtp) {
     MockSmtp smtp(mantis());
     EXPECT_FALSE(mantis().mailer().isConfigured());
 
     const nlohmann::json body = {{"email", "testuser@example.com"}};
+    auto disabled = client->Post("/api/v1/auth/test_users/otp/request", body.dump(), "application/json");
+    ASSERT_TRUE(disabled != nullptr);
+    EXPECT_EQ(disabled->status, 403);
+
+    setAuthMethod(*client, adminToken, "otp", true);
+
     auto res = client->Post("/api/v1/auth/test_users/otp/request", body.dump(), "application/json");
     ASSERT_TRUE(res != nullptr);
     EXPECT_EQ(res->status, 400);
@@ -432,6 +523,7 @@ TEST_F(IntegrationAuthTest, OtpRequestRequiresSmtp) {
 }
 
 TEST_F(IntegrationAuthTest, OtpLoginWithEmailedCode) {
+    setAuthMethod(*client, adminToken, "otp", true);
     MockSmtp smtp(mantis());
     smtp.enable();
     ASSERT_TRUE(mantis().mailer().isConfigured());
@@ -476,6 +568,7 @@ TEST_F(IntegrationAuthTest, OtpLoginWithEmailedCode) {
 }
 
 TEST_F(IntegrationAuthTest, OtpLoginRejectsWrongCode) {
+    setAuthMethod(*client, adminToken, "otp", true);
     MockSmtp smtp(mantis());
     smtp.enable();
 

@@ -4,6 +4,21 @@
 #include "mantisbase/mantisbase.h"
 
 namespace mb {
+    namespace {
+        bool rejectDisabledOAuth(const MbRequest &req, const MbResponse &res) {
+            const auto entity_name = trim(req.pathParamValue("entity_name"));
+            const auto reason = req.mbApp().entity(entity_name).authMethodDisabledReason("oauth");
+            if (reason.empty())
+                return false;
+            res.sendJSON(403, {
+                             {"status", 403},
+                             {"data", json::object()},
+                             {"error", reason}
+                         });
+            return true;
+        }
+    }
+
     void MbRouter::registerOAuthRoutes() {
         const MbMiddlewares authEntityMiddleware = {resolveAuthEntity()};
 
@@ -11,6 +26,9 @@ namespace mb {
         Get("/api/v1/auth/:entity_name/oauth/authorize/:provider",
             [](const MbRequest &req, const MbResponse &res) {
                 try {
+                    if (rejectDisabledOAuth(req, res))
+                        return;
+
                     const auto entity_name = trim(req.pathParamValue("entity_name"));
                     const auto provider = trim(req.pathParamValue("provider"));
                     auto redirect_uri = req.queryParamValue("redirect_uri");
@@ -39,6 +57,9 @@ namespace mb {
         Get("/api/v1/auth/:entity_name/oauth/callback/:provider",
             [](const MbRequest &req, const MbResponse &res) {
                 try {
+                    if (rejectDisabledOAuth(req, res))
+                        return;
+
                     const auto entity_name = trim(req.pathParamValue("entity_name"));
                     const auto provider = trim(req.pathParamValue("provider"));
                     const auto code = req.queryParamValue("code");
@@ -65,6 +86,9 @@ namespace mb {
         Post("/api/v1/auth/:entity_name/oauth/link/:provider",
             [](MbRequest &req, const MbResponse &res) {
             try {
+                if (rejectDisabledOAuth(req, res))
+                    return;
+
                 auto auth = req.get<json>("auth", json::object());
                 auto verification = req.get<json>("verification", json::object());
 
@@ -155,6 +179,9 @@ namespace mb {
         Get("/api/v1/auth/:entity_name/oauth/providers",
             [](const MbRequest &req, const MbResponse &res) {
             try {
+                if (rejectDisabledOAuth(req, res))
+                    return;
+
                 const auto entity_name = trim(req.pathParamValue("entity_name"));
                 auto providers = req.mbApp().auth().oauth().getProviders(entity_name);
                 res.sendJSON(200, {{"status", 200}, {"data", providers}, {"error", ""}});

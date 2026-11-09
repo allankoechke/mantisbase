@@ -318,9 +318,12 @@ curl -X POST http://localhost:7070/api/v1/schemas \
       "add": {"mode": "public", "expr": ""},
       "update": {"mode": "custom", "expr": "auth.id == req.body.id"},
       "delete": {"mode": "", "expr": ""}
-    }
+    },
+    "auth": {"password": true, "otp": false, "oauth": false}
   }'
 ```
+
+`auth` is only valid on auth entities. Password login defaults to enabled. OTP and OAuth default to disabled. Change the flags with an admin `PATCH /api/v1/schemas/<name>`; other clients receive **403** on a disabled login route. See [Authentication API](auth.md#login-methods).
 
 ### MbEntity Types
 

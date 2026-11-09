@@ -31,6 +31,7 @@ namespace mb {
             m_viewSqlQuery = other.m_viewSqlQuery;
             m_isSystem = other.m_isSystem;
             m_hasApi = other.m_hasApi;
+            m_authMethods = other.m_authMethods;
             m_fields = other.m_fields;
             m_indexes = other.m_indexes;
             m_listRule = other.m_listRule;
@@ -49,6 +50,7 @@ namespace mb {
             m_viewSqlQuery = std::move(other.m_viewSqlQuery);
             m_isSystem = other.m_isSystem;
             m_hasApi = other.m_hasApi;
+            m_authMethods = other.m_authMethods;
             m_fields = std::move(other.m_fields);
             m_indexes = std::move(other.m_indexes);
             m_listRule = std::move(other.m_listRule);
@@ -98,6 +100,14 @@ namespace mb {
 
         if (entity_schema.contains("has_api") && entity_schema["has_api"].is_boolean())
             eSchema.setHasApi(entity_schema.at("has_api").get<bool>());
+
+        if (entity_schema.contains("auth")) {
+            if (_type != "auth")
+                throw MbException(400, "Auth methods apply only to auth entities.");
+            auto methods = eSchema.authMethods();
+            methods.mergeStrict(entity_schema["auth"]);
+            eSchema.setAuthMethods(methods);
+        }
 
         if (entity_schema.contains("rules")) {
             auto rules = entity_schema["rules"];
@@ -157,6 +167,8 @@ namespace mb {
         eSchema.setType(entity.type());
         eSchema.setHasApi(entity.hasApi());
         eSchema.setSystem(entity.isSystem());
+        if (entity.type() == "auth")
+            eSchema.setAuthMethods(entity.authMethods());
 
         // Reset fields to clear default added fields
         eSchema.fields().clear();
@@ -327,6 +339,12 @@ namespace mb {
             setHasApi(new_data.at("has_api").get<bool>());
         }
 
+        if (new_data.contains("auth")) {
+            if (m_type != "auth")
+                throw MbException(400, "Auth methods apply only to auth entities.");
+            m_authMethods.mergeStrict(new_data["auth"]);
+        }
+
         if (new_data.contains("rules")) {
             auto rules = new_data["rules"];
 
@@ -444,6 +462,13 @@ namespace mb {
 
     bool MbEntitySchema::hasApi() const { return m_hasApi; }
 
+    MbAuthMethods MbEntitySchema::authMethods() const { return m_authMethods; }
+
+    MbEntitySchema &MbEntitySchema::setAuthMethods(const MbAuthMethods &methods) {
+        m_authMethods = methods;
+        return *this;
+    }
+
     MbEntitySchema &MbEntitySchema::setHasApi(const bool &hasApi) {
         m_hasApi = hasApi;
         return *this;
@@ -522,6 +547,8 @@ namespace mb {
         j["type"] = m_type;
         j["system"] = m_isSystem;
         j["has_api"] = m_hasApi;
+        if (m_type == "auth")
+            j["auth"] = m_authMethods.toJSON();
 
         j["rules"] = {
             {"list", m_listRule.toJSON()},
@@ -709,12 +736,13 @@ namespace mb {
 
     std::string MbEntitySchema::dump() const {
         auto str = std::format(
-            "\n\tid: {}\n\tName: {}\n\tType: {}\n\tIs System? {}\n\tHas API? {}\n\tRules:\n\t\t- list: {}\n\t\t- get: {}\n\t\t- add: {}\n\t\t- update: {}\n\t\t- delete: {}",
+            "\n\tid: {}\n\tName: {}\n\tType: {}\n\tIs System? {}\n\tHas API? {}\n\tAuth methods: {}\n\tRules:\n\t\t- list: {}\n\t\t- get: {}\n\t\t- add: {}\n\t\t- update: {}\n\t\t- delete: {}",
             id(),
             m_name,
             m_type,
             m_isSystem,
             m_hasApi,
+            m_type == "auth" ? m_authMethods.toJSON().dump() : "n/a",
             m_listRule.toJSON().dump(),
             m_getRule.toJSON().dump(),
             m_addRule.toJSON().dump(),

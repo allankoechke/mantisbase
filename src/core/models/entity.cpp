@@ -82,6 +82,34 @@ namespace mb {
         return m_schema->at("name").get<std::string>();
     }
 
+    MbAuthMethods MbEntity::authMethods() const {
+        if (type() != "auth")
+            return {.password = true, .otp = false, .oauth = false};
+        if (!m_schema->contains("auth") || !(*m_schema)["auth"].is_object())
+            return {};
+        return MbAuthMethods::fromJSON(m_schema->at("auth"));
+    }
+
+    std::string MbEntity::authMethodDisabledReason(const std::string_view method) const {
+        const auto methods = authMethods();
+        const bool enabled = method == "password"
+                                 ? methods.password
+                                 : method == "otp"
+                                       ? methods.otp
+                                       : method == "oauth"
+                                             ? methods.oauth
+                                             : false;
+        if (enabled)
+            return {};
+        if (method == "password")
+            return "Password login is disabled for this entity.";
+        if (method == "otp")
+            return "Email sign-in codes are disabled for this entity.";
+        if (method == "oauth")
+            return "OAuth login is disabled for this entity.";
+        return "This login method is disabled for this entity.";
+    }
+
     std::string MbEntity::type() const {
         return m_schema->at("type").get<std::string>();
     }

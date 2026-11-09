@@ -44,6 +44,47 @@ For admin authentication and initial setup, see [System Endpoints – Admin Acco
 
 ---
 
+## Login methods
+
+Each auth entity has three login methods. Password login is enabled by default. Email sign-in codes and OAuth are disabled until an admin enables them. Login routes return **403** while a method is disabled.
+
+| Method | Schema field | Default | Routes |
+|--------|--------------|---------|--------|
+| Email and password | `auth.password` | `true` | `POST /api/v1/auth/<entity>/login` |
+| Email sign-in code | `auth.otp` | `false` | `POST /api/v1/auth/<entity>/otp/request` and `/otp/login` |
+| OAuth | `auth.oauth` | `false` | `/api/v1/auth/<entity>/oauth/authorize`, `/callback`, `/link`, `/providers` |
+
+Read the current flags without an admin token:
+
+```bash
+curl http://localhost:7070/api/v1/auth/users/methods
+```
+
+```json
+{
+  "status": 200,
+  "data": {
+    "password": true,
+    "otp": false,
+    "oauth": false
+  },
+  "error": ""
+}
+```
+
+Change them with an admin token. Schema routes are admin-only. A patch merges the fields you send, so the example below turns on OTP and leaves password and OAuth as they are:
+
+```bash
+curl -X PATCH http://localhost:7070/api/v1/schemas/users \
+  -H "Authorization: Bearer <admin_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"auth": {"otp": true}}'
+```
+
+Existing sessions keep working after a method is turned off. New logins for that method are rejected.
+
+---
+
 ## Login
 
 Authenticate a user and receive a JWT token.
@@ -133,6 +174,8 @@ curl -X POST http://localhost:7070/api/v1/auth/users/login \
 ## Email sign-in code
 
 Sign in with an email address and a one-time code. No password is required. This also works for accounts that have no password, such as OAuth-only users.
+
+An admin must set `auth.otp` to `true` on the entity first. Until then the OTP routes return **403**.
 
 SMTP must already be configured under application settings. If it is not, the request returns **400**:
 

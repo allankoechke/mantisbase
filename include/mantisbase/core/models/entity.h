@@ -10,12 +10,14 @@
 #define MANTISBASE_ENTITY_H
 
 #include <string>
+#include <string_view>
 #include <memory>
 #include "mantisbase/mantis.h"
 #include "mantisbase/core/exceptions.h"
 #include "mantisbase/utils/soci_wrappers.h"
 #include "../types.h"
 #include "access_rules.h"
+#include "auth_methods.h"
 
 namespace mb {
     class MantisBase; // forward declaration; MbEntity holds a non-owning pointer to it
@@ -105,6 +107,20 @@ namespace mb {
          * @return true if API enabled, false otherwise
          */
         [[nodiscard]] bool hasApi() const;
+
+        /**
+         * @brief Login methods for an auth entity.
+         *
+         * Non-auth entities report every method as disabled. Auth entities with
+         * no stored `auth` object use the defaults (password on, OTP and OAuth off).
+         */
+        [[nodiscard]] MbAuthMethods authMethods() const;
+
+        /**
+         * @brief Empty when @p method is enabled, otherwise the client-facing reason.
+         * @param method `password`, `otp`, or `oauth`
+         */
+        [[nodiscard]] std::string authMethodDisabledReason(std::string_view method) const;
 
         /**
          * @brief Get SQL query for view type entities.

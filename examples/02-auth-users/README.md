@@ -39,6 +39,19 @@ The script registers a user, logs in, verifies the token, refreshes it, and logs
 | OTP login with the emailed code | 200 (returns `data.token`) |
 | OTP login with a wrong code | 401 |
 
+## Login methods
+
+Password login is on by default. OTP and OAuth are off until an admin enables them:
+
+```bash
+curl -X PATCH "$BASE_URL/api/v1/schemas/users" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"auth": {"otp": true}}'
+```
+
+`GET /api/v1/auth/users/methods` returns the current flags. A disabled method responds with 403.
+
 ## Email sign-in code
 
 SMTP must be configured in admin settings. Otherwise `otp/request` returns 400.

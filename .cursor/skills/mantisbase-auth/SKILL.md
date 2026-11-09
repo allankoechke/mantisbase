@@ -43,9 +43,11 @@ Example: [`examples/02-auth-users/`](../../examples/02-auth-users/).
 | Verify | GET | `/api/v1/auth/verify` |
 | Admin login | POST | `/api/v1/sys/admins/login` |
 
+Login methods live on the auth entity schema (`auth.password`, `auth.otp`, `auth.oauth`). Password defaults to **on**. OTP and OAuth default to **off**. Admins change them with `PATCH /api/v1/schemas/{entity}` (admin only). Disabled methods return **403**. Read the flags at `GET /api/v1/auth/{entity}/methods`.
+
 Login body: `{"identity": "user@example.com", "password": "..."}`
 
-Email OTP (SMTP must be configured, otherwise **400** `Email service not configured. Set SMTP settings first.`):
+Email OTP (admin must set `auth.otp` to `true`. SMTP must be configured, otherwise **400** `Email service not configured. Set SMTP settings first.`):
 
 1. `POST /api/v1/auth/{entity}/otp/request` with `{"email": "user@example.com"}` → `data.sent: true` and a 6-digit code by email (unknown emails return the same body and send nothing).
 2. `POST /api/v1/auth/{entity}/otp/login` with `{"email": "user@example.com", "otp": "483920"}`.
