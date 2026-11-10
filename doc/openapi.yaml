@@ -363,6 +363,108 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
+  /auth/{entity_name}/password-reset/request:
+    post:
+      tags: [Auth]
+      summary: Email a password reset link
+      description: |
+        Sends a link that expires in 1 hour. SMTP must be configured.
+        Unknown emails return `data.sent: true` and send nothing.
+        `siteDomain` is used as the link origin.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpRequest"
+      responses:
+        "200":
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/OtpSentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          description: SMTP delivery failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/password-reset:
+    get:
+      tags: [Auth]
+      summary: Show the password reset form
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HTML form to choose a new password
+        "400":
+          description: HTML page for a missing token
+    post:
+      tags: [Auth]
+      summary: Set a new password with a reset token
+      description: |
+        Password must be at least 8 characters with no whitespace.
+        Existing sessions for the account are invalidated on success.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        "200":
+          description: Password updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          reset:
+                            type: boolean
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
   /auth/{entity_name}/refresh:
     post:
       tags: [Auth]

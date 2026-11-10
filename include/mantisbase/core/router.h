@@ -202,6 +202,10 @@ namespace mb {
 
         std::function<void(MbRequest &, MbResponse &)> handleAuthVerifyEmail();
 
+        std::function<void(MbRequest &, MbResponse &)> handleAuthPasswordResetRequest();
+
+        std::function<void(MbRequest &, MbResponse &)> handleAuthPasswordReset();
+
         static std::function<void(MbRequest &, MbResponse &)> handleAdminLogin();
 
         std::function<void(MbRequest &, MbResponse &)> handleAuthRefresh() const;

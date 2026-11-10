@@ -291,6 +291,19 @@ namespace mb {
             *sql << "CREATE INDEX IF NOT EXISTS idx_email_verifications_hash "
                     "ON mb_email_verifications(entity_name, token_hash)";
 
+            // One-time password reset links. token_hash is SHA-256, never the raw token.
+            *sql << "CREATE TABLE IF NOT EXISTS mb_password_resets ("
+                    "id TEXT PRIMARY KEY, "
+                    "entity_name TEXT NOT NULL, "
+                    "user_id TEXT NOT NULL, "
+                    "email TEXT NOT NULL, "
+                    "token_hash TEXT NOT NULL, "
+                    "expires_at TEXT NOT NULL, "
+                    "created TEXT NOT NULL"
+                    ")";
+            *sql << "CREATE INDEX IF NOT EXISTS idx_password_resets_hash "
+                    "ON mb_password_resets(entity_name, token_hash)";
+
             // OAuth linked accounts
             *sql << "CREATE TABLE IF NOT EXISTS mb_oauth_accounts ("
                     "id TEXT PRIMARY KEY, "

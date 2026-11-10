@@ -585,6 +585,160 @@ namespace mb {
         };
     }
 
+    namespace {
+        void sendPasswordResetForm(const MbResponse &res, const std::string &token) {
+            res.setStatus(200);
+            res.setContent(
+                "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Reset password</title>"
+                "<style>body{font-family:-apple-system,sans-serif;max-width:560px;margin:40px auto;padding:0 16px}"
+                "label{display:block;margin:12px 0 4px}input{width:100%;padding:10px;box-sizing:border-box}"
+                "button{margin-top:16px;padding:10px 16px;background:#DC2626;color:#fff;border:0;border-radius:6px;cursor:pointer}"
+                ".err{color:#DC2626;margin-top:12px}</style></head><body>"
+                "<h2>Reset your password</h2>"
+                "<p>Choose a new password (at least 8 characters, no spaces).</p>"
+                "<form id=\"reset-form\">"
+                "<label for=\"password\">New password</label>"
+                "<input id=\"password\" name=\"password\" type=\"password\" autocomplete=\"new-password\" required minlength=\"8\">"
+                "<label for=\"confirm\">Confirm password</label>"
+                "<input id=\"confirm\" name=\"confirm\" type=\"password\" autocomplete=\"new-password\" required minlength=\"8\">"
+                "<button type=\"submit\">Reset password</button>"
+                "<p class=\"err\" id=\"err\" hidden></p>"
+                "</form>"
+                "<script>"
+                "const token=" + json(token).dump() + ";"
+                "const form=document.getElementById('reset-form');"
+                "const err=document.getElementById('err');"
+                "form.addEventListener('submit',async(e)=>{"
+                "e.preventDefault();"
+                "err.hidden=true;"
+                "const password=document.getElementById('password').value;"
+                "const confirm=document.getElementById('confirm').value;"
+                "if(password!==confirm){err.textContent='Passwords do not match.';err.hidden=false;return;}"
+                "try{"
+                "const res=await fetch(location.pathname,{method:'POST',headers:{'Content-Type':'application/json'},"
+                "body:JSON.stringify({token,password})});"
+                "const body=await res.json().catch(()=>({}));"
+                "if(!res.ok){err.textContent=(body&&body.error)||'Could not reset password.';err.hidden=false;return;}"
+                "document.body.innerHTML='<h2>Password updated</h2><p>You can close this page and sign in with your new password.</p>';"
+                "}catch(ex){err.textContent='Could not reset password.';err.hidden=false;}"
+                "});"
+                "</script></body></html>",
+                "text/html; charset=utf-8");
+        }
+
+        void sendPasswordResetPage(const MbResponse &res, const int status, const std::string &heading,
+                                   const std::string &message) {
+            res.setStatus(status);
+            res.setContent(
+                "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>" + heading +
+                "</title></head><body style=\"font-family:-apple-system,sans-serif;max-width:560px;margin:40px auto;\">"
+                "<h2>" + heading + "</h2><p>" + message + "</p></body></html>",
+                "text/html; charset=utf-8");
+        }
+    }
+
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthPasswordResetRequest() {
+        return [](const MbRequest &req, const MbResponse &res) {
+            try {
+                const auto &[body, err] = req.bodyAsJson();
+                if (!err.empty()) {
+                    res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
+                    return;
+                }
+                if (!body.contains("email") || !body["email"].is_string() ||
+                    trim(body["email"].get<std::string>()).empty()) {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"data", json::object()},
+                                     {"error", "Expected `email` key in the request body."}
+                                 });
+                    return;
+                }
+
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
+                const auto result = req.mbApp().auth().requestPasswordReset(
+                    entity_name, body["email"].get<std::string>(), req.headerValue("Host"));
+                res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
+            } catch (const MbException &e) {
+                res.sendJSON(e.code(), {{"status", e.code()}, {"data", json::object()}, {"error", e.what()}});
+            } catch (const std::exception &e) {
+                req.mbApp().logger().critical("MbAuth", "Password Reset Request Error",
+                                              fmt::format("Password reset request error: {}", e.what()));
+                res.sendJSON(500, {
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", "An internal error occurred."}
+                             });
+            }
+        };
+    }
+
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthPasswordReset() {
+        return [](const MbRequest &req, const MbResponse &res) {
+            const bool as_html = req.method() == "GET";
+            try {
+                if (as_html) {
+                    const auto token = req.queryParamValue("token");
+                    if (trim(token).empty()) {
+                        sendPasswordResetPage(res, 400, "Reset failed", "Missing password reset token.");
+                        return;
+                    }
+                    sendPasswordResetForm(res, token);
+                    return;
+                }
+
+                const auto &[body, err] = req.bodyAsJson();
+                if (!err.empty()) {
+                    res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
+                    return;
+                }
+                if (!body.contains("token") || !body["token"].is_string() ||
+                    trim(body["token"].get<std::string>()).empty()) {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"data", json::object()},
+                                     {"error", "Expected `token` key in the request body."}
+                                 });
+                    return;
+                }
+                if (!body.contains("password") || !body["password"].is_string() ||
+                    body["password"].get<std::string>().empty()) {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"data", json::object()},
+                                     {"error", "Expected `password` key in the request body."}
+                                 });
+                    return;
+                }
+
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
+                const auto result = req.mbApp().auth().confirmPasswordReset(
+                    entity_name,
+                    body["token"].get<std::string>(),
+                    body["password"].get<std::string>());
+                res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
+            } catch (const MbException &e) {
+                if (as_html) {
+                    sendPasswordResetPage(res, e.code(), "Reset failed", e.what());
+                    return;
+                }
+                res.sendJSON(e.code(), {{"status", e.code()}, {"data", json::object()}, {"error", e.what()}});
+            } catch (const std::exception &e) {
+                req.mbApp().logger().critical("MbAuth", "Password Reset Error",
+                                              fmt::format("Password reset error: {}", e.what()));
+                if (as_html) {
+                    sendPasswordResetPage(res, 500, "Reset failed", "An internal error occurred.");
+                    return;
+                }
+                res.sendJSON(500, {
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", "An internal error occurred."}
+                             });
+            }
+        };
+    }
+
     std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAdminLogin() {
         return [](const MbRequest &req, const MbResponse &res) {
             try {

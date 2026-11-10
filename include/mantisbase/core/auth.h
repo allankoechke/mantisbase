@@ -153,6 +153,25 @@ namespace mb
         [[nodiscard]] json confirmEmailVerification(const std::string &entity_name,
                                                     const std::string &token) const;
 
+        /**
+         * @brief Email a password-reset link for an account.
+         * Unknown addresses return `{ "sent": true }` and send nothing.
+         * @param request_host Host header, used only when `siteDomain` is empty.
+         * @throws MbException 400 when SMTP is not configured, the address is invalid, or no public base URL is set.
+         */
+        [[nodiscard]] json requestPasswordReset(const std::string &entity_name,
+                                                const std::string &email,
+                                                const std::string &request_host) const;
+
+        /**
+         * @brief Set a new password when @p token matches a live reset link.
+         * @return `{ "reset": true }`.
+         * @throws MbException 400 when the token or password is invalid/expired.
+         */
+        [[nodiscard]] json confirmPasswordReset(const std::string &entity_name,
+                                                const std::string &token,
+                                                const std::string &new_password) const;
+
     private:
         [[nodiscard]] std::string verificationLinkBase(const std::string &request_host) const;
 
@@ -160,6 +179,11 @@ namespace mb
                                       const std::string &user_id,
                                       const std::string &email,
                                       const std::string &public_base) const;
+
+        void deliverPasswordReset(const std::string &entity_name,
+                                  const std::string &user_id,
+                                  const std::string &email,
+                                  const std::string &public_base) const;
 
     public:
 #ifdef MB_SCRIPTING_ENABLED

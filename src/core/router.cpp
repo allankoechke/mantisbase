@@ -308,6 +308,9 @@ namespace mb {
         Post("/api/v1/auth/:entity_name/verify-email/request", handleAuthVerifyEmailRequest(), authLoginMiddleware);
         Post("/api/v1/auth/:entity_name/verify-email", handleAuthVerifyEmail(), authEntityMiddleware);
         Get("/api/v1/auth/:entity_name/verify-email", handleAuthVerifyEmail(), authEntityMiddleware);
+        Post("/api/v1/auth/:entity_name/password-reset/request", handleAuthPasswordResetRequest(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/password-reset", handleAuthPasswordReset(), authEntityMiddleware);
+        Get("/api/v1/auth/:entity_name/password-reset", handleAuthPasswordReset(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/refresh", handleAuthRefresh(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/logout", handleAuthLogout(), authEntityMiddleware);
     }

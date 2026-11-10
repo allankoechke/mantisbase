@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <ranges>
 #include <cstdint>
 #include <cstring>
 #include <ctime>
@@ -217,6 +218,7 @@ namespace mb {
         constexpr int kLoginOtpTtlSeconds = 10 * 60;
         constexpr int kLoginOtpMaxAttempts = 5;
         constexpr int kEmailVerificationTtlSeconds = 24 * 60 * 60;
+        constexpr int kPasswordResetTtlSeconds = 60 * 60;
 
         struct OtpAccount {
             std::string id;
@@ -349,6 +351,19 @@ namespace mb {
         void purgeExpiredEmailVerifications(soci::session &sql) {
             const auto now = getCurrentTimestampUTC();
             sql << "DELETE FROM mb_email_verifications WHERE expires_at <= :now", soci::use(now);
+        }
+
+        void purgeExpiredPasswordResets(soci::session &sql) {
+            const auto now = getCurrentTimestampUTC();
+            sql << "DELETE FROM mb_password_resets WHERE expires_at <= :now", soci::use(now);
+        }
+
+        bool looksLikePassword(const std::string &password) {
+            if (password.size() < 8)
+                return false;
+            return std::ranges::none_of(password, [](const unsigned char ch) {
+                return std::isspace(ch) != 0;
+            });
         }
     } // namespace
 
@@ -663,6 +678,134 @@ namespace mb {
                 soci::use(entity_name), soci::use(user_id);
 
         return {{"verified", true}};
+    }
+
+    void MbAuth::deliverPasswordReset(const std::string &entity_name,
+                                      const std::string &user_id,
+                                      const std::string &email,
+                                      const std::string &public_base) const {
+        if (public_base.empty())
+            throw MbException(400, "Set siteDomain before sending a password reset email.");
+
+        const auto address = normalizeEmail(email);
+        const auto token = generateSecureRandom(32);
+        const auto token_hash = sha256Hex(token);
+        const auto id = generateTimeBasedId();
+        const auto expires_at = timestampAfterSeconds(kPasswordResetTtlSeconds);
+        const auto now = getCurrentTimestampUTC();
+        const auto app_name = appDisplayName(mApp);
+        const auto reset_url = std::format("{}/api/v1/auth/{}/password-reset?token={}",
+                                           public_base, entity_name, token);
+
+        const auto sql = mApp.db().session();
+        purgeExpiredPasswordResets(*sql);
+        {
+            soci::transaction tr(*sql);
+            *sql << "INSERT INTO mb_password_resets "
+                    "(id, entity_name, user_id, email, token_hash, expires_at, created) "
+                    "VALUES (:id, :entity, :uid, :email, :hash, :exp, :now)",
+                    soci::use(id), soci::use(entity_name), soci::use(user_id),
+                    soci::use(address), soci::use(token_hash), soci::use(expires_at), soci::use(now);
+            tr.commit();
+        }
+
+        MbEmailMsg message;
+        message.to = email;
+        message.subject = std::format("Reset your password for {}", app_name);
+        const std::unordered_map<std::string, std::string> vars = {
+            {"app_name", app_name},
+            {"reset_url", reset_url}
+        };
+        message.body_text = mApp.mailer().loadTemplate("password_reset.txt", vars);
+        message.body_html = mApp.mailer().loadTemplate("password_reset.html", vars);
+
+        try {
+            if (!mApp.mailer().send(message))
+                throw MbException(502, "Failed to send the password reset email.");
+        } catch (...) {
+            try {
+                *sql << "DELETE FROM mb_password_resets WHERE id = :id", soci::use(id);
+            } catch (const std::exception &) {
+            }
+            throw;
+        }
+
+        *sql << "DELETE FROM mb_password_resets WHERE entity_name = :entity AND user_id = :uid AND id != :id",
+                soci::use(entity_name), soci::use(user_id), soci::use(id);
+    }
+
+    json MbAuth::requestPasswordReset(const std::string &entity_name,
+                                      const std::string &email,
+                                      const std::string &request_host) const {
+        if (!mApp.mailer().isConfigured())
+            throw MbException(400, std::string(MbMailer::kNotConfiguredMessage));
+
+        const auto address = normalizeEmail(email);
+        if (!looksLikeEmail(address))
+            throw MbException(400, "Invalid email address");
+
+        const auto base = verificationLinkBase(request_host);
+        if (base.empty())
+            throw MbException(400, "Set siteDomain before sending a password reset email.");
+
+        const auto account = findAccountByEmail(mApp, entity_name, address);
+        if (!account.has_value())
+            return {{"sent", true}};
+
+        const auto entity = mApp.entity(entity_name);
+        if (!entity.field("password").has_value())
+            return {{"sent", true}};
+
+        deliverPasswordReset(entity_name, account->id, account->email, base);
+        return {{"sent", true}};
+    }
+
+    json MbAuth::confirmPasswordReset(const std::string &entity_name,
+                                      const std::string &token,
+                                      const std::string &new_password) const {
+        const auto raw = trim(token);
+        if (raw.size() < 32 || raw.size() > 256)
+            throw MbException(400, "Invalid or expired password reset link.");
+
+        if (!looksLikePassword(new_password))
+            throw MbException(400, "Expected 8 chars minimum with no whitespaces.");
+
+        const auto token_hash = sha256Hex(raw);
+        const auto sql = mApp.db().session();
+        purgeExpiredPasswordResets(*sql);
+
+        std::string id;
+        std::string user_id;
+        std::string email;
+        const auto now = getCurrentTimestampUTC();
+        *sql << "SELECT id, user_id, email FROM mb_password_resets "
+                "WHERE entity_name = :entity AND token_hash = :hash AND expires_at > :now "
+                "ORDER BY created DESC, id DESC LIMIT 1",
+                soci::use(entity_name), soci::use(token_hash), soci::use(now),
+                soci::into(id), soci::into(user_id), soci::into(email);
+
+        if (!sql->got_data() || id.empty() || user_id.empty())
+            throw MbException(400, "Invalid or expired password reset link.");
+
+        const auto entity = mApp.entity(entity_name);
+        if (!entity.field("password").has_value())
+            throw MbException(400, "This account cannot reset a password.");
+
+        const auto user = entity.read(user_id);
+        if (!user.has_value() || !user->contains("email") || !user->at("email").is_string())
+            throw MbException(400, "Invalid or expired password reset link.");
+
+        const auto current = normalizeEmail(user->at("email").get<std::string>());
+        if (current != normalizeEmail(email))
+            throw MbException(400, "Invalid or expired password reset link.");
+
+        [[maybe_unused]] auto _ = entity.update(user_id, {{"password", new_password}});
+        *sql << "DELETE FROM mb_password_resets WHERE entity_name = :entity AND user_id = :uid",
+                soci::use(entity_name), soci::use(user_id);
+        *sql << "DELETE FROM mb_sessions WHERE entity_name = :entity AND user_id = :uid",
+                soci::use(entity_name), soci::use(user_id);
+
+        return {{"reset", true}};
     }
 
 #ifdef MB_SCRIPTING_ENABLED

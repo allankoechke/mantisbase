@@ -40,6 +40,9 @@ If the entity is missing or does not meet these requirements, the route returns 
 | POST | `/api/v1/auth/<entity>/verify-email/request` | Email an address-verification link |
 | POST | `/api/v1/auth/<entity>/verify-email` | Confirm an address with the link token |
 | GET | `/api/v1/auth/<entity>/verify-email?token=` | Confirm an address from the email link |
+| POST | `/api/v1/auth/<entity>/password-reset/request` | Email a password-reset link |
+| POST | `/api/v1/auth/<entity>/password-reset` | Set a new password with the link token |
+| GET | `/api/v1/auth/<entity>/password-reset?token=` | HTML form to choose a new password |
 | POST | `/api/v1/auth/<entity>/refresh` | Refresh an existing token |
 | POST | `/api/v1/auth/<entity>/logout` | Logout (invalidate token) |
 
@@ -129,6 +132,36 @@ curl -X POST http://localhost:7070/api/v1/auth/users/verify-email \
 A missing, used, or expired token returns **400** `Invalid or expired verification link.`
 
 OAuth login marks `email_verified` when the provider asserts `email_verified`. Otherwise, and when SMTP is configured, a verification link is sent for that account.
+
+---
+
+## Password reset
+
+Request a reset link for an account email. SMTP and `siteDomain` are required. The link is `{siteDomain}/api/v1/auth/<entity>/password-reset?token=...`, expires after **1 hour**, and works once.
+
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/password-reset/request \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+```
+
+```json
+{ "status": 200, "data": { "sent": true }, "error": "" }
+```
+
+The response is the same when no account uses that email, and no message is sent. Opening the link in a browser shows a form to choose a new password. A client can also complete the reset with JSON:
+
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/password-reset \
+  -H "Content-Type: application/json" \
+  -d '{"token": "<token from the email>", "password": "new-secure-password"}'
+```
+
+```json
+{ "status": 200, "data": { "reset": true }, "error": "" }
+```
+
+Passwords must be at least 8 characters with no whitespace. A successful reset invalidates existing sessions for that account. A missing, used, or expired token returns **400** `Invalid or expired password reset link.`
 
 ---
 
