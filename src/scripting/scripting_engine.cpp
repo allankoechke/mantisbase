@@ -16,11 +16,11 @@
 namespace fs = std::filesystem;
 
 namespace mb {
-    ScriptingEngine *ScriptingEngine::s_active = nullptr;
+    MbScriptingEngine *MbScriptingEngine::s_active = nullptr;
 
-    ScriptingEngine::ScriptingEngine(MantisBase &app) : m_app(app) {}
+    MbScriptingEngine::MbScriptingEngine(MantisBase &app) : m_app(app) {}
 
-    ScriptingEngine::~ScriptingEngine() {
+    MbScriptingEngine::~MbScriptingEngine() {
         if (s_active == this) {
             s_active = nullptr;
         }
@@ -30,11 +30,11 @@ namespace mb {
         }
     }
 
-    ScriptingEngine *ScriptingEngine::active() {
+    MbScriptingEngine *MbScriptingEngine::active() {
         return s_active;
     }
 
-    bool ScriptingEngine::isRuntimeDisabled() const {
+    bool MbScriptingEngine::isRuntimeDisabled() const {
         if (m_app.isScriptingDisabled()) {
             return true;
         }
@@ -44,7 +44,7 @@ namespace mb {
         return false;
     }
 
-    void ScriptingEngine::init() {
+    void MbScriptingEngine::init() {
         if (isRuntimeDisabled()) {
             m_app.logger().warn(
                 "Scripting",
@@ -62,7 +62,7 @@ namespace mb {
         registerBindings();
     }
 
-    void ScriptingEngine::registerBindings() const {
+    void MbScriptingEngine::registerBindings() const {
         registerAppBindings(m_ctx, &m_app);
         registerRequestBindings(m_ctx);
         registerResponseBindings(m_ctx);
@@ -78,7 +78,7 @@ namespace mb {
         registerRealtimeBindings(m_ctx);
     }
 
-    void ScriptingEngine::loadStartScript() {
+    void MbScriptingEngine::loadStartScript() {
         if (!m_ctx) {
             return;
         }
@@ -105,7 +105,7 @@ namespace mb {
             fmt::format("No entry script found in scripts dir (expected main.mb.js)"));
     }
 
-    void ScriptingEngine::loadScript(const std::string &relativePath) {
+    void MbScriptingEngine::loadScript(const std::string &relativePath) {
         if (!m_ctx) {
             return;
         }
@@ -116,7 +116,7 @@ namespace mb {
         evalFile(full_path.string());
     }
 
-    void ScriptingEngine::evalFile(const std::string &filePath) {
+    void MbScriptingEngine::evalFile(const std::string &filePath) {
         if (!fs::exists(fs::path(filePath))) {
             m_app.logger().trace(
                 "Scripting",
@@ -130,7 +130,7 @@ namespace mb {
         evalString(buffer.str(), filePath);
     }
 
-    void ScriptingEngine::evalString(const std::string &content, const std::string &label) {
+    void MbScriptingEngine::evalString(const std::string &content, const std::string &label) {
         if (!m_ctx) {
             return;
         }
@@ -146,43 +146,43 @@ namespace mb {
         }
     }
 
-    void ScriptingEngine::fireOnServerStart() {
+    void MbScriptingEngine::fireOnServerStart() {
         if (!m_ctx) {
             return;
         }
         withLock([&]() {
-            ScriptingHooks::fireOnServerStart(m_ctx);
+            MbScriptingHooks::fireOnServerStart(m_ctx);
         });
     }
 
-    void ScriptingEngine::fireOnServerShutdown() {
+    void MbScriptingEngine::fireOnServerShutdown() {
         if (!m_ctx) {
             return;
         }
         withLock([&]() {
-            ScriptingHooks::fireOnServerShutdown(m_ctx);
+            MbScriptingHooks::fireOnServerShutdown(m_ctx);
         });
     }
 
-    void ScriptingEngine::fireOnRecordCreated(const std::string &entity, const std::string &recordId) {
+    void MbScriptingEngine::fireOnRecordCreated(const std::string &entity, const std::string &recordId) {
         if (!m_ctx) {
             return;
         }
         withLock([&]() {
-            ScriptingHooks::fireOnRecordCreated(m_ctx, entity, recordId);
+            MbScriptingHooks::fireOnRecordCreated(m_ctx, entity, recordId);
         });
     }
 
-    void ScriptingEngine::fireOnRecordUpdated(const std::string &entity, const std::string &recordId) {
+    void MbScriptingEngine::fireOnRecordUpdated(const std::string &entity, const std::string &recordId) {
         if (!m_ctx) {
             return;
         }
         withLock([&]() {
-            ScriptingHooks::fireOnRecordUpdated(m_ctx, entity, recordId);
+            MbScriptingHooks::fireOnRecordUpdated(m_ctx, entity, recordId);
         });
     }
 
-    bool ScriptingEngine::pcallBool(const DukValue &fn, MbRequest &req, MbResponse &res) {
+    bool MbScriptingEngine::pcallBool(const DukValue &fn, MbRequest &req, MbResponse &res) {
         return withLock([&]() -> bool {
             try {
                 return dukglue_pcall<bool>(m_ctx, fn, &req, &res);
@@ -193,7 +193,7 @@ namespace mb {
         });
     }
 
-    void ScriptingEngine::pcallVoid(const DukValue &fn, MbRequest &req, MbResponse &res) {
+    void MbScriptingEngine::pcallVoid(const DukValue &fn, MbRequest &req, MbResponse &res) {
         withLock([&]() {
             try {
                 dukglue_pcall<void>(m_ctx, fn, &req, &res);

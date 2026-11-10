@@ -103,7 +103,7 @@ protected:
 
 } // namespace
 
-// --- Auth verify ---
+// --- MbAuth verify ---
 
 TEST_F(IntegrationAuthExtendedTest, VerifyWithoutToken) {
     auto res = client->Get("/api/v1/auth/verify");

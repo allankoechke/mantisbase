@@ -11,17 +11,17 @@
 #include "mantisbase/mantisbase.h"
 
 namespace mb {
-    LogDatabase::LogDatabase(const MantisBase &app) : m_running(false), mApp(app) {
+    MbLogDatabase::MbLogDatabase(const MantisBase &app) : m_running(false), mApp(app) {
     }
 
-    LogDatabase::~LogDatabase() {
+    MbLogDatabase::~MbLogDatabase() {
         if (m_running.load()) {
-            Logger::isDbInitialized.store(false);
+            MbLogger::isDbInitialized.store(false);
             shutdown();
         }
     }
 
-    bool LogDatabase::init(const std::string &data_dir) {
+    bool MbLogDatabase::init(const std::string &data_dir) {
         try {
             m_dataDir = trim(data_dir).empty() ? mApp.dataDir() : data_dir;
 
@@ -41,7 +41,7 @@ namespace mb {
 
             // Start cleanup thread
             m_running.store(true);
-            m_cleanupThread = std::thread(&LogDatabase::cleanupThread, this);
+            m_cleanupThread = std::thread(&MbLogDatabase::cleanupThread, this);
 
             return true;
         } catch (const std::exception &e) {
@@ -51,7 +51,7 @@ namespace mb {
         }
     }
 
-    void LogDatabase::shutdown() {
+    void MbLogDatabase::shutdown() {
         m_running.store(false);
         m_cv.notify_all();
 
@@ -62,9 +62,9 @@ namespace mb {
         }
     }
 
-    void LogDatabase::createTable() const {
+    void MbLogDatabase::createTable() const {
         if (!m_session) {
-            std::cerr << "LogDatabase::createTable: Session is NULL" << std::endl;
+            std::cerr << "MbLogDatabase::createTable: Session is NULL" << std::endl;
             return;
         }
 
@@ -90,11 +90,11 @@ namespace mb {
         *m_session << "CREATE INDEX IF NOT EXISTS idx_mb_logs_created_at ON mb_logs(created_at)";
     }
 
-    bool LogDatabase::insertLog(const std::string &level, const std::string &origin, const std::string &message,
+    bool MbLogDatabase::insertLog(const std::string &level, const std::string &origin, const std::string &message,
                                 const std::string &details, const json &data) {
         try {
             if (!m_session) {
-                std::cerr << "LogDatabase::insertLog: Insert error, session is NULL" << std::endl;
+                std::cerr << "MbLogDatabase::insertLog: Insert error, session is NULL" << std::endl;
                 return false;
             }
 
@@ -139,13 +139,13 @@ namespace mb {
         }
     }
 
-    json LogDatabase::getLogs(const std::string &after, int limit,
+    json MbLogDatabase::getLogs(const std::string &after, int limit,
                               const std::string &level_filter,
                               const std::string &search_filter,
                               const std::string &start_date,
                               const std::string &end_date) {
         if (!m_session) {
-            std::cerr << "LogDatabase::getLogs: Fetch error, session is NULL" << std::endl;
+            std::cerr << "MbLogDatabase::getLogs: Fetch error, session is NULL" << std::endl;
             return json::object();
         }
 
@@ -256,13 +256,13 @@ namespace mb {
             result["data"]["items"] = logs_array;
             result["data"]["items_count"] = logs_array.size();
         } catch (const std::exception &e) {
-            throw MantisException(500, std::string("Failed to fetch logs: ") + e.what());
+            throw MbException(500, std::string("Failed to fetch logs: ") + e.what());
         }
 
         return result;
     }
 
-    void LogDatabase::cleanupThread() {
+    void MbLogDatabase::cleanupThread() {
         // Run cleanup every hour
         const auto cleanup_interval = std::chrono::hours(1);
 
@@ -276,7 +276,7 @@ namespace mb {
         }
     }
 
-    int LogDatabase::configuredLogRetentionDays() const {
+    int MbLogDatabase::configuredLogRetentionDays() const {
         constexpr int kDefaultLogRetentionDays = 5;
 
         try {
@@ -293,10 +293,10 @@ namespace mb {
         return kDefaultLogRetentionDays;
     }
 
-    void LogDatabase::deleteOldLogs(const int days) {
+    void MbLogDatabase::deleteOldLogs(const int days) {
         try {
             if (!m_session) {
-                std::cerr << "LogDatabase::deleteOldLogs: Delete error, session is NULL" << std::endl;
+                std::cerr << "MbLogDatabase::deleteOldLogs: Delete error, session is NULL" << std::endl;
                 return;
             }
 
@@ -323,7 +323,7 @@ namespace mb {
         }
     }
 
-    std::string LogDatabase::buildMinLogWhereCondition(const std::string &level) {
+    std::string MbLogDatabase::buildMinLogWhereCondition(const std::string &level) {
         std::stringstream ss;
         bool first = true;
 

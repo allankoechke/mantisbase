@@ -9,7 +9,7 @@
 
 namespace mb {
     MbResponse::MbResponse(const MantisBase &app)
-        : IMantisBase(app),
+        : MbAppMixin(app),
           m_res(drogon::HttpResponse::newHttpResponse()) {
     }
 
@@ -23,15 +23,11 @@ namespace mb {
         m_res->setStatusCode(static_cast<drogon::HttpStatusCode>(s));
     }
 
-    std::string MbResponse::getVersion() const {
+    std::string MbResponse::version() const {
         return m_res->getHeader("version");
     }
 
-    void MbResponse::setVersion(const std::string &b) {
-        // Drogon handles version internally
-    }
-
-    std::string MbResponse::getBody() const {
+    std::string MbResponse::body() const {
         return std::string(m_res->body());
     }
 
@@ -39,39 +35,21 @@ namespace mb {
         m_res->setBody(b);
     }
 
-    std::string MbResponse::getLocation() const {
+    std::string MbResponse::location() const {
         return m_res->getHeader("Location");
     }
 
-    void MbResponse::setLocation(const std::string &b) {
+    void MbResponse::setLocation(const std::string &b) const {
         m_res->addHeader("Location", b);
-    }
-
-    std::string MbResponse::getReason() const {
-        return "";
-    }
-
-    void MbResponse::setReason(const std::string &b) {
-        // Drogon auto-generates reason from status code
     }
 
     bool MbResponse::hasHeader(const std::string &key) const {
         return !m_res->getHeader(key).empty();
     }
 
-    std::string MbResponse::getHeaderValue(const std::string &key, const char *def, size_t id) const {
+    std::string MbResponse::headerValue(const std::string &key, const std::string& def) const {
         auto val = m_res->getHeader(key);
         return val.empty() ? std::string(def) : val;
-    }
-
-    size_t MbResponse::getHeaderValueU64(const std::string &key, size_t def, size_t id) const {
-        auto val = m_res->getHeader(key);
-        if (val.empty()) return def;
-        try { return std::stoull(val); } catch (...) { return def; }
-    }
-
-    size_t MbResponse::getHeaderValueCount(const std::string &key) const {
-        return m_res->getHeader(key).empty() ? 0 : 1;
     }
 
     void MbResponse::setHeader(const std::string &key, const std::string &val) const {
@@ -160,7 +138,7 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
     void MbResponse::sendJson(const int statusCode, const DukValue &data) const {
-        auto *engine = ScriptingEngine::active();
+        auto *engine = MbScriptingEngine::active();
         if (!engine || !engine->ctx()) {
             send(statusCode, "{}", "application/json");
             return;
@@ -176,7 +154,7 @@ namespace mb {
     void MbResponse::registerDuktapeMethods() {
     }
 #else
-    void MantisResponse::registerDuktapeMethods() {
+    void MbResponse::registerDuktapeMethods() {
     }
 #endif
 }

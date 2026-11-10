@@ -22,7 +22,7 @@ namespace mb {
     [[nodiscard]] MANTISBASE_API bool isUserAuth(const nlohmann::json &auth);
 
     /** Outcome of @ref evaluateAccessRule for HTTP, SSE, and WebSocket checks. */
-    enum class AccessEvalResult {
+    enum class MbAccessEvalResult {
         Allow,                  ///< Rule permits access
         DenyUnauthenticated,    ///< Credentials required but missing/invalid
         DenyForbidden,          ///< Authenticated but rule rejected the caller
@@ -30,7 +30,7 @@ namespace mb {
     };
 
     /** Inputs shared by entity list/get/create/update/delete access checks. */
-    struct MANTISBASE_API AccessEvalContext {
+    struct MANTISBASE_API MbAccessEvalContext {
         const nlohmann::json &auth;          ///< Resolved auth block from middleware
         const nlohmann::json &verification;  ///< JWT/API-key verification metadata
         MbRequest *req = nullptr;        ///< Optional HTTP request (custom rules)
@@ -42,16 +42,16 @@ namespace mb {
      * Modes: `public`, `auth` (optional comma-separated `entity` filter), `custom` (expr),
      * or empty string (admin only).
      */
-    class MANTISBASE_API AccessRule {
+    class MANTISBASE_API MbAccessRule {
     public:
         /** Construct a rule from mode, optional custom expression, and optional entity filter. */
-        explicit AccessRule(const std::string &mode = "", const std::string &expr = "",
+        explicit MbAccessRule(const std::string &mode = "", const std::string &expr = "",
                             const std::string &entity = "");
 
         /** Serialize rule to JSON (`mode`, `expr`, `entity`). */
         [[nodiscard]] nlohmann::json toJSON() const;
         /** Parse rule from stored schema JSON. */
-        static AccessRule fromJSON(const nlohmann::json &j);
+        static MbAccessRule fromJSON(const nlohmann::json &j);
 
         /** @return Rule mode: `public`, `auth`, `custom`, or empty (admin-only). */
         [[nodiscard]] std::string mode() const;
@@ -76,7 +76,7 @@ namespace mb {
     };
 
     /** Evaluate @p rule against @p ctx (auth, verification, optional request). */
-    [[nodiscard]] MANTISBASE_API AccessEvalResult evaluateAccessRule(const AccessRule &rule, const AccessEvalContext &ctx);
+    [[nodiscard]] MANTISBASE_API MbAccessEvalResult evaluateAccessRule(const MbAccessRule &rule, const MbAccessEvalContext &ctx);
 
     /** Build expression variables from an HTTP request and auth block (custom rules). */
     [[nodiscard]] MANTISBASE_API nlohmann::json buildAccessExprVars(const MbRequest &req, const nlohmann::json &auth);
@@ -87,8 +87,8 @@ namespace mb {
                                                      const nlohmann::json &body = nlohmann::json::object());
 
     /** @return `{status, error}` for HTTP error responses. */
-    [[nodiscard]] MANTISBASE_API std::pair<int, std::string> accessEvalHttpError(AccessEvalResult result,
-                                                                  const AccessRule &rule = AccessRule{});
+    [[nodiscard]] MANTISBASE_API std::pair<int, std::string> accessEvalHttpError(MbAccessEvalResult result,
+                                                                  const MbAccessRule &rule = MbAccessRule{});
 } // mb
 
 #endif //MANTISBASE_ACCESS_RULES_H

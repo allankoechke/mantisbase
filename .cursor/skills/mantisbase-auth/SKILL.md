@@ -5,9 +5,9 @@ description: >-
   API keys. Use when adding user accounts or securing API calls.
 ---
 
-# MantisBase Auth
+# MantisBase MbAuth
 
-## Auth entity schema
+## MbAuth entity schema
 
 ```json
 {
@@ -36,12 +36,27 @@ Example: [`examples/02-auth-users/`](../../examples/02-auth-users/).
 |--------|--------|------|
 | Register | POST | `/api/v1/entities/{entity}` |
 | Login | POST | `/api/v1/auth/{entity}/login` |
+| Request OTP | POST | `/api/v1/auth/{entity}/otp/request` |
+| OTP login | POST | `/api/v1/auth/{entity}/otp/login` |
 | Refresh | POST | `/api/v1/auth/{entity}/refresh` |
 | Logout | POST | `/api/v1/auth/{entity}/logout` |
 | Verify | GET | `/api/v1/auth/verify` |
 | Admin login | POST | `/api/v1/sys/admins/login` |
 
+Login methods live on the auth entity schema (`auth.password`, `auth.otp`, `auth.oauth`, `auth.requireEmailVerification`). Password defaults to **on**. OTP, OAuth, and required email verification default to **off**. Admins change them with `PATCH /api/v1/schemas/{entity}` (admin only). Disabled methods return **403**. Read the flags at `GET /api/v1/auth/{entity}/methods`.
+
+Auth tables include system field `email_verified` (default **false**). Existing auth tables gain the column at startup. `mb_admins` does not have it. Clients cannot set the flag; an admin can. When `requireEmailVerification` is true, password, OTP, and OAuth login return **403** until the flag is true.
+
+If SMTP is configured, registration sends a verification link (`siteDomain` + `/api/v1/auth/{entity}/verify-email?token=`). Resend with `POST /api/v1/auth/{entity}/verify-email/request` and `{"email"}`. Confirm with `POST /api/v1/auth/{entity}/verify-email` and `{"token"}`, or open the link (HTML). The link expires in 24 hours. Unknown emails return `data.sent: true` and send nothing. Missing SMTP returns **400** on the request route and does not block registration.
+
 Login body: `{"identity": "user@example.com", "password": "..."}`
+
+Email OTP (admin must set `auth.otp` to `true`. SMTP must be configured, otherwise **400** `Email service not configured. Set SMTP settings first.`):
+
+1. `POST /api/v1/auth/{entity}/otp/request` with `{"email": "user@example.com"}` → `data.sent: true` and a 6-digit code by email (unknown emails return the same body and send nothing).
+2. `POST /api/v1/auth/{entity}/otp/login` with `{"email": "user@example.com", "otp": "483920"}`.
+
+The code expires in 10 minutes, allows 5 attempts, and is single-use. A wrong or expired code returns **401**.
 
 Response: `data.token` (JWT).
 

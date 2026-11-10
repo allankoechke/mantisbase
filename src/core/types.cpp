@@ -2,14 +2,14 @@
 #include "../../include/mantisbase/mantisbase.h"
 
 namespace mb {
-    IMantisBase::IMantisBase(const MantisBase& app)
+    MbAppMixin::MbAppMixin(const MantisBase& app)
     : m_app(app) {}
 
-    const MantisBase& IMantisBase::mbApp() const {
+    const MantisBase& MbAppMixin::mbApp() const {
         return m_app;
     }
 
-    const Logger& IMantisBase::logger() const {
+    const MbLogger& MbAppMixin::logger() const {
         return m_app.logger();
     }
 }

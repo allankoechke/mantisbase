@@ -1,6 +1,6 @@
-# MantisBase for macOS
+# MantisBase for Darwin
 
-Prebuilt MantisBase server binary for macOS.
+Prebuilt MantisBase server binary for Darwin.
 
 ## Quick start
 

@@ -2,8 +2,8 @@
  * @file router.h
  * @brief HTTP router: route registration, schema cache, CORS, and built-in API endpoints.
  *
- * Bridges MantisBase handler/middleware chains (@ref RouteRegistry) to Drogon's HTTP server.
- * Also owns @ref SSEMgr (SSE + WebSocket realtime) and the entity schema cache used on
+ * Bridges MantisBase handler/middleware chains (@ref MbRouteRegistry) to Drogon's HTTP server.
+ * Also owns @ref MbSSEMgr (SSE + WebSocket realtime) and the entity schema cache used on
  * every CRUD request.
  */
 
@@ -32,16 +32,16 @@ typedef struct duk_hthread duk_context;
 #endif
 
 namespace mb {
-    class SSEMgr;
+    class MbSSEMgr;
 
     /**
      * @brief Central HTTP router and schema cache for a @ref MantisBase instance.
      */
-    class MANTISBASE_API Router : public IMantisBase {
+    class MANTISBASE_API MbRouter : public MbAppMixin {
     public:
-        explicit Router(const MantisBase &app);
+        explicit MbRouter(const MantisBase &app);
 
-        ~Router();
+        ~MbRouter();
 
         /** Initialize Drogon, register routes, and prepare the schema cache. */
         bool init();
@@ -53,22 +53,13 @@ namespace mb {
         void close();
 
         /** @return SSE/WebSocket realtime manager. */
-        SSEMgr &sseMgr() const;
+        MbSSEMgr &sseMgr() const;
 
         void Get(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
-        void Post(const std::string &path, const MbHandlerWithContentReaderFn &handler,
-                  const MbMiddlewares &middlewares = {});
-
         void Post(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
-        void Patch(const std::string &path, const MbHandlerWithContentReaderFn &handler,
-                   const MbMiddlewares &middlewares = {});
-
         void Patch(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
-
-        void Put(const std::string &path, const MbHandlerWithContentReaderFn &handler,
-                   const MbMiddlewares &middlewares = {});
 
         void Put(const std::string &path, const MbHandlerFn &handler, const MbMiddlewares &middlewares = {});
 
@@ -91,8 +82,8 @@ namespace mb {
 
         [[nodiscard]] bool hasSchemaCache(const std::string &table_name) const;
 
-        /** @return Cached @ref Entity built from the schema cache entry. */
-        Entity schemaCacheEntity(const std::string &table_name) const;
+        /** @return Cached @ref MbEntity built from the schema cache entry. */
+        MbEntity schemaCacheEntity(const std::string &table_name) const;
 
         void addSchemaCache(const nlohmann::json &entity_schema) const;
 
@@ -151,13 +142,9 @@ namespace mb {
     private:
         void registerDrogonHandler(const std::string &method, const std::string &path) const;
 
-        void registerDrogonHandlerWithReader(const std::string &method, const std::string &path);
-
         static std::string convertPathToDrogon(const std::string &httplib_path);
 
-        static std::vector<std::string> extractParamNames(const std::string &httplib_path);
-
-        void executeMiddlewareChain(MbRequest &req, MbResponse &res, const RouteHandler *route) const;
+        void executeMiddlewareChain(MbRequest &req, MbResponse &res, const MbRouteHandler *route) const;
 
         void generateMiscEndpoints();
 
@@ -205,6 +192,20 @@ namespace mb {
 
         std::function<void(MbRequest &, MbResponse &)> handleAuthLogin();
 
+        std::function<void(MbRequest &, MbResponse &)> handleAuthMethods();
+
+        std::function<void(MbRequest &, MbResponse &)> handleAuthOtpRequest();
+
+        std::function<void(MbRequest &, MbResponse &)> handleAuthOtpLogin();
+
+        std::function<void(MbRequest &, MbResponse &)> handleAuthVerifyEmailRequest();
+
+        std::function<void(MbRequest &, MbResponse &)> handleAuthVerifyEmail();
+
+        std::function<void(MbRequest &, MbResponse &)> handleAuthPasswordResetRequest();
+
+        std::function<void(MbRequest &, MbResponse &)> handleAuthPasswordReset();
+
         static std::function<void(MbRequest &, MbResponse &)> handleAdminLogin();
 
         std::function<void(MbRequest &, MbResponse &)> handleAuthRefresh() const;
@@ -224,15 +225,15 @@ namespace mb {
          */
         static Constraints validateConstraints(const std::vector<std::string> &constraints);;
 
-        RouteRegistry m_routeRegistry;
-        std::unique_ptr<SSEMgr> m_sseMgr;
+        MbRouteRegistry m_routeRegistry;
+        std::unique_ptr<MbSSEMgr> m_sseMgr;
         std::vector<MbMiddlewareFn> m_preRoutingMiddlewares;
         std::vector<MbHandlerFn> m_postRoutingMiddlewares;
 
-        /// Entity schema cache. Read on every request by the http worker
+        /// MbEntity schema cache. Read on every request by the http worker
         /// threads and mutated at runtime by the schema CRUD endpoints, so all
         /// access must be synchronized via m_entityMapMutex.
-        mutable std::unordered_map<std::string, Entity> m_entityMap;
+        mutable std::unordered_map<std::string, MbEntity> m_entityMap;
         std::atomic<bool> m_running{false};
         mutable std::shared_mutex m_entityMapMutex;
 

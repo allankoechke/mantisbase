@@ -42,7 +42,7 @@ namespace mb {
     inline constexpr int kRealtimeCleanupIntervalSeconds = 30;
 
     /**
-     * @brief Auth state captured at connect or subscribe time.
+     * @brief MbAuth state captured at connect or subscribe time.
      *
      * `auth` and `verification` mirror the shape produced by HTTP auth middleware.
      * `token` is empty for guest sessions. `expires_at` is set for JWT-backed sessions.
@@ -62,7 +62,7 @@ namespace mb {
     };
 
     /** Outcome of applying incoming credentials to an existing realtime session. */
-    enum class AuthUpgradeResult {
+    enum class MbAuthUpgradeResult {
         Applied,        /**< Guest upgraded to authenticated, or same-user token refreshed. */
         Unchanged,      /**< Both session and incoming are guest, or same authenticated user. */
         DeniedSwitch,   /**< Attempt to switch to a different authenticated user. */
@@ -98,7 +98,7 @@ namespace mb {
     /**
      * @brief Filter topics by entity access rules.
      *
-     * Entity-only topics use the list rule; `entity:row_id` topics use the get rule.
+     * MbEntity-only topics use the list rule; `entity:row_id` topics use the get rule.
      *
      * @param app Application instance (entity schema lookup).
      * @param topics Requested topic strings.
@@ -111,9 +111,9 @@ namespace mb {
     /**
      * @brief Apply incoming auth to an existing session (subscribe-time upgrade).
      * @param session Session snapshot to update when upgrade is allowed.
-     * @param incoming Auth resolved from the subscribe request.
+     * @param incoming MbAuth resolved from the subscribe request.
      */
-    [[nodiscard]] MANTISBASE_API AuthUpgradeResult tryUpgradeAuth(RealtimeAuthSnapshot &session,
+    [[nodiscard]] MANTISBASE_API MbAuthUpgradeResult tryUpgradeAuth(RealtimeAuthSnapshot &session,
                                                    const RealtimeAuthSnapshot &incoming);
 
     /**

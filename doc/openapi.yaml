@@ -136,6 +136,332 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
+        "403":
+          description: Password login is disabled, or email verification is required and the address is unverified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/methods:
+    get:
+      tags: [Auth]
+      summary: List enabled login methods
+      description: |
+        Public read of the entity's login methods. Password login defaults to enabled.
+        Email OTP and OAuth default to disabled. Changing the flags is an admin schema update.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      responses:
+        "200":
+          description: Login methods
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthMethods"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /auth/{entity_name}/otp/request:
+    post:
+      tags: [Auth]
+      summary: Email a one-time sign-in code
+      description: |
+        Sends a 6-digit sign-in code to an auth-entity account. The entity's `auth.otp`
+        flag must be enabled (admin schema update); otherwise the response is 403.
+        SMTP must be configured;
+        otherwise the response is 400 `Email service not configured. Set SMTP settings first.`
+        The code expires after 10 minutes and allows 5 attempts. A delivered code replaces any
+        earlier code for that account. Unknown emails return `data.sent: true` and send no mail.
+        Rate-limited to 5 requests/minute per IP, and outbound mail is limited to 3 messages/hour
+        per recipient.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpRequest"
+      responses:
+        "200":
+          description: Request accepted. A code is emailed only when the account exists.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/OtpSentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          description: Email sign-in codes are disabled for this entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          description: SMTP delivery failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/otp/login:
+    post:
+      tags: [Auth]
+      summary: Sign in with an emailed code
+      description: |
+        Exchange the 6-digit code from the sign-in email for a JWT. Requires `auth.otp` on the entity.
+        The code is single-use.
+        A wrong, expired, or exhausted code returns 401. Passwordless accounts can use this route.
+        Rate-limited to 5 attempts/minute per IP.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpLoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Email sign-in codes are disabled, or email verification is required and the address is unverified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/verify-email/request:
+    post:
+      tags: [Auth]
+      summary: Email an address verification link
+      description: |
+        Sends a link that expires in 24 hours. SMTP must be configured.
+        Unknown emails and already verified addresses return `data.sent: true` and send nothing.
+        `siteDomain` is used as the link origin.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpRequest"
+      responses:
+        "200":
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/OtpSentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          description: SMTP delivery failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/verify-email:
+    get:
+      tags: [Auth]
+      summary: Confirm an email from the verification link
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HTML page confirming the address
+        "400":
+          description: HTML page for an invalid or expired link
+    post:
+      tags: [Auth]
+      summary: Confirm an email with a verification token
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+      responses:
+        "200":
+          description: Email verified
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          verified:
+                            type: boolean
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/password-reset/request:
+    post:
+      tags: [Auth]
+      summary: Email a password reset link
+      description: |
+        Sends a link that expires in 1 hour. SMTP must be configured.
+        Unknown emails return `data.sent: true` and send nothing.
+        `siteDomain` is used as the link origin.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpRequest"
+      responses:
+        "200":
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/OtpSentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          description: SMTP delivery failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/{entity_name}/password-reset:
+    get:
+      tags: [Auth]
+      summary: Show the password reset form
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HTML form to choose a new password
+        "400":
+          description: HTML page for a missing token
+    post:
+      tags: [Auth]
+      summary: Set a new password with a reset token
+      description: |
+        Password must be at least 8 characters with no whitespace.
+        Existing sessions for the account are invalidated on success.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/EntityName"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        "200":
+          description: Password updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          reset:
+                            type: boolean
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "500":
           $ref: "#/components/responses/InternalError"
 
@@ -1324,6 +1650,71 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiEnvelope"
 
+  /sys/settings/smtp/test:
+    post:
+      tags: [System]
+      summary: Send an SMTP test message
+      description: |
+        Sends a message whose subject and body are `Hey, it works!` to `email`,
+        using the SMTP settings already stored. Does not change those settings.
+        Not blocked by `MB_DISABLE_CONFIG_MUTATIONS`.
+
+        **400** when `email` is missing or invalid, or when SMTP is not configured.
+        **429** when that recipient has already received 3 messages in the last hour.
+        **502** when the SMTP server rejects the message or cannot be reached.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: you@example.com
+      responses:
+        "200":
+          description: Test message accepted by the mailer
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          to:
+                            type: string
+                            example: you@example.com
+                          subject:
+                            type: string
+                            example: MantisBase: Hey, it works!
+                          message:
+                            type: string
+                            example: If you are seeing this, the SMTP Settings are OK!
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          description: SMTP delivery failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
   /sys/api-keys:
     get:
       tags: [System]
@@ -1741,6 +2132,36 @@ components:
           type: string
           format: password
 
+    OtpRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+    OtpLoginRequest:
+      type: object
+      required: [email, otp]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        otp:
+          type: string
+          description: 6-digit sign-in code from the email
+          example: "483920"
+
+    OtpSentResponse:
+      type: object
+      required: [sent]
+      properties:
+        sent:
+          type: boolean
+          example: true
+
     AuthTokenResponse:
       type: object
       properties:
@@ -1886,6 +2307,8 @@ components:
         type:
           type: string
           enum: [base, auth, view]
+        auth:
+          $ref: "#/components/schemas/AuthMethods"
         fields:
           type: array
           items:
@@ -1920,6 +2343,8 @@ components:
         type:
           type: string
           enum: [base, auth, view]
+        auth:
+          $ref: "#/components/schemas/AuthMethods"
         fields:
           type: array
           items:
@@ -1947,9 +2372,36 @@ components:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/AccessRule"
+        auth:
+          $ref: "#/components/schemas/AuthMethods"
         view_query:
           type: string
           description: Must be a single SELECT with no semicolons or DDL/DML keywords.
+
+    AuthMethods:
+      type: object
+      description: >
+        Login methods for an auth entity. Admins change these with PATCH /schemas/{name}.
+        Password defaults to true. OTP and OAuth default to false.
+      properties:
+        password:
+          type: boolean
+          description: Email and password login.
+          default: true
+        otp:
+          type: boolean
+          description: Email one-time-code login.
+          default: false
+        oauth:
+          type: boolean
+          description: OAuth login.
+          default: false
+        requireEmailVerification:
+          type: boolean
+          description: >
+            When true, password, OTP, and OAuth login require email_verified on the account.
+            Default false. Admin accounts are not affected.
+          default: false
 
     AppSettings:
       type: object

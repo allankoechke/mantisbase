@@ -47,14 +47,36 @@ Additionally, some methods are exposed on the `app` object:
 - `app.quit(exitCode, reason)`: Close the application gracefully with a _exitCode_ and a _reason_.
 - `app.db()`: Get the database unit instance.
 - `app.router()`: Get the router unit instance.
-- `app.settings()`: Key/value app configuration (`get`, `set`, `configs`, `reload`).
+- `app.settings()`: Key/value app configuration (`get`, `set`, `configs`, `reload`). `set` persists and applies immediately. `get("smtp")` and `configs()` return `smtp.password` as `"********"` when a password is stored. `reload` re-reads the database and reapplies SMTP (and CORS) from that record.
 - `app.auth()`: JWT and session helpers (`createToken`, `verifyToken`, `deleteSession`, `refreshSession`, `sessionTimeoutSeconds`).
 - `app.files()`: File path helpers for entity uploads (`dirPath`, `filePath`, `getFilePath`, `removeFile`).
 - `app.logs()`: Structured logging (`info`, `warn`, `error`, `debug`, `trace`).
 - `app.rt()`: Realtime change notifications (`notifyChange`).
 - `app.loadScript(path)`: Load an additional script relative to `scriptsDir`.
 
-## Database
+### Settings
+
+`app.settings()` reads and writes the same configuration record as the admin dashboard (**Settings** at `/mb/settings`) and `PATCH /api/v1/sys/settings/config`. SMTP changes take effect on the mailer immediately. See [SMTP](api.md#smtp) for field names, TLS modes, and the password mask.
+
+```js
+app.settings().set("smtp", JSON.stringify({
+    host: "smtp.example.com",
+    port: 587,
+    user: "mailer",
+    password: "s3cret",
+    from: "app@example.com",
+    tls: true
+}));
+
+const smtp = JSON.parse(app.settings().get("smtp"));
+// smtp.password is "********" when a password is stored.
+// Pass that mask, or omit password, to keep the stored secret.
+// Pass "" to clear it.
+```
+
+`MB_DISABLE_CONFIG_MUTATIONS` blocks dashboard and PATCH writes. `app.settings().set` still persists, because the script runs inside the server.
+
+## MbDatabase
 The `DatabaseUnit` object returned from the `app.db()` method exposes the following methods and properties:
 ```js
 const db = app.db() // Get db unit instance
@@ -94,7 +116,7 @@ const sess = db.session() // Lease a session for executing db actions
 - `sess.getBackendName`
 - `sess.emptyBlob`
 
-## Router
+## MbRouter
 The router instance allows binding handlers and optional middlewares to given routes from JavaScript.
 - `app.router().addRoute(method, path, handler, [middlewares])`: Create a route for a given HTTP method, on a given *path* with the given handler function with optional middleware functions.
 - `app.router().get(path, handler, [middlewares])`: Shorthand for `addRoute("GET", ...)`.
@@ -164,7 +186,7 @@ app.router().addRoute("GET", "/test", function (req, res){
 
 To access the request metadata as well as set response metadata, the handler or middleware method passes in two arguments, the request object (shown as `req` above) and the response object (shown as `res` above).
 
-The `req` object maps to `MantisRequest` and `res` maps to `MantisResponse` class in C++.
+The `req` object maps to `MbRequest` and `res` maps to `MbResponse` class in C++.
 
 ### Middlewares
 Middlewares in Mantis carries the same function signature as the request handler with just one tiny difference. The middlewares return a `bool` type, indicating whether or not the middleware executed successfully. That is;
@@ -192,17 +214,13 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 > Note that, middlewares are executed from the first to the last in that order. That is,
 > `app.router().addRoute(...., middleware_1, middleware_2, function(req, res){ return true}, ...)` executing from `middleware_1` to `middleware_n` the finally invoking the handler.
 
-### MantisRequest Methods/Properties
+### MbRequest Methods/Properties
 - `req.hasHeader("Authorization")`: return true/false
-- `req.getHeader("Authorization", "", 0)`: Return Authorization value or default
-- `req.getHeaderCount("key")`: Count for header values given the header key 
-- `req.setHeader("Cow", "Cow Value")`
+- `req.getHeader("Authorization", "")`: Return Authorization value or default
 - `req.hasQueryParam("key")`: return true/false
 - `req.getQueryParam("key")`: Return header value given the key
-- `req.getQueryParamCount("key")`: Return parameter value count
 - `req.hasPathParam("key")`: return true/false
 - `req.getPathParam("key")`: Return header value given the key
-- `req.getPathParamCount("key")`: Return parameter value count
 - `req.isMultipartFormData()`: Return true if request type is of Multipart/FormData
 - `req.body`: Get request body data
 - `req.method`: Get request method ('GET', 'POST', ...)
@@ -216,17 +234,16 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 - `req.get("key")`: Get a value from the context store given the `key`.
 - `req.getOr("key", "default value")`: Returns a value if `key` is in the context store else the default value.
 
-### MantisResponse Methods/Properties
+### MbResponse Methods/Properties
 - `res.hasHeader("Authorization")`: Check if a header `key` exists in the request header. Returns true or false.
-- `res.getHeader(<key>, <default>, <index>)`: Get header value for a given `key` in the header. All three parameters are required, `key` being the header of interest, `default` being the base value if header is not found and `index` being the 0-based index for the item to return if the header value has more than one value. i.e 
+- `res.header(key, default)`: Get header value for a given `key`, or `default` when missing. i.e 
 ```js
-    const token = res.getHeader("Authorization", "", 0)
-    const type = res.getHeader("content-type", "text/plain", 0)
+    const token = res.header("Authorization", "")
+    const type = res.header("content-type", "text/plain")
 ```
-- `res.getHeaderCount("key")` -> Count for header values given the header key
 - `res.setHeader("Cow", "Cow Value")`
 - `res.redirect("http://some-url.com", 302)`
-> **Note:** `res.redirect(url, status)` redirects a single in-flight request from inside a handler. To redirect a whole path without writing a handler, use `app.router().redirect(from, to[, status[, methods]])` (see [Router](#router)).
+> **Note:** `res.redirect(url, status)` redirects a single in-flight request from inside a handler. To redirect a whole path without writing a handler, use `app.router().redirect(from, to[, status[, methods]])` (see [MbRouter](#router)).
 - `res.setContent(content, content_type)`: i.e. `res.setContent("<html>...</html>", "text/html")`
 - `res.setFileContent("/foo/file_path")`
 - `res.send(200, "some data here", "text/plain")`
@@ -236,10 +253,6 @@ app.router().addRoute("POST", "/foo/bar", function (req, res) {}, checkIfAuthent
 - `res.empty(204)`
 - `res.body = "Some Data"`
 - `res.body` -> returns `Some Data`
-- `res.status` (get or set status data)
-- `res.version` (get or set version value)
-- `res.location` (get or set redirect location value)
-- `res.reason` (get or set reason value)
 
 ## Middlewares (C++ factories)
 

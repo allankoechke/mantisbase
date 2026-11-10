@@ -7,10 +7,10 @@
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
     exports.Set("App", AppWrap::GetClass(env));
-    exports.Set("Router", RouterWrap::GetClass(env));
-    exports.Set("MantisRequest", RequestWrap::GetClass(env));
-    exports.Set("MantisResponse", ResponseWrap::GetClass(env));
-    exports.Set("Database", DbWrap::GetClass(env));
+    exports.Set("MbRouter", RouterWrap::GetClass(env));
+    exports.Set("MbRequest", RequestWrap::GetClass(env));
+    exports.Set("MbResponse", ResponseWrap::GetClass(env));
+    exports.Set("MbDatabase", DbWrap::GetClass(env));
     return exports;
 }
 

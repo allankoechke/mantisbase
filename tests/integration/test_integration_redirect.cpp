@@ -60,7 +60,7 @@ TEST_F(IntegrationRedirectTest, RedirectRejectsInvalidMethodConstraint) {
                                              "/api/v1/test/redirect/target",
                                              302,
                                              {"BREW"}),
-                 mb::MantisException);
+                 mb::MbException);
 }
 
 TEST_F(IntegrationRedirectTest, RedirectEmptyConstraintsAllowAllMethods) {

@@ -20,7 +20,7 @@ namespace mb {
      *
      * Parses `Authorization: Bearer <token>` or the `mb_token` HttpOnly cookie.
      * Bearer is preferred when both are present. Tokens starting with `mb_sk_`
-     * are treated as API keys and resolved through @ref ApiKeyManager; JWTs are
+     * are treated as API keys and resolved through @ref MbApiKeyMgr; JWTs are
      * verified on later middleware. Sets `auth` and `verification` request
      * attributes consumed by `requireEntityAuth()` and access-rule checks.
      * @return Middleware function
@@ -74,7 +74,7 @@ namespace mb {
 
     /**
      * @brief Check if request has access to entity based on access rules.
-     * @param entity_name Entity/table name to check access for
+     * @param entity_name MbEntity/table name to check access for
      * @return Middleware function that validates access rules
      * @code
      * router.Get("/api/v1/posts", handler, {hasAccess("posts")});
@@ -149,7 +149,7 @@ namespace mb {
      * `auth.entity` matches @p entity_name. Missing/invalid credentials → **401**;
      * authenticated but wrong entity → **403**.
      *
-     * @param entity_name Entity name for entity-based auth
+     * @param entity_name MbEntity name for entity-based auth
      * @return Middleware function that allows admins or entity users
      */
     MANTISBASE_API MbMiddlewareFn requireAdminOrEntityAuth(
@@ -161,7 +161,7 @@ namespace mb {
      * Requires a valid JWT or API key for @p entity_name only. Admins from other
      * entities are rejected. Missing/invalid credentials → **401**; wrong entity → **403**.
      *
-     * @param entity_name Entity name to authenticate against
+     * @param entity_name MbEntity name to authenticate against
      * @return Middleware function that validates entity auth
      */
     MANTISBASE_API MbMiddlewareFn requireEntityAuth(const std::string &entity_name);

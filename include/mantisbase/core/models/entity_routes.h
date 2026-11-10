@@ -19,10 +19,10 @@ namespace mb {
     MbHandlerFn entityGetOneHandler();
 
     /** `POST /api/v1/entities/:entity_name` — create (supports multipart/file fields). */
-    MbHandlerWithContentReaderFn entityPostHandler();
+    MbHandlerFn entityPostHandler();
 
     /** `PATCH /api/v1/entities/:entity_name/:id` — partial update (supports multipart). */
-    MbHandlerWithContentReaderFn entityPatchHandler();
+    MbHandlerFn entityPatchHandler();
 
     /** `DELETE /api/v1/entities/:entity_name/:id` — delete one record. */
     MbHandlerFn entityDeleteHandler();

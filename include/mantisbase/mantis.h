@@ -26,6 +26,7 @@
 #include "core/files.h"
 #include "core/http.h"
 #include "core/auth.h"
+#include "core/email.h"
 #include "core/logger/logger.h"
 #include "core/middlewares.h"
 #include "core/route_registry.h"

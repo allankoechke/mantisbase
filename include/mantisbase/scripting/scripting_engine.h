@@ -27,13 +27,13 @@ namespace mb {
      * One instance per @ref MantisBase. Handlers and middleware run under
      * @ref withLock because Drogon serves requests on worker threads.
      */
-    class MANTISBASE_API ScriptingEngine {
+    class MANTISBASE_API MbScriptingEngine {
     public:
-        explicit ScriptingEngine(MantisBase &app);
-        ~ScriptingEngine();
+        explicit MbScriptingEngine(MantisBase &app);
+        ~MbScriptingEngine();
 
-        ScriptingEngine(const ScriptingEngine &) = delete;
-        ScriptingEngine &operator=(const ScriptingEngine &) = delete;
+        MbScriptingEngine(const MbScriptingEngine &) = delete;
+        MbScriptingEngine &operator=(const MbScriptingEngine &) = delete;
 
         /** Create heap, register bindings. No-op when disabled at runtime. */
         void init();
@@ -53,7 +53,7 @@ namespace mb {
         [[nodiscard]] bool isActive() const { return m_ctx != nullptr; }
 
         /** Active engine for bindings (set for lifetime of init..destroy). */
-        [[nodiscard]] static ScriptingEngine *active();
+        [[nodiscard]] static MbScriptingEngine *active();
 
         /** Run @p fn while holding the script mutex. */
         template<typename Fn>
@@ -74,7 +74,7 @@ namespace mb {
         MantisBase &m_app;
         duk_context *m_ctx = nullptr;
         mutable std::mutex m_mutex;
-        static ScriptingEngine *s_active;
+        static MbScriptingEngine *s_active;
     };
 }
 

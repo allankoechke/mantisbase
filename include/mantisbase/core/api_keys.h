@@ -6,7 +6,7 @@
  * via `Authorization: Bearer mb_sk_...` and are validated by the `getAuthToken()`
  * middleware. Keys are stored hashed; the raw secret is returned only once at creation.
  *
- * Access from C++ through @ref Auth::apiKey() on your owned @ref MantisBase instance.
+ * Access from C++ through @ref MbAuth::apiKey() on your owned @ref MantisBase instance.
  *
  * @code
  * auto app = MantisBase::create();
@@ -32,7 +32,7 @@
 namespace mb {
     using json = nlohmann::json;
 
-    /** Raw key material returned once from @ref ApiKeyManager::generateApiKey(). */
+    /** Raw key material returned once from @ref MbApiKeyMgr::generateApiKey(). */
     struct MANTISBASE_API ApiKeyResult {
         std::string id;
         std::string key;
@@ -48,9 +48,9 @@ namespace mb {
      * - `POST|GET /api/v1/sys/api-keys` (admin)
      * - `DELETE /api/v1/sys/api-keys/:id` (admin)
      */
-    class MANTISBASE_API ApiKeyManager: public IMantisBase {
+    class MANTISBASE_API MbApiKeyMgr: public MbAppMixin {
     public:
-        explicit ApiKeyManager(const MantisBase& app);
+        explicit MbApiKeyMgr(const MantisBase& app);
 
         /** Generate a new key id, raw secret (`mb_sk_...`), and SHA-256 hash. */
         static ApiKeyResult generateApiKey();

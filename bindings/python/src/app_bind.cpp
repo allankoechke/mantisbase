@@ -94,8 +94,8 @@ namespace {
             m_running.store(false);
         }
 
-        [[nodiscard]] mb::Router& router() const { return m_app->router(); }
-        [[nodiscard]] mb::Database& db() const { return m_app->db(); }
+        [[nodiscard]] mb::MbRouter& router() const { return m_app->router(); }
+        [[nodiscard]] mb::MbDatabase& db() const { return m_app->db(); }
         [[nodiscard]] mb::MantisBase& app() const { return *m_app; }
 
     private:

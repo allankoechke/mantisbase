@@ -1,6 +1,6 @@
-# Auth users
+# MbAuth users
 
-Auth-type entity with registration, login, token refresh, and logout.
+MbAuth-type entity with registration, login, token refresh, and logout.
 
 ## Apply schema
 
@@ -34,6 +34,45 @@ The script registers a user, logs in, verifies the token, refreshes it, and logs
 | Refresh with valid token | 200 |
 | Refresh with invalid token | 401 |
 | Logout | 200 |
+| OTP request without SMTP | 400 |
+| OTP request for a known email (SMTP configured) | 200 (`data.sent` is true) |
+| OTP login with the emailed code | 200 (returns `data.token`) |
+| OTP login with a wrong code | 401 |
+
+## Login methods
+
+Password login is on by default. OTP and OAuth are off until an admin enables them:
+
+```bash
+curl -X PATCH "$BASE_URL/api/v1/schemas/users" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"auth": {"otp": true}}'
+```
+
+`GET /api/v1/auth/users/methods` returns the current flags. A disabled method responds with 403.
+
+`auth.requireEmailVerification` defaults to off. Turn it on to block password, OTP, and OAuth login until `email_verified` is true. That field is added automatically (existing tables are altered on startup). With SMTP configured, registration sends a link to `/api/v1/auth/users/verify-email?token=...`.
+
+```bash
+curl -X PATCH "$BASE_URL/api/v1/schemas/users" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"auth": {"requireEmailVerification": true}}'
+```
+
+## Email sign-in code
+
+SMTP must be configured in admin settings. Otherwise `otp/request` returns 400.
+
+```bash
+export BASE_URL=http://localhost:7070
+export EMAIL=demo@example.com
+./http/otp-login.sh
+
+# After the code arrives:
+OTP=483920 ./http/otp-login.sh
+```
 
 ## Cookie auth
 

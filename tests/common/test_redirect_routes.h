@@ -5,11 +5,11 @@
 
 namespace TestFixture {
 
-/// C++ redirect routes for Router::redirect integration tests.
+/// C++ redirect routes for MbRouter::redirect integration tests.
 /// Registered once before the shared test server starts listening
-/// (Router::redirect calls drogon::app().registerHandler directly,
+/// (MbRouter::redirect calls drogon::app().registerHandler directly,
 /// so registration must happen pre-listen like all other routes).
-inline void registerRedirectTestRoutes(mb::Router &router) {
+inline void registerRedirectTestRoutes(mb::MbRouter &router) {
     static bool registered = false;
     if (registered) {
         return;
@@ -26,7 +26,7 @@ inline void registerRedirectTestRoutes(mb::Router &router) {
 
     router.Get("/api/v1/test/redirect/target", targetHandler);
 
-    // Default: 302 Found, GET-only (mirrors Router::redirect defaults).
+    // Default: 302 Found, GET-only (mirrors MbRouter::redirect defaults).
     router.redirect("/api/v1/test/redirect/old", "/api/v1/test/redirect/target");
 
     // Permanent move.

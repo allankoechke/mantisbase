@@ -8,10 +8,10 @@
 
 namespace mb {
     void registerSettingsBindings(duk_context *ctx) {
-        dukglue_register_method(ctx, &KeyValStore::getScriptingJson, "get");
-        dukglue_register_method(ctx, &KeyValStore::setScriptingJson, "set");
-        dukglue_register_method(ctx, &KeyValStore::configsScriptingJson, "configs");
-        dukglue_register_method(ctx, &KeyValStore::reloadScriptingConfigs, "reload");
+        dukglue_register_method(ctx, &MbKVStore::getScriptingJson, "get");
+        dukglue_register_method(ctx, &MbKVStore::setScriptingJson, "set");
+        dukglue_register_method(ctx, &MbKVStore::configsScriptingJson, "configs");
+        dukglue_register_method(ctx, &MbKVStore::reloadScriptingConfigs, "reload");
     }
 }
 

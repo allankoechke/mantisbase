@@ -2,7 +2,7 @@
  * @file route_registry.h
  * @brief In-memory HTTP route table keyed by method and path.
  *
- * Used by @ref Router to register MantisBase handlers and middleware chains before
+ * Used by @ref MbRouter to register MantisBase handlers and middleware chains before
  * they are mirrored into Drogon's native routing layer.
  */
 
@@ -12,7 +12,6 @@
 #include <unordered_map>
 #include <functional>
 #include <string>
-#include <variant>
 #include <vector>
 #include <nlohmann/json.hpp>
 
@@ -23,42 +22,34 @@
 namespace mb
 {
     /** Hash functor for @ref RouteKey (`method`, `path`) pairs. */
-    struct RouteKeyHash
+    struct MbRouteKeyHash
     {
         size_t operator()(const MbRouteKey& k) const;
     };
 
     /** Handler plus ordered middleware chain for a single route. */
-    struct MANTISBASE_API RouteHandler
+    struct MANTISBASE_API MbRouteHandler
     {
         std::vector<MbMiddlewareFn> middlewares;
-        std::variant<MbHandlerFn, MbHandlerWithContentReaderFn> handler;
+        MbHandlerFn handler;
     };
 
     /**
      * @brief Thread-local route registry backing the MantisBase router.
-     *
-     * Supports both plain and content-reader handler variants (multipart uploads).
      */
-    class MANTISBASE_API RouteRegistry
+    class MANTISBASE_API MbRouteRegistry
     {
-        std::unordered_map<MbRouteKey, RouteHandler, RouteKeyHash> routes;
+        std::unordered_map<MbRouteKey, MbRouteHandler, MbRouteKeyHash> routes;
 
     public:
-        /** Register a standard handler for `method` + `path`. */
+        /** Register a handler for `method` + `path`. */
         void add(const std::string& method,
                  const std::string& path,
                  const MbHandlerFn &handler,
                  const MbMiddlewares& middlewares);
 
-        /** Register a handler that receives a @ref MantisContentReader. */
-        void add(const std::string& method,
-                 const std::string& path,
-                 const MbHandlerWithContentReaderFn &handler,
-                 const MbMiddlewares& middlewares);
-
         /** @return Route handler metadata, or `nullptr` if not registered. */
-        const RouteHandler* find(const std::string& method, const std::string& path) const;
+        const MbRouteHandler* find(const std::string& method, const std::string& path) const;
 
         /**
          * @brief Remove a route from the registry.

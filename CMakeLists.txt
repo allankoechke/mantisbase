@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 # doc/docker.md
 # docker/Dockerfile
 # docker/docker-compose.yaml
-project(MantisBase VERSION 0.4.7)
+project(MantisBase VERSION 0.4.8)
 
 # Set output directories to match SOCI's
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -109,7 +109,6 @@ set( MB_SOURCES
         src/core/router_internals.cpp
         src/core/http_request.cpp
         src/core/http_response.cpp
-        src/core/http_content_reader.cpp
         src/core/models/access_rules.cpp
 
         src/core/realtime.cpp
@@ -118,6 +117,8 @@ set( MB_SOURCES
         src/core/sse_mgr.cpp
         src/core/http.cpp
         src/core/types.cpp
+        src/core/email.cpp
+        src/core/smtp_client.cpp
 
         include/mantisbase/utils/snowflake.hpp
 )
@@ -245,7 +246,7 @@ include(cmake/add-semver.cmake)
 # Add Tests
 option(MB_BUILD_TESTS "Build MantisBase Tests" OFF)
 if (MB_BUILD_TESTS)
-    message("-- Enabling tests for MantisBase")
+    message("Enabling tests for MantisBase")
     enable_testing()
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif ()

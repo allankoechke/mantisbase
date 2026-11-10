@@ -8,7 +8,7 @@
  * - **POST /api/v1/realtime** — Sets topics for an existing session (JSON body: client_id,
  *   topics, optional token). Returns granted topics and denied entries.
  *
- * Authentication is optional at connect; invalid tokens are treated as guest. Auth can be
+ * Authentication is optional at connect; invalid tokens are treated as guest. MbAuth can be
  * upgraded on POST subscribe but not downgraded or switched to another user.
  *
  * @see realtime_session.h
@@ -33,7 +33,7 @@
 
 namespace mb {
     using json = nlohmann::json;
-    class WSMgr;
+    class MbWSMgr;
 
     /**
      * @brief Per-client SSE session state and async stream writer.
@@ -41,7 +41,7 @@ namespace mb {
      * Holds subscribed topics, auth snapshot, activity timestamps, and a Drogon
      * @ref drogon::ResponseStreamPtr for zero-thread event delivery.
      */
-    class MANTISBASE_API SSESession {
+    class MANTISBASE_API MbSSESession {
         std::string m_clientID;
         std::set<std::string> m_topics;
         drogon::ResponseStreamPtr m_stream;
@@ -54,7 +54,7 @@ namespace mb {
         RealtimeAuthSnapshot m_auth;
 
     public:
-        SSESession(std::string client_id,
+        MbSSESession(std::string client_id,
                    const std::set<std::string> &topics,
                    drogon::ResponseStreamPtr stream,
                    RealtimeAuthSnapshot auth = makeGuestAuthSnapshot());
@@ -99,20 +99,20 @@ namespace mb {
     /**
      * @brief Manages SSE routes, sessions, broadcast, and shared WebSocket cleanup.
      *
-     * Owns a @ref WSMgr instance and runs a background thread that closes expired,
+     * Owns a @ref MbWSMgr instance and runs a background thread that closes expired,
      * idle, and connect-only sessions for both SSE and WebSocket.
      */
-    class MANTISBASE_API SSEMgr : public IMantisBase {
-        std::unordered_map<std::string, std::shared_ptr<SSESession>> m_sessions;
+    class MANTISBASE_API MbSSEMgr : public MbAppMixin {
+        std::unordered_map<std::string, std::shared_ptr<MbSSESession>> m_sessions;
         std::mutex m_sessions_mutex;
         std::condition_variable m_cv;
         std::thread m_cleanup_thread;
         std::atomic<bool> m_running{true};
-        std::unique_ptr<WSMgr> m_wsMgr;
+        std::unique_ptr<MbWSMgr> m_wsMgr;
 
     public:
-        explicit SSEMgr(const MantisBase& app);
-        ~SSEMgr();
+        explicit MbSSEMgr(const MantisBase& app);
+        ~MbSSEMgr();
 
         /** Register GET/POST `/api/v1/realtime` and the WebSocket controller. */
         void createRoutes();
@@ -126,7 +126,7 @@ namespace mb {
                                   RealtimeAuthSnapshot auth = makeGuestAuthSnapshot());
 
         /** Look up a session by ID without updating activity. */
-        std::shared_ptr<SSESession> fetchSession(const std::string &session_id);
+        std::shared_ptr<MbSSESession> fetchSession(const std::string &session_id);
 
         /** Remove and close a session by client ID. */
         void removeSession(const std::string &session_id);
@@ -135,7 +135,7 @@ namespace mb {
         void updateActivity(const std::string &session_id);
 
         /** Look up a session by client ID (used by POST subscribe handler). */
-        std::shared_ptr<mb::SSESession> getSession(const std::string &sessionId);
+        std::shared_ptr<mb::MbSSESession> getSession(const std::string &sessionId);
 
         /** Push a change event to all SSE sessions subscribed to the matching topic. */
         void broadcastChange(const json &change_event);
@@ -144,7 +144,7 @@ namespace mb {
         size_t getSessionCount();
 
         /** @return WebSocket manager (shared cleanup loop). */
-        WSMgr &wsMgr() const;
+        MbWSMgr &wsMgr() const;
 
         /** Start the cleanup background thread. */
         void start();

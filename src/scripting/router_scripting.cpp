@@ -10,11 +10,11 @@
 #include <vector>
 
 namespace mb {
-    void Router::executeJsRoute(const DukValue &handler,
+    void MbRouter::executeJsRoute(const DukValue &handler,
                                 const std::vector<DukValue> &middlewares,
                                 MbRequest &req,
                                 MbResponse &res) {
-        auto *engine = ScriptingEngine::active();
+        auto *engine = MbScriptingEngine::active();
         if (!engine) {
             res.sendJSON(500, json{{"error", "Scripting engine not available"}, {"status", "500"}, {"data", json::object()}});
             return;
@@ -33,18 +33,18 @@ namespace mb {
         engine->pcallVoid(handler, req, res);
     }
 
-    void Router::broadcastChange(const nlohmann::json &change_event) const {
+    void MbRouter::broadcastChange(const nlohmann::json &change_event) const {
         sseMgr().broadcastChange(change_event);
     }
 
-    void Router::broadcastChangeJson(const std::string &event_json) const {
+    void MbRouter::broadcastChangeJson(const std::string &event_json) const {
         broadcastChange(json::parse(event_json));
     }
 
     namespace {
         /// Shared helper behind addRoute/get/post/patch/delete JS bindings.
         /// Expects (path, handler, ...middlewares) with the HTTP method fixed by the caller.
-        duk_ret_t bindJsRouteForMethod(Router *router, const std::string &method, duk_context *ctx) {
+        duk_ret_t bindJsRouteForMethod(MbRouter *router, const std::string &method, duk_context *ctx) {
             const auto path = trim(duk_require_string(ctx, 0));
             if (path.empty() || path[0] != '/') {
                 duk_error(ctx, DUK_ERR_TYPE_ERROR,
@@ -79,23 +79,23 @@ namespace mb {
 
             if (method == "GET") {
                 router->Get(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
-                    mb::Router::executeJsRoute(handler, middlewares, req, res);
+                    mb::MbRouter::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "POST") {
                 router->Post(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
-                    mb::Router::executeJsRoute(handler, middlewares, req, res);
+                    mb::MbRouter::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "PATCH") {
                 router->Patch(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
-                    mb::Router::executeJsRoute(handler, middlewares, req, res);
+                    mb::MbRouter::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "PUT") {
                 router->Put(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
-                    mb::Router::executeJsRoute(handler, middlewares, req, res);
+                    mb::MbRouter::executeJsRoute(handler, middlewares, req, res);
                 });
             } else if (method == "DELETE") {
                 router->Delete(path, [router, handler, middlewares](MbRequest &req, MbResponse &res) {
-                    mb::Router::executeJsRoute(handler, middlewares, req, res);
+                    mb::MbRouter::executeJsRoute(handler, middlewares, req, res);
                 });
             } else {
                 duk_error(ctx, DUK_ERR_TYPE_ERROR, "Unsupported HTTP method: %s", method.c_str());
@@ -107,7 +107,7 @@ namespace mb {
         }
     } // namespace
 
-    duk_ret_t Router::bindRoute(duk_context *ctx) {
+    duk_ret_t MbRouter::bindRoute(duk_context *ctx) {
         auto method = trim(duk_require_string(ctx, 0));
         std::ranges::transform(method, method.begin(), ::toupper);
         if (method.empty()
@@ -128,27 +128,27 @@ namespace mb {
         return bindJsRouteForMethod(this, method, ctx);
     }
 
-    duk_ret_t Router::bindGet(duk_context *ctx) {
+    duk_ret_t MbRouter::bindGet(duk_context *ctx) {
         return bindJsRouteForMethod(this, "GET", ctx);
     }
 
-    duk_ret_t Router::bindPost(duk_context *ctx) {
+    duk_ret_t MbRouter::bindPost(duk_context *ctx) {
         return bindJsRouteForMethod(this, "POST", ctx);
     }
 
-    duk_ret_t Router::bindPatch(duk_context *ctx) {
+    duk_ret_t MbRouter::bindPatch(duk_context *ctx) {
         return bindJsRouteForMethod(this, "PATCH", ctx);
     }
 
-    duk_ret_t Router::bindPut(duk_context *ctx) {
+    duk_ret_t MbRouter::bindPut(duk_context *ctx) {
         return bindJsRouteForMethod(this, "PUT", ctx);
     }
 
-    duk_ret_t Router::bindDelete(duk_context *ctx) {
+    duk_ret_t MbRouter::bindDelete(duk_context *ctx) {
         return bindJsRouteForMethod(this, "DELETE", ctx);
     }
 
-    duk_ret_t Router::bindRedirect(duk_context *ctx) const {
+    duk_ret_t MbRouter::bindRedirect(duk_context *ctx) const {
         const duk_idx_t n = duk_get_top(ctx);
         if (n < 2) {
             duk_error(ctx, DUK_ERR_TYPE_ERROR,
@@ -183,7 +183,7 @@ namespace mb {
             }
         }
 
-        // Default mirrors Router::redirect: GET-only. An empty array allows all methods.
+        // Default mirrors MbRouter::redirect: GET-only. An empty array allows all methods.
         std::vector<std::string> constraints{"GET"};
         if (n >= 4 && !duk_is_undefined(ctx, 3) && !duk_is_null(ctx, 3)) {
             constraints.clear();

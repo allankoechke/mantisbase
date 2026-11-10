@@ -6,7 +6,7 @@
 #include <iostream>
 
 namespace mb {
-    duk_ret_t DuktapeImpl::nativeConsoleInfo(duk_context *ctx) {
+    duk_ret_t MbDuktapeImpl::nativeConsoleInfo(duk_context *ctx) {
         const duk_idx_t n = duk_get_top(ctx);
         std::cout << "[INFO] ";
         for (duk_idx_t i = 0; i < n; i++) {
@@ -19,7 +19,7 @@ namespace mb {
         return 0;
     }
 
-    duk_ret_t DuktapeImpl::nativeConsoleTrace(duk_context *ctx) {
+    duk_ret_t MbDuktapeImpl::nativeConsoleTrace(duk_context *ctx) {
         const duk_idx_t n = duk_get_top(ctx);
         std::cout << "[TRACE] ";
         for (duk_idx_t i = 0; i < n; i++) {
@@ -32,11 +32,11 @@ namespace mb {
         return 0;
     }
 
-    duk_ret_t DuktapeImpl::nativeConsoleTable(duk_context *ctx) {
+    duk_ret_t MbDuktapeImpl::nativeConsoleTable(duk_context *ctx) {
         return nativeConsoleInfo(ctx);
     }
 
-    void ScriptingHooks::fireOnServerStart(duk_context *ctx) {
+    void MbScriptingHooks::fireOnServerStart(duk_context *ctx) {
         duk_get_global_string(ctx, "onServerStart");
         if (duk_is_function(ctx, -1)) {
             if (duk_pcall(ctx, 0) != 0) {
@@ -47,7 +47,7 @@ namespace mb {
         duk_pop(ctx);
     }
 
-    void ScriptingHooks::fireOnServerShutdown(duk_context *ctx) {
+    void MbScriptingHooks::fireOnServerShutdown(duk_context *ctx) {
         duk_get_global_string(ctx, "onServerShutdown");
         if (duk_is_function(ctx, -1)) {
             if (duk_pcall(ctx, 0) != 0) {
@@ -58,7 +58,7 @@ namespace mb {
         duk_pop(ctx);
     }
 
-    void ScriptingHooks::fireOnRecordCreated(duk_context *ctx,
+    void MbScriptingHooks::fireOnRecordCreated(duk_context *ctx,
                                              const std::string &entity,
                                              const std::string &recordId) {
         duk_get_global_string(ctx, "onRecordCreated");
@@ -73,7 +73,7 @@ namespace mb {
         duk_pop(ctx);
     }
 
-    void ScriptingHooks::fireOnRecordUpdated(duk_context *ctx,
+    void MbScriptingHooks::fireOnRecordUpdated(duk_context *ctx,
                                              const std::string &entity,
                                              const std::string &recordId) {
         duk_get_global_string(ctx, "onRecordUpdated");
@@ -91,13 +91,13 @@ namespace mb {
     void registerConsoleBindings(duk_context *ctx) {
         duk_push_object(ctx);
 
-        duk_push_c_function(ctx, &DuktapeImpl::nativeConsoleInfo, DUK_VARARGS);
+        duk_push_c_function(ctx, &MbDuktapeImpl::nativeConsoleInfo, DUK_VARARGS);
         duk_put_prop_string(ctx, -2, "info");
 
-        duk_push_c_function(ctx, &DuktapeImpl::nativeConsoleTrace, DUK_VARARGS);
+        duk_push_c_function(ctx, &MbDuktapeImpl::nativeConsoleTrace, DUK_VARARGS);
         duk_put_prop_string(ctx, -2, "trace");
 
-        duk_push_c_function(ctx, &DuktapeImpl::nativeConsoleInfo, DUK_VARARGS);
+        duk_push_c_function(ctx, &MbDuktapeImpl::nativeConsoleInfo, DUK_VARARGS);
         duk_put_prop_string(ctx, -2, "log");
 
         duk_put_global_string(ctx, "console");

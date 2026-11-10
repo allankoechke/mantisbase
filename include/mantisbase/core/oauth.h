@@ -6,7 +6,7 @@
  * Discord, Microsoft) are seeded at startup; admins supply `client_id` and
  * `client_secret` before enabling them for an entity.
  *
- * Access from C++ through @ref Auth::oauth() on your owned @ref MantisBase instance.
+ * Access from C++ through @ref MbAuth::oauth() on your owned @ref MantisBase instance.
  *
  * @code
  * auto app = MantisBase::create();
@@ -45,9 +45,9 @@ namespace mb {
      * - `POST|GET|PATCH|DELETE /api/v1/sys/oauth/providers` (admin)
      * - `POST|DELETE /api/v1/sys/oauth/entity-config` (admin)
      */
-    class MANTISBASE_API OAuthManager : public IMantisBase {
+    class MANTISBASE_API MbOAuthMgr : public MbAppMixin {
     public:
-        explicit OAuthManager(const MantisBase &app);
+        explicit MbOAuthMgr(const MantisBase &app);
 
         /** Build provider authorize URL and persist PKCE state server-side. */
         [[nodiscard]] json buildAuthorizeUrl(const std::string &entity_name,

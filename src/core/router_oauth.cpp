@@ -1,24 +1,43 @@
 #include "mantisbase/core/router.h"
 #include "mantisbase/core/oauth.h"
 #include "mantisbase/core/http.h"
+#include "mantisbase/core/exceptions.h"
 #include "mantisbase/mantisbase.h"
 
 namespace mb {
-    void Router::registerOAuthRoutes() {
+    namespace {
+        bool rejectDisabledOAuth(const MbRequest &req, const MbResponse &res) {
+            const auto entity_name = trim(req.pathParamValue("entity_name"));
+            const auto reason = req.mbApp().entity(entity_name).authMethodDisabledReason("oauth");
+            if (reason.empty())
+                return false;
+            res.sendJSON(403, {
+                             {"status", 403},
+                             {"data", json::object()},
+                             {"error", reason}
+                         });
+            return true;
+        }
+    }
+
+    void MbRouter::registerOAuthRoutes() {
         const MbMiddlewares authEntityMiddleware = {resolveAuthEntity()};
 
         // User-facing OAuth routes
         Get("/api/v1/auth/:entity_name/oauth/authorize/:provider",
             [](const MbRequest &req, const MbResponse &res) {
                 try {
-                    const auto entity_name = trim(req.getPathParamValue("entity_name"));
-                    const auto provider = trim(req.getPathParamValue("provider"));
-                    auto redirect_uri = req.getQueryParamValue("redirect_uri");
+                    if (rejectDisabledOAuth(req, res))
+                        return;
+
+                    const auto entity_name = trim(req.pathParamValue("entity_name"));
+                    const auto provider = trim(req.pathParamValue("provider"));
+                    auto redirect_uri = req.queryParamValue("redirect_uri");
 
                     if (redirect_uri.empty()) {
                         auto base = req.mbApp().settings().configs().value("siteDomain", std::string{});
                         if (base.empty()) {
-                            base = std::format("http://{}", req.getHeaderValue("Host"));
+                            base = std::format("http://{}", req.headerValue("Host"));
                         }
                         while (!base.empty() && base.back() == '/')
                         {
@@ -39,13 +58,16 @@ namespace mb {
         Get("/api/v1/auth/:entity_name/oauth/callback/:provider",
             [](const MbRequest &req, const MbResponse &res) {
                 try {
-                    const auto entity_name = trim(req.getPathParamValue("entity_name"));
-                    const auto provider = trim(req.getPathParamValue("provider"));
-                    const auto code = req.getQueryParamValue("code");
-                    const auto state = req.getQueryParamValue("state");
+                    if (rejectDisabledOAuth(req, res))
+                        return;
+
+                    const auto entity_name = trim(req.pathParamValue("entity_name"));
+                    const auto provider = trim(req.pathParamValue("provider"));
+                    const auto code = req.queryParamValue("code");
+                    const auto state = req.queryParamValue("state");
 
                     if (code.empty() || state.empty()) {
-                        auto error = req.getQueryParamValue("error");
+                        auto error = req.queryParamValue("error");
                         res.sendJSON(400, {
                                          {"status", 400},
                                          {"data", json::object()},
@@ -56,6 +78,8 @@ namespace mb {
 
                     auto result = req.mbApp().auth().oauth().handleCallback(entity_name, provider, code, state);
                     res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
+                } catch (const MbException &e) {
+                    res.sendJSON(e.code(), {{"status", e.code()}, {"data", json::object()}, {"error", e.what()}});
                 } catch (const std::exception &e) {
                     req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
                     res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});
@@ -65,8 +89,11 @@ namespace mb {
         Post("/api/v1/auth/:entity_name/oauth/link/:provider",
             [](MbRequest &req, const MbResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                if (rejectDisabledOAuth(req, res))
+                    return;
+
+                auto auth = req.get<json>("auth", json::object());
+                auto verification = req.get<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(401, {
@@ -75,11 +102,11 @@ namespace mb {
                     return;
                 }
 
-                auto entity_name = trim(req.getPathParamValue("entity_name"));
-                auto provider = trim(req.getPathParamValue("provider"));
+                auto entity_name = trim(req.pathParamValue("entity_name"));
+                auto provider = trim(req.pathParamValue("provider"));
                 auto user_id = auth["id"].get<std::string>();
 
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
                     return;
@@ -90,6 +117,8 @@ namespace mb {
 
                 auto result = req.mbApp().auth().oauth().linkAccount(entity_name, user_id, provider, code, state);
                 res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
+            } catch (const MbException &e) {
+                res.sendJSON(e.code(), {{"status", e.code()}, {"data", json::object()}, {"error", e.what()}});
             } catch (const std::exception &e) {
                 req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
                 res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});
@@ -99,8 +128,8 @@ namespace mb {
         Delete("/api/v1/auth/:entity_name/oauth/link/:provider",
                [](MbRequest &req, const MbResponse &res) {
                    try {
-                       auto auth = req.getOr<json>("auth", json::object());
-                       auto verification = req.getOr<json>("verification", json::object());
+                       auto auth = req.get<json>("auth", json::object());
+                       auto verification = req.get<json>("verification", json::object());
 
                        if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                            res.sendJSON(401, {
@@ -110,8 +139,8 @@ namespace mb {
                            return;
                        }
 
-                       auto entity_name = trim(req.getPathParamValue("entity_name"));
-                       auto provider = trim(req.getPathParamValue("provider"));
+                       auto entity_name = trim(req.pathParamValue("entity_name"));
+                       auto provider = trim(req.pathParamValue("provider"));
                        auto user_id = auth["id"].get<std::string>();
 
                        if (req.mbApp().auth().oauth().unlinkAccount(entity_name, user_id, provider)) {
@@ -131,8 +160,8 @@ namespace mb {
         Get("/api/v1/auth/:entity_name/oauth/accounts",
             [](MbRequest &req, const MbResponse &res) {
             try {
-                auto auth = req.getOr<json>("auth", json::object());
-                auto verification = req.getOr<json>("verification", json::object());
+                auto auth = req.get<json>("auth", json::object());
+                auto verification = req.get<json>("verification", json::object());
 
                 if (!verification.contains("verified") || !verification["verified"].get<bool>()) {
                     res.sendJSON(401, {
@@ -141,7 +170,7 @@ namespace mb {
                     return;
                 }
 
-                auto entity_name = trim(req.getPathParamValue("entity_name"));
+                auto entity_name = trim(req.pathParamValue("entity_name"));
                 auto user_id = auth["id"].get<std::string>();
 
                 auto accounts = req.mbApp().auth().oauth().getLinkedAccounts(entity_name, user_id);
@@ -155,7 +184,10 @@ namespace mb {
         Get("/api/v1/auth/:entity_name/oauth/providers",
             [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto entity_name = trim(req.getPathParamValue("entity_name"));
+                if (rejectDisabledOAuth(req, res))
+                    return;
+
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
                 auto providers = req.mbApp().auth().oauth().getProviders(entity_name);
                 res.sendJSON(200, {{"status", 200}, {"data", providers}, {"error", ""}});
             } catch (const std::exception &e) {
@@ -170,7 +202,7 @@ namespace mb {
         Post("/api/v1/sys/oauth/providers",
             [](MbRequest &req, const MbResponse &res) {
             try {
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
                     return;
@@ -208,8 +240,8 @@ namespace mb {
         Patch("/api/v1/sys/oauth/providers/:id",
             [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto provider_id = trim(req.getPathParamValue("id"));
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto provider_id = trim(req.pathParamValue("id"));
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
                     return;
@@ -226,7 +258,7 @@ namespace mb {
         Delete("/api/v1/sys/oauth/providers/:id",
             [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto provider_id = trim(req.getPathParamValue("id"));
+                const auto provider_id = trim(req.pathParamValue("id"));
                 if (req.mbApp().auth().oauth().removeProvider(provider_id)) {
                     res.sendJSON(200, {{"status", 200}, {"data", {{"deleted", true}}}, {"error", ""}});
                 } else {
@@ -241,7 +273,7 @@ namespace mb {
         Post("/api/v1/sys/oauth/entity-config",
             [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
                     return;
@@ -261,7 +293,7 @@ namespace mb {
         Delete("/api/v1/sys/oauth/entity-config",
             [](const MbRequest &req, const MbResponse &res) {
             try {
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty()) {
                     res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
                     return;

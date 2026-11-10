@@ -87,8 +87,8 @@ static json soci_row_to_json(const soci::row &row) {
 }
 
 static void register_db(const nb::module_ &m) {
-    nb::class_<mb::Database>(m, "Database")
-            .def("query", [](mb::Database &self, const std::string &sql, const nb::args &params) -> nb::list {
+    nb::class_<mb::MbDatabase>(m, "MbDatabase")
+            .def("query", [](mb::MbDatabase &self, const std::string &sql, const nb::args &params) -> nb::list {
                 soci::values binds;
                 bool has_binds = false;
 
@@ -140,5 +140,5 @@ static void register_db(const nb::module_ &m) {
                 }
                 return py_results;
             }, nb::arg("sql"), nb::arg("params"))
-            .def_prop_ro("connected", &mb::Database::isConnected);
+            .def_prop_ro("connected", &mb::MbDatabase::isConnected);
 }

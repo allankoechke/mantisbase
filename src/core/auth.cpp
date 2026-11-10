@@ -1,22 +1,37 @@
 #include "../../../include/mantisbase/core/auth.h"
 #include "../../include/mantisbase/mantisbase.h"
+#include "../../include/mantisbase/core/email.h"
+#include "../../include/mantisbase/core/exceptions.h"
 #include "../../include/mantisbase/utils/crypto_utils.h"
+#include "../../include/mantisbase/utils/utils.h"
 
+#include <soci/soci.h>
+
+#include <algorithm>
+#include <cctype>
+#include <chrono>
+#include <ranges>
+#include <cstdint>
 #include <cstring>
+#include <ctime>
+#include <format>
+#include <limits>
+#include <optional>
+#include <unordered_map>
 #include <jwt-cpp/traits/nlohmann-json/defaults.h>
 
 namespace mb {
-    Auth::Auth(const MantisBase &app)
+    MbAuth::MbAuth(const MantisBase &app)
         : mApp(app),
-          m_oauth(std::make_unique<OAuthManager>(app)),
-          m_apiKeyManager(std::make_unique<ApiKeyManager>(app)) {
+          m_oauth(std::make_unique<MbOAuthMgr>(app)),
+          m_apiKeyManager(std::make_unique<MbApiKeyMgr>(app)) {
     }
 
-    OAuthManager & Auth::oauth() const { return *m_oauth; }
+    MbOAuthMgr & MbAuth::oauth() const { return *m_oauth; }
 
-    ApiKeyManager & Auth::apiKey() const { return *m_apiKeyManager; }
+    MbApiKeyMgr & MbAuth::apiKey() const { return *m_apiKeyManager; }
 
-    int Auth::sessionTimeoutSeconds(const std::string &entity_name, const int timeout) const {
+    int MbAuth::sessionTimeoutSeconds(const std::string &entity_name, const int timeout) const {
         if (timeout > 0) {
             return timeout;
         }
@@ -27,7 +42,7 @@ namespace mb {
                    : config.value("sessionTimeout", 24 * 60 * 60);
     }
 
-    std::string Auth::createToken(const json &claims_params, const int timeout) const {
+    std::string MbAuth::createToken(const json &claims_params, const int timeout) const {
         const auto secretKey = mApp.jwtSecretKey();
         if (claims_params.empty() || !claims_params.contains("id") || !claims_params.contains("entity")) {
             throw std::invalid_argument("Missing `id` and/or `entity` fields in token claims.");
@@ -91,7 +106,7 @@ namespace mb {
         return token;
     }
 
-    json Auth::verifyToken(const std::string &token) const {
+    json MbAuth::verifyToken(const std::string &token) const {
         json result;
         result["claims"] = json::object();
         result["error"] = "";
@@ -162,7 +177,7 @@ namespace mb {
         }
     }
 
-    bool Auth::deleteSession(const std::string &session_id) const {
+    bool MbAuth::deleteSession(const std::string &session_id) const {
         try {
             const auto &sql = mApp.db().session();
             *sql << "DELETE FROM mb_sessions WHERE id = :id", soci::use(session_id);
@@ -174,7 +189,7 @@ namespace mb {
         }
     }
 
-    json Auth::refreshSession(const std::string &old_session_id, const std::string &entity_name,
+    json MbAuth::refreshSession(const std::string &old_session_id, const std::string &entity_name,
                               const std::string &user_id) {
         const auto &sql = mApp.db().session();
         auto now = getCurrentTimestampUTC();
@@ -199,16 +214,610 @@ namespace mb {
         };
     }
 
+    namespace {
+        constexpr int kLoginOtpTtlSeconds = 10 * 60;
+        constexpr int kLoginOtpMaxAttempts = 5;
+        constexpr int kEmailVerificationTtlSeconds = 24 * 60 * 60;
+        constexpr int kPasswordResetTtlSeconds = 60 * 60;
+
+        struct OtpAccount {
+            std::string id;
+            std::string email;
+        };
+
+        std::string normalizeEmail(const std::string &raw) {
+            auto email = trim(raw);
+            toLowerCase(email);
+            return email;
+        }
+
+        bool looksLikeEmail(const std::string &email) {
+            if (email.empty() || email.front() == '@' || email.back() == '@')
+                return false;
+            const auto at = email.find('@');
+            if (at == std::string::npos || email.find('@', at + 1) != std::string::npos)
+                return false;
+            return email.find_first_of(" \t\r\n") == std::string::npos;
+        }
+
+        bool isSixDigitCode(const std::string &otp) {
+            return otp.size() == 6 &&
+                   std::all_of(otp.begin(), otp.end(), [](const unsigned char c) { return std::isdigit(c) != 0; });
+        }
+
+        std::string timestampAfterSeconds(const int seconds) {
+            const auto when = std::chrono::system_clock::now() + std::chrono::seconds(seconds);
+            const auto tt = std::chrono::system_clock::to_time_t(when);
+            const std::tm utc = toUtcTime(tt);
+            char buffer[20];
+            if (std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &utc) == 0)
+                return getCurrentTimestampUTC();
+            return buffer;
+        }
+
+        std::string generateLoginCode() {
+            constexpr std::uint32_t span = 1000000;
+            constexpr std::uint32_t limit =
+                    (std::numeric_limits<std::uint32_t>::max() / span) * span;
+            for (;;) {
+                const auto hex = generateSecureRandom(4);
+                const auto value = static_cast<std::uint32_t>(std::stoul(hex, nullptr, 16));
+                if (value < limit)
+                    return std::format("{:06}", value % span);
+            }
+        }
+
+        const std::string &otpTimingHash() {
+            static const std::string hash = hashPassword("mantisbase-otp-timing");
+            return hash;
+        }
+
+        void burnOtpTiming(const std::string &otp) {
+            try {
+                (void) verifyPassword(otp, otpTimingHash());
+            } catch (const std::exception &) {
+            }
+        }
+
+        std::string appDisplayName(const MantisBase &app) {
+            const auto &config = app.settings().configs();
+            std::string name = "MantisBase";
+            if (config.contains("orgName") && config["orgName"].is_string())
+                name = trim(config["orgName"].get<std::string>());
+            if (name.empty())
+                name = "MantisBase";
+
+            std::string clean;
+            clean.reserve(name.size());
+            for (const unsigned char c : name) {
+                if (c == '\r' || c == '\n' || c == '\0')
+                    clean.push_back(' ');
+                else
+                    clean.push_back(static_cast<char>(c));
+            }
+            return clean;
+        }
+
+        void purgeExpiredOtps(soci::session &sql) {
+            const auto now = getCurrentTimestampUTC();
+            sql << "DELETE FROM mb_login_otps WHERE expires_at <= :now", soci::use(now);
+        }
+
+        std::optional<OtpAccount> findAccountByEmail(const MantisBase &app,
+                                                      const std::string &entity_name,
+                                                      const std::string &email) {
+            const auto entity = app.entity(entity_name);
+            if (!entity.hasField("email").has_value())
+                throw MbException(400, "This account cannot sign in with email.");
+
+            const auto sql = app.db().session();
+            soci::row row;
+            const auto query = std::format(
+                "SELECT id, email FROM {} WHERE email IS NOT NULL AND LOWER(email) = LOWER(:email) LIMIT 1",
+                sqlIdentifier(entity.name()));
+            *sql << query, soci::use(email), soci::into(row);
+            if (!sql->got_data())
+                return std::nullopt;
+
+            OtpAccount account;
+            account.id = row.get<std::string>(0);
+            account.email = trim(row.get<std::string>(1));
+            if (account.id.empty() || account.email.empty())
+                return std::nullopt;
+            return account;
+        }
+
+        [[noreturn]] void rejectLoginCode(const MantisBase &app, const std::string &entity_name) {
+            app.logger().warn("MbAuth", "Sign-in code rejected", entity_name);
+            throw MbException(401, "Invalid or expired sign-in code.");
+        }
+
+        bool emailFlagTrue(const json &user) {
+            if (!user.contains("email_verified") || user["email_verified"].is_null())
+                return false;
+            if (user["email_verified"].is_boolean())
+                return user["email_verified"].get<bool>();
+            if (user["email_verified"].is_number_integer())
+                return user["email_verified"].get<int>() != 0;
+            return false;
+        }
+
+        std::string trimTrailingSlashes(std::string value) {
+            while (!value.empty() && value.back() == '/')
+                value.pop_back();
+            return value;
+        }
+
+        void purgeExpiredEmailVerifications(soci::session &sql) {
+            const auto now = getCurrentTimestampUTC();
+            sql << "DELETE FROM mb_email_verifications WHERE expires_at <= :now", soci::use(now);
+        }
+
+        void purgeExpiredPasswordResets(soci::session &sql) {
+            const auto now = getCurrentTimestampUTC();
+            sql << "DELETE FROM mb_password_resets WHERE expires_at <= :now", soci::use(now);
+        }
+
+        bool looksLikePassword(const std::string &password) {
+            if (password.size() < 8)
+                return false;
+            return std::ranges::none_of(password, [](const unsigned char ch) {
+                return std::isspace(ch) != 0;
+            });
+        }
+    } // namespace
+
+    json MbAuth::requestLoginOtp(const std::string &entity_name, const std::string &email) const {
+        if (!mApp.mailer().isConfigured())
+            throw MbException(400, std::string(MbMailer::kNotConfiguredMessage));
+
+        const auto address = normalizeEmail(email);
+        if (!looksLikeEmail(address))
+            throw MbException(400, "Invalid email address");
+
+        const auto account = findAccountByEmail(mApp, entity_name, address);
+        if (!account.has_value())
+            return {{"sent", true}};
+
+        auto email_key = account->email;
+        toLowerCase(email_key);
+
+        const auto id = generateTimeBasedId();
+        const auto code = generateLoginCode();
+        const auto code_hash = hashPassword(code);
+        const auto expires_at = timestampAfterSeconds(kLoginOtpTtlSeconds);
+        const auto now = getCurrentTimestampUTC();
+        const auto minutes = std::to_string(kLoginOtpTtlSeconds / 60);
+        const auto app_name = appDisplayName(mApp);
+
+        const auto sql = mApp.db().session();
+        purgeExpiredOtps(*sql);
+        {
+            soci::transaction tr(*sql);
+            *sql << "INSERT INTO mb_login_otps "
+                    "(id, entity_name, user_id, email, code_hash, expires_at, attempts, created) "
+                    "VALUES (:id, :entity, :uid, :email, :hash, :exp, 0, :now)",
+                    soci::use(id), soci::use(entity_name), soci::use(account->id),
+                    soci::use(email_key), soci::use(code_hash), soci::use(expires_at), soci::use(now);
+            tr.commit();
+        }
+
+        MbEmailMsg message;
+        message.to = account->email;
+        message.subject = std::format("Your {} sign-in code", app_name);
+        const std::unordered_map<std::string, std::string> vars = {
+            {"app_name", app_name},
+            {"otp", code},
+            {"expires_minutes", minutes}
+        };
+        message.body_text = mApp.mailer().loadTemplate("login_otp.txt", vars);
+        message.body_html = mApp.mailer().loadTemplate("login_otp.html", vars);
+
+        try {
+            if (!mApp.mailer().send(message))
+                throw MbException(502, "Failed to send the sign-in code.");
+        } catch (...) {
+            try {
+                *sql << "DELETE FROM mb_login_otps WHERE id = :id", soci::use(id);
+            } catch (const std::exception &) {
+            }
+            throw;
+        }
+
+        // A failed send leaves any previous code in place. After a successful send,
+        // only the code that was just delivered remains valid.
+        *sql << "DELETE FROM mb_login_otps WHERE entity_name = :entity AND user_id = :uid AND id != :id",
+                soci::use(entity_name), soci::use(account->id), soci::use(id);
+
+        return {{"sent", true}};
+    }
+
+    json MbAuth::loginWithOtp(const std::string &entity_name,
+                              const std::string &email,
+                              const std::string &otp) const {
+        const auto address = normalizeEmail(email);
+        if (!looksLikeEmail(address))
+            throw MbException(400, "Invalid email address");
+
+        const auto code = trim(otp);
+        if (!isSixDigitCode(code))
+            throw MbException(400, "Sign-in code must be a 6-digit number.");
+
+        const auto sql = mApp.db().session();
+        purgeExpiredOtps(*sql);
+
+        std::string id;
+        std::string user_id;
+        std::string code_hash;
+        int attempts = 0;
+        const auto now = getCurrentTimestampUTC();
+        *sql << "SELECT id, user_id, code_hash, attempts FROM mb_login_otps "
+                "WHERE entity_name = :entity AND email = :email AND expires_at > :now "
+                "ORDER BY created DESC, id DESC LIMIT 1",
+                soci::use(entity_name), soci::use(address), soci::use(now),
+                soci::into(id), soci::into(user_id), soci::into(code_hash), soci::into(attempts);
+
+        if (!sql->got_data() || id.empty() || code_hash.empty()) {
+            burnOtpTiming(code);
+            rejectLoginCode(mApp, entity_name);
+        }
+
+        if (attempts >= kLoginOtpMaxAttempts) {
+            *sql << "DELETE FROM mb_login_otps WHERE id = :id", soci::use(id);
+            burnOtpTiming(code);
+            rejectLoginCode(mApp, entity_name);
+        }
+
+        *sql << "UPDATE mb_login_otps SET attempts = attempts + 1 WHERE id = :id", soci::use(id);
+
+        bool matched = false;
+        try {
+            matched = verifyPassword(code, code_hash);
+        } catch (const std::exception &) {
+            matched = false;
+        }
+
+        if (!matched) {
+            if (attempts + 1 >= kLoginOtpMaxAttempts)
+                *sql << "DELETE FROM mb_login_otps WHERE id = :id", soci::use(id);
+            rejectLoginCode(mApp, entity_name);
+        }
+
+        *sql << "DELETE FROM mb_login_otps WHERE entity_name = :entity AND user_id = :uid",
+                soci::use(entity_name), soci::use(user_id);
+
+        const auto entity = mApp.entity(entity_name);
+        auto user_opt = entity.read(user_id);
+        if (!user_opt.has_value())
+            rejectLoginCode(mApp, entity_name);
+
+        auto user = std::move(user_opt.value());
+        user.erase("password");
+        rejectUnverifiedLogin(entity_name, user);
+        const auto token = createToken({{"id", user_id}, {"entity", entity_name}});
+        return {
+            {"token", token},
+            {"user", user}
+        };
+    }
+
+    std::string MbAuth::verificationLinkBase(const std::string &request_host) const {
+        const auto &config = mApp.settings().configs();
+        std::string base;
+        if (config.contains("siteDomain") && config["siteDomain"].is_string())
+            base = trimTrailingSlashes(trim(config["siteDomain"].get<std::string>()));
+        if (!base.empty())
+            return base;
+
+        const auto host = trim(request_host);
+        if (host.empty())
+            return {};
+        return "http://" + host;
+    }
+
+    void MbAuth::rejectUnverifiedLogin(const std::string &entity_name, const json &user) const {
+        const auto entity = mApp.entity(entity_name);
+        if (entity.isSystem() || entity.type() != "auth")
+            return;
+        if (!entity.authMethods().requireEmailVerification)
+            return;
+        if (emailFlagTrue(user))
+            return;
+        throw MbException(403, "Verify your email before signing in.");
+    }
+
+    void MbAuth::deliverEmailVerification(const std::string &entity_name,
+                                          const std::string &user_id,
+                                          const std::string &email,
+                                          const std::string &public_base) const {
+        if (public_base.empty())
+            throw MbException(400, "Set siteDomain before sending a verification email.");
+
+        const auto address = normalizeEmail(email);
+        const auto token = generateSecureRandom(32);
+        const auto token_hash = sha256Hex(token);
+        const auto id = generateTimeBasedId();
+        const auto expires_at = timestampAfterSeconds(kEmailVerificationTtlSeconds);
+        const auto now = getCurrentTimestampUTC();
+        const auto app_name = appDisplayName(mApp);
+        const auto verify_url = std::format("{}/api/v1/auth/{}/verify-email?token={}",
+                                            public_base, entity_name, token);
+
+        const auto sql = mApp.db().session();
+        purgeExpiredEmailVerifications(*sql);
+        {
+            soci::transaction tr(*sql);
+            *sql << "INSERT INTO mb_email_verifications "
+                    "(id, entity_name, user_id, email, token_hash, expires_at, created) "
+                    "VALUES (:id, :entity, :uid, :email, :hash, :exp, :now)",
+                    soci::use(id), soci::use(entity_name), soci::use(user_id),
+                    soci::use(address), soci::use(token_hash), soci::use(expires_at), soci::use(now);
+            tr.commit();
+        }
+
+        MbEmailMsg message;
+        message.to = email;
+        message.subject = std::format("Verify your email for {}", app_name);
+        const std::unordered_map<std::string, std::string> vars = {
+            {"app_name", app_name},
+            {"verify_url", verify_url}
+        };
+        message.body_text = mApp.mailer().loadTemplate("verification.txt", vars);
+        message.body_html = mApp.mailer().loadTemplate("verification.html", vars);
+
+        try {
+            if (!mApp.mailer().send(message))
+                throw MbException(502, "Failed to send the verification email.");
+        } catch (...) {
+            try {
+                *sql << "DELETE FROM mb_email_verifications WHERE id = :id", soci::use(id);
+            } catch (const std::exception &) {
+            }
+            throw;
+        }
+
+        *sql << "DELETE FROM mb_email_verifications WHERE entity_name = :entity AND user_id = :uid AND id != :id",
+                soci::use(entity_name), soci::use(user_id), soci::use(id);
+    }
+
+    void MbAuth::notifyEmailVerification(const std::string &entity_name, const std::string &user_id) const {
+        if (!mApp.mailer().isConfigured())
+            return;
+
+        const auto entity = mApp.entity(entity_name);
+        if (entity.isSystem() || entity.type() != "auth" || !entity.field("email_verified").has_value())
+            return;
+
+        const auto user = entity.read(user_id);
+        if (!user.has_value() || emailFlagTrue(*user))
+            return;
+        if (!user->contains("email") || !user->at("email").is_string())
+            return;
+
+        const auto email = user->at("email").get<std::string>();
+        if (trim(email).empty())
+            return;
+
+        const auto base = verificationLinkBase("");
+        if (base.empty()) {
+            mApp.logger().warn("MbAuth", "Email verification skipped",
+                               "Set siteDomain before verification links can be sent.");
+            return;
+        }
+
+        try {
+            deliverEmailVerification(entity_name, user_id, email, base);
+        } catch (const std::exception &e) {
+            mApp.logger().warn("MbAuth", "Email verification not sent", e.what());
+        }
+    }
+
+    json MbAuth::requestEmailVerification(const std::string &entity_name,
+                                          const std::string &email,
+                                          const std::string &request_host) const {
+        if (!mApp.mailer().isConfigured())
+            throw MbException(400, std::string(MbMailer::kNotConfiguredMessage));
+
+        const auto address = normalizeEmail(email);
+        if (!looksLikeEmail(address))
+            throw MbException(400, "Invalid email address");
+
+        const auto base = verificationLinkBase(request_host);
+        if (base.empty())
+            throw MbException(400, "Set siteDomain before sending a verification email.");
+
+        const auto account = findAccountByEmail(mApp, entity_name, address);
+        if (!account.has_value())
+            return {{"sent", true}};
+
+        const auto entity = mApp.entity(entity_name);
+        const auto user = entity.read(account->id, {{"keep_passwords", true}});
+        if (!user.has_value() || emailFlagTrue(*user))
+            return {{"sent", true}};
+
+        deliverEmailVerification(entity_name, account->id, account->email, base);
+        return {{"sent", true}};
+    }
+
+    json MbAuth::confirmEmailVerification(const std::string &entity_name, const std::string &token) const {
+        const auto raw = trim(token);
+        if (raw.size() < 32 || raw.size() > 256)
+            throw MbException(400, "Invalid or expired verification link.");
+
+        const auto token_hash = sha256Hex(raw);
+        const auto sql = mApp.db().session();
+        purgeExpiredEmailVerifications(*sql);
+
+        std::string id;
+        std::string user_id;
+        std::string email;
+        const auto now = getCurrentTimestampUTC();
+        *sql << "SELECT id, user_id, email FROM mb_email_verifications "
+                "WHERE entity_name = :entity AND token_hash = :hash AND expires_at > :now "
+                "ORDER BY created DESC, id DESC LIMIT 1",
+                soci::use(entity_name), soci::use(token_hash), soci::use(now),
+                soci::into(id), soci::into(user_id), soci::into(email);
+
+        if (!sql->got_data() || id.empty() || user_id.empty())
+            throw MbException(400, "Invalid or expired verification link.");
+
+        const auto entity = mApp.entity(entity_name);
+        if (!entity.field("email_verified").has_value())
+            throw MbException(400, "This account cannot verify an email address.");
+
+        const auto user = entity.read(user_id);
+        if (!user.has_value() || !user->contains("email") || !user->at("email").is_string())
+            throw MbException(400, "Invalid or expired verification link.");
+
+        const auto current = normalizeEmail(user->at("email").get<std::string>());
+        if (current != normalizeEmail(email))
+            throw MbException(400, "Invalid or expired verification link.");
+
+        [[maybe_unused]] auto _ = entity.update(user_id, {{"email_verified", true}});
+        *sql << "DELETE FROM mb_email_verifications WHERE entity_name = :entity AND user_id = :uid",
+                soci::use(entity_name), soci::use(user_id);
+
+        return {{"verified", true}};
+    }
+
+    void MbAuth::deliverPasswordReset(const std::string &entity_name,
+                                      const std::string &user_id,
+                                      const std::string &email,
+                                      const std::string &public_base) const {
+        if (public_base.empty())
+            throw MbException(400, "Set siteDomain before sending a password reset email.");
+
+        const auto address = normalizeEmail(email);
+        const auto token = generateSecureRandom(32);
+        const auto token_hash = sha256Hex(token);
+        const auto id = generateTimeBasedId();
+        const auto expires_at = timestampAfterSeconds(kPasswordResetTtlSeconds);
+        const auto now = getCurrentTimestampUTC();
+        const auto app_name = appDisplayName(mApp);
+        const auto reset_url = std::format("{}/api/v1/auth/{}/password-reset?token={}",
+                                           public_base, entity_name, token);
+
+        const auto sql = mApp.db().session();
+        purgeExpiredPasswordResets(*sql);
+        {
+            soci::transaction tr(*sql);
+            *sql << "INSERT INTO mb_password_resets "
+                    "(id, entity_name, user_id, email, token_hash, expires_at, created) "
+                    "VALUES (:id, :entity, :uid, :email, :hash, :exp, :now)",
+                    soci::use(id), soci::use(entity_name), soci::use(user_id),
+                    soci::use(address), soci::use(token_hash), soci::use(expires_at), soci::use(now);
+            tr.commit();
+        }
+
+        MbEmailMsg message;
+        message.to = email;
+        message.subject = std::format("Reset your password for {}", app_name);
+        const std::unordered_map<std::string, std::string> vars = {
+            {"app_name", app_name},
+            {"reset_url", reset_url}
+        };
+        message.body_text = mApp.mailer().loadTemplate("password_reset.txt", vars);
+        message.body_html = mApp.mailer().loadTemplate("password_reset.html", vars);
+
+        try {
+            if (!mApp.mailer().send(message))
+                throw MbException(502, "Failed to send the password reset email.");
+        } catch (...) {
+            try {
+                *sql << "DELETE FROM mb_password_resets WHERE id = :id", soci::use(id);
+            } catch (const std::exception &) {
+            }
+            throw;
+        }
+
+        *sql << "DELETE FROM mb_password_resets WHERE entity_name = :entity AND user_id = :uid AND id != :id",
+                soci::use(entity_name), soci::use(user_id), soci::use(id);
+    }
+
+    json MbAuth::requestPasswordReset(const std::string &entity_name,
+                                      const std::string &email,
+                                      const std::string &request_host) const {
+        if (!mApp.mailer().isConfigured())
+            throw MbException(400, std::string(MbMailer::kNotConfiguredMessage));
+
+        const auto address = normalizeEmail(email);
+        if (!looksLikeEmail(address))
+            throw MbException(400, "Invalid email address");
+
+        const auto base = verificationLinkBase(request_host);
+        if (base.empty())
+            throw MbException(400, "Set siteDomain before sending a password reset email.");
+
+        const auto account = findAccountByEmail(mApp, entity_name, address);
+        if (!account.has_value())
+            return {{"sent", true}};
+
+        const auto entity = mApp.entity(entity_name);
+        if (!entity.field("password").has_value())
+            return {{"sent", true}};
+
+        deliverPasswordReset(entity_name, account->id, account->email, base);
+        return {{"sent", true}};
+    }
+
+    json MbAuth::confirmPasswordReset(const std::string &entity_name,
+                                      const std::string &token,
+                                      const std::string &new_password) const {
+        const auto raw = trim(token);
+        if (raw.size() < 32 || raw.size() > 256)
+            throw MbException(400, "Invalid or expired password reset link.");
+
+        if (!looksLikePassword(new_password))
+            throw MbException(400, "Expected 8 chars minimum with no whitespaces.");
+
+        const auto token_hash = sha256Hex(raw);
+        const auto sql = mApp.db().session();
+        purgeExpiredPasswordResets(*sql);
+
+        std::string id;
+        std::string user_id;
+        std::string email;
+        const auto now = getCurrentTimestampUTC();
+        *sql << "SELECT id, user_id, email FROM mb_password_resets "
+                "WHERE entity_name = :entity AND token_hash = :hash AND expires_at > :now "
+                "ORDER BY created DESC, id DESC LIMIT 1",
+                soci::use(entity_name), soci::use(token_hash), soci::use(now),
+                soci::into(id), soci::into(user_id), soci::into(email);
+
+        if (!sql->got_data() || id.empty() || user_id.empty())
+            throw MbException(400, "Invalid or expired password reset link.");
+
+        const auto entity = mApp.entity(entity_name);
+        if (!entity.field("password").has_value())
+            throw MbException(400, "This account cannot reset a password.");
+
+        const auto user = entity.read(user_id);
+        if (!user.has_value() || !user->contains("email") || !user->at("email").is_string())
+            throw MbException(400, "Invalid or expired password reset link.");
+
+        const auto current = normalizeEmail(user->at("email").get<std::string>());
+        if (current != normalizeEmail(email))
+            throw MbException(400, "Invalid or expired password reset link.");
+
+        [[maybe_unused]] auto _ = entity.update(user_id, {{"password", new_password}});
+        *sql << "DELETE FROM mb_password_resets WHERE entity_name = :entity AND user_id = :uid",
+                soci::use(entity_name), soci::use(user_id);
+        *sql << "DELETE FROM mb_sessions WHERE entity_name = :entity AND user_id = :uid",
+                soci::use(entity_name), soci::use(user_id);
+
+        return {{"reset", true}};
+    }
+
 #ifdef MB_SCRIPTING_ENABLED
-    std::string Auth::createTokenJson(const std::string &claims_json, const int timeout) const {
+    std::string MbAuth::createTokenJson(const std::string &claims_json, const int timeout) const {
         return createToken(json::parse(claims_json), timeout);
     }
 
-    std::string Auth::verifyTokenJson(const std::string &token) const {
+    std::string MbAuth::verifyTokenJson(const std::string &token) const {
         return verifyToken(token).dump();
     }
 
-    std::string Auth::refreshSessionJson(const std::string &old_session_id,
+    std::string MbAuth::refreshSessionJson(const std::string &old_session_id,
                                          const std::string &entity_name,
                                          const std::string &user_id) {
         return refreshSession(old_session_id, entity_name, user_id).dump();

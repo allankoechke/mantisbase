@@ -8,7 +8,7 @@ public:
     static Napi::Function GetClass(Napi::Env env);
     ResponseWrap(const Napi::CallbackInfo& info);
 
-    static Napi::Object NewInstance(Napi::Env env, mb::MantisResponse* res);
+    static Napi::Object NewInstance(Napi::Env env, mb::MbResponse* res);
 
 private:
     Napi::Value JsonMethod(const Napi::CallbackInfo& info);
@@ -18,7 +18,7 @@ private:
     Napi::Value Redirect(const Napi::CallbackInfo& info);
     Napi::Value SetHeader(const Napi::CallbackInfo& info);
 
-    mb::MantisResponse* m_res = nullptr;
+    mb::MbResponse* m_res = nullptr;
 
     static Napi::FunctionReference s_constructor;
 };

@@ -38,8 +38,8 @@ All REST endpoints live under `/api/v1/` and are grouped by namespace:
 
 | Prefix | Description |
 |--------|-------------|
-| `/api/v1/auth/` | Entity user authentication: token verify (`/verify`), plus per-entity login, refresh, logout, API keys, and OAuth |
-| `/api/v1/entities/` | Entity record CRUD |
+| `/api/v1/auth/` | MbEntity user authentication: token verify (`/verify`), plus per-entity login, email OTP login, refresh, logout, API keys, and OAuth |
+| `/api/v1/entities/` | MbEntity record CRUD |
 | `/api/v1/schemas/` | Schema management (admin only) |
 | `/api/v1/files/` | Uploaded file serving |
 | `/api/v1/health` | Server health check |
@@ -53,7 +53,7 @@ All REST endpoints live under `/api/v1/` and are grouped by namespace:
 
 ---
 
-## Entity Endpoints
+## MbEntity Endpoints
 
 MantisBase automatically exposes CRUD endpoints for each entity (table or view):
 
@@ -65,7 +65,7 @@ MantisBase automatically exposes CRUD endpoints for each entity (table or view):
 | PATCH  | `/api/v1/entities/<entity>/:id`       | Update partial fields |
 | DELETE | `/api/v1/entities/<entity>/:id`       | Delete a record       |
 
-Auth-type entity responses never include the `password` field in list, get, or realtime change payloads.
+MbAuth-type entity responses never include the `password` field in list, get, or realtime change payloads.
 
 ### Example Requests
 
@@ -172,44 +172,44 @@ When creating custom endpoints, you can specify middlewares as the third paramet
 
 ```cpp
 // Require admin authentication
-router.Get("/api/v1/admin/stats", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/admin/stats", [](MbRequest& req, MbResponse& res) {
     res.sendJSON(200, {{"stats", "data"}});
 }, {requireAdminAuth()});
 
 // Require authentication from specific entity
-router.Get("/api/v1/users/profile", [](MantisRequest& req, MantisResponse& res) {
-    auto auth = req.getOr<json>("auth", json::object());
+router.Get("/api/v1/users/profile", [](MbRequest& req, MbResponse& res) {
+    auto auth = req.get<json>("auth", json::object());
     std::string userId = auth["id"];
     // ... return user profile
 }, {requireEntityAuth("users")});
 
 // Allow admins OR users from specific entity
-router.Get("/api/v1/posts/draft", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/posts/draft", [](MbRequest& req, MbResponse& res) {
     // ... return draft posts
 }, {requireAdminOrEntityAuth("users")});
 
 // Guest-only endpoint (no authentication required)
-router.Get("/api/v1/public/info", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/public/info", [](MbRequest& req, MbResponse& res) {
     res.sendJSON(200, {{"info", "public data"}});
 }, {requireGuestOnly()});
 
 // Custom expression evaluation
-router.Get("/api/v1/restricted", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/restricted", [](MbRequest& req, MbResponse& res) {
     // ... handler
 }, {requireExprEval("auth.id != \"\" && auth.user.verified == true")});
 
 // Rate limiting by IP address (100 requests per minute)
-router.Get("/api/v1/data", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/data", [](MbRequest& req, MbResponse& res) {
     res.sendJSON(200, {{"data", "response"}});
 }, {rateLimit(100, 60, false)});
 
 // Rate limiting by user ID (10 requests per second)
-router.Post("/api/v1/upload", [](MantisRequest& req, MantisResponse& res) {
+router.Post("/api/v1/upload", [](MbRequest& req, MbResponse& res) {
     // ... handler
 }, {rateLimit(10, 1, true)});
 
 // Multiple middlewares (executed in order)
-router.Post("/api/v1/sensitive", [](MantisRequest& req, MantisResponse& res) {
+router.Post("/api/v1/sensitive", [](MbRequest& req, MbResponse& res) {
     // ... handler
 }, {
     requireAdminAuth(),
@@ -222,9 +222,9 @@ router.Post("/api/v1/sensitive", [](MantisRequest& req, MantisResponse& res) {
 After middlewares run, you can access authenticated user data from the request context:
 
 ```cpp
-router.Get("/api/v1/me", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/me", [](MbRequest& req, MbResponse& res) {
     // Get auth data from context (set by middlewares)
-    auto auth = req.getOr<json>("auth", json::object());
+    auto auth = req.get<json>("auth", json::object());
     
     if (auth["type"] == "guest") {
         res.sendJSON(401, {{"error", "Not authenticated"}});
@@ -258,7 +258,7 @@ Schema management endpoints allow you to create, read, update, and delete entity
 
 ### Example: Create a Schema
 
-**Base Entity (Standard Table):**
+**Base MbEntity (Standard Table):**
 
 ```bash
 curl -X POST http://localhost:7070/api/v1/schemas \
@@ -282,7 +282,7 @@ curl -X POST http://localhost:7070/api/v1/schemas \
   }'
 ```
 
-**View Entity (SQL View):**
+**View MbEntity (SQL View):**
 
 ```bash
 curl -X POST http://localhost:7070/api/v1/schemas \
@@ -299,7 +299,7 @@ curl -X POST http://localhost:7070/api/v1/schemas \
   }'
 ```
 
-**Auth Entity (Authentication Table):**
+**MbAuth MbEntity (Authentication Table):**
 
 ```bash
 curl -X POST http://localhost:7070/api/v1/schemas \
@@ -318,11 +318,14 @@ curl -X POST http://localhost:7070/api/v1/schemas \
       "add": {"mode": "public", "expr": ""},
       "update": {"mode": "custom", "expr": "auth.id == req.body.id"},
       "delete": {"mode": "", "expr": ""}
-    }
+    },
+    "auth": {"password": true, "otp": false, "oauth": false, "requireEmailVerification": false}
   }'
 ```
 
-### Entity Types
+`auth` is only valid on auth entities. Password login defaults to enabled. OTP and OAuth default to disabled. `requireEmailVerification` defaults to off. Change the flags with an admin `PATCH /api/v1/schemas/<name>`; other clients receive **403** on a disabled login route. Auth tables also store `email_verified` (default `false`). Admin accounts do not. See [Authentication API](auth.md#login-methods).
+
+### MbEntity Types
 
 MantisBase supports three entity types:
 
@@ -332,9 +335,9 @@ MantisBase supports three entity types:
 | `auth` | Authentication entity | Yes | Includes password, email, and user management fields automatically |
 | `view` | SQL view (read-only) | No | Requires `view_query` instead of fields |
 
-### Entity Name Validation
+### MbEntity Name Validation
 
-Entity names must follow these rules:
+MbEntity names must follow these rules:
 - **Alphanumeric and underscores only** - Only letters, numbers, and `_` characters allowed
 - **Maximum 64 characters** - Names cannot exceed 64 characters
 - **Not empty** - Names must contain at least one character
@@ -389,7 +392,7 @@ curl -X PATCH http://localhost:7070/api/v1/schemas/posts \
 
 ## Query Parameters
 
-Entity list endpoints use cursor-based pagination ordered by record `id` (ascending):
+MbEntity list endpoints use cursor-based pagination ordered by record `id` (ascending):
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -435,10 +438,67 @@ When `has_more` is `false`, you have reached the last page.
 You can create custom API endpoints using the router:
 
 ```cpp
-router.Get("/api/v1/custom", [](MantisRequest& req, MantisResponse& res) {
+router.Get("/api/v1/custom", [](MbRequest& req, MbResponse& res) {
     res.sendJSON(200, {{"message", "Custom endpoint"}});
 }, {requireAdminAuth()});
 ```
+
+### Request bodies: JSON and file uploads
+
+PUT/PATCH/POST handlers share the single `(req, res)` signature. Both JSON
+and `multipart/form-data` bodies are read through `MbRequest` (parsed lazily,
+once per request):
+
+| Method | Behavior |
+|---|---|
+| `req.jsonBody()` | Unified parsed body. JSON requests return the parsed body and throw `MbException(400)` on malformed JSON; multipart requests return an empty object until `parseFormDataToEntity()` maps the fields. |
+| `req.bodyAsJson()` | Non-throwing alternative returning a `{body, error}` pair. |
+| `req.isMultipartFormData()` | `true` when the body is `multipart/form-data`. |
+| `req.formData()` | Multipart parts (text and file fields: `name`, `content`, `filename`, `content_type`); empty for JSON bodies. |
+| `req.filesMetadata()` | File metadata keyed by form field name, available after `parseFormDataToEntity()`. |
+| `req.parseFormDataToEntity(entity)` | Map multipart fields onto an entity for create/update (no-op for JSON). |
+| `req.writeFiles(entity_name)` / `req.undoWrittenFiles(entity_name)` | Persist uploaded files / roll them back on failure (no-ops for JSON). |
+
+A custom endpoint accepting both JSON and file uploads:
+
+```cpp
+router.Post("/api/v1/documents", [](MbRequest& req, MbResponse& res) {
+    try {
+        const auto entity = req.mbApp().entity("documents");
+
+        req.parseFormDataToEntity(entity); // no-op for JSON bodies
+        const json &body = req.jsonBody(); // throws 400 on malformed JSON
+
+        if (const auto err = MbValidators::validateRequestBody(entity, body);
+            err.has_value()) {
+            res.sendJSON(400, {
+                {"error", err.value()},
+                {"status", 400},
+                {"data", json::object()}
+            });
+            return;
+        }
+
+        req.writeFiles("documents"); // no-op for JSON bodies
+        auto record = entity.create(body);
+        res.sendJSON(201, {
+            {"error", ""},
+            {"status", 201},
+            {"data", record}
+        });
+    } catch (const MbException &e) {
+        req.undoWrittenFiles("documents");
+        res.sendJSON(e.code(), {
+            {"error", e.what()},
+            {"status", e.code()},
+            {"data", json::object()}
+        });
+    }
+});
+```
+
+Uploaded files are served at `GET /api/v1/files/<entity>/<filename>`.
+See [File Handling](files.md) for more details.
 
 ### Path redirects
 
@@ -514,7 +574,7 @@ Both `on_update` and `on_delete` support the following policies:
 
 When creating or updating schemas with foreign keys, MantisBase automatically validates:
 
-1. **Referenced Entity Exists** - The entity referenced by `foreign_key.entity` must exist
+1. **Referenced MbEntity Exists** - The entity referenced by `foreign_key.entity` must exist
 2. **Referenced Field Exists** - The field specified in `foreign_key.field` must exist in the referenced entity
 3. **Type Compatibility** - Field types should be compatible (warnings issued for mismatches)
 
@@ -571,7 +631,7 @@ When creating or updating schemas with foreign keys, MantisBase automatically va
 
 To remove a foreign key constraint, set `foreign_key` to `null`:
 
-```json
+```bash
 PATCH /api/v1/schemas/comments
 {
   "fields": [
@@ -611,6 +671,7 @@ Requires **admin authentication** for all settings endpoints.
 |--------|----------|-------------|
 | GET | `/api/v1/sys/settings/config` | Get application settings |
 | PATCH | `/api/v1/sys/settings/config` | Update application settings |
+| POST | `/api/v1/sys/settings/smtp/test` | Send an SMTP test message |
 
 PATCH returns **503** when `MB_DISABLE_CONFIG_MUTATIONS` is set to a truthy value. A successful PATCH reloads the CORS allowlist immediately (no server restart required).
 
@@ -632,7 +693,85 @@ The settings object contains the following fields:
 | `jwtEnableSetAudience` | boolean | `false` | Set JWT audience from `siteDomain` |
 | `smtp` | object | see below | Outbound mail configuration |
 
-SMTP object fields: `host`, `port` (default 587), `user`, `password`, `from`, `tls`. On GET, a non-empty password is returned as `"********"`. On PATCH, send `"********"` for `smtp.password` to keep the existing value.
+#### SMTP
+
+SMTP credentials are stored in the `smtp` object of application settings. There is no SMTP environment variable. Any of these writes the same record and applies it to the mailer immediately (no restart):
+
+1. **Admin dashboard** — sign in at `/mb`, open **Settings** (`/mb/settings`), and fill in the SMTP section (Host, Port, Username, Password, From Address, Use TLS).
+2. **REST** — `PATCH /api/v1/sys/settings/config` with an `smtp` object (admin authentication required).
+3. **Startup script** — `app.settings().set("smtp", JSON.stringify({...}))`. See [Scripting](scripting.md).
+
+`MB_DISABLE_CONFIG_MUTATIONS` blocks the dashboard save and the PATCH endpoint (**503**). A script running inside the server can still call `app.settings().set`.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `host` | string | `""` | SMTP server hostname. Empty host disables sending. `mock` and `localhost:0` capture messages in-process and do not connect (tests). |
+| `port` | integer | `587` | SMTP port, 1–65535 |
+| `user` | string | `""` | AUTH username. Leave empty to skip authentication |
+| `password` | string | `""` | AUTH password |
+| `from` | string | `""` | Envelope and header From address. Required, together with `host`, before the mailer will send |
+| `tls` | boolean | `true` | Encrypt the session. See below |
+
+TLS modes:
+
+- `tls: true` and port **465** — implicit TLS
+- `tls: true` and any other port (typically **587**) — STARTTLS. Authentication is refused if the server does not advertise STARTTLS
+- `tls: false` — cleartext
+
+Password handling is the same for the dashboard, PATCH, and `app.settings().set`:
+
+- **GET** and `app.settings().get("smtp")` / `configs()` return a non-empty password as `"********"`. An empty password stays `""`.
+- Sending `"********"`, or omitting `password`, keeps the stored password.
+- Sending `""` clears the stored password.
+- Any other string replaces it.
+
+The dashboard password box is filled with that mask when a password is already stored. Leave the mask as it is, or clear the box, to keep the current password. Type a new value to replace it. The dashboard cannot clear a stored password; send `"password": ""` through the API or a script to remove it. A password that is literally eight asterisks cannot be stored, because that string means "keep the current value".
+
+Example (admin auth required):
+
+```json
+{
+  "smtp": {
+    "host": "smtp.example.com",
+    "port": 587,
+    "user": "mailer",
+    "password": "s3cret",
+    "from": "app@example.com",
+    "tls": true
+  }
+}
+```
+
+#### Test a saved SMTP configuration
+
+`POST /api/v1/sys/settings/smtp/test` sends a message whose subject and body are `Hey, it works!` to the address in the body. Admin authentication is required. The call uses the SMTP settings already stored; it does not change them, and `MB_DISABLE_CONFIG_MUTATIONS` does not block it.
+
+```json
+{ "email": "you@example.com" }
+```
+
+Success:
+
+```json
+{
+  "status": 200,
+  "error": "",
+  "data": {
+    "to": "you@example.com",
+    "subject": "MantisBase: Hey, it works!",
+    "message": "If you are seeing this, the SMTP Settings are OK!"
+  }
+}
+```
+
+Failures use the same envelope, with `data` as `{}`:
+
+| Status | When |
+|--------|------|
+| **400** | `email` is missing, not a string, or not an address. SMTP is not configured (`host` and `from` are required). |
+| **401** | Missing or invalid admin credentials |
+| **429** | That recipient already received 3 messages in the last hour |
+| **502** | The SMTP server rejected the message or could not be reached |
 
 The GET response also includes `mantisVersion` (the running server version).
 
@@ -807,7 +946,7 @@ MantisBase provides **realtime database change notifications** over **Server-Sen
 
 ### Authentication
 
-Realtime connections accept optional credentials via `?token=` (overrides header) or `Authorization: Bearer <token>`. Invalid or expired tokens at connect time are treated as **guest**. Auth can be upgraded on subscribe (POST or WS `subscribe` message) but cannot be downgraded or switched to another user.
+Realtime connections accept optional credentials via `?token=` (overrides header) or `Authorization: Bearer <token>`. Invalid or expired tokens at connect time are treated as **guest**. MbAuth can be upgraded on subscribe (POST or WS `subscribe` message) but cannot be downgraded or switched to another user.
 
 Session IDs use the prefixes `rt_sse_...` and `rt_ws_...`.
 
@@ -867,7 +1006,7 @@ Sets the topic list for an existing SSE session (replaces prior subscriptions). 
 }
 ```
 
-Auth downgrade or switching to another user returns **403**.
+MbAuth downgrade or switching to another user returns **403**.
 
 **Example**
 
@@ -913,7 +1052,7 @@ curl -X POST http://localhost:7070/api/v1/realtime \
 | Field | Type | Description |
 |-------|------|-------------|
 | `action` | string | One of `insert`, `update`, `delete`. |
-| `entity` | string | Entity (table) name. |
+| `entity` | string | MbEntity (table) name. |
 | `row_id` | string | ID of the affected row. |
 | `topic` | string | Topic that matched (entity or `entity:row_id`). |
 | `timestamp` | number | Unix timestamp of the change. |
@@ -1033,7 +1172,7 @@ The `subscribed` acknowledgement lists granted topics and denied failures:
 
 ### Change events
 
-Database changes are delivered in the same format as SSE `change` events:
+MbDatabase changes are delivered in the same format as SSE `change` events:
 
 ```json
 {
@@ -1056,7 +1195,7 @@ The MantisBase Admin Dashboard is a comprehensive web-based interface accessible
 
 ### Dashboard Features
 
-#### Entity Management
+#### MbEntity Management
 - **Browse Entities** - View all entities (tables) in your database
 - **View Records** - Browse, search, and filter records in any entity
 - **Create Records** - Add new records through intuitive forms
@@ -1068,7 +1207,7 @@ The MantisBase Admin Dashboard is a comprehensive web-based interface accessible
 - **Field Management** - Add, edit, and remove fields with type selection
 - **Access Rules Configuration** - Set up access control rules with a user-friendly interface
 - **Foreign Key Setup** - Configure relationships between entities
-- **View Entity Support** - Create and manage SQL view entities
+- **View MbEntity Support** - Create and manage SQL view entities
 
 #### Data Exploration
 - **Search & Filter** - Quickly find records with built-in search
@@ -1084,7 +1223,7 @@ The MantisBase Admin Dashboard is a comprehensive web-based interface accessible
 #### System Management
 - **Logs Viewer** - Access system logs directly from the dashboard
 - **Health Status** - Monitor system health
-- **Configuration** - View and manage system settings
+- **Configuration** - View and manage system settings, including SMTP credentials at `/mb/settings`
 
 ### Accessing the Dashboard
 

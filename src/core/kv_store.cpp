@@ -7,6 +7,7 @@
 #include "../../include/mantisbase/core/types.h"
 #include "../../include/mantisbase/core/middlewares.h"
 #include "../../include/mantisbase/core/router.h"
+#include "../../include/mantisbase/core/email.h"
 
 #include <soci/soci.h>
 
@@ -57,9 +58,9 @@ namespace mb
         }
     }
 
-    KeyValStore::KeyValStore(MantisBase &app) : mApp(app) {}
+    MbKVStore::MbKVStore(MantisBase &app) : mApp(app) {}
 
-    bool KeyValStore::setupRoutes()
+    bool MbKVStore::setupRoutes()
     {
         try
         {
@@ -75,7 +76,7 @@ namespace mb
         return true;
     }
 
-    void KeyValStore::migrate()
+    void MbKVStore::migrate()
     {
         const auto sql = mApp.db().session();
         const auto id = configRowId();
@@ -86,6 +87,7 @@ namespace mb
         {
             m_configs = settings;
             mApp.logger().trace("Config Loaded", "Application settings loaded from database.");
+            mApp.mailer().applySettings(m_configs);
             return;
         }
 
@@ -97,73 +99,92 @@ namespace mb
             soci::use(id), soci::use(settings), soci::use(created_tm), soci::use(created_tm);
 
         m_configs = settings;
+        mApp.mailer().applySettings(m_configs);
         mApp.logger().info("Config Initialized", "Created default application settings.");
     }
 
-    json &KeyValStore::configs()
+    json &MbKVStore::configs()
     {
         return m_configs;
     }
 
-    json KeyValStore::getScriptingValue(const std::string &key) const
+    json MbKVStore::getScriptingValue(const std::string &key) const
     {
-        if (m_configs.contains(key)) {
-            return m_configs.at(key);
+        if (!m_configs.contains(key))
+            return {};
+        if (key == "smtp" && m_configs.at(key).is_object())
+        {
+            const auto redacted = redactForResponse(json{{"smtp", m_configs.at(key)}});
+            return redacted["smtp"];
         }
-        return {};
+        return m_configs.at(key);
     }
 
-    void KeyValStore::setScriptingValue(const std::string &key, const json &value)
+    void MbKVStore::setScriptingValue(const std::string &key, const json &value)
     {
         applyPatch(json{{key, value}});
+        persistConfigs();
+        mApp.router().reloadCorsOrigins();
     }
 
-    json KeyValStore::getScriptingConfigsCopy() const
+    json MbKVStore::getScriptingConfigsCopy() const
     {
-        return m_configs;
+        return redactForResponse(m_configs);
     }
 
-    void KeyValStore::reloadScriptingConfigs()
+    void MbKVStore::reloadScriptingConfigs()
     {
-        m_configs = loadFromDb();
+        m_configs = readStoreRow();
+        mApp.mailer().applySettings(m_configs);
+        mApp.router().reloadCorsOrigins();
     }
 
-    std::string KeyValStore::getScriptingJson(const std::string &key) const
+    std::string MbKVStore::getScriptingJson(const std::string &key) const
     {
         return getScriptingValue(key).dump();
     }
 
-    void KeyValStore::setScriptingJson(const std::string &key, const std::string &json_value)
+    void MbKVStore::setScriptingJson(const std::string &key, const std::string &json_value)
     {
         setScriptingValue(key, json::parse(json_value));
     }
 
-    std::string KeyValStore::configsScriptingJson() const
+    std::string MbKVStore::configsScriptingJson() const
     {
         return getScriptingConfigsCopy().dump();
     }
 
-    json KeyValStore::loadFromDb()
+    json MbKVStore::readStoreRow()
     {
-        if (!m_configs.empty())
-        {
-            return m_configs;
-        }
-
         const auto sql = mApp.db().session();
         const auto id = configRowId();
         json settings;
         *sql << "SELECT value FROM mb_store WHERE id = :id LIMIT 1", soci::use(id), soci::into(settings);
         if (sql->got_data())
-        {
-            m_configs = settings;
             return settings;
-        }
-
         return json::object();
     }
 
-    json KeyValStore::redactForResponse(const json &configs)
+    void MbKVStore::persistConfigs()
+    {
+        const auto sql = mApp.db().session();
+        const std::time_t updated_t = time(nullptr);
+        const std::tm updated_tm = toUtcTime(updated_t);
+        const auto id = configRowId();
+        *sql << "UPDATE mb_store SET value = :value, updated = :updated WHERE id = :id",
+            soci::use(m_configs), soci::use(updated_tm), soci::use(id);
+    }
+
+    json MbKVStore::loadFromDb()
+    {
+        if (!m_configs.empty())
+            return m_configs;
+
+        m_configs = readStoreRow();
+        return m_configs;
+    }
+
+    json MbKVStore::redactForResponse(const json &configs)
     {
         auto data = configs;
         if (data.contains("smtp") && data["smtp"].is_object())
@@ -178,7 +199,7 @@ namespace mb
         return data;
     }
 
-    void KeyValStore::applyPatch(const json &body)
+    void MbKVStore::applyPatch(const json &body)
     {
         if (m_configs.empty())
         {
@@ -207,7 +228,7 @@ namespace mb
             const auto size = body.value("maxFileSize", kDefaultMaxFileSize);
             if (!body["maxFileSize"].is_number_integer() || size <= 0)
             {
-                throw MantisException(400, "maxFileSize must be a positive integer (bytes).");
+                throw MbException(400, "maxFileSize must be a positive integer (bytes).");
             }
             m_configs["maxFileSize"] = size;
         }
@@ -217,7 +238,7 @@ namespace mb
             const auto days = body.value("logRetentionDays", kDefaultLogRetentionDays);
             if (!body["logRetentionDays"].is_number_integer() || days <= 0)
             {
-                throw MantisException(400, "logRetentionDays must be a positive integer (days).");
+                throw MbException(400, "logRetentionDays must be a positive integer (days).");
             }
             m_configs["logRetentionDays"] = days;
         }
@@ -243,13 +264,15 @@ namespace mb
                 }
                 smtp[key] = value;
             }
+
+            mApp.mailer().applySettings(m_configs);
         }
 
         if (body.contains("corsAllowedOrigins"))
         {
             if (!body["corsAllowedOrigins"].is_array())
             {
-                throw MantisException(400, "corsAllowedOrigins must be an array of origin strings.");
+                throw MbException(400, "corsAllowedOrigins must be an array of origin strings.");
             }
 
             json validated = json::array();
@@ -257,13 +280,13 @@ namespace mb
             {
                 if (!item.is_string())
                 {
-                    throw MantisException(400, "corsAllowedOrigins must contain only strings.");
+                    throw MbException(400, "corsAllowedOrigins must contain only strings.");
                 }
 
                 const auto value = trim(item.get<std::string>());
                 if (value.empty())
                 {
-                    throw MantisException(400, "corsAllowedOrigins entries must be non-empty strings.");
+                    throw MbException(400, "corsAllowedOrigins entries must be non-empty strings.");
                 }
 
                 validated.push_back(value);
@@ -273,7 +296,7 @@ namespace mb
         }
     }
 
-    void KeyValStore::setupConfigRoutes()
+    void MbKVStore::setupConfigRoutes()
     {
         const MbMiddlewares adminAuth = {requireAdminAuth()};
         const MbMiddlewares patchMiddleware = {
@@ -311,7 +334,7 @@ namespace mb
             "/api/v1/sys/settings/config",
             [this](const MbRequest &req, const MbResponse &res)
             {
-                const auto &[body, err] = req.getBodyAsJson();
+                const auto &[body, err] = req.bodyAsJson();
                 if (!err.empty())
                 {
                     res.sendJSON(400, {
@@ -325,15 +348,7 @@ namespace mb
                 try
                 {
                     applyPatch(body);
-
-                    const auto& sql = mApp.db().session();
-                    const std::time_t updated_t = time(nullptr);
-                    const std::tm updated_tm = toUtcTime(updated_t);
-                    const auto id = configRowId();
-
-                    *sql << "UPDATE mb_store SET value = :value, updated = :updated WHERE id = :id",
-                        soci::use(m_configs), soci::use(updated_tm), soci::use(id);
-
+                    persistConfigs();
                     mApp.router().reloadCorsOrigins();
 
                     auto data = redactForResponse(m_configs);
@@ -345,7 +360,7 @@ namespace mb
                                      {"data", data}
                                  });
                 }
-                catch (const MantisException &e)
+                catch (const MbException &e)
                 {
                     res.sendJSON(e.code(), {
                                      {"status", e.code()},
@@ -363,5 +378,63 @@ namespace mb
                 }
             },
             patchMiddleware);
+
+        mApp.router().Post(
+            "/api/v1/sys/settings/smtp/test",
+            [this](const MbRequest &req, const MbResponse &res)
+            {
+                const auto &[body, err] = req.bodyAsJson();
+                if (!err.empty())
+                {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"error", err},
+                                     {"data", json::object()}
+                                 });
+                    return;
+                }
+
+                if (!body.contains("email") || !body["email"].is_string())
+                {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"error", "email is required"},
+                                     {"data", json::object()}
+                                 });
+                    return;
+                }
+
+                const auto email = trim(body["email"].get<std::string>());
+                try
+                {
+                    mApp.mailer().sendTest(email);
+                    res.sendJSON(200, {
+                                     {"status", 200},
+                                     {"error", ""},
+                                     {"data", {
+                                         {"to", email},
+                                         {"subject", "MantisBase: Hey, it works!"},
+                                         {"message", "If you are seeing this, the SMTP Settings are OK!"}
+                                     }}
+                                 });
+                }
+                catch (const MbException &e)
+                {
+                    res.sendJSON(e.code(), {
+                                     {"status", e.code()},
+                                     {"error", e.what()},
+                                     {"data", json::object()}
+                                 });
+                }
+                catch (const std::exception &e)
+                {
+                    res.sendJSON(500, {
+                                     {"status", 500},
+                                     {"error", e.what()},
+                                     {"data", json::object()}
+                                 });
+                }
+            },
+            adminAuth);
     }
 } // mb

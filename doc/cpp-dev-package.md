@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 
 - Dev packages ship **shared libraries only**. If you need static linking (single-binary deployment), [build from source](installation.md) instead.
 - The bundled third-party headers (`drogon/`, `trantor/`, `soci/`, ...) are part of the package — don't mix them with system-installed copies.
-- SOCI is bundled inside the shared library (SQLite + PostgreSQL backends) — no extra SOCI install needed. `Database::session()` returns a `soci::session` you can query directly with `<soci/soci.h>`; linking `-lmantisbase` alone is enough:
+- SOCI is bundled inside the shared library (SQLite + PostgreSQL backends) — no extra SOCI install needed. `MbDatabase::session()` returns a `soci::session` you can query directly with `<soci/soci.h>`; linking `-lmantisbase` alone is enough:
 ```cpp
 #include <mantisbase/mantisbase.h>
 #include <soci/soci.h>
@@ -137,5 +137,5 @@ auto sql = app->db().session();
 int count = 0;
 *sql << "SELECT COUNT(*) FROM my_table", soci::into(count);
 ```
-- Only `soci_core` is exported: get sessions from `Database::session()`/`connectionPool()` rather than opening backend sessions yourself (`soci::session(soci::sqlite3, ...)`), and catch `soci::soci_error` instead of backend-specific error types.
+- Only `soci_core` is exported: get sessions from `MbDatabase::session()`/`connectionPool()` rather than opening backend sessions yourself (`soci::session(soci::sqlite3, ...)`), and catch `soci::soci_error` instead of backend-specific error types.
 - `libpq-fe.h` / `uuid.h` are system headers and are intentionally not bundled.

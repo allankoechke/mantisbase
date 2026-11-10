@@ -33,7 +33,7 @@ export USER_TOKEN=<token_from_auth_example_or_login>
 
 ## Expected behavior
 
-| Action | Auth | Expected status |
+| Action | MbAuth | Expected status |
 |--------|------|-----------------|
 | List posts | None | 200 |
 | Create post | User JWT | 201 |

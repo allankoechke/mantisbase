@@ -26,19 +26,19 @@ description: >-
 }
 ```
 
-## Entity types
+## MbEntity types
 
 | type | Purpose |
 |------|---------|
 | `base` | Standard CRUD entity |
-| `auth` | User accounts with login (`email`, `password` fields) |
+| `auth` | User accounts with login (`email`, `password`, `email_verified`). `auth.password` defaults on; `auth.otp`, `auth.oauth`, and `auth.requireEmailVerification` default off. Admins toggle them with `PATCH /api/v1/schemas/{name}`. Existing auth tables gain `email_verified` on startup. Admin accounts do not. |
 | `view` | Read-only SQL view (advanced) |
 
 ## Common field types
 
 `string`, `int`, `double`, `bool`, `date`, `json`, `file`, `files`, `relation`
 
-## Validators (constraints)
+## MbValidators (constraints)
 
 ```json
 {"name": "email", "type": "string", "constraints": {"validator": "@email"}}
@@ -74,7 +74,7 @@ Migration JSON = same schema format. Rollback (`--down`) not implemented.
 ## Examples
 
 - Blog: [`examples/01-blog/schemas/posts.json`](../../examples/01-blog/schemas/posts.json)
-- Auth users: [`examples/02-auth-users/schemas/users.json`](../../examples/02-auth-users/schemas/users.json)
+- MbAuth users: [`examples/02-auth-users/schemas/users.json`](../../examples/02-auth-users/schemas/users.json)
 - Migrations: [`examples/migrations/`](../../examples/migrations/)
 
 ## Docs

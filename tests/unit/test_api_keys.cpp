@@ -9,7 +9,7 @@ class ApiKeyTestFixture : public MbAppFixture {
 };
 
 TEST_F(ApiKeyTestFixture, GenerateApiKey) {
-    auto [id, key, key_hash] = mb::ApiKeyManager::generateApiKey();
+    auto [id, key, key_hash] = mb::MbApiKeyMgr::generateApiKey();
 
     EXPECT_FALSE(id.empty());
     EXPECT_TRUE(key.starts_with("mb_sk_"));
@@ -19,8 +19,8 @@ TEST_F(ApiKeyTestFixture, GenerateApiKey) {
 }
 
 TEST_F(ApiKeyTestFixture, GenerateUniqueKeys) {
-    auto [id1, key1, key_hash1] = mb::ApiKeyManager::generateApiKey();
-    auto [id2, key2, key_hash2] = mb::ApiKeyManager::generateApiKey();
+    auto [id1, key1, key_hash1] = mb::MbApiKeyMgr::generateApiKey();
+    auto [id2, key2, key_hash2] = mb::MbApiKeyMgr::generateApiKey();
 
     EXPECT_NE(key1, key2);
     EXPECT_NE(key_hash1, key_hash2);
@@ -29,8 +29,8 @@ TEST_F(ApiKeyTestFixture, GenerateUniqueKeys) {
 
 TEST_F(ApiKeyTestFixture, HashApiKeyConsistency) {
     const std::string raw_key = "mb_sk_abcdef1234567890abcdef1234567890abcdef1234567890abcdef12345678";
-    const auto hash1 = mb::ApiKeyManager::hashApiKey(raw_key);
-    const auto hash2 = mb::ApiKeyManager::hashApiKey(raw_key);
+    const auto hash1 = mb::MbApiKeyMgr::hashApiKey(raw_key);
+    const auto hash2 = mb::MbApiKeyMgr::hashApiKey(raw_key);
 
     EXPECT_EQ(hash1, hash2);
     EXPECT_EQ(hash1.size(), 64u);
@@ -40,8 +40,8 @@ TEST_F(ApiKeyTestFixture, DifferentKeysDifferentHashes) {
     const std::string key1 = "mb_sk_aaaa";
     const std::string key2 = "mb_sk_bbbb";
 
-    const auto hash1 = mb::ApiKeyManager::hashApiKey(key1);
-    const auto hash2 = mb::ApiKeyManager::hashApiKey(key2);
+    const auto hash1 = mb::MbApiKeyMgr::hashApiKey(key1);
+    const auto hash2 = mb::MbApiKeyMgr::hashApiKey(key2);
 
     EXPECT_NE(hash1, hash2);
 }
@@ -55,7 +55,7 @@ TEST_F(ApiKeyTestFixture, CreateAndLookupApiKey) {
     EXPECT_TRUE(result["key"].get<std::string>().starts_with("mb_sk_"));
     EXPECT_EQ(result["label"].get<std::string>(), "Test Key");
 
-    const auto key_hash = mb::ApiKeyManager::hashApiKey(result["key"].get<std::string>());
+    const auto key_hash = mb::MbApiKeyMgr::hashApiKey(result["key"].get<std::string>());
     auto lookup = keys.lookupByHash(key_hash);
 
     EXPECT_TRUE(lookup.has_value());
@@ -88,7 +88,7 @@ TEST_F(ApiKeyTestFixture, CreateListAndRevokeApiKey) {
     const bool revoked = keys.revoke(key_id, "mb_admins", "list_test_user");
     EXPECT_TRUE(revoked);
 
-    const auto key_hash = mb::ApiKeyManager::hashApiKey(created["key"].get<std::string>());
+    const auto key_hash = mb::MbApiKeyMgr::hashApiKey(created["key"].get<std::string>());
     const auto lookup = keys.lookupByHash(key_hash);
     EXPECT_FALSE(lookup.has_value());
 }
@@ -106,7 +106,7 @@ TEST_F(ApiKeyTestFixture, RevokeByIdAllowsAdminToRevokeAnyKey) {
     EXPECT_FALSE(keys.revoke(key_id, "mb_admins", "other_user"));
     EXPECT_TRUE(keys.revokeById(key_id));
 
-    const auto key_hash = mb::ApiKeyManager::hashApiKey(created["key"].get<std::string>());
+    const auto key_hash = mb::MbApiKeyMgr::hashApiKey(created["key"].get<std::string>());
     EXPECT_FALSE(keys.lookupByHash(key_hash).has_value());
 }
 
@@ -117,7 +117,7 @@ TEST_F(ApiKeyTestFixture, RevokeWithoutUserIdSkipsOwnerCheck) {
 
     EXPECT_TRUE(keys.revoke(key_id, "mb_admins", ""));
 
-    const auto key_hash = mb::ApiKeyManager::hashApiKey(created["key"].get<std::string>());
+    const auto key_hash = mb::MbApiKeyMgr::hashApiKey(created["key"].get<std::string>());
     EXPECT_FALSE(keys.lookupByHash(key_hash).has_value());
 }
 

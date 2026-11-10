@@ -1,10 +1,10 @@
 /**
  * @file http.h
- * @brief HTTP request/response wrappers and multipart content reader.
+ * @brief HTTP request/response wrappers with unified body handling.
  *
- * @ref MantisRequest and @ref MantisResponse wrap Drogon types and expose MantisBase
- * conventions: per-request attributes via `set()`/`getOr()`, auth helpers, and JSON
- * envelope responses via @ref MantisResponse::sendJSON.
+ * @ref MbRequest and @ref MbResponse wrap Drogon types and expose MantisBase
+ * conventions: per-request attributes via `set()`/`get()`, auth helpers, and JSON
+ * envelope responses via @ref MbResponse::sendJSON.
  */
 
 #ifndef MB_HTTP_H
@@ -22,15 +22,24 @@
 #include "../utils/utils.h"
 #include <fstream>
 #include <unordered_map>
+#include <vector>
 #include <drogon/HttpRequest.h>
 #include <drogon/HttpResponse.h>
 
 namespace mb {
     class MantisBase; // forward declaration; MbRequest holds a reference to it
 
+    /** Single field from a parsed `multipart/form-data` body. */
+    struct MANTISBASE_API MbFormDataItem {
+        std::string name;
+        std::string content;
+        std::string filename;
+        std::string content_type;
+    };
+
 #ifdef MB_SCRIPTING_ENABLED
     /** Duktape bindings for the JS `console` object in server scripts. */
-    class MANTISBASE_API DuktapeImpl {
+    class MANTISBASE_API MbDuktapeImpl {
     public:
         static duk_ret_t nativeConsoleInfo(duk_context *ctx);
         static duk_ret_t nativeConsoleTrace(duk_context *ctx);
@@ -38,7 +47,7 @@ namespace mb {
     };
 
     /** Fire Duktape lifecycle hooks for server start and record mutations. */
-    class MANTISBASE_API ScriptingHooks {
+    class MANTISBASE_API MbScriptingHooks {
     public:
         static void fireOnServerStart(duk_context *ctx);
         static void fireOnServerShutdown(duk_context *ctx);
@@ -51,17 +60,28 @@ namespace mb {
      * @brief HTTP request wrapper bound to a @ref MantisBase instance.
      *
      * Per-request attributes (`auth`, `verification`, etc.) are stored on the
-     * underlying Drogon request via `set()` / `getOr()`, not a global context.
-     * Use `mbApp()` (from @ref IMantisBase) to reach application services.
+     * underlying Drogon request via `set()` / `get()`, not a global context.
+     * Use `mbApp()` (from @ref MbAppMixin) to reach application services.
      */
-    class MANTISBASE_API MbRequest: public IMantisBase {
+    class MANTISBASE_API MbRequest: public MbAppMixin {
         drogon::HttpRequestPtr m_req;
         std::unordered_map<std::string, std::string> m_pathParams;
 
-        /// Lazily-parsed, cached request body. getBodyAsJson() is called
+        /// Lazily-parsed, cached request body. bodyAsJson() is called
         /// several times per request (access-rule evaluation, then the
         /// handler), so the body is parsed once and reused.
         mutable std::optional<std::pair<nlohmann::json, std::string>> m_bodyJsonCache;
+
+        /// Unified body state: parsed once on first access via
+        /// ensureBodyParsed(), then reused by jsonBody()/formData()/
+        /// parseFormDataToEntity()/writeFiles().
+        mutable bool m_bodyParsed = false;
+        mutable std::vector<MbFormDataItem> m_formData;
+        /// JSON requests: parsed body. Multipart: empty until
+        /// parseFormDataToEntity() maps the form fields.
+        mutable json m_unifiedJson = json::object();
+        /// File field metadata keyed by form field name (multipart only).
+        mutable json m_filesMetadata = json::object();
 
     public:
         explicit MbRequest(const MantisBase& app, drogon::HttpRequestPtr _req);
@@ -71,28 +91,23 @@ namespace mb {
         /** Replace all route path parameters. */
         void setPathParams(const std::unordered_map<std::string, std::string> &params);
 
-        [[nodiscard]] std::string getMethod() const;
-        [[nodiscard]] std::string getPath() const;
-        [[nodiscard]] std::string getBody() const;
-        [[nodiscard]] std::string getRemoteAddr() const;
-        [[nodiscard]] int getRemotePort() const;
-        [[nodiscard]] std::string getLocalAddr() const;
-        [[nodiscard]] int getLocalPort() const;
+        [[nodiscard]] std::string method() const;
+        [[nodiscard]] std::string path() const;
+        [[nodiscard]] std::string body() const;
+        [[nodiscard]] std::string remoteAddr() const;
+        [[nodiscard]] int remotePort() const;
+        [[nodiscard]] std::string localAddr() const;
+        [[nodiscard]] int localPort() const;
 
         [[nodiscard]] bool hasHeader(const std::string &key) const;
-        [[nodiscard]] std::string getHeaderValue(const std::string &key, const char *def = "", size_t id = 0) const;
-        [[nodiscard]] size_t getHeaderValueU64(const std::string &key, size_t def = 0, size_t id = 0) const;
-        [[nodiscard]] size_t getHeaderValueCount(const std::string &key) const;
+        [[nodiscard]] std::string headerValue(const std::string &key, const std::string& def = "") const;
 
         [[nodiscard]] bool hasQueryParam(const std::string &key) const;
-        [[nodiscard]] std::string getQueryParamValue(const std::string &key) const;
-        [[nodiscard]] std::string getQueryParamValue(const std::string &key, size_t id) const;
-        [[nodiscard]] size_t getQueryParamValueCount(const std::string &key) const;
+        [[nodiscard]] std::string queryParamValue(const std::string &key) const;
 
         [[nodiscard]] bool hasPathParams() const;
         [[nodiscard]] bool hasPathParam(const std::string &key) const;
-        [[nodiscard]] std::string getPathParamValue(const std::string &key) const;
-        [[nodiscard]] size_t getPathParamValueCount(const std::string &key) const;
+        [[nodiscard]] std::string pathParamValue(const std::string &key) const;
 
         /** @return `true` when `Content-Type` is `multipart/form-data`. */
         [[nodiscard]] bool isMultipartFormData() const;
@@ -104,9 +119,9 @@ namespace mb {
         [[nodiscard]] bool hasKey(const std::string &key) const;
 
         /** @return Bearer token from the Authorization header, or empty. */
-        [[nodiscard]] std::string getBearerTokenAuth() const;
+        [[nodiscard]] std::string bearerTokenAuth() const;
 
-        [[nodiscard]] std::string getCookieValue(const std::string &key) const;
+        [[nodiscard]] std::string cookieValue(const std::string &key) const;
 
         /** Bearer token if present, otherwise the auth cookie value. */
         [[nodiscard]] std::string resolveAuthToken() const;
@@ -115,7 +130,7 @@ namespace mb {
          * @brief Parse and cache the JSON request body.
          * @return `{body, error}` — error non-empty on parse failure.
          */
-        [[nodiscard]] std::pair<nlohmann::json, std::string> getBodyAsJson() const;
+        [[nodiscard]] std::pair<nlohmann::json, std::string> bodyAsJson() const;
 
         /** @return Underlying Drogon request pointer. */
         [[nodiscard]] const drogon::HttpRequestPtr& drogonRequest() const;
@@ -130,12 +145,36 @@ namespace mb {
         [[nodiscard]] bool isUserAuth();
 
         /**
-         * @brief Parsed JSON body, or an empty object when absent or malformed.
+         * @brief Unified parsed request body (lazy, parsed once per request).
          *
-         * Convenience wrapper over getBodyAsJson() for callers -- notably the
-         * language bindings -- that want a value rather than a (value, error) pair.
+         * This is the single body entry point for `(req, res)` handlers on
+         * PUT/PATCH/POST, covering both JSON and multipart/file-upload bodies.
+         *
+         * JSON requests: the parsed body; throws `MbException(400)` on
+         * malformed JSON. Multipart requests: empty until
+         * parseFormDataToEntity() maps the form fields onto an entity.
+         *
+         * For a non-throwing parse use bodyAsJson().
          */
-        json jsonBody() const;
+        [[nodiscard]] const json &jsonBody() const;
+
+        /** Multipart parts (text + file fields). Empty for non-multipart bodies. */
+        [[nodiscard]] const std::vector<MbFormDataItem> &formData() const;
+
+        /** File field metadata keyed by form field name (after parseFormDataToEntity). */
+        [[nodiscard]] const json &filesMetadata() const;
+
+        /** Map parsed multipart form fields onto an entity for create/update (no-op for JSON). */
+        void parseFormDataToEntity(const MbEntity &entity) const;
+
+        /** Persist uploaded files for `entity_name` using stored metadata (no-op for JSON). */
+        void writeFiles(const std::string &entity_name) const;
+
+        /** Remove files written by @ref writeFiles on validation failure. */
+        void undoWrittenFiles(const std::string &entity_name) const;
+
+        /** Stable hash of multipart metadata for deduplication checks. */
+        static std::string hashMultipartMetadata(const MbFormDataItem &data);
 
         /** Store a per-request attribute on the underlying Drogon request. */
         template<typename T>
@@ -144,14 +183,14 @@ namespace mb {
         }
 
 #ifdef MB_SCRIPTING_ENABLED
-        DukValue get_duk(const std::string &key);
-        DukValue getOr_duk(const std::string &key, const DukValue &default_value);
+        DukValue get_duk(const std::string &key) const;
+        DukValue getOr_duk(const std::string &key, const DukValue &default_value) const;
         void set_duk(const std::string &key, const DukValue &value);
 #endif
 
         /** Get a per-request attribute, inserting `default_value` if missing. */
         template<typename T>
-        const T &getOr(const std::string &key, T default_value) {
+        const T &get(const std::string &key, T default_value) {
             if (!m_req->attributes()->find(key)) {
                 m_req->attributes()->insert(key, std::any(std::move(default_value)));
             }
@@ -159,6 +198,10 @@ namespace mb {
         }
 
     private:
+        void ensureBodyParsed() const;
+        void readMultipart() const;
+        void readJSON() const;
+        static json valueFromType(const std::string &type, const std::string &value);
     };
 
     /**
@@ -167,7 +210,7 @@ namespace mb {
      * Constructed by the router for each request; use `sendJSON()`, `send()`,
      * or header helpers to build the outgoing response.
      */
-    class MANTISBASE_API MbResponse: public IMantisBase {
+    class MANTISBASE_API MbResponse: public MbAppMixin {
         drogon::HttpResponsePtr m_res;
 
     public:
@@ -182,22 +225,15 @@ namespace mb {
         /** Set HTTP status code. */
         void setStatus(int s) const;
 
-        [[nodiscard]] std::string getVersion() const;
-        void setVersion(const std::string &b);
+        [[nodiscard]] std::string version() const;
 
-        [[nodiscard]] std::string getBody() const;
-        void setBody(const std::string &b);
-
-        [[nodiscard]] std::string getLocation() const;
-        void setLocation(const std::string &b);
-
-        [[nodiscard]] std::string getReason() const;
-        void setReason(const std::string &b);
+        [[nodiscard]] std::string body() const;
+        void setBody(const std::string &b); ///> NOTE: dukglue expects non-const function
+        [[nodiscard]] std::string location() const;
+        void setLocation(const std::string &b) const;
 
         [[nodiscard]] bool hasHeader(const std::string &key) const;
-        [[nodiscard]] std::string getHeaderValue(const std::string &key, const char *def = "", size_t id = 0) const;
-        [[nodiscard]] size_t getHeaderValueU64(const std::string &key, size_t def = 0, size_t id = 0) const;
-        [[nodiscard]] size_t getHeaderValueCount(const std::string &key) const;
+        [[nodiscard]] std::string headerValue(const std::string &key, const std::string& def = "") const;
 
         void setHeader(const std::string &key, const std::string &val) const;
 
@@ -238,59 +274,6 @@ namespace mb {
         static void registerDuktapeMethods();
     };
 
-    /** Single field from a parsed `multipart/form-data` body. */
-    struct MANTISBASE_API MbFormDataItem {
-        std::string name;
-        std::string content;
-        std::string filename;
-        std::string content_type;
-    };
-
-    /**
-     * @brief Lazy multipart/JSON body parser for content-reader route handlers.
-     *
-     * Parses once, then exposes form fields, file metadata, and typed entity binding.
-     */
-    class MANTISBASE_API MbContentReader {
-        const MbRequest &m_req;
-
-        std::vector<MbFormDataItem> m_formData;
-        json m_json{}, m_filesMetadata{};
-        bool m_parsed = false;
-
-    public:
-        explicit MbContentReader(const MbRequest &req);
-
-        /** @return `true` when the request body is multipart form data. */
-        [[nodiscard]] bool isMultipartFormData() const;
-
-        /** Parsed form fields (text and file parts). */
-        [[nodiscard]] const std::vector<MbFormDataItem> &formData() const;
-
-        /** File field metadata keyed by form field name. */
-        [[nodiscard]] const json &filesMetadata() const;
-
-        /** Parsed JSON body (empty object when not JSON). */
-        [[nodiscard]] const json &jsonBody() const;
-
-        /** Map parsed form/JSON fields onto an entity for create/update. */
-        void parseFormDataToEntity(const Entity &entity);
-
-        /** Persist uploaded files for `entity_name` using stored metadata. */
-        void writeFiles(const std::string& entity_name);
-
-        /** Remove files written by @ref writeFiles on validation failure. */
-        void undoWrittenFiles(const std::string& entity_name);
-
-        /** Stable hash of multipart metadata for deduplication checks. */
-        static std::string hashMultipartMetadata(const MbFormDataItem& data);
-
-    private:
-        void read();
-        void readMultipart();
-        void readJSON();
-        static json getValueFromType(const std::string& type, const std::string& value);
-    };
 } // mb
 
 #endif //MB_HTTP_H

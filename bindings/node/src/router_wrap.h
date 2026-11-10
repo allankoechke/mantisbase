@@ -11,9 +11,9 @@ public:
     RouterWrap(const Napi::CallbackInfo& info);
     ~RouterWrap();
 
-    void SetRouter(mb::Router* router) { m_router = router; }
+    void SetRouter(mb::MbRouter* router) { m_router = router; }
 
-    static Napi::Object NewInstance(Napi::Env env, mb::Router* router);
+    static Napi::Object NewInstance(Napi::Env env, mb::MbRouter* router);
 
 private:
     Napi::Value Get(const Napi::CallbackInfo& info);
@@ -22,9 +22,9 @@ private:
     Napi::Value Delete(const Napi::CallbackInfo& info);
 
     void RegisterRoute(const Napi::CallbackInfo& info,
-        void(mb::Router::*method)(const std::string&, const mb::HandlerFn&, const mb::Middlewares&));
+        void(mb::MbRouter::*method)(const std::string&, const mb::HandlerFn&, const mb::Middlewares&));
 
-    mb::Router* m_router = nullptr;
+    mb::MbRouter* m_router = nullptr;
     std::vector<Napi::ThreadSafeFunction> m_tsfns;
 
     static Napi::FunctionReference s_constructor;

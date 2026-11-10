@@ -35,10 +35,133 @@ If the entity is missing or does not meet these requirements, the route returns 
 |--------|----------|-------------|
 | GET | `/api/v1/auth/verify` | Check whether the current JWT or API key is still valid |
 | POST | `/api/v1/auth/<entity>/login` | Authenticate user and get token |
+| POST | `/api/v1/auth/<entity>/otp/request` | Email a one-time sign-in code |
+| POST | `/api/v1/auth/<entity>/otp/login` | Sign in with an emailed code |
+| POST | `/api/v1/auth/<entity>/verify-email/request` | Email an address-verification link |
+| POST | `/api/v1/auth/<entity>/verify-email` | Confirm an address with the link token |
+| GET | `/api/v1/auth/<entity>/verify-email?token=` | Confirm an address from the email link |
+| POST | `/api/v1/auth/<entity>/password-reset/request` | Email a password-reset link |
+| POST | `/api/v1/auth/<entity>/password-reset` | Set a new password with the link token |
+| GET | `/api/v1/auth/<entity>/password-reset?token=` | HTML form to choose a new password |
 | POST | `/api/v1/auth/<entity>/refresh` | Refresh an existing token |
 | POST | `/api/v1/auth/<entity>/logout` | Logout (invalidate token) |
 
 For admin authentication and initial setup, see [System Endpoints – Admin Accounts](api.md#admin-accounts) (`/api/v1/sys/admins/`).
+
+---
+
+## Login methods
+
+Each auth entity has three login methods. Password login is enabled by default. Email sign-in codes and OAuth are disabled until an admin enables them. Login routes return **403** while a method is disabled.
+
+| Method | Schema field | Default | Routes |
+|--------|--------------|---------|--------|
+| Email and password | `auth.password` | `true` | `POST /api/v1/auth/<entity>/login` |
+| Email sign-in code | `auth.otp` | `false` | `POST /api/v1/auth/<entity>/otp/request` and `/otp/login` |
+| OAuth | `auth.oauth` | `false` | `/api/v1/auth/<entity>/oauth/authorize`, `/callback`, `/link`, `/providers` |
+| Require a verified email | `auth.requireEmailVerification` | `false` | Password, OTP, and OAuth login |
+
+Read the current flags without an admin token:
+
+```bash
+curl http://localhost:7070/api/v1/auth/users/methods
+```
+
+```json
+{
+  "status": 200,
+  "data": {
+    "password": true,
+    "otp": false,
+    "oauth": false,
+    "requireEmailVerification": false
+  },
+  "error": ""
+}
+```
+
+Change them with an admin token. Schema routes are admin-only. A patch merges the fields you send, so the example below turns on OTP and leaves password and OAuth as they are:
+
+```bash
+curl -X PATCH http://localhost:7070/api/v1/schemas/users \
+  -H "Authorization: Bearer <admin_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"auth": {"otp": true}}'
+```
+
+Existing sessions keep working after a method is turned off. New logins for that method are rejected.
+
+When `requireEmailVerification` is **true**, password login, email-code login, and OAuth login return **403** `Verify your email before signing in.` until `email_verified` is true. Sessions that are already signed in keep working. The flag defaults to **false**, so existing deployments keep the current login behavior until an admin turns it on.
+
+---
+
+## Email verification
+
+Auth tables store a system field `email_verified` (boolean, default `false`). New auth entities include it. Tables created before this field existed gain the column on startup; existing rows are unverified. Admin accounts (`mb_admins`) do not have the field.
+
+Clients cannot set `email_verified` on create or update. An admin can set it with `PATCH /api/v1/entities/<entity>/<id>`. Changing the account email clears the flag unless that same admin request sets it.
+
+When SMTP is configured, creating an account emails a verification link. The link is `{siteDomain}/api/v1/auth/<entity>/verify-email?token=...`, expires after **24 hours**, and works once. Set `siteDomain` so the link points at this server. If SMTP is not configured, registration still succeeds and no message is sent.
+
+Request another link:
+
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/verify-email/request \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+```
+
+```json
+{ "status": 200, "data": { "sent": true }, "error": "" }
+```
+
+The response is the same when no account uses that email, and no message is sent. An address that is already verified also returns `sent: true` without a new message. SMTP must be configured, otherwise the response is **400** `Email service not configured. Set SMTP settings first.`
+
+Opening the link in a browser returns a short HTML page. A client can confirm the same token with JSON:
+
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/verify-email \
+  -H "Content-Type: application/json" \
+  -d '{"token": "<token from the email>"}'
+```
+
+```json
+{ "status": 200, "data": { "verified": true }, "error": "" }
+```
+
+A missing, used, or expired token returns **400** `Invalid or expired verification link.`
+
+OAuth login marks `email_verified` when the provider asserts `email_verified`. Otherwise, and when SMTP is configured, a verification link is sent for that account.
+
+---
+
+## Password reset
+
+Request a reset link for an account email. SMTP and `siteDomain` are required. The link is `{siteDomain}/api/v1/auth/<entity>/password-reset?token=...`, expires after **1 hour**, and works once.
+
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/password-reset/request \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+```
+
+```json
+{ "status": 200, "data": { "sent": true }, "error": "" }
+```
+
+The response is the same when no account uses that email, and no message is sent. Opening the link in a browser shows a form to choose a new password. A client can also complete the reset with JSON:
+
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/password-reset \
+  -H "Content-Type: application/json" \
+  -d '{"token": "<token from the email>", "password": "new-secure-password"}'
+```
+
+```json
+{ "status": 200, "data": { "reset": true }, "error": "" }
+```
+
+Passwords must be at least 8 characters with no whitespace. A successful reset invalidates existing sessions for that account. A missing, used, or expired token returns **400** `Invalid or expired password reset link.`
 
 ---
 
@@ -123,6 +246,94 @@ curl -X POST http://localhost:7070/api/v1/auth/users/login \
   -d '{
     "identity": "019b292a-e145-7000-813b-c9f528364a2b",
     "password": "userpassword"
+  }'
+```
+
+---
+
+## Email sign-in code
+
+Sign in with an email address and a one-time code. No password is required. This also works for accounts that have no password, such as OAuth-only users.
+
+An admin must set `auth.otp` to `true` on the entity first. Until then the OTP routes return **403**.
+
+SMTP must already be configured under application settings. If it is not, the request returns **400**:
+
+```json
+{
+  "status": 400,
+  "data": {},
+  "error": "Email service not configured. Set SMTP settings first."
+}
+```
+
+The code is 6 digits, expires after **10 minutes**, and allows **5** attempts. Requesting a new code replaces the previous one after the email is sent. Each code can be used once.
+
+> ⚠️ **Rate limiting**: Both OTP routes use the same limit as password login (**5 attempts per minute per IP**). Outbound mail is also limited to **3 messages per hour** for each recipient.
+
+### Request a code
+
+**Endpoint:** `POST /api/v1/auth/<entity>/otp/request`
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response (Success - 200):**
+```json
+{
+  "status": 200,
+  "data": {
+    "sent": true
+  },
+  "error": ""
+}
+```
+
+The response is the same when no account uses that email, and no message is sent in that case. Delivery errors are returned only when a message was attempted.
+
+**Example:**
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/otp/request \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+```
+
+### Sign in with the code
+
+**Endpoint:** `POST /api/v1/auth/<entity>/otp/login`
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "otp": "483920"
+}
+```
+
+**Response (Success - 200):** Same shape as [password login](#login): `data.token`, `data.user`, and an HttpOnly `mb_token` cookie.
+
+**Response (Error - 401):**
+```json
+{
+  "status": 401,
+  "data": {},
+  "error": "Invalid or expired sign-in code."
+}
+```
+
+A code that is not 6 digits returns **400** with `"Sign-in code must be a 6-digit number."`
+
+**Example:**
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/otp/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "otp": "483920"
   }'
 ```
 
@@ -292,7 +503,7 @@ Authorization: Bearer mb_sk_<secret>
 
 The middleware resolves the key, hydrates the user record, and sets the same `auth` / `verification` request attributes as a JWT login.
 
-### Entity user endpoints
+### MbEntity user endpoints
 
 Requires an authenticated session for the same auth entity (JWT from login).
 
@@ -426,7 +637,7 @@ After authentication middleware runs, each request carries an `auth` object:
 |-------|--------|-------------|
 | `type` | `guest`, `user`, `admin` | Role derived from the auth entity (`mb_admins` → `admin`) |
 | `mode` | `none`, `api`, `jwt` | How the credential was presented |
-| `entity` | string | Auth entity table name |
+| `entity` | string | MbAuth entity table name |
 | `id` | string | Authenticated user id |
 | `user` | object | Hydrated user record (password omitted) |
 
@@ -436,4 +647,4 @@ Admin users (`type: admin`) short-circuit all entity access rules. See [Access R
 
 ## Summary
 
-The authentication API provides JWT login, token verification (`GET /api/v1/auth/verify`), long-lived API keys (`mb_sk_...`), and OAuth for auth-type entities. All credential types use `Authorization: Bearer ...` and are validated before entity access rules run. Admin-only routes under `/api/v1/sys/` manage providers and system API keys.
+The authentication API provides JWT login (password or email one-time code), token verification (`GET /api/v1/auth/verify`), long-lived API keys (`mb_sk_...`), and OAuth for auth-type entities. All credential types use `Authorization: Bearer ...` and are validated before entity access rules run. Admin-only routes under `/api/v1/sys/` manage providers and system API keys.

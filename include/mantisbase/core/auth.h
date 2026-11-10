@@ -1,6 +1,6 @@
 /**
  * @file auth.h
- * @brief JWT session management and entry point for API keys and OAuth.
+ * @brief JWT session management and entry point for API keys, OAuth, and email OTP login.
  *
  * Created by allan on 07/06/2025.
  */
@@ -38,26 +38,26 @@ namespace mb
      *     std::string userId = result["id"];
      * }
      *
-     * // API keys and OAuth live on the same Auth instance:
+     * // API keys and OAuth live on the same MbAuth instance:
      * auth.apiKey().create("users", "user123", "Mobile app");
      * auth.oauth().buildAuthorizeUrl("users", "google", redirect_uri);
      * @endcode
      */
-    class MANTISBASE_API Auth
+    class MANTISBASE_API MbAuth
     {
         const MantisBase& mApp;
-        std::unique_ptr<OAuthManager> m_oauth;
-        std::unique_ptr<ApiKeyManager> m_apiKeyManager;
+        std::unique_ptr<MbOAuthMgr> m_oauth;
+        std::unique_ptr<MbApiKeyMgr> m_apiKeyManager;
 
     public:
         /** Construct auth services bound to @p app (OAuth + API keys). */
-        explicit Auth(const MantisBase& app);
+        explicit MbAuth(const MantisBase& app);
 
         /** @return OAuth manager for provider configuration and login flows. */
-        [[nodiscard]] OAuthManager& oauth() const;
+        [[nodiscard]] MbOAuthMgr& oauth() const;
 
         /** @return API key manager for programmatic credentials. */
-        [[nodiscard]] ApiKeyManager& apiKey() const;
+        [[nodiscard]] MbApiKeyMgr& apiKey() const;
 
         /**
          * @brief Create JWT token with custom claims.
@@ -90,6 +90,102 @@ namespace mb
         json refreshSession(const std::string& old_session_id, const std::string& entity_name,
                                    const std::string& user_id);
 
+        /**
+         * @brief Email a one-time sign-in code for an auth-entity account.
+         *
+         * The code expires after 10 minutes and allows 5 attempts. A successfully
+         * delivered code replaces any earlier code for that account. When the
+         * address is valid, unknown emails return `{ "sent": true }` and no message
+         * is sent. A message is delivered only when an account with that email exists.
+         *
+         * @param entity_name Auth entity table name.
+         * @param email Account email address.
+         * @return JSON object `{ "sent": true }`.
+         * @throws MbException 400 when SMTP is not configured or the address is invalid.
+         * @throws MbException when delivery fails (rate limit or SMTP error).
+         */
+        [[nodiscard]] json requestLoginOtp(const std::string &entity_name, const std::string &email) const;
+
+        /**
+         * @brief Exchange a one-time sign-in code for a session token.
+         *
+         * Passwordless accounts (for example OAuth-only users) can sign in this way.
+         * The code is single-use.
+         *
+         * @param entity_name Auth entity table name.
+         * @param email Account email address.
+         * @param otp 6-digit code from the sign-in email.
+         * @return JSON with `token` and `user` (password omitted).
+         * @throws MbException 400 when the email or code is not in the expected shape.
+         * @throws MbException 401 when the code is wrong, expired, used, or exhausted.
+         */
+        [[nodiscard]] json loginWithOtp(const std::string &entity_name,
+                                        const std::string &email,
+                                        const std::string &otp) const;
+
+        /**
+         * @brief Reject login when the entity requires a verified email and the account is not verified.
+         * @throws MbException 403 when verification is required and `email_verified` is not true.
+         */
+        void rejectUnverifiedLogin(const std::string &entity_name, const json &user) const;
+
+        /**
+         * @brief Email a verification link when SMTP is configured and the account is unverified.
+         * Missing SMTP or siteDomain is logged and ignored so registration can still succeed.
+         */
+        void notifyEmailVerification(const std::string &entity_name, const std::string &user_id) const;
+
+        /**
+         * @brief Send a verification link for an email address.
+         * Unknown addresses return `{ "sent": true }` and send nothing.
+         * @param request_host Host header, used only when `siteDomain` is empty.
+         * @throws MbException 400 when SMTP is not configured, the address is invalid, or no public base URL is set.
+         */
+        [[nodiscard]] json requestEmailVerification(const std::string &entity_name,
+                                                    const std::string &email,
+                                                    const std::string &request_host) const;
+
+        /**
+         * @brief Mark the account verified when @p token matches a live verification link.
+         * @return `{ "verified": true }`.
+         * @throws MbException 400 when the token is missing, unknown, or expired.
+         */
+        [[nodiscard]] json confirmEmailVerification(const std::string &entity_name,
+                                                    const std::string &token) const;
+
+        /**
+         * @brief Email a password-reset link for an account.
+         * Unknown addresses return `{ "sent": true }` and send nothing.
+         * @param request_host Host header, used only when `siteDomain` is empty.
+         * @throws MbException 400 when SMTP is not configured, the address is invalid, or no public base URL is set.
+         */
+        [[nodiscard]] json requestPasswordReset(const std::string &entity_name,
+                                                const std::string &email,
+                                                const std::string &request_host) const;
+
+        /**
+         * @brief Set a new password when @p token matches a live reset link.
+         * @return `{ "reset": true }`.
+         * @throws MbException 400 when the token or password is invalid/expired.
+         */
+        [[nodiscard]] json confirmPasswordReset(const std::string &entity_name,
+                                                const std::string &token,
+                                                const std::string &new_password) const;
+
+    private:
+        [[nodiscard]] std::string verificationLinkBase(const std::string &request_host) const;
+
+        void deliverEmailVerification(const std::string &entity_name,
+                                      const std::string &user_id,
+                                      const std::string &email,
+                                      const std::string &public_base) const;
+
+        void deliverPasswordReset(const std::string &entity_name,
+                                  const std::string &user_id,
+                                  const std::string &email,
+                                  const std::string &public_base) const;
+
+    public:
 #ifdef MB_SCRIPTING_ENABLED
         [[nodiscard]] std::string createTokenJson(const std::string &claims_json, int timeout = -1) const;
         [[nodiscard]] std::string verifyTokenJson(const std::string &token) const;

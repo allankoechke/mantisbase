@@ -1,6 +1,6 @@
 # MantisBase for Windows
 
-Prebuilt MantisBase server binary for Windows (64-bit, MinGW).
+Prebuilt MantisBase server binary for Windows.
 
 ## Quick start
 

@@ -36,9 +36,9 @@
 CMRC_DECLARE(mantis);
 
 namespace mb {
-    Router::Router(const MantisBase &app)
-        : IMantisBase(app),
-          m_sseMgr(std::make_unique<SSEMgr>(app)),
+    MbRouter::MbRouter(const MantisBase &app)
+        : MbAppMixin(app),
+          m_sseMgr(std::make_unique<MbSSEMgr>(app)),
           m_corsAllowedOrigins(std::make_shared<const std::set<std::string>>()) {
         // Add global middlewares to work across all routes
         m_preRoutingMiddlewares.push_back(getAuthToken());
@@ -47,12 +47,12 @@ namespace mb {
         m_sfId.init(1, 1);
     }
 
-    Router::~Router() {
+    MbRouter::~MbRouter() {
         if (m_running.load())
             close();
     }
 
-    bool Router::init() {
+    bool MbRouter::init() {
         {
             // Runs before the server starts listening (single-threaded), but we
             // take the exclusive lock anyway to keep all m_entityMap access
@@ -67,7 +67,7 @@ namespace mb {
 
                 // Create entity based on the schema, bound to this application
                 // so its CRUD ops can reach db/realtime without the singleton.
-                Entity entity{mbApp(), schema};
+                MbEntity entity{mbApp(), schema};
 
                 // Store this object to keep alive function pointers
                 // if not, possible access violation error
@@ -75,14 +75,15 @@ namespace mb {
             }
 
             // Add admin routes
-            EntitySchema admin_schema{mbApp(), "mb_admins", "auth"};
+            MbEntitySchema admin_schema{mbApp(), "mb_admins", "auth"};
             admin_schema.removeField("name");
+            admin_schema.removeField("email_verified");
             admin_schema.setSystem(true);
             auto admin_entity = admin_schema.toEntity();
             m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
 
             // Service Schema [No routes]
-            EntitySchema service_schema{mbApp(), "mb_service_acc", "base"};
+            MbEntitySchema service_schema{mbApp(), "mb_service_acc", "base"};
             service_schema.setHasApi(false);
             service_schema.setSystem(true);
             auto service_entity = service_schema.toEntity();
@@ -95,7 +96,7 @@ namespace mb {
         return true;
     }
 
-    bool Router::listen() {
+    bool MbRouter::listen() {
         try {
             const auto host = mbApp().host();
             const auto port = mbApp().port();
@@ -118,6 +119,32 @@ namespace mb {
             Json::Value config;
             config["app"]["client_max_body_size"] = ""; // no body limit
             drogon::app().loadConfigJson(config);
+
+            // Keep Drogon's upload spool dir out of the document root.
+            // loadConfigJson() above resets the upload path to the default
+            // "uploads", resolved against the document root set in
+            // generateMiscEndpoints(), i.e. <publicDir>/uploads. Drogon then
+            // pre-creates <uploadPath>/tmp/00..FF on run() and stages large
+            // request bodies there, which would otherwise litter public/ with
+            // 256 dirs and briefly expose in-flight bodies under a served path.
+            try {
+                const auto spool_dir = fs::temp_directory_path() / "mantisbase-uploads";
+                std::error_code ec;
+                fs::create_directories(spool_dir, ec);
+                if (!ec) {
+                    drogon::app().setUploadPath(spool_dir.string());
+                } else {
+                    logger().warn("Server",
+                                  fmt::format("Failed to create upload spool dir `{}`, "
+                                              "falling back to `<dataDir>/uploads`.", spool_dir.string()));
+                    drogon::app().setUploadPath((fs::path(mbApp().dataDir()) / "uploads").string());
+                }
+            } catch (const std::exception &e) {
+                logger().warn("Server",
+                              fmt::format("Failed to resolve system temp dir ({}), "
+                                          "falling back to `<dataDir>/uploads`.", e.what()));
+                drogon::app().setUploadPath((fs::path(mbApp().dataDir()) / "uploads").string());
+            }
 
             // Register hook to generate request IDs
             drogon::app().registerSyncAdvice(reqIdSyncAdvice());
@@ -176,7 +203,7 @@ namespace mb {
         return false;
     }
 
-    void Router::close() {
+    void MbRouter::close() {
         // Stop SSE manager first before the router
         if (m_sseMgr->isRunning())
             m_sseMgr->stop();
@@ -191,51 +218,51 @@ namespace mb {
         }
     }
 
-    bool Router::isRunning() const {
+    bool MbRouter::isRunning() const {
         return m_running.load();
     }
 
-    SSEMgr &Router::sseMgr() const {
+    MbSSEMgr &MbRouter::sseMgr() const {
         return *m_sseMgr;
     }
 
-    const json &Router::schemaCache(const std::string &table_name) const {
+    const json &MbRouter::schemaCache(const std::string &table_name) const {
         // NOTE: returns a reference into the cache; the caller must not rely on
         // it remaining valid across a concurrent schema mutation. Currently
         // unused, kept for API completeness.
         std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
-            throw MantisException(404, "Entity schema for " + table_name + " was not found!");
+            throw MbException(404, "Entity schema for " + table_name + " was not found!");
         }
 
         return m_entityMap.at(table_name).schema();
     }
 
-    bool Router::hasSchemaCache(const std::string &table_name) const {
+    bool MbRouter::hasSchemaCache(const std::string &table_name) const {
         std::shared_lock lock(m_entityMapMutex);
         return m_entityMap.contains(table_name);
     }
 
-    Entity Router::schemaCacheEntity(const std::string &table_name) const {
+    MbEntity MbRouter::schemaCacheEntity(const std::string &table_name) const {
         std::shared_lock lock(m_entityMapMutex);
         if (!m_entityMap.contains(table_name)) {
-            throw MantisException(404, "Entity schema for `" + table_name + "` was not found!");
+            throw MbException(404, "Entity schema for `" + table_name + "` was not found!");
         }
 
         // Returns a copy, so it stays valid after the lock is released.
-        return Entity{m_entityMap.at(table_name)};
+        return MbEntity{m_entityMap.at(table_name)};
     }
 
-    void Router::addSchemaCache(const nlohmann::json &entity_schema) const {
+    void MbRouter::addSchemaCache(const nlohmann::json &entity_schema) const {
         std::unique_lock lock(m_entityMapMutex);
         addSchemaCacheLocked(entity_schema);
     }
 
-    void Router::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) const {
+    void MbRouter::updateSchemaCache(const std::string &old_entity_name, const json &new_schema) const {
         std::unique_lock lock(m_entityMapMutex);
 
         if (!m_entityMap.contains(old_entity_name))
-            throw MantisException(404, "Cannot update, schema not found for entity " + old_entity_name);
+            throw MbException(404, "Cannot update, schema not found for entity " + old_entity_name);
 
         // Clean up old entity, then insert the new one, all under a single
         // exclusive lock so readers never observe the intermediate state.
@@ -243,43 +270,52 @@ namespace mb {
         addSchemaCacheLocked(new_schema);
     }
 
-    void Router::removeSchemaCache(const std::string &entity_name) const {
+    void MbRouter::removeSchemaCache(const std::string &entity_name) const {
         std::unique_lock lock(m_entityMapMutex);
         removeSchemaCacheLocked(entity_name);
     }
 
-    void Router::addSchemaCacheLocked(const nlohmann::json &entity_schema) const {
+    void MbRouter::addSchemaCacheLocked(const nlohmann::json &entity_schema) const {
         const auto entity_name = entity_schema.at("name").get<std::string>();
         if (m_entityMap.contains(entity_name)) {
-            throw MantisException(500, "An entity exists with given entity_name");
+            throw MbException(500, "An entity exists with given entity_name");
         }
 
         // Create entity and cache it, bound to this application. Unified entity
         // routes resolve entities dynamically.
-        // auto entity = Entity(mApp, entity_schema);
-        m_entityMap.try_emplace(entity_name, Entity(mbApp(), entity_schema));
+        // auto entity = MbEntity(mApp, entity_schema);
+        m_entityMap.try_emplace(entity_name, MbEntity(mbApp(), entity_schema));
     }
 
-    void Router::removeSchemaCacheLocked(const std::string &entity_name) const {
+    void MbRouter::removeSchemaCacheLocked(const std::string &entity_name) const {
         if (!m_entityMap.contains(entity_name)) {
-            throw MantisException(404, "Could not find EntitySchema for " + entity_name);
+            throw MbException(404, "Could not find EntitySchema for " + entity_name);
         }
 
         m_entityMap.erase(entity_name);
     }
 
-    void Router::registerAuthRoutes() {
+    void MbRouter::registerAuthRoutes() {
         const MbMiddlewares authEntityMiddleware = {resolveAuthEntity()};
         const MbMiddlewares authLoginMiddleware = {resolveAuthEntity(), rateLimit(5, 60, false)};
 
         // Verify that the logged in user is valid or still
         Get("/api/v1/auth/verify", handleAuthVerify(), {rateLimit(5, 60, false)});
+        Get("/api/v1/auth/:entity_name/methods", handleAuthMethods(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/login", handleAuthLogin(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/otp/request", handleAuthOtpRequest(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/otp/login", handleAuthOtpLogin(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/verify-email/request", handleAuthVerifyEmailRequest(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/verify-email", handleAuthVerifyEmail(), authEntityMiddleware);
+        Get("/api/v1/auth/:entity_name/verify-email", handleAuthVerifyEmail(), authEntityMiddleware);
+        Post("/api/v1/auth/:entity_name/password-reset/request", handleAuthPasswordResetRequest(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/password-reset", handleAuthPasswordReset(), authEntityMiddleware);
+        Get("/api/v1/auth/:entity_name/password-reset", handleAuthPasswordReset(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/refresh", handleAuthRefresh(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/logout", handleAuthLogout(), authEntityMiddleware);
     }
 
-    void Router::registerSchemaRoutes() {
+    void MbRouter::registerSchemaRoutes() {
         const MbMiddlewares adminAuth = {requireAdminAuth()};
         const MbMiddlewares schemaMutateMiddleware = {
             requireAdminAuth(),
@@ -299,7 +335,7 @@ namespace mb {
         Delete("/api/v1/schemas/:schema_name_or_id", schemaDeleteHandler(), schemaItemMutateMiddleware);
     }
 
-    void Router::registerEntityRoutes() {
+    void MbRouter::registerEntityRoutes() {
         const MbMiddlewares readMiddleware = {resolveEntity(), hasEntityAccess()};
         const MbMiddlewares mutateMiddleware = {resolveEntity(), rejectViewMutations(), hasEntityAccess()};
 
@@ -310,7 +346,7 @@ namespace mb {
         Delete("/api/v1/entities/:entity_name/:id", entityDeleteHandler(), mutateMiddleware);
     }
 
-    void Router::generateMiscEndpoints() {
+    void MbRouter::generateMiscEndpoints() {
         auto &router = mbApp().router();
 
         // Admin dashboard route - use Drogon regex handler
@@ -326,6 +362,15 @@ namespace mb {
             },
             {drogon::Get});
 
+        // Check if favicon is provided in the public dir, if not, get the favicon from the mb admin dir
+        if (!fs::exists(fs::path(mbApp().publicDir()) / "favicon.ico")) {
+            router.redirect("/favicon.ico", "/mb/favicon.ico");
+
+            // Get the svg file from the mantisbase admin files
+            router.redirect("/mantisbase.svg", "/mb/mantisbase.svg", 301);
+        }
+
+        // Health check endpoint registration
         router.Get("/api/v1/health", healthCheckHandler());
 
         // /api/v1/sys/*
@@ -361,13 +406,13 @@ namespace mb {
         }
     }
 
-    std::function<void(const MbRequest &, MbResponse &)> Router::handleAdminDashboardRoute() {
+    std::function<void(const MbRequest &, MbResponse &)> MbRouter::handleAdminDashboardRoute() {
         return [](const MbRequest &req, MbResponse &res) {
             try {
                 const auto fs = cmrc::mantis::get_filesystem();
 
                 // Extract path after /mb
-                std::string full_path = req.getPath();
+                const std::string full_path = req.path();
                 std::string path;
                 if (full_path.size() > 3) {
                     path = full_path.substr(3); // strip "/mb"
@@ -389,12 +434,12 @@ namespace mb {
 
                 try {
                     const auto file = fs.open(path);
-                    const auto mime = Router::getMimeType(path);
+                    const auto mime = MbRouter::getMimeType(path);
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(200);
                 } catch (const std::exception &e) {
                     const auto file = fs.open("/public/404.html");
-                    const auto mime = Router::getMimeType("404.html");
+                    const auto mime = MbRouter::getMimeType("404.html");
 
                     res.setContent(file.begin(), file.size(), mime);
                     res.setStatus(404);
@@ -403,19 +448,18 @@ namespace mb {
                 }
             } catch (const std::exception &e) {
                 res.setStatus(500);
-                res.setReason(e.what());
                 req.mbApp().logger().critical("Admin Request Error",
                                               fmt::format("Error processing /admin request: {}", e.what()));
             }
         };
     }
 
-    std::function<void(MbRequest &, MbResponse &)> Router::fileServingHandler() {
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::fileServingHandler() {
         return [](MbRequest &req, MbResponse &res) {
-            const auto table_name = req.getPathParamValue("entity");
-            const auto file_name = req.getPathParamValue("file");
+            const auto table_name = req.pathParamValue("entity");
+            const auto file_name = req.pathParamValue("file");
 
-            if (!EntitySchema::isValidEntityName(table_name)) {
+            if (!MbEntitySchema::isValidEntityName(table_name)) {
                 res.sendJSON(400, {
                     {"error", "Invalid entity name."},
                     {"status", 400},
@@ -443,16 +487,16 @@ namespace mb {
             }
 
             const auto entity = req.mbApp().entity(table_name);
-            const auto &auth = req.getOr<json>("auth", json::object());
-            const auto &verification = req.getOr<json>("verification", json::object());
+            const auto &auth = req.get<json>("auth", json::object());
+            const auto &verification = req.get<json>("verification", json::object());
             const auto rule = entity.getRule();
 
             if (!req.isAdminAuth()) {
-                AccessEvalContext ctx{auth, verification, const_cast<MbRequest *>(&req)};
+                MbAccessEvalContext ctx{auth, verification, const_cast<MbRequest *>(&req)};
                 const auto result = evaluateAccessRule(rule, ctx);
-                if (result != AccessEvalResult::Allow) {
+                if (result != MbAccessEvalResult::Allow) {
                     const auto [status, error] = accessEvalHttpError(result, rule);
-                    const std::string message = result == AccessEvalResult::DenyUnauthenticated
+                    const std::string message = result == MbAccessEvalResult::DenyUnauthenticated
                                                     ? "Authentication required to access this file."
                                                     : (rule.mode().empty()
                                                            ? "Admin auth required to access this file."
@@ -508,14 +552,14 @@ namespace mb {
         };
     }
 
-    std::function<void(const MbRequest &, MbResponse &)> Router::healthCheckHandler() {
+    std::function<void(const MbRequest &, MbResponse &)> MbRouter::healthCheckHandler() {
         return [](const MbRequest &, const MbResponse &res) {
             res.setHeader("Cache-Control", "no-cache");
             res.send(200, R"({"status": "OK"})", "application/json");
         };
     }
 
-    std::string Router::getMimeType(const std::string &path) {
+    std::string MbRouter::getMimeType(const std::string &path) {
         if (path.ends_with(".js")) return "application/javascript";
         if (path.ends_with(".css")) return "text/css";
         if (path.ends_with(".html")) return "text/html";
@@ -525,10 +569,10 @@ namespace mb {
         return "application/octet-stream";
     }
 
-    std::function<void(const MbRequest &, MbResponse &)> Router::handleLogs() {
+    std::function<void(const MbRequest &, MbResponse &)> MbRouter::handleLogs() {
         return [&](const MbRequest &req, MbResponse &res) {
             try {
-                if (!Logger::isDbInitialized) {
+                if (!MbLogger::isDbInitialized) {
                     json response;
                     response["error"] = "Log database not initialized";
                     response["status"] = 503;
@@ -547,12 +591,12 @@ namespace mb {
                 std::string end_date;
 
                 if (req.hasQueryParam("after")) {
-                    after = req.getQueryParamValue("after");
+                    after = req.queryParamValue("after");
                 }
 
                 if (req.hasQueryParam("limit")) {
                     try {
-                        limit = std::stoi(req.getQueryParamValue("limit"));
+                        limit = std::stoi(req.queryParamValue("limit"));
                         if (limit < 1) limit = 1;
                         if (limit > 1000) limit = 1000;
                     } catch (...) {
@@ -561,7 +605,7 @@ namespace mb {
                 }
 
                 if (req.hasQueryParam("level")) {
-                    level_filter = req.getQueryParamValue("level");
+                    level_filter = req.queryParamValue("level");
 
                     if (level_filter != "trace" && level_filter != "debug" &&
                         level_filter != "info" && level_filter != "warn" &&
@@ -571,7 +615,7 @@ namespace mb {
                 }
 
                 if (req.hasQueryParam("min_level")) {
-                    min_level_filter = req.getQueryParamValue("min_level");
+                    min_level_filter = req.queryParamValue("min_level");
 
                     if (min_level_filter != "trace" && min_level_filter != "debug" &&
                         min_level_filter != "info" && min_level_filter != "warn" &&
@@ -581,14 +625,14 @@ namespace mb {
                 }
 
                 if (req.hasQueryParam("search")) {
-                    search_filter = req.getQueryParamValue("search");
+                    search_filter = req.queryParamValue("search");
                 }
 
                 if (req.hasQueryParam("start_date")) {
-                    start_date = req.getQueryParamValue("start_date");
+                    start_date = req.queryParamValue("start_date");
                 }
                 if (req.hasQueryParam("end_date")) {
-                    end_date = req.getQueryParamValue("end_date");
+                    end_date = req.queryParamValue("end_date");
                 }
 
                 if (!min_level_filter.empty()) level_filter = ">" + min_level_filter;
@@ -603,7 +647,7 @@ namespace mb {
                 response["status"] = 200;
                 response["data"] = result;
                 res.sendJSON(200, result);
-            } catch (const MantisException &e) {
+            } catch (const MbException &e) {
                 json response;
                 response["error"] = e.what();
                 response["status"] = 500;
@@ -620,7 +664,7 @@ namespace mb {
         };
     }
 
-    Router::Constraints Router::validateConstraints(const std::vector<std::string> &constraints) {
+    MbRouter::Constraints MbRouter::validateConstraints(const std::vector<std::string> &constraints) {
         // Allow: Get, Post, Head, Put, Delete, Options, Patch
         Constraints result{};
 
@@ -630,7 +674,7 @@ namespace mb {
 
         for (auto constraint: constraints) {
             mb::toUpperCase(constraint);
-            if (constraint.empty()) throw MantisException(400, "Invalid redirect constraint");
+            if (constraint.empty()) throw MbException(400, "Invalid redirect constraint");
 
             if (constraint == "GET") result.emplace_back(drogon::Get);
             else if (constraint == "POST") result.emplace_back(drogon::Post);
@@ -640,7 +684,7 @@ namespace mb {
             else if (constraint == "OPTIONS") result.emplace_back(drogon::Options);
             else if (constraint == "PATCH") result.emplace_back(drogon::Patch);
             else
-                throw MantisException(400,
+                throw MbException(400,
                                       std::format(
                                           "Invalid constraint. Expected '{}' to be one of: Get, Post, Head, Put, Delete, Options, Patch",
                                           constraint));

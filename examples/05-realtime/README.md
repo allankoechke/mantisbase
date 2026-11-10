@@ -39,7 +39,7 @@ You should receive a `connected` event with `client_id`, then change events when
 | Connect without topics | 200, empty topics array |
 | Connect with `topics=messages` (public entity) | 200, `messages` in granted topics |
 | Invalid topic name | 400 |
-| Auth-only entity without token | Topic not granted |
+| MbAuth-only entity without token | Topic not granted |
 
 See [`http/sse-subscribe.sh`](http/sse-subscribe.sh) for a minimal subscribe script.
 

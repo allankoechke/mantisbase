@@ -2,7 +2,7 @@
  * @file context_store.h
  * @brief Generic key-value context store for scripting and internal utilities.
  *
- * HTTP handlers should prefer @ref MantisRequest::set and @ref MantisRequest::getOr for
+ * HTTP handlers should prefer @ref MbRequest::set and @ref MbRequest::get for
  * per-request attributes (`auth`, `verification`, etc.). This store is used where a
  * standalone typed bag is needed outside the request lifecycle.
  */
@@ -24,9 +24,9 @@ namespace mb
     using json = nlohmann::json;
 
     /**
-     * The `ContextStore` class provides a key-value store for scripting and
-     * internal utilities. HTTP handlers should use @ref MantisRequest::set and
-     * @ref MantisRequest::getOr for per-request attributes (`auth`, etc.).
+     * The `MbContextStore` class provides a key-value store for scripting and
+     * internal utilities. HTTP handlers should use @ref MbRequest::set and
+     * @ref MbRequest::get for per-request attributes (`auth`, etc.).
      *
      * For instance, the auth middleware will inject user `id` and subsequent middlewares can retrieve it as needed.
      *
@@ -46,7 +46,7 @@ namespace mb
      * req.set("key2", { a: 5, b: 7}) // Objects/JSON
      * req.set("valid", true) // BOOLs
      *
-     * req.getOr("nothing", "Default Value")
+     * req.get("nothing", "Default Value")
      * @endcode
      *
      * The value returned from the `get()` is a std::optional, meaning a std::nullopt if the key was not found.
@@ -55,15 +55,15 @@ namespace mb
      * if(key.has_value()) { .... }
      * @endcode
      *
-     * Additionally, we have a @see get_or() method that takes in a key and a default value if the key is missing. This
-     * unlike @see get() method, returns a `T&` instead of `T*` depending on the usage needs.
+     * Additionally, we have an overload of @see get() that takes in a key and a default value if the key is missing. This
+     * unlike the optional-returning @see get() method, returns a `T&` instead of `T*` depending on the usage needs.
      */
-    class MANTISBASE_API ContextStore
+    class MANTISBASE_API MbContextStore
     {
         std::unordered_map<std::string, std::any> data;
 
     public:
-        ContextStore() = default;
+        MbContextStore() = default;
         /**
          * @brief Convenience method for dumping context data for debugging.
          */
@@ -100,9 +100,7 @@ namespace mb
         std::optional<T*> get(const std::string& key)
         {
             const auto it = data.find(key);
-            if (it != data.end())
-                return std::any_cast<T>(&it->second);
-
+            if (it != data.end()) return std::any_cast<T>(&it->second);
             return std::nullopt;
         }
 
@@ -115,7 +113,7 @@ namespace mb
          * @return Value or default value
          */
         template <typename T>
-        T& getOr(const std::string& key, T default_value)
+        T& get(const std::string& key, T default_value)
         {
             if (const auto it = data.find(key); it == data.end())
             {

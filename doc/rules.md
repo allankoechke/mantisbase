@@ -69,7 +69,7 @@ When `mode` is `"public"`, the endpoint is open to everyone:
 
 **Behavior:** No authentication required. Anyone can access the endpoint.
 
-### Auth Mode
+### MbAuth Mode
 
 When `mode` is `"auth"`, any valid authenticated user is accepted. Optionally restrict to specific auth entities with the `entity` field:
 
@@ -138,7 +138,7 @@ Contains information about the authenticated user:
 auth.type      // "guest", "user", or "admin"
 auth.mode      // "none", "api", or "jwt"
 auth.id        // User's unique identifier (null for guests)
-auth.entity    // Entity table user authenticated against (e.g., "users", "mb_admins")
+auth.entity    // MbEntity table user authenticated against (e.g., "users", "mb_admins")
 auth.token     // JWT token string (null for guests)
 auth.user      // Full user record from database (null if not found or guest)
 ```

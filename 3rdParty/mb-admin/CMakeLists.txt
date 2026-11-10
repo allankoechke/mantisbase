@@ -4,13 +4,9 @@ file(GLOB_RECURSE MANTIS_ASSET_FILES LIST_DIRECTORIES false "${CMAKE_CURRENT_SOU
 
 # Combine and escape problematic characters
 set(ALL_RESOURCE_FILES ${ADMIN_STATIC_FILES} ${MANTIS_ASSET_FILES})
-set(ESCAPED_RESOURCE_FILES "")
-foreach(file ${ALL_RESOURCE_FILES})
-    list(APPEND ESCAPED_RESOURCE_FILES "${file}")
-endforeach()
 
 # Create CMRC resource library with escaped paths
-cmrc_add_resource_library(mb-rc NAMESPACE mantis ${ESCAPED_RESOURCE_FILES} "favicon.ico")
+cmrc_add_resource_library(mb-rc NAMESPACE mantis ${ALL_RESOURCE_FILES} "favicon.ico")
 
 # Link resources to admin library - use PUBLIC to expose to downstream targets
 target_link_libraries(mantisbase PUBLIC mb-rc)

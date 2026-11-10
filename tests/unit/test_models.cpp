@@ -11,7 +11,7 @@ class ModelsAppTest : public MbAppFixture {
 };
 
 TEST_F(ModelsAppTest, EntitySchemaBaseType) {
-    mb::EntitySchema base{mantis(), "test", "base"};
+    mb::MbEntitySchema base{mantis(), "test", "base"};
 
     EXPECT_EQ(base.type(), "base");
     EXPECT_EQ(base.name(), "test");
@@ -37,7 +37,7 @@ TEST_F(ModelsAppTest, EntitySchemaBaseType) {
 }
 
 TEST_F(ModelsAppTest, EntitySchemaAuthType) {
-    mb::EntitySchema auth{mantis(), "test", "auth"};
+    mb::MbEntitySchema auth{mantis(), "test", "auth"};
 
     EXPECT_EQ(auth.type(), "auth");
     EXPECT_EQ(auth.name(), "test");
@@ -65,7 +65,7 @@ TEST_F(ModelsAppTest, EntitySchemaAuthType) {
 }
 
 TEST_F(ModelsAppTest, EntitySchemaViewType) {
-    const mb::EntitySchema view{mantis(), "test", "view"};
+    const mb::MbEntitySchema view{mantis(), "test", "view"};
 
     EXPECT_EQ(view.type(), "view");
     EXPECT_EQ(view.name(), "test");
@@ -75,14 +75,14 @@ TEST_F(ModelsAppTest, EntitySchemaViewType) {
 }
 
 TEST_F(ModelsAppTest, EntitySchemaAccessRules) {
-    mb::EntitySchema schema{mantis(), "test", "base"};
+    mb::MbEntitySchema schema{mantis(), "test", "base"};
     
     // Set access rules with different modes
-    schema.setListRule(mb::AccessRule("public", ""));
-    schema.setGetRule(mb::AccessRule("auth", ""));
-    schema.setAddRule(mb::AccessRule("custom", "auth.id != \"\""));
-    schema.setUpdateRule(mb::AccessRule("", "")); // Admin only
-    schema.setDeleteRule(mb::AccessRule("custom", "auth.entity == \"mb_admins\""));
+    schema.setListRule(mb::MbAccessRule("public", ""));
+    schema.setGetRule(mb::MbAccessRule("auth", ""));
+    schema.setAddRule(mb::MbAccessRule("custom", "auth.id != \"\""));
+    schema.setUpdateRule(mb::MbAccessRule("", "")); // Admin only
+    schema.setDeleteRule(mb::MbAccessRule("custom", "auth.entity == \"mb_admins\""));
     
     EXPECT_EQ(schema.listRule().mode(), "public");
     EXPECT_EQ(schema.listRule().expr(), "");
@@ -101,14 +101,14 @@ TEST_F(ModelsAppTest, EntitySchemaAccessRules) {
 }
 
 TEST_F(ModelsAppTest, EntitySchemaFieldOperations) {
-    mb::EntitySchema schema{mantis(), "test", "base"};
+    mb::MbEntitySchema schema{mantis(), "test", "base"};
     
     // Add custom fields
-    mb::EntitySchemaField nameField("name", "string");
+    mb::MbEntitySchemaField nameField("name", "string");
     nameField.setRequired(true);
     schema.addField(nameField);
     
-    mb::EntitySchemaField emailField("email", "string");
+    mb::MbEntitySchemaField emailField("email", "string");
     emailField.setIsUnique(true);
     schema.addField(emailField);
     
@@ -124,9 +124,9 @@ TEST_F(ModelsAppTest, EntitySchemaFieldOperations) {
 }
 
 TEST_F(ModelsAppTest, EntitySchemaJSONConversion) {
-    mb::EntitySchema schema{mantis(), "test", "base"};
-    schema.addField(mb::EntitySchemaField("name", "string").setRequired(true));
-    schema.setListRule(mb::AccessRule("public", ""));
+    mb::MbEntitySchema schema{mantis(), "test", "base"};
+    schema.addField(mb::MbEntitySchemaField("name", "string").setRequired(true));
+    schema.setListRule(mb::MbAccessRule("public", ""));
 
     // Convert to JSON
     auto json = schema.toJSON();
@@ -136,56 +136,56 @@ TEST_F(ModelsAppTest, EntitySchemaJSONConversion) {
     EXPECT_TRUE(json.contains("fields"));
 
     // Create from JSON
-    auto newSchema = mb::EntitySchema::fromSchema(mantis(), json);
+    auto newSchema = mb::MbEntitySchema::fromSchema(mantis(), json);
     EXPECT_EQ(newSchema.name(), "test");
     EXPECT_EQ(newSchema.type(), "base");
     EXPECT_EQ(newSchema.listRule().mode(), "public");
     EXPECT_TRUE(newSchema.hasField("name"));
 }
 
-TEST(EntitySchema, IntTypeWithPrecision) {
-    mb::EntitySchemaField field("count", "int");
+TEST(MbEntitySchema, IntTypeWithPrecision) {
+    mb::MbEntitySchemaField field("count", "int");
     EXPECT_EQ(field.type(), "int");
-    EXPECT_EQ(field.intPrecision(), mb::IntPrecision::I32);
+    EXPECT_EQ(field.intPrecision(), mb::MbIntPrecision::I32);
 
     field.setPrecision("i64");
-    EXPECT_EQ(field.intPrecision(), mb::IntPrecision::I64);
+    EXPECT_EQ(field.intPrecision(), mb::MbIntPrecision::I64);
 
     field.setPrecision("u16");
-    EXPECT_EQ(field.intPrecision(), mb::IntPrecision::U16);
+    EXPECT_EQ(field.intPrecision(), mb::MbIntPrecision::U16);
 
     auto j = field.toJSON();
     EXPECT_EQ(j["type"], "int");
     EXPECT_EQ(j["precision"], "u16");
 
-    mb::EntitySchemaField field2(j);
+    mb::MbEntitySchemaField field2(j);
     EXPECT_EQ(field2.type(), "int");
-    EXPECT_EQ(field2.intPrecision(), mb::IntPrecision::U16);
+    EXPECT_EQ(field2.intPrecision(), mb::MbIntPrecision::U16);
 
-    EXPECT_THROW(field.setPrecision("u128"), mb::MantisException);
-    EXPECT_THROW(field.setPrecision("i0"), mb::MantisException);
+    EXPECT_THROW(field.setPrecision("u128"), mb::MbException);
+    EXPECT_THROW(field.setPrecision("i0"), mb::MbException);
 
-    mb::EntitySchemaField legacy_field({
+    mb::MbEntitySchemaField legacy_field({
         {"name", "legacy"},
         {"type", "int"},
         {"precision", 64},
     });
-    EXPECT_EQ(legacy_field.intPrecision(), mb::IntPrecision::I64);
+    EXPECT_EQ(legacy_field.intPrecision(), mb::MbIntPrecision::I64);
 }
 
-TEST(EntitySchema, IntPrecisionSociTypes) {
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::I8), soci::db_int8);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::I16), soci::db_int16);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::I32), soci::db_int32);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::I64), soci::db_int64);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::U8), soci::db_uint8);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::U16), soci::db_uint16);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::U32), soci::db_uint32);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int", mb::IntPrecision::U64), soci::db_uint64);
-    EXPECT_EQ(mb::EntitySchemaField::toSociType("int"), soci::db_int32);
+TEST(MbEntitySchema, IntPrecisionSociTypes) {
+    EXPECT_EQ(mb::MbEntitySchemaField::toSociType("int", mb::MbIntPrecision::I8), soci::db_int8);
+    EXPECT_EQ(mb::MbEntitySchemaField::toSociType("int", mb::MbIntPrecision::I16), soci::db_int16);
+    EXPECT_EQ(mb::MbEntitySchemaField::toSociType("int", mb::MbIntPrecision::I32), soci::db_int32);
+    EXPECT_EQ(mb::MbEntitySchemaField::toSociType("int", mb::MbIntPrecision::I64), soci::db_int64);
+    EXPECT_EQ(mb::MbEntitySchemaField::toSociType("int", mb::MbIntPrecision::U8), soci::db_uint8);
+    EXPECT_EQ(mb::MbEntitySchemaField::toSociType("int", mb::MbIntPrecision::U16), soci::db_uint16);
+    EXPECT_EQ(mb::MbEntitySchemaField::toSociType("int", mb::MbIntPrecision::U32), soci::db_uint32);
+    EXPECT_EQ(mb::MbEntitySchemaField::toSociType("int", mb::MbIntPrecision::U64), soci::db_uint64);
+    EXPECT_EQ(mb::MbEntitySchemaField::toSociType("int"), soci::db_int32);
 }
 
-TEST(EntitySchema, IntPrecisionValidation) {
+TEST(MbEntitySchema, IntPrecisionValidation) {
     nlohmann::json field = {
         {"name", "qty"},
         {"type", "int"},
@@ -193,9 +193,9 @@ TEST(EntitySchema, IntPrecisionValidation) {
         {"constraints", {{"min_value", 0}, {"max_value", 255}}},
     };
 
-    EXPECT_FALSE(mb::validateIntFieldValue(10, mb::IntPrecision::U8).has_value());
-    EXPECT_TRUE(mb::validateIntFieldValue(256, mb::IntPrecision::U8).has_value());
-    EXPECT_TRUE(mb::validateIntFieldValue(-1, mb::IntPrecision::U8).has_value());
+    EXPECT_FALSE(mb::validateIntFieldValue(10, mb::MbIntPrecision::U8).has_value());
+    EXPECT_TRUE(mb::validateIntFieldValue(256, mb::MbIntPrecision::U8).has_value());
+    EXPECT_TRUE(mb::validateIntFieldValue(-1, mb::MbIntPrecision::U8).has_value());
     EXPECT_FALSE(mb::validateIntConstraintBounds(field).has_value());
 
     field["constraints"]["max_value"] = 300;
@@ -207,19 +207,19 @@ TEST(EntitySchema, IntPrecisionValidation) {
         {"precision", "i8"},
         {"constraints", {{"min_value", -128}, {"max_value", 127}}},
     };
-    EXPECT_FALSE(mb::validateIntFieldValue(-128, mb::IntPrecision::I8).has_value());
-    EXPECT_TRUE(mb::validateIntFieldValue(-129, mb::IntPrecision::I8).has_value());
+    EXPECT_FALSE(mb::validateIntFieldValue(-128, mb::MbIntPrecision::I8).has_value());
+    EXPECT_TRUE(mb::validateIntFieldValue(-129, mb::MbIntPrecision::I8).has_value());
     EXPECT_FALSE(mb::validateIntConstraintBounds(field).has_value());
 }
 
-TEST(EntitySchema, IntTypeInFieldTypes) {
-    EXPECT_TRUE(mb::EntitySchemaField::isValidFieldType("int"));
-    EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("int32"));
-    EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("uint32"));
-    EXPECT_FALSE(mb::EntitySchemaField::isValidFieldType("int64"));
+TEST(MbEntitySchema, IntTypeInFieldTypes) {
+    EXPECT_TRUE(mb::MbEntitySchemaField::isValidFieldType("int"));
+    EXPECT_FALSE(mb::MbEntitySchemaField::isValidFieldType("int32"));
+    EXPECT_FALSE(mb::MbEntitySchemaField::isValidFieldType("uint32"));
+    EXPECT_FALSE(mb::MbEntitySchemaField::isValidFieldType("int64"));
 }
 
-TEST(EntitySchema, IndexDefinition) {
+TEST(MbEntitySchema, IndexDefinition) {
     mb::IndexDefinition idx;
     idx.name = "idx_users_email";
     idx.unique = true;
@@ -239,7 +239,7 @@ TEST(EntitySchema, IndexDefinition) {
 }
 
 TEST_F(ModelsAppTest, SchemaWithIndexes) {
-    mb::EntitySchema schema{mantis(), "test", "base"};
+    mb::MbEntitySchema schema{mantis(), "test", "base"};
     EXPECT_TRUE(schema.indexes().empty());
 
     mb::IndexDefinition idx;
@@ -256,7 +256,7 @@ TEST_F(ModelsAppTest, SchemaWithIndexes) {
     EXPECT_EQ(j["indexes"].size(), 1);
     EXPECT_EQ(j["indexes"][0]["name"], "idx_test_name");
 
-    auto schema2 = mb::EntitySchema::fromSchema(mantis(), j);
+    auto schema2 = mb::MbEntitySchema::fromSchema(mantis(), j);
     EXPECT_EQ(schema2.indexes().size(), 1);
     EXPECT_EQ(schema2.indexes()[0].name, "idx_test_name");
 
@@ -271,7 +271,7 @@ TEST_F(ModelsAppTest, ViewEntityType) {
         {"view_query", "SELECT id, name FROM users WHERE active = 1"}
     };
 
-    auto schema = mb::EntitySchema::fromSchema(mantis(), viewSchema);
+    auto schema = mb::MbEntitySchema::fromSchema(mantis(), viewSchema);
     EXPECT_EQ(schema.type(), "view");
     EXPECT_EQ(schema.name(), "active_users");
     EXPECT_EQ(schema.viewQuery(), "SELECT id, name FROM users WHERE active = 1");
@@ -283,7 +283,7 @@ TEST_F(ModelsAppTest, ViewEntityType) {
 }
 
 TEST_F(ModelsAppTest, ViewEntityRejectsFields) {
-    const mb::EntitySchema view{mantis(), "test_view", "view"};
+    const mb::MbEntitySchema view{mantis(), "test_view", "view"};
     EXPECT_TRUE(view.fields().empty());
     EXPECT_FALSE(view.hasField("anything"));
 }
