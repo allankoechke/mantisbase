@@ -195,6 +195,24 @@ namespace mb {
                         }
                     },
                 }
+            },
+            MbEntitySchemaField{
+                {
+                    {"name", "email_verified"},
+                    {"type", "bool"},
+                    {"required", true},
+                    {"primary_key", false},
+                    {"system", true},
+                    {"unique", false},
+                    {
+                        "constraints", {
+                            {"min-value", nullptr},
+                            {"max_value", nullptr},
+                            {"validator", nullptr},
+                            {"default_value", false},
+                        }
+                    },
+                }
             }
         };
         return _auth_field_schema;
@@ -207,7 +225,7 @@ namespace mb {
 
     const std::vector<std::string> &MbEntitySchemaField::defaultAuthFields() {
         static const std::vector<std::string> _auth_fields = {
-            "id", "created", "updated", "name", "email", "password", "avatar_url"
+            "id", "created", "updated", "name", "email", "password", "avatar_url", "email_verified"
         };
         return _auth_fields;
     }

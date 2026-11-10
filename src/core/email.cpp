@@ -433,16 +433,18 @@ bool mb::MbMailer::checkRateLimit(const std::string &email, const int max_per_ho
 }
 
 std::string mb::MbMailer::verificationEmailHtml(const std::string &app_name, const std::string &verify_url) {
+    const auto safe_app = htmlEscape(app_name);
+    const auto safe_url = htmlEscape(verify_url);
     std::ostringstream html;
     html << "<!DOCTYPE html>\n"
             << "<html><head><meta charset=\"utf-8\"></head>\n"
             << "<body style=\"font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">\n"
-            << "<h2>Verify your email for " << app_name << "</h2>\n"
+            << "<h2>Verify your email for " << safe_app << "</h2>\n"
             << "<p>Click the button below to verify your email address:</p>\n"
-            << "<p><a href=\"" << verify_url << "\" style=\"display: inline-block; padding: 12px 24px; "
+            << "<p><a href=\"" << safe_url << "\" style=\"display: inline-block; padding: 12px 24px; "
             << "background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px;\">"
             << "Verify Email</a></p>\n"
-            << "<p style=\"color: #6B7280; font-size: 14px;\">This link expires in 1 hour. "
+            << "<p style=\"color: #6B7280; font-size: 14px;\">This link expires in 24 hours. "
             << "If you didn't create an account, you can safely ignore this email.</p>\n"
             << "</body></html>";
     return html.str();
@@ -453,7 +455,7 @@ std::string mb::MbMailer::verificationEmailText(const std::string &app_name, con
     text << "Verify your email for " << app_name << "\n\n"
             << "Visit the following link to verify your email address:\n\n"
             << verify_url << "\n\n"
-            << "This link expires in 1 hour.\n"
+            << "This link expires in 24 hours.\n"
             << "If you didn't create an account, you can safely ignore this email.\n";
     return text.str();
 }

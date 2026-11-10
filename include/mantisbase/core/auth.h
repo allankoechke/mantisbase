@@ -123,6 +123,45 @@ namespace mb
                                         const std::string &email,
                                         const std::string &otp) const;
 
+        /**
+         * @brief Reject login when the entity requires a verified email and the account is not verified.
+         * @throws MbException 403 when verification is required and `email_verified` is not true.
+         */
+        void rejectUnverifiedLogin(const std::string &entity_name, const json &user) const;
+
+        /**
+         * @brief Email a verification link when SMTP is configured and the account is unverified.
+         * Missing SMTP or siteDomain is logged and ignored so registration can still succeed.
+         */
+        void notifyEmailVerification(const std::string &entity_name, const std::string &user_id) const;
+
+        /**
+         * @brief Send a verification link for an email address.
+         * Unknown addresses return `{ "sent": true }` and send nothing.
+         * @param request_host Host header, used only when `siteDomain` is empty.
+         * @throws MbException 400 when SMTP is not configured, the address is invalid, or no public base URL is set.
+         */
+        [[nodiscard]] json requestEmailVerification(const std::string &entity_name,
+                                                    const std::string &email,
+                                                    const std::string &request_host) const;
+
+        /**
+         * @brief Mark the account verified when @p token matches a live verification link.
+         * @return `{ "verified": true }`.
+         * @throws MbException 400 when the token is missing, unknown, or expired.
+         */
+        [[nodiscard]] json confirmEmailVerification(const std::string &entity_name,
+                                                    const std::string &token) const;
+
+    private:
+        [[nodiscard]] std::string verificationLinkBase(const std::string &request_host) const;
+
+        void deliverEmailVerification(const std::string &entity_name,
+                                      const std::string &user_id,
+                                      const std::string &email,
+                                      const std::string &public_base) const;
+
+    public:
 #ifdef MB_SCRIPTING_ENABLED
         [[nodiscard]] std::string createTokenJson(const std::string &claims_json, int timeout = -1) const;
         [[nodiscard]] std::string verifyTokenJson(const std::string &token) const;

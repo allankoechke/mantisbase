@@ -1,6 +1,7 @@
 #include "mantisbase/core/router.h"
 #include "mantisbase/core/oauth.h"
 #include "mantisbase/core/http.h"
+#include "mantisbase/core/exceptions.h"
 #include "mantisbase/mantisbase.h"
 
 namespace mb {
@@ -77,6 +78,8 @@ namespace mb {
 
                     auto result = req.mbApp().auth().oauth().handleCallback(entity_name, provider, code, state);
                     res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
+                } catch (const MbException &e) {
+                    res.sendJSON(e.code(), {{"status", e.code()}, {"data", json::object()}, {"error", e.what()}});
                 } catch (const std::exception &e) {
                     req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
                     res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});
@@ -114,6 +117,8 @@ namespace mb {
 
                 auto result = req.mbApp().auth().oauth().linkAccount(entity_name, user_id, provider, code, state);
                 res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
+            } catch (const MbException &e) {
+                res.sendJSON(e.code(), {{"status", e.code()}, {"data", json::object()}, {"error", e.what()}});
             } catch (const std::exception &e) {
                 req.mbApp().logger().critical("OAuth", "Request Error", fmt::format("OAuth request error: {}", e.what()));
                 res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", "OAuth request failed."}});

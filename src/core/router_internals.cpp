@@ -315,6 +315,8 @@ namespace mb {
                     return;
                 }
 
+                req.mbApp().auth().rejectUnverifiedLogin(entity.name(), user);
+
                 auto token = req.mbApp().auth().createToken({{"id", user["id"]}, {"entity", entity.name()}});
 
                 user.erase("password");
@@ -471,6 +473,109 @@ namespace mb {
             } catch (const std::exception &e) {
                 req.mbApp().logger().critical("MbAuth", "OTP Login Error",
                                               fmt::format("Sign-in code login error: {}", e.what()));
+                res.sendJSON(500, {
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", "An internal error occurred."}
+                             });
+            }
+        };
+    }
+
+    namespace {
+        void sendVerifyEmailPage(const MbResponse &res, const int status, const std::string &heading,
+                                 const std::string &message) {
+            res.setStatus(status);
+            res.setContent(
+                "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>" + heading +
+                "</title></head><body style=\"font-family:-apple-system,sans-serif;max-width:560px;margin:40px auto;\">"
+                "<h2>" + heading + "</h2><p>" + message + "</p></body></html>",
+                "text/html; charset=utf-8");
+        }
+    }
+
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthVerifyEmailRequest() {
+        return [](const MbRequest &req, const MbResponse &res) {
+            try {
+                const auto &[body, err] = req.bodyAsJson();
+                if (!err.empty()) {
+                    res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
+                    return;
+                }
+                if (!body.contains("email") || !body["email"].is_string() ||
+                    trim(body["email"].get<std::string>()).empty()) {
+                    res.sendJSON(400, {
+                                     {"status", 400},
+                                     {"data", json::object()},
+                                     {"error", "Expected `email` key in the request body."}
+                                 });
+                    return;
+                }
+
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
+                const auto result = req.mbApp().auth().requestEmailVerification(
+                    entity_name, body["email"].get<std::string>(), req.headerValue("Host"));
+                res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
+            } catch (const MbException &e) {
+                res.sendJSON(e.code(), {{"status", e.code()}, {"data", json::object()}, {"error", e.what()}});
+            } catch (const std::exception &e) {
+                req.mbApp().logger().critical("MbAuth", "Email Verification Request Error",
+                                              fmt::format("Verification email request error: {}", e.what()));
+                res.sendJSON(500, {
+                                 {"status", 500},
+                                 {"data", json::object()},
+                                 {"error", "An internal error occurred."}
+                             });
+            }
+        };
+    }
+
+    std::function<void(MbRequest &, MbResponse &)> MbRouter::handleAuthVerifyEmail() {
+        return [](const MbRequest &req, const MbResponse &res) {
+            const bool as_html = req.method() == "GET";
+            try {
+                std::string token;
+                if (as_html) {
+                    token = req.queryParamValue("token");
+                } else {
+                    const auto &[body, err] = req.bodyAsJson();
+                    if (!err.empty()) {
+                        res.sendJSON(400, {{"status", 400}, {"data", json::object()}, {"error", err}});
+                        return;
+                    }
+                    if (!body.contains("token") || !body["token"].is_string() ||
+                        trim(body["token"].get<std::string>()).empty()) {
+                        res.sendJSON(400, {
+                                         {"status", 400},
+                                         {"data", json::object()},
+                                         {"error", "Expected `token` key in the request body."}
+                                     });
+                        return;
+                    }
+                    token = body["token"].get<std::string>();
+                }
+
+                const auto entity_name = trim(req.pathParamValue("entity_name"));
+                const auto result = req.mbApp().auth().confirmEmailVerification(entity_name, token);
+                if (as_html) {
+                    sendVerifyEmailPage(res, 200, "Email verified",
+                                        "Your email address is verified. You can close this page and sign in.");
+                    return;
+                }
+                res.sendJSON(200, {{"status", 200}, {"data", result}, {"error", ""}});
+            } catch (const MbException &e) {
+                if (as_html) {
+                    sendVerifyEmailPage(res, e.code(), "Verification failed", e.what());
+                    return;
+                }
+                res.sendJSON(e.code(), {{"status", e.code()}, {"data", json::object()}, {"error", e.what()}});
+            } catch (const std::exception &e) {
+                req.mbApp().logger().critical("MbAuth", "Email Verification Error",
+                                              fmt::format("Email verification error: {}", e.what()));
+                if (as_html) {
+                    sendVerifyEmailPage(res, 500, "Verification failed", "An internal error occurred.");
+                    return;
+                }
                 res.sendJSON(500, {
                                  {"status", 500},
                                  {"data", json::object()},

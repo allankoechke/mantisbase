@@ -31,7 +31,7 @@ description: >-
 | type | Purpose |
 |------|---------|
 | `base` | Standard CRUD entity |
-| `auth` | User accounts with login (`email`, `password` fields). `auth.password` defaults on; `auth.otp` and `auth.oauth` default off. Admins toggle them with `PATCH /api/v1/schemas/{name}`. |
+| `auth` | User accounts with login (`email`, `password`, `email_verified`). `auth.password` defaults on; `auth.otp`, `auth.oauth`, and `auth.requireEmailVerification` default off. Admins toggle them with `PATCH /api/v1/schemas/{name}`. Existing auth tables gain `email_verified` on startup. Admin accounts do not. |
 | `view` | Read-only SQL view (advanced) |
 
 ## Common field types

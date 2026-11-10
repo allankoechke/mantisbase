@@ -77,6 +77,7 @@ namespace mb {
             // Add admin routes
             MbEntitySchema admin_schema{mbApp(), "mb_admins", "auth"};
             admin_schema.removeField("name");
+            admin_schema.removeField("email_verified");
             admin_schema.setSystem(true);
             auto admin_entity = admin_schema.toEntity();
             m_entityMap.emplace(admin_entity.name(), std::move(admin_entity));
@@ -304,6 +305,9 @@ namespace mb {
         Post("/api/v1/auth/:entity_name/login", handleAuthLogin(), authLoginMiddleware);
         Post("/api/v1/auth/:entity_name/otp/request", handleAuthOtpRequest(), authLoginMiddleware);
         Post("/api/v1/auth/:entity_name/otp/login", handleAuthOtpLogin(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/verify-email/request", handleAuthVerifyEmailRequest(), authLoginMiddleware);
+        Post("/api/v1/auth/:entity_name/verify-email", handleAuthVerifyEmail(), authEntityMiddleware);
+        Get("/api/v1/auth/:entity_name/verify-email", handleAuthVerifyEmail(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/refresh", handleAuthRefresh(), authEntityMiddleware);
         Post("/api/v1/auth/:entity_name/logout", handleAuthLogout(), authEntityMiddleware);
     }

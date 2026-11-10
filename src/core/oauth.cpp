@@ -234,14 +234,27 @@ namespace mb {
             throw std::runtime_error("Cannot identify user from OAuth callback: no email or linked account");
         }
 
-        // Create session token
-        auto token = mbApp().auth().createToken({{"id", user_id}, {"entity", entity_name}});
+        bool provider_verified = false;
+        if (tokens.contains("email_verified")) {
+            if (tokens["email_verified"].is_boolean())
+                provider_verified = tokens["email_verified"].get<bool>();
+            else if (tokens["email_verified"].is_number_integer())
+                provider_verified = tokens["email_verified"].get<int>() != 0;
+        }
 
-        // Get user record
-        const auto entity = mbApp().entity(entity_name);
-        auto user_opt = entity.read(user_id);
+        const auto account_entity = mbApp().entity(entity_name);
+        if (provider_verified && account_entity.field("email_verified").has_value())
+            [[maybe_unused]] auto _ = account_entity.update(user_id, {{"email_verified", true}});
+        else
+            mbApp().auth().notifyEmailVerification(entity_name, user_id);
+
+        auto user_opt = account_entity.read(user_id);
         json user = user_opt.has_value() ? user_opt.value() : json::object();
         user.erase("password");
+        mbApp().auth().rejectUnverifiedLogin(entity_name, user);
+
+        // Create session token
+        auto token = mbApp().auth().createToken({{"id", user_id}, {"entity", entity_name}});
 
         return {
             {"token", token},
@@ -571,6 +584,8 @@ namespace mb {
                 if (claims.contains("email")) token_data["email"] = claims["email"];
                 if (claims.contains("name")) token_data["name"] = claims["name"];
                 if (claims.contains("picture")) token_data["picture"] = claims["picture"];
+                if (claims.contains("email_verified"))
+                    token_data["email_verified"] = claims["email_verified"];
             } catch (const std::exception &e) {
                 throw std::runtime_error(std::string("ID token verification failed: ") + e.what());
             }

@@ -6,6 +6,44 @@
 
 namespace mb {
     namespace {
+        json authWriteBody(MbRequest &req, const MbEntity &entity, const json &existing = json{}) {
+            json body = req.jsonBody();
+            if (entity.type() != "auth" || entity.isSystem() || !entity.field("email_verified").has_value())
+                return body;
+
+            const bool admin = req.isAdminAuth();
+            if (!admin)
+                body.erase("email_verified");
+            else if (body.contains("email_verified") && !body["email_verified"].is_boolean())
+                throw MbException(400, "Expected `email_verified` to be a boolean.");
+
+            if (!existing.is_object() || existing.empty())
+                return body;
+            if (!body.contains("email") || !body["email"].is_string())
+                return body;
+
+            const auto previous = existing.contains("email") && existing["email"].is_string()
+                                      ? trim(existing["email"].get<std::string>())
+                                      : std::string{};
+            auto next = trim(body["email"].get<std::string>());
+            auto previous_key = previous;
+            auto next_key = next;
+            toLowerCase(previous_key);
+            toLowerCase(next_key);
+            if (!next_key.empty() && previous_key != next_key && !(admin && body.contains("email_verified")))
+                body["email_verified"] = false;
+            return body;
+        }
+
+        void maybeSendVerification(const MbRequest &req, const MbEntity &entity, const json &record) {
+            if (entity.type() != "auth" || entity.isSystem() || !record.contains("id") || !record["id"].is_string())
+                return;
+            if (record.contains("email_verified") && record["email_verified"].is_boolean() &&
+                record["email_verified"].get<bool>())
+                return;
+            req.mbApp().auth().notifyEmailVerification(entity.name(), record["id"].get<std::string>());
+        }
+
         void handleGetOne(const MbRequest &req, const MbResponse &res, const std::string &entity_name) {
             try {
                 const auto entity = req.mbApp().entity(entity_name);
@@ -122,11 +160,12 @@ namespace mb {
                 }
 
                 req.writeFiles(entity_name);
-                auto record = entity.create(req.jsonBody());
+                auto record = entity.create(authWriteBody(req, entity));
 
                 if (entity.type() == "auth" && record.contains("password")) {
                     record.erase("password");
                 }
+                maybeSendVerification(req, entity, record);
 
                 res.sendJSON(201, {
                                  {"data", record},
@@ -171,12 +210,21 @@ namespace mb {
                     return;
                 }
 
+                json existing = json::object();
+                if (entity.type() == "auth" && !entity.isSystem()) {
+                    if (const auto current = entity.read(entity_id); current.has_value())
+                        existing = *current;
+                }
+
                 req.writeFiles(entity_name);
-                auto record = entity.update(entity_id, req.jsonBody());
+                auto record = entity.update(entity_id, authWriteBody(req, entity, existing));
 
                 if (entity.type() == "auth" && record.contains("password")) {
                     record.erase("password");
                 }
+                if (existing.contains("email") && record.contains("email") &&
+                    existing["email"] != record["email"])
+                    maybeSendVerification(req, entity, record);
 
                 res.sendJSON(200, {
                                  {"data", record},

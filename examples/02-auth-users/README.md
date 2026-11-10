@@ -52,6 +52,15 @@ curl -X PATCH "$BASE_URL/api/v1/schemas/users" \
 
 `GET /api/v1/auth/users/methods` returns the current flags. A disabled method responds with 403.
 
+`auth.requireEmailVerification` defaults to off. Turn it on to block password, OTP, and OAuth login until `email_verified` is true. That field is added automatically (existing tables are altered on startup). With SMTP configured, registration sends a link to `/api/v1/auth/users/verify-email?token=...`.
+
+```bash
+curl -X PATCH "$BASE_URL/api/v1/schemas/users" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"auth": {"requireEmailVerification": true}}'
+```
+
 ## Email sign-in code
 
 SMTP must be configured in admin settings. Otherwise `otp/request` returns 400.

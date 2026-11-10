@@ -37,6 +37,9 @@ If the entity is missing or does not meet these requirements, the route returns 
 | POST | `/api/v1/auth/<entity>/login` | Authenticate user and get token |
 | POST | `/api/v1/auth/<entity>/otp/request` | Email a one-time sign-in code |
 | POST | `/api/v1/auth/<entity>/otp/login` | Sign in with an emailed code |
+| POST | `/api/v1/auth/<entity>/verify-email/request` | Email an address-verification link |
+| POST | `/api/v1/auth/<entity>/verify-email` | Confirm an address with the link token |
+| GET | `/api/v1/auth/<entity>/verify-email?token=` | Confirm an address from the email link |
 | POST | `/api/v1/auth/<entity>/refresh` | Refresh an existing token |
 | POST | `/api/v1/auth/<entity>/logout` | Logout (invalidate token) |
 
@@ -53,6 +56,7 @@ Each auth entity has three login methods. Password login is enabled by default. 
 | Email and password | `auth.password` | `true` | `POST /api/v1/auth/<entity>/login` |
 | Email sign-in code | `auth.otp` | `false` | `POST /api/v1/auth/<entity>/otp/request` and `/otp/login` |
 | OAuth | `auth.oauth` | `false` | `/api/v1/auth/<entity>/oauth/authorize`, `/callback`, `/link`, `/providers` |
+| Require a verified email | `auth.requireEmailVerification` | `false` | Password, OTP, and OAuth login |
 
 Read the current flags without an admin token:
 
@@ -66,7 +70,8 @@ curl http://localhost:7070/api/v1/auth/users/methods
   "data": {
     "password": true,
     "otp": false,
-    "oauth": false
+    "oauth": false,
+    "requireEmailVerification": false
   },
   "error": ""
 }
@@ -82,6 +87,48 @@ curl -X PATCH http://localhost:7070/api/v1/schemas/users \
 ```
 
 Existing sessions keep working after a method is turned off. New logins for that method are rejected.
+
+When `requireEmailVerification` is **true**, password login, email-code login, and OAuth login return **403** `Verify your email before signing in.` until `email_verified` is true. Sessions that are already signed in keep working. The flag defaults to **false**, so existing deployments keep the current login behavior until an admin turns it on.
+
+---
+
+## Email verification
+
+Auth tables store a system field `email_verified` (boolean, default `false`). New auth entities include it. Tables created before this field existed gain the column on startup; existing rows are unverified. Admin accounts (`mb_admins`) do not have the field.
+
+Clients cannot set `email_verified` on create or update. An admin can set it with `PATCH /api/v1/entities/<entity>/<id>`. Changing the account email clears the flag unless that same admin request sets it.
+
+When SMTP is configured, creating an account emails a verification link. The link is `{siteDomain}/api/v1/auth/<entity>/verify-email?token=...`, expires after **24 hours**, and works once. Set `siteDomain` so the link points at this server. If SMTP is not configured, registration still succeeds and no message is sent.
+
+Request another link:
+
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/verify-email/request \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+```
+
+```json
+{ "status": 200, "data": { "sent": true }, "error": "" }
+```
+
+The response is the same when no account uses that email, and no message is sent. An address that is already verified also returns `sent: true` without a new message. SMTP must be configured, otherwise the response is **400** `Email service not configured. Set SMTP settings first.`
+
+Opening the link in a browser returns a short HTML page. A client can confirm the same token with JSON:
+
+```bash
+curl -X POST http://localhost:7070/api/v1/auth/users/verify-email \
+  -H "Content-Type: application/json" \
+  -d '{"token": "<token from the email>"}'
+```
+
+```json
+{ "status": 200, "data": { "verified": true }, "error": "" }
+```
+
+A missing, used, or expired token returns **400** `Invalid or expired verification link.`
+
+OAuth login marks `email_verified` when the provider asserts `email_verified`. Otherwise, and when SMTP is configured, a verification link is sent for that account.
 
 ---
 

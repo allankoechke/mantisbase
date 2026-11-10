@@ -319,11 +319,11 @@ curl -X POST http://localhost:7070/api/v1/schemas \
       "update": {"mode": "custom", "expr": "auth.id == req.body.id"},
       "delete": {"mode": "", "expr": ""}
     },
-    "auth": {"password": true, "otp": false, "oauth": false}
+    "auth": {"password": true, "otp": false, "oauth": false, "requireEmailVerification": false}
   }'
 ```
 
-`auth` is only valid on auth entities. Password login defaults to enabled. OTP and OAuth default to disabled. Change the flags with an admin `PATCH /api/v1/schemas/<name>`; other clients receive **403** on a disabled login route. See [Authentication API](auth.md#login-methods).
+`auth` is only valid on auth entities. Password login defaults to enabled. OTP and OAuth default to disabled. `requireEmailVerification` defaults to off. Change the flags with an admin `PATCH /api/v1/schemas/<name>`; other clients receive **403** on a disabled login route. Auth tables also store `email_verified` (default `false`). Admin accounts do not. See [Authentication API](auth.md#login-methods).
 
 ### MbEntity Types
 

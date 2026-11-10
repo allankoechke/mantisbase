@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 #include <regex>
+#include <soci/soci.h>
 #include "../common/test_fixture.h"
 #include "../common/test_helpers.h"
 #include "../common/test_config.h"
@@ -426,6 +427,7 @@ TEST_F(IntegrationAuthTest, AuthMethodsDefaultToPasswordOnly) {
     EXPECT_TRUE(methods["password"].get<bool>());
     EXPECT_FALSE(methods["otp"].get<bool>());
     EXPECT_FALSE(methods["oauth"].get<bool>());
+    EXPECT_FALSE(methods["requireEmailVerification"].get<bool>());
 
     const TestHttp::Headers admin = {{"Authorization", "Bearer " + adminToken}};
     auto schemaRes = client->Get("/api/v1/schemas/test_users", admin);
@@ -435,6 +437,7 @@ TEST_F(IntegrationAuthTest, AuthMethodsDefaultToPasswordOnly) {
     EXPECT_TRUE(stored["password"].get<bool>());
     EXPECT_FALSE(stored["otp"].get<bool>());
     EXPECT_FALSE(stored["oauth"].get<bool>());
+    EXPECT_FALSE(stored["requireEmailVerification"].get<bool>());
 
     nlohmann::json login = {
         {"identity", "testuser@example.com"},
@@ -594,4 +597,183 @@ TEST_F(IntegrationAuthTest, OtpLoginRejectsWrongCode) {
                                   "application/json");
     ASSERT_TRUE(exhausted != nullptr);
     EXPECT_EQ(exhausted->status, 401);
+}
+
+namespace {
+
+bool jsonFlag(const nlohmann::json &value) {
+    if (value.is_boolean())
+        return value.get<bool>();
+    if (value.is_number_integer())
+        return value.get<int>() != 0;
+    return false;
+}
+
+std::string tokenFromVerificationMail(const std::string &body) {
+    const auto pos = body.find("token=");
+    if (pos == std::string::npos)
+        return {};
+    const auto start = pos + 6;
+    const auto end = body.find_first_of(" \r\n&\"'<>", start);
+    return body.substr(start, end == std::string::npos ? std::string::npos : end - start);
+}
+
+class LegacyAuthTable {
+public:
+    explicit LegacyAuthTable(mb::MantisBase &app) : app_(app) {}
+    ~LegacyAuthTable() {
+        try {
+            const auto sql = app_.db().session();
+            *sql << "DROP TABLE IF EXISTS legacy_users";
+            *sql << "DELETE FROM mb_tables WHERE id = 'legacy_schema'";
+        } catch (...) {
+        }
+    }
+
+private:
+    mb::MantisBase &app_;
+};
+
+} // namespace
+
+TEST_F(IntegrationAuthTest, EmailVerifiedFlagGatesLoginWhenRequired) {
+    EXPECT_FALSE(mantis().entity("mb_admins").field("email_verified").has_value());
+    EXPECT_TRUE(mantis().entity("test_users").field("email_verified").has_value());
+
+    nlohmann::json login = {
+        {"identity", "testuser@example.com"},
+        {"password", TestConfig::getTestPassword()}
+    };
+    auto loginRes = client->Post("/api/v1/auth/test_users/login", login.dump(), "application/json");
+    ASSERT_TRUE(loginRes != nullptr);
+    ASSERT_EQ(loginRes->status, 200);
+    const auto loggedIn = nlohmann::json::parse(loginRes->body)["data"];
+    const auto userId = loggedIn["user"]["id"].get<std::string>();
+    EXPECT_FALSE(jsonFlag(loggedIn["user"]["email_verified"]));
+    const auto userToken = loggedIn["token"].get<std::string>();
+
+    const TestHttp::Headers user = {{"Authorization", "Bearer " + userToken}};
+    const TestHttp::Headers admin = {{"Authorization", "Bearer " + adminToken}};
+    const nlohmann::json claimVerified = {{"name", "Test User"}, {"email_verified", true}};
+    auto self = client->Patch("/api/v1/entities/test_users/" + userId, user, claimVerified.dump(), "application/json");
+    ASSERT_TRUE(self != nullptr);
+    ASSERT_EQ(self->status, 200) << self->body;
+    EXPECT_FALSE(jsonFlag(nlohmann::json::parse(self->body)["data"]["email_verified"]));
+
+    auto moved = client->Patch("/api/v1/entities/test_users/" + userId, user,
+                               nlohmann::json{{"email", "moved@example.com"}}.dump(), "application/json");
+    ASSERT_TRUE(moved != nullptr);
+    ASSERT_EQ(moved->status, 200) << moved->body;
+    EXPECT_FALSE(jsonFlag(nlohmann::json::parse(moved->body)["data"]["email_verified"]));
+
+    auto restored = client->Patch("/api/v1/entities/test_users/" + userId, user,
+                                  nlohmann::json{{"email", "testuser@example.com"}}.dump(), "application/json");
+    ASSERT_TRUE(restored != nullptr);
+    ASSERT_EQ(restored->status, 200) << restored->body;
+
+    setAuthMethod(*client, adminToken, "requireEmailVerification", true);
+    auto blocked = client->Post("/api/v1/auth/test_users/login", login.dump(), "application/json");
+    ASSERT_TRUE(blocked != nullptr);
+    EXPECT_EQ(blocked->status, 403);
+    EXPECT_NE(nlohmann::json::parse(blocked->body)["error"].get<std::string>().find("Verify your email"),
+              std::string::npos);
+
+    auto marked = client->Patch("/api/v1/entities/test_users/" + userId, admin,
+                                nlohmann::json{{"email_verified", true}}.dump(), "application/json");
+    ASSERT_TRUE(marked != nullptr);
+    ASSERT_EQ(marked->status, 200) << marked->body;
+    EXPECT_TRUE(jsonFlag(nlohmann::json::parse(marked->body)["data"]["email_verified"]));
+
+    auto allowed = client->Post("/api/v1/auth/test_users/login", login.dump(), "application/json");
+    ASSERT_TRUE(allowed != nullptr);
+    EXPECT_EQ(allowed->status, 200);
+
+    auto cleared = client->Patch("/api/v1/entities/test_users/" + userId, admin,
+                                 nlohmann::json{{"email_verified", false}}.dump(), "application/json");
+    ASSERT_TRUE(cleared != nullptr);
+    ASSERT_EQ(cleared->status, 200);
+
+    auto unconfigured = client->Post("/api/v1/auth/test_users/verify-email/request",
+                                     nlohmann::json{{"email", "testuser@example.com"}}.dump(), "application/json");
+    ASSERT_TRUE(unconfigured != nullptr);
+    EXPECT_EQ(unconfigured->status, 400);
+
+    MockSmtp smtp(mantis());
+    smtp.enable();
+    const auto previous_domain = mantis().settings().configs().value("siteDomain", nlohmann::json(""));
+    mantis().settings().setScriptingValue("siteDomain", "http://verify.example");
+
+    nlohmann::json created_body = {
+        {"name", "New User"},
+        {"email", "newuser@example.com"},
+        {"password", TestConfig::getTestPassword()},
+        {"email_verified", true}
+    };
+    auto created = client->Post("/api/v1/entities/test_users", created_body.dump(), "application/json");
+    ASSERT_TRUE(created != nullptr);
+    ASSERT_EQ(created->status, 201) << created->body;
+    const auto created_user = nlohmann::json::parse(created->body)["data"];
+    EXPECT_FALSE(jsonFlag(created_user["email_verified"]));
+    ASSERT_EQ(mantis().mailer().sentMessages().size(), 1u);
+    const auto token = tokenFromVerificationMail(mantis().mailer().sentMessages().front().body_text);
+    ASSERT_FALSE(token.empty());
+    EXPECT_EQ(created->body.find(token), std::string::npos);
+
+    auto unknown = client->Post("/api/v1/auth/test_users/verify-email/request",
+                                nlohmann::json{{"email", "nobody@example.com"}}.dump(), "application/json");
+    ASSERT_TRUE(unknown != nullptr);
+    EXPECT_EQ(unknown->status, 200);
+    EXPECT_EQ(mantis().mailer().sentMessages().size(), 1u);
+
+    auto confirm = client->Get("/api/v1/auth/test_users/verify-email?token=" + token);
+    ASSERT_TRUE(confirm != nullptr);
+    EXPECT_EQ(confirm->status, 200);
+    EXPECT_NE(confirm->body.find("Email verified"), std::string::npos);
+
+    auto again = client->Post("/api/v1/auth/test_users/verify-email",
+                              nlohmann::json{{"token", token}}.dump(), "application/json");
+    ASSERT_TRUE(again != nullptr);
+    EXPECT_EQ(again->status, 400);
+
+    nlohmann::json new_login = {
+        {"identity", "newuser@example.com"},
+        {"password", TestConfig::getTestPassword()}
+    };
+    auto new_session = client->Post("/api/v1/auth/test_users/login", new_login.dump(), "application/json");
+    ASSERT_TRUE(new_session != nullptr);
+    EXPECT_EQ(new_session->status, 200);
+    EXPECT_TRUE(jsonFlag(nlohmann::json::parse(new_session->body)["data"]["user"]["email_verified"]));
+
+    mantis().settings().setScriptingValue("siteDomain", previous_domain);
+
+    LegacyAuthTable cleanup(mantis());
+    {
+        const auto sql = mantis().db().session();
+        *sql << "CREATE TABLE legacy_users (id TEXT PRIMARY KEY, email TEXT)";
+        *sql << "INSERT INTO legacy_users (id, email) VALUES ('legacy1', 'old@example.com')";
+        const nlohmann::json legacy_schema = {
+            {"name", "legacy_users"},
+            {"type", "auth"},
+            {"system", false},
+            {"fields", nlohmann::json::array({{{"name", "id"}, {"type", "string"}}})}
+        };
+        *sql << "INSERT INTO mb_tables (id, schema, created, updated) "
+                "VALUES ('legacy_schema', :schema, datetime('now'), datetime('now'))",
+                soci::use(legacy_schema);
+    }
+    ASSERT_TRUE(mantis().db().createSysTables());
+    {
+        const auto sql = mantis().db().session();
+        int verified = -1;
+        *sql << "SELECT email_verified FROM legacy_users WHERE id = 'legacy1'", soci::into(verified);
+        EXPECT_EQ(verified, 0);
+        nlohmann::json stored;
+        *sql << "SELECT schema FROM mb_tables WHERE id = 'legacy_schema'", soci::into(stored);
+        bool found = false;
+        for (const auto &field: stored["fields"]) {
+            if (field.value("name", "") == "email_verified")
+                found = true;
+        }
+        EXPECT_TRUE(found);
+    }
 }

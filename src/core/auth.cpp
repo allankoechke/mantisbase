@@ -216,6 +216,7 @@ namespace mb {
     namespace {
         constexpr int kLoginOtpTtlSeconds = 10 * 60;
         constexpr int kLoginOtpMaxAttempts = 5;
+        constexpr int kEmailVerificationTtlSeconds = 24 * 60 * 60;
 
         struct OtpAccount {
             std::string id;
@@ -327,6 +328,27 @@ namespace mb {
         [[noreturn]] void rejectLoginCode(const MantisBase &app, const std::string &entity_name) {
             app.logger().warn("MbAuth", "Sign-in code rejected", entity_name);
             throw MbException(401, "Invalid or expired sign-in code.");
+        }
+
+        bool emailFlagTrue(const json &user) {
+            if (!user.contains("email_verified") || user["email_verified"].is_null())
+                return false;
+            if (user["email_verified"].is_boolean())
+                return user["email_verified"].get<bool>();
+            if (user["email_verified"].is_number_integer())
+                return user["email_verified"].get<int>() != 0;
+            return false;
+        }
+
+        std::string trimTrailingSlashes(std::string value) {
+            while (!value.empty() && value.back() == '/')
+                value.pop_back();
+            return value;
+        }
+
+        void purgeExpiredEmailVerifications(soci::session &sql) {
+            const auto now = getCurrentTimestampUTC();
+            sql << "DELETE FROM mb_email_verifications WHERE expires_at <= :now", soci::use(now);
         }
     } // namespace
 
@@ -456,11 +478,191 @@ namespace mb {
 
         auto user = std::move(user_opt.value());
         user.erase("password");
+        rejectUnverifiedLogin(entity_name, user);
         const auto token = createToken({{"id", user_id}, {"entity", entity_name}});
         return {
             {"token", token},
             {"user", user}
         };
+    }
+
+    std::string MbAuth::verificationLinkBase(const std::string &request_host) const {
+        const auto &config = mApp.settings().configs();
+        std::string base;
+        if (config.contains("siteDomain") && config["siteDomain"].is_string())
+            base = trimTrailingSlashes(trim(config["siteDomain"].get<std::string>()));
+        if (!base.empty())
+            return base;
+
+        const auto host = trim(request_host);
+        if (host.empty())
+            return {};
+        return "http://" + host;
+    }
+
+    void MbAuth::rejectUnverifiedLogin(const std::string &entity_name, const json &user) const {
+        const auto entity = mApp.entity(entity_name);
+        if (entity.isSystem() || entity.type() != "auth")
+            return;
+        if (!entity.authMethods().requireEmailVerification)
+            return;
+        if (emailFlagTrue(user))
+            return;
+        throw MbException(403, "Verify your email before signing in.");
+    }
+
+    void MbAuth::deliverEmailVerification(const std::string &entity_name,
+                                          const std::string &user_id,
+                                          const std::string &email,
+                                          const std::string &public_base) const {
+        if (public_base.empty())
+            throw MbException(400, "Set siteDomain before sending a verification email.");
+
+        const auto address = normalizeEmail(email);
+        const auto token = generateSecureRandom(32);
+        const auto token_hash = sha256Hex(token);
+        const auto id = generateTimeBasedId();
+        const auto expires_at = timestampAfterSeconds(kEmailVerificationTtlSeconds);
+        const auto now = getCurrentTimestampUTC();
+        const auto app_name = appDisplayName(mApp);
+        const auto verify_url = std::format("{}/api/v1/auth/{}/verify-email?token={}",
+                                            public_base, entity_name, token);
+
+        const auto sql = mApp.db().session();
+        purgeExpiredEmailVerifications(*sql);
+        {
+            soci::transaction tr(*sql);
+            *sql << "INSERT INTO mb_email_verifications "
+                    "(id, entity_name, user_id, email, token_hash, expires_at, created) "
+                    "VALUES (:id, :entity, :uid, :email, :hash, :exp, :now)",
+                    soci::use(id), soci::use(entity_name), soci::use(user_id),
+                    soci::use(address), soci::use(token_hash), soci::use(expires_at), soci::use(now);
+            tr.commit();
+        }
+
+        MbEmailMsg message;
+        message.to = email;
+        message.subject = std::format("Verify your email for {}", app_name);
+        const std::unordered_map<std::string, std::string> vars = {
+            {"app_name", app_name},
+            {"verify_url", verify_url}
+        };
+        message.body_text = mApp.mailer().loadTemplate("verification.txt", vars);
+        message.body_html = mApp.mailer().loadTemplate("verification.html", vars);
+
+        try {
+            if (!mApp.mailer().send(message))
+                throw MbException(502, "Failed to send the verification email.");
+        } catch (...) {
+            try {
+                *sql << "DELETE FROM mb_email_verifications WHERE id = :id", soci::use(id);
+            } catch (const std::exception &) {
+            }
+            throw;
+        }
+
+        *sql << "DELETE FROM mb_email_verifications WHERE entity_name = :entity AND user_id = :uid AND id != :id",
+                soci::use(entity_name), soci::use(user_id), soci::use(id);
+    }
+
+    void MbAuth::notifyEmailVerification(const std::string &entity_name, const std::string &user_id) const {
+        if (!mApp.mailer().isConfigured())
+            return;
+
+        const auto entity = mApp.entity(entity_name);
+        if (entity.isSystem() || entity.type() != "auth" || !entity.field("email_verified").has_value())
+            return;
+
+        const auto user = entity.read(user_id);
+        if (!user.has_value() || emailFlagTrue(*user))
+            return;
+        if (!user->contains("email") || !user->at("email").is_string())
+            return;
+
+        const auto email = user->at("email").get<std::string>();
+        if (trim(email).empty())
+            return;
+
+        const auto base = verificationLinkBase("");
+        if (base.empty()) {
+            mApp.logger().warn("MbAuth", "Email verification skipped",
+                               "Set siteDomain before verification links can be sent.");
+            return;
+        }
+
+        try {
+            deliverEmailVerification(entity_name, user_id, email, base);
+        } catch (const std::exception &e) {
+            mApp.logger().warn("MbAuth", "Email verification not sent", e.what());
+        }
+    }
+
+    json MbAuth::requestEmailVerification(const std::string &entity_name,
+                                          const std::string &email,
+                                          const std::string &request_host) const {
+        if (!mApp.mailer().isConfigured())
+            throw MbException(400, std::string(MbMailer::kNotConfiguredMessage));
+
+        const auto address = normalizeEmail(email);
+        if (!looksLikeEmail(address))
+            throw MbException(400, "Invalid email address");
+
+        const auto base = verificationLinkBase(request_host);
+        if (base.empty())
+            throw MbException(400, "Set siteDomain before sending a verification email.");
+
+        const auto account = findAccountByEmail(mApp, entity_name, address);
+        if (!account.has_value())
+            return {{"sent", true}};
+
+        const auto entity = mApp.entity(entity_name);
+        const auto user = entity.read(account->id, {{"keep_passwords", true}});
+        if (!user.has_value() || emailFlagTrue(*user))
+            return {{"sent", true}};
+
+        deliverEmailVerification(entity_name, account->id, account->email, base);
+        return {{"sent", true}};
+    }
+
+    json MbAuth::confirmEmailVerification(const std::string &entity_name, const std::string &token) const {
+        const auto raw = trim(token);
+        if (raw.size() < 32 || raw.size() > 256)
+            throw MbException(400, "Invalid or expired verification link.");
+
+        const auto token_hash = sha256Hex(raw);
+        const auto sql = mApp.db().session();
+        purgeExpiredEmailVerifications(*sql);
+
+        std::string id;
+        std::string user_id;
+        std::string email;
+        const auto now = getCurrentTimestampUTC();
+        *sql << "SELECT id, user_id, email FROM mb_email_verifications "
+                "WHERE entity_name = :entity AND token_hash = :hash AND expires_at > :now "
+                "ORDER BY created DESC, id DESC LIMIT 1",
+                soci::use(entity_name), soci::use(token_hash), soci::use(now),
+                soci::into(id), soci::into(user_id), soci::into(email);
+
+        if (!sql->got_data() || id.empty() || user_id.empty())
+            throw MbException(400, "Invalid or expired verification link.");
+
+        const auto entity = mApp.entity(entity_name);
+        if (!entity.field("email_verified").has_value())
+            throw MbException(400, "This account cannot verify an email address.");
+
+        const auto user = entity.read(user_id);
+        if (!user.has_value() || !user->contains("email") || !user->at("email").is_string())
+            throw MbException(400, "Invalid or expired verification link.");
+
+        const auto current = normalizeEmail(user->at("email").get<std::string>());
+        if (current != normalizeEmail(email))
+            throw MbException(400, "Invalid or expired verification link.");
+
+        [[maybe_unused]] auto _ = entity.update(user_id, {{"email_verified", true}});
+        *sql << "DELETE FROM mb_email_verifications WHERE entity_name = :entity AND user_id = :uid",
+                soci::use(entity_name), soci::use(user_id);
+
+        return {{"verified", true}};
     }
 
 #ifdef MB_SCRIPTING_ENABLED

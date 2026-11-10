@@ -7,6 +7,8 @@
 #include <private/soci-mktime.h>
 #include <soci/sqlite3/soci-sqlite3.h>
 
+#include <vector>
+
 #include "mantisbase/core/models/entity_schema.h"
 
 #if MB_HAS_POSTGRESQL
@@ -178,6 +180,7 @@ namespace mb {
             // Create admin table, for managing and auth for admin accounts
             MbEntitySchema admin_schema{mbApp, "mb_admins", "auth"};
             admin_schema.removeField("name");
+            admin_schema.removeField("email_verified");
             admin_schema.setSystem(true);
             *sql << admin_schema.toDDL();
 
@@ -275,6 +278,19 @@ namespace mb {
                     ")";
             *sql << "CREATE INDEX IF NOT EXISTS idx_login_otps_lookup ON mb_login_otps(entity_name, email)";
 
+            // One-time email verification links. token_hash is SHA-256, never the raw token.
+            *sql << "CREATE TABLE IF NOT EXISTS mb_email_verifications ("
+                    "id TEXT PRIMARY KEY, "
+                    "entity_name TEXT NOT NULL, "
+                    "user_id TEXT NOT NULL, "
+                    "email TEXT NOT NULL, "
+                    "token_hash TEXT NOT NULL, "
+                    "expires_at TEXT NOT NULL, "
+                    "created TEXT NOT NULL"
+                    ")";
+            *sql << "CREATE INDEX IF NOT EXISTS idx_email_verifications_hash "
+                    "ON mb_email_verifications(entity_name, token_hash)";
+
             // OAuth linked accounts
             *sql << "CREATE TABLE IF NOT EXISTS mb_oauth_accounts ("
                     "id TEXT PRIMARY KEY, "
@@ -291,6 +307,9 @@ namespace mb {
 
             // Seed default OAuth provider presets
             seedOAuthPresets(*sql);
+
+            // Existing auth entities predate email_verified. Add the column in place.
+            migrateAuthEmailVerified(*sql);
 
             // Commit changes
             tr.commit();
@@ -346,6 +365,96 @@ namespace mb {
                         "VALUES (:id, :name, '', '', :du, :sc, 1, 1)",
                     soci::use(id), soci::use(name), soci::use(discovery_url), soci::use(scopes);
             }
+        }
+    }
+
+    namespace {
+        bool tableHasColumn(soci::session &sql, const std::string &db_type,
+                            const std::string &table, const std::string &column) {
+            const auto safe_table = sqlIdentifier(table);
+            if (db_type == "sqlite3") {
+                const soci::rowset<soci::row> rows =
+                        (sql.prepare << "PRAGMA table_info(" + safe_table + ")");
+                for (const auto &row: rows) {
+                    if (row.get<std::string>(1) == column)
+                        return true;
+                }
+                return false;
+            }
+
+            int count = 0;
+            if (db_type == "mysql") {
+                sql << "SELECT COUNT(*) FROM information_schema.columns "
+                       "WHERE table_schema = DATABASE() AND table_name = :table AND column_name = :column",
+                        soci::use(table), soci::use(column), soci::into(count);
+            } else {
+                sql << "SELECT COUNT(*) FROM information_schema.columns "
+                       "WHERE table_name = :table AND column_name = :column",
+                        soci::use(table), soci::use(column), soci::into(count);
+            }
+            return count > 0;
+        }
+
+        json emailVerifiedFieldJson() {
+            for (const auto &field: MbEntitySchema::defaultAuthFieldsSchema()) {
+                if (field.name() == "email_verified")
+                    return field.toJSON();
+            }
+            throw MbException(500, "Auth schema is missing the email_verified field.");
+        }
+    }
+
+    void MbDatabase::migrateAuthEmailVerified(soci::session &sql) const {
+        struct Pending {
+            std::string id;
+            json schema;
+        };
+        std::vector<Pending> pending;
+        {
+            const soci::rowset<soci::row> rows = (sql.prepare << "SELECT id, schema FROM mb_tables");
+            for (const auto &row: rows)
+                pending.push_back({row.get<std::string>(0), row.get<json>(1)});
+        }
+
+        const auto field_json = emailVerifiedFieldJson();
+        MbEntitySchemaField field{field_json};
+        const auto db_type = mbApp.dbType();
+
+        for (auto &item: pending) {
+            auto &schema = item.schema;
+            if (!schema.is_object() || schema.value("type", "") != "auth")
+                continue;
+            if (schema.value("name", "") == "mb_admins")
+                continue;
+            if (!schema.contains("fields") || !schema["fields"].is_array())
+                continue;
+
+            bool present = false;
+            for (const auto &existing: schema["fields"]) {
+                if (existing.value("name", "") == "email_verified") {
+                    present = true;
+                    break;
+                }
+            }
+            if (present)
+                continue;
+
+            const auto table = schema.at("name").get<std::string>();
+            if (!MbEntitySchema::isValidEntityName(table))
+                continue;
+
+            if (!tableHasColumn(sql, db_type, table, "email_verified")) {
+                std::string query = sql.get_backend()->add_column(
+                    table, "email_verified", field.toSociType(), 0, 0);
+                query += " NOT NULL DEFAULT 0";
+                sql << query;
+                mbApp.logger().info("MbDatabase", "Auth schema updated",
+                                    fmt::format("Added email_verified to `{}`.", table));
+            }
+
+            schema["fields"].push_back(field_json);
+            sql << "UPDATE mb_tables SET schema = :schema WHERE id = :id",
+                    soci::use(schema), soci::use(item.id);
         }
     }
 

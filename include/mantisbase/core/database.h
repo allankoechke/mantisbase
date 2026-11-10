@@ -115,6 +115,12 @@ namespace mb {
 
         static void seedOAuthPresets(soci::session &sql);
 
+        /**
+         * Add `email_verified` to auth tables created before that column existed.
+         * New auth tables already include the field. Admin accounts are left unchanged.
+         */
+        void migrateAuthEmailVerified(soci::session &sql) const;
+
         std::string m_connStr;
         std::unique_ptr<soci::connection_pool> m_connPool;
         const MantisBase &mbApp;

@@ -122,6 +122,7 @@ TEST(MbEntitySchemaField, DefaultAuthFields) {
     // Check for email and password fields
     bool hasEmail = false;
     bool hasPassword = false;
+    bool hasVerified = false;
     for (const auto& field : fields) {
         if (field.name() == "email") {
             hasEmail = true;
@@ -129,9 +130,16 @@ TEST(MbEntitySchemaField, DefaultAuthFields) {
         if (field.name() == "password") {
             hasPassword = true;
         }
+        if (field.name() == "email_verified") {
+            hasVerified = true;
+            EXPECT_EQ(field.type(), "bool");
+            EXPECT_TRUE(field.isSystem());
+            EXPECT_TRUE(field.required());
+        }
     }
     EXPECT_TRUE(hasEmail);
     EXPECT_TRUE(hasPassword);
+    EXPECT_TRUE(hasVerified);
 }
 
 TEST(MbEntitySchemaField, ValidFieldTypes) {
