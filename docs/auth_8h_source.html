@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.8</span>
    </div>
   </td>
  </tr>
@@ -140,18 +140,57 @@ $(document).ready(function(){initNavTree('auth_8h_source.html',''); initResizabl
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> refreshSession(<span class="keyword">const</span> std::string&amp; old_session_id, <span class="keyword">const</span> std::string&amp; entity_name,</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>                                   <span class="keyword">const</span> std::string&amp; user_id);</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        [[nodiscard]] std::string createTokenJson(<span class="keyword">const</span> std::string &amp;claims_json, <span class="keywordtype">int</span> timeout = -1) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        [[nodiscard]] std::string verifyTokenJson(<span class="keyword">const</span> std::string &amp;token) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        std::string refreshSessionJson(<span class="keyword">const</span> std::string &amp;old_session_id,</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                                       <span class="keyword">const</span> std::string &amp;entity_name,</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>                                       <span class="keyword">const</span> std::string &amp;user_id);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    };</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> requestLoginOtp(<span class="keyword">const</span> std::string &amp;entity_name, <span class="keyword">const</span> std::string &amp;email) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> loginWithOtp(<span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>                                        <span class="keyword">const</span> std::string &amp;email,</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>                                        <span class="keyword">const</span> std::string &amp;otp) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        <span class="keywordtype">void</span> rejectUnverifiedLogin(<span class="keyword">const</span> std::string &amp;entity_name, <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;user) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        <span class="keywordtype">void</span> notifyEmailVerification(<span class="keyword">const</span> std::string &amp;entity_name, <span class="keyword">const</span> std::string &amp;user_id) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> requestEmailVerification(<span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>                                                    <span class="keyword">const</span> std::string &amp;email,</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>                                                    <span class="keyword">const</span> std::string &amp;request_host) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> confirmEmailVerification(<span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>                                                    <span class="keyword">const</span> std::string &amp;token) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> requestPasswordReset(<span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>                                                <span class="keyword">const</span> std::string &amp;email,</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>                                                <span class="keyword">const</span> std::string &amp;request_host) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>        [[nodiscard]] <a class="code hl_typedef" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> confirmPasswordReset(<span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>                                                <span class="keyword">const</span> std::string &amp;token,</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>                                                <span class="keyword">const</span> std::string &amp;new_password) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        [[nodiscard]] std::string verificationLinkBase(<span class="keyword">const</span> std::string &amp;request_host) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <span class="keywordtype">void</span> deliverEmailVerification(<span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>                                      <span class="keyword">const</span> std::string &amp;user_id,</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                                      <span class="keyword">const</span> std::string &amp;email,</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>                                      <span class="keyword">const</span> std::string &amp;public_base) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>        <span class="keywordtype">void</span> deliverPasswordReset(<span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>                                  <span class="keyword">const</span> std::string &amp;user_id,</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>                                  <span class="keyword">const</span> std::string &amp;email,</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>                                  <span class="keyword">const</span> std::string &amp;public_base) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span><span class="preprocessor">#ifdef MB_SCRIPTING_ENABLED</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        [[nodiscard]] std::string createTokenJson(<span class="keyword">const</span> std::string &amp;claims_json, <span class="keywordtype">int</span> timeout = -1) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>        [[nodiscard]] std::string verifyTokenJson(<span class="keyword">const</span> std::string &amp;token) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        std::string refreshSessionJson(<span class="keyword">const</span> std::string &amp;old_session_id,</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>                                       <span class="keyword">const</span> std::string &amp;entity_name,</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>                                       <span class="keyword">const</span> std::string &amp;user_id);</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    };</div>
 </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>} <span class="comment">// mb</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#endif </span><span class="comment">//JWTUNIT_H</span></div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>} <span class="comment">// mb</span></div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="preprocessor">#endif </span><span class="comment">//JWTUNIT_H</span></div>
 <div class="ttc" id="aapi__keys_8h_html"><div class="ttname"><a href="api__keys_8h.html">api_keys.h</a></div><div class="ttdoc">Programmatic and REST-backed API key management.</div></div>
 <div class="ttc" id="aclassmb_1_1MantisBase_html"><div class="ttname"><a href="classmb_1_1MantisBase.html">mb::MantisBase</a></div><div class="ttdoc">MantisBase entry point.</div><div class="ttdef"><b>Definition</b> mantisbase.h:54</div></div>
 <div class="ttc" id="aclassmb_1_1MbApiKeyMgr_html"><div class="ttname"><a href="classmb_1_1MbApiKeyMgr.html">mb::MbApiKeyMgr</a></div><div class="ttdoc">Create, list, revoke, and resolve API keys for entity users and admins.</div><div class="ttdef"><b>Definition</b> api_keys.h:51</div></div>

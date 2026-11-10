@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['4_20test_20edge_20cases_0',['4. Test Edge Cases',['../docs_rest_api_rules.html#autotoc_md300',1,'']]],
-  ['4_20use_20your_20auto_20generated_20api_1',['4. Use Your Auto-generated API',['../index.html#autotoc_md247',1,'']]]
+  ['4_20test_20edge_20cases_0',['4. Test Edge Cases',['../docs_rest_api_rules.html#autotoc_md310',1,'']]],
+  ['4_20use_20your_20auto_20generated_20api_1',['4. Use Your Auto-generated API',['../index.html#autotoc_md257',1,'']]]
 ];

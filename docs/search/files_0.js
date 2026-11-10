@@ -10,5 +10,6 @@ var searchData=
   ['auth_2eh_7',['auth.h',['../auth_8h.html',1,'']]],
   ['auth_2emd_8',['auth.md',['../auth_8md.html',1,'']]],
   ['auth_5fbindings_2ecpp_9',['auth_bindings.cpp',['../auth__bindings_8cpp.html',1,'']]],
-  ['auth_5futils_2ecpp_10',['auth_utils.cpp',['../auth__utils_8cpp.html',1,'']]]
+  ['auth_5fmethods_2eh_10',['auth_methods.h',['../auth__methods_8h.html',1,'']]],
+  ['auth_5futils_2ecpp_11',['auth_utils.cpp',['../auth__utils_8cpp.html',1,'']]]
 ];

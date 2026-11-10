@@ -32,9 +32,10 @@ var searchData=
   ['mbssemgr_29',['MbSSEMgr',['../classmb_1_1MbSSEMgr.html#a3cdca0fe3b072ff51a603e4539b866c1',1,'mb::MbSSEMgr']]],
   ['mbssesession_30',['MbSSESession',['../classmb_1_1MbSSESession.html#a3803964ff089633622f2570930aea885',1,'mb::MbSSESession']]],
   ['mbwsmgr_31',['MbWSMgr',['../classmb_1_1MbWSMgr.html#a5ddcb2e487f698296ab53fa292b24dc2',1,'mb::MbWSMgr']]],
-  ['method_32',['method',['../classmb_1_1MbRequest.html#ae9691b2e9e95dfb510e6a407d82104e4',1,'mb::MbRequest']]],
-  ['migrate_33',['migrate',['../classmb_1_1MbKVStore.html#ae43bbb743b3e8f18e546873b68705004',1,'mb::MbKVStore']]],
-  ['migrationsdir_34',['migrationsDir',['../classmb_1_1MantisBase.html#a298e5dc7929388e131b19eab611b4043',1,'mb::MantisBase']]],
-  ['minimumconstraintcheck_35',['minimumConstraintCheck',['../classmb_1_1MbValidators.html#afce0e11cd02f79ea03ed38ac0abd1e9a',1,'mb::MbValidators']]],
-  ['mode_36',['mode',['../classmb_1_1MbAccessRule.html#aa06378334596fc1e5664f7fd6ed22acd',1,'mb::MbAccessRule']]]
+  ['mergestrict_32',['mergeStrict',['../structmb_1_1MbAuthMethods.html#ad23b7997722668e3006d710b0655faeb',1,'mb::MbAuthMethods']]],
+  ['method_33',['method',['../classmb_1_1MbRequest.html#ae9691b2e9e95dfb510e6a407d82104e4',1,'mb::MbRequest']]],
+  ['migrate_34',['migrate',['../classmb_1_1MbKVStore.html#ae43bbb743b3e8f18e546873b68705004',1,'mb::MbKVStore']]],
+  ['migrationsdir_35',['migrationsDir',['../classmb_1_1MantisBase.html#a298e5dc7929388e131b19eab611b4043',1,'mb::MantisBase']]],
+  ['minimumconstraintcheck_36',['minimumConstraintCheck',['../classmb_1_1MbValidators.html#afce0e11cd02f79ea03ed38ac0abd1e9a',1,'mb::MbValidators']]],
+  ['mode_37',['mode',['../classmb_1_1MbAccessRule.html#aa06378334596fc1e5664f7fd6ed22acd',1,'mb::MbAccessRule']]]
 ];

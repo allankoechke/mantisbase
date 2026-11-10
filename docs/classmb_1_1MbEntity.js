@@ -5,6 +5,8 @@ var classmb_1_1MbEntity =
     [ "MbEntity", "classmb_1_1MbEntity.html#a0f298e4d3c8631ced96e74b94d674da4", null ],
     [ "MbEntity", "classmb_1_1MbEntity.html#a877d46eb429686129e342a354c4ffafc", null ],
     [ "addRule", "classmb_1_1MbEntity.html#a8cc26b77f055248328af2f4e9d90aa2f", null ],
+    [ "authMethodDisabledReason", "classmb_1_1MbEntity.html#aab4be9ac928a0d9eced7b3ccde222c96", null ],
+    [ "authMethods", "classmb_1_1MbEntity.html#af41e7f2afd1e3c19760ac8290997217f", null ],
     [ "countRecords", "classmb_1_1MbEntity.html#a094fe74b9202705605e67b373b3466a9", null ],
     [ "create", "classmb_1_1MbEntity.html#a00360b7ed13e6567d6fa34830c122e76", null ],
     [ "deleteRule", "classmb_1_1MbEntity.html#a7b586c05d2048a94e377d7ee645e0392", null ],

@@ -3,7 +3,7 @@ var searchData=
   ['genentityid_0',['genEntityId',['../classmb_1_1MbEntitySchema.html#a9ede65e5fdf251f11fd8a39063ce2bf4',1,'mb::MbEntitySchema']]],
   ['generate_5fuuidv7_1',['generate_uuidv7',['../namespacemb.html#ad67ff06c25bb2ccdd5f52404e51405f9',1,'mb']]],
   ['generateapikey_2',['generateApiKey',['../classmb_1_1MbApiKeyMgr.html#afe6d2f7e331fec3eeb1954f874e00ab5',1,'mb::MbApiKeyMgr']]],
-  ['generated_20api_3',['4. Use Your Auto-generated API',['../index.html#autotoc_md247',1,'']]],
+  ['generated_20api_3',['4. Use Your Auto-generated API',['../index.html#autotoc_md257',1,'']]],
   ['generatepkcechallenge_4',['generatePKCEChallenge',['../namespacemb.html#ab1732e537d2f880aebd13253dad4bd21',1,'mb']]],
   ['generatepkceverifier_5',['generatePKCEVerifier',['../namespacemb.html#ac5b5233790c2e722a8af39b5cb7e65c6',1,'mb']]],
   ['generatereadabletimeid_6',['generateReadableTimeId',['../namespacemb.html#af1b47490bcd171b34e7371a721ec4d82',1,'mb']]],
@@ -12,7 +12,7 @@ var searchData=
   ['generateshortid_9',['generateShortId',['../namespacemb.html#ab5004cdfdf21f04cf630c15f7f191bac',1,'mb']]],
   ['generatetimebasedid_10',['generateTimeBasedId',['../namespacemb.html#a4bbd6b13fd498f212dd8f5d7b7565e2e',1,'mb']]],
   ['genfieldid_11',['genFieldId',['../classmb_1_1MbEntitySchemaField.html#a7781b1cee228ebc69560a66eac089cb8',1,'mb::MbEntitySchemaField']]],
-  ['get_12',['get',['../classmb_1_1MbRequest.html#a8259c781b99fc410009e7d0bc60003aa',1,'mb::MbRequest::get()'],['../classmb_1_1MbContextStore.html#a57e6511aec82ba045cbb909ecc30f918',1,'mb::MbContextStore::get(const std::string &amp;key)'],['../classmb_1_1MbContextStore.html#a9621c6d623f8eb1de040368ac0102032',1,'mb::MbContextStore::get(const std::string &amp;key, T default_value)'],['../classmb_1_1MbRouter.html#af88146ca7b1d1b16ef2aa4ff29aaf251',1,'mb::MbRouter::Get()'],['../docs_cpp_dev.html#autotoc_md137',1,'What you get']]],
+  ['get_12',['get',['../classmb_1_1MbContextStore.html#a9621c6d623f8eb1de040368ac0102032',1,'mb::MbContextStore::get()'],['../classmb_1_1MbRouter.html#af88146ca7b1d1b16ef2aa4ff29aaf251',1,'mb::MbRouter::Get()'],['../classmb_1_1MbContextStore.html#a57e6511aec82ba045cbb909ecc30f918',1,'mb::MbContextStore::get()'],['../classmb_1_1MbRequest.html#a8259c781b99fc410009e7d0bc60003aa',1,'mb::MbRequest::get()'],['../docs_cpp_dev.html#autotoc_md147',1,'What you get']]],
   ['get_20api_20v1_20realtime_20—_20open_20sse_20connection_13',['GET /api/v1/realtime — Open SSE connection',['../docs_rest_api.html#autotoc_md61',1,'']]],
   ['getauthtoken_14',['getAuthToken',['../namespacemb.html#a5ef7ecc7ac0b7f820e23602419d3012f',1,'mb']]],
   ['getcanonicalpath_15',['getCanonicalPath',['../classmb_1_1MbFilesMgr.html#af5b9d6ca2842d9c3706bcbb210dfeb2e',1,'mb::MbFilesMgr']]],
@@ -38,7 +38,7 @@ var searchData=
   ['getstatus_35',['getStatus',['../classmb_1_1MbResponse.html#ae572d3df1681b862e7c7469d3bea07c8',1,'mb::MbResponse']]],
   ['gettable_36',['getTable',['../classmb_1_1MbEntitySchema.html#a5b38f33d9056f3cb7851d30f367516fe',1,'mb::MbEntitySchema']]],
   ['gettopics_37',['getTopics',['../classmb_1_1MbSSESession.html#a400986011581b83e3336af84c6b297b9',1,'mb::MbSSESession']]],
-  ['global_20options_38',['Global Options',['../docs_cli.html#autotoc_md122',1,'']]],
+  ['global_20options_38',['Global Options',['../docs_cli.html#autotoc_md132',1,'']]],
   ['granted_39',['granted',['../structmb_1_1TopicAccessResult.html#a927557b82d06eaca1b2ba24e00d72d85',1,'mb::TopicAccessResult']]],
   ['guide_40',['guide',['../index.html',1,'Quick Start Guide'],['../docs_rest_api.html',1,'REST API Reference Guide']]]
 ];

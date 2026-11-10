@@ -11,7 +11,7 @@ var searchData=
   ['generateshortid_8',['generateShortId',['../namespacemb.html#ab5004cdfdf21f04cf630c15f7f191bac',1,'mb']]],
   ['generatetimebasedid_9',['generateTimeBasedId',['../namespacemb.html#a4bbd6b13fd498f212dd8f5d7b7565e2e',1,'mb']]],
   ['genfieldid_10',['genFieldId',['../classmb_1_1MbEntitySchemaField.html#a7781b1cee228ebc69560a66eac089cb8',1,'mb::MbEntitySchemaField']]],
-  ['get_11',['get',['../classmb_1_1MbContextStore.html#a57e6511aec82ba045cbb909ecc30f918',1,'mb::MbContextStore::get()'],['../classmb_1_1MbRouter.html#af88146ca7b1d1b16ef2aa4ff29aaf251',1,'mb::MbRouter::Get()'],['../classmb_1_1MbRequest.html#a8259c781b99fc410009e7d0bc60003aa',1,'mb::MbRequest::get()'],['../classmb_1_1MbContextStore.html#a9621c6d623f8eb1de040368ac0102032',1,'mb::MbContextStore::get()']]],
+  ['get_11',['get',['../classmb_1_1MbRouter.html#af88146ca7b1d1b16ef2aa4ff29aaf251',1,'mb::MbRouter::Get()'],['../classmb_1_1MbRequest.html#a8259c781b99fc410009e7d0bc60003aa',1,'mb::MbRequest::get()'],['../classmb_1_1MbContextStore.html#a9621c6d623f8eb1de040368ac0102032',1,'mb::MbContextStore::get(const std::string &amp;key, T default_value)'],['../classmb_1_1MbContextStore.html#a57e6511aec82ba045cbb909ecc30f918',1,'mb::MbContextStore::get(const std::string &amp;key)']]],
   ['getauthtoken_12',['getAuthToken',['../namespacemb.html#a5ef7ecc7ac0b7f820e23602419d3012f',1,'mb']]],
   ['getcanonicalpath_13',['getCanonicalPath',['../classmb_1_1MbFilesMgr.html#af5b9d6ca2842d9c3706bcbb210dfeb2e',1,'mb::MbFilesMgr']]],
   ['getclientid_14',['getClientID',['../classmb_1_1MbSSESession.html#a5cb5b370a5127ded39a461d8bc0889c4',1,'mb::MbSSESession']]],

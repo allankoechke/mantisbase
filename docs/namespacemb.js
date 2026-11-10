@@ -13,6 +13,7 @@ var namespacemb =
     [ "MbApiKeyMgr", "classmb_1_1MbApiKeyMgr.html", "classmb_1_1MbApiKeyMgr" ],
     [ "MbAppMixin", "classmb_1_1MbAppMixin.html", "classmb_1_1MbAppMixin" ],
     [ "MbAuth", "classmb_1_1MbAuth.html", "classmb_1_1MbAuth" ],
+    [ "MbAuthMethods", "structmb_1_1MbAuthMethods.html", "structmb_1_1MbAuthMethods" ],
     [ "MbContextStore", "classmb_1_1MbContextStore.html", "classmb_1_1MbContextStore" ],
     [ "MbDatabase", "classmb_1_1MbDatabase.html", "classmb_1_1MbDatabase" ],
     [ "MbEmailMsg", "structmb_1_1MbEmailMsg.html", "structmb_1_1MbEmailMsg" ],

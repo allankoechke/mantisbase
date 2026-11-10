@@ -1,5 +1,5 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/auth.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/auth.h">
-<area shape="rect" id="Node000001" title="JWT session management and entry point for API keys and OAuth." alt="" coords="209,5,442,60"/>
+<area shape="rect" id="Node000001" title="JWT session management and entry point for API keys, OAuth, and email OTP login." alt="" coords="209,5,442,60"/>
 <area shape="rect" id="Node000002" href="$mantis_8h.html" title="Convenience header that includes all MantisBase public API headers." alt="" coords="5958,108,6191,163"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="456,34,5958,129,5958,135,455,39"/>
 <area shape="rect" id="Node000006" href="$mantisbase_8h.html" title="The main application for mantisbase." alt="" coords="3419,519,3653,573"/>

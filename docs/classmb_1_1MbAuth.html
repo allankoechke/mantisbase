@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.8</span>
    </div>
   </td>
  </tr>
@@ -125,6 +125,30 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a04dfaaabb5d0f2880659af8c993e0257" id="r_a04dfaaabb5d0f2880659af8c993e0257"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbAuth.html#a04dfaaabb5d0f2880659af8c993e0257">refreshSession</a> (const std::string &amp;old_session_id, const std::string &amp;entity_name, const std::string &amp;user_id)</td></tr>
 <tr class="memdesc:a04dfaaabb5d0f2880659af8c993e0257"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rotate a session: invalidate <code>old_session_id</code> and issue a new JWT.  <br /></td></tr>
 <tr class="separator:a04dfaaabb5d0f2880659af8c993e0257"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e63d47669053cd59f350f86358e22a8" id="r_a5e63d47669053cd59f350f86358e22a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbAuth.html#a5e63d47669053cd59f350f86358e22a8">requestLoginOtp</a> (const std::string &amp;entity_name, const std::string &amp;email) const</td></tr>
+<tr class="memdesc:a5e63d47669053cd59f350f86358e22a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Email a one-time sign-in code for an auth-entity account.  <br /></td></tr>
+<tr class="separator:a5e63d47669053cd59f350f86358e22a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaad3b4fd20ea77c584e65c3f711a0741" id="r_aaad3b4fd20ea77c584e65c3f711a0741"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbAuth.html#aaad3b4fd20ea77c584e65c3f711a0741">loginWithOtp</a> (const std::string &amp;entity_name, const std::string &amp;email, const std::string &amp;otp) const</td></tr>
+<tr class="memdesc:aaad3b4fd20ea77c584e65c3f711a0741"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exchange a one-time sign-in code for a session token.  <br /></td></tr>
+<tr class="separator:aaad3b4fd20ea77c584e65c3f711a0741"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a012e2cc78413068d354d0aa1ae9a5b75" id="r_a012e2cc78413068d354d0aa1ae9a5b75"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbAuth.html#a012e2cc78413068d354d0aa1ae9a5b75">rejectUnverifiedLogin</a> (const std::string &amp;entity_name, const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;user) const</td></tr>
+<tr class="memdesc:a012e2cc78413068d354d0aa1ae9a5b75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reject login when the entity requires a verified email and the account is not verified.  <br /></td></tr>
+<tr class="separator:a012e2cc78413068d354d0aa1ae9a5b75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3a30aab96cd9dd5cc6c5910a2bca815" id="r_ad3a30aab96cd9dd5cc6c5910a2bca815"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbAuth.html#ad3a30aab96cd9dd5cc6c5910a2bca815">notifyEmailVerification</a> (const std::string &amp;entity_name, const std::string &amp;user_id) const</td></tr>
+<tr class="memdesc:ad3a30aab96cd9dd5cc6c5910a2bca815"><td class="mdescLeft">&#160;</td><td class="mdescRight">Email a verification link when SMTP is configured and the account is unverified. Missing SMTP or siteDomain is logged and ignored so registration can still succeed.  <br /></td></tr>
+<tr class="separator:ad3a30aab96cd9dd5cc6c5910a2bca815"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1abe61dc1321093cc1c397eada39a4e8" id="r_a1abe61dc1321093cc1c397eada39a4e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbAuth.html#a1abe61dc1321093cc1c397eada39a4e8">requestEmailVerification</a> (const std::string &amp;entity_name, const std::string &amp;email, const std::string &amp;request_host) const</td></tr>
+<tr class="memdesc:a1abe61dc1321093cc1c397eada39a4e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a verification link for an email address. Unknown addresses return <code>{ "sent": true }</code> and send nothing.  <br /></td></tr>
+<tr class="separator:a1abe61dc1321093cc1c397eada39a4e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4f7aff7c2e4ea37cb31e3ae131adf0e" id="r_aa4f7aff7c2e4ea37cb31e3ae131adf0e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbAuth.html#aa4f7aff7c2e4ea37cb31e3ae131adf0e">confirmEmailVerification</a> (const std::string &amp;entity_name, const std::string &amp;token) const</td></tr>
+<tr class="memdesc:aa4f7aff7c2e4ea37cb31e3ae131adf0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark the account verified when <code>token</code> matches a live verification link.  <br /></td></tr>
+<tr class="separator:aa4f7aff7c2e4ea37cb31e3ae131adf0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa12d7d8a30131c4c8236e65d3aa76b06" id="r_aa12d7d8a30131c4c8236e65d3aa76b06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbAuth.html#aa12d7d8a30131c4c8236e65d3aa76b06">requestPasswordReset</a> (const std::string &amp;entity_name, const std::string &amp;email, const std::string &amp;request_host) const</td></tr>
+<tr class="memdesc:aa12d7d8a30131c4c8236e65d3aa76b06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Email a password-reset link for an account. Unknown addresses return <code>{ "sent": true }</code> and send nothing.  <br /></td></tr>
+<tr class="separator:aa12d7d8a30131c4c8236e65d3aa76b06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bf7ec8a4bea63032dc3714a84d6a0fd" id="r_a3bf7ec8a4bea63032dc3714a84d6a0fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbAuth.html#a3bf7ec8a4bea63032dc3714a84d6a0fd">confirmPasswordReset</a> (const std::string &amp;entity_name, const std::string &amp;token, const std::string &amp;new_password) const</td></tr>
+<tr class="memdesc:a3bf7ec8a4bea63032dc3714a84d6a0fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a new password when <code>token</code> matches a live reset link.  <br /></td></tr>
+<tr class="separator:a3bf7ec8a4bea63032dc3714a84d6a0fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>JWT token creation and verification utilities. </p>
@@ -192,6 +216,86 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="aa4f7aff7c2e4ea37cb31e3ae131adf0e" name="aa4f7aff7c2e4ea37cb31e3ae131adf0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4f7aff7c2e4ea37cb31e3ae131adf0e">&#9670;&#160;</a></span>confirmEmailVerification()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::MbAuth::confirmEmailVerification </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>token</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Mark the account verified when <code>token</code> matches a live verification link. </p>
+<dl class="section return"><dt>Returns</dt><dd><code>{ "verified": true }</code>. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MbException.html" title="Application exception carrying an HTTP status code and messages.">MbException</a></td><td>400 when the token is missing, unknown, or expired. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a3bf7ec8a4bea63032dc3714a84d6a0fd" name="a3bf7ec8a4bea63032dc3714a84d6a0fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bf7ec8a4bea63032dc3714a84d6a0fd">&#9670;&#160;</a></span>confirmPasswordReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::MbAuth::confirmPasswordReset </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>token</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>new_password</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set a new password when <code>token</code> matches a live reset link. </p>
+<dl class="section return"><dt>Returns</dt><dd><code>{ "reset": true }</code>. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MbException.html" title="Application exception carrying an HTTP status code and messages.">MbException</a></td><td>400 when the token or password is invalid/expired. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ad6a205a21c176940ee50b7de7da156d4" name="ad6a205a21c176940ee50b7de7da156d4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad6a205a21c176940ee50b7de7da156d4">&#9670;&#160;</a></span>createToken()</h2>
 
@@ -251,6 +355,89 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="aaad3b4fd20ea77c584e65c3f711a0741" name="aaad3b4fd20ea77c584e65c3f711a0741"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaad3b4fd20ea77c584e65c3f711a0741">&#9670;&#160;</a></span>loginWithOtp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::MbAuth::loginWithOtp </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>email</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>otp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Exchange a one-time sign-in code for a session token. </p>
+<p>Passwordless accounts (for example OAuth-only users) can sign in this way. The code is single-use.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">entity_name</td><td>Auth entity table name. </td></tr>
+    <tr><td class="paramname">email</td><td>Account email address. </td></tr>
+    <tr><td class="paramname">otp</td><td>6-digit code from the sign-in email. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>JSON with <code>token</code> and <code>user</code> (password omitted). </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MbException.html" title="Application exception carrying an HTTP status code and messages.">MbException</a></td><td>400 when the email or code is not in the expected shape. </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MbException.html" title="Application exception carrying an HTTP status code and messages.">MbException</a></td><td>401 when the code is wrong, expired, used, or exhausted. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad3a30aab96cd9dd5cc6c5910a2bca815" name="ad3a30aab96cd9dd5cc6c5910a2bca815"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3a30aab96cd9dd5cc6c5910a2bca815">&#9670;&#160;</a></span>notifyEmailVerification()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::MbAuth::notifyEmailVerification </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>user_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Email a verification link when SMTP is configured and the account is unverified. Missing SMTP or siteDomain is logged and ignored so registration can still succeed. </p>
+
+</div>
+</div>
 <a id="a90a35d967a9c3b4945bd46d459d82e33" name="a90a35d967a9c3b4945bd46d459d82e33"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a90a35d967a9c3b4945bd46d459d82e33">&#9670;&#160;</a></span>oauth()</h2>
 
@@ -303,6 +490,184 @@ Public Member Functions</h2></td></tr>
 
 <p>Rotate a session: invalidate <code>old_session_id</code> and issue a new JWT. </p>
 <dl class="section return"><dt>Returns</dt><dd>JSON with new <code>token</code> on success. </dd></dl>
+
+</div>
+</div>
+<a id="a012e2cc78413068d354d0aa1ae9a5b75" name="a012e2cc78413068d354d0aa1ae9a5b75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a012e2cc78413068d354d0aa1ae9a5b75">&#9670;&#160;</a></span>rejectUnverifiedLogin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void mb::MbAuth::rejectUnverifiedLogin </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> &amp;&#160;</td>
+          <td class="paramname"><em>user</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reject login when the entity requires a verified email and the account is not verified. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MbException.html" title="Application exception carrying an HTTP status code and messages.">MbException</a></td><td>403 when verification is required and <code>email_verified</code> is not true. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1abe61dc1321093cc1c397eada39a4e8" name="a1abe61dc1321093cc1c397eada39a4e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1abe61dc1321093cc1c397eada39a4e8">&#9670;&#160;</a></span>requestEmailVerification()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::MbAuth::requestEmailVerification </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>email</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>request_host</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Send a verification link for an email address. Unknown addresses return <code>{ "sent": true }</code> and send nothing. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">request_host</td><td>Host header, used only when <code>siteDomain</code> is empty. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MbException.html" title="Application exception carrying an HTTP status code and messages.">MbException</a></td><td>400 when SMTP is not configured, the address is invalid, or no public base URL is set. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5e63d47669053cd59f350f86358e22a8" name="a5e63d47669053cd59f350f86358e22a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e63d47669053cd59f350f86358e22a8">&#9670;&#160;</a></span>requestLoginOtp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::MbAuth::requestLoginOtp </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>email</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Email a one-time sign-in code for an auth-entity account. </p>
+<p>The code expires after 10 minutes and allows 5 attempts. A successfully delivered code replaces any earlier code for that account. When the address is valid, unknown emails return <code>{ "sent": true }</code> and no message is sent. A message is delivered only when an account with that email exists.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">entity_name</td><td>Auth entity table name. </td></tr>
+    <tr><td class="paramname">email</td><td>Account email address. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>JSON object <code>{ "sent": true }</code>. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MbException.html" title="Application exception carrying an HTTP status code and messages.">MbException</a></td><td>400 when SMTP is not configured or the address is invalid. </td></tr>
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MbException.html" title="Application exception carrying an HTTP status code and messages.">MbException</a></td><td>when delivery fails (rate limit or SMTP error). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa12d7d8a30131c4c8236e65d3aa76b06" name="aa12d7d8a30131c4c8236e65d3aa76b06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa12d7d8a30131c4c8236e65d3aa76b06">&#9670;&#160;</a></span>requestPasswordReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemb.html#afff330d3a64f28304acd2ec11dd1f71d">json</a> mb::MbAuth::requestPasswordReset </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>entity_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>email</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>request_host</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Email a password-reset link for an account. Unknown addresses return <code>{ "sent": true }</code> and send nothing. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">request_host</td><td>Host header, used only when <code>siteDomain</code> is empty. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classmb_1_1MbException.html" title="Application exception carrying an HTTP status code and messages.">MbException</a></td><td>400 when SMTP is not configured, the address is invalid, or no public base URL is set. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

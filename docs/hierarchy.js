@@ -27,6 +27,7 @@ var hierarchy =
       [ "mb::MbSSEMgr", "classmb_1_1MbSSEMgr.html", null ]
     ] ],
     [ "mb::MbAuth", "classmb_1_1MbAuth.html", null ],
+    [ "mb::MbAuthMethods", "structmb_1_1MbAuthMethods.html", null ],
     [ "mb::MbContextStore", "classmb_1_1MbContextStore.html", null ],
     [ "mb::MbDatabase", "classmb_1_1MbDatabase.html", null ],
     [ "mb::MbEmailMsg", "structmb_1_1MbEmailMsg.html", null ],

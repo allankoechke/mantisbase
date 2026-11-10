@@ -1,6 +1,6 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/oauth.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/oauth.h">
 <area shape="rect" id="Node000001" title="OAuth 2.0 / OIDC provider configuration and user login flows." alt="" coords="3071,5,3304,60"/>
-<area shape="rect" id="Node000002" href="$auth_8h.html" title="JWT session management and entry point for API keys and OAuth." alt="" coords="2818,108,3051,163"/>
+<area shape="rect" id="Node000002" href="$auth_8h.html" title="JWT session management and entry point for API keys, OAuth, and email OTP login." alt="" coords="2818,108,3051,163"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="3110,67,3001,110,3000,105,3108,62"/>
 <area shape="rect" id="Node000032" href="$oauth_8cpp.html" title=" " alt="" coords="3448,731,3674,771"/>
 <area shape="poly" id="edge129_Node000001_Node000032" title=" " alt="" coords="3190,74,3190,237,3190,445,3193,473,3199,500,3224,550,3260,594,3305,632,3356,664,3407,691,3501,729,3499,734,3405,696,3353,669,3302,636,3257,598,3219,553,3194,502,3188,474,3185,445,3185,237,3185,74"/>

@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.8</span>
    </div>
   </td>
  </tr>
@@ -122,7 +122,7 @@ API Namespaces</h2>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Prefix   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>/api/v1/auth/</code>   </td><td class="markdownTableBodyNone">MbEntity user authentication: token verify (<code>/verify</code>), plus per-entity login, refresh, logout, API keys, and OAuth    </td></tr>
+<td class="markdownTableBodyNone"><code>/api/v1/auth/</code>   </td><td class="markdownTableBodyNone">MbEntity user authentication: token verify (<code>/verify</code>), plus per-entity login, email OTP login, refresh, logout, API keys, and OAuth    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>/api/v1/entities/</code>   </td><td class="markdownTableBodyNone">MbEntity record CRUD    </td></tr>
 <tr class="markdownTableRowOdd">
@@ -413,9 +413,11 @@ Example: Create a Schema</h3>
 <div class="line">      &quot;add&quot;: {&quot;mode&quot;: &quot;public&quot;, &quot;expr&quot;: &quot;&quot;},</div>
 <div class="line">      &quot;update&quot;: {&quot;mode&quot;: &quot;custom&quot;, &quot;expr&quot;: &quot;auth.id == req.body.id&quot;},</div>
 <div class="line">      &quot;delete&quot;: {&quot;mode&quot;: &quot;&quot;, &quot;expr&quot;: &quot;&quot;}</div>
-<div class="line">    }</div>
+<div class="line">    },</div>
+<div class="line">    &quot;auth&quot;: {&quot;password&quot;: true, &quot;otp&quot;: false, &quot;oauth&quot;: false, &quot;requireEmailVerification&quot;: false}</div>
 <div class="line">  }&#39;</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md22"></a>
+</div><!-- fragment --><p><code>auth</code> is only valid on auth entities. Password login defaults to enabled. OTP and OAuth default to disabled. <code>requireEmailVerification</code> defaults to off. Change the flags with an admin <code>PATCH /api/v1/schemas/&lt;name&gt;</code>; other clients receive <b>403</b> on a disabled login route. Auth tables also store <code>email_verified</code> (default <code>false</code>). Admin accounts do not. See <a href="auth.md#login-methods">Authentication API</a>.</p>
+<h3><a class="anchor" id="autotoc_md22"></a>
 MbEntity Types</h3>
 <p>MantisBase supports three entity types:</p>
 <table class="markdownTable">

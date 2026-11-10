@@ -21,5 +21,7 @@ var searchData=
   ['apppatchversion_18',['appPatchVersion',['../classmb_1_1MantisBase.html#a7f953ae796264550051b90945f8ad251',1,'mb::MantisBase']]],
   ['appversion_19',['appVersion',['../classmb_1_1MantisBase.html#acff8b41afb6071721e34a0fcce975e8c',1,'mb::MantisBase']]],
   ['auth_20',['auth',['../classmb_1_1MantisBase.html#ac2988918ab42ee20d96d464d9dc3b377',1,'mb::MantisBase']]],
-  ['authsnapshot_21',['authsnapshot',['../classmb_1_1MbSSESession.html#ae1c409e2a3e18de70997c90087e44b78',1,'mb::MbSSESession::authSnapshot()'],['../classmb_1_1MbSSESession.html#af31ddf03c8e38180e3c92cbc233cda93',1,'mb::MbSSESession::authSnapshot() const']]]
+  ['authmethoddisabledreason_21',['authMethodDisabledReason',['../classmb_1_1MbEntity.html#aab4be9ac928a0d9eced7b3ccde222c96',1,'mb::MbEntity']]],
+  ['authmethods_22',['authmethods',['../classmb_1_1MbEntity.html#af41e7f2afd1e3c19760ac8290997217f',1,'mb::MbEntity::authMethods()'],['../classmb_1_1MbEntitySchema.html#a7d74679c245c5c9e1cdc25f913201e0f',1,'mb::MbEntitySchema::authMethods()']]],
+  ['authsnapshot_23',['authsnapshot',['../classmb_1_1MbSSESession.html#ae1c409e2a3e18de70997c90087e44b78',1,'mb::MbSSESession::authSnapshot()'],['../classmb_1_1MbSSESession.html#af31ddf03c8e38180e3c92cbc233cda93',1,'mb::MbSSESession::authSnapshot() const']]]
 ];

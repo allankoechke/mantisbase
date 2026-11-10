@@ -3,8 +3,9 @@ var searchData=
   ['kauthtokencookiename_0',['kAuthTokenCookieName',['../namespacemb.html#a3577855d94ded18e61381684a8459ef2',1,'mb']]],
   ['key_1',['key',['../structmb_1_1ApiKeyResult.html#a9989fa2ad2943a1793fa9af9ae8df39b',1,'mb::ApiKeyResult']]],
   ['key_5fhash_2',['key_hash',['../structmb_1_1ApiKeyResult.html#ae36d79ee2ac0db7b93f1bf48069ee03c',1,'mb::ApiKeyResult']]],
-  ['krealtimecleanupintervalseconds_3',['kRealtimeCleanupIntervalSeconds',['../namespacemb.html#a577239b435a49ad837c7cc9fce521963',1,'mb']]],
-  ['krealtimeidletimeoutminutes_4',['kRealtimeIdleTimeoutMinutes',['../namespacemb.html#a366213419dc88820a3281b8d870a35eb',1,'mb']]],
-  ['krealtimenotopicgraceseconds_5',['kRealtimeNoTopicGraceSeconds',['../namespacemb.html#aa818680a6b7100fc8bb43827c53600d9',1,'mb']]],
-  ['ktestmessage_6',['kTestMessage',['../classmb_1_1MbMailer.html#a3a6ab5673f9886e2f9e6f845fd75e7f4',1,'mb::MbMailer']]]
+  ['knotconfiguredmessage_3',['kNotConfiguredMessage',['../classmb_1_1MbMailer.html#a0f6c40bbfa06269eed6bd3ae2551ed33',1,'mb::MbMailer']]],
+  ['krealtimecleanupintervalseconds_4',['kRealtimeCleanupIntervalSeconds',['../namespacemb.html#a577239b435a49ad837c7cc9fce521963',1,'mb']]],
+  ['krealtimeidletimeoutminutes_5',['kRealtimeIdleTimeoutMinutes',['../namespacemb.html#a366213419dc88820a3281b8d870a35eb',1,'mb']]],
+  ['krealtimenotopicgraceseconds_6',['kRealtimeNoTopicGraceSeconds',['../namespacemb.html#aa818680a6b7100fc8bb43827c53600d9',1,'mb']]],
+  ['ktestmessage_7',['kTestMessage',['../classmb_1_1MbMailer.html#a3a6ab5673f9886e2f9e6f845fd75e7f4',1,'mb::MbMailer']]]
 ];

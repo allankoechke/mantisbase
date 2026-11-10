@@ -12,8 +12,11 @@ var searchData=
   ['localaddr_9',['localAddr',['../classmb_1_1MbRequest.html#a9b245fd0f8ff4dda105425edeff775a0',1,'mb::MbRequest']]],
   ['localport_10',['localPort',['../classmb_1_1MbRequest.html#a7b7aaac64ca50598dc6a9cc7a6b9d882',1,'mb::MbRequest']]],
   ['location_11',['location',['../classmb_1_1MbResponse.html#a7210e41b2ffe2a14871f676e24f13112',1,'mb::MbResponse']]],
-  ['logger_12',['logger',['../classmb_1_1MbAppMixin.html#a3ae5b238e713efad30abdb67eb70cdbe',1,'mb::MbAppMixin::logger()'],['../classmb_1_1MantisBase.html#a923f683b8d475adfa29a350f1b722ee2',1,'mb::MantisBase::logger() const']]],
-  ['logs_13',['logs',['../classmb_1_1MantisBase.html#ada0fd2fae8f0faff23ff69234e8cb3db',1,'mb::MantisBase']]],
-  ['logsdb_14',['logsDb',['../classmb_1_1MbLogger.html#ae8091914fe59720454c9bd69a009227a',1,'mb::MbLogger']]],
-  ['lookupbyhash_15',['lookupByHash',['../classmb_1_1MbApiKeyMgr.html#a1fe5b786d15338a43289699f75f9328e',1,'mb::MbApiKeyMgr']]]
+  ['logger_12',['logger',['../classmb_1_1MbAppMixin.html#a3ae5b238e713efad30abdb67eb70cdbe',1,'mb::MbAppMixin::logger()'],['../classmb_1_1MantisBase.html#a923f683b8d475adfa29a350f1b722ee2',1,'mb::MantisBase::logger()']]],
+  ['loginotpemailhtml_13',['loginOtpEmailHtml',['../classmb_1_1MbMailer.html#a9bb86ab5e2a13862f0038504931ef221',1,'mb::MbMailer']]],
+  ['loginotpemailtext_14',['loginOtpEmailText',['../classmb_1_1MbMailer.html#a51333ecaa8ed951bd5dd0a23143a948f',1,'mb::MbMailer']]],
+  ['loginwithotp_15',['loginWithOtp',['../classmb_1_1MbAuth.html#aaad3b4fd20ea77c584e65c3f711a0741',1,'mb::MbAuth']]],
+  ['logs_16',['logs',['../classmb_1_1MantisBase.html#ada0fd2fae8f0faff23ff69234e8cb3db',1,'mb::MantisBase']]],
+  ['logsdb_17',['logsDb',['../classmb_1_1MbLogger.html#ae8091914fe59720454c9bd69a009227a',1,'mb::MbLogger']]],
+  ['lookupbyhash_18',['lookupByHash',['../classmb_1_1MbApiKeyMgr.html#a1fe5b786d15338a43289699f75f9328e',1,'mb::MbApiKeyMgr']]]
 ];

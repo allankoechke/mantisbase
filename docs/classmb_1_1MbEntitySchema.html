@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.8</span>
    </div>
   </td>
  </tr>
@@ -170,6 +170,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5c05560acdbc33701035098ed170e015" id="r_a5c05560acdbc33701035098ed170e015"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbEntitySchema.html">MbEntitySchema</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbEntitySchema.html#a5c05560acdbc33701035098ed170e015">setHasApi</a> (const bool &amp;<a class="el" href="classmb_1_1MbEntitySchema.html#a33d38b38aeeba8fb805d15eec3ddc88f">hasApi</a>)</td></tr>
 <tr class="memdesc:a5c05560acdbc33701035098ed170e015"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable/disable API endpoints (fluent interface).  <br /></td></tr>
 <tr class="separator:a5c05560acdbc33701035098ed170e015"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d74679c245c5c9e1cdc25f913201e0f" id="r_a7d74679c245c5c9e1cdc25f913201e0f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmb_1_1MbAuthMethods.html">MbAuthMethods</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbEntitySchema.html#a7d74679c245c5c9e1cdc25f913201e0f">authMethods</a> () const</td></tr>
+<tr class="separator:a7d74679c245c5c9e1cdc25f913201e0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56587332cad1a346e351b4000fd4c6f0" id="r_a56587332cad1a346e351b4000fd4c6f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmb_1_1MbEntitySchema.html">MbEntitySchema</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbEntitySchema.html#a56587332cad1a346e351b4000fd4c6f0">setAuthMethods</a> (const <a class="el" href="structmb_1_1MbAuthMethods.html">MbAuthMethods</a> &amp;methods)</td></tr>
+<tr class="separator:a56587332cad1a346e351b4000fd4c6f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaee3a3761142e40c02c1a75bacf61603" id="r_aaee3a3761142e40c02c1a75bacf61603"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmb_1_1MbEntitySchema.html#aaee3a3761142e40c02c1a75bacf61603">isSystem</a> () const</td></tr>
 <tr class="memdesc:aaee3a3761142e40c02c1a75bacf61603"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if this is a system table.  <br /></td></tr>
 <tr class="separator:aaee3a3761142e40c02c1a75bacf61603"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -327,8 +331,8 @@ Static Public Member Functions</h2></td></tr>
 <div class="ttc" id="aclassmb_1_1MantisBase_html_a39320e2aeb02263d4bc2252e1853854a"><div class="ttname"><a href="classmb_1_1MantisBase.html#a39320e2aeb02263d4bc2252e1853854a">mb::MantisBase::create</a></div><div class="ttdeci">static std::unique_ptr&lt; MantisBase &gt; create(int argc, char **argv)</div><div class="ttdoc">Create class instance given cmd args passed in.</div><div class="ttdef"><b>Definition</b> mantisbase.cpp:67</div></div>
 <div class="ttc" id="aclassmb_1_1MbAccessRule_html"><div class="ttname"><a href="classmb_1_1MbAccessRule.html">mb::MbAccessRule</a></div><div class="ttdoc">Access control rule for entity permissions.</div><div class="ttdef"><b>Definition</b> access_rules.h:45</div></div>
 <div class="ttc" id="aclassmb_1_1MbEntitySchemaField_html"><div class="ttname"><a href="classmb_1_1MbEntitySchemaField.html">mb::MbEntitySchemaField</a></div><div class="ttdef"><b>Definition</b> entity_schema_field.h:34</div></div>
-<div class="ttc" id="aclassmb_1_1MbEntitySchema_html"><div class="ttname"><a href="classmb_1_1MbEntitySchema.html">mb::MbEntitySchema</a></div><div class="ttdoc">Builder class for creating and managing database table schemas.</div><div class="ttdef"><b>Definition</b> entity_schema.h:38</div></div>
-<div class="ttc" id="aclassmb_1_1MbEntity_html"><div class="ttname"><a href="classmb_1_1MbEntity.html">mb::MbEntity</a></div><div class="ttdoc">Represents a database table/entity with schema and CRUD operations.</div><div class="ttdef"><b>Definition</b> entity.h:53</div></div>
+<div class="ttc" id="aclassmb_1_1MbEntitySchema_html"><div class="ttname"><a href="classmb_1_1MbEntitySchema.html">mb::MbEntitySchema</a></div><div class="ttdoc">Builder class for creating and managing database table schemas.</div><div class="ttdef"><b>Definition</b> entity_schema.h:39</div></div>
+<div class="ttc" id="aclassmb_1_1MbEntity_html"><div class="ttname"><a href="classmb_1_1MbEntity.html">mb::MbEntity</a></div><div class="ttdoc">Represents a database table/entity with schema and CRUD operations.</div><div class="ttdef"><b>Definition</b> entity.h:55</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aad7f1b2a875435bedcd952c797a58814" name="aad7f1b2a875435bedcd952c797a58814"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aad7f1b2a875435bedcd952c797a58814">&#9670;&#160;</a></span>MbEntitySchema() <span class="overload">[1/4]</span></h2>
@@ -547,6 +551,24 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>Create access rule. </dd></dl>
+
+</div>
+</div>
+<a id="a7d74679c245c5c9e1cdc25f913201e0f" name="a7d74679c245c5c9e1cdc25f913201e0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d74679c245c5c9e1cdc25f913201e0f">&#9670;&#160;</a></span>authMethods()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmb_1_1MbAuthMethods.html">MbAuthMethods</a> mb::MbEntitySchema::authMethods </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Login methods stored for an auth entity. </dd></dl>
 
 </div>
 </div>
@@ -1454,6 +1476,25 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a56587332cad1a346e351b4000fd4c6f0" name="a56587332cad1a346e351b4000fd4c6f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56587332cad1a346e351b4000fd4c6f0">&#9670;&#160;</a></span>setAuthMethods()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmb_1_1MbEntitySchema.html">MbEntitySchema</a> &amp; mb::MbEntitySchema::setAuthMethods </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmb_1_1MbAuthMethods.html">MbAuthMethods</a> &amp;&#160;</td>
+          <td class="paramname"><em>methods</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Replace the stored login methods. Included in JSON only for auth entities. </p>
 
 </div>
 </div>

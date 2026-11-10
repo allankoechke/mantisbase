@@ -29,16 +29,16 @@ var NAVTREE =
     [ "REST API Reference Guide", "docs_rest_api.html", null ],
     [ "Authentication API", "docs_auth_api.html", null ],
     [ "Command Line Usage", "docs_cli.html", [
-      [ "mantisbase CLI Reference", "docs_cli.html#autotoc_md120", [
-        [ "Global Options", "docs_cli.html#autotoc_md122", null ],
-        [ "serve", "docs_cli.html#autotoc_md124", null ],
-        [ "admins", "docs_cli.html#autotoc_md126", null ],
-        [ "schema", "docs_cli.html#autotoc_md128", null ],
-        [ "migrate", "docs_cli.html#autotoc_md130", [
-          [ "apply", "docs_cli.html#autotoc_md131", null ],
-          [ "schema", "docs_cli.html#autotoc_md132", null ]
+      [ "mantisbase CLI Reference", "docs_cli.html#autotoc_md130", [
+        [ "Global Options", "docs_cli.html#autotoc_md132", null ],
+        [ "serve", "docs_cli.html#autotoc_md134", null ],
+        [ "admins", "docs_cli.html#autotoc_md136", null ],
+        [ "schema", "docs_cli.html#autotoc_md138", null ],
+        [ "migrate", "docs_cli.html#autotoc_md140", [
+          [ "apply", "docs_cli.html#autotoc_md141", null ],
+          [ "schema", "docs_cli.html#autotoc_md142", null ]
         ] ],
-        [ "See Also", "docs_cli.html#autotoc_md134", null ]
+        [ "See Also", "docs_cli.html#autotoc_md144", null ]
       ] ]
     ] ],
     [ "C++ Dev Package", "docs_cpp_dev.html", null ],
@@ -84,12 +84,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "access__rules_8cpp.html",
-"classmb_1_1MbEntity.html#a19ed01954fd60115c21020568c0da2b5",
-"classmb_1_1MbFilesMgr.html#abcc1b1a4064ea7668603e2147ea7e920",
-"classmb_1_1MbResponse.html#a5edd555f8fc59aad8399988b87579080",
-"docs_cli.html#autotoc_md134",
-"namespacemb.html#a2a30159f6036133cae7e5a8a4d85cbb9",
-"structmb_1_1ApiKeyResult.html"
+"classmb_1_1MbDatabase.html#a61067d8561660bae104ad5d1f48a7e15",
+"classmb_1_1MbException.html#a59a3f1f941c854c030417b1eeb160208",
+"classmb_1_1MbRequest.html#afac335c6435ef769c68c72ffd4a8792a",
+"date__utils_8cpp.html#ae4d3d9830d695badbaa82fec75d2be94",
+"middlewares_8h.html#a9f854322d02df36bb0a93588749dace2",
+"sse_8h.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

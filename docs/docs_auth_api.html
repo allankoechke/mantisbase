@@ -28,7 +28,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="mantisbase.png"/></td>
   <td id="projectalign">
-   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.7</span>
+   <div id="projectname">MantisBase<span id="projectnumber">&#160;v0.4.8</span>
    </div>
   </td>
  </tr>
@@ -129,6 +129,22 @@ Authentication Endpoints</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/login</code>   </td><td class="markdownTableBodyNone">Authenticate user and get token    </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/otp/request</code>   </td><td class="markdownTableBodyNone">Email a one-time sign-in code    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/otp/login</code>   </td><td class="markdownTableBodyNone">Sign in with an emailed code    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/verify-email/request</code>   </td><td class="markdownTableBodyNone">Email an address-verification link    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/verify-email</code>   </td><td class="markdownTableBodyNone">Confirm an address with the link token    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/verify-email?token=</code>   </td><td class="markdownTableBodyNone">Confirm an address from the email link    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/password-reset/request</code>   </td><td class="markdownTableBodyNone">Email a password-reset link    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/password-reset</code>   </td><td class="markdownTableBodyNone">Set a new password with the link token    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/password-reset?token=</code>   </td><td class="markdownTableBodyNone">HTML form to choose a new password    </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/refresh</code>   </td><td class="markdownTableBodyNone">Refresh an existing token    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">POST   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/logout</code>   </td><td class="markdownTableBodyNone">Logout (invalidate token)   </td></tr>
@@ -136,6 +152,74 @@ Authentication Endpoints</h2>
 <p>For admin authentication and initial setup, see <a href="api.md#admin-accounts">System Endpoints – Admin Accounts</a> (<code>/api/v1/sys/admins/</code>).</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md91"></a>
+Login methods</h2>
+<p>Each auth entity has three login methods. Password login is enabled by default. Email sign-in codes and OAuth are disabled until an admin enables them. Login routes return <b>403</b> while a method is disabled.</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Method   </th><th class="markdownTableHeadNone">Schema field   </th><th class="markdownTableHeadNone">Default   </th><th class="markdownTableHeadNone">Routes    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Email and password   </td><td class="markdownTableBodyNone"><code>auth.password</code>   </td><td class="markdownTableBodyNone"><code>true</code>   </td><td class="markdownTableBodyNone"><code>POST /api/v1/auth/&lt;entity&gt;/login</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Email sign-in code   </td><td class="markdownTableBodyNone"><code>auth.otp</code>   </td><td class="markdownTableBodyNone"><code>false</code>   </td><td class="markdownTableBodyNone"><code>POST /api/v1/auth/&lt;entity&gt;/otp/request</code> and <code>/otp/login</code>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">OAuth   </td><td class="markdownTableBodyNone"><code>auth.oauth</code>   </td><td class="markdownTableBodyNone"><code>false</code>   </td><td class="markdownTableBodyNone"><code>/api/v1/auth/&lt;entity&gt;/oauth/authorize</code>, <code>/callback</code>, <code>/link</code>, <code>/providers</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Require a verified email   </td><td class="markdownTableBodyNone"><code>auth.requireEmailVerification</code>   </td><td class="markdownTableBodyNone"><code>false</code>   </td><td class="markdownTableBodyNone">Password, OTP, and OAuth login   </td></tr>
+</table>
+<p>Read the current flags without an admin token:</p>
+<div class="fragment"><div class="line">curl http://localhost:7070/api/v1/auth/users/methods</div>
+</div><!-- fragment --><div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;status&quot;: 200,</div>
+<div class="line">  &quot;data&quot;: {</div>
+<div class="line">    &quot;password&quot;: true,</div>
+<div class="line">    &quot;otp&quot;: false,</div>
+<div class="line">    &quot;oauth&quot;: false,</div>
+<div class="line">    &quot;requireEmailVerification&quot;: false</div>
+<div class="line">  },</div>
+<div class="line">  &quot;error&quot;: &quot;&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>Change them with an admin token. Schema routes are admin-only. A patch merges the fields you send, so the example below turns on OTP and leaves password and OAuth as they are:</p>
+<div class="fragment"><div class="line">curl -X PATCH http://localhost:7070/api/v1/schemas/users \</div>
+<div class="line">  -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{&quot;auth&quot;: {&quot;otp&quot;: true}}&#39;</div>
+</div><!-- fragment --><p>Existing sessions keep working after a method is turned off. New logins for that method are rejected.</p>
+<p>When <code>requireEmailVerification</code> is <b>true</b>, password login, email-code login, and OAuth login return <b>403</b> <code>Verify your email before signing in.</code> until <code>email_verified</code> is true. Sessions that are already signed in keep working. The flag defaults to <b>false</b>, so existing deployments keep the current login behavior until an admin turns it on.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md93"></a>
+Email verification</h2>
+<p>Auth tables store a system field <code>email_verified</code> (boolean, default <code>false</code>). New auth entities include it. Tables created before this field existed gain the column on startup; existing rows are unverified. Admin accounts (<code>mb_admins</code>) do not have the field.</p>
+<p>Clients cannot set <code>email_verified</code> on create or update. An admin can set it with <code>PATCH /api/v1/entities/&lt;entity&gt;/&lt;id&gt;</code>. Changing the account email clears the flag unless that same admin request sets it.</p>
+<p>When SMTP is configured, creating an account emails a verification link. The link is <code>{siteDomain}/api/v1/auth/&lt;entity&gt;/verify-email?token=...</code>, expires after <b>24 hours</b>, and works once. Set <code>siteDomain</code> so the link points at this server. If SMTP is not configured, registration still succeeds and no message is sent.</p>
+<p>Request another link:</p>
+<div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/verify-email/request \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{&quot;email&quot;: &quot;user@example.com&quot;}&#39;</div>
+</div><!-- fragment --><div class="fragment"><div class="line">{ &quot;status&quot;: 200, &quot;data&quot;: { &quot;sent&quot;: true }, &quot;error&quot;: &quot;&quot; }</div>
+</div><!-- fragment --><p>The response is the same when no account uses that email, and no message is sent. An address that is already verified also returns <code>sent: true</code> without a new message. SMTP must be configured, otherwise the response is <b>400</b> <code>Email service not configured. Set SMTP settings first.</code></p>
+<p>Opening the link in a browser returns a short HTML page. A client can confirm the same token with JSON:</p>
+<div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/verify-email \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{&quot;token&quot;: &quot;&lt;token from the email&gt;&quot;}&#39;</div>
+</div><!-- fragment --><div class="fragment"><div class="line">{ &quot;status&quot;: 200, &quot;data&quot;: { &quot;verified&quot;: true }, &quot;error&quot;: &quot;&quot; }</div>
+</div><!-- fragment --><p>A missing, used, or expired token returns <b>400</b> <code>Invalid or expired verification link.</code></p>
+<p>OAuth login marks <code>email_verified</code> when the provider asserts <code>email_verified</code>. Otherwise, and when SMTP is configured, a verification link is sent for that account.</p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md95"></a>
+Password reset</h2>
+<p>Request a reset link for an account email. SMTP and <code>siteDomain</code> are required. The link is <code>{siteDomain}/api/v1/auth/&lt;entity&gt;/password-reset?token=...</code>, expires after <b>1 hour</b>, and works once.</p>
+<div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/password-reset/request \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{&quot;email&quot;: &quot;user@example.com&quot;}&#39;</div>
+</div><!-- fragment --><div class="fragment"><div class="line">{ &quot;status&quot;: 200, &quot;data&quot;: { &quot;sent&quot;: true }, &quot;error&quot;: &quot;&quot; }</div>
+</div><!-- fragment --><p>The response is the same when no account uses that email, and no message is sent. Opening the link in a browser shows a form to choose a new password. A client can also complete the reset with JSON:</p>
+<div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/password-reset \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{&quot;token&quot;: &quot;&lt;token from the email&gt;&quot;, &quot;password&quot;: &quot;new-secure-password&quot;}&#39;</div>
+</div><!-- fragment --><div class="fragment"><div class="line">{ &quot;status&quot;: 200, &quot;data&quot;: { &quot;reset&quot;: true }, &quot;error&quot;: &quot;&quot; }</div>
+</div><!-- fragment --><p>Passwords must be at least 8 characters with no whitespace. A successful reset invalidates existing sessions for that account. A missing, used, or expired token returns <b>400</b> <code>Invalid or expired password reset link.</code></p>
+<hr  />
+<h2><a class="anchor" id="autotoc_md97"></a>
 Login</h2>
 <p>Authenticate a user and receive a JWT token.</p>
 <blockquote class="doxtable">
@@ -193,7 +277,59 @@ Login</h2>
 <div class="line">    &quot;password&quot;: &quot;userpassword&quot;</div>
 <div class="line">  }&#39;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md93"></a>
+<h2><a class="anchor" id="autotoc_md99"></a>
+Email sign-in code</h2>
+<p>Sign in with an email address and a one-time code. No password is required. This also works for accounts that have no password, such as OAuth-only users.</p>
+<p>An admin must set <code>auth.otp</code> to <code>true</code> on the entity first. Until then the OTP routes return <b>403</b>.</p>
+<p>SMTP must already be configured under application settings. If it is not, the request returns <b>400</b>:</p>
+<div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;status&quot;: 400,</div>
+<div class="line">  &quot;data&quot;: {},</div>
+<div class="line">  &quot;error&quot;: &quot;Email service not configured. Set SMTP settings first.&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>The code is 6 digits, expires after <b>10 minutes</b>, and allows <b>5</b> attempts. Requesting a new code replaces the previous one after the email is sent. Each code can be used once.</p>
+<blockquote class="doxtable">
+<p>&zwj;⚠️ <b>Rate limiting</b>: Both OTP routes use the same limit as password login (<b>5 attempts per minute per IP</b>). Outbound mail is also limited to <b>3 messages per hour</b> for each recipient. </p>
+</blockquote>
+<h3><a class="anchor" id="autotoc_md100"></a>
+Request a code</h3>
+<p><b>Endpoint:</b> <code>POST /api/v1/auth/&lt;entity&gt;/otp/request</code></p>
+<p><b>Request Body:</b> </p><div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;email&quot;: &quot;user@example.com&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p><b>Response (Success - 200):</b> </p><div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;status&quot;: 200,</div>
+<div class="line">  &quot;data&quot;: {</div>
+<div class="line">    &quot;sent&quot;: true</div>
+<div class="line">  },</div>
+<div class="line">  &quot;error&quot;: &quot;&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>The response is the same when no account uses that email, and no message is sent in that case. Delivery errors are returned only when a message was attempted.</p>
+<p><b>Example:</b> </p><div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/otp/request \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{&quot;email&quot;: &quot;user@example.com&quot;}&#39;</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md101"></a>
+Sign in with the code</h3>
+<p><b>Endpoint:</b> <code>POST /api/v1/auth/&lt;entity&gt;/otp/login</code></p>
+<p><b>Request Body:</b> </p><div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;email&quot;: &quot;user@example.com&quot;,</div>
+<div class="line">  &quot;otp&quot;: &quot;483920&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p><b>Response (Success - 200):</b> Same shape as password login: <code>data.token</code>, <code>data.user</code>, and an HttpOnly <code>mb_token</code> cookie.</p>
+<p><b>Response (Error - 401):</b> </p><div class="fragment"><div class="line">{</div>
+<div class="line">  &quot;status&quot;: 401,</div>
+<div class="line">  &quot;data&quot;: {},</div>
+<div class="line">  &quot;error&quot;: &quot;Invalid or expired sign-in code.&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>A code that is not 6 digits returns <b>400</b> with <code>"Sign-in code must be a 6-digit number."</code></p>
+<p><b>Example:</b> </p><div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/otp/login \</div>
+<div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
+<div class="line">  -d &#39;{</div>
+<div class="line">    &quot;email&quot;: &quot;user@example.com&quot;,</div>
+<div class="line">    &quot;otp&quot;: &quot;483920&quot;</div>
+<div class="line">  }&#39;</div>
+</div><!-- fragment --><hr  />
+<h2><a class="anchor" id="autotoc_md103"></a>
 Refresh Token</h2>
 <p>Refresh an existing JWT token to extend its validity.</p>
 <p><b>Endpoint:</b> <code>POST /api/v1/auth/&lt;entity&gt;/refresh</code></p>
@@ -212,7 +348,7 @@ Refresh Token</h2>
 </div><!-- fragment --><p><b>Example:</b> </p><div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/refresh \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;existing_token&gt;&quot;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md95"></a>
+<h2><a class="anchor" id="autotoc_md105"></a>
 Logout</h2>
 <p>Logout and invalidate the current token.</p>
 <p><b>Endpoint:</b> <code>POST /api/v1/auth/&lt;entity&gt;/logout</code></p>
@@ -227,7 +363,7 @@ Logout</h2>
 </div><!-- fragment --><p><b>Example:</b> </p><div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/logout \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md97"></a>
+<h2><a class="anchor" id="autotoc_md107"></a>
 Verify Token</h2>
 <p>Check whether the current JWT or API key is still valid without performing a refresh or logout. Useful for client-side session checks and keeping UI auth state in sync.</p>
 <blockquote class="doxtable">
@@ -260,28 +396,28 @@ Verify Token</h2>
 </div><!-- fragment --><p>Verify an API key: </p><div class="fragment"><div class="line">curl http://localhost:7070/api/v1/auth/verify \</div>
 <div class="line">  -H &quot;Authorization: Bearer mb_sk_...&quot;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md99"></a>
+<h2><a class="anchor" id="autotoc_md109"></a>
 Admin Setup and Authentication</h2>
 <p>Admin account setup and admin-only authentication use the <code>/api/v1/sys/admins/</code> namespace. See <a href="api.md#admin-accounts">System Endpoints – Admin Accounts</a> in the API reference.</p>
 <p><b>Initial setup:</b> <code>POST /api/v1/sys/admins/setup</code> (only when no admin accounts exist)</p>
 <p><b>Admin login:</b> <code>POST /api/v1/sys/admins/login</code></p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md101"></a>
+<h2><a class="anchor" id="autotoc_md111"></a>
 Using Tokens</h2>
 <p>After receiving a token from the login endpoint, include it in all subsequent API requests:</p>
 <div class="fragment"><div class="line">Authorization: Bearer &lt;token&gt;</div>
 </div><!-- fragment --><p>JWTs and API keys both use the same header. API keys are prefixed with <code>mb_sk_</code> and are validated by the same auth middleware as JWTs.</p>
 <p>The token contains user information (id, entity) and is validated automatically by the <code>getAuthToken()</code> middleware on all endpoints.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md103"></a>
+<h2><a class="anchor" id="autotoc_md113"></a>
 API Keys</h2>
 <p>Long-lived API keys complement short-lived JWTs. Keys are scoped to an auth entity and user, stored hashed server-side, and shown <b>once</b> at creation.</p>
-<h3><a class="anchor" id="autotoc_md104"></a>
+<h3><a class="anchor" id="autotoc_md114"></a>
 Authentication</h3>
 <p>Send the raw key in the standard Authorization header:</p>
 <div class="fragment"><div class="line">Authorization: Bearer mb_sk_&lt;secret&gt;</div>
 </div><!-- fragment --><p>The middleware resolves the key, hydrates the user record, and sets the same <code>auth</code> / <code>verification</code> request attributes as a JWT login.</p>
-<h3><a class="anchor" id="autotoc_md105"></a>
+<h3><a class="anchor" id="autotoc_md115"></a>
 MbEntity user endpoints</h3>
 <p>Requires an authenticated session for the same auth entity (JWT from login).</p>
 <table class="markdownTable">
@@ -310,7 +446,7 @@ MbEntity user endpoints</h3>
 <div class="line"># Use the returned mb_sk_... key on API calls</div>
 <div class="line">curl -H &quot;Authorization: Bearer mb_sk_...&quot; \</div>
 <div class="line">  http://localhost:7070/api/v1/entities/posts</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md106"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md116"></a>
 Admin endpoints</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -323,17 +459,17 @@ Admin endpoints</h3>
 <td class="markdownTableBodyNone">DELETE   </td><td class="markdownTableBodyNone"><code>/api/v1/sys/api-keys/:id</code>   </td><td class="markdownTableBodyNone">Revoke admin key   </td></tr>
 </table>
 <p>Admin routes require admin JWT authentication.</p>
-<h3><a class="anchor" id="autotoc_md107"></a>
+<h3><a class="anchor" id="autotoc_md117"></a>
 C++ API</h3>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> app = MantisBase::create();</div>
 <div class="line"><span class="keyword">auto</span>&amp; keys = app-&gt;auth().apiKey();</div>
 <div class="line"><span class="keyword">auto</span> created = keys.create(<span class="stringliteral">&quot;users&quot;</span>, user_id, <span class="stringliteral">&quot;Desktop client&quot;</span>);</div>
 <div class="line"><span class="comment">// created[&quot;key&quot;] — store securely; not returned again on list()</span></div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md109"></a>
+<h2><a class="anchor" id="autotoc_md119"></a>
 OAuth</h2>
 <p>OAuth 2.0 / OIDC login and account linking for auth-type entities. Preset providers (<code>google</code>, <code>github</code>, <code>discord</code>, <code>microsoft</code>) are seeded at startup; admins configure client credentials and enable providers per entity.</p>
-<h3><a class="anchor" id="autotoc_md110"></a>
+<h3><a class="anchor" id="autotoc_md120"></a>
 Configuration</h3>
 <p>OAuth requires a dedicated encryption key for client secrets at rest:</p>
 <table class="markdownTable">
@@ -344,7 +480,7 @@ Configuration</h3>
 </table>
 <p>Set this in your environment or <code>.env</code> before enabling OAuth providers. See <a href="docker.md#environment-variables">Docker Guide</a>.</p>
 <p>On callback, MantisBase exchanges the authorization code and <b>verifies the provider ID token signature</b> via the provider JWKS before trusting claims (<code>sub</code>, <code>email</code>, etc.).</p>
-<h3><a class="anchor" id="autotoc_md111"></a>
+<h3><a class="anchor" id="autotoc_md121"></a>
 User-facing routes</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -364,7 +500,7 @@ User-facing routes</h3>
 </table>
 <p><b>Start login (browser redirect):</b></p>
 <div class="fragment"><div class="line">curl -L &quot;http://localhost:7070/api/v1/auth/users/oauth/authorize/google?redirect_uri=http://localhost:3000/callback&quot;</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md112"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md122"></a>
 Admin provider management</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -387,7 +523,7 @@ Admin provider management</h3>
 <div class="line">  -H &quot;Authorization: Bearer &lt;admin_token&gt;&quot; \</div>
 <div class="line">  -H &quot;Content-Type: application/json&quot; \</div>
 <div class="line">  -d &#39;{&quot;entity_name&quot;: &quot;users&quot;, &quot;provider_id&quot;: &quot;&lt;provider_uuid&gt;&quot;}&#39;</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md113"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md123"></a>
 C++ API</h3>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> app = MantisBase::create();</div>
 <div class="line"><span class="keyword">auto</span>&amp; oauth = app-&gt;auth().oauth();</div>
@@ -395,11 +531,11 @@ C++ API</h3>
 <div class="line">oauth.enableProviderForEntity(<span class="stringliteral">&quot;users&quot;</span>, provider_id);</div>
 <div class="line"><span class="keyword">auto</span> url = oauth.buildAuthorizeUrl(<span class="stringliteral">&quot;users&quot;</span>, <span class="stringliteral">&quot;google&quot;</span>, redirect_uri);</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md115"></a>
+<h2><a class="anchor" id="autotoc_md125"></a>
 Token Expiration</h2>
 <p>By default, tokens expire after 1 hour. Use the refresh endpoint to extend token validity without requiring the user to log in again.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md117"></a>
+<h2><a class="anchor" id="autotoc_md127"></a>
 Request auth context</h2>
 <p>After authentication middleware runs, each request carries an <code>auth</code> object:</p>
 <table class="markdownTable">
@@ -418,9 +554,9 @@ Request auth context</h2>
 </table>
 <p>Admin users (<code>type: admin</code>) short-circuit all entity access rules. See <a class="el" href="rules_8md.html">Access Rules</a> for rule modes and the optional <code>entity</code> filter on <code>auth</code> mode.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md119"></a>
+<h2><a class="anchor" id="autotoc_md129"></a>
 Summary</h2>
-<p>The authentication API provides JWT login, token verification (<code>GET /api/v1/auth/verify</code>), long-lived API keys (<code>mb_sk_...</code>), and OAuth for auth-type entities. All credential types use <code>Authorization: Bearer ...</code> and are validated before entity access rules run. Admin-only routes under <code>/api/v1/sys/</code> manage providers and system API keys. </p>
+<p>The authentication API provides JWT login (password or email one-time code), token verification (<code>GET /api/v1/auth/verify</code>), long-lived API keys (<code>mb_sk_...</code>), and OAuth for auth-type entities. All credential types use <code>Authorization: Bearer ...</code> and are validated before entity access rules run. Admin-only routes under <code>/api/v1/sys/</code> manage providers and system API keys. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
