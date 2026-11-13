@@ -277,8 +277,6 @@ jobs:
               (void)tr;
               soci::values vals;
               vals.set("k", 1);
-              MantisLoggerImpl logger;
-              (void)logger;
               return 0;
           }
           EOF
