@@ -1,29 +1,29 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/models/int_precision.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/models/int_precision.h">
-<area shape="rect" id="Node000001" title="Signed/unsigned integer width tokens for entity int fields (i8..u64)." alt="" coords="181,5,414,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,72,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,63,86,107,84,102,217,58"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="96,108,171,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="248,62,169,104,166,99,246,58"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="71,181,129,207"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="270,62,184,135,130,176,127,171,181,131,267,58"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="403,108,463,133"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="340,58,405,98,402,103,337,62"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="153,181,300,207"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="288,61,240,170,235,168,283,59"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="488,108,637,133"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="379,58,515,101,514,106,378,63"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="661,108,768,133"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="415,55,649,103,647,108,414,60"/>
-<area shape="rect" id="Node000009" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="296,108,379,133"/>
-<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="312,59,329,94,324,97,307,61"/>
-<area shape="poly" id="edge11_Node000009_Node000004" title=" " alt="" coords="300,136,143,183,142,177,298,131"/>
-<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="321,136,258,176,255,171,318,131"/>
-<area shape="rect" id="Node000010" title=" " alt="" coords="551,181,638,207"/>
-<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="379,131,541,175,539,180,378,136"/>
-<area shape="rect" id="Node000011" title=" " alt="" coords="662,181,725,207"/>
-<area shape="poly" id="edge12_Node000009_Node000011" title=" " alt="" coords="380,128,392,131,519,153,649,178,648,184,518,158,392,136,379,133"/>
-<area shape="rect" id="Node000012" title=" " alt="" coords="324,181,415,207"/>
-<area shape="poly" id="edge13_Node000009_Node000012" title=" " alt="" coords="345,133,361,168,356,170,340,135"/>
-<area shape="rect" id="Node000013" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="439,181,527,207"/>
-<area shape="poly" id="edge14_Node000009_Node000013" title=" " alt="" coords="362,131,448,173,446,178,360,136"/>
+<area shape="rect" id="Node000001" title="Signed/unsigned integer width tokens for entity int fields (i8..u64)." alt="" coords="179,5,412,67"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,115,71,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,70,87,113,84,108,210,65"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="94,115,168,143"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="239,69,169,110,167,105,243,66"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="70,191,128,218"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="267,66,182,145,131,184,128,179,179,141,262,68"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="400,115,460,143"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="341,65,401,106,396,106,340,70"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="152,191,297,218"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="285,66,238,178,234,175,280,69"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="484,115,632,143"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="383,65,508,109,503,110,383,70"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="657,115,763,143"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="412,60,644,112,639,114,412,65"/>
+<area shape="rect" id="Node000009" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="295,115,376,143"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="310,65,326,101,321,100,307,70"/>
+<area shape="poly" id="edge11_Node000009_Node000004" title=" " alt="" coords="296,145,144,192,143,187,293,141"/>
+<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="318,142,258,185,255,180,313,144"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="546,191,632,218"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="377,139,533,186,528,187,376,145"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="656,191,718,218"/>
+<area shape="poly" id="edge12_Node000009_Node000011" title=" " alt="" coords="377,137,389,140,514,163,644,190,638,190,513,168,388,145,377,143"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="321,191,411,218"/>
+<area shape="poly" id="edge13_Node000009_Node000012" title=" " alt="" coords="342,141,357,177,352,175,339,145"/>
+<area shape="rect" id="Node000013" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="434,191,522,218"/>
+<area shape="poly" id="edge14_Node000009_Node000013" title=" " alt="" coords="361,141,442,183,437,183,360,146"/>
 </map>

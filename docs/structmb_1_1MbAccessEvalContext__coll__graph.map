@@ -1,7 +1,7 @@
 <map id="mb::MbAccessEvalContext" name="mb::MbAccessEvalContext">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,168,200,193"/>
-<area shape="rect" id="Node000002" href="$classmb_1_1MbRequest.html" title="HTTP request wrapper bound to a MantisBase instance." alt="" coords="41,80,165,105"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,119,105,167,100,167,100,119"/>
-<area shape="rect" id="Node000003" href="$classmb_1_1MbAppMixin.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="37,5,169,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="105,45,105,80,100,80,100,45"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,183,200,211"/>
+<area shape="rect" id="Node000002" href="$classmb_1_1MbRequest.html" title="HTTP request wrapper bound to a MantisBase instance." alt="" coords="41,82,164,110"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,124,105,183,100,182,100,127"/>
+<area shape="rect" id="Node000003" href="$classmb_1_1MbAppMixin.html" title="Non&#45;owning access to the active MantisBase from DI&#45;aware types." alt="" coords="37,5,168,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,46,105,83,100,81,101,51"/>
 </map>

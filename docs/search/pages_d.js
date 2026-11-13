@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['scripting_0',['Scripting',['../docs_scripting.html',1,'']]],
-  ['setting_20up_20mantisbase_1',['Setting Up MantisBase',['../docs_setup.html',1,'']]],
-  ['start_20guide_2',['Quick Start Guide',['../index.html',1,'']]]
+  ['json_20and_20file_20uploads_0',['Request bodies: JSON and file uploads',['../docs_rest_api.html#autotoc_md31',1,'']]],
+  ['json_20configuration_1',['Using JSON Configuration',['../docs_embedding.html#autotoc_md188',1,'']]]
 ];

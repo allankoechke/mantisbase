@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['query_20parameters_0',['query parameters',['../docs_rest_api.html#autotoc_md28',1,'Query Parameters'],['../docs_rest_api.html#autotoc_md52',1,'Query Parameters']]],
+  ['query_20parameters_0',['Query Parameters',['../docs_rest_api.html#autotoc_md28',1,'Query Parameters'],['../docs_rest_api.html#autotoc_md52',1,'Query Parameters']]],
   ['query_20validation_1',['View Query Validation',['../docs_rest_api.html#autotoc_md25',1,'']]],
   ['queryfromcols_2',['queryFromCols',['../classmb_1_1MbEntity.html#a685a356b9c023840ece1524be4f681b3',1,'mb::MbEntity']]],
   ['queryparamvalue_3',['queryParamValue',['../classmb_1_1MbRequest.html#a582fd3024cad9b15185ebe41581876da',1,'mb::MbRequest']]],

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['validate_0',['validate',['../classmb_1_1MbEntitySchema.html#a2a41653edb28817cd65e32667f4e92d0',1,'mb::MbEntitySchema::validate()'],['../classmb_1_1MbEntitySchemaField.html#a129352e4db43b93d265d075b99319af5',1,'mb::MbEntitySchemaField::validate()'],['../classmb_1_1MbEntitySchema.html#ab157760eadb0ecd5acaa017601e88d51',1,'mb::MbEntitySchema::validate()']]],
+  ['validate_0',['validate',['../classmb_1_1MbEntitySchema.html#ab157760eadb0ecd5acaa017601e88d51',1,'mb::MbEntitySchema::validate(const MbEntitySchema &amp;table_schema)'],['../classmb_1_1MbEntitySchema.html#a2a41653edb28817cd65e32667f4e92d0',1,'mb::MbEntitySchema::validate() const'],['../classmb_1_1MbEntitySchemaField.html#a129352e4db43b93d265d075b99319af5',1,'mb::MbEntitySchemaField::validate()']]],
   ['validateintconstraintbounds_1',['validateIntConstraintBounds',['../namespacemb.html#aeee48d117ecdb58563be7bc289fc4771',1,'mb']]],
   ['validateintfieldvalue_2',['validateIntFieldValue',['../namespacemb.html#a3fc6a107977ecc0848e0498b93b39c0f',1,'mb']]],
   ['validateintprecisiontoken_3',['validateIntPrecisionToken',['../namespacemb.html#a396aa186b5e8e30715cfe5342f9b2111',1,'mb']]],
@@ -14,6 +14,6 @@ var searchData=
   ['verifypassword_11',['verifyPassword',['../namespacemb.html#aa3085c18b75188b1e46d16c21ab2e58b',1,'mb']]],
   ['verifytoken_12',['verifyToken',['../classmb_1_1MbAuth.html#aa005dec4e835b7da99a5ba1feb8fb0b6',1,'mb::MbAuth']]],
   ['version_13',['version',['../classmb_1_1MbResponse.html#ae351540bde2374753a2e6841a859b415',1,'mb::MbResponse']]],
-  ['viewquery_14',['viewquery',['../classmb_1_1MbEntitySchema.html#ad276e0839e1dadd0c0984c2c7d1fa17b',1,'mb::MbEntitySchema::viewQuery()'],['../classmb_1_1MbEntity.html#a93a748d074e07673c97501549497c342',1,'mb::MbEntity::viewQuery()']]],
+  ['viewquery_14',['viewQuery',['../classmb_1_1MbEntity.html#a93a748d074e07673c97501549497c342',1,'mb::MbEntity::viewQuery()'],['../classmb_1_1MbEntitySchema.html#ad276e0839e1dadd0c0984c2c7d1fa17b',1,'mb::MbEntitySchema::viewQuery()']]],
   ['viewtypesqlcheck_15',['viewTypeSQLCheck',['../classmb_1_1MbValidators.html#afeffdaeee8e6664a304c8fc1a5587b4d',1,'mb::MbValidators']]]
 ];

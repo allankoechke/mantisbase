@@ -1,4 +1,30 @@
 var searchData=
 [
-  ['mantisbase_0',['mantisbase',['../docs_embedding.html',1,'Embedding MantisBase'],['../docs_setup.html',1,'Setting Up MantisBase']]]
+  ['facing_20routes_0',['User-facing routes',['../docs_auth_api.html#autotoc_md121',1,'']]],
+  ['factories_1',['Middlewares (C++ factories)',['../docs_scripting.html#autotoc_md330',1,'']]],
+  ['features_2',['Dashboard Features',['../docs_rest_api.html#autotoc_md76',1,'']]],
+  ['field_20name_20validation_3',['Field Name Validation',['../docs_rest_api.html#autotoc_md24',1,'']]],
+  ['field_20names_4',['2. Use Consistent Field Names',['../docs_rest_api_rules.html#autotoc_md308',1,'']]],
+  ['field_20types_5',['Field Types',['../docs_file.html#autotoc_md226',1,'']]],
+  ['file_20handling_6',['File Handling',['../docs_rest_api.html#autotoc_md34',1,'']]],
+  ['file_20serving_7',['File Serving',['../docs_file.html#autotoc_md211',1,'']]],
+  ['file_20storage_8',['File Storage',['../docs_file.html#autotoc_md219',1,'']]],
+  ['file_20uploads_9',['File Uploads',['../index.html#autotoc_md263',1,'']]],
+  ['file_20uploads_10',['Request bodies: JSON and file uploads',['../docs_rest_api.html#autotoc_md31',1,'']]],
+  ['filename_20sanitization_11',['Filename Sanitization',['../docs_file.html#autotoc_md220',1,'']]],
+  ['files_12',['Files',['../docs_file.html#autotoc_md213',1,'Creating Records with Files'],['../docs_file.html#autotoc_md217',1,'Deleting Files'],['../docs_file.html',1,'Handling Files'],['../docs_file.html#autotoc_md223',1,'Serving Files']]],
+  ['files_20in_20records_13',['Updating Files in Records',['../docs_file.html#autotoc_md215',1,'']]],
+  ['find_5fpackage_20recommended_14',['Option A: &lt;span class=&quot;tt&quot;&gt;find_package&lt;/span&gt; (recommended)',['../docs_cpp_dev.html#autotoc_md152',1,'']]],
+  ['first_20mbentity_15',['3. Create Your First MbEntity',['../index.html#autotoc_md256',1,'']]],
+  ['first_20steps_16',['First Steps',['../index.html#autotoc_md253',1,'']]],
+  ['foreign_20key_20policies_17',['Foreign Key Policies',['../docs_rest_api.html#autotoc_md39',1,'']]],
+  ['foreign_20key_20properties_18',['Foreign Key Properties',['../docs_rest_api.html#autotoc_md38',1,'']]],
+  ['foreign_20key_20relationships_19',['Foreign Key Relationships',['../docs_rest_api.html#autotoc_md36',1,'']]],
+  ['foreign_20key_20structure_20',['Foreign Key Structure',['../docs_rest_api.html#autotoc_md37',1,'']]],
+  ['foreign_20key_20validation_21',['Foreign Key Validation',['../docs_rest_api.html#autotoc_md40',1,'']]],
+  ['format_22',['Response Format',['../docs_rest_api.html#autotoc_md54',1,'']]],
+  ['format_23',['Event data format',['../docs_rest_api.html#autotoc_md64',1,'']]],
+  ['from_20source_24',['Build from Source',['../index.html#autotoc_md251',1,'']]],
+  ['full_20setup_20with_20postgresql_25',['Example: Full Setup with PostgreSQL',['../docs_docker.html#autotoc_md174',1,'']]],
+  ['functions_26',['Utils (utility functions)',['../docs_scripting.html#autotoc_md331',1,'']]]
 ];

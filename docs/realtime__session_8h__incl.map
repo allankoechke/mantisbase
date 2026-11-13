@@ -1,28 +1,28 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/realtime_session.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/realtime_session.h">
-<area shape="rect" id="Node000001" title="Shared auth, topic filtering, and session helpers for SSE and WebSocket realtime." alt="" coords="135,5,369,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,72,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,63,81,105,79,100,186,58"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="96,108,139,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="212,62,148,103,145,98,209,58"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="112,181,171,207"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="236,62,159,172,155,169,232,59"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="522,108,619,133"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="350,57,516,102,515,107,349,63"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="195,181,258,207"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="250,61,233,168,228,167,245,60"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="643,108,807,133"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="369,52,649,103,648,108,369,58"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="283,181,429,207"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="266,59,284,94,306,132,337,170,333,173,302,135,279,97,261,61"/>
-<area shape="rect" id="Node000009" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="315,108,498,133"/>
-<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="301,58,375,99,373,104,298,62"/>
-<area shape="poly" id="edge11_Node000009_Node000004" title=" " alt="" coords="365,136,184,184,183,179,363,131"/>
-<area shape="poly" id="edge12_Node000009_Node000006" title=" " alt="" coords="379,136,270,179,268,174,377,131"/>
-<area shape="poly" id="edge9_Node000009_Node000008" title=" " alt="" coords="400,135,374,172,370,169,396,132"/>
-<area shape="rect" id="Node000010" title=" " alt="" coords="454,181,541,207"/>
-<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="423,131,473,170,470,175,420,135"/>
-<area shape="rect" id="Node000011" title=" " alt="" coords="565,181,656,207"/>
-<area shape="poly" id="edge13_Node000009_Node000011" title=" " alt="" coords="440,131,566,174,564,179,439,136"/>
-<area shape="rect" id="Node000012" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="680,181,768,207"/>
-<area shape="poly" id="edge14_Node000009_Node000012" title=" " alt="" coords="458,131,667,177,666,182,457,136"/>
+<area shape="rect" id="Node000001" title="Shared auth, topic filtering, and session helpers for SSE and WebSocket realtime." alt="" coords="134,5,366,67"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,115,71,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,70,84,111,81,106,181,65"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="95,115,136,143"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,69,149,108,146,104,207,66"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="112,191,170,218"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="233,67,159,180,155,176,228,68"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="518,115,614,143"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="356,65,508,110,503,111,355,70"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="194,191,256,218"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="248,66,231,177,227,174,243,69"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="638,115,801,143"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="367,57,638,110,634,113,366,63"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="280,191,425,218"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="263,65,281,103,303,141,332,179,327,178,298,144,277,106,261,70"/>
+<area shape="rect" id="Node000009" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="313,115,494,143"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="302,65,371,107,366,107,301,70"/>
+<area shape="poly" id="edge11_Node000009_Node000004" title=" " alt="" coords="356,144,186,192,184,187,352,142"/>
+<area shape="poly" id="edge12_Node000009_Node000006" title=" " alt="" coords="374,143,271,187,270,182,369,144"/>
+<area shape="poly" id="edge9_Node000009_Node000008" title=" " alt="" coords="397,142,372,180,369,175,392,144"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="450,191,536,218"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="420,141,468,181,462,180,418,146"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="560,191,649,218"/>
+<area shape="poly" id="edge13_Node000009_Node000011" title=" " alt="" coords="440,141,557,185,552,185,439,146"/>
+<area shape="rect" id="Node000012" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="673,191,760,218"/>
+<area shape="poly" id="edge14_Node000009_Node000012" title=" " alt="" coords="460,141,660,189,655,190,459,146"/>
 </map>

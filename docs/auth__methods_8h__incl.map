@@ -1,24 +1,24 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/models/auth_methods.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/models/auth_methods.h">
-<area shape="rect" id="Node000001" title="Per&#45;entity login method flags (password, OTP, OAuth)." alt="" coords="187,5,421,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,255,152,280"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="252,62,217,84,185,110,155,143,129,180,92,244,88,241,125,177,151,140,181,106,214,79,249,58"/>
-<area shape="rect" id="Node000003" href="$exceptions_8h.html" title="Custom exception class for MantisBase errors." alt="" coords="195,108,413,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="307,60,307,94,301,94,301,60"/>
-<area shape="rect" id="Node000010" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="572,255,660,280"/>
-<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="351,58,426,106,521,180,595,244,592,248,518,184,422,110,348,62"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="363,181,450,207"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="322,131,380,171,377,175,319,136"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="176,255,235,280"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="296,135,258,183,221,244,216,241,254,180,292,132"/>
-<area shape="rect" id="Node000006" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="269,181,339,207"/>
-<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="307,134,307,168,301,168,301,134"/>
-<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="269,209,129,253,127,248,267,204"/>
-<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="290,209,234,249,231,244,287,205"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="374,255,461,280"/>
-<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="324,204,389,245,386,250,321,209"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="485,255,547,280"/>
-<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="339,204,473,249,471,254,337,209"/>
-<area shape="rect" id="Node000009" title=" " alt="" coords="259,255,349,280"/>
-<area shape="poly" id="edge10_Node000006_Node000009" title=" " alt="" coords="307,207,307,241,301,241,301,207"/>
-<area shape="poly" id="edge11_Node000006_Node000010" title=" " alt="" coords="340,201,351,204,559,251,558,256,350,209,339,207"/>
+<area shape="rect" id="Node000001" title="Per&#45;entity login method flags (password, OTP, OAuth)." alt="" coords="184,5,417,67"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,266,151,294"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="241,69,212,91,183,117,154,151,129,188,92,254,88,251,124,185,149,148,179,113,209,87,245,66"/>
+<area shape="rect" id="Node000003" href="$exceptions_8h.html" title="Custom exception class for MantisBase errors." alt="" coords="192,115,409,143"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="302,65,303,100,298,98,299,70"/>
+<area shape="rect" id="Node000010" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="566,266,654,294"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="351,65,422,113,515,188,588,256,583,255,511,192,419,117,350,70"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="359,191,445,218"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="319,141,374,181,369,181,318,146"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="174,266,232,294"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="292,142,256,192,219,255,215,251,252,189,288,145"/>
+<area shape="rect" id="Node000006" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="266,191,335,218"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="302,141,303,176,298,174,299,145"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="267,219,133,263,132,258,264,215"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="286,218,234,259,231,255,281,220"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="370,266,456,294"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="321,216,383,258,378,258,320,221"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="480,266,542,294"/>
+<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="336,215,468,263,463,263,335,221"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="256,266,345,294"/>
+<area shape="poly" id="edge10_Node000006_Node000009" title=" " alt="" coords="303,217,303,252,298,249,299,221"/>
+<area shape="poly" id="edge11_Node000006_Node000010" title=" " alt="" coords="336,213,348,216,554,265,549,266,347,221,336,218"/>
 </map>

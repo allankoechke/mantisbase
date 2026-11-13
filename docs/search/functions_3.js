@@ -14,7 +14,7 @@ var searchData=
   ['defaultintprecision_11',['defaultIntPrecision',['../namespacemb.html#ae2c02d2bfcbe8caca529269dd03d5e7d',1,'mb']]],
   ['delete_12',['Delete',['../classmb_1_1MbRouter.html#ad9f6a423da92c8dc0c1f4ab83051b431',1,'mb::MbRouter']]],
   ['deletedir_13',['deleteDir',['../classmb_1_1MbFilesMgr.html#ac1b0fd37276423c98be98b9627deccb0',1,'mb::MbFilesMgr']]],
-  ['deleterule_14',['deleterule',['../classmb_1_1MbEntity.html#a7b586c05d2048a94e377d7ee645e0392',1,'mb::MbEntity::deleteRule()'],['../classmb_1_1MbEntitySchema.html#a3cdd2989dfd565b96a42e16966cf7d46',1,'mb::MbEntitySchema::deleteRule()']]],
+  ['deleterule_14',['deleteRule',['../classmb_1_1MbEntity.html#a7b586c05d2048a94e377d7ee645e0392',1,'mb::MbEntity::deleteRule()'],['../classmb_1_1MbEntitySchema.html#a3cdd2989dfd565b96a42e16966cf7d46',1,'mb::MbEntitySchema::deleteRule()']]],
   ['deletesession_15',['deleteSession',['../classmb_1_1MbAuth.html#aec825cf9f6b199d2dd921ccbbf379097',1,'mb::MbAuth']]],
   ['deliver_16',['deliver',['../namespacemb_1_1smtp__detail.html#a8e68da7912d3a4970b500d2a4b981972',1,'mb::smtp_detail']]],
   ['desc_17',['desc',['../classmb_1_1MbException.html#a59a3f1f941c854c030417b1eeb160208',1,'mb::MbException']]],
@@ -24,7 +24,7 @@ var searchData=
   ['disconnect_21',['disconnect',['../classmb_1_1MbDatabase.html#a6fe1a0fe8104c1b20cadd530ef6938cb',1,'mb::MbDatabase']]],
   ['drogonrequest_22',['drogonRequest',['../classmb_1_1MbRequest.html#aa9048c81572ee519797e849fcbb22132',1,'mb::MbRequest']]],
   ['drogonresponse_23',['drogonResponse',['../classmb_1_1MbResponse.html#a0c9f7c22644a6e5a687603078ce9b937',1,'mb::MbResponse']]],
-  ['dropdbhooks_24',['dropdbhooks',['../classmb_1_1MbRealtimeDB.html#a358fac49495e83b8559f58e04b195780',1,'mb::MbRealtimeDB::dropDbHooks(const std::string &amp;entity_name) const'],['../classmb_1_1MbRealtimeDB.html#ace9fde31f2664286e310348bc842c4ad',1,'mb::MbRealtimeDB::dropDbHooks(const std::string &amp;entity_name, const std::shared_ptr&lt; soci::session &gt; &amp;sess)']]],
-  ['droptable_25',['droptable',['../classmb_1_1MbEntitySchema.html#ab863f2d58fae1db93f7aece8e29671a0',1,'mb::MbEntitySchema::dropTable(const MbEntitySchema &amp;original_table)'],['../classmb_1_1MbEntitySchema.html#abceba7c8ad736334dfd91c1807298095',1,'mb::MbEntitySchema::dropTable(const MantisBase &amp;app, const std::string &amp;table_id)']]],
+  ['dropdbhooks_24',['dropDbHooks',['../classmb_1_1MbRealtimeDB.html#a358fac49495e83b8559f58e04b195780',1,'mb::MbRealtimeDB::dropDbHooks(const std::string &amp;entity_name) const'],['../classmb_1_1MbRealtimeDB.html#ace9fde31f2664286e310348bc842c4ad',1,'mb::MbRealtimeDB::dropDbHooks(const std::string &amp;entity_name, const std::shared_ptr&lt; soci::session &gt; &amp;sess)']]],
+  ['droptable_25',['dropTable',['../classmb_1_1MbEntitySchema.html#ab863f2d58fae1db93f7aece8e29671a0',1,'mb::MbEntitySchema::dropTable(const MbEntitySchema &amp;original_table)'],['../classmb_1_1MbEntitySchema.html#abceba7c8ad736334dfd91c1807298095',1,'mb::MbEntitySchema::dropTable(const MantisBase &amp;app, const std::string &amp;table_id)']]],
   ['dump_26',['dump',['../classmb_1_1MbContextStore.html#a8805cb791fd9e402eab23a65ec9db330',1,'mb::MbContextStore::dump()'],['../classmb_1_1MbEntitySchema.html#a2d81389ec6321ce1ebea1ce8ec414514',1,'mb::MbEntitySchema::dump()']]]
 ];

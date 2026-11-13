@@ -74,7 +74,6 @@ var NAVTREE =
       [ "File Members", "globals.html", [
         [ "All", "globals.html", null ],
         [ "Functions", "globals_func.html", null ],
-        [ "Variables", "globals_vars.html", null ],
         [ "Macros", "globals_defs.html", null ]
       ] ]
     ] ]
@@ -84,13 +83,13 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "access__rules_8cpp.html",
-"classmb_1_1MbDatabase.html#a61067d8561660bae104ad5d1f48a7e15",
-"classmb_1_1MbException.html#a59a3f1f941c854c030417b1eeb160208",
-"classmb_1_1MbRequest.html#afac335c6435ef769c68c72ffd4a8792a",
-"date__utils_8cpp.html#ae4d3d9830d695badbaa82fec75d2be94",
-"middlewares_8h.html#a9f854322d02df36bb0a93588749dace2",
-"sse_8h.html"
+"classmb_1_1MbEntity.html#a310a01fa3c546810098b95f47b914e6a",
+"classmb_1_1MbFilesMgr.html#aa74850be9b5cc31927c2241361811176",
+"classmb_1_1MbResponse.html#a518fa59a9cb8f0d138058f89600f0506",
+"entity__schema_8cpp.html",
+"namespacemb.html#ae4d3d9830d695badbaa82fec75d2be94"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+var SYNCONMSG = 'click to disable panel synchronization';
+var SYNCOFFMSG = 'click to enable panel synchronization';
+var LISTOFALLMEMBERS = 'List of all members';

@@ -21,6 +21,7 @@ var searchData=
   ['formatevent_18',['formatEvent',['../classmb_1_1MbSSESession.html#acae6d3eec212e327e5d875f01ca99292',1,'mb::MbSSESession']]],
   ['formdata_19',['formData',['../classmb_1_1MbRequest.html#ac80c63a38a6f5a4ae257bf6b061bc704',1,'mb::MbRequest']]],
   ['fromentity_20',['fromEntity',['../classmb_1_1MbEntitySchema.html#ac54e6e3cf974a9236c4df4f1c08313a4',1,'mb::MbEntitySchema']]],
-  ['fromjson_21',['fromjson',['../structmb_1_1MbSmtpConfig.html#a370faf7ed7d5ca9e29632b5c52b21d84',1,'mb::MbSmtpConfig::fromJson()'],['../classmb_1_1MbAccessRule.html#af396489c8733dabaa97fdc8c51b28221',1,'mb::MbAccessRule::fromJSON()'],['../structmb_1_1MbAuthMethods.html#a8f6b7d78796b58a16ee42942af154f6c',1,'mb::MbAuthMethods::fromJSON()'],['../structmb_1_1IndexDefinition.html#ae00ab68fb72b71b289e2064cc13cbea3',1,'mb::IndexDefinition::fromJSON()']]],
-  ['fromschema_22',['fromSchema',['../classmb_1_1MbEntitySchema.html#a979a1e31769b1217f86602fd2faa2713',1,'mb::MbEntitySchema']]]
+  ['fromjson_21',['fromJSON',['../classmb_1_1MbAccessRule.html#af396489c8733dabaa97fdc8c51b28221',1,'mb::MbAccessRule::fromJSON()'],['../structmb_1_1MbAuthMethods.html#a8f6b7d78796b58a16ee42942af154f6c',1,'mb::MbAuthMethods::fromJSON()'],['../structmb_1_1IndexDefinition.html#ae00ab68fb72b71b289e2064cc13cbea3',1,'mb::IndexDefinition::fromJSON()']]],
+  ['fromjson_22',['fromJson',['../structmb_1_1MbSmtpConfig.html#a370faf7ed7d5ca9e29632b5c52b21d84',1,'mb::MbSmtpConfig']]],
+  ['fromschema_23',['fromSchema',['../classmb_1_1MbEntitySchema.html#a979a1e31769b1217f86602fd2faa2713',1,'mb::MbEntitySchema']]]
 ];

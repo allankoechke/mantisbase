@@ -1,20 +1,20 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/exceptions.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/core/exceptions.h">
-<area shape="rect" id="Node000001" title="Custom exception class for MantisBase errors." alt="" coords="15,5,249,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="7,108,94,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,62,73,100,69,96,105,58"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,64,207"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="132,61,124,97,108,135,89,157,67,175,64,171,85,153,103,132,119,96,127,60"/>
-<area shape="rect" id="Node000004" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="267,108,338,133"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,58,269,99,266,104,183,62"/>
-<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="268,134,78,184,76,179,267,129"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="88,181,235,207"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="281,136,198,177,195,173,279,131"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="259,181,346,207"/>
-<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="305,134,305,168,300,168,300,134"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="370,181,433,207"/>
-<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="320,131,376,171,373,175,317,136"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="457,181,548,207"/>
-<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="336,131,458,174,456,179,334,136"/>
-<area shape="rect" id="Node000009" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="572,181,660,207"/>
-<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="339,127,559,177,558,182,337,133"/>
+<area shape="rect" id="Node000001" title="Custom exception class for MantisBase errors." alt="" coords="16,5,248,67"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="9,115,94,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,70,76,105,71,101,107,65"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,191,64,218"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,65,125,106,109,144,91,166,71,183,68,179,87,162,104,141,120,104,128,70"/>
+<area shape="rect" id="Node000004" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="265,115,334,143"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="188,65,265,107,260,108,187,70"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="265,142,79,192,78,187,264,137"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="87,191,232,218"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="277,143,199,186,197,181,272,144"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="257,191,343,218"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="302,141,302,177,298,173,298,145"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="367,191,430,218"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="318,141,372,182,366,181,317,146"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="454,191,543,218"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="335,140,452,185,446,185,334,146"/>
+<area shape="rect" id="Node000009" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="567,191,654,218"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="335,136,555,189,549,190,335,141"/>
 </map>

@@ -7,7 +7,7 @@ var searchData=
   ['redirect_4',['redirect',['../classmb_1_1MbRouter.html#a98161f0b6eff5755fe10c6026d7c7b35',1,'mb::MbRouter']]],
   ['refreshsession_5',['refreshSession',['../classmb_1_1MbAuth.html#a04dfaaabb5d0f2880659af8c993e0257',1,'mb::MbAuth']]],
   ['registeradminentityroutes_6',['registerAdminEntityRoutes',['../namespacemb.html#aeed2bf19be2818ab366a847308d819a9',1,'mb']]],
-  ['registerduktapemethods_7',['registerduktapemethods',['../classmb_1_1MbResponse.html#a9cf9eb7fa7f837bc3ab50f0b258eeccc',1,'mb::MbResponse::registerDuktapeMethods()'],['../classmb_1_1MbRequest.html#a723c0da218b1b0dc8ecfa4cd040fdf7c',1,'mb::MbRequest::registerDuktapeMethods()']]],
+  ['registerduktapemethods_7',['registerDuktapeMethods',['../classmb_1_1MbRequest.html#a723c0da218b1b0dc8ecfa4cd040fdf7c',1,'mb::MbRequest::registerDuktapeMethods()'],['../classmb_1_1MbResponse.html#a9cf9eb7fa7f837bc3ab50f0b258eeccc',1,'mb::MbResponse::registerDuktapeMethods()']]],
   ['rejectunverifiedlogin_8',['rejectUnverifiedLogin',['../classmb_1_1MbAuth.html#a012e2cc78413068d354d0aa1ae9a5b75',1,'mb::MbAuth']]],
   ['rejectviewmutations_9',['rejectViewMutations',['../namespacemb.html#a9f854322d02df36bb0a93588749dace2',1,'mb']]],
   ['reloadcorsorigins_10',['reloadCorsOrigins',['../classmb_1_1MbRouter.html#aae1b3c3d3c5142492d5202a50c21dca9',1,'mb::MbRouter']]],

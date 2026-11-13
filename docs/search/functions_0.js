@@ -4,11 +4,11 @@ var searchData=
   ['add_1',['add',['../classmb_1_1MbRouteRegistry.html#aede36b3e4169269fbbe99246cbc1e9ab',1,'mb::MbRouteRegistry']]],
   ['addcallback_2',['addCallback',['../classmb_1_1MbRtDbWorker.html#a23c4c4c7dc02d68f26be6160a1314288',1,'mb::MbRtDbWorker']]],
   ['addconnection_3',['addConnection',['../classmb_1_1MbWSMgr.html#a67c514d00351a27fce42148874af350e',1,'mb::MbWSMgr']]],
-  ['adddbhooks_4',['adddbhooks',['../classmb_1_1MbRealtimeDB.html#a2a7ce09612e3b232593a3267b4712227',1,'mb::MbRealtimeDB::addDbHooks(const std::string &amp;entity_name) const'],['../classmb_1_1MbRealtimeDB.html#a3073e9fb05b91630d33525289020d913',1,'mb::MbRealtimeDB::addDbHooks(const MbEntity &amp;entity) const'],['../classmb_1_1MbRealtimeDB.html#ab253aa928800e3d019e24ebb29c65271',1,'mb::MbRealtimeDB::addDbHooks(const MbEntity &amp;entity, const std::shared_ptr&lt; soci::session &gt; &amp;sess)']]],
+  ['adddbhooks_4',['addDbHooks',['../classmb_1_1MbRealtimeDB.html#a2a7ce09612e3b232593a3267b4712227',1,'mb::MbRealtimeDB::addDbHooks(const std::string &amp;entity_name) const'],['../classmb_1_1MbRealtimeDB.html#a3073e9fb05b91630d33525289020d913',1,'mb::MbRealtimeDB::addDbHooks(const MbEntity &amp;entity) const'],['../classmb_1_1MbRealtimeDB.html#ab253aa928800e3d019e24ebb29c65271',1,'mb::MbRealtimeDB::addDbHooks(const MbEntity &amp;entity, const std::shared_ptr&lt; soci::session &gt; &amp;sess)']]],
   ['addfield_5',['addField',['../classmb_1_1MbEntitySchema.html#a354cfa7e69c8a2c717e4b8b1f7bd6079',1,'mb::MbEntitySchema']]],
   ['addindex_6',['addIndex',['../classmb_1_1MbEntitySchema.html#acd5c2d153de36966fbe9192a282241f4',1,'mb::MbEntitySchema']]],
   ['addprovider_7',['addProvider',['../classmb_1_1MbOAuthMgr.html#a840084eef4a0d348aa53f56667a5f653',1,'mb::MbOAuthMgr']]],
-  ['addrule_8',['addrule',['../classmb_1_1MbEntity.html#a8cc26b77f055248328af2f4e9d90aa2f',1,'mb::MbEntity::addRule()'],['../classmb_1_1MbEntitySchema.html#ade6f6a20a0340b96821f7e3dba58ba5a',1,'mb::MbEntitySchema::addRule()']]],
+  ['addrule_8',['addRule',['../classmb_1_1MbEntity.html#a8cc26b77f055248328af2f4e9d90aa2f',1,'mb::MbEntity::addRule()'],['../classmb_1_1MbEntitySchema.html#ade6f6a20a0340b96821f7e3dba58ba5a',1,'mb::MbEntitySchema::addRule()']]],
   ['addschemacache_9',['addSchemaCache',['../classmb_1_1MbRouter.html#a3bb789fe31e28c91fb4278acaa0ec75c',1,'mb::MbRouter']]],
   ['addschemacachelocked_10',['addSchemaCacheLocked',['../classmb_1_1MbRouter.html#a1c5a81ad6284f43ffa593edc5ccad1a9',1,'mb::MbRouter']]],
   ['aes256gcmdecrypt_11',['aes256GcmDecrypt',['../namespacemb.html#a5893dfa8f60709096677fda285e9f5e5',1,'mb']]],
@@ -22,6 +22,6 @@ var searchData=
   ['appversion_19',['appVersion',['../classmb_1_1MantisBase.html#acff8b41afb6071721e34a0fcce975e8c',1,'mb::MantisBase']]],
   ['auth_20',['auth',['../classmb_1_1MantisBase.html#ac2988918ab42ee20d96d464d9dc3b377',1,'mb::MantisBase']]],
   ['authmethoddisabledreason_21',['authMethodDisabledReason',['../classmb_1_1MbEntity.html#aab4be9ac928a0d9eced7b3ccde222c96',1,'mb::MbEntity']]],
-  ['authmethods_22',['authmethods',['../classmb_1_1MbEntity.html#af41e7f2afd1e3c19760ac8290997217f',1,'mb::MbEntity::authMethods()'],['../classmb_1_1MbEntitySchema.html#a7d74679c245c5c9e1cdc25f913201e0f',1,'mb::MbEntitySchema::authMethods()']]],
-  ['authsnapshot_23',['authsnapshot',['../classmb_1_1MbSSESession.html#ae1c409e2a3e18de70997c90087e44b78',1,'mb::MbSSESession::authSnapshot()'],['../classmb_1_1MbSSESession.html#af31ddf03c8e38180e3c92cbc233cda93',1,'mb::MbSSESession::authSnapshot() const']]]
+  ['authmethods_22',['authMethods',['../classmb_1_1MbEntity.html#af41e7f2afd1e3c19760ac8290997217f',1,'mb::MbEntity::authMethods()'],['../classmb_1_1MbEntitySchema.html#a7d74679c245c5c9e1cdc25f913201e0f',1,'mb::MbEntitySchema::authMethods()']]],
+  ['authsnapshot_23',['authSnapshot',['../classmb_1_1MbSSESession.html#ae1c409e2a3e18de70997c90087e44b78',1,'mb::MbSSESession::authSnapshot()'],['../classmb_1_1MbSSESession.html#af31ddf03c8e38180e3c92cbc233cda93',1,'mb::MbSSESession::authSnapshot() const']]]
 ];

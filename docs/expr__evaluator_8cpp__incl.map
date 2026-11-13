@@ -1,71 +1,71 @@
 <map id="/home/runner/work/mantisbase/mantisbase/src/core/expr_evaluator.cpp" name="/home/runner/work/mantisbase/mantisbase/src/core/expr_evaluator.cpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="98,5,323,60"/>
-<area shape="rect" id="Node000002" href="$expr__evaluator_8h.html" title="Expression Evaluator Unit for database access rules." alt="" coords="520,108,693,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="323,57,514,102,513,108,321,63"/>
-<area shape="rect" id="Node000012" title=" " alt="" coords="137,519,284,544"/>
-<area shape="poly" id="edge40_Node000001_Node000012" title=" " alt="" coords="141,63,95,87,52,119,34,138,20,159,11,182,8,208,8,378,12,404,22,427,38,447,58,464,105,493,154,512,152,517,103,497,55,469,34,450,18,429,7,406,3,379,3,207,6,181,16,156,30,135,48,115,92,82,138,58"/>
-<area shape="rect" id="Node000014" title=" " alt="" coords="43,365,123,390"/>
-<area shape="poly" id="edge39_Node000001_Node000014" title=" " alt="" coords="203,61,94,353,89,351,198,59"/>
-<area shape="rect" id="Node000028" title=" " alt="" coords="718,115,837,141"/>
-<area shape="poly" id="edge41_Node000001_Node000028" title=" " alt="" coords="324,45,504,70,706,105,724,109,723,115,705,111,503,75,323,50"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="816,519,875,544"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="520,142,451,158,417,170,385,186,357,205,334,228,320,256,315,288,315,379,315,430,322,449,339,469,374,488,424,503,486,514,555,521,693,528,802,528,802,534,693,533,555,526,486,519,423,508,372,493,336,473,317,452,310,431,309,379,309,288,315,254,330,225,353,201,382,181,415,165,450,153,519,137"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="1579,196,1755,221"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="694,144,706,145,945,168,1132,175,1320,179,1560,193,1565,194,1564,199,1560,199,1319,185,1132,180,945,173,705,151,693,149"/>
-<area shape="rect" id="Node000005" href="$utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="879,196,985,221"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="685,145,872,190,871,195,684,151"/>
-<area shape="rect" id="Node000023" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="987,445,1170,471"/>
-<area shape="poly" id="edge38_Node000002_Node000023" title=" " alt="" coords="694,143,706,145,782,154,880,158,1107,168,1221,179,1324,197,1369,210,1409,226,1442,245,1467,268,1480,287,1487,305,1487,322,1480,338,1469,353,1454,366,1412,389,1359,409,1301,425,1184,447,1183,441,1299,419,1358,404,1409,384,1451,362,1465,349,1476,335,1481,321,1481,306,1476,289,1463,271,1439,249,1407,230,1368,215,1323,202,1220,184,1107,174,879,164,782,159,705,151,693,149"/>
-<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="879,220,781,239,738,254,713,271,705,289,713,308,725,322,738,331,768,337,801,340,819,345,837,355,891,391,910,413,927,445,928,466,919,485,903,501,884,514,881,510,899,497,915,481,923,465,921,446,906,416,888,395,835,360,817,350,800,346,767,342,736,335,722,326,708,311,700,289,709,268,736,249,779,234,878,214"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="1352,519,1443,544"/>
-<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="986,209,1111,216,1262,227,1396,244,1442,254,1467,267,1485,296,1492,329,1489,363,1480,397,1449,460,1417,509,1413,506,1445,458,1475,395,1484,362,1486,329,1480,298,1464,271,1440,259,1395,249,1262,232,1110,221,985,215"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="896,277,968,302"/>
-<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="935,222,935,263,929,263,929,222"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="1043,277,1109,302"/>
-<area shape="poly" id="edge8_Node000005_Node000008" title=" " alt="" coords="955,219,1044,268,1042,272,952,224"/>
-<area shape="rect" id="Node000009" title=" " alt="" coords="1134,277,1231,302"/>
-<area shape="poly" id="edge9_Node000005_Node000009" title=" " alt="" coords="969,219,1134,270,1132,275,968,224"/>
-<area shape="rect" id="Node000010" title=" " alt="" coords="1256,277,1341,302"/>
-<area shape="poly" id="edge10_Node000005_Node000010" title=" " alt="" coords="986,215,1105,236,1245,267,1255,270,1254,275,1243,272,1104,241,985,220"/>
-<area shape="rect" id="Node000011" title=" " alt="" coords="1366,277,1453,302"/>
-<area shape="poly" id="edge11_Node000005_Node000011" title=" " alt="" coords="986,212,1151,230,1253,246,1354,267,1366,270,1365,275,1353,272,1252,251,1150,236,985,217"/>
-<area shape="poly" id="edge12_Node000005_Node000012" title=" " alt="" coords="879,214,799,219,697,229,585,246,474,272,418,288,375,303,336,324,291,359,262,394,241,433,227,473,218,506,213,504,222,471,236,431,258,391,287,355,333,319,373,298,417,283,473,267,584,240,697,223,799,213,878,209"/>
-<area shape="rect" id="Node000013" href="$logger_8h.html" title="Structured logging wrapper around spdlog with optional SQLite persistence." alt="" coords="485,277,648,302"/>
-<area shape="poly" id="edge13_Node000005_Node000013" title=" " alt="" coords="879,223,627,276,626,271,878,218"/>
-<area shape="poly" id="edge36_Node000005_Node000023" title=" " alt="" coords="945,220,982,268,1034,357,1070,432,1065,434,1029,360,978,271,941,223"/>
-<area shape="rect" id="Node000027" title=" " alt="" coords="723,269,871,309"/>
-<area shape="poly" id="edge37_Node000005_Node000027" title=" " alt="" coords="913,224,843,265,840,260,911,219"/>
-<area shape="poly" id="edge34_Node000013_Node000005" title=" " alt="" coords="626,274,871,222,873,227,627,279"/>
-<area shape="poly" id="edge15_Node000013_Node000012" title=" " alt="" coords="486,304,411,324,373,339,339,359,300,394,268,434,242,474,224,507,219,505,237,471,263,431,296,390,336,355,371,335,409,319,484,299"/>
-<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="502,305,137,369,136,364,501,299"/>
-<area shape="rect" id="Node000015" title=" " alt="" coords="350,365,474,390"/>
-<area shape="poly" id="edge16_Node000013_Node000015" title=" " alt="" coords="547,305,446,360,443,356,545,300"/>
-<area shape="rect" id="Node000016" title=" " alt="" coords="499,357,640,397"/>
-<area shape="poly" id="edge17_Node000013_Node000016" title=" " alt="" coords="570,302,571,343,566,343,564,302"/>
-<area shape="rect" id="Node000017" title=" " alt="" coords="835,445,912,471"/>
-<area shape="poly" id="edge18_Node000013_Node000017" title=" " alt="" coords="621,300,721,325,767,340,799,355,819,372,837,392,863,432,859,434,833,396,816,376,796,360,765,345,719,330,620,305"/>
-<area shape="rect" id="Node000018" href="$log__database_8h.html" title="SQLite database manager for application logs." alt="" coords="665,365,786,390"/>
-<area shape="poly" id="edge19_Node000013_Node000018" title=" " alt="" coords="589,300,693,356,690,360,587,305"/>
-<area shape="poly" id="edge35_Node000013_Node000023" title=" " alt="" coords="624,300,724,323,837,355,950,397,1043,437,1041,442,948,402,835,360,722,328,622,305"/>
-<area shape="poly" id="edge20_Node000018_Node000003" title=" " alt="" coords="736,388,830,506,826,509,732,392"/>
-<area shape="poly" id="edge26_Node000018_Node000012" title=" " alt="" coords="684,393,652,400,563,412,492,415,423,423,384,432,338,448,281,478,236,512,233,507,279,474,336,443,382,427,422,418,492,410,563,407,652,395,683,387"/>
-<area shape="poly" id="edge21_Node000018_Node000017" title=" " alt="" coords="748,388,841,436,838,441,746,393"/>
-<area shape="rect" id="Node000019" title=" " alt="" coords="349,445,413,471"/>
-<area shape="poly" id="edge22_Node000018_Node000019" title=" " alt="" coords="683,393,653,400,427,448,426,442,651,395,681,387"/>
-<area shape="rect" id="Node000020" title=" " alt="" coords="437,445,504,471"/>
-<area shape="poly" id="edge23_Node000018_Node000020" title=" " alt="" coords="689,393,518,445,516,440,688,387"/>
-<area shape="rect" id="Node000021" title=" " alt="" coords="529,445,671,471"/>
-<area shape="poly" id="edge24_Node000018_Node000021" title=" " alt="" coords="708,392,632,440,629,436,705,388"/>
-<area shape="rect" id="Node000022" title=" " alt="" coords="696,445,760,471"/>
-<area shape="poly" id="edge25_Node000018_Node000022" title=" " alt="" coords="728,390,730,431,724,432,723,390"/>
-<area shape="poly" id="edge27_Node000018_Node000023" title=" " alt="" coords="777,387,1015,440,1014,445,776,393"/>
-<area shape="poly" id="edge30_Node000023_Node000003" title=" " alt="" coords="1042,473,889,520,887,515,1040,468"/>
-<area shape="poly" id="edge32_Node000023_Node000006" title=" " alt="" coords="1130,468,1339,514,1338,520,1129,473"/>
-<area shape="poly" id="edge28_Node000023_Node000012" title=" " alt="" coords="987,469,298,526,298,520,987,464"/>
-<area shape="rect" id="Node000024" title=" " alt="" coords="1147,519,1234,544"/>
-<area shape="poly" id="edge29_Node000023_Node000024" title=" " alt="" coords="1098,468,1162,509,1159,513,1095,473"/>
-<area shape="rect" id="Node000025" title=" " alt="" coords="947,519,1010,544"/>
-<area shape="poly" id="edge31_Node000023_Node000025" title=" " alt="" coords="1064,473,1008,513,1005,508,1061,469"/>
-<area shape="rect" id="Node000026" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="1035,519,1123,544"/>
-<area shape="poly" id="edge33_Node000023_Node000026" title=" " alt="" coords="1081,471,1081,505,1076,505,1076,471"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="98,5,323,67"/>
+<area shape="rect" id="Node000002" href="$expr__evaluator_8h.html" title="Expression Evaluator Unit for database access rules." alt="" coords="518,115,690,160"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="323,63,505,109,500,112,324,68"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="138,544,283,572"/>
+<area shape="poly" id="edge40_Node000001_Node000012" title=" " alt="" coords="135,70,93,96,51,130,33,149,20,171,11,195,8,220,8,399,12,425,22,448,37,468,56,486,102,516,152,538,147,539,100,520,53,490,33,472,17,451,6,426,3,400,3,220,6,193,15,169,29,146,47,126,90,91,138,65"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="43,384,122,412"/>
+<area shape="poly" id="edge39_Node000001_Node000014" title=" " alt="" coords="203,68,95,371,90,369,197,67"/>
+<area shape="rect" id="Node000028" title=" " alt="" coords="715,124,832,151"/>
+<area shape="poly" id="edge41_Node000001_Node000028" title=" " alt="" coords="323,48,503,74,703,112,721,118,715,119,702,118,502,80,324,54"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="814,544,872,572"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="515,152,450,171,416,184,384,200,356,220,334,244,320,272,315,305,315,400,315,453,322,474,339,494,373,514,423,529,484,539,552,547,689,554,800,558,795,558,689,560,551,552,483,545,422,534,371,519,336,498,317,476,309,454,309,400,309,304,315,270,330,241,352,216,381,196,413,179,448,166,519,149"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="1568,208,1744,235"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="690,155,703,157,831,172,940,181,1125,188,1311,191,1550,205,1556,208,1551,208,1549,210,1311,196,1125,193,940,186,831,177,702,162,691,160"/>
+<area shape="rect" id="Node000005" href="$utils_8h.html" title="Collection of utility functions that are re&#45;used across different files." alt="" coords="874,208,979,235"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="690,158,863,203,858,204,690,163"/>
+<area shape="rect" id="Node000023" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="984,469,1165,496"/>
+<area shape="poly" id="edge38_Node000002_Node000023" title=" " alt="" coords="690,155,703,157,778,166,875,171,1100,182,1213,193,1315,211,1360,224,1399,240,1432,259,1457,282,1470,301,1476,319,1476,336,1470,352,1460,367,1444,381,1404,406,1353,426,1295,444,1181,468,1180,463,1294,439,1351,421,1401,401,1441,377,1456,364,1466,350,1471,335,1471,320,1465,303,1453,285,1428,263,1397,245,1358,229,1314,217,1212,198,1100,188,875,177,778,171,702,162,691,160"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="871,231,777,253,735,268,710,285,704,296,702,305,710,327,723,341,736,349,765,355,798,359,816,364,835,374,889,412,908,435,924,468,928,483,924,497,907,520,884,538,882,533,903,517,919,495,922,483,919,470,903,438,885,416,832,378,814,369,797,364,764,361,734,354,719,345,706,329,697,306,699,294,706,282,733,263,776,248,876,229"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="1343,544,1433,572"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="979,222,1104,229,1254,240,1386,258,1431,268,1456,281,1475,312,1482,345,1480,380,1471,416,1442,482,1408,534,1406,529,1437,479,1466,414,1475,379,1477,345,1470,313,1453,285,1430,273,1385,263,1253,246,1103,234,980,228"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="891,292,962,320"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="928,234,929,278,924,275,925,238"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="1038,292,1103,320"/>
+<area shape="poly" id="edge8_Node000005_Node000008" title=" " alt="" coords="950,233,1037,284,1032,284,949,239"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="1128,292,1224,320"/>
+<area shape="poly" id="edge9_Node000005_Node000009" title=" " alt="" coords="969,233,1117,281,1128,286,1122,286,1115,286,969,239"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="1248,292,1333,320"/>
+<area shape="poly" id="edge10_Node000005_Node000010" title=" " alt="" coords="980,228,1099,248,1237,281,1248,286,1242,286,1235,286,1098,253,980,233"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="1357,292,1443,320"/>
+<area shape="poly" id="edge11_Node000005_Node000011" title=" " alt="" coords="979,224,1145,242,1246,259,1346,281,1358,286,1353,286,1345,286,1245,264,1144,248,980,229"/>
+<area shape="poly" id="edge12_Node000005_Node000012" title=" " alt="" coords="871,225,794,231,693,241,582,259,471,286,415,303,371,318,331,341,287,378,259,414,239,455,225,495,217,531,213,528,220,494,234,453,255,411,283,374,328,336,369,313,413,298,470,281,581,254,692,236,794,226,876,224"/>
+<area shape="rect" id="Node000013" href="$logger_8h.html" title="Structured logging wrapper around spdlog with optional SQLite persistence." alt="" coords="483,292,645,320"/>
+<area shape="poly" id="edge13_Node000005_Node000013" title=" " alt="" coords="871,234,631,290,630,285,876,232"/>
+<area shape="poly" id="edge36_Node000005_Node000023" title=" " alt="" coords="939,233,977,282,1029,375,1066,455,1061,453,1024,377,972,285,937,238"/>
+<area shape="rect" id="Node000027" title=" " alt="" coords="720,283,867,328"/>
+<area shape="poly" id="edge37_Node000005_Node000027" title=" " alt="" coords="908,235,842,277,840,273,903,237"/>
+<area shape="poly" id="edge34_Node000013_Node000005" title=" " alt="" coords="628,289,863,238,858,240,630,294"/>
+<area shape="poly" id="edge15_Node000013_Node000012" title=" " alt="" coords="480,319,410,342,373,358,339,378,300,414,268,455,242,497,224,532,220,528,238,494,263,452,296,410,336,374,370,353,408,337,485,317"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="491,323,192,379,139,389,136,384,192,373,493,318"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="349,384,472,412"/>
+<area shape="poly" id="edge16_Node000013_Node000015" title=" " alt="" coords="544,319,447,379,445,374,540,321"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="496,376,637,421"/>
+<area shape="poly" id="edge17_Node000013_Node000016" title=" " alt="" coords="566,318,568,361,563,359,563,322"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="832,469,909,496"/>
+<area shape="poly" id="edge18_Node000013_Node000017" title=" " alt="" coords="622,317,720,343,764,359,795,374,816,392,834,412,860,456,855,454,829,416,812,395,792,378,762,363,719,348,622,323"/>
+<area shape="rect" id="Node000018" href="$log__database_8h.html" title="SQLite database manager for application logs." alt="" coords="661,384,782,412"/>
+<area shape="poly" id="edge19_Node000013_Node000018" title=" " alt="" coords="587,317,688,376,683,377,586,323"/>
+<area shape="poly" id="edge35_Node000013_Node000023" title=" " alt="" coords="627,317,725,341,834,373,945,417,1038,462,1032,461,943,422,832,379,724,346,627,323"/>
+<area shape="poly" id="edge20_Node000018_Node000003" title=" " alt="" coords="733,410,826,532,821,531,730,415"/>
+<area shape="poly" id="edge26_Node000018_Node000012" title=" " alt="" coords="682,412,650,423,561,436,491,439,422,446,383,455,338,471,283,502,237,536,235,532,280,497,336,466,382,450,421,441,491,434,561,431,649,418,677,413"/>
+<area shape="poly" id="edge21_Node000018_Node000017" title=" " alt="" coords="746,410,836,461,831,461,745,415"/>
+<area shape="rect" id="Node000019" title=" " alt="" coords="350,469,413,496"/>
+<area shape="poly" id="edge22_Node000018_Node000019" title=" " alt="" coords="681,412,650,423,541,447,428,471,427,466,540,442,649,418,676,413"/>
+<area shape="rect" id="Node000020" title=" " alt="" coords="438,469,504,496"/>
+<area shape="poly" id="edge23_Node000018_Node000020" title=" " alt="" coords="684,412,520,468,518,463,678,413"/>
+<area shape="rect" id="Node000021" title=" " alt="" coords="528,469,669,496"/>
+<area shape="poly" id="edge24_Node000018_Node000021" title=" " alt="" coords="704,412,632,462,630,457,699,414"/>
+<area shape="rect" id="Node000022" title=" " alt="" coords="694,469,757,496"/>
+<area shape="poly" id="edge25_Node000018_Node000022" title=" " alt="" coords="724,411,726,455,722,452,720,415"/>
+<area shape="poly" id="edge27_Node000018_Node000023" title=" " alt="" coords="778,410,1006,464,1000,465,778,415"/>
+<area shape="poly" id="edge30_Node000023_Node000003" title=" " alt="" coords="1036,497,887,546,886,540,1031,497"/>
+<area shape="poly" id="edge32_Node000023_Node000006" title=" " alt="" coords="1131,494,1331,543,1325,543,1131,500"/>
+<area shape="poly" id="edge28_Node000023_Node000012" title=" " alt="" coords="984,494,299,552,298,547,983,489"/>
+<area shape="rect" id="Node000024" title=" " alt="" coords="1142,544,1228,572"/>
+<area shape="poly" id="edge29_Node000023_Node000024" title=" " alt="" coords="1095,494,1156,536,1151,535,1094,499"/>
+<area shape="rect" id="Node000025" title=" " alt="" coords="945,544,1007,572"/>
+<area shape="poly" id="edge31_Node000023_Node000025" title=" " alt="" coords="1060,496,1006,538,1004,533,1054,498"/>
+<area shape="rect" id="Node000026" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="1031,544,1118,572"/>
+<area shape="poly" id="edge33_Node000023_Node000026" title=" " alt="" coords="1077,495,1077,530,1073,527,1073,499"/>
 </map>

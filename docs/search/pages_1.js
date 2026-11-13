@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['c_20dev_20package_0',['C++ Dev Package',['../docs_cpp_dev.html',1,'']]],
-  ['check_1',['Health Check',['../docs_healthcheck.html',1,'']]],
-  ['command_20line_20usage_2',['Command Line Usage',['../docs_cli.html',1,'']]]
+  ['2_20access_20the_20admin_20dashboard_0',['2. Access the Admin Dashboard',['../index.html#autotoc_md255',1,'']]],
+  ['2_20use_20consistent_20field_20names_1',['2. Use Consistent Field Names',['../docs_rest_api_rules.html#autotoc_md308',1,'']]]
 ];

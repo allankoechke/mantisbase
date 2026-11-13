@@ -1,21 +1,21 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/utils/crypto_utils.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/utils/crypto_utils.h">
-<area shape="rect" id="Node000001" title="Cryptographic helpers for OAuth PKCE, API keys, and token encryption." alt="" coords="53,5,286,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,181,64,207"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,62,55,173,51,169,145,58"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="89,181,151,207"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="155,61,133,109,127,139,124,167,118,167,121,138,128,107,150,59"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="351,108,417,133"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="236,58,343,100,341,105,234,63"/>
-<area shape="rect" id="Node000005" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="143,108,326,133"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="191,58,220,95,215,99,187,62"/>
-<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="203,136,78,180,76,175,202,131"/>
-<area shape="poly" id="edge8_Node000005_Node000003" title=" " alt="" coords="218,136,152,176,149,172,215,131"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="403,181,549,207"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="274,131,424,175,423,180,273,136"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="574,181,661,207"/>
-<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="300,131,561,179,560,184,299,136"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="176,181,267,207"/>
-<area shape="poly" id="edge9_Node000005_Node000008" title=" " alt="" coords="235,134,229,168,223,167,230,133"/>
-<area shape="rect" id="Node000009" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="291,181,379,207"/>
-<area shape="poly" id="edge10_Node000005_Node000009" title=" " alt="" coords="252,131,309,171,306,175,249,136"/>
+<area shape="rect" id="Node000001" title="Cryptographic helpers for OAuth PKCE, API keys, and token encryption." alt="" coords="52,5,284,67"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,191,64,218"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,69,56,180,52,177,141,66"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="87,191,150,218"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="152,65,132,116,125,146,122,177,117,174,120,146,127,114,148,69"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="347,115,412,143"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="239,65,338,108,333,109,238,70"/>
+<area shape="rect" id="Node000005" href="$types_8h.html" title="Core type aliases, handler signatures, and the MbAppMixin DI mixin." alt="" coords="141,115,322,143"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="190,65,216,102,211,102,188,70"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="197,146,80,189,78,184,196,141"/>
+<area shape="poly" id="edge8_Node000005_Node000003" title=" " alt="" coords="214,143,152,184,150,180,209,144"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="398,191,543,218"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="275,141,416,185,411,186,274,146"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="567,191,654,218"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="307,141,555,189,550,191,306,146"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="174,191,263,218"/>
+<area shape="poly" id="edge9_Node000005_Node000008" title=" " alt="" coords="231,141,226,177,221,174,227,145"/>
+<area shape="rect" id="Node000009" href="$export_8h.html" title="DLL/shared&#45;library symbol visibility macros for MantisBase." alt="" coords="287,191,374,218"/>
+<area shape="poly" id="edge10_Node000005_Node000009" title=" " alt="" coords="250,141,304,182,298,181,249,146"/>
 </map>
