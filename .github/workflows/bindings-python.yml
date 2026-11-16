@@ -227,7 +227,8 @@ jobs:
         shell: bash
         run: |
           # macOS equivalent of auditwheel: vendors libmantisbase.dylib.
-          delocate-wheel -w repaired -v 2 wheelhouse/*.whl
+          # -v is a count flag; a following number is taken as a wheel path.
+          delocate-wheel -w repaired -vv wheelhouse/*.whl
 
       - name: Repair wheel (delvewheel)
         if: matrix.repair == 'delvewheel'

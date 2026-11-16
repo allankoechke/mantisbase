@@ -52,4 +52,11 @@ set_target_properties(mantisbase_python PROPERTIES
     OUTPUT_NAME "mantisbase"
 )
 
+if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # nanobind compiles Release with -Os, which enables -fdeclone-ctor-dtor.
+    # GCC 16 then references a unified std::string constructor that MinGW's
+    # libstdc++ does not export (GCC PR 125359).
+    target_compile_options(mantisbase_python PRIVATE -fno-declone-ctor-dtor)
+endif()
+
 install(TARGETS mantisbase_python LIBRARY DESTINATION .)

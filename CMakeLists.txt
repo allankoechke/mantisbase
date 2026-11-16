@@ -159,6 +159,14 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         VISIBILITY_INLINES_HIDDEN YES
         WINDOWS_EXPORT_ALL_SYMBOLS ON
     )
+    if(WIN32 AND NOT MSVC)
+        # WINDOWS_EXPORT_ALL_SYMBOLS is implemented for MSVC only. On MinGW,
+        # any dllexport (MANTISBASE_API) turns off the default "export
+        # everything" behavior, so soci/drogon/trantor symbols linked into
+        # this DLL are missing from the import library. The bindings include
+        # public headers that reference those symbols directly.
+        target_link_options(mantisbase-dll PRIVATE "-Wl,--export-all-symbols")
+    endif()
 endif()
 
 # Add main executable
