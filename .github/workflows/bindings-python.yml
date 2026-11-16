@@ -27,26 +27,38 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        # engine_platform must be a real axis. include entries that only add
+        # new keys are merged into every job, and the last entry wins — so a
+        # platform listed only under include would collapse the whole matrix
+        # onto one runner. Names match build-matrix.yml `platform`
+        # (darwin-*, not macos-*).
+        engine_platform:
+          - linux-x86_64
+          - linux-aarch64
+          - windows-x86_64
+          - windows-aarch64
+          - darwin-aarch64
+          - darwin-x86_64
         include:
-          - runner: ubuntu-latest
-            engine_platform: linux-x86_64
+          - engine_platform: linux-x86_64
+            runner: ubuntu-latest
             repair: auditwheel
-          - runner: ubuntu-24.04-arm
-            engine_platform: linux-aarch64
+          - engine_platform: linux-aarch64
+            runner: ubuntu-24.04-arm
             repair: auditwheel
-          - runner: windows-latest
-            engine_platform: windows-x86_64
+          - engine_platform: windows-x86_64
+            runner: windows-latest
             repair: delvewheel
-          - runner: windows-11-arm
-            engine_platform: windows-aarch64
+          - engine_platform: windows-aarch64
+            runner: windows-11-arm
             repair: delvewheel
-          - runner: macos-latest
-            engine_platform: macos-aarch64
+          - engine_platform: darwin-aarch64
+            runner: macos-latest
             repair: delocate
           # NOTE: macos-15-intel is GitHub's last x86-64 macOS image and is on
           # the deprecation path — if it disappears, drop this entry.
-          - runner: macos-15-intel
-            engine_platform: macos-x86_64
+          - engine_platform: darwin-x86_64
+            runner: macos-15-intel
             repair: delocate
     runs-on: ${{ matrix.runner }}
 
@@ -114,9 +126,15 @@ jobs:
         run: |
           # Normalize the lib-staging/ + headers-staging/ trees into a standard
           # CMAKE_PREFIX_PATH layout: <prefix>/lib + <prefix>/include.
+          # download-artifact exits 0 when the pattern matches nothing and
+          # does not create the destination directory.
+          if [ ! -d engine-dl ]; then
+            echo "::error::No engine artifacts matched mantisbase_${{ github.ref_name }}_${{ matrix.engine_platform }}-lib or -headers"
+            exit 1
+          fi
           PREFIX="$RUNNER_TEMP/engine"
           mkdir -p "$PREFIX/lib" "$PREFIX/include"
-          LIB=$(find engine-dl -name 'libmantisbase.so' -o -name 'libmantisbase.dylib' | head -n 1)
+          LIB=$(find engine-dl \( -name 'libmantisbase.so' -o -name 'libmantisbase.dylib' \) | head -n 1)
           test -n "$LIB" || { echo "::error::engine shared library missing in artifacts"; exit 1; }
           cp "$LIB" "$PREFIX/lib/"
           # NOTE: upload-artifact strips the uploaded root dir, so the headers
@@ -129,6 +147,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          if (-not (Test-Path "engine-dl")) {
+            Write-Error "No engine artifacts matched mantisbase_${{ github.ref_name }}_${{ matrix.engine_platform }}-lib or -headers"
+            exit 1
+          }
           $Prefix = Join-Path $env:RUNNER_TEMP "engine"
           New-Item -ItemType Directory -Force -Path "$Prefix\lib", "$Prefix\include" | Out-Null
           $dll = Get-ChildItem "engine-dl" -Recurse -Filter "libmantisbase.dll" | Select-Object -First 1
