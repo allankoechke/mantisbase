@@ -26,7 +26,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        # 3.9 is absent from actions/setup-python on Ubuntu 26.04 (ubuntu-latest)
+        # and has no Windows ARM64 build. 3.10 also has no Windows ARM64 build.
+        python-version: ['3.10', '3.11', '3.12', '3.13']
         # engine_platform must be a real axis. include entries that only add
         # new keys are merged into every job, and the last entry wins — so a
         # platform listed only under include would collapse the whole matrix
@@ -60,6 +62,10 @@ jobs:
           - engine_platform: darwin-x86_64
             runner: macos-15-intel
             repair: delocate
+        exclude:
+          # setup-python has no CPython 3.10 arm64 build for Windows.
+          - python-version: '3.10'
+            engine_platform: windows-aarch64
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -197,8 +203,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          # scikit-build-core no longer accepts cmake.generator as a config
+          # setting. CMake still honors CMAKE_GENERATOR.
+          $env:CMAKE_GENERATOR = "MinGW Makefiles"
           pip wheel bindings/python --no-deps --wheel-dir wheelhouse `
-            --config-settings=cmake.generator="MinGW Makefiles" `
             --config-settings=cmake.define.CMAKE_PREFIX_PATH="$env:ENGINE_PREFIX" `
             --config-settings=cmake.define.CMAKE_C_COMPILER="$env:MB_CC" `
             --config-settings=cmake.define.CMAKE_CXX_COMPILER="$env:MB_CXX"
@@ -209,6 +217,9 @@ jobs:
         run: |
           # Vendors libmantisbase.so into the wheel and stamps the correct
           # manylinux tag (plain linux_* tags are rejected by PyPI).
+          # cmake --install drops the build RPATH, so the engine lib is only
+          # visible if this directory is on the search path.
+          export LD_LIBRARY_PATH="${ENGINE_PREFIX}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           auditwheel repair wheelhouse/*.whl -w repaired/
 
       - name: Repair wheel (delocate)

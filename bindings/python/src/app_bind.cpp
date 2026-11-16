@@ -105,7 +105,7 @@ namespace {
     };
 }
 
-static void register_app(const nb::module_& m) {
+void register_app(const nb::module_& m) {
     nb::class_<PyApp>(m, "App")
         .def(nb::init<nb::kwargs>())
         .def("start", &PyApp::start, nb::arg("blocking") = true)

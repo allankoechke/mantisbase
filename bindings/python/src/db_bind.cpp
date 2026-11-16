@@ -86,7 +86,7 @@ static json soci_row_to_json(const soci::row &row) {
     return obj;
 }
 
-static void register_db(const nb::module_ &m) {
+void register_db(const nb::module_ &m) {
     nb::class_<mb::MbDatabase>(m, "MbDatabase")
             .def("query", [](mb::MbDatabase &self, const std::string &sql, const nb::args &params) -> nb::list {
                 soci::values binds;
