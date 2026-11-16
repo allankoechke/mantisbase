@@ -165,6 +165,8 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         # everything" behavior, so soci/drogon/trantor symbols linked into
         # this DLL are missing from the import library. The bindings include
         # public headers that reference those symbols directly.
+        # Requires SOCI_LTO=OFF (see cmake/add-soci.cmake): ld auto-export
+        # rejects LTO template symbols ("symbol wrong type").
         target_link_options(mantisbase-dll PRIVATE "-Wl,--export-all-symbols")
     endif()
 endif()

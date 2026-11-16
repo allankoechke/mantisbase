@@ -18,9 +18,11 @@ set ( SOCI_SHARED OFF CACHE BOOL "Build SOCI as static library" FORCE )
 # Clang + SOCI LTO breaks the link: SOCI compiles with -flto (thin-LTO
 # bitcode objects), but libmantisbase.so links without IPO flags, so the
 # link goes through GNU ld.bfd, which cannot parse LLVM bitcode members
-# ("error adding symbols: file format not recognized"). GCC is unaffected
-# (fat LTO objects). Disable SOCI LTO when building with Clang.
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+# ("error adding symbols: file format not recognized").
+# MinGW GCC is the same class of failure once the shared library is linked
+# with --export-all-symbols: ld auto-export plus LTO rejects template
+# symbols ("cannot export ...: symbol wrong type").
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR MINGW)
     set ( SOCI_LTO OFF CACHE BOOL "Disable SOCI LTO (bitcode breaks GNU ld links)" FORCE )
 endif()
 
