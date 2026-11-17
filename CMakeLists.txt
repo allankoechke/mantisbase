@@ -46,6 +46,11 @@ else() # We are linking statically
             # mantisbase-dll, while the MinGW Python extension uses the
             # shared libstdc++. Two copies segfault in `import mantisbase`.
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+            # GCC 16 + -Os references a std::string constructor that
+            # libstdc++-6.dll does not export (PR 125359). Keep every MinGW
+            # TU off that path so loading the DLL does not fail with
+            # "procedure could not be found".
+            add_compile_options(-fno-declone-ctor-dtor)
             message("-- Building MantisBase static libs (Windows MinGW fully static executables)")
         endif ()
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

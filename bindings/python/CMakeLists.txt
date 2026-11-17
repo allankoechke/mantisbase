@@ -38,6 +38,22 @@ nanobind_add_module(mantisbase_python
     src/db_bind.cpp
 )
 
+if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # nanobind compiles Release with -Os, which enables -fdeclone-ctor-dtor.
+    # GCC 16 then references a unified std::string constructor that MinGW's
+    # libstdc++-6.dll does not export (GCC PR 125359). LoadLibrary reports
+    # that as "The specified procedure could not be found."
+    # The flag must follow -Os; repeating it after nanobind_opt_size does that.
+    target_compile_options(mantisbase_python PRIVATE -fno-declone-ctor-dtor)
+    if(TARGET nanobind-static)
+        target_compile_options(nanobind-static PRIVATE -fno-declone-ctor-dtor)
+    endif()
+    # libmantisbase.dll is linked with --export-all-symbols, so its import
+    # library also advertises std:: instantiations. Resolving those from the
+    # engine DLL fails at load time. Bind libstdc++ first.
+    target_link_libraries(mantisbase_python PRIVATE stdc++)
+endif()
+
 # Link against mantisbase shared library
 if(TARGET mb::shared)
     target_link_libraries(mantisbase_python PRIVATE mb::shared)
@@ -51,12 +67,5 @@ endif()
 set_target_properties(mantisbase_python PROPERTIES
     OUTPUT_NAME "mantisbase"
 )
-
-if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # nanobind compiles Release with -Os, which enables -fdeclone-ctor-dtor.
-    # GCC 16 then references a unified std::string constructor that MinGW's
-    # libstdc++ does not export (GCC PR 125359).
-    target_compile_options(mantisbase_python PRIVATE -fno-declone-ctor-dtor)
-endif()
 
 install(TARGETS mantisbase_python LIBRARY DESTINATION .)
