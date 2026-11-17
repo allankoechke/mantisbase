@@ -108,6 +108,18 @@ jobs:
           $bin = Join-Path $binDir.FullName 'bin'
           if (-not (Test-Path (Join-Path $bin 'aarch64-w64-mingw32-clang++.exe'))) { throw "llvm-mingw toolchain not found under $bin" }
           Add-Content -Path $env:GITHUB_PATH -Value $bin
+          # aarch64 runtime DLLs (libunwind.dll, libc++.dll) live in the
+          # target sysroot, not next to the x64 host clang. delvewheel
+          # needs that directory to vendor them into the wheel.
+          $runtime = Join-Path $binDir.FullName 'aarch64-w64-mingw32\bin'
+          if (-not (Test-Path (Join-Path $runtime 'libunwind.dll'))) {
+            $found = Get-ChildItem -Path $binDir.FullName -Recurse -Filter 'libunwind.dll' |
+              Where-Object { $_.FullName -match 'aarch64' } |
+              Select-Object -First 1
+            if (-not $found) { throw "aarch64 libunwind.dll not found under $dest" }
+            $runtime = $found.DirectoryName
+          }
+          echo "MINGW_RUNTIME_BIN=$runtime" >> $env:GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -227,7 +239,10 @@ jobs:
         shell: bash
         run: |
           # macOS equivalent of auditwheel: vendors libmantisbase.dylib.
+          # The extension depends on @rpath/libmantisbase.dylib and the wheel
+          # has no LC_RPATH. delocate searches LC_RPATH, then DYLD_LIBRARY_PATH.
           # -v is a count flag; a following number is taken as a wheel path.
+          export DYLD_LIBRARY_PATH="${ENGINE_PREFIX}/lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
           delocate-wheel -w repaired -vv wheelhouse/*.whl
 
       - name: Repair wheel (delvewheel)
@@ -235,9 +250,14 @@ jobs:
         shell: pwsh
         run: |
           # Windows equivalent of auditwheel: vendors libmantisbase.dll.
-          # The engine prefix must be on PATH so its DLLs are discoverable.
-          $env:PATH = "$env:ENGINE_PREFIX\lib;$env:PATH"
-          delvewheel repair -w repaired wheelhouse/*.whl --add-path "$env:ENGINE_PREFIX\lib"
+          # ARM64 wheels also need the llvm-mingw runtime (libunwind.dll,
+          # libc++.dll); those are not next to the host clang on PATH.
+          $addPaths = @("$env:ENGINE_PREFIX\lib")
+          if ($env:MINGW_RUNTIME_BIN) { $addPaths += $env:MINGW_RUNTIME_BIN }
+          $env:PATH = ($addPaths -join ';') + ";$env:PATH"
+          $delveArgs = @('repair', '-w', 'repaired', 'wheelhouse/*.whl')
+          foreach ($p in $addPaths) { $delveArgs += @('--add-path', $p) }
+          & delvewheel @delveArgs
 
       - name: Smoke-test repaired wheel
         shell: bash
