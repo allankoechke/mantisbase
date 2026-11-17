@@ -13,6 +13,21 @@ if(NOT Python_FOUND)
     return()
 endif()
 
+# CPython's Windows import library is an MSVC .lib. MinGW ld records data
+# exports (Py_None and the rest) as functions, and loading the extension
+# fails with "The specified procedure could not be found." The wheel job
+# builds a GNU import library with gendef/dlltool and points here.
+if(MINGW AND DEFINED ENV{PYTHON_MINGW_LIB})
+    set(_mb_pyimp "$ENV{PYTHON_MINGW_LIB}")
+    if(NOT EXISTS "${_mb_pyimp}")
+        message(FATAL_ERROR "PYTHON_MINGW_LIB does not exist: ${_mb_pyimp}")
+    endif()
+    foreach(_mb_cfg "" "_RELEASE" "_DEBUG" "_RELWITHDEBINFO" "_MINSIZEREL")
+        set_target_properties(Python::Module PROPERTIES
+            "IMPORTED_IMPLIB${_mb_cfg}" "${_mb_pyimp}")
+    endforeach()
+endif()
+
 # Locate nanobind via Python's package metadata
 execute_process(
     COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
