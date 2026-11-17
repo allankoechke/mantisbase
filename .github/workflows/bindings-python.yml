@@ -234,6 +234,14 @@ jobs:
           export LD_LIBRARY_PATH="${ENGINE_PREFIX}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           auditwheel repair wheelhouse/*.whl -w repaired/
 
+      - name: Install ossp-uuid (macOS Intel)
+        if: matrix.engine_platform == 'darwin-x86_64'
+        run: |
+          # The Intel engine dylib is linked to
+          # /usr/local/opt/ossp-uuid/lib/libuuid.16.dylib. That Homebrew
+          # prefix is not on the wheel image, so delocate cannot vendor it.
+          brew install ossp-uuid
+
       - name: Repair wheel (delocate)
         if: matrix.repair == 'delocate'
         shell: bash
