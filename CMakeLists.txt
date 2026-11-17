@@ -41,11 +41,12 @@ else() # We are linking statically
     # due to mismatch libstd* libs.
     if(WIN32)
         if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            # Windows MinGW: fully static link to avoid DLL dependencies
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
+            # Fully static executables only. -static must not be a global
+            # compile/link flag: it would also bake libstdc++ into
+            # mantisbase-dll, while the MinGW Python extension uses the
+            # shared libstdc++. Two copies segfault in `import mantisbase`.
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-            message("-- Building MantisBase static libs (Windows MinGW fully static)")
+            message("-- Building MantisBase static libs (Windows MinGW fully static executables)")
         endif ()
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         # Linux GCC: static link only runtime libraries

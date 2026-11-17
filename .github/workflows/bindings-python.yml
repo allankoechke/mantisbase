@@ -84,6 +84,10 @@ jobs:
         run: |
           choco install mingw --no-progress
           echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
+          # libmantisbase.dll uses the shared libstdc++. delvewheel vendors
+          # libstdc++-6.dll, libgcc_s_seh-1.dll, and libwinpthread-1.dll
+          # from this directory.
+          echo "MINGW_RUNTIME_BIN=C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_ENV
 
       - name: Install llvm-mingw (Windows ARM64)
         if: runner.os == 'Windows' && matrix.engine_platform == 'windows-aarch64'
