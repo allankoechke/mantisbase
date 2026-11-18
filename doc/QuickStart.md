@@ -194,7 +194,8 @@ Set `MB_JWT_SECRET` in production. See [CLI Reference](cmd.md) for all options.
 4. [File Handling](files.md) — Upload, serve, and delete files
 5. [Embedding Guide](embedding.md) — Use MantisBase as a C++ library
 6. [Scripting Guide](scripting.md) — JavaScript extensions for custom routes
-7. [Docker Guide](docker.md) — Container deployment
+7. [Python Bindings](python.md) — Embed the server and call it from Python
+8. [Docker Guide](docker.md) — Container deployment
 
 ---
 
@@ -208,4 +209,5 @@ Set `MB_JWT_SECRET` in production. See [CLI Reference](cmd.md) for all options.
 - [Embedding Guide](embedding.md) — Use as a C++ library
 - [File Handling](files.md) — File upload and serving
 - [Scripting Guide](scripting.md) — JavaScript extensions
+- [Python Bindings](python.md) — `pip install mantisbase`
 - [Docker Guide](docker.md) — Running in containers

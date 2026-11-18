@@ -12,6 +12,7 @@ MantisBase is available in two formats:
 
 - 💻 **Source code** for embedding into your own C++ application
     - See the [Embedding MantisBase](embedding.md) guide for details.
+- 🐍 **Python package** — `pip install mantisbase`, then follow the [Python Bindings](python.md) guide.
 
 ---
 
@@ -54,6 +55,7 @@ After creating an admin account (see [Quick Start Guide](QuickStart.md)), access
 
 ## Next Steps
 - Learn how to [Embed MantisBase](embedding.md) into your C++ app (own a `MantisBase` instance via `create()`).
+- Install the [Python bindings](python.md) with `pip install mantisbase`.
 - Explore the [REST API generation](api.md) to build your app.
 - Read [Authentication API](auth.md) for JWT, API keys, and OAuth.
 - Access the [Admin Dashboard](QuickStart.md#2-access-the-admin-dashboard) to manage your data visually.

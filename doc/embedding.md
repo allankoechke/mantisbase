@@ -2,6 +2,8 @@
 
 MantisBase is designed as a lightweight C++ library that can be embedded directly into your desktop, mobile, or embedded application. This guide explains how to integrate MantisBase into your project and configure it.
 
+The same embedded server is available from Python. See the [Python Bindings](python.md) guide (`pip install mantisbase`).
+
 ---
 
 ## Why Embed MantisBase?

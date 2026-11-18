@@ -46,12 +46,20 @@ find_package(nanobind CONFIG REQUIRED)
 
 nanobind_add_module(mantisbase_python
     src/module.cpp
+    src/py_conv.cpp
     src/app_bind.cpp
     src/router_bind.cpp
     src/request_bind.cpp
     src/response_bind.cpp
     src/db_bind.cpp
+    src/entity_bind.cpp
+    src/auth_bind.cpp
+    src/services_bind.cpp
+    src/middleware_bind.cpp
+    src/utils_bind.cpp
 )
+
+target_include_directories(mantisbase_python PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # nanobind compiles Release with -Os, which enables -fdeclone-ctor-dtor.
