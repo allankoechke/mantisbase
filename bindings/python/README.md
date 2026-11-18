@@ -6,6 +6,8 @@ Python bindings for [MantisBase](https://github.com/allankoechke/mantisbase), a 
 pip install mantisbase
 ```
 
+Pre-release tags are published with a PEP 440 marker: `v0.4.9-alpha.1` is `0.4.9a1`, `v0.4.9-beta.1` is `0.4.9b1`, and `v0.4.9-rc.1` is `0.4.9rc1`. Install one with `pip install mantisbase==0.4.9b1`. `pip install mantisbase` still selects the newest stable release.
+
 Full API reference: <https://allankoechke.github.io/mantisbase/docs_python.html>
 
 Source for that page: <https://github.com/allankoechke/mantisbase/blob/master/doc/python.md>

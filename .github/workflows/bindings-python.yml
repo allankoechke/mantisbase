@@ -79,6 +79,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # vX.Y.Z-beta.N (and alpha/rc) becomes the PEP 440 version X.Y.ZbN.
+      # Stable tags stay on the plain CMake version. The script exports
+      # MB_PYTHON_VERSION for the wheel build.
+      - name: Set Python package version
+        run: python bindings/python/version_provider.py
+
       - name: Install MinGW (Windows x86-64)
         if: runner.os == 'Windows' && matrix.engine_platform == 'windows-x86_64'
         run: |
@@ -319,6 +325,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      # Same tag-to-PEP 440 mapping as the wheel jobs.
+      - name: Set Python package version
+        run: python bindings/python/version_provider.py
 
       - name: Install build
         run: pip install build

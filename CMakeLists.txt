@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 set(CMAKE_CXX_STANDARD 20)
 
-# For the project version, update it across the following files
+# For the project version, update it across the following files.
+# The Python package reads project(MantisBase VERSION ...) from this file.
+# A pre-release git tag vX.Y.Z-alpha.N, -beta.N, or -rc.N publishes the
+# Python package as X.Y.ZaN, X.Y.ZbN, or X.Y.ZrcN. CMake stays X.Y.Z.
 # CMakeLists.txt
 # doc/docker.md
 # docker/Dockerfile
