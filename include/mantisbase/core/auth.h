@@ -192,6 +192,28 @@ namespace mb
         std::string refreshSessionJson(const std::string &old_session_id,
                                        const std::string &entity_name,
                                        const std::string &user_id);
+
+        [[nodiscard]] std::string requestLoginOtpJson(const std::string &entity_name,
+                                                      const std::string &email) const;
+        [[nodiscard]] std::string loginWithOtpJson(const std::string &entity_name,
+                                                   const std::string &email,
+                                                   const std::string &otp) const;
+        void rejectUnverifiedLoginJson(const std::string &entity_name,
+                                       const std::string &user_json) const;
+        [[nodiscard]] std::string requestEmailVerificationJson(const std::string &entity_name,
+                                                               const std::string &email,
+                                                               const std::string &request_host) const;
+        [[nodiscard]] std::string confirmEmailVerificationJson(const std::string &entity_name,
+                                                               const std::string &token) const;
+        [[nodiscard]] std::string requestPasswordResetJson(const std::string &entity_name,
+                                                           const std::string &email,
+                                                           const std::string &request_host) const;
+        [[nodiscard]] std::string confirmPasswordResetJson(const std::string &entity_name,
+                                                           const std::string &token,
+                                                           const std::string &new_password) const;
+
+        [[nodiscard]] MbApiKeyMgr *duk_apiKey() const { return &apiKey(); }
+        [[nodiscard]] MbOAuthMgr *duk_oauth() const { return &oauth(); }
 #endif
     };
 } // mb

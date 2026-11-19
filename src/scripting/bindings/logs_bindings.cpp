@@ -11,6 +11,7 @@ namespace mb {
         dukglue_register_method(ctx, &MbLogger::jsInfo, "info");
         dukglue_register_method(ctx, &MbLogger::jsWarn, "warn");
         dukglue_register_method(ctx, &MbLogger::jsError, "error");
+        dukglue_register_method(ctx, &MbLogger::jsCritical, "critical");
         dukglue_register_method(ctx, &MbLogger::jsDebug, "debug");
         dukglue_register_method(ctx, &MbLogger::jsTrace, "trace");
     }

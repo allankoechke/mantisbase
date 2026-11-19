@@ -15,6 +15,9 @@ namespace mb {
         dukglue_register_function(ctx, &sanitizeFilename_JSWrapper, "sanitizeFilename");
         dukglue_register_function(ctx, &hashPassword, "hashPassword");
         dukglue_register_function(ctx, &verifyPassword, "verifyPassword");
+        dukglue_register_function(ctx, &isAllowedFileExtension, "isAllowedFileExtension");
+        dukglue_register_function(ctx, &safeContentType, "safeContentType");
+        dukglue_register_function(ctx, &strToBool, "strToBool");
 
         duk_peval_string(ctx,
                          "utils = {"
@@ -24,7 +27,10 @@ namespace mb {
                          "  getEnvOrDefault: getEnvOrDefault,"
                          "  sanitizeFilename: sanitizeFilename,"
                          "  hashPassword: hashPassword,"
-                         "  verifyPassword: verifyPassword"
+                         "  verifyPassword: verifyPassword,"
+                         "  isAllowedFileExtension: isAllowedFileExtension,"
+                         "  safeContentType: safeContentType,"
+                         "  strToBool: strToBool"
                          "};");
     }
 }

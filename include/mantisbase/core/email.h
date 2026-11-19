@@ -94,6 +94,23 @@ namespace mb {
 
         void clearRateLimits();
 
+#ifdef MB_SCRIPTING_ENABLED
+        /** SMTP settings as JSON. `password` is `"********"` when one is stored. */
+        [[nodiscard]] std::string configJson() const;
+        /** `smtp_json` is the settings `smtp` object (`host`, `port`, `user`, `password`, `from`, `tls`). */
+        void configureJson(const std::string &smtp_json);
+        /** Full settings object as JSON; reads its `smtp` member. */
+        void applySettingsJson(const std::string &configs_json);
+        bool sendMessage(const std::string &to, const std::string &subject,
+                         const std::string &html, const std::string &text);
+        /**
+         * `variables_json` is a JSON object of string values, or empty for none.
+         */
+        [[nodiscard]] std::string loadTemplateJson(const std::string &template_name,
+                                                   const std::string &variables_json) const;
+        [[nodiscard]] std::string sentMessagesJson() const;
+#endif
+
         static std::string verificationEmailHtml(const std::string &app_name,
                                                    const std::string &verify_url);
 

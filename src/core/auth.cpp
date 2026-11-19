@@ -822,5 +822,37 @@ namespace mb {
                                          const std::string &user_id) {
         return refreshSession(old_session_id, entity_name, user_id).dump();
     }
+
+    std::string MbAuth::requestLoginOtpJson(const std::string &entity_name, const std::string &email) const {
+        return requestLoginOtp(entity_name, email).dump();
+    }
+
+    std::string MbAuth::loginWithOtpJson(const std::string &entity_name, const std::string &email,
+                                         const std::string &otp) const {
+        return loginWithOtp(entity_name, email, otp).dump();
+    }
+
+    void MbAuth::rejectUnverifiedLoginJson(const std::string &entity_name, const std::string &user_json) const {
+        rejectUnverifiedLogin(entity_name, json::parse(user_json));
+    }
+
+    std::string MbAuth::requestEmailVerificationJson(const std::string &entity_name, const std::string &email,
+                                                     const std::string &request_host) const {
+        return requestEmailVerification(entity_name, email, request_host).dump();
+    }
+
+    std::string MbAuth::confirmEmailVerificationJson(const std::string &entity_name, const std::string &token) const {
+        return confirmEmailVerification(entity_name, token).dump();
+    }
+
+    std::string MbAuth::requestPasswordResetJson(const std::string &entity_name, const std::string &email,
+                                                 const std::string &request_host) const {
+        return requestPasswordReset(entity_name, email, request_host).dump();
+    }
+
+    std::string MbAuth::confirmPasswordResetJson(const std::string &entity_name, const std::string &token,
+                                                 const std::string &new_password) const {
+        return confirmPasswordReset(entity_name, token, new_password).dump();
+    }
 #endif
 };

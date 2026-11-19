@@ -534,6 +534,70 @@ std::string mb::MbMailer::hideEmail(const std::string &email) {
            domain;
 }
 
+#ifdef MB_SCRIPTING_ENABLED
+std::string mb::MbMailer::configJson() const {
+    return json{
+        {"host", m_config.host},
+        {"port", m_config.port},
+        {"user", m_config.user},
+        {"password", m_config.password.empty() ? "" : "********"},
+        {"from", m_config.from_address},
+        {"tls", m_config.use_tls},
+    }.dump();
+}
+
+void mb::MbMailer::configureJson(const std::string &smtp_json) {
+    auto smtp = json::parse(smtp_json);
+    if (smtp.contains("password") && smtp["password"].is_string()
+        && smtp["password"].get<std::string>() == "********")
+        smtp["password"] = m_config.password;
+    configure(MbSmtpConfig::fromJson(smtp));
+}
+
+void mb::MbMailer::applySettingsJson(const std::string &configs_json) {
+    applySettings(json::parse(configs_json));
+}
+
+bool mb::MbMailer::sendMessage(const std::string &to, const std::string &subject,
+                               const std::string &html, const std::string &text) {
+    MbEmailMsg message;
+    message.to = to;
+    message.subject = subject;
+    message.body_html = html;
+    message.body_text = text;
+    return send(message);
+}
+
+std::string mb::MbMailer::loadTemplateJson(const std::string &template_name,
+                                           const std::string &variables_json) const {
+    std::unordered_map<std::string, std::string> values;
+    if (!variables_json.empty()) {
+        const auto object = json::parse(variables_json);
+        if (!object.is_object())
+            throw MbException(400, "template variables must be a JSON object of strings");
+        for (auto it = object.begin(); it != object.end(); ++it) {
+            if (!it.value().is_string())
+                throw MbException(400, "template variables must be a JSON object of strings");
+            values.emplace(it.key(), it.value().get<std::string>());
+        }
+    }
+    return loadTemplate(template_name, values);
+}
+
+std::string mb::MbMailer::sentMessagesJson() const {
+    json out = json::array();
+    for (const auto &message : m_sent_messages) {
+        out.push_back({
+            {"to", message.to},
+            {"subject", message.subject},
+            {"html", message.body_html},
+            {"text", message.body_text},
+        });
+    }
+    return out.dump();
+}
+#endif
+
 const mb::MbSmtpConfig &mb::MbMailer::config() const { return m_config; }
 
 bool mb::MbMailer::isConfigured() const { return m_configured; }

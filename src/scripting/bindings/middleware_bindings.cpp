@@ -78,6 +78,19 @@ namespace mb {
             const auto entity = std::string(duk_require_string(ctx, 0));
             return push_middleware(ctx, requireAdminOrEntityAuth(entity));
         }
+
+        duk_ret_t mw_envGate(duk_context *ctx) {
+            const auto env_var = std::string(duk_require_string(ctx, 0));
+            const bool block_when_truthy = duk_require_boolean(ctx, 1) != 0;
+            return push_middleware(ctx, envGateMiddleware(env_var, block_when_truthy));
+        }
+
+        duk_ret_t mw_rateLimit(duk_context *ctx) {
+            const int max_requests = duk_require_int(ctx, 0);
+            const int window_seconds = duk_require_int(ctx, 1);
+            const bool use_user_id = duk_get_top(ctx) >= 3 && duk_require_boolean(ctx, 2) != 0;
+            return push_middleware(ctx, rateLimit(max_requests, window_seconds, use_user_id));
+        }
     }
 
     void registerMiddlewareBindings(duk_context *ctx) {
@@ -124,6 +137,12 @@ namespace mb {
 
         duk_push_c_function(ctx, mw_requireAdminOrEntityAuth, 1);
         duk_put_prop_string(ctx, -2, "requireAdminOrEntityAuth");
+
+        duk_push_c_function(ctx, mw_envGate, 2);
+        duk_put_prop_string(ctx, -2, "envGate");
+
+        duk_push_c_function(ctx, mw_rateLimit, 3);
+        duk_put_prop_string(ctx, -2, "rateLimit");
 
         duk_put_global_string(ctx, "middlewares");
     }

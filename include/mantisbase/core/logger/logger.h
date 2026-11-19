@@ -93,6 +93,7 @@ namespace mb {
         void jsInfo(const std::string &message) const;
         void jsWarn(const std::string &message) const;
         void jsError(const std::string &message) const;
+        void jsCritical(const std::string &message) const;
         void jsDebug(const std::string &message) const;
         void jsTrace(const std::string &message) const;
 #endif

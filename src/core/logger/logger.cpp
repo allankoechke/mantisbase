@@ -195,6 +195,10 @@ void mb::MbLogger::jsError(const std::string &message) const {
     critical("Scripting", message);
 }
 
+void mb::MbLogger::jsCritical(const std::string &message) const {
+    critical("Scripting", message);
+}
+
 void mb::MbLogger::jsDebug(const std::string &message) const {
     debug("Scripting", message);
 }

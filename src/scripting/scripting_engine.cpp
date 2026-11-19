@@ -72,6 +72,7 @@ namespace mb {
         registerRouterBindings(m_ctx);
         registerSettingsBindings(m_ctx);
         registerAuthBindings(m_ctx);
+        registerMailerBindings(m_ctx);
         registerMiddlewareBindings(m_ctx);
         registerFilesBindings(m_ctx);
         registerLogsBindings(m_ctx);

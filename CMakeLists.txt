@@ -145,6 +145,7 @@ if(MB_SCRIPTING_ENABLED)
         src/scripting/bindings/router_bindings.cpp
         src/scripting/bindings/settings_bindings.cpp
         src/scripting/bindings/auth_bindings.cpp
+        src/scripting/bindings/mailer_bindings.cpp
         src/scripting/bindings/middleware_bindings.cpp
         src/scripting/bindings/files_bindings.cpp
         src/scripting/bindings/logs_bindings.cpp

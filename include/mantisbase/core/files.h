@@ -122,6 +122,11 @@ namespace mb {
 #ifdef MB_SCRIPTING_ENABLED
         [[nodiscard]] std::string getFilePathString(const std::string &entity_name,
                                                     const std::string &filename);
+        /** @p files_json is a JSON array of filenames. */
+        void removeFilesJson(const std::string &entity_name, const std::string &files_json) const;
+        [[nodiscard]] std::string canonicalPathString(const std::string &path) const;
+        [[nodiscard]] bool isCanonicalPathString(const std::string &path) const;
+        [[nodiscard]] std::string filesBaseDirString() const;
 #endif
 
         /**
