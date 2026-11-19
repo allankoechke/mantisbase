@@ -3,7 +3,7 @@ var searchData=
   ['genentityid_0',['genEntityId',['../classmb_1_1MbEntitySchema.html#a9ede65e5fdf251f11fd8a39063ce2bf4',1,'mb::MbEntitySchema']]],
   ['generate_5fuuidv7_1',['generate_uuidv7',['../namespacemb.html#ad67ff06c25bb2ccdd5f52404e51405f9',1,'mb']]],
   ['generateapikey_2',['generateApiKey',['../classmb_1_1MbApiKeyMgr.html#afe6d2f7e331fec3eeb1954f874e00ab5',1,'mb::MbApiKeyMgr']]],
-  ['generated_20api_3',['4. Use Your Auto-generated API',['../index.html#autotoc_md257',1,'']]],
+  ['generated_20api_3',['4. Use Your Auto-generated API',['../index.html#autotoc_md275',1,'']]],
   ['generatepkcechallenge_4',['generatePKCEChallenge',['../namespacemb.html#ab1732e537d2f880aebd13253dad4bd21',1,'mb']]],
   ['generatepkceverifier_5',['generatePKCEVerifier',['../namespacemb.html#ac5b5233790c2e722a8af39b5cb7e65c6',1,'mb']]],
   ['generatereadabletimeid_6',['generateReadableTimeId',['../namespacemb.html#af1b47490bcd171b34e7371a721ec4d82',1,'mb']]],

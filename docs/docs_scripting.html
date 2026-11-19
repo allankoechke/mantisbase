@@ -95,17 +95,18 @@ $(function(){initNavTree('docs_scripting.html','',''); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>On server startup, MantisBase loads JavaScript from your configured scripts directory. The primary entry file is <b><span class="tt">main.mb.js</span></b>. If that file is missing, MantisBase falls back to <b><span class="tt">index.mantis.js</span></b> and logs a deprecation warning.</p>
+<p>To embed the server in Python instead of extending it with JavaScript, see the <a class="el" href="python_8md.html">Python Bindings</a> guide.</p>
 <p>Scripts run once at startup. Custom routes registered via <span class="tt">app.router().addRoute()</span> are stored in the Duktape heap and invoked by the C++ HTTP layer when matching requests arrive.</p>
 <p>The scripts directory is resolved as follows:</p><ul>
 <li>By default: a <span class="tt">scripts</span> folder next to the <span class="tt">mantisbase</span> binary</li>
 <li>Override with <span class="tt">--scriptsDir /some/path</span> (see Command-line options)</li>
 </ul>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md318"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md336"></a>
 Type hinting</h3>
 <p>Copy <span class="tt">mantisbase.d.ts</span> (repo root) next to your scripts for autocompletion and inline docs in VS Code, Cursor, and other editors with JavaScript type checking:</p>
 <div class="fragment"><div class="line">cp mantisbase.d.ts ./scripts/</div>
 </div><!-- fragment --><p>It covers the whole JS surface: <span class="tt">app</span> (router, db, settings, auth, files, logs, realtime), <span class="tt">middlewares</span>, <span class="tt">utils</span>, <span class="tt">console</span>, request/response objects, and the <span class="tt">onServerStart</span> / <span class="tt">onRecordCreated</span> / <span class="tt">onRecordUpdated</span> lifecycle hooks.</p>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md319"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md337"></a>
 Build and runtime switches</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -117,10 +118,10 @@ Build and runtime switches</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">MB_SCRIPTING_DISABLED=1</span>  </td><td class="markdownTableBodyNone">Same as <span class="tt">--disable-scripting</span>  </td></tr>
 </table>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md320"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md338"></a>
 Thread safety</h3>
 <p>All JavaScript execution uses a <b>single Duktape context</b> guarded by a mutex. Custom route handlers and middleware run under this lock on Drogon worker threads. Keep handlers fast; delegate heavy or blocking work to C++ APIs or async patterns outside the script lock.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md321"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md339"></a>
 Application</h2>
 <p>Mantis exposes a global object <span class="tt">app</span> that provides access to the following properties. Despite them being both <span class="tt">READ</span> and <span class="tt">WRITE</span>, note that some of these properties are evaluated only once when initializing, as such, update to the values will not have any impact.</p><ul>
 <li><span class="tt">app.host</span>:Get HTTP server host, by default <span class="tt">0.0.0.0</span>.</li>
@@ -145,7 +146,7 @@ Application</h2>
 <li><span class="tt">app.rt()</span>: Realtime change notifications (<span class="tt">notifyChange</span>).</li>
 <li><span class="tt">app.loadScript(path)</span>: Load an additional script relative to <span class="tt">scriptsDir</span>.</li>
 </ul>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md322"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md340"></a>
 Settings</h3>
 <p><span class="tt">app.settings()</span> reads and writes the same configuration record as the admin dashboard (<b>Settings</b> at <span class="tt">/mb/settings</span>) and <span class="tt">PATCH /api/v1/sys/settings/config</span>. SMTP changes take effect on the mailer immediately. See <a href="api.md#smtp">SMTP</a> for field names, TLS modes, and the password mask.</p>
 <div class="fragment"><div class="line">app.settings().set(&quot;smtp&quot;, JSON.stringify({</div>
@@ -162,7 +163,7 @@ Settings</h3>
 <div class="line">// Pass that mask, or omit password, to keep the stored secret.</div>
 <div class="line">// Pass &quot;&quot; to clear it.</div>
 </div><!-- fragment --><p><span class="tt">MB_DISABLE_CONFIG_MUTATIONS</span> blocks dashboard and PATCH writes. <span class="tt">app.settings().set</span> still persists, because the script runs inside the server.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md323"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md341"></a>
 MbDatabase</h2>
 <p>The <span class="tt">DatabaseUnit</span> object returned from the <span class="tt">app.db()</span> method exposes the following methods and properties: </p><div class="fragment"><div class="line">const db = app.db() // Get db unit instance</div>
 </div><!-- fragment --><ul>
@@ -179,7 +180,7 @@ MbDatabase</h2>
 <div class="line">const r = db.query(&quot;SELECT * FROM mb_settings WHERE id = :id&quot;, { id: &quot;12509202836555480207&quot; });</div>
 <div class="line">// db.query(&quot;SELECT * FROM __settings WHERE id = :id &amp;&amp; updated = :updated&quot;, { id: &quot;12509202836555480207&quot; }, { updated: &quot;2025-10-24 01:32:49&quot; });</div>
 <div class="line">console.log(&quot;Settings:  &quot;, r.id); // `r` may be null if not found.</div>
-</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md324"></a>
+</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md342"></a>
 Session</h3>
 <p>The session method returns an instance that exposes the following methods and properties: </p><div class="fragment"><div class="line">const sess = db.session() // Lease a session for executing db actions</div>
 </div><!-- fragment --><ul>
@@ -197,7 +198,7 @@ Session</h3>
 <li><span class="tt">sess.getBackendName</span></li>
 <li><span class="tt">sess.emptyBlob</span></li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md325"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md343"></a>
 MbRouter</h2>
 <p>The router instance allows binding handlers and optional middlewares to given routes from JavaScript.</p><ul>
 <li><span class="tt">app.router().addRoute(method, path, handler, [middlewares])</span>: Create a route for a given HTTP method, on a given <em>path</em> with the given handler function with optional middleware functions.</li>
@@ -234,7 +235,7 @@ MbRouter</h2>
 <div class="line"> </div>
 <div class="line">// Permanent redirect allowing several methods</div>
 <div class="line">app.router().redirect(&quot;/old/upload&quot;, &quot;/test&quot;, 301, [&quot;GET&quot;, &quot;POST&quot;])</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md326"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md344"></a>
 Requests</h2>
 <p>To add a new request endpoint in JS, Mantis exposes a <span class="tt">addRoute</span> method having the following signature:</p>
 <div class="fragment"><div class="line">app.router().addRoute(method, path, function_handler) </div>
@@ -259,7 +260,7 @@ Requests</h2>
 <div class="line">}) </div>
 </div><!-- fragment --><p>To access the request metadata as well as set response metadata, the handler or middleware method passes in two arguments, the request object (shown as <span class="tt">req</span> above) and the response object (shown as <span class="tt">res</span> above).</p>
 <p>The <span class="tt">req</span> object maps to <span class="tt">MbRequest</span> and <span class="tt">res</span> maps to <span class="tt">MbResponse</span> class in C++.</p>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md327"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md345"></a>
 Middlewares</h3>
 <p>Middlewares in Mantis carries the same function signature as the request handler with just one tiny difference. The middlewares return a <span class="tt">bool</span> type, indicating whether or not the middleware executed successfully. That is;</p><ul>
 <li>Return <span class="tt">true</span>: Middleware execution succeeded, proceed to the next handler and or handler.</li>
@@ -282,7 +283,7 @@ Middlewares</h3>
 </div><!-- fragment --><blockquote class="doxtable">
 <p>Warning Note that, middlewares are executed from the first to the last in that order. That is, <span class="tt">app.router().addRoute(...., middleware_1, middleware_2, function(req, res){ return true}, ...)</span> executing from <span class="tt">middleware_1</span> to <span class="tt">middleware_n</span> the finally invoking the handler. </p>
 </blockquote>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md328"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md346"></a>
 MbRequest Methods/Properties</h3>
 <ul>
 <li><span class="tt">req.hasHeader("Authorization")</span>: return true/false</li>
@@ -304,7 +305,7 @@ MbRequest Methods/Properties</h3>
 <li><span class="tt">req.get("key")</span>: Get a value from the context store given the <span class="tt">key</span>.</li>
 <li><span class="tt">req.getOr("key", "default value")</span>: Returns a value if <span class="tt">key</span> is in the context store else the default value.</li>
 </ul>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md329"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md347"></a>
 MbResponse Methods/Properties</h3>
 <ul>
 <li><span class="tt">res.hasHeader("Authorization")</span>: Check if a header <span class="tt">key</span> exists in the request header. Returns true or false.</li>
@@ -326,7 +327,7 @@ MbResponse Methods/Properties</h3>
 - &lt;tt&gt;res.body = \"Some Data\"&lt;/tt&gt;
 - &lt;tt&gt;res.body&lt;/tt&gt; -&gt; returns &lt;tt&gt;Some Data&lt;/tt&gt;
 
-@subsection autotoc_md330 Middlewares (C++ factories)
+@subsection autotoc_md348 Middlewares (C++ factories)
 
 The global &lt;tt&gt;middlewares&lt;/tt&gt; object exposes C++ middleware factories. Each factory returns a JS function with signature &lt;tt&gt;(req, res) =\&gt; bool&lt;/tt&gt; that runs under the script mutex:
 
@@ -352,7 +353,7 @@ app.router().get("/api/v1/custom/protected", handler,
 </span></li>
 </ul>
 <p><span class="tt"></span></p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md331"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md349"></a>
 <span class="tt">Utils (utility functions)</span></h2>
 <p><span class="tt">
 Mantis exposes an object <span class="tt">utils</span> which has the following utility functions.</p><ul>

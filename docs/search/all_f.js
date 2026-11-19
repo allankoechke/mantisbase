@@ -4,7 +4,7 @@ var searchData=
   ['levels_1',['Log Levels',['../docs_rest_api.html#autotoc_md55',1,'']]],
   ['library_2',['As a Static or Shared Library',['../docs_embedding.html#autotoc_md182',1,'']]],
   ['lifecycle_3',['Application lifecycle',['../docs_embedding.html#autotoc_md184',1,'']]],
-  ['limitations_4',['Limitations',['../docs_rest_api_rules.html#autotoc_md298',1,'Expression Limitations'],['../docs_docker.html#autotoc_md160',1,'Limitations'],['../docs_file.html#autotoc_md224',1,'Remaining Limitations']]],
+  ['limitations_4',['Limitations',['../docs_rest_api_rules.html#autotoc_md316',1,'Expression Limitations'],['../docs_docker.html#autotoc_md160',1,'Limitations'],['../docs_file.html#autotoc_md224',1,'Remaining Limitations']]],
   ['limits_5',['Upload Limits',['../docs_file.html#autotoc_md222',1,'']]],
   ['line_20arguments_6',['Using Command-Line Arguments',['../docs_embedding.html#autotoc_md187',1,'']]],
   ['line_20usage_7',['Command Line Usage',['../docs_cli.html',1,'']]],
@@ -32,9 +32,10 @@ var searchData=
   ['loginotpemailtext_29',['loginOtpEmailText',['../classmb_1_1MbMailer.html#a51333ecaa8ed951bd5dd0a23143a948f',1,'mb::MbMailer']]],
   ['loginwithotp_30',['loginWithOtp',['../classmb_1_1MbAuth.html#aaad3b4fd20ea77c584e65c3f711a0741',1,'mb::MbAuth']]],
   ['logout_31',['Logout',['../docs_auth_api.html#autotoc_md105',1,'']]],
-  ['logs_32',['logs',['../classmb_1_1MantisBase.html#ada0fd2fae8f0faff23ff69234e8cb3db',1,'mb::MantisBase']]],
-  ['logs_20endpoint_33',['Logs Endpoint',['../docs_rest_api.html#autotoc_md51',1,'']]],
-  ['logs_5fbindings_2ecpp_34',['logs_bindings.cpp',['../logs__bindings_8cpp.html',1,'']]],
-  ['logsdb_35',['logsDb',['../classmb_1_1MbLogger.html#ae8091914fe59720454c9bd69a009227a',1,'mb::MbLogger']]],
-  ['lookupbyhash_36',['lookupByHash',['../classmb_1_1MbApiKeyMgr.html#a1fe5b786d15338a43289699f75f9328e',1,'mb::MbApiKeyMgr']]]
+  ['logs_32',['Logs',['../docs_python.html#autotoc_md260',1,'']]],
+  ['logs_33',['logs',['../classmb_1_1MantisBase.html#ada0fd2fae8f0faff23ff69234e8cb3db',1,'mb::MantisBase']]],
+  ['logs_20endpoint_34',['Logs Endpoint',['../docs_rest_api.html#autotoc_md51',1,'']]],
+  ['logs_5fbindings_2ecpp_35',['logs_bindings.cpp',['../logs__bindings_8cpp.html',1,'']]],
+  ['logsdb_36',['logsDb',['../classmb_1_1MbLogger.html#ae8091914fe59720454c9bd69a009227a',1,'mb::MbLogger']]],
+  ['lookupbyhash_37',['lookupByHash',['../classmb_1_1MbApiKeyMgr.html#a1fe5b786d15338a43289699f75f9328e',1,'mb::MbApiKeyMgr']]]
 ];

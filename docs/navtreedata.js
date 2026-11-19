@@ -47,6 +47,7 @@ var NAVTREE =
     [ "Handling Files", "docs_file.html", null ],
     [ "Health Check", "docs_healthcheck.html", null ],
     [ "Setting Up MantisBase", "docs_setup.html", null ],
+    [ "Python Bindings", "docs_python.html", null ],
     [ "API Access Rules", "docs_rest_api_rules.html", null ],
     [ "Scripting", "docs_scripting.html", null ],
     [ "Namespaces", "namespaces.html", [
@@ -86,8 +87,8 @@ var NAVTREEINDEX =
 "classmb_1_1MbEntity.html#a310a01fa3c546810098b95f47b914e6a",
 "classmb_1_1MbFilesMgr.html#aa74850be9b5cc31927c2241361811176",
 "classmb_1_1MbResponse.html#a518fa59a9cb8f0d138058f89600f0506",
-"entity__schema_8cpp.html",
-"namespacemb.html#ae4d3d9830d695badbaa82fec75d2be94"
+"entity__routes__handlers_8cpp.html",
+"namespacemb.html#ae3d330dc89f3e4aa4ca7205b02feecaf"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

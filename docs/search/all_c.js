@@ -19,7 +19,7 @@ var searchData=
   ['init_16',['init',['../classmb_1_1MbLogDatabase.html#af1255a1a94eca5f3cb6d949487567782',1,'mb::MbLogDatabase::init()'],['../classmb_1_1MbRealtimeDB.html#a13a81f7e661ba8929c6da044eacc27f0',1,'mb::MbRealtimeDB::init()'],['../classmb_1_1MbRouter.html#adaeeb7ce58da49efb7c6e0e032c0c26d',1,'mb::MbRouter::init()']]],
   ['initdb_17',['initDb',['../classmb_1_1MbLogger.html#af58a6c1c45b92302eadfac956880ab4e',1,'mb::MbLogger']]],
   ['insertlog_18',['insertLog',['../classmb_1_1MbLogDatabase.html#af184b830558239360e230ee83206f59c',1,'mb::MbLogDatabase']]],
-  ['installation_19',['Installation',['../index.html#autotoc_md249',1,'']]],
+  ['installation_19',['Installation',['../index.html#autotoc_md267',1,'']]],
   ['installation_20options_20',['Installation Options',['../docs_setup.html#autotoc_md239',1,'']]],
   ['installation_2emd_21',['installation.md',['../installation_8md.html',1,'']]],
   ['int_5fprecision_2ecpp_22',['int_precision.cpp',['../int__precision_8cpp.html',1,'']]],
