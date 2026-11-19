@@ -207,6 +207,7 @@ App</h2>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md249"></a>
 Router</h2>
 <p>Paths use <span class="tt">{param}</span> placeholders. Pass a handler, or omit it and use the method as a decorator. <span class="tt">middlewares</span> is a callable, a <span class="tt">Middleware</span>, or a list of either.</p>
+<p>A handler may take <span class="tt">(req, res)</span>, <span class="tt">(req)</span>, or no arguments. A return value other than <span class="tt">None</span> is sent as JSON with status 200. Call <span class="tt">res.json(status, data)</span> when the status is not 200, or when the handler writes the response itself; that return should stay <span class="tt">None</span>.</p>
 <p>A Python middleware is <span class="tt">(req, res) -&gt; bool</span>. Return <span class="tt">True</span> or <span class="tt">None</span> to continue. Return <span class="tt">False</span> after writing the response to stop the chain. An exception becomes HTTP 500 <span class="tt">{"error": "..."}</span> and stops the chain.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -224,7 +225,11 @@ Router</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">sse</span>  </td><td class="markdownTableBodyNone"><span class="tt">Sse</span> manager.  </td></tr>
 </table>
-<div class="fragment"><div class="line"><span class="preprocessor">@app.router.put</span>(<span class="stringliteral">&quot;/notes/{id}&quot;</span>, middlewares=[</div>
+<div class="fragment"><div class="line"><span class="preprocessor">@app.router.get(&quot;/hello&quot;)</span></div>
+<div class="line"><span class="keyword">def </span>hello():</div>
+<div class="line">    <span class="keywordflow">return</span> {<span class="stringliteral">&quot;message&quot;</span>: <span class="stringliteral">&quot;Hello, World!&quot;</span>}</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">@app.router.put</span>(<span class="stringliteral">&quot;/notes/{id}&quot;</span>, middlewares=[</div>
 <div class="line">    mantisbase.middlewares.get_auth_token(),</div>
 <div class="line">    mantisbase.middlewares.require_admin(),</div>
 <div class="line">])</div>
