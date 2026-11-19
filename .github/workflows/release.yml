@@ -78,6 +78,10 @@ jobs:
       channel: ${{ steps.meta.outputs.channel }}
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/download-artifact@v4
         with:
           pattern: mantisbase_${{ github.ref_name }}*.zip
@@ -101,11 +105,34 @@ jobs:
             echo "channel=" >> "$GITHUB_OUTPUT"
           fi
 
+      # GitHub's generated notes only list merged pull requests. These tags are
+      # direct commits, so that body is only the compare link. Prepend the
+      # commit subjects; generate_release_notes still appends the compare link.
+      - name: Build release notes
+        id: notes
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          prev=$(git describe --tags --abbrev=0 --match 'v*' "${tag}^" 2>/dev/null || true)
+          delimiter="MB_RELEASE_NOTES_EOF_$(date +%s)"
+          {
+            echo "body<<${delimiter}"
+            echo "## Changes"
+            echo
+            if [ -n "$prev" ]; then
+              git log --pretty=format:'- %s (%h)' "${prev}..${tag}"
+            else
+              git log -1 --pretty=format:'- %s (%h)' "${tag}"
+            fi
+            echo
+            echo "${delimiter}"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
+          body: ${{ steps.notes.outputs.body }}
           generate_release_notes: true
           prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
           files: ./artifacts/*
