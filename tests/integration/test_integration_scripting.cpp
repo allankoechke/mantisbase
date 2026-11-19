@@ -120,6 +120,96 @@ TEST_F(IntegrationScriptingTest, JsRedirectSupportsPermanent301) {
     EXPECT_EQ(res->header("Location"), "/api/v1/test/scripting/shorthand-get");
 }
 
+TEST_F(IntegrationScriptingTest, DbSessionTransactionCommitsAndRollsBack) {
+    const auto res = client->Get("/api/v1/test/scripting/db");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200) << res->body;
+
+    const auto body = parseBody(*res);
+    EXPECT_TRUE(body.value("connected", false));
+    EXPECT_EQ(body.value("backend", ""), "sqlite3");
+    EXPECT_TRUE(body.value("committed", false));
+    EXPECT_TRUE(body.value("rolledBack", false));
+    EXPECT_TRUE(body.value("lastQueryHasInsert", false));
+}
+
+TEST_F(IntegrationScriptingTest, HelperBindingsReturnValues) {
+    const auto res = client->Get("/api/v1/test/scripting/helpers");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200) << res->body;
+
+    const auto body = parseBody(*res);
+    for (const auto &key : {"timeId", "readable", "shortId", "env", "password", "extension",
+                            "contentType", "flag", "filename", "logged"}) {
+        EXPECT_TRUE(body.value(key, false)) << key;
+    }
+}
+
+TEST_F(IntegrationScriptingTest, MailerBindingsUseObjects) {
+    const auto res = client->Get("/api/v1/test/scripting/mailer");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200) << res->body;
+
+    const auto body = parseBody(*res);
+    for (const auto &key : {"configured", "maskKept", "sent", "template", "allowed"}) {
+        EXPECT_TRUE(body.value(key, false)) << key;
+    }
+    EXPECT_TRUE(body.value("appliedPort", false));
+    EXPECT_FALSE(mantis().mailer().isConfigured());
+}
+
+TEST_F(IntegrationScriptingTest, AuthKeyAndOAuthBindingsUseObjects) {
+    const auto res = client->Get("/api/v1/test/scripting/auth");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200) << res->body;
+
+    const auto body = parseBody(*res);
+    for (const auto &key : {"tokenVerified", "timeout", "otpSent", "emailSent", "resetSent", "quiet",
+                            "keyPrefix", "keyListed", "adminKey", "google", "providersArray"}) {
+        EXPECT_TRUE(body.value(key, false)) << key;
+    }
+    EXPECT_FALSE(mantis().mailer().isConfigured());
+}
+
+TEST_F(IntegrationScriptingTest, FileBindingsAcceptObjects) {
+    const auto res = client->Get("/api/v1/test/scripting/files");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200) << res->body;
+
+    const auto body = parseBody(*res);
+    for (const auto &key : {"dir", "exists", "missing", "removed", "canonical"}) {
+        EXPECT_TRUE(body.value(key, false)) << key;
+    }
+}
+
+TEST_F(IntegrationScriptingTest, RealtimeHooksAndBroadcast) {
+    const auto res = client->Get("/api/v1/test/scripting/realtime");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200) << res->body;
+    EXPECT_TRUE(parseBody(*res).value("hooked", false));
+}
+
+TEST_F(IntegrationScriptingTest, EnvGateBlocksWhenVariableIsSet) {
+    const auto res = client->Get("/api/v1/test/scripting/env-blocked");
+    ASSERT_TRUE(res);
+    EXPECT_EQ(res->status, 503);
+    EXPECT_EQ(res->body.find("\"reached\":true"), std::string::npos);
+}
+
+TEST_F(IntegrationScriptingTest, EnvGateAllowsWhenVariableIsUnset) {
+    const auto res = client->Get("/api/v1/test/scripting/env-open");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200) << res->body;
+    EXPECT_TRUE(parseBody(*res).value("reached", false));
+}
+
+TEST_F(IntegrationScriptingTest, RateLimitBindingLetsDisabledHarnessThrough) {
+    const auto res = client->Get("/api/v1/test/scripting/rate-limit");
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res->status, 200) << res->body;
+    EXPECT_TRUE(parseBody(*res).value("reached", false));
+}
+
 #else
 
 TEST(ScriptingDisabledAtCompileTime, Skipped) {

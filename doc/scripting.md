@@ -154,7 +154,8 @@ const db = app.db() // Get db unit instance
 ```
 - `db.connected`: Property to read the connection state to the database.
 - `db.session()`: Request a database session object which is used for executing SQL queries and other database operations. Returns an instance of `soci::session` object.
-- `db.query(sql_query, [bind objects])`: Useful for executing SQL queries on database directly. Expects the first argument to a valid SQL query followed by optional values to bind if any.
+- `db.query(sql_query, [bind objects])`: Execute SQL on a newly leased session. The first argument is the SQL, followed by optional bind objects.
+- `db.queryOn(session, sql_query, [bind objects])`: Execute SQL on a session you already leased. Use this inside `begin` / `commit` / `rollback`. `db.query` cannot see that transaction, because it leases a different connection.
 
 ```js
 const db = app.db();
@@ -176,9 +177,21 @@ const sess = db.session() // Lease a session for executing db actions
 - `sess.close()`: Close a specific database session. Note that, if the poolSize is greater than 1, this only closes the _sess_ we borrowed earlier.
 - `sess.reconnect()`: Reconnect the session instance.
 - `sess.connected`: Property to get session instance connection status.
-- `sess.begin`
-- `sess.commit`
-- `sess.rollback`
+- `sess.begin()`
+- `sess.commit()`
+- `sess.rollback()`
+
+```js
+const sess = db.session();
+db.queryOn(sess, "CREATE TABLE IF NOT EXISTS notes (id TEXT PRIMARY KEY, body TEXT)");
+sess.begin();
+db.queryOn(sess, "INSERT INTO notes (id, body) VALUES (:id, :body)", { id: "1", body: "kept" });
+sess.commit();
+
+sess.begin();
+db.queryOn(sess, "INSERT INTO notes (id, body) VALUES (:id, :body)", { id: "2", body: "dropped" });
+sess.rollback();
+```
 - `sess.getQuery`
 - `sess.getLastQuery`
 - `sess.getLastQueryContext`

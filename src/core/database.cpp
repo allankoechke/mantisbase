@@ -556,24 +556,22 @@ namespace mb {
         }
     }
 
-    duk_ret_t MbDatabase::query(duk_context *ctx) const {
-        // Get number of arguments
+    duk_ret_t MbDatabase::runScriptQuery(duk_context *ctx, const std::shared_ptr<soci::session> &sql, const int sql_arg) const {
         const int nargs = duk_get_top(ctx);
 
-        if (nargs < 1) {
-            mbApp.logger().critical("MbDatabase", "Invalid Arguments", "[JS] Expected at least 1 argument (query string)");
-            duk_error(ctx, DUK_ERR_TYPE_ERROR, "Expected at least 1 argument (query string)");
+        if (nargs <= sql_arg) {
+            mbApp.logger().critical("MbDatabase", "Invalid Arguments", "[JS] Expected a query string");
+            duk_error(ctx, DUK_ERR_TYPE_ERROR, "Expected a query string");
             return DUK_RET_TYPE_ERROR;
         }
 
-        // First argument is the SQL query
-        const char *query = duk_require_string(ctx, 0);
+        const char *query = duk_require_string(ctx, sql_arg);
 
         // Collect remaining arguments (bind parameters)
         soci::values vals;
 
         try {
-            for (int i = 1; i < nargs; i++) {
+            for (int i = sql_arg + 1; i < nargs; i++) {
                 if (!duk_is_object(ctx, i)) {
                     mbApp.logger().critical("MbDatabase", "Invalid Arguments", "[JS] Arguments after query must be objects.");
                     duk_error(ctx, DUK_ERR_TYPE_ERROR, "Arguments after query must be objects");
@@ -628,7 +626,7 @@ namespace mb {
                         mbApp.logger().trace("MbDatabase", "Value Binding", fmt::format("[JS] JSON Value: `{}`", value.dump()));
                         vals.set(key, value);
                     } else {
-                        auto err = std::format("Could not cast type at {} to DB supported types.", (i - 1));
+                        auto err = std::format("Could not cast type at {} to DB supported types.", (i - sql_arg));
                         mbApp.logger().critical("MbDatabase", "Value Casting Error", fmt::format("[JS] Casting Value > {}", err));
                         duk_error(ctx, DUK_ERR_TYPE_ERROR, err.c_str());
                         return DUK_RET_TYPE_ERROR;
@@ -640,15 +638,11 @@ namespace mb {
                                   fmt::format("[JS] Getting Binding Values Failed: Why? {}", e.what()));
         }
 
-        // Get SQL Session
-        auto sql = session();
+        mbApp.logger().trace("MbDatabase", "Value Binding", fmt::format("[JS] soci::value binding? {}", nargs - sql_arg - 1));
 
-        mbApp.logger().trace("MbDatabase", "Value Binding", fmt::format("[JS] soci::value binding? {}", nargs - 1));
-
-        // Execute SQL Statement
         soci::row data_row;
-        soci::statement st = nargs < 2 // If only the query is provided, no binding values
-                                 ? (sql->prepare << query, soci::into(data_row)) // Execute only the query
+        soci::statement st = nargs < sql_arg + 2
+                                 ? (sql->prepare << query, soci::into(data_row))
                                  : (sql->prepare << query, soci::use(vals), soci::into(data_row));
         st.execute(); // Execute statement
 
@@ -670,7 +664,26 @@ namespace mb {
         std::string results_str = results.size() == 1 ? results[0].dump() : results.dump();
         duk_push_string(ctx, results_str.c_str());
         duk_json_decode(ctx, -1);
-        return 1; // Return the object
+        return 1;
+    }
+
+    duk_ret_t MbDatabase::query(duk_context *ctx) const {
+        return runScriptQuery(ctx, session(), 0);
+    }
+
+    duk_ret_t MbDatabase::queryOn(duk_context *ctx) const {
+        if (duk_get_top(ctx) < 2) {
+            duk_error(ctx, DUK_ERR_TYPE_ERROR, "queryOn expects a session and a query string");
+            return DUK_RET_TYPE_ERROR;
+        }
+
+        const auto sql = dukglue::types::DukType<std::shared_ptr<soci::session>>::read<
+            std::shared_ptr<soci::session>>(ctx, 0);
+        if (!sql) {
+            duk_error(ctx, DUK_ERR_TYPE_ERROR, "queryOn expected a database session");
+            return DUK_RET_TYPE_ERROR;
+        }
+        return runScriptQuery(ctx, sql, 1);
     }
 #endif
 } // namespace mb

@@ -202,6 +202,12 @@ interface MbDatabase {
      * @example db.query("SELECT * FROM __settings WHERE id = :id", { id: "123" })
      */
     query(sql: string, ...binds: MbDbBinds[]): MbQueryResult;
+    /**
+     * Execute `sql` on a session from `session()`.
+     * `begin` / `commit` / `rollback` apply to this call.
+     * `query` leases a different connection and stays outside that transaction.
+     */
+    queryOn(session: MbDbSession, sql: string, ...binds: MbDbBinds[]): MbQueryResult;
 }
 
 /** Leased database session (`soci::session` in C++). */

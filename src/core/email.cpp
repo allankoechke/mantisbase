@@ -47,7 +47,7 @@ mb::MbSmtpConfig mb::MbSmtpConfig::fromJson(const json &smtp) {
     MbSmtpConfig cfg;
     if (smtp.contains("host") && smtp["host"].is_string())
         cfg.host = trim(smtp["host"].get<std::string>());
-    if (smtp.contains("port") && smtp["port"].is_number_integer())
+    if (smtp.contains("port") && smtp["port"].is_number())
         cfg.port = smtp["port"].get<int>();
     if (smtp.contains("user") && smtp["user"].is_string())
         cfg.user = smtp["user"].get<std::string>();
