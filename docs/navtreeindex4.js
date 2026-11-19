@@ -1,5 +1,7 @@
 var NAVTREEINDEX4 =
 {
+"entity__routes_8h.html":[15,0,1,0,0,1,3],
+"entity__routes_8h_source.html":[15,0,1,0,0,1,3],
 "entity__routes__handlers_8cpp.html":[15,0,2,0,1,3],
 "entity__schema_8cpp.html":[15,0,2,0,1,4],
 "entity__schema_8h.html":[15,0,1,0,0,1,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX4 =
 "namespacemb.html#ad67ff06c25bb2ccdd5f52404e51405f9":[13,0,0,82],
 "namespacemb.html#ad854a7305442a83e62112ec6878c4bbe":[13,0,0,81],
 "namespacemb.html#ad8b7a8765ebd2eb5a0e48da2fbb84219":[13,0,0,52],
-"namespacemb.html#adce5fd59ea95a90dc5d62a3caed135ca":[13,0,0,80],
-"namespacemb.html#adecfee123411cd020f142e490622a161":[13,0,0,78],
-"namespacemb.html#ae2c02d2bfcbe8caca529269dd03d5e7d":[13,0,0,72]
+"namespacemb.html#adce5fd59ea95a90dc5d62a3caed135ca":[13,0,0,80]
 };
