@@ -102,31 +102,6 @@ namespace mb {
         /** @return AES key material used to encrypt stored OAuth client secrets. */
         [[nodiscard]] std::string getEncryptionKey() const;
 
-#ifdef MB_SCRIPTING_ENABLED
-        [[nodiscard]] std::string authorizeUrlJson(const std::string &entity_name,
-                                                   const std::string &provider_name,
-                                                   const std::string &redirect_uri) const;
-        [[nodiscard]] std::string handleCallbackJson(const std::string &entity_name,
-                                                     const std::string &provider_name,
-                                                     const std::string &code,
-                                                     const std::string &state) const;
-        [[nodiscard]] std::string linkAccountJson(const std::string &entity_name,
-                                                  const std::string &user_id,
-                                                  const std::string &provider_name,
-                                                  const std::string &code,
-                                                  const std::string &state) const;
-        [[nodiscard]] std::string linkedAccountsJson(const std::string &entity_name,
-                                                     const std::string &user_id) const;
-        [[nodiscard]] std::string providersJson(const std::string &entity_name);
-        /** @p provider_json is the provider object (`name`, `client_id`, `client_secret`, ...). */
-        [[nodiscard]] std::string addProviderJson(const std::string &provider_json) const;
-        [[nodiscard]] std::string updateProviderJson(const std::string &provider_id,
-                                                     const std::string &updates_json) const;
-        [[nodiscard]] std::string listProvidersJson() const;
-        [[nodiscard]] std::string enableProviderJson(const std::string &entity_name,
-                                                     const std::string &provider_id) const;
-#endif
-
     private:
         static json discoverOIDC(const std::string &discovery_url);
 

@@ -87,18 +87,15 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
         /**
-         * @p permissions_json is a JSON array, or empty for none.
+         * @p permissions is an array, or null for none.
          * @p expires_at is empty when the key does not expire.
-         * Returns JSON including the one-time `key`.
+         * The returned object includes the one-time `key`.
          */
-        [[nodiscard]] std::string createJson(const std::string &entity_name, const std::string &user_id,
-                                             const std::string &label, const std::string &permissions_json,
-                                             const std::string &expires_at) const;
-        [[nodiscard]] std::string listJson(const std::string &entity_name, const std::string &user_id) const;
-        [[nodiscard]] std::string listAdminJson() const;
-        [[nodiscard]] std::string createAdminJson(const std::string &user_id, const std::string &label,
-                                                  const std::string &permissions_json,
-                                                  const std::string &expires_at) const;
+        [[nodiscard]] json createJson(const std::string &entity_name, const std::string &user_id,
+                                      const std::string &label, const json &permissions,
+                                      const std::string &expires_at) const;
+        [[nodiscard]] json createAdminJson(const std::string &user_id, const std::string &label,
+                                           const json &permissions, const std::string &expires_at) const;
 #endif
     };
 } // mb

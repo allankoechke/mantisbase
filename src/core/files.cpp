@@ -87,15 +87,14 @@ namespace mb {
         return {};
     }
 
-    void MbFilesMgr::removeFilesJson(const std::string &entity_name, const std::string &files_json) const {
-        const auto listed = json::parse(files_json);
-        if (!listed.is_array())
-            throw MbException(400, "files must be a JSON array of filenames");
+    void MbFilesMgr::removeFilesJson(const std::string &entity_name, const json &files) const {
+        if (!files.is_array())
+            throw MbException(400, "files must be an array of filenames");
         std::vector<std::string> names;
-        names.reserve(listed.size());
-        for (const auto &item : listed) {
+        names.reserve(files.size());
+        for (const auto &item : files) {
             if (!item.is_string())
-                throw MbException(400, "files must be a JSON array of filenames");
+                throw MbException(400, "files must be an array of filenames");
             names.push_back(item.get<std::string>());
         }
         removeFiles(entity_name, names);

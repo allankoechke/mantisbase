@@ -535,27 +535,23 @@ std::string mb::MbMailer::hideEmail(const std::string &email) {
 }
 
 #ifdef MB_SCRIPTING_ENABLED
-std::string mb::MbMailer::configJson() const {
-    return json{
+mb::json mb::MbMailer::configJson() const {
+    return {
         {"host", m_config.host},
         {"port", m_config.port},
         {"user", m_config.user},
         {"password", m_config.password.empty() ? "" : "********"},
         {"from", m_config.from_address},
         {"tls", m_config.use_tls},
-    }.dump();
+    };
 }
 
-void mb::MbMailer::configureJson(const std::string &smtp_json) {
-    auto smtp = json::parse(smtp_json);
+void mb::MbMailer::configureJson(const mb::json &smtp_in) {
+    json smtp = smtp_in;
     if (smtp.contains("password") && smtp["password"].is_string()
         && smtp["password"].get<std::string>() == "********")
         smtp["password"] = m_config.password;
     configure(MbSmtpConfig::fromJson(smtp));
-}
-
-void mb::MbMailer::applySettingsJson(const std::string &configs_json) {
-    applySettings(json::parse(configs_json));
 }
 
 bool mb::MbMailer::sendMessage(const std::string &to, const std::string &subject,
@@ -568,23 +564,21 @@ bool mb::MbMailer::sendMessage(const std::string &to, const std::string &subject
     return send(message);
 }
 
-std::string mb::MbMailer::loadTemplateJson(const std::string &template_name,
-                                           const std::string &variables_json) const {
+std::string mb::MbMailer::loadTemplateJson(const std::string &template_name, const mb::json &variables) const {
     std::unordered_map<std::string, std::string> values;
-    if (!variables_json.empty()) {
-        const auto object = json::parse(variables_json);
-        if (!object.is_object())
-            throw MbException(400, "template variables must be a JSON object of strings");
-        for (auto it = object.begin(); it != object.end(); ++it) {
+    if (!variables.is_null()) {
+        if (!variables.is_object())
+            throw MbException(400, "template variables must be an object of strings");
+        for (auto it = variables.begin(); it != variables.end(); ++it) {
             if (!it.value().is_string())
-                throw MbException(400, "template variables must be a JSON object of strings");
+                throw MbException(400, "template variables must be an object of strings");
             values.emplace(it.key(), it.value().get<std::string>());
         }
     }
     return loadTemplate(template_name, values);
 }
 
-std::string mb::MbMailer::sentMessagesJson() const {
+mb::json mb::MbMailer::sentMessagesJson() const {
     json out = json::array();
     for (const auto &message : m_sent_messages) {
         out.push_back({
@@ -594,7 +588,7 @@ std::string mb::MbMailer::sentMessagesJson() const {
             {"text", message.body_text},
         });
     }
-    return out.dump();
+    return out;
 }
 #endif
 

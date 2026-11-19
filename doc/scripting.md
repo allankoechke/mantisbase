@@ -81,69 +81,69 @@ const smtp = JSON.parse(app.settings().get("smtp"));
 
 ### Mailer
 
-`app.mailer()` sends mail through the same SMTP settings as the dashboard. `config()` returns a JSON string and masks a stored password as `"********"`. Passing that mask back to `configure` keeps the stored password. `send` delivers one message. Mock hosts (`mock`, `localhost:0`) capture it in `sentMessages()` instead of opening a connection.
+`app.mailer()` sends mail through the same SMTP settings as the dashboard. `config()` returns an object and masks a stored password as `"********"`. Passing that mask back to `configure` keeps the stored password. `send` delivers one message. Mock hosts (`mock`, `localhost:0`) capture it in `sentMessages()` instead of opening a connection.
 
 ```js
-app.mailer().configure(JSON.stringify({
+app.mailer().configure({
     host: "smtp.example.com",
     port: 587,
     user: "mailer",
     password: "s3cret",
     from: "app@example.com",
     tls: true
-}));
+});
 
 app.mailer().send("user@example.com", "Hello", "<p>Hello</p>", "Hello");
 app.mailer().sendTest("user@example.com");
 ```
 
-`checkRateLimit(email, maxPerHour)` is required with both arguments. `loadTemplate(name, variablesJson)` takes a JSON object of strings, or `""` when there are no variables. `applySettings(configsJson)` reads the `smtp` object from a settings document.
+`checkRateLimit(email, maxPerHour)` is required with both arguments. `loadTemplate(name, variables)` takes an object of strings, or `null` when there are no variables. `applySettings(configs)` reads the `smtp` object from a settings document. `settings().get` and `settings().set` still use JSON strings.
 
 ### Auth, API keys, and OAuth
 
-Methods that return JSON give back a string. Parse it with `JSON.parse`.
+`createToken`, `verifyToken`, and `refreshSession` still take and return JSON strings. The mail, sign-in, API key, and OAuth methods take and return objects.
 
 ```js
 const auth = app.auth();
 const token = auth.createToken(JSON.stringify({ id: "user123", table: "users" }), 3600);
 JSON.parse(auth.verifyToken(token));
 
-JSON.parse(auth.requestLoginOtp("users", "user@example.com"));
-JSON.parse(auth.loginWithOtp("users", "user@example.com", "123456"));
+auth.requestLoginOtp("users", "user@example.com");
+const session = auth.loginWithOtp("users", "user@example.com", "123456");
 auth.notifyEmailVerification("users", userId);
-JSON.parse(auth.requestEmailVerification("users", "user@example.com", req.getHeader("Host", "")));
-JSON.parse(auth.confirmEmailVerification("users", token));
-JSON.parse(auth.requestPasswordReset("users", "user@example.com", req.getHeader("Host", "")));
-JSON.parse(auth.confirmPasswordReset("users", token, "new-password"));
-auth.rejectUnverifiedLogin("users", JSON.stringify(user));
+auth.requestEmailVerification("users", "user@example.com", req.getHeader("Host", ""));
+auth.confirmEmailVerification("users", token);
+auth.requestPasswordReset("users", "user@example.com", req.getHeader("Host", ""));
+auth.confirmPasswordReset("users", token, "new-password");
+auth.rejectUnverifiedLogin("users", user);
 ```
 
-`requestLoginOtp`, `requestEmailVerification`, and `requestPasswordReset` return `{ "sent": true }` even when the address is unknown, and they send nothing in that case. They throw when SMTP is not configured.
+`requestLoginOtp`, `requestEmailVerification`, and `requestPasswordReset` return `{ sent: true }` even when the address is unknown, and they send nothing in that case. They throw when SMTP is not configured.
 
-`auth.apiKey()` creates and lists keys. `permissionsJson` is a JSON array, or `""` for none. `expiresAt` is empty when the key does not expire. `create` returns JSON that includes the raw `key` once.
+`auth.apiKey()` creates and lists keys. `permissions` is an array, or `null` for none. `expiresAt` is empty when the key does not expire. `create` returns an object that includes the raw `key` once.
 
 ```js
-const created = JSON.parse(auth.apiKey().create("users", userId, "CI token", "[]", ""));
+const created = auth.apiKey().create("users", userId, "CI token", [], "");
 auth.apiKey().revoke(created.id, "users", userId);
-JSON.parse(auth.apiKey().list("users", userId));
-JSON.parse(auth.apiKey().listAdmin());
-JSON.parse(auth.apiKey().createAdmin(adminId, "Admin token", "", ""));
+auth.apiKey().list("users", userId);
+auth.apiKey().listAdmin();
+auth.apiKey().createAdmin(adminId, "Admin token", null, "");
 ```
 
 `auth.oauth()` configures providers and builds login URLs. The OAuth encryption key is not exposed.
 
 ```js
 const oauth = auth.oauth();
-JSON.parse(oauth.addProvider(JSON.stringify({
+oauth.addProvider({
     name: "google",
     client_id: "...",
     client_secret: "..."
-})));
-JSON.parse(oauth.listProviders());
-JSON.parse(oauth.enableProvider("users", providerId));
-JSON.parse(oauth.authorizeUrl("users", "google", redirectUri));
-JSON.parse(oauth.handleCallback("users", "google", code, state));
-JSON.parse(oauth.providers("users"));
+});
+oauth.listProviders();
+oauth.enableProvider("users", providerId);
+oauth.authorizeUrl("users", "google", redirectUri);
+oauth.handleCallback("users", "google", code, state);
+oauth.providers("users");
 oauth.disableProvider("users", providerId);
 ```
 
@@ -374,7 +374,7 @@ Mantis exposes an object `utils` which has the following utility functions.
 - `dirPath(entity, createIfMissing)`, `filePath(entity, filename)`
 - `getFilePath(entity, filename)` returns the path, or `""` when the file is missing
 - `fileExists(entity, filename)`, `removeFile(entity, filename)`
-- `removeFiles(entity, filesJson)` where `filesJson` is a JSON array of filenames
+- `removeFiles(entity, files)` where `files` is an array of filenames
 - `canonicalPath(path)`, `isCanonical(path)`, `baseDir()`
 
 ### Realtime

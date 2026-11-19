@@ -5,6 +5,7 @@
 #include "../../../include/mantisbase/core/files.h"
 
 #include <dukglue/dukglue.h>
+#include "../../../include/mantisbase/scripting/duk_json.h"
 
 namespace mb {
     void registerFilesBindings(duk_context *ctx) {

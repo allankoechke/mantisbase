@@ -593,46 +593,4 @@ namespace mb {
 
         return token_data;
     }
-
-#ifdef MB_SCRIPTING_ENABLED
-    std::string MbOAuthMgr::authorizeUrlJson(const std::string &entity_name, const std::string &provider_name,
-                                             const std::string &redirect_uri) const {
-        return buildAuthorizeUrl(entity_name, provider_name, redirect_uri).dump();
-    }
-
-    std::string MbOAuthMgr::handleCallbackJson(const std::string &entity_name, const std::string &provider_name,
-                                               const std::string &code, const std::string &state) const {
-        return handleCallback(entity_name, provider_name, code, state).dump();
-    }
-
-    std::string MbOAuthMgr::linkAccountJson(const std::string &entity_name, const std::string &user_id,
-                                            const std::string &provider_name, const std::string &code,
-                                            const std::string &state) const {
-        return linkAccount(entity_name, user_id, provider_name, code, state).dump();
-    }
-
-    std::string MbOAuthMgr::linkedAccountsJson(const std::string &entity_name, const std::string &user_id) const {
-        return getLinkedAccounts(entity_name, user_id).dump();
-    }
-
-    std::string MbOAuthMgr::providersJson(const std::string &entity_name) {
-        return getProviders(entity_name).dump();
-    }
-
-    std::string MbOAuthMgr::addProviderJson(const std::string &provider_json) const {
-        return addProvider(json::parse(provider_json)).dump();
-    }
-
-    std::string MbOAuthMgr::updateProviderJson(const std::string &provider_id, const std::string &updates_json) const {
-        return updateProvider(provider_id, json::parse(updates_json)).dump();
-    }
-
-    std::string MbOAuthMgr::listProvidersJson() const {
-        return listProviders().dump();
-    }
-
-    std::string MbOAuthMgr::enableProviderJson(const std::string &entity_name, const std::string &provider_id) const {
-        return enableProviderForEntity(entity_name, provider_id).dump();
-    }
-#endif
 } // mb

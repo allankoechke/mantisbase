@@ -255,74 +255,74 @@ interface MbAuth {
     refreshSession(oldSessionId: string, entityName: string, userId: string): string;
     /** Session timeout in seconds for `entityName` (or set it when `timeout` is given). */
     sessionTimeoutSeconds(entityName: string, timeout?: number): number;
-    /** Email a one-time sign-in code. Returns JSON `{ "sent": true }`. */
-    requestLoginOtp(entityName: string, email: string): string;
-    /** Exchange a one-time sign-in code for a session. Returns JSON with `token` and `user`. */
-    loginWithOtp(entityName: string, email: string, otp: string): string;
-    /** Throw when the entity requires a verified email and `userJson` is unverified. */
-    rejectUnverifiedLogin(entityName: string, userJson: string): void;
+    /** Email a one-time sign-in code. Returns `{ sent: true }`. */
+    requestLoginOtp(entityName: string, email: string): { sent: boolean };
+    /** Exchange a one-time sign-in code for a session. Returns `{ token, user }`. */
+    loginWithOtp(entityName: string, email: string, otp: string): { token: string; user: any };
+    /** Throw when the entity requires a verified email and `user` is unverified. */
+    rejectUnverifiedLogin(entityName: string, user: any): void;
     /** Email a verification link for an existing account. Missing SMTP is ignored. */
     notifyEmailVerification(entityName: string, userId: string): void;
-    /** Email a verification link. Unknown addresses return `{ "sent": true }` and send nothing. */
-    requestEmailVerification(entityName: string, email: string, requestHost: string): string;
-    /** Mark the account verified. Returns `{ "verified": true }`. */
-    confirmEmailVerification(entityName: string, token: string): string;
-    /** Email a password-reset link. Unknown addresses return `{ "sent": true }` and send nothing. */
-    requestPasswordReset(entityName: string, email: string, requestHost: string): string;
-    /** Set a new password from a live reset link. Returns `{ "reset": true }`. */
-    confirmPasswordReset(entityName: string, token: string, newPassword: string): string;
+    /** Email a verification link. Unknown addresses return `{ sent: true }` and send nothing. */
+    requestEmailVerification(entityName: string, email: string, requestHost: string): { sent: boolean };
+    /** Mark the account verified. Returns `{ verified: true }`. */
+    confirmEmailVerification(entityName: string, token: string): { verified: boolean };
+    /** Email a password-reset link. Unknown addresses return `{ sent: true }` and send nothing. */
+    requestPasswordReset(entityName: string, email: string, requestHost: string): { sent: boolean };
+    /** Set a new password from a live reset link. Returns `{ reset: true }`. */
+    confirmPasswordReset(entityName: string, token: string, newPassword: string): { reset: boolean };
     /** API key manager. */
     apiKey(): MbApiKeys;
     /** OAuth provider and login manager. The encryption key is not exposed. */
     oauth(): MbOAuth;
 }
 
-/** API keys returned by `app.auth().apiKey()`. JSON results are strings. */
+/** API keys returned by `app.auth().apiKey()`. */
 interface MbApiKeys {
     /**
-     * Create an entity key. `permissionsJson` is a JSON array, or `""` for none.
+     * Create an entity key. `permissions` is an array, or `null` for none.
      * `expiresAt` is empty when the key does not expire.
-     * The returned JSON includes the raw `key` once.
+     * The returned object includes the raw `key` once.
      */
-    create(entityName: string, userId: string, label: string, permissionsJson: string, expiresAt: string): string;
+    create(entityName: string, userId: string, label: string, permissions: any[] | null, expiresAt: string): any;
     /** Key metadata for one user. Raw secrets are omitted. */
-    list(entityName: string, userId: string): string;
+    list(entityName: string, userId: string): any[];
     /** Revoke a key owned by `userId`. Pass `""` for `userId` to skip the owner check. */
     revoke(keyId: string, entityName: string, userId: string): boolean;
     /** Revoke any key by id. */
     revokeById(keyId: string): boolean;
     /** Admin key metadata. */
-    listAdmin(): string;
-    /** Create an admin key. The returned JSON includes the raw `key` once. */
-    createAdmin(userId: string, label: string, permissionsJson: string, expiresAt: string): string;
+    listAdmin(): any[];
+    /** Create an admin key. The returned object includes the raw `key` once. */
+    createAdmin(userId: string, label: string, permissions: any[] | null, expiresAt: string): any;
     /** Revoke an admin key by id. */
     revokeAdmin(keyId: string): boolean;
 }
 
-/** OAuth manager returned by `app.auth().oauth()`. JSON results are strings. */
+/** OAuth manager returned by `app.auth().oauth()`. */
 interface MbOAuth {
     /** Authorize URL plus server-side PKCE state. */
-    authorizeUrl(entityName: string, providerName: string, redirectUri: string): string;
+    authorizeUrl(entityName: string, providerName: string, redirectUri: string): any;
     /** Exchange a callback `code` and `state` for a session. */
-    handleCallback(entityName: string, providerName: string, code: string, state: string): string;
+    handleCallback(entityName: string, providerName: string, code: string, state: string): any;
     /** Link an OAuth identity to an authenticated user. */
-    linkAccount(entityName: string, userId: string, providerName: string, code: string, state: string): string;
+    linkAccount(entityName: string, userId: string, providerName: string, code: string, state: string): any;
     /** Unlink a provider from a user. */
     unlinkAccount(entityName: string, userId: string, providerName: string): boolean;
     /** Identities linked to `userId`. */
-    linkedAccounts(entityName: string, userId: string): string;
+    linkedAccounts(entityName: string, userId: string): any[];
     /** Providers enabled for an entity. */
-    providers(entityName: string): string;
-    /** Create a provider from a JSON object (`name`, `client_id`, `client_secret`, ...). */
-    addProvider(providerJson: string): string;
-    /** Patch a provider from a JSON object. */
-    updateProvider(providerId: string, updatesJson: string): string;
+    providers(entityName: string): any[];
+    /** Create a provider (`name`, `client_id`, `client_secret`, ...). */
+    addProvider(provider: any): any;
+    /** Patch a provider. */
+    updateProvider(providerId: string, updates: any): any;
     /** Delete a provider. */
     removeProvider(providerId: string): boolean;
     /** All configured providers. */
-    listProviders(): string;
+    listProviders(): any[];
     /** Allow a provider on an entity. */
-    enableProvider(entityName: string, providerId: string): string;
+    enableProvider(entityName: string, providerId: string): any;
     /** Remove a provider from an entity. */
     disableProvider(entityName: string, providerId: string): boolean;
 }
@@ -331,25 +331,25 @@ interface MbOAuth {
 interface MbMailer {
     /** `true` when SMTP host and from-address are set. */
     isConfigured(): boolean;
-    /** SMTP settings as JSON. A stored password is `"********"`. */
-    config(): string;
+    /** SMTP settings. A stored password is `"********"`. */
+    config(): { host: string; port: number; user: string; password: string; from: string; tls: boolean };
     /**
-     * Apply an SMTP JSON object (`host`, `port`, `user`, `password`, `from`, `tls`).
+     * Apply an SMTP object (`host`, `port`, `user`, `password`, `from`, `tls`).
      * Passing the `"********"` password mask keeps the stored password.
      */
-    configure(smtpJson: string): void;
-    /** Read the `smtp` object from a settings JSON document. */
-    applySettings(configsJson: string): void;
+    configure(smtp: any): void;
+    /** Read the `smtp` object from a settings document. */
+    applySettings(configs: any): void;
     /** Deliver one message. Mock hosts are captured by `sentMessages`. */
     send(to: string, subject: string, html: string, text: string): boolean;
     /** Send the fixed test message to `to`. */
     sendTest(to: string): boolean;
-    /** Render `name` with a JSON object of string variables, or `""` for none. */
-    loadTemplate(name: string, variablesJson: string): string;
+    /** Render `name` with an object of string variables, or `null` for none. */
+    loadTemplate(name: string, variables: Record<string, string> | null): string;
     /** `true` when `email` is still under `maxPerHour` (both arguments are required). */
     checkRateLimit(email: string, maxPerHour: number): boolean;
-    /** Mock-transport messages as a JSON array. */
-    sentMessages(): string;
+    /** Mock-transport messages. */
+    sentMessages(): { to: string; subject: string; html: string; text: string }[];
     clearSentMessages(): void;
     clearRateLimits(): void;
 }
@@ -370,8 +370,8 @@ interface MbFiles {
     renameDir(oldEntityName: string, newEntityName: string): void;
     /** Delete an entity upload directory and its files. */
     deleteDir(entityName: string): void;
-    /** Delete every filename in `filesJson` (a JSON array). */
-    removeFiles(entityName: string, filesJson: string): void;
+    /** Delete every filename in `files`. */
+    removeFiles(entityName: string, files: string[]): void;
     /** `true` when `filename` exists under `entityName`. */
     fileExists(entityName: string, filename: string): boolean;
     /** Canonical path, or throws when it escapes the files directory. */
