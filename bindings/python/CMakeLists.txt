@@ -81,8 +81,14 @@ endif()
 if(TARGET mb::shared)
     target_link_libraries(mantisbase_python PRIVATE mb::shared)
 else()
-    find_library(MANTISBASE_LIB mantisbase REQUIRED)
-    find_path(MANTISBASE_INCLUDE mantisbase/mantisbase.h REQUIRED)
+    find_library(MANTISBASE_LIB mantisbase)
+    find_path(MANTISBASE_INCLUDE mantisbase/mantisbase.h)
+    if(NOT MANTISBASE_LIB OR NOT MANTISBASE_INCLUDE)
+        message(FATAL_ERROR
+            "Could not find the mantisbase shared library and headers.\n"
+            "Wheels are published for CPython 3.10-3.14. A Python outside that set makes pip/uv build this sdist, which does not compile the C++ engine.\n"
+            "To build from source, install the engine first and set CMAKE_PREFIX_PATH to the prefix that contains lib/libmantisbase.so and include/mantisbase/mantisbase.h.")
+    endif()
     target_link_libraries(mantisbase_python PRIVATE ${MANTISBASE_LIB})
     target_include_directories(mantisbase_python PRIVATE ${MANTISBASE_INCLUDE})
 endif()

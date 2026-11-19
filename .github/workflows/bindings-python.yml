@@ -28,7 +28,7 @@ jobs:
       matrix:
         # 3.9 is absent from actions/setup-python on Ubuntu 26.04 (ubuntu-latest)
         # and has no Windows ARM64 build. 3.10 also has no Windows ARM64 build.
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
         # engine_platform must be a real axis. include entries that only add
         # new keys are merged into every job, and the last entry wins — so a
         # platform listed only under include would collapse the whole matrix
