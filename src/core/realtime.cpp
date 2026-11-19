@@ -9,6 +9,8 @@
 mb::MbRealtimeDB::MbRealtimeDB(const MantisBase &app)
     : MbAppMixin(app) {}
 
+mb::MbRealtimeDB::~MbRealtimeDB() = default;
+
 bool mb::MbRealtimeDB::init() const {
     try {
         const auto &sql = mbApp().db().session();
