@@ -2,7 +2,7 @@ var searchData=
 [
   ['c_20api_0',['C API',['../docs_auth_api.html#autotoc_md117',1,'C++ API'],['../docs_auth_api.html#autotoc_md123',1,'C++ API']]],
   ['c_20dev_20package_1',['C++ Dev Package',['../docs_cpp_dev.html',1,'']]],
-  ['c_20factories_2',['Middlewares (C++ factories)',['../docs_scripting.html#autotoc_md348',1,'']]],
+  ['c_20factories_2',['Middlewares (C++ factories)',['../docs_scripting.html#autotoc_md350',1,'']]],
   ['cases_3',['4. Test Edge Cases',['../docs_rest_api_rules.html#autotoc_md328',1,'']]],
   ['change_20events_4',['Change events',['../docs_rest_api.html#autotoc_md73',1,'']]],
   ['check_5',['Check',['../docs_healthcheck.html',1,'Health Check'],['../docs_rest_api.html#autotoc_md45',1,'Health Check']]],

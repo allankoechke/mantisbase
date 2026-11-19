@@ -1,5 +1,11 @@
 var annotated_dup =
 [
+    [ "dukglue", "namespacedukglue.html", [
+      [ "types", "namespacedukglue_1_1types.html", [
+        [ "DukType&lt; nlohmann::json &gt;", "structdukglue_1_1types_1_1DukType_3_01nlohmann_1_1json_01_4.html", "structdukglue_1_1types_1_1DukType_3_01nlohmann_1_1json_01_4" ],
+        [ "DukType&lt; mb::MbScriptJson &gt;", "structdukglue_1_1types_1_1DukType_3_01mb_1_1MbScriptJson_01_4.html", "structdukglue_1_1types_1_1DukType_3_01mb_1_1MbScriptJson_01_4" ]
+      ] ]
+    ] ],
     [ "mb", "namespacemb.html", [
       [ "ApiKeyResult", "structmb_1_1ApiKeyResult.html", "structmb_1_1ApiKeyResult" ],
       [ "MbApiKeyMgr", "classmb_1_1MbApiKeyMgr.html", "classmb_1_1MbApiKeyMgr" ],
@@ -44,6 +50,7 @@ var annotated_dup =
       [ "MbAppMixin", "classmb_1_1MbAppMixin.html", "classmb_1_1MbAppMixin" ],
       [ "MbWSMgr", "classmb_1_1MbWSMgr.html", "classmb_1_1MbWSMgr" ],
       [ "MbRealtimeWSController", "classmb_1_1MbRealtimeWSController.html", "classmb_1_1MbRealtimeWSController" ],
-      [ "MantisBase", "classmb_1_1MantisBase.html", "classmb_1_1MantisBase" ]
+      [ "MantisBase", "classmb_1_1MantisBase.html", "classmb_1_1MantisBase" ],
+      [ "MbScriptJson", "structmb_1_1MbScriptJson.html", "structmb_1_1MbScriptJson" ]
     ] ]
 ];

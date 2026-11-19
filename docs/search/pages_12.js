@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['oauth_0',['OAuth',['../docs_auth_api.html#autotoc_md119',1,'OAuth'],['../docs_python.html#autotoc_md257',1,'OAuth']]],
+  ['oauth_0',['OAuth',['../docs_scripting.html#autotoc_md342',1,'Auth, API keys, and OAuth'],['../docs_auth_api.html#autotoc_md119',1,'OAuth'],['../docs_python.html#autotoc_md257',1,'OAuth']]],
   ['only_1',['Only',['../docs_rest_api_rules.html#autotoc_md306',1,'Admin Only'],['../docs_rest_api_rules.html#autotoc_md307',1,'Authenticated Users Only'],['../docs_rest_api_rules.html#autotoc_md295',1,'Empty Mode (Admin Only)']]],
   ['open_20sse_20connection_2',['GET /api/v1/realtime — Open SSE connection',['../docs_rest_api.html#autotoc_md61',1,'']]],
   ['operations_3',['Supported Operations',['../docs_rest_api_rules.html#autotoc_md317',1,'']]],

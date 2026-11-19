@@ -29,13 +29,14 @@ var searchData=
   ['mbresponse_26',['MbResponse',['../classmb_1_1MbResponse.html#a4af80a2345ff5e5cc373396cd21d996e',1,'mb::MbResponse']]],
   ['mbrouter_27',['MbRouter',['../classmb_1_1MbRouter.html#adb8142227ce10c1e438e01a2e4c97c0c',1,'mb::MbRouter']]],
   ['mbrtdbworker_28',['MbRtDbWorker',['../classmb_1_1MbRtDbWorker.html#a9694f75464614aa6a64bda67d95b735b',1,'mb::MbRtDbWorker']]],
-  ['mbssemgr_29',['MbSSEMgr',['../classmb_1_1MbSSEMgr.html#a3cdca0fe3b072ff51a603e4539b866c1',1,'mb::MbSSEMgr']]],
-  ['mbssesession_30',['MbSSESession',['../classmb_1_1MbSSESession.html#a3803964ff089633622f2570930aea885',1,'mb::MbSSESession']]],
-  ['mbwsmgr_31',['MbWSMgr',['../classmb_1_1MbWSMgr.html#a5ddcb2e487f698296ab53fa292b24dc2',1,'mb::MbWSMgr']]],
-  ['mergestrict_32',['mergeStrict',['../structmb_1_1MbAuthMethods.html#ad23b7997722668e3006d710b0655faeb',1,'mb::MbAuthMethods']]],
-  ['method_33',['method',['../classmb_1_1MbRequest.html#ae9691b2e9e95dfb510e6a407d82104e4',1,'mb::MbRequest']]],
-  ['migrate_34',['migrate',['../classmb_1_1MbKVStore.html#ae43bbb743b3e8f18e546873b68705004',1,'mb::MbKVStore']]],
-  ['migrationsdir_35',['migrationsDir',['../classmb_1_1MantisBase.html#a298e5dc7929388e131b19eab611b4043',1,'mb::MantisBase']]],
-  ['minimumconstraintcheck_36',['minimumConstraintCheck',['../classmb_1_1MbValidators.html#afce0e11cd02f79ea03ed38ac0abd1e9a',1,'mb::MbValidators']]],
-  ['mode_37',['mode',['../classmb_1_1MbAccessRule.html#aa06378334596fc1e5664f7fd6ed22acd',1,'mb::MbAccessRule']]]
+  ['mbscriptjson_29',['MbScriptJson',['../structmb_1_1MbScriptJson.html#a125508eca74cf374cbf231a2e13dd645',1,'mb::MbScriptJson::MbScriptJson()=default'],['../structmb_1_1MbScriptJson.html#aae22f0d1efa9bc8e90f8bf8efb159d35',1,'mb::MbScriptJson::MbScriptJson(const MbScriptJson &amp;)=default'],['../structmb_1_1MbScriptJson.html#a8084240dd99697348bbaefb30e6200b6',1,'mb::MbScriptJson::MbScriptJson(MbScriptJson &amp;&amp;) noexcept=default'],['../structmb_1_1MbScriptJson.html#a0b1e5760e2038cf497591f115e26e9f2',1,'mb::MbScriptJson::MbScriptJson(T &amp;&amp;json)']]],
+  ['mbssemgr_30',['MbSSEMgr',['../classmb_1_1MbSSEMgr.html#a3cdca0fe3b072ff51a603e4539b866c1',1,'mb::MbSSEMgr']]],
+  ['mbssesession_31',['MbSSESession',['../classmb_1_1MbSSESession.html#a3803964ff089633622f2570930aea885',1,'mb::MbSSESession']]],
+  ['mbwsmgr_32',['MbWSMgr',['../classmb_1_1MbWSMgr.html#a5ddcb2e487f698296ab53fa292b24dc2',1,'mb::MbWSMgr']]],
+  ['mergestrict_33',['mergeStrict',['../structmb_1_1MbAuthMethods.html#ad23b7997722668e3006d710b0655faeb',1,'mb::MbAuthMethods']]],
+  ['method_34',['method',['../classmb_1_1MbRequest.html#ae9691b2e9e95dfb510e6a407d82104e4',1,'mb::MbRequest']]],
+  ['migrate_35',['migrate',['../classmb_1_1MbKVStore.html#ae43bbb743b3e8f18e546873b68705004',1,'mb::MbKVStore']]],
+  ['migrationsdir_36',['migrationsDir',['../classmb_1_1MantisBase.html#a298e5dc7929388e131b19eab611b4043',1,'mb::MantisBase']]],
+  ['minimumconstraintcheck_37',['minimumConstraintCheck',['../classmb_1_1MbValidators.html#afce0e11cd02f79ea03ed38ac0abd1e9a',1,'mb::MbValidators']]],
+  ['mode_38',['mode',['../classmb_1_1MbAccessRule.html#aa06378334596fc1e5664f7fd6ed22acd',1,'mb::MbAccessRule']]]
 ];

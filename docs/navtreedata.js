@@ -67,7 +67,8 @@ var NAVTREE =
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
         [ "Functions", "functions_func.html", "functions_func" ],
-        [ "Variables", "functions_vars.html", null ]
+        [ "Variables", "functions_vars.html", null ],
+        [ "Typedefs", "functions_type.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [
@@ -86,9 +87,9 @@ var NAVTREEINDEX =
 "access__rules_8cpp.html",
 "classmb_1_1MbEntity.html#a310a01fa3c546810098b95f47b914e6a",
 "classmb_1_1MbFilesMgr.html#aa74850be9b5cc31927c2241361811176",
-"classmb_1_1MbResponse.html#a504cb3236292e5d6caf9d461c0d81e9e",
-"entity__routes_8h.html",
-"namespacemb.html#adecfee123411cd020f142e490622a161"
+"classmb_1_1MbResponse.html#a4f4d09fecd39b9f925a200ba11a8c52d",
+"entity_8cpp.html",
+"namespacemb.html#acd34e0c5b979f2e3379be7ede1ecce00"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

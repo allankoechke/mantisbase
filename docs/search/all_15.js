@@ -1,9 +1,9 @@
 var searchData=
 [
   ['ratelimit_0',['rateLimit',['../namespacemb.html#aec462b3d9984ec753a5c506ff8bd2569',1,'mb']]],
-  ['read_1',['read',['../classmb_1_1MbEntity.html#afc9eb70f9031a5e1eb47dc83c25a05aa',1,'mb::MbEntity']]],
+  ['read_1',['read',['../classmb_1_1MbEntity.html#afc9eb70f9031a5e1eb47dc83c25a05aa',1,'mb::MbEntity::read()'],['../structdukglue_1_1types_1_1DukType_3_01nlohmann_1_1json_01_4.html#ac7e3d87118d082845215537b15755594',1,'dukglue::types::DukType&lt; nlohmann::json &gt;::read()'],['../structdukglue_1_1types_1_1DukType_3_01mb_1_1MbScriptJson_01_4.html#add6d74d99ef590c6be35b33d23d54fd7',1,'dukglue::types::DukType&lt; mb::MbScriptJson &gt;::read()']]],
   ['readintfieldvalue_2',['readIntFieldValue',['../namespacemb.html#ad0cd11ad40ba92c00436e8fe4c44c817',1,'mb']]],
-  ['realtime_3',['Realtime',['../docs_python.html#autotoc_md261',1,'']]],
+  ['realtime_3',['Realtime',['../docs_python.html#autotoc_md261',1,'Realtime'],['../docs_scripting.html#autotoc_md353',1,'Realtime']]],
   ['realtime_20—_20open_20sse_20connection_4',['GET /api/v1/realtime — Open SSE connection',['../docs_rest_api.html#autotoc_md61',1,'']]],
   ['realtime_20—_20subscribe_20update_20session_5',['POST /api/v1/realtime — Subscribe / update session',['../docs_rest_api.html#autotoc_md62',1,'']]],
   ['realtime_20api_6',['Realtime API',['../docs_rest_api.html#autotoc_md58',1,'Realtime API'],['../docs_rest_api.html#autotoc_md68',1,'WebSocket Realtime API']]],
@@ -60,7 +60,7 @@ var searchData=
   ['requestemailverification_57',['requestEmailVerification',['../classmb_1_1MbAuth.html#a1abe61dc1321093cc1c397eada39a4e8',1,'mb::MbAuth']]],
   ['requestloginotp_58',['requestLoginOtp',['../classmb_1_1MbAuth.html#a5e63d47669053cd59f350f86358e22a8',1,'mb::MbAuth']]],
   ['requestpasswordreset_59',['requestPasswordReset',['../classmb_1_1MbAuth.html#aa12d7d8a30131c4c8236e65d3aa76b06',1,'mb::MbAuth']]],
-  ['requests_60',['Requests',['../docs_rest_api.html#autotoc_md8',1,'Example Requests'],['../docs_rest_api.html#autotoc_md53',1,'Example Requests'],['../docs_scripting.html#autotoc_md344',1,'Requests']]],
+  ['requests_60',['Requests',['../docs_rest_api.html#autotoc_md8',1,'Example Requests'],['../docs_rest_api.html#autotoc_md53',1,'Example Requests'],['../docs_scripting.html#autotoc_md346',1,'Requests']]],
   ['requireadminauth_61',['requireAdminAuth',['../namespacemb.html#af4d67e180d9193e855cbe7043c6c3a89',1,'mb']]],
   ['requireadminorentityauth_62',['requireAdminOrEntityAuth',['../namespacemb.html#af56ff8a1b4f017f90a5647176b465290',1,'mb']]],
   ['required_63',['required',['../classmb_1_1MbEntitySchemaField.html#ae99a3d774266cf9ead13e351c1964e72',1,'mb::MbEntitySchemaField']]],

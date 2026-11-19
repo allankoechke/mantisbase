@@ -29,14 +29,15 @@ var searchData=
   ['precompiled_20binaries_26',['Using Precompiled Binaries',['../docs_setup.html#autotoc_md241',1,'']]],
   ['prerequisites_27',['Prerequisites',['../docs_cpp_dev.html#autotoc_md149',1,'']]],
   ['preroutingmiddlewares_28',['preRoutingMiddlewares',['../classmb_1_1MbRouter.html#a96874161b1604b1a9e82d10a869020ab',1,'mb::MbRouter']]],
-  ['properties_29',['Properties',['../docs_rest_api.html#autotoc_md38',1,'Foreign Key Properties'],['../docs_scripting.html#autotoc_md346',1,'MbRequest Methods/Properties'],['../docs_scripting.html#autotoc_md347',1,'MbResponse Methods/Properties']]],
+  ['properties_29',['Properties',['../docs_rest_api.html#autotoc_md38',1,'Foreign Key Properties'],['../docs_scripting.html#autotoc_md348',1,'MbRequest Methods/Properties'],['../docs_scripting.html#autotoc_md349',1,'MbResponse Methods/Properties']]],
   ['protection_30',['Path Traversal Protection',['../docs_file.html#autotoc_md221',1,'']]],
   ['provider_20management_31',['Admin provider management',['../docs_auth_api.html#autotoc_md122',1,'']]],
   ['proxies_20and_20client_20ip_32',['Reverse Proxies and Client IP',['../docs_rest_api.html#autotoc_md3',1,'']]],
   ['public_20access_33',['Public Access',['../docs_rest_api_rules.html#autotoc_md305',1,'']]],
   ['public_20mode_34',['Public Mode',['../docs_rest_api_rules.html#autotoc_md296',1,'']]],
   ['publicdir_35',['publicDir',['../classmb_1_1MantisBase.html#a616493c105acd0717ed9b8f65bfcf074',1,'mb::MantisBase']]],
-  ['put_36',['Put',['../classmb_1_1MbRouter.html#a5af552af82b4a782dd61e71be53c22d8',1,'mb::MbRouter']]],
-  ['python_20bindings_37',['Python Bindings',['../docs_python.html',1,'']]],
-  ['python_2emd_38',['python.md',['../python_8md.html',1,'']]]
+  ['push_36',['push',['../structdukglue_1_1types_1_1DukType_3_01nlohmann_1_1json_01_4.html#a1dccb6c373b42225afad104df4df2ef2',1,'dukglue::types::DukType&lt; nlohmann::json &gt;::push()'],['../structdukglue_1_1types_1_1DukType_3_01mb_1_1MbScriptJson_01_4.html#aec385aaa5d718ee70a90eef0a1f19a2c',1,'dukglue::types::DukType&lt; mb::MbScriptJson &gt;::push()']]],
+  ['put_37',['Put',['../classmb_1_1MbRouter.html#a5af552af82b4a782dd61e71be53c22d8',1,'mb::MbRouter']]],
+  ['python_20bindings_38',['Python Bindings',['../docs_python.html',1,'']]],
+  ['python_2emd_39',['python.md',['../python_8md.html',1,'']]]
 ];

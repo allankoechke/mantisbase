@@ -1,7 +1,7 @@
 var searchData=
 [
   ['ratelimit_0',['rateLimit',['../namespacemb.html#aec462b3d9984ec753a5c506ff8bd2569',1,'mb']]],
-  ['read_1',['read',['../classmb_1_1MbEntity.html#afc9eb70f9031a5e1eb47dc83c25a05aa',1,'mb::MbEntity']]],
+  ['read_1',['read',['../classmb_1_1MbEntity.html#afc9eb70f9031a5e1eb47dc83c25a05aa',1,'mb::MbEntity::read()'],['../structdukglue_1_1types_1_1DukType_3_01nlohmann_1_1json_01_4.html#ac7e3d87118d082845215537b15755594',1,'dukglue::types::DukType&lt; nlohmann::json &gt;::read()'],['../structdukglue_1_1types_1_1DukType_3_01mb_1_1MbScriptJson_01_4.html#add6d74d99ef590c6be35b33d23d54fd7',1,'dukglue::types::DukType&lt; mb::MbScriptJson &gt;::read()']]],
   ['readintfieldvalue_2',['readIntFieldValue',['../namespacemb.html#ad0cd11ad40ba92c00436e8fe4c44c817',1,'mb']]],
   ['recordexists_3',['recordExists',['../classmb_1_1MbEntity.html#ac685253eaf791fe261c593c26fbd1ea5',1,'mb::MbEntity']]],
   ['redirect_4',['redirect',['../classmb_1_1MbRouter.html#a98161f0b6eff5755fe10c6026d7c7b35',1,'mb::MbRouter']]],

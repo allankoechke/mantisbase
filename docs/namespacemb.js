@@ -47,6 +47,7 @@ var namespacemb =
     [ "MbWSMgr", "classmb_1_1MbWSMgr.html", "classmb_1_1MbWSMgr" ],
     [ "MbRealtimeWSController", "classmb_1_1MbRealtimeWSController.html", "classmb_1_1MbRealtimeWSController" ],
     [ "MantisBase", "classmb_1_1MantisBase.html", "classmb_1_1MantisBase" ],
+    [ "MbScriptJson", "structmb_1_1MbScriptJson.html", "structmb_1_1MbScriptJson" ],
     [ "json", "namespacemb.html#a4308c03eb62a8fd5a0565ab3816c3374", null ],
     [ "MbHandlerFn", "namespacemb.html#a7f7542939c0b0babc7774123d88e4650", null ],
     [ "MbLogLevel", "namespacemb.html#a2a30159f6036133cae7e5a8a4d85cbb9", null ],

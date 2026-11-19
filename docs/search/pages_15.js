@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['realtime_0',['Realtime',['../docs_python.html#autotoc_md261',1,'']]],
+  ['realtime_0',['Realtime',['../docs_python.html#autotoc_md261',1,'Realtime'],['../docs_scripting.html#autotoc_md353',1,'Realtime']]],
   ['realtime_20—_20open_20sse_20connection_1',['GET /api/v1/realtime — Open SSE connection',['../docs_rest_api.html#autotoc_md61',1,'']]],
   ['realtime_20—_20subscribe_20update_20session_2',['POST /api/v1/realtime — Subscribe / update session',['../docs_rest_api.html#autotoc_md62',1,'']]],
   ['realtime_20api_3',['Realtime API',['../docs_rest_api.html#autotoc_md58',1,'Realtime API'],['../docs_rest_api.html#autotoc_md68',1,'WebSocket Realtime API']]],
@@ -19,7 +19,7 @@ var searchData=
   ['request_20auth_20context_16',['Request auth context',['../docs_auth_api.html#autotoc_md127',1,'']]],
   ['request_20bodies_3a_20json_20and_20file_20uploads_17',['Request bodies: JSON and file uploads',['../docs_rest_api.html#autotoc_md31',1,'']]],
   ['request_20context_20req_18',['Request Context (&lt;span class=&quot;tt&quot;&gt;req&lt;/span&gt;)',['../docs_rest_api_rules.html#autotoc_md302',1,'']]],
-  ['requests_19',['Requests',['../docs_rest_api.html#autotoc_md8',1,'Example Requests'],['../docs_rest_api.html#autotoc_md53',1,'Example Requests'],['../docs_scripting.html#autotoc_md344',1,'Requests']]],
+  ['requests_19',['Requests',['../docs_rest_api.html#autotoc_md8',1,'Example Requests'],['../docs_rest_api.html#autotoc_md53',1,'Example Requests'],['../docs_scripting.html#autotoc_md346',1,'Requests']]],
   ['requirements_20',['Dashboard Requirements',['../docs_rest_api.html#autotoc_md83',1,'']]],
   ['reset_21',['Password reset',['../docs_auth_api.html#autotoc_md95',1,'']]],
   ['resource_20sharing_20cors_22',['Cross-Origin Resource Sharing (CORS)',['../docs_rest_api.html#autotoc_md49',1,'']]],

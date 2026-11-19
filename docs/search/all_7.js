@@ -58,6 +58,11 @@ var searchData=
   ['drogonresponse_55',['drogonResponse',['../classmb_1_1MbResponse.html#a0c9f7c22644a6e5a687603078ce9b937',1,'mb::MbResponse']]],
   ['dropdbhooks_56',['dropDbHooks',['../classmb_1_1MbRealtimeDB.html#a358fac49495e83b8559f58e04b195780',1,'mb::MbRealtimeDB::dropDbHooks(const std::string &amp;entity_name) const'],['../classmb_1_1MbRealtimeDB.html#ace9fde31f2664286e310348bc842c4ad',1,'mb::MbRealtimeDB::dropDbHooks(const std::string &amp;entity_name, const std::shared_ptr&lt; soci::session &gt; &amp;sess)']]],
   ['droptable_57',['dropTable',['../classmb_1_1MbEntitySchema.html#ab863f2d58fae1db93f7aece8e29671a0',1,'mb::MbEntitySchema::dropTable(const MbEntitySchema &amp;original_table)'],['../classmb_1_1MbEntitySchema.html#abceba7c8ad736334dfd91c1807298095',1,'mb::MbEntitySchema::dropTable(const MantisBase &amp;app, const std::string &amp;table_id)']]],
-  ['dump_58',['dump',['../classmb_1_1MbContextStore.html#a8805cb791fd9e402eab23a65ec9db330',1,'mb::MbContextStore::dump()'],['../classmb_1_1MbEntitySchema.html#a2d81389ec6321ce1ebea1ce8ec414514',1,'mb::MbEntitySchema::dump()']]],
-  ['during_20schema_20creation_59',['During Schema Creation',['../docs_rest_api_rules.html#autotoc_md313',1,'']]]
+  ['duk_5fjson_2eh_58',['duk_json.h',['../duk__json_8h.html',1,'']]],
+  ['dukglue_59',['dukglue',['../namespacedukglue.html',1,'']]],
+  ['dukglue_3a_3atypes_60',['types',['../namespacedukglue_1_1types.html',1,'dukglue']]],
+  ['duktype_3c_20mb_3a_3ambscriptjson_20_3e_61',['DukType&lt; mb::MbScriptJson &gt;',['../structdukglue_1_1types_1_1DukType_3_01mb_1_1MbScriptJson_01_4.html',1,'dukglue::types']]],
+  ['duktype_3c_20nlohmann_3a_3ajson_20_3e_62',['DukType&lt; nlohmann::json &gt;',['../structdukglue_1_1types_1_1DukType_3_01nlohmann_1_1json_01_4.html',1,'dukglue::types']]],
+  ['dump_63',['dump',['../classmb_1_1MbContextStore.html#a8805cb791fd9e402eab23a65ec9db330',1,'mb::MbContextStore::dump()'],['../classmb_1_1MbEntitySchema.html#a2d81389ec6321ce1ebea1ce8ec414514',1,'mb::MbEntitySchema::dump()']]],
+  ['during_20schema_20creation_64',['During Schema Creation',['../docs_rest_api_rules.html#autotoc_md313',1,'']]]
 ];

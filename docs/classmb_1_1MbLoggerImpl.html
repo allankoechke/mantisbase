@@ -124,10 +124,36 @@ Collaboration diagram for mb::MbLoggerImpl:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab170b028637cecbdf35f4aee8d90cafb" id="r_ab170b028637cecbdf35f4aee8d90cafb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab170b028637cecbdf35f4aee8d90cafb">start_query</a> (std::string const &amp;query) override</td></tr>
 <tr class="memdesc:ab170b028637cecbdf35f4aee8d90cafb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called before query is executed by soci, we can log the query here.  <br /></td></tr>
+<tr class="memitem:a46c76a4c4449618fd8dcde0247b236d3" id="r_a46c76a4c4449618fd8dcde0247b236d3"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a46c76a4c4449618fd8dcde0247b236d3">get_last_query</a> () const override</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classmb_1_1MbLogger.html">MbLogger</a> implementation for soci, allowing us to override the default logging behaviour with our own custom logger. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a46c76a4c4449618fd8dcde0247b236d3" name="a46c76a4c4449618fd8dcde0247b236d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46c76a4c4449618fd8dcde0247b236d3">&#9670;&#160;</a></span>get_last_query()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string mb::MbLoggerImpl::get_last_query </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel override">override</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ab170b028637cecbdf35f4aee8d90cafb" name="ab170b028637cecbdf35f4aee8d90cafb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab170b028637cecbdf35f4aee8d90cafb">&#9670;&#160;</a></span>start_query()</h2>
 

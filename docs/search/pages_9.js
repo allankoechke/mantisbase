@@ -1,7 +1,7 @@
 var searchData=
 [
   ['facing_20routes_0',['User-facing routes',['../docs_auth_api.html#autotoc_md121',1,'']]],
-  ['factories_1',['Middlewares (C++ factories)',['../docs_scripting.html#autotoc_md348',1,'']]],
+  ['factories_1',['Middlewares (C++ factories)',['../docs_scripting.html#autotoc_md350',1,'']]],
   ['features_2',['Dashboard Features',['../docs_rest_api.html#autotoc_md76',1,'']]],
   ['field_20name_20validation_3',['Field Name Validation',['../docs_rest_api.html#autotoc_md24',1,'']]],
   ['field_20names_4',['2. Use Consistent Field Names',['../docs_rest_api_rules.html#autotoc_md326',1,'']]],
@@ -12,7 +12,7 @@ var searchData=
   ['file_20uploads_9',['File Uploads',['../index.html#autotoc_md281',1,'']]],
   ['file_20uploads_10',['Request bodies: JSON and file uploads',['../docs_rest_api.html#autotoc_md31',1,'']]],
   ['filename_20sanitization_11',['Filename Sanitization',['../docs_file.html#autotoc_md220',1,'']]],
-  ['files_12',['Files',['../docs_file.html#autotoc_md213',1,'Creating Records with Files'],['../docs_file.html#autotoc_md217',1,'Deleting Files'],['../docs_python.html#autotoc_md258',1,'Files'],['../docs_file.html',1,'Handling Files'],['../docs_file.html#autotoc_md223',1,'Serving Files']]],
+  ['files_12',['Files',['../docs_file.html#autotoc_md213',1,'Creating Records with Files'],['../docs_file.html#autotoc_md217',1,'Deleting Files'],['../docs_python.html#autotoc_md258',1,'Files'],['../docs_scripting.html#autotoc_md352',1,'Files'],['../docs_file.html',1,'Handling Files'],['../docs_file.html#autotoc_md223',1,'Serving Files']]],
   ['files_20in_20records_13',['Updating Files in Records',['../docs_file.html#autotoc_md215',1,'']]],
   ['find_5fpackage_20recommended_14',['Option A: &lt;span class=&quot;tt&quot;&gt;find_package&lt;/span&gt; (recommended)',['../docs_cpp_dev.html#autotoc_md152',1,'']]],
   ['first_20mbentity_15',['3. Create Your First MbEntity',['../index.html#autotoc_md274',1,'']]],
@@ -27,5 +27,5 @@ var searchData=
   ['from_20source_24',['Build from Source',['../index.html#autotoc_md269',1,'']]],
   ['from_20source_25',['Building from source',['../docs_python.html#autotoc_md265',1,'']]],
   ['full_20setup_20with_20postgresql_26',['Example: Full Setup with PostgreSQL',['../docs_docker.html#autotoc_md174',1,'']]],
-  ['functions_27',['Utils (utility functions)',['../docs_scripting.html#autotoc_md349',1,'']]]
+  ['functions_27',['Utils (utility functions)',['../docs_scripting.html#autotoc_md351',1,'']]]
 ];

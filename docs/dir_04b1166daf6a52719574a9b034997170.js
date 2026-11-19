@@ -5,6 +5,7 @@ var dir_04b1166daf6a52719574a9b034997170 =
     [ "database_bindings.cpp", "database__bindings_8cpp.html", null ],
     [ "files_bindings.cpp", "files__bindings_8cpp.html", null ],
     [ "logs_bindings.cpp", "logs__bindings_8cpp.html", null ],
+    [ "mailer_bindings.cpp", "mailer__bindings_8cpp.html", null ],
     [ "middleware_bindings.cpp", "middleware__bindings_8cpp.html", null ],
     [ "realtime_bindings.cpp", "realtime__bindings_8cpp.html", null ],
     [ "request_bindings.cpp", "request__bindings_8cpp.html", null ],

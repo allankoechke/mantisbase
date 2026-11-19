@@ -16,7 +16,7 @@ var searchData=
   ['services_20di_13',['Accessing services (DI)',['../docs_embedding.html#autotoc_md191',1,'']]],
   ['serving_14',['File Serving',['../docs_file.html#autotoc_md211',1,'']]],
   ['serving_20files_15',['Serving Files',['../docs_file.html#autotoc_md223',1,'']]],
-  ['session_16',['Session',['../docs_scripting.html#autotoc_md342',1,'']]],
+  ['session_16',['Session',['../docs_scripting.html#autotoc_md344',1,'']]],
   ['session_17',['POST /api/v1/realtime — Subscribe / update session',['../docs_rest_api.html#autotoc_md62',1,'']]],
   ['setting_20rules_20via_20api_18',['Setting Rules via API',['../docs_rest_api_rules.html#autotoc_md312',1,'']]],
   ['setting_20up_20mantisbase_19',['Setting Up MantisBase',['../docs_setup.html',1,'']]],

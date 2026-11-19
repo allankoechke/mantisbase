@@ -45,9 +45,9 @@ var searchData=
   ['using_20middlewares_42',['Using Middlewares',['../docs_rest_api.html#autotoc_md17',1,'']]],
   ['using_20precompiled_20binaries_43',['Using Precompiled Binaries',['../docs_setup.html#autotoc_md241',1,'']]],
   ['using_20tokens_44',['Using Tokens',['../docs_auth_api.html#autotoc_md111',1,'']]],
-  ['utility_20functions_45',['Utils (utility functions)',['../docs_scripting.html#autotoc_md349',1,'']]],
+  ['utility_20functions_45',['Utils (utility functions)',['../docs_scripting.html#autotoc_md351',1,'']]],
   ['utils_46',['Utils',['../docs_python.html#autotoc_md263',1,'']]],
-  ['utils_20utility_20functions_47',['Utils (utility functions)',['../docs_scripting.html#autotoc_md349',1,'']]],
+  ['utils_20utility_20functions_47',['Utils (utility functions)',['../docs_scripting.html#autotoc_md351',1,'']]],
   ['utils_2eh_48',['utils.h',['../utils_8h.html',1,'']]],
   ['utils_5fbindings_2ecpp_49',['utils_bindings.cpp',['../utils__bindings_8cpp.html',1,'']]],
   ['uuidv7_2eh_50',['uuidv7.h',['../uuidv7_8h.html',1,'']]]

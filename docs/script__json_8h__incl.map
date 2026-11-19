@@ -1,0 +1,9 @@
+<map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/scripting/script_json.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/scripting/script_json.h">
+<area shape="rect" id="Node000001" title="JSON value carried into a Duktape method without going through nlohmann::json." alt="" coords="104,5,337,67"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,115,151,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,67,112,109,110,104,171,68"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="175,115,266,143"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="222,66,223,101,218,98,219,69"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="291,115,350,143"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="255,65,298,105,293,104,253,70"/>
+</map>

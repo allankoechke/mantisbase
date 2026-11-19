@@ -1,7 +1,7 @@
 var searchData=
 [
   ['facing_20routes_0',['User-facing routes',['../docs_auth_api.html#autotoc_md121',1,'']]],
-  ['factories_1',['Middlewares (C++ factories)',['../docs_scripting.html#autotoc_md348',1,'']]],
+  ['factories_1',['Middlewares (C++ factories)',['../docs_scripting.html#autotoc_md350',1,'']]],
   ['features_2',['Dashboard Features',['../docs_rest_api.html#autotoc_md76',1,'']]],
   ['fetchsession_3',['fetchSession',['../classmb_1_1MbSSEMgr.html#a3b070203234c0c38d8b3bd580b825c06',1,'mb::MbSSEMgr']]],
   ['field_4',['field',['../classmb_1_1MbEntity.html#ae26019f55899e4989a3fd77bdbecf49a',1,'mb::MbEntity::field()'],['../classmb_1_1MbEntitySchema.html#a21191053604055fbe84b4479e53c0f5d',1,'mb::MbEntitySchema::field()']]],
@@ -19,7 +19,7 @@ var searchData=
   ['filename_16',['filename',['../structmb_1_1MbFormDataItem.html#affb83fae33ec66b80fcc482a66604516',1,'mb::MbFormDataItem']]],
   ['filename_20sanitization_17',['Filename Sanitization',['../docs_file.html#autotoc_md220',1,'']]],
   ['filepath_18',['filePath',['../classmb_1_1MbFilesMgr.html#afaa580a36f0d8b7bb6c3e02c3adee981',1,'mb::MbFilesMgr']]],
-  ['files_19',['Files',['../docs_file.html#autotoc_md213',1,'Creating Records with Files'],['../docs_file.html#autotoc_md217',1,'Deleting Files'],['../docs_python.html#autotoc_md258',1,'Files'],['../docs_file.html',1,'Handling Files'],['../docs_file.html#autotoc_md223',1,'Serving Files']]],
+  ['files_19',['Files',['../docs_file.html#autotoc_md213',1,'Creating Records with Files'],['../docs_file.html#autotoc_md217',1,'Deleting Files'],['../docs_python.html#autotoc_md258',1,'Files'],['../docs_scripting.html#autotoc_md352',1,'Files'],['../docs_file.html',1,'Handling Files'],['../docs_file.html#autotoc_md223',1,'Serving Files']]],
   ['files_20',['files',['../classmb_1_1MantisBase.html#a29183b51b571439d0707cc82fe7203cd',1,'mb::MantisBase']]],
   ['files_20in_20records_21',['Updating Files in Records',['../docs_file.html#autotoc_md215',1,'']]],
   ['files_2ecpp_22',['files.cpp',['../files_8cpp.html',1,'']]],
@@ -57,5 +57,5 @@ var searchData=
   ['fromjson_54',['fromJson',['../structmb_1_1MbSmtpConfig.html#a370faf7ed7d5ca9e29632b5c52b21d84',1,'mb::MbSmtpConfig']]],
   ['fromschema_55',['fromSchema',['../classmb_1_1MbEntitySchema.html#a979a1e31769b1217f86602fd2faa2713',1,'mb::MbEntitySchema']]],
   ['full_20setup_20with_20postgresql_56',['Example: Full Setup with PostgreSQL',['../docs_docker.html#autotoc_md174',1,'']]],
-  ['functions_57',['Utils (utility functions)',['../docs_scripting.html#autotoc_md349',1,'']]]
+  ['functions_57',['Utils (utility functions)',['../docs_scripting.html#autotoc_md351',1,'']]]
 ];

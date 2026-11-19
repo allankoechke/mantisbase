@@ -11,5 +11,6 @@ var searchData=
   ['post_8',['Post',['../classmb_1_1MbRouter.html#a224145dae09ebdf68f0758bc4920b4b4',1,'mb::MbRouter']]],
   ['preroutingmiddlewares_9',['preRoutingMiddlewares',['../classmb_1_1MbRouter.html#a96874161b1604b1a9e82d10a869020ab',1,'mb::MbRouter']]],
   ['publicdir_10',['publicDir',['../classmb_1_1MantisBase.html#a616493c105acd0717ed9b8f65bfcf074',1,'mb::MantisBase']]],
-  ['put_11',['Put',['../classmb_1_1MbRouter.html#a5af552af82b4a782dd61e71be53c22d8',1,'mb::MbRouter']]]
+  ['push_11',['push',['../structdukglue_1_1types_1_1DukType_3_01nlohmann_1_1json_01_4.html#a1dccb6c373b42225afad104df4df2ef2',1,'dukglue::types::DukType&lt; nlohmann::json &gt;::push()'],['../structdukglue_1_1types_1_1DukType_3_01mb_1_1MbScriptJson_01_4.html#aec385aaa5d718ee70a90eef0a1f19a2c',1,'dukglue::types::DukType&lt; mb::MbScriptJson &gt;::push()']]],
+  ['put_12',['Put',['../classmb_1_1MbRouter.html#a5af552af82b4a782dd61e71be53c22d8',1,'mb::MbRouter']]]
 ];

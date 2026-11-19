@@ -1,6 +1,8 @@
 var hierarchy =
 [
     [ "mb::ApiKeyResult", "structmb_1_1ApiKeyResult.html", null ],
+    [ "dukglue::types::DukType&lt; mb::MbScriptJson &gt;", "structdukglue_1_1types_1_1DukType_3_01mb_1_1MbScriptJson_01_4.html", null ],
+    [ "dukglue::types::DukType&lt; nlohmann::json &gt;", "structdukglue_1_1types_1_1DukType_3_01nlohmann_1_1json_01_4.html", null ],
     [ "mb::EntityListPage", "structmb_1_1EntityListPage.html", null ],
     [ "std::exception", null, [
       [ "mb::MbException", "classmb_1_1MbException.html", null ]
@@ -41,6 +43,7 @@ var hierarchy =
     [ "mb::MbRouteKeyHash", "structmb_1_1MbRouteKeyHash.html", null ],
     [ "mb::MbRouteRegistry", "classmb_1_1MbRouteRegistry.html", null ],
     [ "mb::MbRtDbWorker", "classmb_1_1MbRtDbWorker.html", null ],
+    [ "mb::MbScriptJson", "structmb_1_1MbScriptJson.html", null ],
     [ "mb::MbSmtpConfig", "structmb_1_1MbSmtpConfig.html", null ],
     [ "mb::MbSSESession", "classmb_1_1MbSSESession.html", null ],
     [ "mb::MbValidators", "classmb_1_1MbValidators.html", null ],

@@ -1,0 +1,12 @@
+<map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/scripting/duk_json.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/scripting/duk_json.h">
+<area shape="rect" id="Node000001" title="Teach dukglue to pass nlohmann::json as a JavaScript value." alt="" coords="32,5,265,67"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,191,151,218"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,67,92,177,87,175,133,68"/>
+<area shape="rect" id="Node000003" href="$script__json_8h.html" title="JSON value carried into a Duktape method without going through nlohmann::json." alt="" coords="156,115,259,143"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,65,193,102,188,102,167,70"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="187,143,115,185,113,180,182,144"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="175,191,266,218"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="211,141,218,177,213,174,208,145"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="291,191,350,218"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="228,141,291,182,285,182,227,146"/>
+</map>

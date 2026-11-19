@@ -105,7 +105,7 @@ $(function(){initNavTree('docs_scripting.html','',''); });
 Type hinting</h3>
 <p>Copy <span class="tt">mantisbase.d.ts</span> (repo root) next to your scripts for autocompletion and inline docs in VS Code, Cursor, and other editors with JavaScript type checking:</p>
 <div class="fragment"><div class="line">cp mantisbase.d.ts ./scripts/</div>
-</div><!-- fragment --><p>It covers the whole JS surface: <span class="tt">app</span> (router, db, settings, auth, files, logs, realtime), <span class="tt">middlewares</span>, <span class="tt">utils</span>, <span class="tt">console</span>, request/response objects, and the <span class="tt">onServerStart</span> / <span class="tt">onRecordCreated</span> / <span class="tt">onRecordUpdated</span> lifecycle hooks.</p>
+</div><!-- fragment --><p>It covers the whole JS surface: <span class="tt">app</span> (router, db, settings, auth, API keys, OAuth, mailer, files, logs, realtime), <span class="tt">middlewares</span>, <span class="tt">utils</span>, <span class="tt">console</span>, request/response objects, and the <span class="tt">onServerStart</span> / <span class="tt">onRecordCreated</span> / <span class="tt">onRecordUpdated</span> lifecycle hooks.</p>
 <h3 class="doxsection"><a class="anchor" id="autotoc_md337"></a>
 Build and runtime switches</h3>
 <table class="markdownTable">
@@ -140,10 +140,11 @@ Application</h2>
 <li><span class="tt">app.db()</span>: Get the database unit instance.</li>
 <li><span class="tt">app.router()</span>: Get the router unit instance.</li>
 <li><span class="tt">app.settings()</span>: Key/value app configuration (<span class="tt">get</span>, <span class="tt">set</span>, <span class="tt">configs</span>, <span class="tt">reload</span>). <span class="tt">set</span> persists and applies immediately. <span class="tt">get("smtp")</span> and <span class="tt">configs()</span> return <span class="tt">smtp.password</span> as <span class="tt">"********"</span> when a password is stored. <span class="tt">reload</span> re-reads the database and reapplies SMTP (and CORS) from that record.</li>
-<li><span class="tt">app.auth()</span>: JWT and session helpers (<span class="tt">createToken</span>, <span class="tt">verifyToken</span>, <span class="tt">deleteSession</span>, <span class="tt">refreshSession</span>, <span class="tt">sessionTimeoutSeconds</span>).</li>
-<li><span class="tt">app.files()</span>: File path helpers for entity uploads (<span class="tt">dirPath</span>, <span class="tt">filePath</span>, <span class="tt">getFilePath</span>, <span class="tt">removeFile</span>).</li>
-<li><span class="tt">app.logs()</span>: Structured logging (<span class="tt">info</span>, <span class="tt">warn</span>, <span class="tt">error</span>, <span class="tt">debug</span>, <span class="tt">trace</span>).</li>
-<li><span class="tt">app.rt()</span>: Realtime change notifications (<span class="tt">notifyChange</span>).</li>
+<li><span class="tt">app.auth()</span>: JWT sessions, email sign-in codes, email verification, password reset, plus <span class="tt">apiKey()</span> and <span class="tt">oauth()</span>.</li>
+<li><span class="tt">app.mailer()</span>: Outbound SMTP (<span class="tt">configure</span>, <span class="tt">send</span>, <span class="tt">sendTest</span>, templates, mock <span class="tt">sentMessages</span>).</li>
+<li><span class="tt">app.files()</span>: Entity upload directories (<span class="tt">createDir</span>, <span class="tt">dirPath</span>, <span class="tt">filePath</span>, <span class="tt">removeFile</span>, <span class="tt">fileExists</span>).</li>
+<li><span class="tt">app.logs()</span>: Structured logging (<span class="tt">info</span>, <span class="tt">warn</span>, <span class="tt">error</span>, <span class="tt">critical</span>, <span class="tt">debug</span>, <span class="tt">trace</span>). <span class="tt">error</span> and <span class="tt">critical</span> both record a critical log.</li>
+<li><span class="tt">app.rt()</span>: Realtime change notifications (<span class="tt">notifyChange</span>, <span class="tt">addDbHooks</span>, <span class="tt">dropDbHooks</span>).</li>
 <li><span class="tt">app.loadScript(path)</span>: Load an additional script relative to <span class="tt">scriptsDir</span>.</li>
 </ul>
 <h3 class="doxsection"><a class="anchor" id="autotoc_md340"></a>
@@ -163,13 +164,64 @@ Settings</h3>
 <div class="line">// Pass that mask, or omit password, to keep the stored secret.</div>
 <div class="line">// Pass &quot;&quot; to clear it.</div>
 </div><!-- fragment --><p><span class="tt">MB_DISABLE_CONFIG_MUTATIONS</span> blocks dashboard and PATCH writes. <span class="tt">app.settings().set</span> still persists, because the script runs inside the server.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md341"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md341"></a>
+Mailer</h3>
+<p><span class="tt">app.mailer()</span> sends mail through the same SMTP settings as the dashboard. <span class="tt">config()</span> returns an object and masks a stored password as <span class="tt">"********"</span>. Passing that mask back to <span class="tt">configure</span> keeps the stored password. <span class="tt">send</span> delivers one message. Mock hosts (<span class="tt">mock</span>, <span class="tt">localhost:0</span>) capture it in <span class="tt">sentMessages()</span> instead of opening a connection.</p>
+<div class="fragment"><div class="line">app.mailer().configure({</div>
+<div class="line">    host: &quot;smtp.example.com&quot;,</div>
+<div class="line">    port: 587,</div>
+<div class="line">    user: &quot;mailer&quot;,</div>
+<div class="line">    password: &quot;s3cret&quot;,</div>
+<div class="line">    from: &quot;app@example.com&quot;,</div>
+<div class="line">    tls: true</div>
+<div class="line">});</div>
+<div class="line"> </div>
+<div class="line">app.mailer().send(&quot;user@example.com&quot;, &quot;Hello&quot;, &quot;&lt;p&gt;Hello&lt;/p&gt;&quot;, &quot;Hello&quot;);</div>
+<div class="line">app.mailer().sendTest(&quot;user@example.com&quot;);</div>
+</div><!-- fragment --><p><span class="tt">checkRateLimit(email, maxPerHour)</span> is required with both arguments. <span class="tt">loadTemplate(name, variables)</span> takes an object of strings, or <span class="tt">null</span> when there are no variables. <span class="tt">applySettings(configs)</span> reads the <span class="tt">smtp</span> object from a settings document. <span class="tt">settings().get</span> and <span class="tt">settings().set</span> still use JSON strings.</p>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md342"></a>
+Auth, API keys, and OAuth</h3>
+<p><span class="tt">createToken</span>, <span class="tt">verifyToken</span>, and <span class="tt">refreshSession</span> still take and return JSON strings. The mail, sign-in, API key, and OAuth methods take and return objects.</p>
+<div class="fragment"><div class="line">const auth = app.auth();</div>
+<div class="line">const token = auth.createToken(JSON.stringify({ id: &quot;user123&quot;, table: &quot;users&quot; }), 3600);</div>
+<div class="line">JSON.parse(auth.verifyToken(token));</div>
+<div class="line"> </div>
+<div class="line">auth.requestLoginOtp(&quot;users&quot;, &quot;user@example.com&quot;);</div>
+<div class="line">const session = auth.loginWithOtp(&quot;users&quot;, &quot;user@example.com&quot;, &quot;123456&quot;);</div>
+<div class="line">auth.notifyEmailVerification(&quot;users&quot;, userId);</div>
+<div class="line">auth.requestEmailVerification(&quot;users&quot;, &quot;user@example.com&quot;, req.getHeader(&quot;Host&quot;, &quot;&quot;));</div>
+<div class="line">auth.confirmEmailVerification(&quot;users&quot;, token);</div>
+<div class="line">auth.requestPasswordReset(&quot;users&quot;, &quot;user@example.com&quot;, req.getHeader(&quot;Host&quot;, &quot;&quot;));</div>
+<div class="line">auth.confirmPasswordReset(&quot;users&quot;, token, &quot;new-password&quot;);</div>
+<div class="line">auth.rejectUnverifiedLogin(&quot;users&quot;, user);</div>
+</div><!-- fragment --><p><span class="tt">requestLoginOtp</span>, <span class="tt">requestEmailVerification</span>, and <span class="tt">requestPasswordReset</span> return <span class="tt">{ sent: true }</span> even when the address is unknown, and they send nothing in that case. They throw when SMTP is not configured.</p>
+<p><span class="tt">auth.apiKey()</span> creates and lists keys. <span class="tt">permissions</span> is an array, or <span class="tt">null</span> for none. <span class="tt">expiresAt</span> is empty when the key does not expire. <span class="tt">create</span> returns an object that includes the raw <span class="tt">key</span> once.</p>
+<div class="fragment"><div class="line">const created = auth.apiKey().create(&quot;users&quot;, userId, &quot;CI token&quot;, [], &quot;&quot;);</div>
+<div class="line">auth.apiKey().revoke(created.id, &quot;users&quot;, userId);</div>
+<div class="line">auth.apiKey().list(&quot;users&quot;, userId);</div>
+<div class="line">auth.apiKey().listAdmin();</div>
+<div class="line">auth.apiKey().createAdmin(adminId, &quot;Admin token&quot;, null, &quot;&quot;);</div>
+</div><!-- fragment --><p><span class="tt">auth.oauth()</span> configures providers and builds login URLs. The OAuth encryption key is not exposed.</p>
+<div class="fragment"><div class="line">const oauth = auth.oauth();</div>
+<div class="line">oauth.addProvider({</div>
+<div class="line">    name: &quot;google&quot;,</div>
+<div class="line">    client_id: &quot;...&quot;,</div>
+<div class="line">    client_secret: &quot;...&quot;</div>
+<div class="line">});</div>
+<div class="line">oauth.listProviders();</div>
+<div class="line">oauth.enableProvider(&quot;users&quot;, providerId);</div>
+<div class="line">oauth.authorizeUrl(&quot;users&quot;, &quot;google&quot;, redirectUri);</div>
+<div class="line">oauth.handleCallback(&quot;users&quot;, &quot;google&quot;, code, state);</div>
+<div class="line">oauth.providers(&quot;users&quot;);</div>
+<div class="line">oauth.disableProvider(&quot;users&quot;, providerId);</div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md343"></a>
 MbDatabase</h2>
 <p>The <span class="tt">DatabaseUnit</span> object returned from the <span class="tt">app.db()</span> method exposes the following methods and properties: </p><div class="fragment"><div class="line">const db = app.db() // Get db unit instance</div>
 </div><!-- fragment --><ul>
 <li><span class="tt">db.connected</span>: Property to read the connection state to the database.</li>
 <li><span class="tt">db.session()</span>: Request a database session object which is used for executing SQL queries and other database operations. Returns an instance of <span class="tt">soci::session</span> object.</li>
-<li><span class="tt">db.query(sql_query, [bind objects])</span>: Useful for executing SQL queries on database directly. Expects the first argument to a valid SQL query followed by optional values to bind if any.</li>
+<li><span class="tt">db.query(sql_query, [bind objects])</span>: Execute SQL on a newly leased session. The first argument is the SQL, followed by optional bind objects.</li>
+<li><span class="tt">db.queryOn(session, sql_query, [bind objects])</span>: Execute SQL on a session you already leased. Use this inside <span class="tt">begin</span> / <span class="tt">commit</span> / <span class="tt">rollback</span>. <span class="tt">db.query</span> cannot see that transaction, because it leases a different connection.</li>
 </ul>
 <div class="fragment"><div class="line">const db = app.db();</div>
 <div class="line">const items = db.query(&quot;SELECT * FROM mb_settings&quot;);</div>
@@ -180,16 +232,27 @@ MbDatabase</h2>
 <div class="line">const r = db.query(&quot;SELECT * FROM mb_settings WHERE id = :id&quot;, { id: &quot;12509202836555480207&quot; });</div>
 <div class="line">// db.query(&quot;SELECT * FROM __settings WHERE id = :id &amp;&amp; updated = :updated&quot;, { id: &quot;12509202836555480207&quot; }, { updated: &quot;2025-10-24 01:32:49&quot; });</div>
 <div class="line">console.log(&quot;Settings:  &quot;, r.id); // `r` may be null if not found.</div>
-</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md342"></a>
+</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md344"></a>
 Session</h3>
 <p>The session method returns an instance that exposes the following methods and properties: </p><div class="fragment"><div class="line">const sess = db.session() // Lease a session for executing db actions</div>
 </div><!-- fragment --><ul>
 <li><span class="tt">sess.close()</span>: Close a specific database session. Note that, if the poolSize is greater than 1, this only closes the <em>sess</em> we borrowed earlier.</li>
 <li><span class="tt">sess.reconnect()</span>: Reconnect the session instance.</li>
 <li><span class="tt">sess.connected</span>: Property to get session instance connection status.</li>
-<li><span class="tt">sess.begin</span></li>
-<li><span class="tt">sess.commit</span></li>
-<li><span class="tt">sess.rollback</span></li>
+<li><span class="tt">sess.begin()</span></li>
+<li><span class="tt">sess.commit()</span></li>
+<li><span class="tt">sess.rollback()</span></li>
+</ul>
+<div class="fragment"><div class="line">const sess = db.session();</div>
+<div class="line">db.queryOn(sess, &quot;CREATE TABLE IF NOT EXISTS notes (id TEXT PRIMARY KEY, body TEXT)&quot;);</div>
+<div class="line">sess.begin();</div>
+<div class="line">db.queryOn(sess, &quot;INSERT INTO notes (id, body) VALUES (:id, :body)&quot;, { id: &quot;1&quot;, body: &quot;kept&quot; });</div>
+<div class="line">sess.commit();</div>
+<div class="line"> </div>
+<div class="line">sess.begin();</div>
+<div class="line">db.queryOn(sess, &quot;INSERT INTO notes (id, body) VALUES (:id, :body)&quot;, { id: &quot;2&quot;, body: &quot;dropped&quot; });</div>
+<div class="line">sess.rollback();</div>
+</div><!-- fragment --><ul>
 <li><span class="tt">sess.getQuery</span></li>
 <li><span class="tt">sess.getLastQuery</span></li>
 <li><span class="tt">sess.getLastQueryContext</span></li>
@@ -198,7 +261,7 @@ Session</h3>
 <li><span class="tt">sess.getBackendName</span></li>
 <li><span class="tt">sess.emptyBlob</span></li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md343"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md345"></a>
 MbRouter</h2>
 <p>The router instance allows binding handlers and optional middlewares to given routes from JavaScript.</p><ul>
 <li><span class="tt">app.router().addRoute(method, path, handler, [middlewares])</span>: Create a route for a given HTTP method, on a given <em>path</em> with the given handler function with optional middleware functions.</li>
@@ -208,6 +271,7 @@ MbRouter</h2>
 <li><span class="tt">app.router().patch(path, handler, [middlewares])</span>: Shorthand for <span class="tt">addRoute("PATCH", ...)</span>.</li>
 <li><span class="tt">app.router().delete(path, handler, [middlewares])</span>: Shorthand for <span class="tt">addRoute("DELETE", ...)</span>. (<span class="tt">delete</span> is a reserved word, so some editors/linters prefer the <span class="tt">app.router()["delete"](...)</span> spelling — both work.)</li>
 <li><span class="tt">app.router().redirect(from, to[, status[, methods]])</span>: Redirect requests from one path to another without a handler. <span class="tt">status</span> is a 3xx code (default <span class="tt">302</span>); <span class="tt">methods</span> is a single method name or an array of method names allowed for the redirect (default <span class="tt">["GET"]</span>, pass <span class="tt">[]</span> to allow all methods).</li>
+<li><span class="tt">app.router().broadcastChange(eventJson)</span>: Push a change event, as a JSON string, to realtime subscribers.</li>
 </ul>
 <div class="fragment"><div class="line">app.router().addRoute(&quot;GET&quot;, &quot;/test&quot;, function (req, res){</div>
 <div class="line">    // ...</div>
@@ -235,7 +299,7 @@ MbRouter</h2>
 <div class="line"> </div>
 <div class="line">// Permanent redirect allowing several methods</div>
 <div class="line">app.router().redirect(&quot;/old/upload&quot;, &quot;/test&quot;, 301, [&quot;GET&quot;, &quot;POST&quot;])</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md344"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md346"></a>
 Requests</h2>
 <p>To add a new request endpoint in JS, Mantis exposes a <span class="tt">addRoute</span> method having the following signature:</p>
 <div class="fragment"><div class="line">app.router().addRoute(method, path, function_handler) </div>
@@ -260,7 +324,7 @@ Requests</h2>
 <div class="line">}) </div>
 </div><!-- fragment --><p>To access the request metadata as well as set response metadata, the handler or middleware method passes in two arguments, the request object (shown as <span class="tt">req</span> above) and the response object (shown as <span class="tt">res</span> above).</p>
 <p>The <span class="tt">req</span> object maps to <span class="tt">MbRequest</span> and <span class="tt">res</span> maps to <span class="tt">MbResponse</span> class in C++.</p>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md345"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md347"></a>
 Middlewares</h3>
 <p>Middlewares in Mantis carries the same function signature as the request handler with just one tiny difference. The middlewares return a <span class="tt">bool</span> type, indicating whether or not the middleware executed successfully. That is;</p><ul>
 <li>Return <span class="tt">true</span>: Middleware execution succeeded, proceed to the next handler and or handler.</li>
@@ -283,7 +347,7 @@ Middlewares</h3>
 </div><!-- fragment --><blockquote class="doxtable">
 <p>Warning Note that, middlewares are executed from the first to the last in that order. That is, <span class="tt">app.router().addRoute(...., middleware_1, middleware_2, function(req, res){ return true}, ...)</span> executing from <span class="tt">middleware_1</span> to <span class="tt">middleware_n</span> the finally invoking the handler. </p>
 </blockquote>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md346"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md348"></a>
 MbRequest Methods/Properties</h3>
 <ul>
 <li><span class="tt">req.hasHeader("Authorization")</span>: return true/false</li>
@@ -305,7 +369,7 @@ MbRequest Methods/Properties</h3>
 <li><span class="tt">req.get("key")</span>: Get a value from the context store given the <span class="tt">key</span>.</li>
 <li><span class="tt">req.getOr("key", "default value")</span>: Returns a value if <span class="tt">key</span> is in the context store else the default value.</li>
 </ul>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md347"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md349"></a>
 MbResponse Methods/Properties</h3>
 <ul>
 <li><span class="tt">res.hasHeader("Authorization")</span>: Check if a header <span class="tt">key</span> exists in the request header. Returns true or false.</li>
@@ -327,7 +391,7 @@ MbResponse Methods/Properties</h3>
 - &lt;tt&gt;res.body = \"Some Data\"&lt;/tt&gt;
 - &lt;tt&gt;res.body&lt;/tt&gt; -&gt; returns &lt;tt&gt;Some Data&lt;/tt&gt;
 
-@subsection autotoc_md348 Middlewares (C++ factories)
+@subsection autotoc_md350 Middlewares (C++ factories)
 
 The global &lt;tt&gt;middlewares&lt;/tt&gt; object exposes C++ middleware factories. Each factory returns a JS function with signature &lt;tt&gt;(req, res) =\&gt; bool&lt;/tt&gt; that runs under the script mutex:
 
@@ -338,6 +402,8 @@ The global &lt;tt&gt;middlewares&lt;/tt&gt; object exposes C++ middleware factor
 - &lt;tt&gt;middlewares.requireAdminAuth()&lt;/tt&gt;, &lt;tt&gt;requireGuestOnly()&lt;/tt&gt;, &lt;tt&gt;hasEntityAccess()&lt;/tt&gt;
 - &lt;tt&gt;middlewares.requireExprEval(expr)&lt;/tt&gt;, &lt;tt&gt;settingsFeatureGate(key)&lt;/tt&gt;
 - &lt;tt&gt;middlewares.rejectViewMutations()&lt;/tt&gt;
+- &lt;tt&gt;middlewares.envGate(envVar, blockWhenTruthy)&lt;/tt&gt;: HTTP 503 when &lt;tt&gt;utils.strToBool&lt;/tt&gt; of that environment variable equals &lt;tt&gt;blockWhenTruthy&lt;/tt&gt;.
+- &lt;tt&gt;middlewares.rateLimit(maxRequests, windowSeconds[, byUser])&lt;/tt&gt;: HTTP 429 after &lt;tt&gt;maxRequests&lt;/tt&gt; in the window. &lt;tt&gt;byUser&lt;/tt&gt; defaults to &lt;tt&gt;false&lt;/tt&gt; (limit by IP). Pass &lt;tt&gt;true&lt;/tt&gt; to limit by the authenticated user id, falling back to IP.
 
 @icode{js} 
 app.router().addRoute("GET", "/api/v1/custom/protected", handler,
@@ -350,22 +416,35 @@ app.router().get("/api/v1/custom/protected", handler,
     middlewares.getAuthToken(),
     middlewares.hydrateContextData()
 ); 
-</span></li>
+@endicode 
+
+@subsection autotoc_md351 Utils (utility functions)
+Mantis exposes an object &lt;tt&gt;utils&lt;/tt&gt; which has the following utility functions.
+- &lt;tt&gt;utils.generateTimeBasedId()&lt;/tt&gt;
+- &lt;tt&gt;utils.generateReadableTimeId()&lt;/tt&gt;
+- &lt;tt&gt;utils.generateShortId(char_count)&lt;/tt&gt;
+- &lt;tt&gt;utils.getEnvOrDefault(key, default_value)&lt;/tt&gt;
+- &lt;tt&gt;utils.sanitizeFilename(file_name)&lt;/tt&gt;
+- &lt;tt&gt;utils.hashPassword(password)&lt;/tt&gt;
+- &lt;tt&gt;utils.verifyPassword(password, stored_password)&lt;/tt&gt;
+- &lt;tt&gt;utils.isAllowedFileExtension(extension)&lt;/tt&gt;
+- &lt;tt&gt;utils.safeContentType(extension)&lt;/tt&gt;
+- &lt;tt&gt;utils.strToBool(value)&lt;/tt&gt;
+
+@subsubsection autotoc_md352 Files
+
+&lt;tt&gt;app.files()&lt;/tt&gt; manages the upload directory under the data directory.
+
+- &lt;tt&gt;createDir(entity)&lt;/tt&gt;, &lt;tt&gt;renameDir(old, new)&lt;/tt&gt;, &lt;tt&gt;deleteDir(entity)&lt;/tt&gt;
+- &lt;tt&gt;dirPath(entity, createIfMissing)&lt;/tt&gt;, &lt;tt&gt;filePath(entity, filename)&lt;/tt&gt;
+- &lt;tt&gt;getFilePath(entity, filename)&lt;/tt&gt; returns the path, or &lt;tt&gt;\"\"</span> when the file is missing</li>
+<li><span class="tt">fileExists(entity, filename)</span>, <span class="tt">removeFile(entity, filename)</span></li>
+<li><span class="tt">removeFiles(entity, files)</span> where <span class="tt">files</span> is an array of filenames</li>
+<li><span class="tt">canonicalPath(path)</span>, <span class="tt">isCanonical(path)</span>, <span class="tt">baseDir()</span></li>
 </ul>
-<p><span class="tt"></span></p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md349"></a>
-<span class="tt">Utils (utility functions)</span></h2>
-<p><span class="tt">
-Mantis exposes an object <span class="tt">utils</span> which has the following utility functions.</p><ul>
-<li><span class="tt">utils.generateTimeBasedId()</span></li>
-<li><span class="tt">utils.generateReadableTimeId()</span></li>
-<li><span class="tt">utils.generateShortId(char_count)</span></li>
-<li><span class="tt">utils.getEnvOrDefault(key, default_value)</span></li>
-<li><span class="tt">utils.sanitizeFilename(file_name)</span></li>
-<li><span class="tt">utils.hashPassword(password)</span></li>
-<li><span class="tt">utils.verifyPassword(password, stored_password)</span> </li>
-</ul>
-<p></span></p>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md353"></a>
+Realtime</h3>
+<p><span class="tt">app.rt().notifyChange()</span> wakes the worker. <span class="tt">addDbHooks(entity)</span> and <span class="tt">dropDbHooks(entity)</span> install or remove the database triggers for one entity. Fan-out of a single event uses <span class="tt">app.router().broadcastChange(eventJson)</span>. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
