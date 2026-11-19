@@ -112,6 +112,8 @@ Schema JSON matches the REST schema body. See the [API Reference](api.md) for fi
 
 Paths use `{param}` placeholders. Pass a handler, or omit it and use the method as a decorator. `middlewares` is a callable, a `Middleware`, or a list of either.
 
+A handler may take `(req, res)`, `(req)`, or no arguments. A return value other than `None` is sent as JSON with status 200. Call `res.json(status, data)` when the status is not 200, or when the handler writes the response itself; that return should stay `None`.
+
 A Python middleware is `(req, res) -> bool`. Return `True` or `None` to continue. Return `False` after writing the response to stop the chain. An exception becomes HTTP 500 `{"error": "..."}` and stops the chain.
 
 | Method | Purpose |
@@ -124,6 +126,10 @@ A Python middleware is `(req, res) -> bool`. Return `True` or `None` to continue
 | `sse` | `Sse` manager. |
 
 ```python
+@app.router.get("/hello")
+def hello():
+    return {"message": "Hello, World!"}
+
 @app.router.put("/notes/{id}", middlewares=[
     mantisbase.middlewares.get_auth_token(),
     mantisbase.middlewares.require_admin(),

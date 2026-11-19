@@ -1,20 +1,20 @@
-#include <nanobind/nanobind.h>
 #include <mantisbase/mantisbase.h>
+#include <nanobind/nanobind.h>
 
 #include "py_conv.h"
 
 namespace nb = nanobind;
 
-void register_entity(nb::module_ &m);
-void register_request(nb::module_ &m);
-void register_response(nb::module_ &m);
-void register_middleware(nb::module_ &m);
-void register_db(nb::module_ &m);
-void register_auth(nb::module_ &m);
-void register_services(nb::module_ &m);
-void register_router(nb::module_ &m);
-void register_app(nb::module_ &m);
-void register_utils(nb::module_ &m);
+void register_entity(nb::module_ & m);
+void register_request(nb::module_ & m);
+void register_response(nb::module_ & m);
+void register_middleware(nb::module_ & m);
+void register_db(nb::module_ & m);
+void register_auth(nb::module_ & m);
+void register_services(nb::module_ & m);
+void register_router(nb::module_ & m);
+void register_app(nb::module_ & m);
+void register_utils(nb::module_ & m);
 
 NB_MODULE(mantisbase, m) {
     m.doc() = "Python bindings for MantisBase, a C++20 backend-as-a-service";
