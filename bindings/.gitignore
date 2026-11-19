@@ -7,6 +7,8 @@ package-lock.json
 # Python extension build artefacts
 __pycache__/
 *.egg-info/
+# Written when the Python sdist is built; records the PEP 440 version.
+_mb_version.txt
 dist/
 wheelhouse/
 _skbuild/

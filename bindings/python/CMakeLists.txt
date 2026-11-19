@@ -13,6 +13,21 @@ if(NOT Python_FOUND)
     return()
 endif()
 
+# CPython's Windows import library is an MSVC .lib. MinGW ld records data
+# exports (Py_None and the rest) as functions, and loading the extension
+# fails with "The specified procedure could not be found." The wheel job
+# builds a GNU import library with gendef/dlltool and points here.
+if(MINGW AND DEFINED ENV{PYTHON_MINGW_LIB})
+    set(_mb_pyimp "$ENV{PYTHON_MINGW_LIB}")
+    if(NOT EXISTS "${_mb_pyimp}")
+        message(FATAL_ERROR "PYTHON_MINGW_LIB does not exist: ${_mb_pyimp}")
+    endif()
+    foreach(_mb_cfg "" "_RELEASE" "_DEBUG" "_RELWITHDEBINFO" "_MINSIZEREL")
+        set_target_properties(Python::Module PROPERTIES
+            "IMPORTED_IMPLIB${_mb_cfg}" "${_mb_pyimp}")
+    endforeach()
+endif()
+
 # Locate nanobind via Python's package metadata
 execute_process(
     COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
@@ -31,12 +46,36 @@ find_package(nanobind CONFIG REQUIRED)
 
 nanobind_add_module(mantisbase_python
     src/module.cpp
+    src/py_conv.cpp
     src/app_bind.cpp
     src/router_bind.cpp
     src/request_bind.cpp
     src/response_bind.cpp
     src/db_bind.cpp
+    src/entity_bind.cpp
+    src/auth_bind.cpp
+    src/services_bind.cpp
+    src/middleware_bind.cpp
+    src/utils_bind.cpp
 )
+
+target_include_directories(mantisbase_python PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # nanobind compiles Release with -Os, which enables -fdeclone-ctor-dtor.
+    # GCC 16 then references a unified std::string constructor that MinGW's
+    # libstdc++-6.dll does not export (GCC PR 125359). LoadLibrary reports
+    # that as "The specified procedure could not be found."
+    # The flag must follow -Os; repeating it after nanobind_opt_size does that.
+    target_compile_options(mantisbase_python PRIVATE -fno-declone-ctor-dtor)
+    if(TARGET nanobind-static)
+        target_compile_options(nanobind-static PRIVATE -fno-declone-ctor-dtor)
+    endif()
+    # libmantisbase.dll is linked with --export-all-symbols, so its import
+    # library also advertises std:: instantiations. Resolving those from the
+    # engine DLL fails at load time. Bind libstdc++ first.
+    target_link_libraries(mantisbase_python PRIVATE stdc++)
+endif()
 
 # Link against mantisbase shared library
 if(TARGET mb::shared)

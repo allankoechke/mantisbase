@@ -2,6 +2,8 @@
 
 On server startup, MantisBase loads JavaScript from your configured scripts directory. The primary entry file is **`main.mb.js`**. If that file is missing, MantisBase falls back to **`index.mantis.js`** and logs a deprecation warning.
 
+To embed the server in Python instead of extending it with JavaScript, see the [Python Bindings](python.md) guide.
+
 Scripts run once at startup. Custom routes registered via `app.router().addRoute()` are stored in the Duktape heap and invoked by the C++ HTTP layer when matching requests arrive.
 
 The scripts directory is resolved as follows:

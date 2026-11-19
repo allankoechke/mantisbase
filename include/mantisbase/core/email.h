@@ -16,7 +16,7 @@ namespace mb {
      * connection. Any other port with `use_tls` negotiates STARTTLS. With
      * `use_tls` false the session stays in cleartext.
      */
-    struct MbSmtpConfig {
+    struct MANTISBASE_API MbSmtpConfig {
         std::string host;
         int port = 587;
         std::string user;
@@ -43,7 +43,7 @@ namespace mb {
         std::vector<std::chrono::steady_clock::time_point> timestamps;
     };
 
-    class MbMailer : public MbAppMixin {
+    class MANTISBASE_API MbMailer : public MbAppMixin {
     public:
         explicit MbMailer(const MantisBase &app);
 

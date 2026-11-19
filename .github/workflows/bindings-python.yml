@@ -26,28 +26,46 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        # 3.9 is absent from actions/setup-python on Ubuntu 26.04 (ubuntu-latest)
+        # and has no Windows ARM64 build. 3.10 also has no Windows ARM64 build.
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+        # engine_platform must be a real axis. include entries that only add
+        # new keys are merged into every job, and the last entry wins — so a
+        # platform listed only under include would collapse the whole matrix
+        # onto one runner. Names match build-matrix.yml `platform`
+        # (darwin-*, not macos-*).
+        engine_platform:
+          - linux-x86_64
+          - linux-aarch64
+          - windows-x86_64
+          - windows-aarch64
+          - darwin-aarch64
+          - darwin-x86_64
         include:
-          - runner: ubuntu-latest
-            engine_platform: linux-x86_64
+          - engine_platform: linux-x86_64
+            runner: ubuntu-latest
             repair: auditwheel
-          - runner: ubuntu-24.04-arm
-            engine_platform: linux-aarch64
+          - engine_platform: linux-aarch64
+            runner: ubuntu-24.04-arm
             repair: auditwheel
-          - runner: windows-latest
-            engine_platform: windows-x86_64
+          - engine_platform: windows-x86_64
+            runner: windows-latest
             repair: delvewheel
-          - runner: windows-11-arm
-            engine_platform: windows-aarch64
+          - engine_platform: windows-aarch64
+            runner: windows-11-arm
             repair: delvewheel
-          - runner: macos-latest
-            engine_platform: macos-aarch64
+          - engine_platform: darwin-aarch64
+            runner: macos-latest
             repair: delocate
           # NOTE: macos-15-intel is GitHub's last x86-64 macOS image and is on
           # the deprecation path — if it disappears, drop this entry.
-          - runner: macos-15-intel
-            engine_platform: macos-x86_64
+          - engine_platform: darwin-x86_64
+            runner: macos-15-intel
             repair: delocate
+        exclude:
+          # setup-python has no CPython 3.10 arm64 build for Windows.
+          - python-version: '3.10'
+            engine_platform: windows-aarch64
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -61,11 +79,21 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # vX.Y.Z-beta.N (and alpha/rc) becomes the PEP 440 version X.Y.ZbN.
+      # Stable tags stay on the plain CMake version. The script exports
+      # MB_PYTHON_VERSION for the wheel build.
+      - name: Set Python package version
+        run: python bindings/python/version_provider.py
+
       - name: Install MinGW (Windows x86-64)
         if: runner.os == 'Windows' && matrix.engine_platform == 'windows-x86_64'
         run: |
           choco install mingw --no-progress
           echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
+          # libmantisbase.dll uses the shared libstdc++. delvewheel vendors
+          # libstdc++-6.dll, libgcc_s_seh-1.dll, and libwinpthread-1.dll
+          # from this directory.
+          echo "MINGW_RUNTIME_BIN=C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_ENV
 
       - name: Install llvm-mingw (Windows ARM64)
         if: runner.os == 'Windows' && matrix.engine_platform == 'windows-aarch64'
@@ -90,6 +118,18 @@ jobs:
           $bin = Join-Path $binDir.FullName 'bin'
           if (-not (Test-Path (Join-Path $bin 'aarch64-w64-mingw32-clang++.exe'))) { throw "llvm-mingw toolchain not found under $bin" }
           Add-Content -Path $env:GITHUB_PATH -Value $bin
+          # aarch64 runtime DLLs (libunwind.dll, libc++.dll) live in the
+          # target sysroot, not next to the x64 host clang. delvewheel
+          # needs that directory to vendor them into the wheel.
+          $runtime = Join-Path $binDir.FullName 'aarch64-w64-mingw32\bin'
+          if (-not (Test-Path (Join-Path $runtime 'libunwind.dll'))) {
+            $found = Get-ChildItem -Path $binDir.FullName -Recurse -Filter 'libunwind.dll' |
+              Where-Object { $_.FullName -match 'aarch64' } |
+              Select-Object -First 1
+            if (-not $found) { throw "aarch64 libunwind.dll not found under $dest" }
+            $runtime = $found.DirectoryName
+          }
+          echo "MINGW_RUNTIME_BIN=$runtime" >> $env:GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -114,9 +154,15 @@ jobs:
         run: |
           # Normalize the lib-staging/ + headers-staging/ trees into a standard
           # CMAKE_PREFIX_PATH layout: <prefix>/lib + <prefix>/include.
+          # download-artifact exits 0 when the pattern matches nothing and
+          # does not create the destination directory.
+          if [ ! -d engine-dl ]; then
+            echo "::error::No engine artifacts matched mantisbase_${{ github.ref_name }}_${{ matrix.engine_platform }}-lib or -headers"
+            exit 1
+          fi
           PREFIX="$RUNNER_TEMP/engine"
           mkdir -p "$PREFIX/lib" "$PREFIX/include"
-          LIB=$(find engine-dl -name 'libmantisbase.so' -o -name 'libmantisbase.dylib' | head -n 1)
+          LIB=$(find engine-dl \( -name 'libmantisbase.so' -o -name 'libmantisbase.dylib' \) | head -n 1)
           test -n "$LIB" || { echo "::error::engine shared library missing in artifacts"; exit 1; }
           cp "$LIB" "$PREFIX/lib/"
           # NOTE: upload-artifact strips the uploaded root dir, so the headers
@@ -129,6 +175,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          if (-not (Test-Path "engine-dl")) {
+            Write-Error "No engine artifacts matched mantisbase_${{ github.ref_name }}_${{ matrix.engine_platform }}-lib or -headers"
+            exit 1
+          }
           $Prefix = Join-Path $env:RUNNER_TEMP "engine"
           New-Item -ItemType Directory -Force -Path "$Prefix\lib", "$Prefix\include" | Out-Null
           $dll = Get-ChildItem "engine-dl" -Recurse -Filter "libmantisbase.dll" | Select-Object -First 1
@@ -150,6 +200,24 @@ jobs:
           if ("${{ matrix.engine_platform }}" -eq "windows-x86_64") {
             echo "MB_CC=C:\ProgramData\mingw64\mingw64\bin\gcc.exe" >> $env:GITHUB_ENV
             echo "MB_CXX=C:\ProgramData\mingw64\mingw64\bin\g++.exe" >> $env:GITHUB_ENV
+            # GNU import library for the official (MSVC-built) CPython DLL.
+            $pyDir = Split-Path (Get-Command python).Source
+            $dll = Get-ChildItem $pyDir -Filter "python3*.dll" |
+              Where-Object { $_.BaseName -match '^python3\d+$' } |
+              Select-Object -First 1
+            if (-not $dll) { throw "versioned Python DLL not found in $pyDir" }
+            $work = Join-Path $env:RUNNER_TEMP "pyimp"
+            New-Item -ItemType Directory -Force -Path $work | Out-Null
+            Push-Location $work
+            & gendef $dll.FullName
+            if ($LASTEXITCODE -ne 0) { throw "gendef failed for $($dll.FullName)" }
+            $def = Get-ChildItem -Filter "*.def" | Select-Object -First 1
+            $imp = Join-Path $work "libpython.dll.a"
+            & dlltool -m i386:x86-64 -d $def.FullName -l $imp
+            if ($LASTEXITCODE -ne 0) { throw "dlltool failed" }
+            Pop-Location
+            $impFwd = $imp -replace '\\','/'
+            echo "PYTHON_MINGW_LIB=$impFwd" >> $env:GITHUB_ENV
           } else {
             $cxx = (Get-Command aarch64-w64-mingw32-clang++.exe -ErrorAction SilentlyContinue)
             if (-not $cxx) {
@@ -175,8 +243,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          # scikit-build-core no longer accepts cmake.generator as a config
+          # setting. CMake still honors CMAKE_GENERATOR.
+          $env:CMAKE_GENERATOR = "MinGW Makefiles"
           pip wheel bindings/python --no-deps --wheel-dir wheelhouse `
-            --config-settings=cmake.generator="MinGW Makefiles" `
             --config-settings=cmake.define.CMAKE_PREFIX_PATH="$env:ENGINE_PREFIX" `
             --config-settings=cmake.define.CMAKE_C_COMPILER="$env:MB_CC" `
             --config-settings=cmake.define.CMAKE_CXX_COMPILER="$env:MB_CXX"
@@ -187,29 +257,57 @@ jobs:
         run: |
           # Vendors libmantisbase.so into the wheel and stamps the correct
           # manylinux tag (plain linux_* tags are rejected by PyPI).
+          # cmake --install drops the build RPATH, so the engine lib is only
+          # visible if this directory is on the search path.
+          export LD_LIBRARY_PATH="${ENGINE_PREFIX}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           auditwheel repair wheelhouse/*.whl -w repaired/
+
+      - name: Install ossp-uuid (macOS Intel)
+        if: matrix.engine_platform == 'darwin-x86_64'
+        run: |
+          # The Intel engine dylib is linked to
+          # /usr/local/opt/ossp-uuid/lib/libuuid.16.dylib. That Homebrew
+          # prefix is not on the wheel image, so delocate cannot vendor it.
+          brew install ossp-uuid
 
       - name: Repair wheel (delocate)
         if: matrix.repair == 'delocate'
         shell: bash
         run: |
           # macOS equivalent of auditwheel: vendors libmantisbase.dylib.
-          delocate-wheel -w repaired -v 2 wheelhouse/*.whl
+          # The extension depends on @rpath/libmantisbase.dylib and the wheel
+          # has no LC_RPATH. delocate searches LC_RPATH, then DYLD_LIBRARY_PATH.
+          # -v is a count flag; a following number is taken as a wheel path.
+          export DYLD_LIBRARY_PATH="${ENGINE_PREFIX}/lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+          delocate-wheel -w repaired -vv wheelhouse/*.whl
 
       - name: Repair wheel (delvewheel)
         if: matrix.repair == 'delvewheel'
         shell: pwsh
         run: |
           # Windows equivalent of auditwheel: vendors libmantisbase.dll.
-          # The engine prefix must be on PATH so its DLLs are discoverable.
-          $env:PATH = "$env:ENGINE_PREFIX\lib;$env:PATH"
-          delvewheel repair -w repaired wheelhouse/*.whl --add-path "$env:ENGINE_PREFIX\lib"
+          # ARM64 wheels also need the llvm-mingw runtime (libunwind.dll,
+          # libc++.dll); those are not next to the host clang on PATH.
+          $addPaths = @("$env:ENGINE_PREFIX\lib")
+          if ($env:MINGW_RUNTIME_BIN) { $addPaths += $env:MINGW_RUNTIME_BIN }
+          $env:PATH = ($addPaths -join ';') + ";$env:PATH"
+          $delveArgs = @('repair', '-w', 'repaired', 'wheelhouse/*.whl')
+          foreach ($p in $addPaths) { $delveArgs += @('--add-path', $p) }
+          & delvewheel @delveArgs
 
       - name: Smoke-test repaired wheel
         shell: bash
         run: |
           pip install repaired/*.whl --force-reinstall --no-deps
-          python -c "import mantisbase; print('ok')"
+          if python -c "import mantisbase; print('ok')"; then
+            exit 0
+          fi
+          status=$?
+          if [ "${RUNNER_OS}" = "Windows" ]; then
+            pip install -q pefile
+            python .github/scripts/check_pyd_imports.py || true
+          fi
+          exit "$status"
 
       - name: Upload wheel artifacts
         uses: actions/upload-artifact@v4
@@ -227,6 +325,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      # Same tag-to-PEP 440 mapping as the wheel jobs.
+      - name: Set Python package version
+        run: python bindings/python/version_provider.py
 
       - name: Install build
         run: pip install build

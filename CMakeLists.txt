@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.22)
 set(CMAKE_CXX_STANDARD 20)
 
-# For the project version, update it across the following files
+# For the project version, update it across the following files.
+# The Python package reads project(MantisBase VERSION ...) from this file.
+# A pre-release git tag vX.Y.Z-alpha.N, -beta.N, or -rc.N publishes the
+# Python package as X.Y.ZaN, X.Y.ZbN, or X.Y.ZrcN. CMake stays X.Y.Z.
 # CMakeLists.txt
 # doc/docker.md
 # docker/Dockerfile
 # docker/docker-compose.yaml
-project(MantisBase VERSION 0.4.8)
+project(MantisBase VERSION 0.4.9)
 
 # Set output directories to match SOCI's
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -41,11 +44,17 @@ else() # We are linking statically
     # due to mismatch libstd* libs.
     if(WIN32)
         if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            # Windows MinGW: fully static link to avoid DLL dependencies
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
+            # Fully static executables only. -static must not be a global
+            # compile/link flag: it would also bake libstdc++ into
+            # mantisbase-dll, while the MinGW Python extension uses the
+            # shared libstdc++. Two copies segfault in `import mantisbase`.
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-            message("-- Building MantisBase static libs (Windows MinGW fully static)")
+            # GCC 16 + -Os references a std::string constructor that
+            # libstdc++-6.dll does not export (PR 125359). Keep every MinGW
+            # TU off that path so loading the DLL does not fail with
+            # "procedure could not be found".
+            add_compile_options(-fno-declone-ctor-dtor)
+            message("-- Building MantisBase static libs (Windows MinGW fully static executables)")
         endif ()
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         # Linux GCC: static link only runtime libraries
@@ -159,6 +168,16 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         VISIBILITY_INLINES_HIDDEN YES
         WINDOWS_EXPORT_ALL_SYMBOLS ON
     )
+    if(WIN32 AND NOT MSVC)
+        # WINDOWS_EXPORT_ALL_SYMBOLS is implemented for MSVC only. On MinGW,
+        # any dllexport (MANTISBASE_API) turns off the default "export
+        # everything" behavior, so soci/drogon/trantor symbols linked into
+        # this DLL are missing from the import library. The bindings include
+        # public headers that reference those symbols directly.
+        # Requires SOCI_LTO=OFF (see cmake/add-soci.cmake): ld auto-export
+        # rejects LTO template symbols ("symbol wrong type").
+        target_link_options(mantisbase-dll PRIVATE "-Wl,--export-all-symbols")
+    endif()
 endif()
 
 # Add main executable

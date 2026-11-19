@@ -54,6 +54,12 @@ namespace mb {
         /** @param app Owning application (used for db access/config). Stored by reference. */
         explicit MbRealtimeDB(const MantisBase &app);
 
+        /**
+         * Defined in the library. The implicit destructor would be emitted in
+         * every consumer and would need MbRtDbWorker, which is not exported.
+         */
+        ~MbRealtimeDB();
+
         /** Initialize realtime for the current database backend. Must be called after DB is ready. */
         [[nodiscard]] bool init() const;
 
