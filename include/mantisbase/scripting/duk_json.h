@@ -2,13 +2,14 @@
  * @file duk_json.h
  * @brief Teach dukglue to pass nlohmann::json as a JavaScript value.
  *
- * Include this after dukglue. A returned JSON value is decoded onto the
- * Duktape stack, and a JavaScript argument is encoded back into JSON.
+ * A returned JSON value is decoded onto the Duktape stack, and a JavaScript
+ * argument is encoded back into JSON.
  */
 
 #ifndef MANTISBASE_SCRIPTING_DUK_JSON_H
 #define MANTISBASE_SCRIPTING_DUK_JSON_H
 
+#include <dukglue/dukglue.h>
 #include <nlohmann/json.hpp>
 #include "script_json.h"
 
