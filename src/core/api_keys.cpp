@@ -170,14 +170,14 @@ namespace mb {
     }
 
     json MbApiKeyMgr::createJson(const std::string &entity_name, const std::string &user_id,
-                                 const std::string &label, const json &permissions,
+                                 const std::string &label, const MbScriptJson &permissions,
                                  const std::string &expires_at) const {
-        return create(entity_name, user_id, label, permissionsFromScript(permissions), expires_at);
+        return create(entity_name, user_id, label, permissionsFromScript(permissions.value), expires_at);
     }
 
     json MbApiKeyMgr::createAdminJson(const std::string &user_id, const std::string &label,
-                                      const json &permissions, const std::string &expires_at) const {
-        return createAdmin(user_id, label, permissionsFromScript(permissions), expires_at);
+                                      const MbScriptJson &permissions, const std::string &expires_at) const {
+        return createAdmin(user_id, label, permissionsFromScript(permissions.value), expires_at);
     }
 #endif
 } // mb

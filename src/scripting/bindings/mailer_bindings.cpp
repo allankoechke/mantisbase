@@ -12,7 +12,7 @@ namespace mb {
         dukglue_register_method(ctx, &MbMailer::isConfigured, "isConfigured");
         dukglue_register_method(ctx, &MbMailer::configJson, "config");
         dukglue_register_method(ctx, &MbMailer::configureJson, "configure");
-        dukglue_register_method(ctx, &MbMailer::applySettings, "applySettings");
+        dukglue_register_method(ctx, &MbMailer::applySettingsScript, "applySettings");
         dukglue_register_method(ctx, &MbMailer::sendMessage, "send");
         dukglue_register_method(ctx, &MbMailer::sendTest, "sendTest");
         dukglue_register_method(ctx, &MbMailer::loadTemplateJson, "loadTemplate");

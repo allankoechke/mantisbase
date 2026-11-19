@@ -14,6 +14,9 @@
 #include "api_keys.h"
 #include "oauth.h"
 #include "types.h"
+#ifdef MB_SCRIPTING_ENABLED
+#include "../scripting/script_json.h"
+#endif
 
 namespace mb
 {
@@ -128,6 +131,12 @@ namespace mb
          * @throws MbException 403 when verification is required and `email_verified` is not true.
          */
         void rejectUnverifiedLogin(const std::string &entity_name, const json &user) const;
+
+#ifdef MB_SCRIPTING_ENABLED
+        void rejectUnverifiedLoginScript(const std::string &entity_name, const MbScriptJson &user) const {
+            rejectUnverifiedLogin(entity_name, user.value);
+        }
+#endif
 
         /**
          * @brief Email a verification link when SMTP is configured and the account is unverified.

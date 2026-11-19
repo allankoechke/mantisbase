@@ -10,6 +10,7 @@
 #define MANTISBASE_SCRIPTING_DUK_JSON_H
 
 #include <nlohmann/json.hpp>
+#include "script_json.h"
 
 namespace dukglue {
     namespace types {
@@ -46,6 +47,23 @@ namespace dukglue {
                 const std::string text = value.dump();
                 duk_push_string(ctx, text.c_str());
                 duk_json_decode(ctx, -1);
+            }
+        };
+
+        // Arguments use MbScriptJson. A nlohmann::json parameter is wrapped in an
+        // array by dukglue's tuple conversion; see script_json.h.
+        template<>
+        struct DukType<mb::MbScriptJson> {
+            typedef std::true_type IsValueType;
+
+            template<typename FullT>
+            static mb::MbScriptJson read(duk_context *ctx, duk_idx_t arg_idx) {
+                return mb::MbScriptJson(DukType<nlohmann::json>::read<nlohmann::json>(ctx, arg_idx));
+            }
+
+            template<typename FullT>
+            static void push(duk_context *ctx, const mb::MbScriptJson &value) {
+                DukType<nlohmann::json>::push<nlohmann::json>(ctx, value.value);
             }
         };
     }

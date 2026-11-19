@@ -87,7 +87,8 @@ namespace mb {
         return {};
     }
 
-    void MbFilesMgr::removeFilesJson(const std::string &entity_name, const json &files) const {
+    void MbFilesMgr::removeFilesJson(const std::string &entity_name, const MbScriptJson &files_in) const {
+        const json &files = files_in.value;
         if (!files.is_array())
             throw MbException(400, "files must be an array of filenames");
         std::vector<std::string> names;

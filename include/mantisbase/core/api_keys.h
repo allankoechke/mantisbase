@@ -28,6 +28,9 @@
 #include <nlohmann/json.hpp>
 
 #include "types.h"
+#ifdef MB_SCRIPTING_ENABLED
+#include "../scripting/script_json.h"
+#endif
 
 namespace mb {
     using json = nlohmann::json;
@@ -92,10 +95,10 @@ namespace mb {
          * The returned object includes the one-time `key`.
          */
         [[nodiscard]] json createJson(const std::string &entity_name, const std::string &user_id,
-                                      const std::string &label, const json &permissions,
+                                      const std::string &label, const MbScriptJson &permissions,
                                       const std::string &expires_at) const;
         [[nodiscard]] json createAdminJson(const std::string &user_id, const std::string &label,
-                                           const json &permissions, const std::string &expires_at) const;
+                                           const MbScriptJson &permissions, const std::string &expires_at) const;
 #endif
     };
 } // mb

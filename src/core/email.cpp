@@ -546,8 +546,8 @@ mb::json mb::MbMailer::configJson() const {
     };
 }
 
-void mb::MbMailer::configureJson(const mb::json &smtp_in) {
-    json smtp = smtp_in;
+void mb::MbMailer::configureJson(const mb::MbScriptJson &smtp_in) {
+    json smtp = smtp_in.value;
     if (smtp.contains("password") && smtp["password"].is_string()
         && smtp["password"].get<std::string>() == "********")
         smtp["password"] = m_config.password;
@@ -564,7 +564,8 @@ bool mb::MbMailer::sendMessage(const std::string &to, const std::string &subject
     return send(message);
 }
 
-std::string mb::MbMailer::loadTemplateJson(const std::string &template_name, const mb::json &variables) const {
+std::string mb::MbMailer::loadTemplateJson(const std::string &template_name, const mb::MbScriptJson &variables_in) const {
+    const json &variables = variables_in.value;
     std::unordered_map<std::string, std::string> values;
     if (!variables.is_null()) {
         if (!variables.is_object())

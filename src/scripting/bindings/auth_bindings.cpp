@@ -18,7 +18,7 @@ namespace mb {
         dukglue_register_method(ctx, &MbAuth::sessionTimeoutSeconds, "sessionTimeoutSeconds");
         dukglue_register_method(ctx, &MbAuth::requestLoginOtp, "requestLoginOtp");
         dukglue_register_method(ctx, &MbAuth::loginWithOtp, "loginWithOtp");
-        dukglue_register_method(ctx, &MbAuth::rejectUnverifiedLogin, "rejectUnverifiedLogin");
+        dukglue_register_method(ctx, &MbAuth::rejectUnverifiedLoginScript, "rejectUnverifiedLogin");
         dukglue_register_method(ctx, &MbAuth::notifyEmailVerification, "notifyEmailVerification");
         dukglue_register_method(ctx, &MbAuth::requestEmailVerification, "requestEmailVerification");
         dukglue_register_method(ctx, &MbAuth::confirmEmailVerification, "confirmEmailVerification");
@@ -41,8 +41,8 @@ namespace mb {
         dukglue_register_method(ctx, &MbOAuthMgr::unlinkAccount, "unlinkAccount");
         dukglue_register_method(ctx, &MbOAuthMgr::getLinkedAccounts, "linkedAccounts");
         dukglue_register_method(ctx, &MbOAuthMgr::getProviders, "providers");
-        dukglue_register_method(ctx, &MbOAuthMgr::addProvider, "addProvider");
-        dukglue_register_method(ctx, &MbOAuthMgr::updateProvider, "updateProvider");
+        dukglue_register_method(ctx, &MbOAuthMgr::addProviderScript, "addProvider");
+        dukglue_register_method(ctx, &MbOAuthMgr::updateProviderScript, "updateProvider");
         dukglue_register_method(ctx, &MbOAuthMgr::removeProvider, "removeProvider");
         dukglue_register_method(ctx, &MbOAuthMgr::listProviders, "listProviders");
         dukglue_register_method(ctx, &MbOAuthMgr::enableProviderForEntity, "enableProvider");
