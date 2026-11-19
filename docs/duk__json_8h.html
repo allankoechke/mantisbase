@@ -97,23 +97,26 @@ $(function(){initNavTree('duk__json_8h.html','',''); });
 
 <p>Teach dukglue to pass nlohmann::json as a JavaScript value.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;nlohmann/json.hpp&gt;</code><br />
+<div class="textblock"><code>#include &lt;dukglue/dukglue.h&gt;</code><br />
+<code>#include &lt;nlohmann/json.hpp&gt;</code><br />
 <code>#include &quot;<a class="el" href="script__json_8h_source.html">script_json.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for duk_json.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="duk__json_8h__incl.png" border="0" usemap="#a_2home_2runner_2work_2mantisbase_2mantisbase_2include_2mantisbase_2scripting_2duk__json_8h" loading="lazy" alt=""/></div>
 <map name="a_2home_2runner_2work_2mantisbase_2mantisbase_2include_2mantisbase_2scripting_2duk__json_8h" id="a_2home_2runner_2work_2mantisbase_2mantisbase_2include_2mantisbase_2scripting_2duk__json_8h">
-<area shape="rect" title="Teach dukglue to pass nlohmann::json as a JavaScript value." alt="" coords="32,5,265,67"/>
-<area shape="rect" title=" " alt="" coords="5,191,151,218"/>
-<area shape="poly" title=" " alt="" coords="139,67,92,177,87,175,133,68"/>
-<area shape="rect" href="script__json_8h.html" title="JSON value carried into a Duktape method without going through nlohmann::json." alt="" coords="156,115,259,143"/>
-<area shape="poly" title=" " alt="" coords="169,65,193,102,188,102,167,70"/>
-<area shape="poly" title=" " alt="" coords="187,143,115,185,113,180,182,144"/>
-<area shape="rect" title=" " alt="" coords="175,191,266,218"/>
-<area shape="poly" title=" " alt="" coords="211,141,218,177,213,174,208,145"/>
-<area shape="rect" title=" " alt="" coords="291,191,350,218"/>
-<area shape="poly" title=" " alt="" coords="228,141,291,182,285,182,227,146"/>
+<area shape="rect" title="Teach dukglue to pass nlohmann::json as a JavaScript value." alt="" coords="68,5,300,67"/>
+<area shape="rect" title=" " alt="" coords="5,115,147,143"/>
+<area shape="poly" title=" " alt="" coords="146,69,105,107,101,103,150,66"/>
+<area shape="rect" title=" " alt="" coords="98,191,243,218"/>
+<area shape="poly" title=" " alt="" coords="184,66,175,176,170,174,179,69"/>
+<area shape="rect" href="script__json_8h.html" title="JSON value carried into a Duktape method without going through nlohmann::json." alt="" coords="248,115,352,143"/>
+<area shape="poly" title=" " alt="" coords="223,65,274,105,269,105,222,70"/>
+<area shape="poly" title=" " alt="" coords="279,143,208,185,206,180,274,144"/>
+<area shape="rect" title=" " alt="" coords="268,191,359,218"/>
+<area shape="poly" title=" " alt="" coords="304,141,311,177,306,174,301,145"/>
+<area shape="rect" title=" " alt="" coords="384,191,443,218"/>
+<area shape="poly" title=" " alt="" coords="321,141,383,182,378,182,320,146"/>
 </map>
 </div>
 </div>
@@ -131,7 +134,7 @@ Namespaces</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Teach dukglue to pass nlohmann::json as a JavaScript value. </p>
-<p>Include this after dukglue. A returned JSON value is decoded onto the Duktape stack, and a JavaScript argument is encoded back into JSON. </p>
+<p>A returned JSON value is decoded onto the Duktape stack, and a JavaScript argument is encoded back into JSON. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
