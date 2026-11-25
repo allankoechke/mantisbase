@@ -181,16 +181,11 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         # rejects LTO template symbols ("symbol wrong type").
         target_link_options(mantisbase-dll PRIVATE "-Wl,--export-all-symbols")
     endif()
-    if(UNIX AND NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # Executables opt into a private libstdc++ via mb_static_cxx_runtime.
-        # This DLL must keep the system one: the Python extension links that
-        # same runtime, and a second copy makes SOCI casts throw std::bad_cast.
-        target_link_options(mantisbase-dll PRIVATE -shared-libgcc -shared-libstdc++)
-    endif()
 endif()
 
-# Standalone binaries keep a private libstdc++ so they run without the
-# system runtime. Shared libraries must not: see the note above.
+# Executables only. GCC has no -shared-libstdc++; the shared library keeps
+# the system runtime by not passing -static-libstdc++. A private copy in
+# libmantisbase.so breaks SOCI casts in the Python extension (std::bad_cast).
 function(mb_static_cxx_runtime target)
     if(NOT MB_SHARED_DEPS AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT WIN32)
         target_link_options(${target} PRIVATE -static-libgcc -static-libstdc++)
