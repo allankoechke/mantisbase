@@ -15,6 +15,29 @@ namespace mbpy {
 
         std::mutex g_pin_mutex;
         std::unordered_map<const void *, std::vector<std::shared_ptr<PyRefPin> > > g_pins;
+
+        // nb::cast<std::string> throws std::bad_cast unless this TU sees
+        // nanobind's string caster. Go through the Python C API so a JSON
+        // string cannot fail that way.
+        nb::object unicode_from_utf8(const std::string &text) {
+            PyObject *obj = PyUnicode_FromStringAndSize(
+                text.data(), static_cast<Py_ssize_t>(text.size()));
+            if (!obj) {
+                PyErr_Clear();
+                throw std::runtime_error("JSON string is not valid UTF-8");
+            }
+            return nb::steal<nb::object>(obj);
+        }
+
+        std::string unicode_to_utf8(PyObject *ptr) {
+            Py_ssize_t size = 0;
+            const char *data = PyUnicode_AsUTF8AndSize(ptr, &size);
+            if (!data) {
+                PyErr_Clear();
+                throw std::runtime_error("Expected a UTF-8 string");
+            }
+            return std::string(data, static_cast<std::size_t>(size));
+        }
     } // namespace
 
     std::shared_ptr<PyRefPin> retain_py_ref(const void *owner, nb::handle obj) {
@@ -71,7 +94,7 @@ namespace mbpy {
         if (value.is_number_float())
             return nb::cast(value.get<double>());
         if (value.is_string())
-            return nb::cast(value.get<std::string>());
+            return unicode_from_utf8(value.get<std::string>());
         if (value.is_array()) {
             nb::list out;
             for (const auto &item: value)
@@ -81,7 +104,7 @@ namespace mbpy {
         if (value.is_object()) {
             nb::dict out;
             for (auto it = value.begin(); it != value.end(); ++it)
-                out[nb::cast(it.key())] = json_to_python(it.value());
+                out[unicode_from_utf8(it.key())] = json_to_python(it.value());
             return out;
         }
         return nb::none();
@@ -99,7 +122,7 @@ namespace mbpy {
         if (PyFloat_Check(ptr))
             return nb::cast<double>(value);
         if (PyUnicode_Check(ptr))
-            return nb::cast<std::string>(value);
+            return unicode_to_utf8(ptr);
 
         if (PyList_Check(ptr) || PyTuple_Check(ptr)) {
             nlohmann::json array = nlohmann::json::array();
@@ -117,7 +140,7 @@ namespace mbpy {
             while (PyDict_Next(ptr, &pos, &key, &item)) {
                 if (!PyUnicode_Check(key))
                     throw nb::type_error("JSON object keys must be strings");
-                object[nb::cast<std::string>(nb::handle(key))] =
+                object[unicode_to_utf8(key)] =
                         python_to_json(nb::handle(item));
             }
             return object;

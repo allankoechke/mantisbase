@@ -403,6 +403,28 @@ jobs:
           New-Item -ItemType Directory -Force -Path $Staging | Out-Null
           Copy-Item "build\bin\libmantisbase.dll" -Destination "$Staging\"
           Copy-Item "build\lib\libmantisbase.dll.a" -Destination "$Staging\"
+          # Ship the MinGW runtime this DLL was linked against. The wheel job
+          # installs MinGW again on a fresh runner; a newer libstdc++-6.dll
+          # does not export every symbol this build referenced, and loading
+          # the extension fails with "The specified procedure could not be found."
+          $runtimeNames = @(
+            "libstdc++-6.dll", "libgcc_s_seh-1.dll", "libgcc_s_dw2-1.dll",
+            "libwinpthread-1.dll", "libc++.dll", "libunwind.dll"
+          )
+          $search = ($env:PATH -split ';') + @(
+            "C:\ProgramData\mingw64\mingw64\bin",
+            "C:\llvm-mingw\bin"
+          )
+          foreach ($dllName in $runtimeNames) {
+            foreach ($dir in $search) {
+              if (-not $dir) { continue }
+              $candidate = Join-Path $dir $dllName
+              if (Test-Path $candidate) {
+                Copy-Item $candidate "$Staging\" -Force
+                break
+              }
+            }
+          }
           New-Item -ItemType Directory -Force -Path "lib-staging\generated-include\mantisbase" | Out-Null
           Copy-Item "build\include\mantisbase\config.hpp" -Destination "lib-staging\generated-include\mantisbase\"
 

@@ -57,8 +57,10 @@ else() # We are linking statically
             message("-- Building MantisBase static libs (Windows MinGW fully static executables)")
         endif ()
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # Linux GCC: static link only runtime libraries
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+        # Static libstdc++ is applied to executables only (mb_static_cxx_runtime).
+        # Putting it in CMAKE_CXX_FLAGS also links it into mantisbase-dll, and
+        # the Python extension then loads a second libstdc++. SOCI casts and
+        # C++ exceptions across that boundary throw std::bad_cast.
         message("-- Building MantisBase static libs")
     else()
         message("-- Building MantisBase static libs (no runtime static flags for ${CMAKE_CXX_COMPILER_ID})")
@@ -179,10 +181,25 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         # rejects LTO template symbols ("symbol wrong type").
         target_link_options(mantisbase-dll PRIVATE "-Wl,--export-all-symbols")
     endif()
+    if(UNIX AND NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        # Executables opt into a private libstdc++ via mb_static_cxx_runtime.
+        # This DLL must keep the system one: the Python extension links that
+        # same runtime, and a second copy makes SOCI casts throw std::bad_cast.
+        target_link_options(mantisbase-dll PRIVATE -shared-libgcc -shared-libstdc++)
+    endif()
 endif()
+
+# Standalone binaries keep a private libstdc++ so they run without the
+# system runtime. Shared libraries must not: see the note above.
+function(mb_static_cxx_runtime target)
+    if(NOT MB_SHARED_DEPS AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT WIN32)
+        target_link_options(${target} PRIVATE -static-libgcc -static-libstdc++)
+    endif()
+endfunction()
 
 # Add main executable
 add_executable(mantisbase_app src/main.cpp)
+mb_static_cxx_runtime(mantisbase_app)
 
 # Ensure resultant name is always `mantisbase` for the app despite targets names for consistency
 set_target_properties(mantisbase_app PROPERTIES OUTPUT_NAME mantisbase)

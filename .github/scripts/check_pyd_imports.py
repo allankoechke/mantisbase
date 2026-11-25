@@ -51,28 +51,44 @@ def locate(dll, pyd):
     return found
 
 
-def main():
-    pyd = find_pyd()
-    print("pyd:", pyd)
-    if not pyd:
+def check_pe(path, missing, seen, depth):
+    key = os.path.normcase(os.path.abspath(path))
+    if key in seen or depth > 2:
         return
-    pe = pefile.PE(pyd, fast_load=True)
+    seen.add(key)
+    pe = pefile.PE(path, fast_load=True)
     pe.parse_data_directories(directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"]])
-    missing = []
+    if not hasattr(pe, "DIRECTORY_ENTRY_IMPORT"):
+        return
     for entry in pe.DIRECTORY_ENTRY_IMPORT:
         dll = entry.dll.decode(errors="replace")
-        paths = locate(dll, pyd)
-        print(f"import {dll} -> {paths[0] if paths else 'NOT FOUND'}")
-        if not paths:
+        paths = locate(dll, path)
+        chosen = paths[0] if paths else None
+        print(f"import {dll} -> {chosen or 'NOT FOUND'} (from {os.path.basename(path)})")
+        if not chosen:
             missing.append(f"{dll}: DLL not found")
             continue
-        have = exports(paths[0])
+        have = exports(chosen)
         for imp in entry.imports:
             if not imp.name:
                 continue
             name = imp.name.decode(errors="replace")
             if name not in have:
                 missing.append(f"{dll}: {name}")
+        # The loader fails on a missing procedure in libmantisbase.dll even
+        # when every direct import of the pyd itself resolves.
+        bundled = os.path.dirname(os.path.abspath(chosen)) == os.path.dirname(os.path.abspath(path))
+        if bundled and not dll.lower().startswith("api-ms-win-"):
+            check_pe(chosen, missing, seen, depth + 1)
+
+
+def main():
+    pyd = find_pyd()
+    print("pyd:", pyd)
+    if not pyd:
+        return
+    missing = []
+    check_pe(pyd, missing, set(), 0)
     if missing:
         print("missing procedures:")
         for line in missing:

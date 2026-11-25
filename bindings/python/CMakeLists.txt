@@ -67,10 +67,18 @@ if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # libstdc++-6.dll does not export (GCC PR 125359). LoadLibrary reports
     # that as "The specified procedure could not be found."
     # The flag must follow -Os; repeating it after nanobind_opt_size does that.
+    # The static lib is nanobind-static, or nanobind-static-abi3 / -ft / -fa
+    # depending on the Python build. Every one of those objects is linked in.
     target_compile_options(mantisbase_python PRIVATE -fno-declone-ctor-dtor)
-    if(TARGET nanobind-static)
-        target_compile_options(nanobind-static PRIVATE -fno-declone-ctor-dtor)
-    endif()
+    foreach(_mb_nb
+            nanobind-static nanobind-static-abi3
+            nanobind-static-ft nanobind-static-abi3-ft
+            nanobind-static-fa nanobind-static-fa-ft
+            nanobind-static-ps nanobind-static-abi3-ps)
+        if(TARGET ${_mb_nb})
+            target_compile_options(${_mb_nb} PRIVATE -fno-declone-ctor-dtor)
+        endif()
+    endforeach()
     # libmantisbase.dll is linked with --export-all-symbols, so its import
     # library also advertises std:: instantiations. Resolving those from the
     # engine DLL fails at load time. Bind libstdc++ first.

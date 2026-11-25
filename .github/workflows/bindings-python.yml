@@ -185,6 +185,11 @@ jobs:
           if (-not $dll) { Write-Error "engine DLL missing in artifacts"; exit 1 }
           Copy-Item $dll.FullName "$Prefix\lib\"
           Copy-Item (Join-Path $dll.DirectoryName "libmantisbase.dll.a") "$Prefix\lib\"
+          # Runtime DLLs staged next to the engine (libstdc++, libgcc, winpthread
+          # or llvm-mingw libc++/libunwind) must win over a freshly installed toolchain.
+          Get-ChildItem $dll.DirectoryName -Filter "*.dll" | ForEach-Object {
+            Copy-Item $_.FullName "$Prefix\lib\" -Force
+          }
           # NOTE: upload-artifact strips the uploaded root dir, so headers land
           # as engine-dl\include\... (not headers-staging\...).
           if (-not (Test-Path "engine-dl\include\mantisbase\mantisbase.h")) { Write-Error "engine headers missing in artifacts"; exit 1 }

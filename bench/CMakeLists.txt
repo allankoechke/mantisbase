@@ -24,6 +24,7 @@ add_executable(mantisbase_bench
     bench_sse.cpp
     bench_crud.cpp
 )
+mb_static_cxx_runtime(mantisbase_bench)
 
 target_compile_definitions(mantisbase_bench PRIVATE
     MANTISBASE_TESTS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/../tests"
