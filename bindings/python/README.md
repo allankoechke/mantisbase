@@ -61,6 +61,16 @@ Requires CMake >= 3.22, a C++20 compiler, and Python >= 3.9. `nanobind` and `sci
 
 Wheel production is described in `.github/workflows/bindings-python.yml`.
 
+## Tests
+
+With a wheel installed in the active environment, from the repository root:
+
+```bash
+python -m unittest discover -s bindings/python/tests -v
+```
+
+The suite starts a temporary SQLite server and checks schemas, entity CRUD, SQL transactions, JWT and API keys, files, the mock mailer, and HTTP routes. CI runs it against every repaired wheel.
+
 ## License
 
 MIT

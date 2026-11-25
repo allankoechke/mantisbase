@@ -295,15 +295,15 @@ jobs:
           foreach ($p in $addPaths) { $delveArgs += @('--add-path', $p) }
           & delvewheel @delveArgs
 
-      - name: Smoke-test repaired wheel
+      - name: Test repaired wheel
         shell: bash
         run: |
           pip install repaired/*.whl --force-reinstall --no-deps
-          if python -c "import mantisbase; print('ok')"; then
-            exit 0
-          fi
+          set +e
+          python -m unittest discover -s bindings/python/tests -v
           status=$?
-          if [ "${RUNNER_OS}" = "Windows" ]; then
+          set -e
+          if [ "$status" -ne 0 ] && [ "${RUNNER_OS}" = "Windows" ]; then
             pip install -q pefile
             python .github/scripts/check_pyd_imports.py || true
           fi
