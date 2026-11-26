@@ -61,6 +61,12 @@ nanobind_add_module(mantisbase_python
 
 target_include_directories(mantisbase_python PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+if(MINGW)
+    # See src/win_detach.cpp. ARM (clang) and x64 (GCC) both use the MinGW CRT,
+    # which runs C++ static destructors from DllMain after the interpreter exits.
+    target_sources(mantisbase_python PRIVATE src/win_detach.cpp)
+endif()
+
 if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # nanobind compiles Release with -Os, which enables -fdeclone-ctor-dtor.
     # GCC 16 then references a unified std::string constructor that MinGW's

@@ -34,6 +34,18 @@ NB_MODULE(mantisbase, m) {
 
     m.def("version", &mb::MantisBase::appVersion, "MantisBase version string");
 
+    // Drop pinned callables before CPython clears module globals. Py_AtExit
+    // runs too late: the runtime is already half destroyed by then.
+    try {
+        nb::module_::import_("atexit").attr("register")(
+            nb::cpp_function([]() {
+                mbpy::note_python_shutdown();
+                mbpy::clear_all_retained();
+            }));
+    } catch (const nb::python_error &) {
+        PyErr_Clear();
+    }
+
     // Names used by earlier examples, alongside the Mb* classes.
     m.attr("Router") = m.attr("MbRouter");
     m.attr("MantisRequest") = m.attr("MbRequest");

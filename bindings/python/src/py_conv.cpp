@@ -1,5 +1,6 @@
 #include "py_conv.h"
 
+#include <atomic>
 #include <limits>
 #include <mantisbase/core/http.h>
 #include <mutex>
@@ -14,6 +15,7 @@ namespace mbpy {
         }
 
         std::mutex g_pin_mutex;
+        std::atomic<bool> g_py_shutdown{false};
         std::unordered_map<const void *, std::vector<std::shared_ptr<PyRefPin> > > g_pins;
 
         // nb::cast<std::string> throws std::bad_cast unless this TU sees
@@ -53,15 +55,22 @@ namespace mbpy {
         return pin && pin->obj.is_valid() ? pin->obj : nb::object();
     }
 
-    void copy_retained(const void *owner, std::vector<nb::object> &out) {
-        std::lock_guard lock(g_pin_mutex);
-        const auto found = g_pins.find(owner);
-        if (found == g_pins.end())
-            return;
-        for (const auto &pin: found->second) {
-            if (pin->obj.is_valid())
-                out.push_back(pin->obj);
+    int visit_retained(const void *owner, visitproc visit, void *arg) {
+        std::vector<PyObject *> held;
+        {
+            std::lock_guard lock(g_pin_mutex);
+            const auto found = g_pins.find(owner);
+            if (found == g_pins.end())
+                return 0;
+            held.reserve(found->second.size());
+            for (const auto &pin: found->second) {
+                if (pin && pin->obj.is_valid())
+                    held.push_back(pin->obj.ptr());
+            }
         }
+        for (PyObject *obj: held)
+            Py_VISIT(obj);
+        return 0;
     }
 
     void clear_retained(const void *owner) {
@@ -76,6 +85,28 @@ namespace mbpy {
         }
         for (auto &pin: taken)
             pin->obj = nb::object();
+    }
+
+    void note_python_shutdown() noexcept {
+        g_py_shutdown.store(true, std::memory_order_release);
+    }
+
+    bool python_shutdown_started() noexcept {
+        return g_py_shutdown.load(std::memory_order_acquire);
+    }
+
+    void clear_all_retained() {
+        std::unordered_map<const void *, std::vector<std::shared_ptr<PyRefPin> > > taken;
+        {
+            std::lock_guard lock(g_pin_mutex);
+            taken.swap(g_pins);
+        }
+        for (auto &entry: taken) {
+            for (auto &pin: entry.second) {
+                if (pin)
+                    pin->obj = nb::object();
+            }
+        }
     }
 
     nb::object json_to_python(const nlohmann::json &value) {

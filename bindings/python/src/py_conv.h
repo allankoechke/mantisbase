@@ -27,15 +27,34 @@ namespace mbpy {
      */
     struct PyRefPin {
         nb::object obj;
+
+        ~PyRefPin() {
+            // Process exit destroys this after Py_Finalize. nb::object would
+            // Py_DECREF into a runtime that is already gone.
+            if (!Py_IsInitialized())
+                obj.release();
+        }
     };
 
     std::shared_ptr<PyRefPin> retain_py_ref(const void *owner, nb::handle obj);
 
     nb::object load_pin(const std::shared_ptr<PyRefPin> &pin);
 
-    void copy_retained(const void *owner, std::vector<nb::object> &out);
+    /**
+     * Hand the GC the pinned objects. Must not incref or allocate Python
+     * objects: a temporary nb::object created here is destroyed before
+     * traverse returns, and that decref crashes CPython 3.10 and 3.13+.
+     */
+    int visit_retained(const void *owner, visitproc visit, void *arg);
 
     void clear_retained(const void *owner);
+
+    void clear_all_retained();
+
+    /** Set from the atexit hook, before CPython clears module globals. */
+    void note_python_shutdown() noexcept;
+
+    bool python_shutdown_started() noexcept;
 
     /** Accept a middleware, a callable, or a list/tuple of either. */
     mb::MbMiddlewares collect_middlewares(nb::handle middlewares,

@@ -8,7 +8,6 @@
 #include <nanobind/stl/string.h>
 #include <optional>
 #include <thread>
-#include <vector>
 
 #include "py_conv.h"
 
@@ -66,10 +65,12 @@ namespace {
         }
 
         ~PyApp() {
-            if (m_pin_key)
-                mbpy::clear_retained(m_pin_key);
-            m_pin_key = nullptr;
+            // stop() drops the pinned callables after the server thread is
+            // joined, which breaks the App ↔ closure cycle while this object
+            // is still reachable from Python. Leaving the cycle for interpreter
+            // finalization faults on CPython 3.10, 3.13, and 3.14.
             stop();
+            m_pin_key = nullptr;
         }
 
         [[nodiscard]] const void *pin_key() const { return m_pin_key; }
@@ -95,12 +96,29 @@ namespace {
             if (!m_app)
                 return;
 
-            nb::gil_scoped_release release;
-            if (m_running.load())
-                m_app->close();
-            if (m_serverThread.joinable())
-                m_serverThread.join();
-            m_running.store(false);
+            if (m_running.load() || m_serverThread.joinable()) {
+                // Releasing the GIL while the interpreter is finalizing faults
+                // on CPython 3.10, 3.13, and 3.14. The server thread is blocked
+                // in the event loop, so close() and join() can run with the
+                // GIL held. An in-request stop() is not in that window and
+                // still drops the GIL so a handler can finish.
+                const bool release_gil =
+                        Py_IsInitialized() && !mbpy::python_shutdown_started();
+                std::optional<nb::gil_scoped_release> release;
+                if (release_gil)
+                    release.emplace();
+                if (m_running.load())
+                    m_app->close();
+                if (m_serverThread.joinable())
+                    m_serverThread.join();
+                m_running.store(false);
+            }
+
+            // Handlers may be on the stack until the server thread joins, so
+            // the pins stay until after that join. The caller of stop() still
+            // owns this App, so dropping the closures here does not delete it.
+            if (m_pin_key && Py_IsInitialized())
+                mbpy::clear_retained(m_pin_key);
         }
 
         [[nodiscard]] mb::MantisBase &app() const { return *m_app; }
@@ -114,10 +132,8 @@ namespace {
 
     int app_traverse(PyObject *self, visitproc visit, void *arg) {
         if (const PyApp *app = nb::inst_ptr<PyApp>(self); app && app->pin_key()) {
-            std::vector<nb::object> held;
-            mbpy::copy_retained(app->pin_key(), held);
-            for (nb::handle obj: held)
-                Py_VISIT(obj.ptr());
+            if (const int rc = mbpy::visit_retained(app->pin_key(), visit, arg))
+                return rc;
         }
         Py_VISIT(Py_TYPE(self));
         return 0;
