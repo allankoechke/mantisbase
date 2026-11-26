@@ -89,7 +89,7 @@ var NAVTREEINDEX =
 "classmb_1_1MbFilesMgr.html#aa74850be9b5cc31927c2241361811176",
 "classmb_1_1MbResponse.html#a4f4d09fecd39b9f925a200ba11a8c52d",
 "email_8h_source.html",
-"namespacemb.html#ac5b5233790c2e722a8af39b5cb7e65c6"
+"namespacemb.html#ac4020e7207d3b2f6eace4d5cfa0eacef"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

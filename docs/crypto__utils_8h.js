@@ -8,5 +8,6 @@ var crypto__utils_8h =
     [ "mb::generatePKCEChallenge", "namespacemb.html#ab1732e537d2f880aebd13253dad4bd21", null ],
     [ "mb::generatePKCEVerifier", "namespacemb.html#ac5b5233790c2e722a8af39b5cb7e65c6", null ],
     [ "mb::generateSecureRandom", "namespacemb.html#ab7fd34295b20b3c5ebe1024866cfba86", null ],
+    [ "mb::initWolfSsl", "namespacemb.html#a75ea34c60da916b00f13048b19636d95", null ],
     [ "mb::sha256Hex", "namespacemb.html#af20911282ea72bd07f37f89e722119cd", null ]
 ];

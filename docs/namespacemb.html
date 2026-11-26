@@ -310,6 +310,7 @@ Functions</h2></td></tr>
 <tr class="memitem:a6b5dfde726a437facf878332322fc6f8" id="r_a6b5dfde726a437facf878332322fc6f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6b5dfde726a437facf878332322fc6f8">isAuthExpired</a> (const <a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">RealtimeAuthSnapshot</a> &amp;snap, const <a class="el" href="classmb_1_1MantisBase.html">MantisBase</a> &amp;app)</td></tr>
 <tr class="memitem:aaa6df102130df0f2881e4943e3c1686a" id="r_aaa6df102130df0f2881e4943e3c1686a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaa6df102130df0f2881e4943e3c1686a">isAuthenticatedSnapshot</a> (const <a class="el" href="structmb_1_1RealtimeAuthSnapshot.html">RealtimeAuthSnapshot</a> &amp;snap)</td></tr>
 <tr class="memitem:a80e7b76a5023b74babc342a83d288284" id="r_a80e7b76a5023b74babc342a83d288284"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a80e7b76a5023b74babc342a83d288284">touchWsSession</a> (<a class="el" href="structmb_1_1RealtimeWsSession.html">RealtimeWsSession</a> &amp;session)</td></tr>
+<tr class="memitem:a75ea34c60da916b00f13048b19636d95" id="r_a75ea34c60da916b00f13048b19636d95"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a75ea34c60da916b00f13048b19636d95">initWolfSsl</a> ()</td></tr>
 <tr class="memitem:ab7fd34295b20b3c5ebe1024866cfba86" id="r_ab7fd34295b20b3c5ebe1024866cfba86"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab7fd34295b20b3c5ebe1024866cfba86">generateSecureRandom</a> (size_t length)</td></tr>
 <tr class="memitem:af20911282ea72bd07f37f89e722119cd" id="r_af20911282ea72bd07f37f89e722119cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af20911282ea72bd07f37f89e722119cd">sha256Hex</a> (const std::string &amp;input)</td></tr>
 <tr class="memitem:a9c74b18eee6bb0699b7f3976e5daa239" id="r_a9c74b18eee6bb0699b7f3976e5daa239"><td class="memItemLeft" align="right" valign="top"><a class="el" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">MANTISBASE_API</a> std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9c74b18eee6bb0699b7f3976e5daa239">base64UrlEncode</a> (const std::vector&lt; uint8_t &gt; &amp;data)</td></tr>
@@ -1711,6 +1712,24 @@ Variables</h2></td></tr>
 
 <p>Hydrate request context with additional data. </p>
 <p>Populates context store with request metadata and user information. </p><dl class="section return"><dt>Returns</dt><dd>Middleware function </dd></dl>
+
+</div>
+</div>
+<a id="a75ea34c60da916b00f13048b19636d95" name="a75ea34c60da916b00f13048b19636d95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75ea34c60da916b00f13048b19636d95">&#9670;&#160;</a></span>initWolfSsl()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mb::initWolfSsl </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Initialize wolfSSL once per process. Windows builds fault in HMAC and the RNG until this runs. Safe to call more than once. </p><dl class="section return"><dt>Returns</dt><dd>true when wolfSSL is ready. </dd></dl>
 
 </div>
 </div>
@@ -3196,7 +3215,7 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 </div><div class="memdoc">
 
 <p>Thread-safe conversion of an epoch time to a local-time std::tm. </p>
-<p>std::localtime returns a pointer to a shared static std::tm, so calling it from multiple threads concurrently is a data race. This wrapper serializes the call and returns a copy, making it safe to use from the request-handling worker threads. Portable across MinGW/MSVC/Linux without depending on the non-standard localtime_r/localtime_s.</p>
+<p>std::localtime returns a pointer to a shared static std::tm. This fills a private std::tm with localtime_s / localtime_r so request threads do not share that buffer.</p>
 <p>Prefer <a class="el" href="#ae4d3d9830d695badbaa82fec75d2be94" title="Thread-safe conversion of an epoch time to a UTC std::tm.">toUtcTime()</a> for anything persisted to the database; this is only for values intended to be rendered in the server's local timezone.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -3296,7 +3315,7 @@ Rate limit headers are included in responses: X-RateLimit-Limit, X-RateLimit-Rem
 </div><div class="memdoc">
 
 <p>Thread-safe conversion of an epoch time to a UTC std::tm. </p>
-<p>std::gmtime returns a pointer to a shared static std::tm, so calling it from multiple threads concurrently is a data race. This wrapper serializes the call and returns a copy. UTC is the canonical timezone for all persisted timestamps so values are stable regardless of the server's local timezone or DST.</p>
+<p>std::gmtime returns a pointer to a shared static std::tm. Concurrent calls from the server thread and a request thread race on that buffer, and on Windows the race faults. This fills a private std::tm with gmtime_s / gmtime_r. UTC is the canonical timezone for persisted timestamps so values stay stable across local timezone and DST.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">t</td><td>Epoch time value. </td></tr>

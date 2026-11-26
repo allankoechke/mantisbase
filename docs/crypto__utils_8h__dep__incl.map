@@ -1,11 +1,13 @@
 <map id="/home/runner/work/mantisbase/mantisbase/include/mantisbase/utils/crypto_utils.h" name="/home/runner/work/mantisbase/mantisbase/include/mantisbase/utils/crypto_utils.h">
-<area shape="rect" id="Node000001" title="Cryptographic helpers for OAuth PKCE, API keys, and token encryption." alt="" coords="373,5,606,67"/>
+<area shape="rect" id="Node000001" title="Cryptographic helpers for OAuth PKCE, API keys, and token encryption." alt="" coords="497,5,730,67"/>
 <area shape="rect" id="Node000002" href="$api__keys_8cpp.html" title=" " alt="" coords="5,115,230,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="373,71,223,117,221,112,368,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="481,66,242,118,231,120,230,115,241,112,483,62"/>
 <area shape="rect" id="Node000003" href="$auth_8cpp.html" title=" " alt="" coords="253,124,478,168"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="446,76,392,125,389,121,441,78"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="533,73,416,125,415,120,527,74"/>
 <area shape="rect" id="Node000004" href="$oauth_8cpp.html" title=" " alt="" coords="501,124,726,168"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="536,75,591,124,586,122,535,80"/>
-<area shape="rect" id="Node000005" href="$crypto__utils_8cpp.html" title=" " alt="" coords="749,115,974,177"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="609,69,760,114,754,114,608,74"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="615,81,616,125,611,121,612,84"/>
+<area shape="rect" id="Node000005" href="$mantisbase_8cpp.html" title=" " alt="" coords="750,124,981,168"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="699,71,817,123,812,123,698,76"/>
+<area shape="rect" id="Node000006" href="$crypto__utils_8cpp.html" title=" " alt="" coords="1005,115,1230,177"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="745,61,994,112,1007,118,1002,117,993,118,745,66"/>
 </map>

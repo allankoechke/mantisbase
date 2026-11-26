@@ -130,6 +130,7 @@ var namespacemb =
     [ "hasEntityAccess", "namespacemb.html#ac4020e7207d3b2f6eace4d5cfa0eacef", null ],
     [ "hashPassword", "namespacemb.html#ab16eec531440dbc19ec0880549d0638e", null ],
     [ "hydrateContextData", "namespacemb.html#a744fe2255bd45a1b982fb14a6943cd9a", null ],
+    [ "initWolfSsl", "namespacemb.html#a75ea34c60da916b00f13048b19636d95", null ],
     [ "intPrecisionFromField", "namespacemb.html#a984a34e8f347ae9b3ba742b76f8f9417", null ],
     [ "intPrecisionFromString", "namespacemb.html#a3b72b90aa68869a81730c245c2dac9c7", null ],
     [ "intPrecisionSignedRange", "namespacemb.html#a2538e4ac3e88c87780be99e6459641a4", null ],
