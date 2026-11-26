@@ -172,14 +172,24 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         WINDOWS_EXPORT_ALL_SYMBOLS ON
     )
     if(WIN32 AND NOT MSVC)
-        # WINDOWS_EXPORT_ALL_SYMBOLS is implemented for MSVC only. On MinGW,
-        # any dllexport (MANTISBASE_API) turns off the default "export
-        # everything" behavior, so soci/drogon/trantor symbols linked into
-        # this DLL are missing from the import library. The bindings include
-        # public headers that reference those symbols directly.
-        # Requires SOCI_LTO=OFF (see cmake/add-soci.cmake): ld auto-export
-        # rejects LTO template symbols ("symbol wrong type").
+        # WINDOWS_EXPORT_ALL_SYMBOLS is implemented for MSVC only. MANTISBASE_API
+        # is visibility("default") on MinGW, not dllexport: one dllexport makes
+        # lld export only those symbols, so drogon/soci vtables the Python
+        # extension imports are missing and the first use segfaults.
+        # --export-all-symbols still covers GNU ld. Requires SOCI_LTO=OFF
+        # (see cmake/add-soci.cmake): ld auto-export plus LTO rejects template
+        # symbols ("symbol wrong type").
         target_link_options(mantisbase-dll PRIVATE "-Wl,--export-all-symbols")
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            # Provide std::format / std::call_once symbols that libstdc++-6.dll
+            # does not export. See src/platform/mingw_libstdcxx_compat.cpp.
+            # -fno-weak makes the explicit instantiation a strong symbol so the
+            # linker keeps it instead of importing the missing DLL entry.
+            set_source_files_properties(src/platform/mingw_libstdcxx_compat.cpp
+                PROPERTIES COMPILE_OPTIONS "-fno-weak")
+            target_sources(mantisbase-dll PRIVATE
+                src/platform/mingw_libstdcxx_compat.cpp)
+        endif()
     endif()
 endif()
 

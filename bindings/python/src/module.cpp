@@ -1,5 +1,6 @@
 #include <mantisbase/mantisbase.h>
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 
 #include "py_conv.h"
 

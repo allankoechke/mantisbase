@@ -1,5 +1,4 @@
-name: Build & Publish Node.js Bindings
-
+# name: Build & Publish Node.js Bindings
 # on:
 #   push:
 #     tags:

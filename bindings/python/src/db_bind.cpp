@@ -205,7 +205,10 @@ void register_db(nb::module_ &m) {
                 [](PyTransaction &self, nb::handle exc_type, nb::handle, nb::handle) {
                     return self.exit(exc_type);
                 },
-                nb::arg("exc_type"), nb::arg("exc"), nb::arg("traceback"));
+                // A successful `with` block calls __exit__(None, None, None).
+                // nanobind rejects None for `object` unless the argument opts in.
+                nb::arg("exc_type").none(), nb::arg("exc").none(),
+                nb::arg("traceback").none());
 
     nb::class_<mb::MbDatabase>(m, "MbDatabase", "Pooled SQL connection")
             .def(

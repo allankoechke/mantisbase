@@ -223,9 +223,13 @@ namespace mbpy {
                 } catch (const mb::MbException &error) {
                     Py_INCREF(g_mantis_error);
                     nb::object type = nb::steal<nb::object>(g_mantis_error);
-                    nb::object instance = type(std::string(error.what()));
+                    // Assigning a std::string here goes through nanobind's
+                    // caster, which throws std::bad_cast in a TU that does
+                    // not include the string caster. Build the Python
+                    // strings directly.
+                    nb::object instance = type(unicode_from_utf8(error.what()));
                     instance.attr("code") = error.code();
-                    instance.attr("description") = std::string(error.desc());
+                    instance.attr("description") = unicode_from_utf8(error.desc());
                     PyErr_SetObject(type.ptr(), instance.ptr());
                 }
             });

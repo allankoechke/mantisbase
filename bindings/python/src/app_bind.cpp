@@ -316,9 +316,15 @@ void register_app(nb::module_ &m) {
                     std::optional<std::string> error;
                     {
                         nb::gil_scoped_release release;
-                        const mb::MbEntitySchema table =
-                                mb::MbEntitySchema::fromSchema(self.app(), body);
-                        error = table.validate();
+                        try {
+                            const mb::MbEntitySchema table =
+                                    mb::MbEntitySchema::fromSchema(self.app(), body);
+                            error = table.validate();
+                        } catch (const mb::MbException &ex) {
+                            // fromSchema throws on a missing name or type.
+                            // validate_schema reports that as a string.
+                            error = ex.what();
+                        }
                     }
                     if (!error.has_value())
                         return nb::none();

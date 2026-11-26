@@ -143,9 +143,22 @@ namespace mb {
                 const auto pattern_parts = splitString(_path, "/");
 
                 for (size_t i = 0; i < pattern_parts.size() && i < actual_parts.size(); ++i) {
-                    if (!pattern_parts[i].empty() && pattern_parts[i][0] == ':') {
-                        ma_req.setPathParam(pattern_parts[i].substr(1), actual_parts[i]);
-                    }
+                    const std::string &token = pattern_parts[i];
+                    if (token.empty())
+                        continue;
+                    // Routes are stored as registered. `:id` is the httplib
+                    // form; `{id}` is already Drogon's form (and what the
+                    // Python bindings register).
+                    std::string name;
+                    if (token.front() == ':')
+                        name = token.substr(1);
+                    else if (token.size() >= 2 && token.front() == '{' && token.back() == '}')
+                        name = token.substr(1, token.size() - 2);
+                    const auto colon = name.find(':');
+                    if (colon != std::string::npos)
+                        name.resize(colon);
+                    if (!name.empty())
+                        ma_req.setPathParam(name, actual_parts[i]);
                 }
             }
 

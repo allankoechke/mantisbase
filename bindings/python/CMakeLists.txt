@@ -83,6 +83,12 @@ if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # library also advertises std:: instantiations. Resolving those from the
     # engine DLL fails at load time. Bind libstdc++ first.
     target_link_libraries(mantisbase_python PRIVATE stdc++)
+    # Same missing libstdc++-6.dll symbols as the engine DLL. The extension
+    # is a separate link, so it needs its own copy of the definitions.
+    set(_mb_cxx_compat
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../src/platform/mingw_libstdcxx_compat.cpp)
+    set_source_files_properties(${_mb_cxx_compat} PROPERTIES COMPILE_OPTIONS "-fno-weak")
+    target_sources(mantisbase_python PRIVATE ${_mb_cxx_compat})
 endif()
 
 # Link against mantisbase shared library
