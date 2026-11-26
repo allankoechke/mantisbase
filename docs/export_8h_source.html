@@ -103,21 +103,27 @@ $(function(){initNavTree('export_8h_source.html','',''); });
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#  define MANTISBASE_API</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#else</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#  ifdef MantisBase_EXPORTS</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#    ifdef _WIN32</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#    if defined(_WIN32) &amp;&amp; !defined(__GNUC__) &amp;&amp; !defined(__clang__)</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#      define MANTISBASE_API __declspec(dllexport)</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#    else</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#      define MANTISBASE_API __attribute__((visibility(&quot;default&quot;)))</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#    endif</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#  else</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#    ifdef _WIN32</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#      define MANTISBASE_API __declspec(dllimport)</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#    else</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">   25</a></span><span class="preprocessor">#      define MANTISBASE_API</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>       <span class="comment">// MinGW (GCC and llvm-mingw clang) must not mark symbols dllexport.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>       <span class="comment">// One dllexport turns off &quot;export every global&quot;. GNU ld can be forced</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>       <span class="comment">// back with --export-all-symbols; lld still drops the drogon and soci</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>       <span class="comment">// vtables the Python extension imports, and the first use segfaults.</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>       <span class="comment">// visibility(&quot;default&quot;) keeps the public API exported, and with no</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>       <span class="comment">// dllexport the linker auto-exports the rest.</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#      define MANTISBASE_API __attribute__((visibility(&quot;default&quot;)))</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#    endif</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#  endif</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#endif </span><span class="comment">// MANTISBASE_EXPORT_H</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#  else</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#    ifdef _WIN32</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#      define MANTISBASE_API __declspec(dllimport)</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#    else</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="export_8h.html#ad67b3f9a509bd18bd030486e98d14e34">   31</a></span><span class="preprocessor">#      define MANTISBASE_API</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#    endif</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#  endif</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#endif </span><span class="comment">// MANTISBASE_EXPORT_H</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

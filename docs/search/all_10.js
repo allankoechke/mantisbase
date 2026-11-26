@@ -93,11 +93,12 @@ var searchData=
   ['middlewares_2eh_90',['middlewares.h',['../middlewares_8h.html',1,'']]],
   ['migrate_91',['migrate',['../classmb_1_1MbKVStore.html#ae43bbb743b3e8f18e546873b68705004',1,'mb::MbKVStore::migrate()'],['../docs_cli.html#autotoc_md140',1,'migrate']]],
   ['migrationsdir_92',['migrationsDir',['../classmb_1_1MantisBase.html#a298e5dc7929388e131b19eab611b4043',1,'mb::MantisBase']]],
-  ['minimal_20configuration_93',['Minimal Configuration',['../docs_embedding.html#autotoc_md189',1,'']]],
-  ['minimumconstraintcheck_94',['minimumConstraintCheck',['../classmb_1_1MbValidators.html#afce0e11cd02f79ea03ed38ac0abd1e9a',1,'mb::MbValidators']]],
-  ['mistakes_95',['Common Mistakes',['../docs_rest_api_rules.html#autotoc_md333',1,'']]],
-  ['mode_96',['Mode',['../docs_rest_api_rules.html#autotoc_md298',1,'Custom Mode'],['../docs_rest_api_rules.html#autotoc_md297',1,'MbAuth Mode'],['../docs_rest_api_rules.html#autotoc_md296',1,'Public Mode']]],
-  ['mode_97',['mode',['../classmb_1_1MbAccessRule.html#aa06378334596fc1e5664f7fd6ed22acd',1,'mb::MbAccessRule']]],
-  ['mode_20admin_20only_98',['Empty Mode (Admin Only)',['../docs_rest_api_rules.html#autotoc_md295',1,'']]],
-  ['modes_99',['Access Modes',['../docs_rest_api_rules.html#autotoc_md294',1,'']]]
+  ['mingw_5flibstdcxx_5fcompat_2ecpp_93',['mingw_libstdcxx_compat.cpp',['../mingw__libstdcxx__compat_8cpp.html',1,'']]],
+  ['minimal_20configuration_94',['Minimal Configuration',['../docs_embedding.html#autotoc_md189',1,'']]],
+  ['minimumconstraintcheck_95',['minimumConstraintCheck',['../classmb_1_1MbValidators.html#afce0e11cd02f79ea03ed38ac0abd1e9a',1,'mb::MbValidators']]],
+  ['mistakes_96',['Common Mistakes',['../docs_rest_api_rules.html#autotoc_md333',1,'']]],
+  ['mode_97',['Mode',['../docs_rest_api_rules.html#autotoc_md298',1,'Custom Mode'],['../docs_rest_api_rules.html#autotoc_md297',1,'MbAuth Mode'],['../docs_rest_api_rules.html#autotoc_md296',1,'Public Mode']]],
+  ['mode_98',['mode',['../classmb_1_1MbAccessRule.html#aa06378334596fc1e5664f7fd6ed22acd',1,'mb::MbAccessRule']]],
+  ['mode_20admin_20only_99',['Empty Mode (Admin Only)',['../docs_rest_api_rules.html#autotoc_md295',1,'']]],
+  ['modes_100',['Access Modes',['../docs_rest_api_rules.html#autotoc_md294',1,'']]]
 ];

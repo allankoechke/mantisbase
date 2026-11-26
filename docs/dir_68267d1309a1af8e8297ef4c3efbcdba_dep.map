@@ -1,15 +1,16 @@
 <map id="/home/runner/work/mantisbase/mantisbase/src" name="/home/runner/work/mantisbase/mantisbase/src">
-<area shape="rect" id="node5" href="dir_d44c64559bbebec7f509842c48db8b23.html" title="include" alt="" coords="126,102,194,130"/>
-<area shape="poly" id="edge1" href="dir_000012_000004.html" alt="" coords="64,52,81,63,128,93,123,95,79,67,64,57"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000012_000004.html" title="204" alt="" coords="115,77,139,94"/>
+<area shape="rect" id="node6" href="dir_d44c64559bbebec7f509842c48db8b23.html" title="include" alt="" coords="176,102,245,130"/>
+<area shape="poly" id="edge1" href="dir_000013_000004.html" alt="" coords="63,52,81,63,164,98,160,101,79,67,63,57"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000013_000004.html" title="204" alt="" coords="150,82,174,99"/>
 <area shape="rect" id="node2" href="dir_aebb8dcc11953d78e620bbef0b9e2183.html" title="core" alt="" coords="91,27,141,54"/>
-<area shape="poly" id="edge2" href="dir_000002_000004.html" alt="" coords="125,53,147,89,142,89,123,57"/>
-<area shape="rect" id="edge2-headlabel" href="dir_000002_000004.html" title="162" alt="" coords="138,74,162,91"/>
-<area shape="rect" id="node3" href="dir_b49f11675e92293ffa7ceeef744893f4.html" title="scripting" alt="" coords="165,27,243,54"/>
-<area shape="poly" id="edge3" href="dir_000011_000004.html" alt="" coords="198,54,177,91,174,87,194,56"/>
-<area shape="rect" id="edge3-headlabel" href="dir_000011_000004.html" title="21" alt="" coords="176,82,192,99"/>
-<area shape="rect" id="node4" href="dir_313caf1132e152dd9b58bea13a4052ca.html" title="utils" alt="" coords="267,27,317,54"/>
-<area shape="poly" id="edge4" href="dir_000014_000004.html" alt="" coords="274,54,256,67,201,97,198,92,253,63,269,56"/>
-<area shape="rect" id="edge4-headlabel" href="dir_000014_000004.html" title="9" alt="" coords="202,93,210,110"/>
-<area shape="rect" id="clust1" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html" alt="" coords="16,16,328,65"/>
+<area shape="poly" id="edge2" href="dir_000002_000004.html" alt="" coords="134,52,185,92,179,93,132,57"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000002_000004.html" title="162" alt="" coords="173,76,197,93"/>
+<area shape="rect" id="node3" href="dir_4b68c2fef3e151b6b93d5e93b14f1857.html" title="platform" alt="" coords="165,27,243,54"/>
+<area shape="rect" id="node4" href="dir_b49f11675e92293ffa7ceeef744893f4.html" title="scripting" alt="" coords="267,27,344,54"/>
+<area shape="poly" id="edge3" href="dir_000012_000004.html" alt="" coords="291,54,241,95,238,90,286,56"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000012_000004.html" title="21" alt="" coords="239,89,255,106"/>
+<area shape="rect" id="node5" href="dir_313caf1132e152dd9b58bea13a4052ca.html" title="utils" alt="" coords="369,27,418,54"/>
+<area shape="poly" id="edge4" href="dir_000015_000004.html" alt="" coords="377,54,357,67,308,88,260,104,259,98,306,83,355,63,372,56"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000015_000004.html" title="9" alt="" coords="261,100,269,117"/>
+<area shape="rect" id="clust1" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html" alt="" coords="16,16,429,65"/>
 </map>
