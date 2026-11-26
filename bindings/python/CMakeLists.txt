@@ -85,10 +85,10 @@ if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(mantisbase_python PRIVATE stdc++)
     # Same missing libstdc++-6.dll symbols as the engine DLL. The extension
     # is a separate link, so it needs its own copy of the definitions.
-    set(_mb_cxx_compat
+    # No -fno-weak: that flag makes this file's libstdc++ vtables strong and
+    # the DLL link fails with multiple definitions against the other objects.
+    target_sources(mantisbase_python PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../../src/platform/mingw_libstdcxx_compat.cpp)
-    set_source_files_properties(${_mb_cxx_compat} PROPERTIES COMPILE_OPTIONS "-fno-weak")
-    target_sources(mantisbase_python PRIVATE ${_mb_cxx_compat})
 endif()
 
 # Link against mantisbase shared library

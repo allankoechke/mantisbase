@@ -183,10 +183,9 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             # Provide std::format / std::call_once symbols that libstdc++-6.dll
             # does not export. See src/platform/mingw_libstdcxx_compat.cpp.
-            # -fno-weak makes the explicit instantiation a strong symbol so the
-            # linker keeps it instead of importing the missing DLL entry.
-            set_source_files_properties(src/platform/mingw_libstdcxx_compat.cpp
-                PROPERTIES COMPILE_OPTIONS "-fno-weak")
+            # Leave the instantiation as a COMDAT. -fno-weak also makes the
+            # libstdc++ vtables this file emits (bad_optional_access, _Seq_sink)
+            # strong, and they then collide with the copies in every other TU.
             target_sources(mantisbase-dll PRIVATE
                 src/platform/mingw_libstdcxx_compat.cpp)
         endif()
