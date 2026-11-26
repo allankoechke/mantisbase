@@ -11,8 +11,18 @@
 //
 // This file is compiled into libmantisbase.dll and into the Python
 // extension, and only for MinGW GCC. llvm-mingw (Windows ARM) uses libc++.
+//
+// libstdc++ declares these as extern templates and ships the bodies in the
+// shared library, but the MinGW DLL does not export them. Turning extern
+// templates off in this translation unit emits the bodies here
+// (__do_vformat_to and basic_format_arg::_M_handle_unrecognized). They stay
+// COMDAT, so they merge with any other copy instead of colliding.
 
 #if defined(__MINGW32__) && defined(__GNUC__) && !defined(__clang__)
+
+#include <bits/c++config.h>
+#undef _GLIBCXX_EXTERN_TEMPLATE
+#define _GLIBCXX_EXTERN_TEMPLATE 0
 
 #include <format>
 #include <mutex>
