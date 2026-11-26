@@ -182,10 +182,11 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         target_link_options(mantisbase-dll PRIVATE "-Wl,--export-all-symbols")
         if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             # Provide std::format / std::call_once symbols that libstdc++-6.dll
-            # does not export. See src/platform/mingw_libstdcxx_compat.cpp.
-            # Leave the instantiation as a COMDAT. -fno-weak also makes the
-            # libstdc++ vtables this file emits (bad_optional_access, _Seq_sink)
-            # strong, and they then collide with the copies in every other TU.
+            # does not export, including __once_proxy so call_once does not
+            # jump through libstdc++'s empty thread-local. See
+            # src/platform/mingw_libstdcxx_compat.cpp. Leave the format
+            # instantiation as a COMDAT. -fno-weak makes the libstdc++ vtables
+            # this file emits strong, and they then collide with every other TU.
             target_sources(mantisbase-dll PRIVATE
                 src/platform/mingw_libstdcxx_compat.cpp)
         endif()

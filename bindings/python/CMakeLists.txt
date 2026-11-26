@@ -83,8 +83,9 @@ if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # library also advertises std:: instantiations. Resolving those from the
     # engine DLL fails at load time. Bind libstdc++ first.
     target_link_libraries(mantisbase_python PRIVATE stdc++)
-    # Same missing libstdc++-6.dll symbols as the engine DLL. The extension
-    # is a separate link, so it needs its own copy of the definitions.
+    # Same missing libstdc++-6.dll symbols as the engine DLL, including
+    # __once_proxy. The extension is a separate link, so it needs its own
+    # copy: call_once and the proxy must share one thread-local.
     # No -fno-weak: that flag makes this file's libstdc++ vtables strong and
     # the DLL link fails with multiple definitions against the other objects.
     target_sources(mantisbase_python PRIVATE
