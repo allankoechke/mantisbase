@@ -89,11 +89,12 @@ namespace mb {
 
             // Compute expiry timestamp
             auto expiry_time = std::chrono::system_clock::now() + std::chrono::seconds(expiry_t);
-            auto expiry_tt = std::chrono::system_clock::to_time_t(expiry_time);
-            auto *utc = std::gmtime(&expiry_tt);
-            char expires_buf[20];
-            std::strftime(expires_buf, sizeof(expires_buf), "%Y-%m-%d %H:%M:%S", utc);
-            std::string expires_at(expires_buf);
+            const auto expiry_tt = std::chrono::system_clock::to_time_t(expiry_time);
+            const std::tm utc = toUtcTime(expiry_tt);
+            char expires_buf[32];
+            if (std::strftime(expires_buf, sizeof(expires_buf), "%Y-%m-%d %H:%M:%S", &utc) == 0)
+                throw std::runtime_error("Failed to format session expiry");
+            const std::string expires_at(expires_buf);
 
             *sql << "INSERT INTO mb_sessions (id, entity_name, user_id, token_hash, expires_at, created) "
                     "VALUES (:id, :entity, :uid, :hash, :exp, :now)",

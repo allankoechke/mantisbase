@@ -14,6 +14,13 @@
 #include <mantisbase/core/types.h>
 
 namespace mb {
+    /**
+     * Initialize wolfSSL once per process. Windows builds fault in HMAC and
+     * the RNG until this runs. Safe to call more than once.
+     * @return true when wolfSSL is ready.
+     */
+    MANTISBASE_API bool initWolfSsl();
+
     /** @return Cryptographically secure random bytes encoded as a hex or raw string. */
     MANTISBASE_API std::string generateSecureRandom(size_t length);
 

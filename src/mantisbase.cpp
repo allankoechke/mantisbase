@@ -1,4 +1,5 @@
 #include "../include/mantisbase/mantis.h"
+#include "../include/mantisbase/utils/crypto_utils.h"
 #include "../include/mantisbase/config.hpp"
 #include "../include/mantisbase/core/models/entity.h"
 #include "../include/mantisbase/core/kv_store.h"
@@ -32,6 +33,13 @@ namespace mb {
         std::cout << "mantisbase v" << appVersion() << std::endl << std::endl;
         m_logger = std::make_unique<MbLogger>(*this);
         m_snowflakeId.init(1, 1);
+
+        // wolfSSL's Windows locks are CRITICAL_SECTIONs with no static
+        // initializer. HMAC and the RNG fault if they run first. The C++
+        // test harness calls this from main(); the library has to do it
+        // for every other entry point.
+        if (!initWolfSsl())
+            logger().critical("Crypto", "wolfSSL_Init failed");
     }
 
     MantisBase::~MantisBase() {

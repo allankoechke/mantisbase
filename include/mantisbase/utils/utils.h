@@ -317,11 +317,11 @@ namespace mb {
     /**
      * @brief Thread-safe conversion of an epoch time to a UTC std::tm.
      *
-     * std::gmtime returns a pointer to a shared static std::tm, so calling it
-     * from multiple threads concurrently is a data race. This wrapper
-     * serializes the call and returns a copy. UTC is the canonical timezone
-     * for all persisted timestamps so values are stable regardless of the
-     * server's local timezone or DST.
+     * std::gmtime returns a pointer to a shared static std::tm. Concurrent
+     * calls from the server thread and a request thread race on that buffer,
+     * and on Windows the race faults. This fills a private std::tm with
+     * gmtime_s / gmtime_r. UTC is the canonical timezone for persisted
+     * timestamps so values stay stable across local timezone and DST.
      *
      * @param t Epoch time value.
      * @return std::tm in UTC.
@@ -331,11 +331,9 @@ namespace mb {
     /**
      * @brief Thread-safe conversion of an epoch time to a local-time std::tm.
      *
-     * std::localtime returns a pointer to a shared static std::tm, so calling
-     * it from multiple threads concurrently is a data race. This wrapper
-     * serializes the call and returns a copy, making it safe to use from the
-     * request-handling worker threads. Portable across MinGW/MSVC/Linux
-     * without depending on the non-standard localtime_r/localtime_s.
+     * std::localtime returns a pointer to a shared static std::tm. This fills
+     * a private std::tm with localtime_s / localtime_r so request threads
+     * do not share that buffer.
      *
      * Prefer toUtcTime() for anything persisted to the database; this is only
      * for values intended to be rendered in the server's local timezone.

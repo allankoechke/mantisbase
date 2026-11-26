@@ -2,7 +2,6 @@
 #include <private/soci-mktime.h>
 
 #include <ctime>
-#include <mutex>
 
 #include "../../include/mantisbase/mantisbase.h"
 
@@ -10,22 +9,31 @@ namespace mb
 {
     std::tm toUtcTime(const std::time_t t)
     {
-        // std::gmtime writes into a shared static buffer, so concurrent calls
-        // from request threads race on it. Serialize the call and copy the
-        // result out while holding the lock.
-        static std::mutex mtx;
-        std::lock_guard lock(mtx);
-        return *std::gmtime(&t);
+        // gmtime() writes a process-wide buffer. The server thread and a
+        // request thread both format timestamps, and on Windows that race
+        // faults. The reentrant call fills a private tm.
+        std::tm out{};
+#if defined(_WIN32)
+        if (gmtime_s(&out, &t) != 0)
+            return {};
+#else
+        if (gmtime_r(&t, &out) == nullptr)
+            return {};
+#endif
+        return out;
     }
 
     std::tm toLocalTime(const std::time_t t)
     {
-        // std::localtime writes into a shared static buffer, so concurrent
-        // calls from request threads race on it. Serialize the call and copy
-        // the result out while holding the lock.
-        static std::mutex mtx;
-        std::lock_guard lock(mtx);
-        return *std::localtime(&t);
+        std::tm out{};
+#if defined(_WIN32)
+        if (localtime_s(&out, &t) != 0)
+            return {};
+#else
+        if (localtime_r(&t, &out) == nullptr)
+            return {};
+#endif
+        return out;
     }
 
     std::string tmToStr(const std::tm& t)
