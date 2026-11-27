@@ -33,6 +33,12 @@ cd build && ctest --output-on-failure
 
 CI runs the same test suite on Linux for every pull request.
 
+Python bindings, after a wheel is installed in the active environment:
+
+```bash
+python -m unittest discover -s bindings/python/tests -v
+```
+
 With scripting enabled:
 
 ```bash
@@ -63,6 +69,7 @@ mantisbase/
 ├── tests/                # Unit and integration tests
 ├── doc/                  # User and API documentation
 ├── examples/             # Copy-paste schemas, migrations, HTTP scripts
+├── bindings/             # Python package (bindings/python) and Node addon
 ├── .cursor/skills/       # Cursor skills for vibecoding on MantisBase
 ├── cmake/                # Dependency and build modules
 ├── 3rdParty/             # Git submodules (Drogon, SOCI, etc.)

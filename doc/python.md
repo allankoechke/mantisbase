@@ -6,6 +6,8 @@ Python bindings embed the MantisBase server in a process and expose the same ser
 pip install mantisbase
 ```
 
+Published wheels cover CPython 3.10–3.14 on Linux (x86-64 and aarch64), Windows x86-64, and macOS (arm64 and x86-64). Windows ARM64 wheels start at 3.11. Each wheel vendors `libmantisbase`, so `pip install` is enough to import it. Python 3.9 can build the extension from source and has no published wheel.
+
 The published copy of this page is [docs_python.html](https://allankoechke.github.io/mantisbase/docs_python.html).
 
 `start()` refuses to serve in production when `MB_JWT_SECRET` is empty: the process exits. For local use pass `dev=True`. For anything else pass `secret_key` (or export `MB_JWT_SECRET` before creating the app).
@@ -68,7 +70,7 @@ app = mantisbase.App(
     port=8080,
     host="127.0.0.1",
     data_dir="./data",
-    db_type="sqlite3",          # or "postgresql"
+    db_type="sqlite3",          # or "postgresql" or "mysql"
     db_url="",
     public_dir="./public",
     scripts_dir="./scripts",
@@ -81,18 +83,20 @@ app = mantisbase.App(
 )
 ```
 
+Keyword names are snake_case. Any other keyword is ignored, including the camelCase names used by the Node bindings (`dataDir`, `dbType`, and so on).
+
 | Member | Meaning |
 |---|---|
 | `start(blocking=True)` | Run the HTTP server. `blocking=False` runs it on a background thread. |
 | `stop()` / `close()` | Stop the server and join the background thread. |
-| `quit(code=0, reason=...)` | Stop the server, then terminate the process with `std::exit`. |
+| `quit(code=0, reason="Something went wrong!")` | Stop the server, then terminate the process with `std::exit`. |
 | `entity(name)` | `Entity` for a table in the schema cache. A missing table or an invalid name raises `MantisError`. |
 | `has_entity(name)` | Whether that table is in the schema cache. |
-| `create_schema(schema)` | Create a table from a schema dict (same shape as `POST /api/v1/schemas`). |
-| `list_schemas(opts=None)` | Schema rows. `opts` matches the C++ list options. |
-| `get_schema(table_id)` | One schema by id. |
-| `update_schema(table_id, schema)` | Patch a schema. |
-| `drop_schema(table_id)` | Drop a table. |
+| `create_schema(schema)` | Create a table from a schema dict (same shape as `POST /api/v1/schemas`). Returns `{id, schema, created, updated}`. A duplicate name raises `MantisError`. |
+| `list_schemas(opts=None)` | Table rows, each `{id, schema, created, updated}`. `opts` matches the C++ list options. |
+| `get_schema(table_id)` | One table row by id. |
+| `update_schema(table_id, schema)` | Merge a schema patch and return the updated row. |
+| `drop_schema(table_id)` | Drop a table. Returns `None`. |
 | `table_exists(name)` | Whether the table is stored. |
 | `validate_schema(schema)` | `None` when the schema is valid, otherwise the error string. |
 | `snowflake_id()` | Next Snowflake id string. |
@@ -101,7 +105,8 @@ app = mantisbase.App(
 | `host`, `port`, `pool_size` | Read/write. Changes after `start()` do not rebind the listener or the pool. |
 | `public_dir`, `data_dir`, `scripts_dir`, `templates_dir`, `migrations_dir` | Read/write paths. |
 | `skip_admin_setup` | Read/write. |
-| `db_type`, `dev_mode`, `scripting_disabled`, `secret_key`, `version` | Read-only. |
+| `db_type`, `dev_mode`, `secret_key`, `version` | Read-only. `db_type` is `sqlite3`, `postgresql`, or `mysql`. |
+| `scripting_disabled` | Read-only CLI flag. The constructor never sets it, so it stays false. Export `MB_SCRIPTING_DISABLED=1` before `start()` to skip JavaScript loading. That variable does not change this property. |
 | `uptime_seconds` | Seconds since the app object was created. |
 
 `mantisbase.version()` returns the same version string.
@@ -215,7 +220,7 @@ def upload(req, res):
 
 ## Database
 
-`app.db.query(sql, *binds)` returns a list of dicts. Each bind is a dict of named parameters (`:name` in the SQL). Values are `None`, `bool`, `int`, `float`, or `str`. The GIL is released while the query runs.
+`app.db.query(sql, *params)` returns a list of dicts. Each item in `params` is a dict of named parameters (`:name` in the SQL). Values are `None`, `bool`, `int`, `float`, or `str`. The GIL is released while the query runs. `Transaction.query` takes the same arguments and uses the leased session.
 
 ```python
 rows = app.db.query(
@@ -250,8 +255,8 @@ with app.db.transaction() as tx:
 | `auth_method_disabled_reason(method)` | Empty when `password`, `otp`, or `oauth` is enabled. |
 | `view_query()` | SQL for a view entity. |
 | `create(record, opts=None)` | Insert and return the stored row. |
-| `list(opts=None)` | Rows ordered by `id`. |
-| `list_page(opts=None)` | `{"items", "has_more"}`. |
+| `list(opts=None)` | One page of rows ordered by `id`. Same options as `list_page`. Default page size is 50. |
+| `list_page(opts=None)` | `{"items", "has_more"}` for that page. |
 | `read(id, opts=None)` | One row, or `None`. |
 | `update(id, data, opts=None)` | Patch and return the row. |
 | `remove(id)` / `delete(id)` | Delete one row. |
@@ -261,9 +266,11 @@ with app.db.transaction() as tx:
 
 List options:
 
-- `pagination.limit` — page size from 1 to 500, default 50
+- `pagination.limit` — page size from 1 to 500, default 50. `list` and `list_page` both apply it.
 - `pagination.after` — id of the last row from the previous page
 - `filter` — `{field: value}` equality filters, as a dict or a JSON string
+
+Auth entities omit `password` from `list`, `list_page`, and `read`. `read(id, {"keep_passwords": True})` returns that field.
 
 ```python
 page = app.entity("notes").list_page({
@@ -278,10 +285,10 @@ page = app.entity("notes").list_page({
 
 | Method | Purpose |
 |---|---|
-| `create_token(claims, timeout=-1)` | Sign a JWT. `claims` needs `id` and `table`. `timeout` is seconds; `-1` uses the entity default. |
-| `verify_token(token)` | Claims plus `verified` and `error`. |
+| `create_token(claims, timeout=-1)` | Sign a JWT. `claims` needs `id` and `entity`. Missing either raises `ValueError`. `timeout` is seconds; `-1` uses the configured lifetime (`adminSessionTimeout`, default 1 hour, for `mb_admins`; `sessionTimeout`, default 24 hours, otherwise). |
+| `verify_token(token)` | `{verified, error, claims}`. A rejected token sets `verified` to false and fills `error`. It does not raise. |
 | `delete_session(session_id)` | Invalidate a session row. |
-| `refresh_session(session_id, entity, user_id)` | Rotate the session and return the new token payload. |
+| `refresh_session(session_id, entity, user_id)` | Rotate the session and return `{"token": ...}`. A missing session raises `RuntimeError`. |
 | `session_timeout(entity, timeout=-1)` | Lifetime in seconds. |
 | `request_login_otp(entity, email)` | Email a one-time sign-in code. Unknown addresses still return `{"sent": true}`. |
 | `login_with_otp(entity, email, otp)` | Exchange the code for `{"token", "user"}`. |
@@ -293,8 +300,9 @@ page = app.entity("notes").list_page({
 | `notify_email_verification(entity, user_id)` | Send a verification link when SMTP is configured. Missing SMTP is ignored. |
 
 ```python
-token = app.auth.create_token({"id": user["id"], "table": "users"}, timeout=3600)
-claims = app.auth.verify_token(token)
+token = app.auth.create_token({"id": user["id"], "entity": "users"}, timeout=3600)
+checked = app.auth.verify_token(token)
+user_id = checked["claims"]["id"]
 ```
 
 OTP, verification, and reset calls require SMTP. See [Authentication](auth.md) for the HTTP equivalents.
@@ -419,10 +427,10 @@ Clients still connect through `GET /api/v1/realtime` and the WebSocket endpoint.
 | `generate_readable_time_id()` | Time-based id that stays readable. |
 | `generate_short_id(length=16)` | Short random id. |
 | `get_env(key, default="")` | Environment variable or default. |
-| `sanitize_filename(name, max_len=50, id_len=12, separator="_")` | Safe unique filename. |
+| `sanitize_filename(name, max_len=50, id_len=12, separator="_")` | Unique filename. A disallowed extension raises `MantisError` with code 415. |
 | `hash_password(password)` / `verify_password(password, stored_hash)` | Password hash used by auth entities. |
-| `is_allowed_file_extension(extension)` | Upload allow-list check. |
-| `safe_content_type(extension)` | MIME type safe to send for that extension. |
+| `is_allowed_file_extension(extension)` | Upload allow-list check. Pass the extension with its dot, as in `.png`. |
+| `safe_content_type(extension)` | MIME type for that extension, or `application/octet-stream` when it is unknown. |
 | `str_to_bool(value)` | `true`, `1`, `on`, `yes` and their opposites. |
 
 ## Threading
@@ -430,6 +438,14 @@ Clients still connect through `GET /api/v1/realtime` and the WebSocket endpoint.
 Route handlers run on MantisBase worker threads. The GIL is acquired around each Python handler, middleware, and callback, and released around database and filesystem work. Python handlers therefore serialize on the GIL the same way a Flask threaded server does.
 
 Do not call `stop()` from inside a handler on the server thread that is running that handler. Call it from another thread, or from the thread that called a non-blocking `start()`.
+
+## Editor hints
+
+`import mantisbase` loads the nanobind extension. The wheel ships that extension only. There is no `mantisbase.pyi`.
+
+`help()` and `function.__doc__` show a one-line class summary plus a signature built from the binding's argument names, for example `start(self, blocking: bool = True) -> None`. Prose beyond that signature is attached to `version`, `App.quit`, `router.redirect`, `router.broadcast`, `request.parse_form`, `mailer.configure`, `mailer.apply_settings`, `middlewares.get_auth_token`, and `middlewares.env_gate`.
+
+`App(...)` is bound as `**kwargs`. Its signature lists no constructor names (`port`, `host`, `data_dir`, and the rest above). `MantisError.code` and `MantisError.description` exist on the instance after a C++ error is translated. The class itself has no annotations for them, so completion skips them. mypy and Pyright treat the module as an untyped native extension. Parameter descriptions live on this page.
 
 ## Building from source
 
@@ -444,6 +460,10 @@ pip install -e bindings/python \
   --config-settings=cmake.define.CMAKE_PREFIX_PATH=$PWD/install
 ```
 
-At runtime the loader must find `libmantisbase.so`, for example `export LD_LIBRARY_PATH=$PWD/install/lib`.
+At runtime the loader must find the shared library next to that prefix:
 
-The extension needs CMake >= 3.22, a C++20 compiler, and Python >= 3.9. `nanobind` and `scikit-build-core` are fetched by pip. Wheel production is described in `.github/workflows/bindings-python.yml`.
+- Linux: `libmantisbase.so`, for example `export LD_LIBRARY_PATH=$PWD/install/lib`
+- macOS: `libmantisbase.dylib`, for example `export DYLD_LIBRARY_PATH=$PWD/install/lib`
+- Windows: `libmantisbase.dll` on `PATH`
+
+The extension needs CMake >= 3.22, a C++20 compiler, and Python >= 3.9. `nanobind` and `scikit-build-core` are fetched by pip. `pip install mantisbase` on a Python outside the published wheel set (3.10–3.14, Windows ARM64 from 3.11) builds the sdist, which does not compile the C++ engine. Install the shared library first, as above, or use a Python that has a wheel. Wheel production is described in `.github/workflows/bindings-python.yml`.
