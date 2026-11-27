@@ -119,3 +119,6 @@ set_target_properties(mantisbase_python PROPERTIES
 )
 
 install(TARGETS mantisbase_python LIBRARY DESTINATION .)
+# PEP 561 stub. Sits next to the extension so mypy and Pyright type the module.
+# App(...) is **kwargs at runtime; the stub names the constructor arguments.
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/mantisbase.pyi" DESTINATION .)

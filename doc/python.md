@@ -441,11 +441,11 @@ Do not call `stop()` from inside a handler on the server thread that is running 
 
 ## Editor hints
 
-`import mantisbase` loads the nanobind extension. The wheel ships that extension only. There is no `mantisbase.pyi`.
+`import mantisbase` loads the nanobind extension. The wheel also ships `mantisbase.pyi` next to that extension. mypy and Pyright use the stub, including `App`'s constructor arguments and `MantisError.code` / `MantisError.description`. `mantisbase.utils` and `mantisbase.middlewares` are typed as attributes of the module.
 
-`help()` and `function.__doc__` show a one-line class summary plus a signature built from the binding's argument names, for example `start(self, blocking: bool = True) -> None`. Prose beyond that signature is attached to `version`, `App.quit`, `router.redirect`, `router.broadcast`, `request.parse_form`, `mailer.configure`, `mailer.apply_settings`, `middlewares.get_auth_token`, and `middlewares.env_gate`.
+`help()` and `function.__doc__` still show the runtime signature nanobind writes, for example `start(self, blocking: bool = True) -> None`. Prose beyond that signature is attached to `version`, `App.quit`, `router.redirect`, `router.broadcast`, `request.parse_form`, `mailer.configure`, `mailer.apply_settings`, `middlewares.get_auth_token`, and `middlewares.env_gate`.
 
-`App(...)` is bound as `**kwargs`. Its signature lists no constructor names (`port`, `host`, `data_dir`, and the rest above). `MantisError.code` and `MantisError.description` exist on the instance after a C++ error is translated. The class itself has no annotations for them, so completion skips them. mypy and Pyright treat the module as an untyped native extension. Parameter descriptions live on this page.
+`App(...)` is bound as `**kwargs`, so `help(App)` does not list `port`, `host`, or `data_dir`. Those names are in the stub. Unknown keywords are ignored. Parameter descriptions live on this page.
 
 ## Building from source
 

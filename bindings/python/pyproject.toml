@@ -24,7 +24,8 @@ cmake.build-type = "Release"
 wheel.packages = []
 # version_provider.py is source. _mb_version.txt is generated at sdist time
 # (see generate below) and is gitignored, so it must be named here.
-sdist.include = ["version_provider.py", "_mb_version.txt"]
+# mantisbase.pyi is installed beside the extension by CMakeLists.txt.
+sdist.include = ["version_provider.py", "_mb_version.txt", "mantisbase.pyi"]
 
 [[tool.dynamic-metadata]]
 provider = {path = ".", module = "version_provider"}

@@ -42,7 +42,7 @@ Pass `secret_key` (or set `MB_JWT_SECRET`) before `start()` in production. Witho
 
 The bindings cover routing and middleware, request and response helpers, SQL queries and transactions, entity CRUD, schema management, JWT sessions, API keys, OAuth, files, settings, logs, realtime fan-out, mail, and the small `mantisbase.utils` helpers. Method names and arguments are listed in the [Python bindings guide](https://allankoechke.github.io/mantisbase/docs_python.html).
 
-`help(mantisbase.App.start)` shows the signature nanobind writes into `__doc__`. The package does not ship a `mantisbase.pyi`. `App(...)` is `**kwargs`, so that signature does not name `port`, `data_dir`, or the other constructor arguments. The guide is the reference for those.
+`help(mantisbase.App.start)` shows the signature nanobind writes into `__doc__`. The wheel ships `mantisbase.pyi` beside the extension, so editors and type checkers see `port`, `data_dir`, and the other constructor arguments, plus the rest of the public methods. At runtime `App(...)` is still `**kwargs`, and unknown keywords are ignored. The guide is the reference for behavior past those signatures.
 
 ## Threading
 

@@ -6,6 +6,7 @@ server covers schema CRUD, SQL, auth, files, mail, and HTTP routes.
     python -m unittest discover -s bindings/python/tests -v
 """
 
+import ast
 import atexit
 import http.client
 import json
@@ -206,6 +207,12 @@ class BindingsTest(unittest.TestCase):
         self.assertIs(mantisbase.MantisRequest, mantisbase.MbRequest)
         self.assertIs(mantisbase.MantisResponse, mantisbase.MbResponse)
         self.assertTrue(issubclass(mantisbase.MantisError, Exception))
+        stub = os.path.join(os.path.dirname(mantisbase.__file__), "mantisbase.pyi")
+        self.assertTrue(os.path.isfile(stub), stub)
+        with open(stub, encoding="utf-8") as handle:
+            source = handle.read()
+        ast.parse(source)
+        self.assertIn("class App", source)
 
     def test_utils(self):
         self.assertTrue(mantisbase.utils.str_to_bool("yes"))
