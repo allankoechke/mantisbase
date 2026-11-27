@@ -1,10 +1,10 @@
 var searchData=
 [
-  ['dashboard_0',['Dashboard',['../index.html#autotoc_md273',1,'2. Access the Admin Dashboard'],['../docs_rest_api.html#autotoc_md82',1,'Accessing the Dashboard'],['../docs_rest_api.html#autotoc_md75',1,'Admin Dashboard'],['../docs_setup.html#autotoc_md245',1,'Admin Dashboard']]],
+  ['dashboard_0',['Dashboard',['../index.html#autotoc_md274',1,'2. Access the Admin Dashboard'],['../docs_rest_api.html#autotoc_md82',1,'Accessing the Dashboard'],['../docs_rest_api.html#autotoc_md75',1,'Admin Dashboard'],['../docs_setup.html#autotoc_md245',1,'Admin Dashboard']]],
   ['dashboard_20features_1',['Dashboard Features',['../docs_rest_api.html#autotoc_md76',1,'']]],
   ['dashboard_20requirements_2',['Dashboard Requirements',['../docs_rest_api.html#autotoc_md83',1,'']]],
   ['data_3',['Persistent Data',['../docs_docker.html#autotoc_md164',1,'']]],
-  ['data_20exists_4',['3. Validate User Data Exists',['../docs_rest_api_rules.html#autotoc_md327',1,'']]],
+  ['data_20exists_4',['3. Validate User Data Exists',['../docs_rest_api_rules.html#autotoc_md328',1,'']]],
   ['data_20exploration_5',['Data Exploration',['../docs_rest_api.html#autotoc_md79',1,'']]],
   ['data_20format_6',['Event data format',['../docs_rest_api.html#autotoc_md64',1,'']]],
   ['data_20in_20handlers_7',['Accessing User Data in Handlers',['../docs_rest_api.html#autotoc_md18',1,'']]],
@@ -19,7 +19,7 @@ var searchData=
   ['dbtype_16',['dbType',['../classmb_1_1MantisBase.html#a2a9a711b0c3c33ecdd2a0e2e4cd5e570',1,'mb::MantisBase']]],
   ['debug_17',['DEBUG',['../namespacemb.html#a9ff2e5ee4e235526221d8beb47edf607adc30ec20708ef7b0f641ef78b7880a15',1,'mb']]],
   ['debug_18',['debug',['../classmb_1_1MbLogger.html#a9551a5209e7029b984e25154be66839a',1,'mb::MbLogger']]],
-  ['default_20behavior_19',['Default Behavior',['../docs_rest_api_rules.html#autotoc_md320',1,'']]],
+  ['default_20behavior_19',['Default Behavior',['../docs_rest_api_rules.html#autotoc_md321',1,'']]],
   ['default_20middlewares_20',['Default Middlewares',['../docs_rest_api.html#autotoc_md14',1,'']]],
   ['defaultauthfields_21',['defaultAuthFields',['../classmb_1_1MbEntitySchemaField.html#a5f938cfd92c8143b1dc1d7534a5d67dd',1,'mb::MbEntitySchemaField']]],
   ['defaultauthfieldsschema_22',['defaultAuthFieldsSchema',['../classmb_1_1MbEntitySchema.html#abfc9729ab8be7e8dcd819f1ef090c12f',1,'mb::MbEntitySchema']]],
@@ -35,7 +35,7 @@ var searchData=
   ['deleting_20files_32',['Deleting Files',['../docs_file.html#autotoc_md217',1,'']]],
   ['deliver_33',['deliver',['../namespacemb_1_1smtp__detail.html#a8e68da7912d3a4970b500d2a4b981972',1,'mb::smtp_detail']]],
   ['denied_34',['denied',['../structmb_1_1TopicAccessResult.html#a808fea14ce61aabd8f253877d8e48d05',1,'mb::TopicAccessResult']]],
-  ['denied_20errors_35',['Access Denied Errors',['../docs_rest_api_rules.html#autotoc_md331',1,'']]],
+  ['denied_20errors_35',['Access Denied Errors',['../docs_rest_api_rules.html#autotoc_md332',1,'']]],
   ['denieddowngrade_36',['DeniedDowngrade',['../namespacemb.html#abe31476d8e2a547768a3712d6311e381a15ead7e9e753b314fa659c71eb998037',1,'mb']]],
   ['deniedswitch_37',['DeniedSwitch',['../namespacemb.html#abe31476d8e2a547768a3712d6311e381ae9dc1a5224658c867af186d0ed3c647c',1,'mb']]],
   ['denyforbidden_38',['DenyForbidden',['../namespacemb.html#a0bac5ee21709dac7566b89181ac45046a6aa1ca7ca8f15f8d327d74f9db988fc6',1,'mb']]],
@@ -53,7 +53,7 @@ var searchData=
   ['docker_20compose_50',['Docker Compose',['../docs_docker.html#autotoc_md166',1,'']]],
   ['docker_2emd_51',['docker.md',['../docker_8md.html',1,'']]],
   ['dockerfile_52',['Using Dockerfile',['../docs_docker.html#autotoc_md163',1,'']]],
-  ['documentation_53',['Documentation',['../index.html#autotoc_md287',1,'']]],
+  ['documentation_53',['Documentation',['../index.html#autotoc_md288',1,'']]],
   ['drogonrequest_54',['drogonRequest',['../classmb_1_1MbRequest.html#aa9048c81572ee519797e849fcbb22132',1,'mb::MbRequest']]],
   ['drogonresponse_55',['drogonResponse',['../classmb_1_1MbResponse.html#a0c9f7c22644a6e5a687603078ce9b937',1,'mb::MbResponse']]],
   ['dropdbhooks_56',['dropDbHooks',['../classmb_1_1MbRealtimeDB.html#a358fac49495e83b8559f58e04b195780',1,'mb::MbRealtimeDB::dropDbHooks(const std::string &amp;entity_name) const'],['../classmb_1_1MbRealtimeDB.html#ace9fde31f2664286e310348bc842c4ad',1,'mb::MbRealtimeDB::dropDbHooks(const std::string &amp;entity_name, const std::shared_ptr&lt; soci::session &gt; &amp;sess)']]],
@@ -64,5 +64,5 @@ var searchData=
   ['duktype_3c_20mb_3a_3ambscriptjson_20_3e_61',['DukType&lt; mb::MbScriptJson &gt;',['../structdukglue_1_1types_1_1DukType_3_01mb_1_1MbScriptJson_01_4.html',1,'dukglue::types']]],
   ['duktype_3c_20nlohmann_3a_3ajson_20_3e_62',['DukType&lt; nlohmann::json &gt;',['../structdukglue_1_1types_1_1DukType_3_01nlohmann_1_1json_01_4.html',1,'dukglue::types']]],
   ['dump_63',['dump',['../classmb_1_1MbContextStore.html#a8805cb791fd9e402eab23a65ec9db330',1,'mb::MbContextStore::dump()'],['../classmb_1_1MbEntitySchema.html#a2d81389ec6321ce1ebea1ce8ec414514',1,'mb::MbEntitySchema::dump()']]],
-  ['during_20schema_20creation_64',['During Schema Creation',['../docs_rest_api_rules.html#autotoc_md313',1,'']]]
+  ['during_20schema_20creation_64',['During Schema Creation',['../docs_rest_api_rules.html#autotoc_md314',1,'']]]
 ];

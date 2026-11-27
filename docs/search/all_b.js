@@ -30,13 +30,14 @@ var searchData=
   ['headervalue_27',['headerValue',['../classmb_1_1MbRequest.html#a513f1fdc8eaac948e5526e0496a5dcfa',1,'mb::MbRequest::headerValue()'],['../classmb_1_1MbResponse.html#a297af635f9ffd8a43ecd1d0b64e14a8f',1,'mb::MbResponse::headerValue()']]],
   ['health_20check_28',['Health Check',['../docs_healthcheck.html',1,'Health Check'],['../docs_rest_api.html#autotoc_md45',1,'Health Check']]],
   ['healthcheck_2emd_29',['healthcheck.md',['../healthcheck_8md.html',1,'']]],
-  ['hinting_30',['Type hinting',['../docs_scripting.html#autotoc_md336',1,'']]],
-  ['hooks_2ecpp_31',['hooks.cpp',['../hooks_8cpp.html',1,'']]],
-  ['host_32',['host',['../structmb_1_1MbSmtpConfig.html#a12da935bdf3608bc1fc7443faaad7fb9',1,'mb::MbSmtpConfig::host'],['../classmb_1_1MantisBase.html#a7020dfe16c1f842ea6d0bd60dbc97b4c',1,'mb::MantisBase::host()']]],
-  ['http_20status_20codes_33',['HTTP status codes',['../docs_rest_api.html#autotoc_md11',1,'HTTP status codes'],['../docs_auth_api.html#autotoc_md85',1,'HTTP status codes']]],
-  ['http_2ecpp_34',['http.cpp',['../http_8cpp.html',1,'']]],
-  ['http_2eh_35',['http.h',['../http_8h.html',1,'']]],
-  ['http_5frequest_2ecpp_36',['http_request.cpp',['../http__request_8cpp.html',1,'']]],
-  ['http_5fresponse_2ecpp_37',['http_response.cpp',['../http__response_8cpp.html',1,'']]],
-  ['hydratecontextdata_38',['hydrateContextData',['../namespacemb.html#a744fe2255bd45a1b982fb14a6943cd9a',1,'mb']]]
+  ['hinting_30',['Type hinting',['../docs_scripting.html#autotoc_md337',1,'']]],
+  ['hints_31',['Editor hints',['../docs_python.html#autotoc_md265',1,'']]],
+  ['hooks_2ecpp_32',['hooks.cpp',['../hooks_8cpp.html',1,'']]],
+  ['host_33',['host',['../structmb_1_1MbSmtpConfig.html#a12da935bdf3608bc1fc7443faaad7fb9',1,'mb::MbSmtpConfig::host'],['../classmb_1_1MantisBase.html#a7020dfe16c1f842ea6d0bd60dbc97b4c',1,'mb::MantisBase::host()']]],
+  ['http_20status_20codes_34',['HTTP status codes',['../docs_rest_api.html#autotoc_md11',1,'HTTP status codes'],['../docs_auth_api.html#autotoc_md85',1,'HTTP status codes']]],
+  ['http_2ecpp_35',['http.cpp',['../http_8cpp.html',1,'']]],
+  ['http_2eh_36',['http.h',['../http_8h.html',1,'']]],
+  ['http_5frequest_2ecpp_37',['http_request.cpp',['../http__request_8cpp.html',1,'']]],
+  ['http_5fresponse_2ecpp_38',['http_response.cpp',['../http__response_8cpp.html',1,'']]],
+  ['hydratecontextdata_39',['hydrateContextData',['../namespacemb.html#a744fe2255bd45a1b982fb14a6943cd9a',1,'mb']]]
 ];

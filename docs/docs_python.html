@@ -96,7 +96,8 @@ $(function(){initNavTree('docs_python.html','',''); });
 <div class="contents">
 <div class="textblock"><p>Python bindings embed the MantisBase server in a process and expose the same services the C++ API does: routing, SQL, entity CRUD, schemas, auth, files, settings, logs, realtime, and mail.</p>
 <div class="fragment"><div class="line">pip install mantisbase</div>
-</div><!-- fragment --><p>The published copy of this page is <a href="https://allankoechke.github.io/mantisbase/docs_python.html">docs_python.html</a>.</p>
+</div><!-- fragment --><p>Published wheels cover CPython 3.10–3.14 on Linux (x86-64 and aarch64), Windows x86-64, and macOS (arm64 and x86-64). Windows ARM64 wheels start at 3.11. Each wheel vendors <span class="tt">libmantisbase</span>, so <span class="tt">pip install</span> is enough to import it. Python 3.9 can build the extension from source and has no published wheel.</p>
+<p>The published copy of this page is <a href="https://allankoechke.github.io/mantisbase/docs_python.html">docs_python.html</a>.</p>
 <p><span class="tt">start()</span> refuses to serve in production when <span class="tt">MB_JWT_SECRET</span> is empty: the process exits. For local use pass <span class="tt">dev=True</span>. For anything else pass <span class="tt">secret_key</span> (or export <span class="tt">MB_JWT_SECRET</span> before creating the app).</p>
 <div class="fragment"><div class="line"><span class="keyword">import</span> mantisbase</div>
 <div class="line"> </div>
@@ -147,7 +148,7 @@ App</h2>
 <div class="line">    port=8080,</div>
 <div class="line">    host=<span class="stringliteral">&quot;127.0.0.1&quot;</span>,</div>
 <div class="line">    data_dir=<span class="stringliteral">&quot;./data&quot;</span>,</div>
-<div class="line">    db_type=<span class="stringliteral">&quot;sqlite3&quot;</span>,          <span class="comment"># or &quot;postgresql&quot;</span></div>
+<div class="line">    db_type=<span class="stringliteral">&quot;sqlite3&quot;</span>,          <span class="comment"># or &quot;postgresql&quot; or &quot;mysql&quot;</span></div>
 <div class="line">    db_url=<span class="stringliteral">&quot;&quot;</span>,</div>
 <div class="line">    public_dir=<span class="stringliteral">&quot;./public&quot;</span>,</div>
 <div class="line">    scripts_dir=<span class="stringliteral">&quot;./scripts&quot;</span>,</div>
@@ -158,7 +159,8 @@ App</h2>
 <div class="line">    skip_admin_setup=<span class="keyword">False</span>,</div>
 <div class="line">    secret_key=<span class="stringliteral">&quot;replace-me&quot;</span>,    <span class="comment"># exported as MB_JWT_SECRET before startup</span></div>
 <div class="line">)</div>
-</div><!-- fragment --><table class="markdownTable">
+</div><!-- fragment --><p>Keyword names are snake_case. Any other keyword is ignored, including the camelCase names used by the Node bindings (<span class="tt">dataDir</span>, <span class="tt">dbType</span>, and so on).</p>
+<table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Member  </th><th class="markdownTableHeadNone">Meaning  </th></tr>
 <tr class="markdownTableRowOdd">
@@ -166,21 +168,21 @@ App</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">stop()</span> / <span class="tt">close()</span>  </td><td class="markdownTableBodyNone">Stop the server and join the background thread.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">quit(code=0, reason=...)</span>  </td><td class="markdownTableBodyNone">Stop the server, then terminate the process with <span class="tt">std::exit</span>.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">quit(code=0, reason="Something went wrong!")</span>  </td><td class="markdownTableBodyNone">Stop the server, then terminate the process with <span class="tt">std::exit</span>.  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">entity(name)</span>  </td><td class="markdownTableBodyNone"><span class="tt">Entity</span> for a table in the schema cache. A missing table or an invalid name raises <span class="tt">MantisError</span>.  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">has_entity(name)</span>  </td><td class="markdownTableBodyNone">Whether that table is in the schema cache.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">create_schema(schema)</span>  </td><td class="markdownTableBodyNone">Create a table from a schema dict (same shape as <span class="tt">POST /api/v1/schemas</span>).  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">create_schema(schema)</span>  </td><td class="markdownTableBodyNone">Create a table from a schema dict (same shape as <span class="tt">POST /api/v1/schemas</span>). Returns <span class="tt">{id, schema, created, updated}</span>. A duplicate name raises <span class="tt">MantisError</span>.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">list_schemas(opts=None)</span>  </td><td class="markdownTableBodyNone">Schema rows. <span class="tt">opts</span> matches the C++ list options.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">list_schemas(opts=None)</span>  </td><td class="markdownTableBodyNone">Table rows, each <span class="tt">{id, schema, created, updated}</span>. <span class="tt">opts</span> matches the C++ list options.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">get_schema(table_id)</span>  </td><td class="markdownTableBodyNone">One schema by id.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">get_schema(table_id)</span>  </td><td class="markdownTableBodyNone">One table row by id.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">update_schema(table_id, schema)</span>  </td><td class="markdownTableBodyNone">Patch a schema.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">update_schema(table_id, schema)</span>  </td><td class="markdownTableBodyNone">Merge a schema patch and return the updated row.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">drop_schema(table_id)</span>  </td><td class="markdownTableBodyNone">Drop a table.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">drop_schema(table_id)</span>  </td><td class="markdownTableBodyNone">Drop a table. Returns <span class="tt">None</span>.  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">table_exists(name)</span>  </td><td class="markdownTableBodyNone">Whether the table is stored.  </td></tr>
 <tr class="markdownTableRowEven">
@@ -198,8 +200,10 @@ App</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">skip_admin_setup</span>  </td><td class="markdownTableBodyNone">Read/write.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">db_type</span>, <span class="tt">dev_mode</span>, <span class="tt">scripting_disabled</span>, <span class="tt">secret_key</span>, <span class="tt">version</span>  </td><td class="markdownTableBodyNone">Read-only.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">db_type</span>, <span class="tt">dev_mode</span>, <span class="tt">secret_key</span>, <span class="tt">version</span>  </td><td class="markdownTableBodyNone">Read-only. <span class="tt">db_type</span> is <span class="tt">sqlite3</span>, <span class="tt">postgresql</span>, or <span class="tt">mysql</span>.  </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">scripting_disabled</span>  </td><td class="markdownTableBodyNone">Read-only CLI flag. The constructor never sets it, so it stays false. Export <span class="tt">MB_SCRIPTING_DISABLED=1</span> before <span class="tt">start()</span> to skip JavaScript loading. That variable does not change this property.  </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">uptime_seconds</span>  </td><td class="markdownTableBodyNone">Seconds since the app object was created.  </td></tr>
 </table>
 <p><span class="tt">mantisbase.version()</span> returns the same version string.</p>
@@ -351,7 +355,7 @@ Response</h2>
 </table>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md253"></a>
 Database</h2>
-<p><span class="tt">app.db.query(sql, *binds)</span> returns a list of dicts. Each bind is a dict of named parameters (<span class="tt">:name</span> in the SQL). Values are <span class="tt">None</span>, <span class="tt">bool</span>, <span class="tt">int</span>, <span class="tt">float</span>, or <span class="tt">str</span>. The GIL is released while the query runs.</p>
+<p><span class="tt">app.db.query(sql, *params)</span> returns a list of dicts. Each item in <span class="tt">params</span> is a dict of named parameters (<span class="tt">:name</span> in the SQL). Values are <span class="tt">None</span>, <span class="tt">bool</span>, <span class="tt">int</span>, <span class="tt">float</span>, or <span class="tt">str</span>. The GIL is released while the query runs. <span class="tt">Transaction.query</span> takes the same arguments and uses the leased session.</p>
 <div class="fragment"><div class="line">rows = app.db.query(</div>
 <div class="line">    <span class="stringliteral">&quot;SELECT id, title FROM notes WHERE title = :title&quot;</span>,</div>
 <div class="line">    {<span class="stringliteral">&quot;title&quot;</span>: <span class="stringliteral">&quot;Hello&quot;</span>},</div>
@@ -385,9 +389,9 @@ Entity</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">create(record, opts=None)</span>  </td><td class="markdownTableBodyNone">Insert and return the stored row.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">list(opts=None)</span>  </td><td class="markdownTableBodyNone">Rows ordered by <span class="tt">id</span>.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">list(opts=None)</span>  </td><td class="markdownTableBodyNone">One page of rows ordered by <span class="tt">id</span>. Same options as <span class="tt">list_page</span>. Default page size is 50.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">list_page(opts=None)</span>  </td><td class="markdownTableBodyNone"><span class="tt">{"items", "has_more"}</span>.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">list_page(opts=None)</span>  </td><td class="markdownTableBodyNone"><span class="tt">{"items", "has_more"}</span> for that page.  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">read(id, opts=None)</span>  </td><td class="markdownTableBodyNone">One row, or <span class="tt">None</span>.  </td></tr>
 <tr class="markdownTableRowEven">
@@ -403,10 +407,11 @@ Entity</h2>
 </table>
 <p>List options:</p>
 <ul>
-<li><span class="tt">pagination.limit</span> — page size from 1 to 500, default 50</li>
+<li><span class="tt">pagination.limit</span> — page size from 1 to 500, default 50. <span class="tt">list</span> and <span class="tt">list_page</span> both apply it.</li>
 <li><span class="tt">pagination.after</span> — id of the last row from the previous page</li>
 <li><span class="tt">filter</span> — <span class="tt">{field: value}</span> equality filters, as a dict or a JSON string</li>
 </ul>
+<p>Auth entities omit <span class="tt">password</span> from <span class="tt">list</span>, <span class="tt">list_page</span>, and <span class="tt">read</span>. <span class="tt">read(id, {"keep_passwords": True})</span> returns that field.</p>
 <div class="fragment"><div class="line">page = app.entity(<span class="stringliteral">&quot;notes&quot;</span>).list_page({</div>
 <div class="line">    <span class="stringliteral">&quot;pagination&quot;</span>: {<span class="stringliteral">&quot;limit&quot;</span>: 20, <span class="stringliteral">&quot;after&quot;</span>: last_id},</div>
 <div class="line">    <span class="stringliteral">&quot;filter&quot;</span>: {<span class="stringliteral">&quot;title&quot;</span>: <span class="stringliteral">&quot;Hello&quot;</span>},</div>
@@ -418,13 +423,13 @@ Auth</h2>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Method  </th><th class="markdownTableHeadNone">Purpose  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">create_token(claims, timeout=-1)</span>  </td><td class="markdownTableBodyNone">Sign a JWT. <span class="tt">claims</span> needs <span class="tt">id</span> and <span class="tt">table</span>. <span class="tt">timeout</span> is seconds; <span class="tt">-1</span> uses the entity default.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">create_token(claims, timeout=-1)</span>  </td><td class="markdownTableBodyNone">Sign a JWT. <span class="tt">claims</span> needs <span class="tt">id</span> and <span class="tt">entity</span>. Missing either raises <span class="tt">ValueError</span>. <span class="tt">timeout</span> is seconds; <span class="tt">-1</span> uses the configured lifetime (<span class="tt">adminSessionTimeout</span>, default 1 hour, for <span class="tt">mb_admins</span>; <span class="tt">sessionTimeout</span>, default 24 hours, otherwise).  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">verify_token(token)</span>  </td><td class="markdownTableBodyNone">Claims plus <span class="tt">verified</span> and <span class="tt">error</span>.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">verify_token(token)</span>  </td><td class="markdownTableBodyNone"><span class="tt">{verified, error, claims}</span>. A rejected token sets <span class="tt">verified</span> to false and fills <span class="tt">error</span>. It does not raise.  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">delete_session(session_id)</span>  </td><td class="markdownTableBodyNone">Invalidate a session row.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">refresh_session(session_id, entity, user_id)</span>  </td><td class="markdownTableBodyNone">Rotate the session and return the new token payload.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">refresh_session(session_id, entity, user_id)</span>  </td><td class="markdownTableBodyNone">Rotate the session and return <span class="tt">{"token": ...}</span>. A missing session raises <span class="tt">RuntimeError</span>.  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">session_timeout(entity, timeout=-1)</span>  </td><td class="markdownTableBodyNone">Lifetime in seconds.  </td></tr>
 <tr class="markdownTableRowEven">
@@ -444,8 +449,9 @@ Auth</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">notify_email_verification(entity, user_id)</span>  </td><td class="markdownTableBodyNone">Send a verification link when SMTP is configured. Missing SMTP is ignored.  </td></tr>
 </table>
-<div class="fragment"><div class="line">token = app.auth.create_token({<span class="stringliteral">&quot;id&quot;</span>: user[<span class="stringliteral">&quot;id&quot;</span>], <span class="stringliteral">&quot;table&quot;</span>: <span class="stringliteral">&quot;users&quot;</span>}, timeout=3600)</div>
-<div class="line">claims = app.auth.verify_token(token)</div>
+<div class="fragment"><div class="line">token = app.auth.create_token({<span class="stringliteral">&quot;id&quot;</span>: user[<span class="stringliteral">&quot;id&quot;</span>], <span class="stringliteral">&quot;entity&quot;</span>: <span class="stringliteral">&quot;users&quot;</span>}, timeout=3600)</div>
+<div class="line">checked = app.auth.verify_token(token)</div>
+<div class="line">user_id = checked[<span class="stringliteral">&quot;claims&quot;</span>][<span class="stringliteral">&quot;id&quot;</span>]</div>
 </div><!-- fragment --><p>OTP, verification, and reset calls require SMTP. See <a class="el" href="auth_8md.html">Authentication</a> for the HTTP equivalents.</p>
 <h3 class="doxsection"><a class="anchor" id="autotoc_md256"></a>
 API keys</h3>
@@ -599,13 +605,13 @@ Utils</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">get_env(key, default="")</span>  </td><td class="markdownTableBodyNone">Environment variable or default.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">sanitize_filename(name, max_len=50, id_len=12, separator="_")</span>  </td><td class="markdownTableBodyNone">Safe unique filename.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">sanitize_filename(name, max_len=50, id_len=12, separator="_")</span>  </td><td class="markdownTableBodyNone">Unique filename. A disallowed extension raises <span class="tt">MantisError</span> with code 415.  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">hash_password(password)</span> / <span class="tt">verify_password(password, stored_hash)</span>  </td><td class="markdownTableBodyNone">Password hash used by auth entities.  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">is_allowed_file_extension(extension)</span>  </td><td class="markdownTableBodyNone">Upload allow-list check.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">is_allowed_file_extension(extension)</span>  </td><td class="markdownTableBodyNone">Upload allow-list check. Pass the extension with its dot, as in <span class="tt">.png</span>.  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">safe_content_type(extension)</span>  </td><td class="markdownTableBodyNone">MIME type safe to send for that extension.  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">safe_content_type(extension)</span>  </td><td class="markdownTableBodyNone">MIME type for that extension, or <span class="tt">application/octet-stream</span> when it is unknown.  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">str_to_bool(value)</span>  </td><td class="markdownTableBodyNone"><span class="tt">true</span>, <span class="tt">1</span>, <span class="tt">on</span>, <span class="tt">yes</span> and their opposites.  </td></tr>
 </table>
@@ -614,6 +620,11 @@ Threading</h2>
 <p>Route handlers run on MantisBase worker threads. The GIL is acquired around each Python handler, middleware, and callback, and released around database and filesystem work. Python handlers therefore serialize on the GIL the same way a Flask threaded server does.</p>
 <p>Do not call <span class="tt">stop()</span> from inside a handler on the server thread that is running that handler. Call it from another thread, or from the thread that called a non-blocking <span class="tt">start()</span>.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md265"></a>
+Editor hints</h2>
+<p><span class="tt">import mantisbase</span> loads the nanobind extension. The wheel ships that extension only. There is no <span class="tt">mantisbase.pyi</span>.</p>
+<p><span class="tt">help()</span> and <span class="tt">function.__doc__</span> show a one-line class summary plus a signature built from the binding's argument names, for example <span class="tt">start(self, blocking: bool = True) -&gt; None</span>. Prose beyond that signature is attached to <span class="tt">version</span>, <span class="tt">App.quit</span>, <span class="tt">router.redirect</span>, <span class="tt">router.broadcast</span>, <span class="tt">request.parse_form</span>, <span class="tt">mailer.configure</span>, <span class="tt">mailer.apply_settings</span>, <span class="tt">middlewares.get_auth_token</span>, and <span class="tt">middlewares.env_gate</span>.</p>
+<p><span class="tt">App(...)</span> is bound as <span class="tt">**kwargs</span>. Its signature lists no constructor names (<span class="tt">port</span>, <span class="tt">host</span>, <span class="tt">data_dir</span>, and the rest above). <span class="tt">MantisError.code</span> and <span class="tt">MantisError.description</span> exist on the instance after a C++ error is translated. The class itself has no annotations for them, so completion skips them. mypy and Pyright treat the module as an untyped native extension. Parameter descriptions live on this page.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md266"></a>
 Building from source</h2>
 <p>The wheel links the MantisBase shared library. Build and install that library first (<span class="tt">cmake --install</span> is required; a plain build does not install it):</p>
 <div class="fragment"><div class="line">cmake -B build -DMB_BUILD_SHARED_LIB=ON</div>
@@ -622,8 +633,13 @@ Building from source</h2>
 <div class="line"> </div>
 <div class="line">pip install -e bindings/python \</div>
 <div class="line">  --config-settings=cmake.define.CMAKE_PREFIX_PATH=$PWD/install</div>
-</div><!-- fragment --><p>At runtime the loader must find <span class="tt">libmantisbase.so</span>, for example <span class="tt">export LD_LIBRARY_PATH=$PWD/install/lib</span>.</p>
-<p>The extension needs CMake &gt;= 3.22, a C++20 compiler, and Python &gt;= 3.9. <span class="tt">nanobind</span> and <span class="tt">scikit-build-core</span> are fetched by pip. Wheel production is described in <span class="tt">.github/workflows/bindings-python.yml</span>. </p>
+</div><!-- fragment --><p>At runtime the loader must find the shared library next to that prefix:</p>
+<ul>
+<li>Linux: <span class="tt">libmantisbase.so</span>, for example <span class="tt">export LD_LIBRARY_PATH=$PWD/install/lib</span></li>
+<li>macOS: <span class="tt">libmantisbase.dylib</span>, for example <span class="tt">export DYLD_LIBRARY_PATH=$PWD/install/lib</span></li>
+<li>Windows: <span class="tt">libmantisbase.dll</span> on <span class="tt">PATH</span></li>
+</ul>
+<p>The extension needs CMake &gt;= 3.22, a C++20 compiler, and Python &gt;= 3.9. <span class="tt">nanobind</span> and <span class="tt">scikit-build-core</span> are fetched by pip. <span class="tt">pip install mantisbase</span> on a Python outside the published wheel set (3.10–3.14, Windows ARM64 from 3.11) builds the sdist, which does not compile the C++ engine. Install the shared library first, as above, or use a Python that has a wheel. Wheel production is described in <span class="tt">.github/workflows/bindings-python.yml</span>. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

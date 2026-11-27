@@ -99,9 +99,9 @@ $(function(){initNavTree('index.html','',''); });
 <p align="center"></p>
 <p><b>A self-hosted C++20 BaaS — one binary, instant REST APIs, auth, realtime, and an admin dashboard.</b> </p>
 <hr  />
-<h2 class="doxsection"><a class="anchor" id="autotoc_md267"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md268"></a>
 Installation</h2>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md268"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md269"></a>
 Pre-built Binary</h3>
 <ol type="1">
 <li>Download the latest release from <a href="https://github.com/allankoechke/mantisbase/releases">GitHub Releases</a></li>
@@ -111,7 +111,7 @@ Pre-built Binary</h3>
 </div><!-- fragment --><p>The server starts on <span class="tt"><a href="http://localhost:7070">http://localhost:7070</a></span>.</p>
 <p><b>Linux dependencies:</b> </p><div class="fragment"><div class="line">sudo apt-get install -y libpq-dev uuid-dev</div>
 </div><!-- fragment --><p><b>macOS dependencies:</b> </p><div class="fragment"><div class="line">brew install libpq ossp-uuid</div>
-</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md269"></a>
+</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md270"></a>
 Build from Source</h3>
 <div class="fragment"><div class="line">git clone https://github.com/allankoechke/mantisbase.git</div>
 <div class="line">cd mantisbase</div>
@@ -120,17 +120,17 @@ Build from Source</h3>
 <div class="line">./build/mantisbase serve</div>
 </div><!-- fragment --><p>See <a class="el" href="installation_8md.html">Installation Guide</a> for more details.</p>
 <hr  />
-<h2 class="doxsection"><a class="anchor" id="autotoc_md271"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md272"></a>
 First Steps</h2>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md272"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md273"></a>
 1. Create an Admin Account</h3>
 <div class="fragment"><div class="line">./mantisbase admins --add admin@example.com your_password</div>
-</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md273"></a>
+</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md274"></a>
 2. Access the Admin Dashboard</h3>
 <p>Open <span class="tt"><a href="http://localhost:7070/mb">http://localhost:7070/mb</a></span> and log in with your admin credentials.</p>
 <p>The dashboard lets you create entities, manage records and schemas, configure access rules, upload files, and set SMTP credentials under Settings — all without writing API calls.</p>
 <p><img src="assets/mantisbase-admin.png" alt="MantisBase Admin Dashboard" class="inline"/></p>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md274"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md275"></a>
 3. Create Your First MbEntity</h3>
 <p><b>Using the Admin Dashboard (recommended):</b> navigate to Schemas, click New, and fill in the name, fields, and access rules.</p>
 <p><b>Using the API:</b></p>
@@ -152,7 +152,7 @@ First Steps</h2>
 <div class="line">      &quot;delete&quot;: {&quot;mode&quot;: &quot;&quot;, &quot;expr&quot;: &quot;&quot;}</div>
 <div class="line">    }</div>
 <div class="line">  }&#39;</div>
-</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md275"></a>
+</div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="autotoc_md276"></a>
 4. Use Your Auto-generated API</h3>
 <div class="fragment"><div class="line"># List all posts</div>
 <div class="line">curl http://localhost:7070/api/v1/entities/posts</div>
@@ -176,7 +176,7 @@ First Steps</h2>
 <div class="line">curl -X DELETE http://localhost:7070/api/v1/entities/posts/&lt;id&gt; \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot;</div>
 </div><!-- fragment --><hr  />
-<h2 class="doxsection"><a class="anchor" id="autotoc_md277"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md278"></a>
 Authentication</h2>
 <div class="fragment"><div class="line"># Login</div>
 <div class="line">curl -X POST http://localhost:7070/api/v1/auth/users/login \</div>
@@ -192,7 +192,7 @@ Authentication</h2>
 <div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot;</div>
 </div><!-- fragment --><p>See <a class="el" href="auth_8md.html">Authentication API</a> for verify, refresh, logout, API keys, and OAuth.</p>
 <hr  />
-<h2 class="doxsection"><a class="anchor" id="autotoc_md279"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md280"></a>
 Access Control</h2>
 <p>Each entity defines per-operation access rules:</p>
 <table class="markdownTable">
@@ -209,7 +209,7 @@ Access Control</h2>
 </table>
 <p>See <a class="el" href="rules_8md.html">Access Rules</a> for details.</p>
 <hr  />
-<h2 class="doxsection"><a class="anchor" id="autotoc_md281"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md282"></a>
 File Uploads</h2>
 <div class="fragment"><div class="line">curl -X POST http://localhost:7070/api/v1/entities/posts \</div>
 <div class="line">  -H &quot;Authorization: Bearer &lt;token&gt;&quot; \</div>
@@ -217,7 +217,7 @@ File Uploads</h2>
 <div class="line">  -F &quot;image=@photo.jpg&quot;</div>
 </div><!-- fragment --><p>Serve files at <span class="tt">GET /api/v1/files/posts/&lt;filename&gt;</span>. See <a class="el" href="files_8md.html">File Handling</a>.</p>
 <hr  />
-<h2 class="doxsection"><a class="anchor" id="autotoc_md283"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md284"></a>
 Configuration</h2>
 <div class="fragment"><div class="line"># Custom port and host</div>
 <div class="line">mantisbase serve --port 8080 --host 0.0.0.0</div>
@@ -231,7 +231,7 @@ Configuration</h2>
 <div class="line">  serve</div>
 </div><!-- fragment --><p>Set <span class="tt">MB_JWT_SECRET</span> in production. See <a class="el" href="cmd_8md.html">CLI Reference</a> for all options.</p>
 <hr  />
-<h2 class="doxsection"><a class="anchor" id="autotoc_md285"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md286"></a>
 Next Steps</h2>
 <ol type="1">
 <li><a class="el" href="api_8md.html">API Reference</a> — All endpoints, schema management, realtime SSE and WebSocket</li>
@@ -244,7 +244,7 @@ Next Steps</h2>
 <li><a class="el" href="docker_8md.html">Docker Guide</a> — Container deployment</li>
 </ol>
 <hr  />
-<h2 class="doxsection"><a class="anchor" id="autotoc_md287"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md288"></a>
 Documentation</h2>
 <ul>
 <li><a class="el" href="installation_8md.html">Installation Guide</a> — Detailed installation instructions</li>

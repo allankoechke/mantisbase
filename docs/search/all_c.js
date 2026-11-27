@@ -20,7 +20,7 @@ var searchData=
   ['initdb_17',['initDb',['../classmb_1_1MbLogger.html#af58a6c1c45b92302eadfac956880ab4e',1,'mb::MbLogger']]],
   ['initwolfssl_18',['initWolfSsl',['../namespacemb.html#a75ea34c60da916b00f13048b19636d95',1,'mb']]],
   ['insertlog_19',['insertLog',['../classmb_1_1MbLogDatabase.html#af184b830558239360e230ee83206f59c',1,'mb::MbLogDatabase']]],
-  ['installation_20',['Installation',['../index.html#autotoc_md267',1,'']]],
+  ['installation_20',['Installation',['../index.html#autotoc_md268',1,'']]],
   ['installation_20options_21',['Installation Options',['../docs_setup.html#autotoc_md239',1,'']]],
   ['installation_2emd_22',['installation.md',['../installation_8md.html',1,'']]],
   ['int_5fprecision_2ecpp_23',['int_precision.cpp',['../int__precision_8cpp.html',1,'']]],
