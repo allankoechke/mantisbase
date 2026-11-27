@@ -86,6 +86,32 @@ namespace mb {
         }
         return {};
     }
+
+    void MbFilesMgr::removeFilesJson(const std::string &entity_name, const MbScriptJson &files_in) const {
+        const json &files = files_in.value;
+        if (!files.is_array())
+            throw MbException(400, "files must be an array of filenames");
+        std::vector<std::string> names;
+        names.reserve(files.size());
+        for (const auto &item : files) {
+            if (!item.is_string())
+                throw MbException(400, "files must be an array of filenames");
+            names.push_back(item.get<std::string>());
+        }
+        removeFiles(entity_name, names);
+    }
+
+    std::string MbFilesMgr::canonicalPathString(const std::string &path) const {
+        return getCanonicalPath(path).string();
+    }
+
+    bool MbFilesMgr::isCanonicalPathString(const std::string &path) const {
+        return isCanonicalPath(path);
+    }
+
+    std::string MbFilesMgr::filesBaseDirString() const {
+        return filesBaseDir().string();
+    }
 #endif
 
     std::string MbFilesMgr::dirPath(const std::string &entity_name, const bool create_if_missing) const {

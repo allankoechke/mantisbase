@@ -72,6 +72,7 @@ namespace mb {
         registerRouterBindings(m_ctx);
         registerSettingsBindings(m_ctx);
         registerAuthBindings(m_ctx);
+        registerMailerBindings(m_ctx);
         registerMiddlewareBindings(m_ctx);
         registerFilesBindings(m_ctx);
         registerLogsBindings(m_ctx);
@@ -185,8 +186,11 @@ namespace mb {
     bool MbScriptingEngine::pcallBool(const DukValue &fn, MbRequest &req, MbResponse &res) {
         return withLock([&]() -> bool {
             try {
-                return dukglue_pcall<bool>(m_ctx, fn, &req, &res);
+                const bool ok = dukglue_pcall<bool>(m_ctx, fn, &req, &res);
+                duk_gc(m_ctx, 0);
+                return ok;
             } catch (const DukErrorException &e) {
+                duk_gc(m_ctx, 0);
                 m_app.logger().critical("Scripting", fmt::format("JS middleware error: {}", e.what()));
                 return false;
             }
@@ -197,7 +201,9 @@ namespace mb {
         withLock([&]() {
             try {
                 dukglue_pcall<void>(m_ctx, fn, &req, &res);
+                duk_gc(m_ctx, 0);
             } catch (const DukErrorException &e) {
+                duk_gc(m_ctx, 0);
                 m_app.logger().critical("Scripting", fmt::format("JS handler error: {}", e.what()));
             }
         });

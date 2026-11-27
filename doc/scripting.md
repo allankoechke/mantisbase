@@ -18,7 +18,7 @@ Copy `mantisbase.d.ts` (repo root) next to your scripts for autocompletion and i
 cp mantisbase.d.ts ./scripts/
 ```
 
-It covers the whole JS surface: `app` (router, db, settings, auth, files, logs, realtime), `middlewares`, `utils`, `console`, request/response objects, and the `onServerStart` / `onRecordCreated` / `onRecordUpdated` lifecycle hooks.
+It covers the whole JS surface: `app` (router, db, settings, auth, API keys, OAuth, mailer, files, logs, realtime), `middlewares`, `utils`, `console`, request/response objects, and the `onServerStart` / `onRecordCreated` / `onRecordUpdated` lifecycle hooks.
 
 ### Build and runtime switches
 
@@ -50,10 +50,11 @@ Additionally, some methods are exposed on the `app` object:
 - `app.db()`: Get the database unit instance.
 - `app.router()`: Get the router unit instance.
 - `app.settings()`: Key/value app configuration (`get`, `set`, `configs`, `reload`). `set` persists and applies immediately. `get("smtp")` and `configs()` return `smtp.password` as `"********"` when a password is stored. `reload` re-reads the database and reapplies SMTP (and CORS) from that record.
-- `app.auth()`: JWT and session helpers (`createToken`, `verifyToken`, `deleteSession`, `refreshSession`, `sessionTimeoutSeconds`).
-- `app.files()`: File path helpers for entity uploads (`dirPath`, `filePath`, `getFilePath`, `removeFile`).
-- `app.logs()`: Structured logging (`info`, `warn`, `error`, `debug`, `trace`).
-- `app.rt()`: Realtime change notifications (`notifyChange`).
+- `app.auth()`: JWT sessions, email sign-in codes, email verification, password reset, plus `apiKey()` and `oauth()`.
+- `app.mailer()`: Outbound SMTP (`configure`, `send`, `sendTest`, templates, mock `sentMessages`).
+- `app.files()`: Entity upload directories (`createDir`, `dirPath`, `filePath`, `removeFile`, `fileExists`).
+- `app.logs()`: Structured logging (`info`, `warn`, `error`, `critical`, `debug`, `trace`). `error` and `critical` both record a critical log.
+- `app.rt()`: Realtime change notifications (`notifyChange`, `addDbHooks`, `dropDbHooks`).
 - `app.loadScript(path)`: Load an additional script relative to `scriptsDir`.
 
 ### Settings
@@ -78,6 +79,74 @@ const smtp = JSON.parse(app.settings().get("smtp"));
 
 `MB_DISABLE_CONFIG_MUTATIONS` blocks dashboard and PATCH writes. `app.settings().set` still persists, because the script runs inside the server.
 
+### Mailer
+
+`app.mailer()` sends mail through the same SMTP settings as the dashboard. `config()` returns an object and masks a stored password as `"********"`. Passing that mask back to `configure` keeps the stored password. `send` delivers one message. Mock hosts (`mock`, `localhost:0`) capture it in `sentMessages()` instead of opening a connection.
+
+```js
+app.mailer().configure({
+    host: "smtp.example.com",
+    port: 587,
+    user: "mailer",
+    password: "s3cret",
+    from: "app@example.com",
+    tls: true
+});
+
+app.mailer().send("user@example.com", "Hello", "<p>Hello</p>", "Hello");
+app.mailer().sendTest("user@example.com");
+```
+
+`checkRateLimit(email, maxPerHour)` is required with both arguments. `loadTemplate(name, variables)` takes an object of strings, or `null` when there are no variables. `applySettings(configs)` reads the `smtp` object from a settings document. `settings().get` and `settings().set` still use JSON strings.
+
+### Auth, API keys, and OAuth
+
+`createToken`, `verifyToken`, and `refreshSession` still take and return JSON strings. The mail, sign-in, API key, and OAuth methods take and return objects.
+
+```js
+const auth = app.auth();
+const token = auth.createToken(JSON.stringify({ id: "user123", table: "users" }), 3600);
+JSON.parse(auth.verifyToken(token));
+
+auth.requestLoginOtp("users", "user@example.com");
+const session = auth.loginWithOtp("users", "user@example.com", "123456");
+auth.notifyEmailVerification("users", userId);
+auth.requestEmailVerification("users", "user@example.com", req.getHeader("Host", ""));
+auth.confirmEmailVerification("users", token);
+auth.requestPasswordReset("users", "user@example.com", req.getHeader("Host", ""));
+auth.confirmPasswordReset("users", token, "new-password");
+auth.rejectUnverifiedLogin("users", user);
+```
+
+`requestLoginOtp`, `requestEmailVerification`, and `requestPasswordReset` return `{ sent: true }` even when the address is unknown, and they send nothing in that case. They throw when SMTP is not configured.
+
+`auth.apiKey()` creates and lists keys. `permissions` is an array, or `null` for none. `expiresAt` is empty when the key does not expire. `create` returns an object that includes the raw `key` once.
+
+```js
+const created = auth.apiKey().create("users", userId, "CI token", [], "");
+auth.apiKey().revoke(created.id, "users", userId);
+auth.apiKey().list("users", userId);
+auth.apiKey().listAdmin();
+auth.apiKey().createAdmin(adminId, "Admin token", null, "");
+```
+
+`auth.oauth()` configures providers and builds login URLs. The OAuth encryption key is not exposed.
+
+```js
+const oauth = auth.oauth();
+oauth.addProvider({
+    name: "google",
+    client_id: "...",
+    client_secret: "..."
+});
+oauth.listProviders();
+oauth.enableProvider("users", providerId);
+oauth.authorizeUrl("users", "google", redirectUri);
+oauth.handleCallback("users", "google", code, state);
+oauth.providers("users");
+oauth.disableProvider("users", providerId);
+```
+
 ## MbDatabase
 The `DatabaseUnit` object returned from the `app.db()` method exposes the following methods and properties:
 ```js
@@ -85,7 +154,8 @@ const db = app.db() // Get db unit instance
 ```
 - `db.connected`: Property to read the connection state to the database.
 - `db.session()`: Request a database session object which is used for executing SQL queries and other database operations. Returns an instance of `soci::session` object.
-- `db.query(sql_query, [bind objects])`: Useful for executing SQL queries on database directly. Expects the first argument to a valid SQL query followed by optional values to bind if any.
+- `db.query(sql_query, [bind objects])`: Execute SQL on a newly leased session. The first argument is the SQL, followed by optional bind objects.
+- `db.queryOn(session, sql_query, [bind objects])`: Execute SQL on a session you already leased. Use this inside `begin` / `commit` / `rollback`. `db.query` cannot see that transaction, because it leases a different connection.
 
 ```js
 const db = app.db();
@@ -107,9 +177,21 @@ const sess = db.session() // Lease a session for executing db actions
 - `sess.close()`: Close a specific database session. Note that, if the poolSize is greater than 1, this only closes the _sess_ we borrowed earlier.
 - `sess.reconnect()`: Reconnect the session instance.
 - `sess.connected`: Property to get session instance connection status.
-- `sess.begin`
-- `sess.commit`
-- `sess.rollback`
+- `sess.begin()`
+- `sess.commit()`
+- `sess.rollback()`
+
+```js
+const sess = db.session();
+db.queryOn(sess, "CREATE TABLE IF NOT EXISTS notes (id TEXT PRIMARY KEY, body TEXT)");
+sess.begin();
+db.queryOn(sess, "INSERT INTO notes (id, body) VALUES (:id, :body)", { id: "1", body: "kept" });
+sess.commit();
+
+sess.begin();
+db.queryOn(sess, "INSERT INTO notes (id, body) VALUES (:id, :body)", { id: "2", body: "dropped" });
+sess.rollback();
+```
 - `sess.getQuery`
 - `sess.getLastQuery`
 - `sess.getLastQueryContext`
@@ -127,6 +209,7 @@ The router instance allows binding handlers and optional middlewares to given ro
 - `app.router().patch(path, handler, [middlewares])`: Shorthand for `addRoute("PATCH", ...)`.
 - `app.router().delete(path, handler, [middlewares])`: Shorthand for `addRoute("DELETE", ...)`. (`delete` is a reserved word, so some editors/linters prefer the `app.router()["delete"](...)` spelling — both work.)
 - `app.router().redirect(from, to[, status[, methods]])`: Redirect requests from one path to another without a handler. `status` is a 3xx code (default `302`); `methods` is a single method name or an array of method names allowed for the redirect (default `["GET"]`, pass `[]` to allow all methods).
+- `app.router().broadcastChange(eventJson)`: Push a change event, as a JSON string, to realtime subscribers.
 
 ```js
 app.router().addRoute("GET", "/test", function (req, res){
@@ -267,6 +350,8 @@ The global `middlewares` object exposes C++ middleware factories. Each factory r
 - `middlewares.requireAdminAuth()`, `requireGuestOnly()`, `hasEntityAccess()`
 - `middlewares.requireExprEval(expr)`, `settingsFeatureGate(key)`
 - `middlewares.rejectViewMutations()`
+- `middlewares.envGate(envVar, blockWhenTruthy)`: HTTP 503 when `utils.strToBool` of that environment variable equals `blockWhenTruthy`.
+- `middlewares.rateLimit(maxRequests, windowSeconds[, byUser])`: HTTP 429 after `maxRequests` in the window. `byUser` defaults to `false` (limit by IP). Pass `true` to limit by the authenticated user id, falling back to IP.
 
 ```js  
 app.router().addRoute("GET", "/api/v1/custom/protected", handler,
@@ -290,3 +375,21 @@ Mantis exposes an object `utils` which has the following utility functions.
 - `utils.sanitizeFilename(file_name)`
 - `utils.hashPassword(password)`
 - `utils.verifyPassword(password, stored_password)`
+- `utils.isAllowedFileExtension(extension)`
+- `utils.safeContentType(extension)`
+- `utils.strToBool(value)`
+
+### Files
+
+`app.files()` manages the upload directory under the data directory.
+
+- `createDir(entity)`, `renameDir(old, new)`, `deleteDir(entity)`
+- `dirPath(entity, createIfMissing)`, `filePath(entity, filename)`
+- `getFilePath(entity, filename)` returns the path, or `""` when the file is missing
+- `fileExists(entity, filename)`, `removeFile(entity, filename)`
+- `removeFiles(entity, files)` where `files` is an array of filenames
+- `canonicalPath(path)`, `isCanonical(path)`, `baseDir()`
+
+### Realtime
+
+`app.rt().notifyChange()` wakes the worker. `addDbHooks(entity)` and `dropDbHooks(entity)` install or remove the database triggers for one entity. Fan-out of a single event uses `app.router().broadcastChange(eventJson)`.

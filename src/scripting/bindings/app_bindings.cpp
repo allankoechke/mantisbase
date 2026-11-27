@@ -30,6 +30,7 @@ namespace mb {
         dukglue_register_method(ctx, &MantisBase::duk_files, "files");
         dukglue_register_method(ctx, &MantisBase::duk_logs, "logs");
         dukglue_register_method(ctx, &MantisBase::duk_rt, "rt");
+        dukglue_register_method(ctx, &MantisBase::duk_mailer, "mailer");
         dukglue_register_method(ctx, &MantisBase::loadScriptJs, "loadScript");
     }
 }

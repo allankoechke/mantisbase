@@ -28,6 +28,9 @@
 #include <nlohmann/json.hpp>
 
 #include "types.h"
+#ifdef MB_SCRIPTING_ENABLED
+#include "../scripting/script_json.h"
+#endif
 
 namespace mb {
     using json = nlohmann::json;
@@ -84,6 +87,19 @@ namespace mb {
 
         /** Revoke any admin API key by id (any admin may revoke any admin key). */
         [[nodiscard]] bool revokeAdmin(const std::string &key_id) const;
+
+#ifdef MB_SCRIPTING_ENABLED
+        /**
+         * @p permissions is an array, or null for none.
+         * @p expires_at is empty when the key does not expire.
+         * The returned object includes the one-time `key`.
+         */
+        [[nodiscard]] json createJson(const std::string &entity_name, const std::string &user_id,
+                                      const std::string &label, const MbScriptJson &permissions,
+                                      const std::string &expires_at) const;
+        [[nodiscard]] json createAdminJson(const std::string &user_id, const std::string &label,
+                                           const MbScriptJson &permissions, const std::string &expires_at) const;
+#endif
     };
 } // mb
 

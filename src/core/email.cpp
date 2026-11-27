@@ -47,7 +47,7 @@ mb::MbSmtpConfig mb::MbSmtpConfig::fromJson(const json &smtp) {
     MbSmtpConfig cfg;
     if (smtp.contains("host") && smtp["host"].is_string())
         cfg.host = trim(smtp["host"].get<std::string>());
-    if (smtp.contains("port") && smtp["port"].is_number_integer())
+    if (smtp.contains("port") && smtp["port"].is_number())
         cfg.port = smtp["port"].get<int>();
     if (smtp.contains("user") && smtp["user"].is_string())
         cfg.user = smtp["user"].get<std::string>();
@@ -533,6 +533,65 @@ std::string mb::MbMailer::hideEmail(const std::string &email) {
            std::string(username.size() - 2, '*') +
            domain;
 }
+
+#ifdef MB_SCRIPTING_ENABLED
+mb::json mb::MbMailer::configJson() const {
+    return {
+        {"host", m_config.host},
+        {"port", m_config.port},
+        {"user", m_config.user},
+        {"password", m_config.password.empty() ? "" : "********"},
+        {"from", m_config.from_address},
+        {"tls", m_config.use_tls},
+    };
+}
+
+void mb::MbMailer::configureJson(const mb::MbScriptJson &smtp_in) {
+    json smtp = smtp_in.value;
+    if (smtp.contains("password") && smtp["password"].is_string()
+        && smtp["password"].get<std::string>() == "********")
+        smtp["password"] = m_config.password;
+    configure(MbSmtpConfig::fromJson(smtp));
+}
+
+bool mb::MbMailer::sendMessage(const std::string &to, const std::string &subject,
+                               const std::string &html, const std::string &text) {
+    MbEmailMsg message;
+    message.to = to;
+    message.subject = subject;
+    message.body_html = html;
+    message.body_text = text;
+    return send(message);
+}
+
+std::string mb::MbMailer::loadTemplateJson(const std::string &template_name, const mb::MbScriptJson &variables_in) const {
+    const json &variables = variables_in.value;
+    std::unordered_map<std::string, std::string> values;
+    if (!variables.is_null()) {
+        if (!variables.is_object())
+            throw MbException(400, "template variables must be an object of strings");
+        for (auto it = variables.begin(); it != variables.end(); ++it) {
+            if (!it.value().is_string())
+                throw MbException(400, "template variables must be an object of strings");
+            values.emplace(it.key(), it.value().get<std::string>());
+        }
+    }
+    return loadTemplate(template_name, values);
+}
+
+mb::json mb::MbMailer::sentMessagesJson() const {
+    json out = json::array();
+    for (const auto &message : m_sent_messages) {
+        out.push_back({
+            {"to", message.to},
+            {"subject", message.subject},
+            {"html", message.body_html},
+            {"text", message.body_text},
+        });
+    }
+    return out;
+}
+#endif
 
 const mb::MbSmtpConfig &mb::MbMailer::config() const { return m_config; }
 

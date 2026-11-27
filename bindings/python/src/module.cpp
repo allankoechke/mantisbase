@@ -1,20 +1,21 @@
-#include <nanobind/nanobind.h>
 #include <mantisbase/mantisbase.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 
 #include "py_conv.h"
 
 namespace nb = nanobind;
 
-void register_entity(nb::module_ &m);
-void register_request(nb::module_ &m);
-void register_response(nb::module_ &m);
-void register_middleware(nb::module_ &m);
-void register_db(nb::module_ &m);
-void register_auth(nb::module_ &m);
-void register_services(nb::module_ &m);
-void register_router(nb::module_ &m);
-void register_app(nb::module_ &m);
-void register_utils(nb::module_ &m);
+void register_entity(nb::module_ & m);
+void register_request(nb::module_ & m);
+void register_response(nb::module_ & m);
+void register_middleware(nb::module_ & m);
+void register_db(nb::module_ & m);
+void register_auth(nb::module_ & m);
+void register_services(nb::module_ & m);
+void register_router(nb::module_ & m);
+void register_app(nb::module_ & m);
+void register_utils(nb::module_ & m);
 
 NB_MODULE(mantisbase, m) {
     m.doc() = "Python bindings for MantisBase, a C++20 backend-as-a-service";
@@ -32,6 +33,18 @@ NB_MODULE(mantisbase, m) {
     register_utils(m);
 
     m.def("version", &mb::MantisBase::appVersion, "MantisBase version string");
+
+    // Drop pinned callables before CPython clears module globals. Py_AtExit
+    // runs too late: the runtime is already half destroyed by then.
+    try {
+        nb::module_::import_("atexit").attr("register")(
+            nb::cpp_function([]() {
+                mbpy::note_python_shutdown();
+                mbpy::clear_all_retained();
+            }));
+    } catch (const nb::python_error &) {
+        PyErr_Clear();
+    }
 
     // Names used by earlier examples, alongside the Mb* classes.
     m.attr("Router") = m.attr("MbRouter");

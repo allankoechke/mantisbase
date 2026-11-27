@@ -1,4 +1,5 @@
 #include "mantisbase/core/api_keys.h"
+#include "mantisbase/core/exceptions.h"
 #include "mantisbase/mantisbase.h"
 #include "mantisbase/utils/crypto_utils.h"
 #include "mantisbase/utils/utils.h"
@@ -156,4 +157,27 @@ namespace mb {
     bool MbApiKeyMgr::revokeAdmin(const std::string &key_id) const {
         return revokeById(key_id);
     }
+
+#ifdef MB_SCRIPTING_ENABLED
+    namespace {
+        json permissionsFromScript(const json &permissions) {
+            if (permissions.is_null())
+                return json::array();
+            if (!permissions.is_array())
+                throw MbException(400, "permissions must be an array");
+            return permissions;
+        }
+    }
+
+    json MbApiKeyMgr::createJson(const std::string &entity_name, const std::string &user_id,
+                                 const std::string &label, const MbScriptJson &permissions,
+                                 const std::string &expires_at) const {
+        return create(entity_name, user_id, label, permissionsFromScript(permissions.value), expires_at);
+    }
+
+    json MbApiKeyMgr::createAdminJson(const std::string &user_id, const std::string &label,
+                                      const MbScriptJson &permissions, const std::string &expires_at) const {
+        return createAdmin(user_id, label, permissionsFromScript(permissions.value), expires_at);
+    }
+#endif
 } // mb

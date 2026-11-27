@@ -119,7 +119,7 @@ Set `MB_JWT_SECRET` in production for secure token signing. See the [CLI Referen
 | **Docker** | `docker run -p 7070:8080 allankoech/mantisbase` → [Docker Guide](doc/docker.md) |
 | **Build from source** | `git clone https://github.com/allankoechke/mantisbase.git && cd mantisbase && cmake -B build && cmake --build build` → [Installation Guide](doc/installation.md) |
 | **Embed in C++** | Add as a CMake submodule and `#include <mantisbase/mantisbase.h>` in your app → [Embedding Guide](doc/embedding.md) |
-| **Python package** | `pip install mantisbase` → [Python Bindings](doc/python.md) |
+| **Python package** | `pip install mantisbase` (CPython 3.10–3.14 wheels; Windows ARM64 from 3.11) → [Python Bindings](doc/python.md) |
 | **C++ dev package** | Prebuilt shared library + headers, no source build (`*-linux-cpp-dev.zip`, `*-windows-cpp-dev.zip`, `*-darwin-cpp-dev.zip`) → [C++ Dev Package Guide](doc/cpp-dev-package.md) |
 
 > **Requirements**: C++20 compiler (GCC/MinGW 13+, Apple Clang 15+). Linux builds need `libpq-dev` and `uuid-dev`, macOS builds need `brew install libpq ossp-uuid` for PostgreSQL support. No external runtime dependencies — everything is bundled.

@@ -23,6 +23,7 @@ namespace mb {
     void registerRouterBindings(duk_context *ctx);
     void registerSettingsBindings(duk_context *ctx);
     void registerAuthBindings(duk_context *ctx);
+    void registerMailerBindings(duk_context *ctx);
     void registerMiddlewareBindings(duk_context *ctx);
     void registerFilesBindings(duk_context *ctx);
     void registerLogsBindings(duk_context *ctx);

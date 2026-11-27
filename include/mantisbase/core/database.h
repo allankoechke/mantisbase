@@ -105,6 +105,8 @@ namespace mb {
 
 #ifdef MB_SCRIPTING_ENABLED
         duk_ret_t query(duk_context *ctx) const;
+        /** Run SQL on a session already leased by a script, so begin/commit/rollback apply. */
+        duk_ret_t queryOn(duk_context *ctx) const;
 #endif
 
     private:
@@ -120,6 +122,10 @@ namespace mb {
          * New auth tables already include the field. Admin accounts are left unchanged.
          */
         void migrateAuthEmailVerified(soci::session &sql) const;
+
+#ifdef MB_SCRIPTING_ENABLED
+        duk_ret_t runScriptQuery(duk_context *ctx, const std::shared_ptr<soci::session> &sql, int sql_arg) const;
+#endif
 
         std::string m_connStr;
         std::unique_ptr<soci::connection_pool> m_connPool;
@@ -137,9 +143,11 @@ namespace mb {
          * @param query SQL Query to be executed
          */
         void start_query(std::string const &query) override {
+            last_query_ = query;
             logger_impl::start_query(query);
-            // LogOrigin::dbTrace(fmt::format("$ sql << {}", query));
         }
+
+        std::string get_last_query() const override { return last_query_; }
 
     private:
         /**
@@ -147,8 +155,12 @@ namespace mb {
          * @return MbLogger implementation pointer
          */
         logger_impl *do_clone() const override {
-            return new MbLoggerImpl();
+            auto *copy = new MbLoggerImpl();
+            copy->last_query_ = last_query_;
+            return copy;
         }
+
+        std::string last_query_;
     };
 } // mb
 

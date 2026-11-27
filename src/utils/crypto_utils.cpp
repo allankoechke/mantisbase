@@ -1,6 +1,7 @@
 #include "mantisbase/utils/crypto_utils.h"
 #include "mantisbase/core/logger/logger.h"
 
+#include <wolfssl/ssl.h>
 #include <wolfssl/wolfcrypt/sha256.h>
 #include <wolfssl/wolfcrypt/aes.h>
 #include <wolfssl/wolfcrypt/random.h>
@@ -13,6 +14,13 @@
 #include <cstring>
 
 namespace mb {
+    bool initWolfSsl() {
+        // Refcounted inside wolfSSL. The function-local static makes the
+        // first call the one that takes the lock; later calls are a read.
+        static const int ready = wolfSSL_Init();
+        return ready == WOLFSSL_SUCCESS;
+    }
+
     std::string generateSecureRandom(const size_t length) {
         WC_RNG rng;
         if (wc_InitRng(&rng) != 0) {

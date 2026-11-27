@@ -9,6 +9,9 @@
 #include <vector>
 
 #include "types.h"
+#ifdef MB_SCRIPTING_ENABLED
+#include "../scripting/script_json.h"
+#endif
 
 namespace mb {
     /**
@@ -55,6 +58,11 @@ namespace mb {
          */
         void applySettings(const json &configs);
 
+#ifdef MB_SCRIPTING_ENABLED
+        /** Script entry for @ref applySettings. Takes a settings object. */
+        void applySettingsScript(const MbScriptJson &configs) { applySettings(configs.value); }
+#endif
+
         const MbSmtpConfig &config() const;
 
         bool isConfigured() const;
@@ -93,6 +101,19 @@ namespace mb {
         void clearSentMessages();
 
         void clearRateLimits();
+
+#ifdef MB_SCRIPTING_ENABLED
+        /** SMTP settings. `password` is `"********"` when one is stored. */
+        [[nodiscard]] json configJson() const;
+        /** SMTP object: `host`, `port`, `user`, `password`, `from`, `tls`. */
+        void configureJson(const MbScriptJson &smtp);
+        bool sendMessage(const std::string &to, const std::string &subject,
+                         const std::string &html, const std::string &text);
+        /** `variables` is an object of strings, or null for none. */
+        [[nodiscard]] std::string loadTemplateJson(const std::string &template_name,
+                                                   const MbScriptJson &variables) const;
+        [[nodiscard]] json sentMessagesJson() const;
+#endif
 
         static std::string verificationEmailHtml(const std::string &app_name,
                                                    const std::string &verify_url);

@@ -82,6 +82,8 @@ interface MantisBaseApp {
     logs(): MbLogs;
     /** Realtime change notifications unit. */
     rt(): MbRealtime;
+    /** Outbound SMTP mailer. */
+    mailer(): MbMailer;
     /** Load an additional script relative to `scriptsDir`. */
     loadScript(path: string): void;
 }
@@ -200,6 +202,12 @@ interface MbDatabase {
      * @example db.query("SELECT * FROM __settings WHERE id = :id", { id: "123" })
      */
     query(sql: string, ...binds: MbDbBinds[]): MbQueryResult;
+    /**
+     * Execute `sql` on a session from `session()`.
+     * `begin` / `commit` / `rollback` apply to this call.
+     * `query` leases a different connection and stays outside that transaction.
+     */
+    queryOn(session: MbDbSession, sql: string, ...binds: MbDbBinds[]): MbQueryResult;
 }
 
 /** Leased database session (`soci::session` in C++). */
@@ -253,6 +261,103 @@ interface MbAuth {
     refreshSession(oldSessionId: string, entityName: string, userId: string): string;
     /** Session timeout in seconds for `entityName` (or set it when `timeout` is given). */
     sessionTimeoutSeconds(entityName: string, timeout?: number): number;
+    /** Email a one-time sign-in code. Returns `{ sent: true }`. */
+    requestLoginOtp(entityName: string, email: string): { sent: boolean };
+    /** Exchange a one-time sign-in code for a session. Returns `{ token, user }`. */
+    loginWithOtp(entityName: string, email: string, otp: string): { token: string; user: any };
+    /** Throw when the entity requires a verified email and `user` is unverified. */
+    rejectUnverifiedLogin(entityName: string, user: any): void;
+    /** Email a verification link for an existing account. Missing SMTP is ignored. */
+    notifyEmailVerification(entityName: string, userId: string): void;
+    /** Email a verification link. Unknown addresses return `{ sent: true }` and send nothing. */
+    requestEmailVerification(entityName: string, email: string, requestHost: string): { sent: boolean };
+    /** Mark the account verified. Returns `{ verified: true }`. */
+    confirmEmailVerification(entityName: string, token: string): { verified: boolean };
+    /** Email a password-reset link. Unknown addresses return `{ sent: true }` and send nothing. */
+    requestPasswordReset(entityName: string, email: string, requestHost: string): { sent: boolean };
+    /** Set a new password from a live reset link. Returns `{ reset: true }`. */
+    confirmPasswordReset(entityName: string, token: string, newPassword: string): { reset: boolean };
+    /** API key manager. */
+    apiKey(): MbApiKeys;
+    /** OAuth provider and login manager. The encryption key is not exposed. */
+    oauth(): MbOAuth;
+}
+
+/** API keys returned by `app.auth().apiKey()`. */
+interface MbApiKeys {
+    /**
+     * Create an entity key. `permissions` is an array, or `null` for none.
+     * `expiresAt` is empty when the key does not expire.
+     * The returned object includes the raw `key` once.
+     */
+    create(entityName: string, userId: string, label: string, permissions: any[] | null, expiresAt: string): any;
+    /** Key metadata for one user. Raw secrets are omitted. */
+    list(entityName: string, userId: string): any[];
+    /** Revoke a key owned by `userId`. Pass `""` for `userId` to skip the owner check. */
+    revoke(keyId: string, entityName: string, userId: string): boolean;
+    /** Revoke any key by id. */
+    revokeById(keyId: string): boolean;
+    /** Admin key metadata. */
+    listAdmin(): any[];
+    /** Create an admin key. The returned object includes the raw `key` once. */
+    createAdmin(userId: string, label: string, permissions: any[] | null, expiresAt: string): any;
+    /** Revoke an admin key by id. */
+    revokeAdmin(keyId: string): boolean;
+}
+
+/** OAuth manager returned by `app.auth().oauth()`. */
+interface MbOAuth {
+    /** Authorize URL plus server-side PKCE state. */
+    authorizeUrl(entityName: string, providerName: string, redirectUri: string): any;
+    /** Exchange a callback `code` and `state` for a session. */
+    handleCallback(entityName: string, providerName: string, code: string, state: string): any;
+    /** Link an OAuth identity to an authenticated user. */
+    linkAccount(entityName: string, userId: string, providerName: string, code: string, state: string): any;
+    /** Unlink a provider from a user. */
+    unlinkAccount(entityName: string, userId: string, providerName: string): boolean;
+    /** Identities linked to `userId`. */
+    linkedAccounts(entityName: string, userId: string): any[];
+    /** Providers enabled for an entity. */
+    providers(entityName: string): any[];
+    /** Create a provider (`name`, `client_id`, `client_secret`, ...). */
+    addProvider(provider: any): any;
+    /** Patch a provider. */
+    updateProvider(providerId: string, updates: any): any;
+    /** Delete a provider. */
+    removeProvider(providerId: string): boolean;
+    /** All configured providers. */
+    listProviders(): any[];
+    /** Allow a provider on an entity. */
+    enableProvider(entityName: string, providerId: string): any;
+    /** Remove a provider from an entity. */
+    disableProvider(entityName: string, providerId: string): boolean;
+}
+
+/** Outbound SMTP mailer returned by `app.mailer()`. */
+interface MbMailer {
+    /** `true` when SMTP host and from-address are set. */
+    isConfigured(): boolean;
+    /** SMTP settings. A stored password is `"********"`. */
+    config(): { host: string; port: number; user: string; password: string; from: string; tls: boolean };
+    /**
+     * Apply an SMTP object (`host`, `port`, `user`, `password`, `from`, `tls`).
+     * Passing the `"********"` password mask keeps the stored password.
+     */
+    configure(smtp: any): void;
+    /** Read the `smtp` object from a settings document. */
+    applySettings(configs: any): void;
+    /** Deliver one message. Mock hosts are captured by `sentMessages`. */
+    send(to: string, subject: string, html: string, text: string): boolean;
+    /** Send the fixed test message to `to`. */
+    sendTest(to: string): boolean;
+    /** Render `name` with an object of string variables, or `null` for none. */
+    loadTemplate(name: string, variables: Record<string, string> | null): string;
+    /** `true` when `email` is still under `maxPerHour` (both arguments are required). */
+    checkRateLimit(email: string, maxPerHour: number): boolean;
+    /** Mock-transport messages. */
+    sentMessages(): { to: string; subject: string; html: string; text: string }[];
+    clearSentMessages(): void;
+    clearRateLimits(): void;
 }
 
 /** File path helpers for entity uploads, returned by `app.files()`. */
@@ -265,6 +370,22 @@ interface MbFiles {
     getFilePath(entityName: string, filename: string): string;
     /** Delete `filename` under `entityName`. Returns `true` on success. */
     removeFile(entityName: string, filename: string): boolean;
+    /** Create the upload directory for `entityName`. */
+    createDir(entityName: string): void;
+    /** Rename an entity upload directory, creating it when the old one is missing. */
+    renameDir(oldEntityName: string, newEntityName: string): void;
+    /** Delete an entity upload directory and its files. */
+    deleteDir(entityName: string): void;
+    /** Delete every filename in `files`. */
+    removeFiles(entityName: string, files: string[]): void;
+    /** `true` when `filename` exists under `entityName`. */
+    fileExists(entityName: string, filename: string): boolean;
+    /** Canonical path, or throws when it escapes the files directory. */
+    canonicalPath(path: string): string;
+    /** `true` when `path` is inside the files directory. */
+    isCanonical(path: string): boolean;
+    /** Absolute files directory (`<dataDir>/files`). */
+    baseDir(): string;
 }
 
 /** Structured logging unit returned by `app.logs()`. */
@@ -272,6 +393,8 @@ interface MbLogs {
     info(message: string): void;
     warn(message: string): void;
     error(message: string): void;
+    /** Same severity as `error`. */
+    critical(message: string): void;
     debug(message: string): void;
     trace(message: string): void;
 }
@@ -280,6 +403,10 @@ interface MbLogs {
 interface MbRealtime {
     /** Wake the realtime worker to drain change events immediately. */
     notifyChange(): void;
+    /** Install database change hooks for `entityName`. */
+    addDbHooks(entityName: string): void;
+    /** Remove database change hooks for `entityName`. */
+    dropDbHooks(entityName: string): void;
 }
 
 /** C++ middleware factories. Each returns a `(req, res) => boolean` function. */
@@ -298,6 +425,16 @@ interface MbMiddlewares {
     requireExprEval(expr: string): MbMiddleware;
     settingsFeatureGate(key: string): MbMiddleware;
     rejectViewMutations(): MbMiddleware;
+    /**
+     * HTTP 503 when `strToBool` of `envVar` equals `blockWhenTruthy`.
+     * Example: `envGate("MB_DISABLE_ADMIN_MUTATIONS", true)`.
+     */
+    envGate(envVar: string, blockWhenTruthy: boolean): MbMiddleware;
+    /**
+     * HTTP 429 after `maxRequests` in `windowSeconds`.
+     * `byUser` defaults to `false` (limit by IP). `true` limits by user id, then IP.
+     */
+    rateLimit(maxRequests: number, windowSeconds: number, byUser?: boolean): MbMiddleware;
 }
 
 /** Utility functions. */
@@ -316,6 +453,12 @@ interface MbUtils {
     hashPassword(password: string): string;
     /** `true` when `password` matches `storedHash`. */
     verifyPassword(password: string, storedHash: string): boolean;
+    /** `true` when `extension` is on the upload allow-list. */
+    isAllowedFileExtension(extension: string): boolean;
+    /** Safe `Content-Type` for `extension`. */
+    safeContentType(extension: string): string;
+    /** `true` for `true`, `1`, `on`, and `yes`. */
+    strToBool(value: string): boolean;
 }
 
 /** Console output (goes to the server stdout). */

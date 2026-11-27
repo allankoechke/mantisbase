@@ -13,9 +13,15 @@
 #  define MANTISBASE_API
 #else
 #  ifdef MantisBase_EXPORTS
-#    ifdef _WIN32
+#    if defined(_WIN32) && !defined(__GNUC__) && !defined(__clang__)
 #      define MANTISBASE_API __declspec(dllexport)
 #    else
+       // MinGW (GCC and llvm-mingw clang) must not mark symbols dllexport.
+       // One dllexport turns off "export every global". GNU ld can be forced
+       // back with --export-all-symbols; lld still drops the drogon and soci
+       // vtables the Python extension imports, and the first use segfaults.
+       // visibility("default") keeps the public API exported, and with no
+       // dllexport the linker auto-exports the rest.
 #      define MANTISBASE_API __attribute__((visibility("default")))
 #    endif
 #  else

@@ -14,6 +14,9 @@
 #include <vector>
 #include "../utils/utils.h"
 #include "mantisbase/mantisbase.h"
+#ifdef MB_SCRIPTING_ENABLED
+#include "../scripting/script_json.h"
+#endif
 
 namespace mb {
     /**
@@ -122,6 +125,11 @@ namespace mb {
 #ifdef MB_SCRIPTING_ENABLED
         [[nodiscard]] std::string getFilePathString(const std::string &entity_name,
                                                     const std::string &filename);
+        /** @p files is an array of filenames. */
+        void removeFilesJson(const std::string &entity_name, const MbScriptJson &files) const;
+        [[nodiscard]] std::string canonicalPathString(const std::string &path) const;
+        [[nodiscard]] bool isCanonicalPathString(const std::string &path) const;
+        [[nodiscard]] std::string filesBaseDirString() const;
 #endif
 
         /**

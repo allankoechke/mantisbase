@@ -28,7 +28,7 @@ jobs:
       matrix:
         # 3.9 is absent from actions/setup-python on Ubuntu 26.04 (ubuntu-latest)
         # and has no Windows ARM64 build. 3.10 also has no Windows ARM64 build.
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
         # engine_platform must be a real axis. include entries that only add
         # new keys are merged into every job, and the last entry wins — so a
         # platform listed only under include would collapse the whole matrix
@@ -185,6 +185,11 @@ jobs:
           if (-not $dll) { Write-Error "engine DLL missing in artifacts"; exit 1 }
           Copy-Item $dll.FullName "$Prefix\lib\"
           Copy-Item (Join-Path $dll.DirectoryName "libmantisbase.dll.a") "$Prefix\lib\"
+          # Runtime DLLs staged next to the engine (libstdc++, libgcc, winpthread
+          # or llvm-mingw libc++/libunwind) must win over a freshly installed toolchain.
+          Get-ChildItem $dll.DirectoryName -Filter "*.dll" | ForEach-Object {
+            Copy-Item $_.FullName "$Prefix\lib\" -Force
+          }
           # NOTE: upload-artifact strips the uploaded root dir, so headers land
           # as engine-dl\include\... (not headers-staging\...).
           if (-not (Test-Path "engine-dl\include\mantisbase\mantisbase.h")) { Write-Error "engine headers missing in artifacts"; exit 1 }
@@ -295,15 +300,15 @@ jobs:
           foreach ($p in $addPaths) { $delveArgs += @('--add-path', $p) }
           & delvewheel @delveArgs
 
-      - name: Smoke-test repaired wheel
+      - name: Test repaired wheel
         shell: bash
         run: |
           pip install repaired/*.whl --force-reinstall --no-deps
-          if python -c "import mantisbase; print('ok')"; then
-            exit 0
-          fi
+          set +e
+          python -m unittest discover -s bindings/python/tests -v
           status=$?
-          if [ "${RUNNER_OS}" = "Windows" ]; then
+          set -e
+          if [ "$status" -ne 0 ] && [ "${RUNNER_OS}" = "Windows" ]; then
             pip install -q pefile
             python .github/scripts/check_pyd_imports.py || true
           fi

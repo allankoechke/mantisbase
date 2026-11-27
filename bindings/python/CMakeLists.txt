@@ -61,28 +61,55 @@ nanobind_add_module(mantisbase_python
 
 target_include_directories(mantisbase_python PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+if(MINGW)
+    # See src/win_detach.cpp. ARM (clang) and x64 (GCC) both use the MinGW CRT,
+    # which runs C++ static destructors from DllMain after the interpreter exits.
+    target_sources(mantisbase_python PRIVATE src/win_detach.cpp)
+endif()
+
 if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # nanobind compiles Release with -Os, which enables -fdeclone-ctor-dtor.
     # GCC 16 then references a unified std::string constructor that MinGW's
     # libstdc++-6.dll does not export (GCC PR 125359). LoadLibrary reports
     # that as "The specified procedure could not be found."
     # The flag must follow -Os; repeating it after nanobind_opt_size does that.
+    # The static lib is nanobind-static, or nanobind-static-abi3 / -ft / -fa
+    # depending on the Python build. Every one of those objects is linked in.
     target_compile_options(mantisbase_python PRIVATE -fno-declone-ctor-dtor)
-    if(TARGET nanobind-static)
-        target_compile_options(nanobind-static PRIVATE -fno-declone-ctor-dtor)
-    endif()
+    foreach(_mb_nb
+            nanobind-static nanobind-static-abi3
+            nanobind-static-ft nanobind-static-abi3-ft
+            nanobind-static-fa nanobind-static-fa-ft
+            nanobind-static-ps nanobind-static-abi3-ps)
+        if(TARGET ${_mb_nb})
+            target_compile_options(${_mb_nb} PRIVATE -fno-declone-ctor-dtor)
+        endif()
+    endforeach()
     # libmantisbase.dll is linked with --export-all-symbols, so its import
     # library also advertises std:: instantiations. Resolving those from the
     # engine DLL fails at load time. Bind libstdc++ first.
     target_link_libraries(mantisbase_python PRIVATE stdc++)
+    # Same missing libstdc++-6.dll symbols as the engine DLL, including
+    # __once_proxy. The extension is a separate link, so it needs its own
+    # copy: call_once and the proxy must share one thread-local.
+    # No -fno-weak: that flag makes this file's libstdc++ vtables strong and
+    # the DLL link fails with multiple definitions against the other objects.
+    target_sources(mantisbase_python PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../src/platform/mingw_libstdcxx_compat.cpp)
 endif()
 
 # Link against mantisbase shared library
 if(TARGET mb::shared)
     target_link_libraries(mantisbase_python PRIVATE mb::shared)
 else()
-    find_library(MANTISBASE_LIB mantisbase REQUIRED)
-    find_path(MANTISBASE_INCLUDE mantisbase/mantisbase.h REQUIRED)
+    find_library(MANTISBASE_LIB mantisbase)
+    find_path(MANTISBASE_INCLUDE mantisbase/mantisbase.h)
+    if(NOT MANTISBASE_LIB OR NOT MANTISBASE_INCLUDE)
+        message(FATAL_ERROR
+            "Could not find the mantisbase shared library and headers.\n"
+            "Wheels are published for CPython 3.10-3.14. A Python outside that set makes pip/uv build this sdist, which does not compile the C++ engine.\n"
+            "To build from source, install the engine first and set CMAKE_PREFIX_PATH to the prefix that contains lib/libmantisbase.so and include/mantisbase/mantisbase.h.")
+    endif()
     target_link_libraries(mantisbase_python PRIVATE ${MANTISBASE_LIB})
     target_include_directories(mantisbase_python PRIVATE ${MANTISBASE_INCLUDE})
 endif()

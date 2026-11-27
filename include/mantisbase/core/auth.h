@@ -14,6 +14,9 @@
 #include "api_keys.h"
 #include "oauth.h"
 #include "types.h"
+#ifdef MB_SCRIPTING_ENABLED
+#include "../scripting/script_json.h"
+#endif
 
 namespace mb
 {
@@ -129,6 +132,12 @@ namespace mb
          */
         void rejectUnverifiedLogin(const std::string &entity_name, const json &user) const;
 
+#ifdef MB_SCRIPTING_ENABLED
+        void rejectUnverifiedLoginScript(const std::string &entity_name, const MbScriptJson &user) const {
+            rejectUnverifiedLogin(entity_name, user.value);
+        }
+#endif
+
         /**
          * @brief Email a verification link when SMTP is configured and the account is unverified.
          * Missing SMTP or siteDomain is logged and ignored so registration can still succeed.
@@ -192,6 +201,9 @@ namespace mb
         std::string refreshSessionJson(const std::string &old_session_id,
                                        const std::string &entity_name,
                                        const std::string &user_id);
+
+        [[nodiscard]] MbApiKeyMgr *duk_apiKey() const { return &apiKey(); }
+        [[nodiscard]] MbOAuthMgr *duk_oauth() const { return &oauth(); }
 #endif
     };
 } // mb

@@ -57,8 +57,10 @@ else() # We are linking statically
             message("-- Building MantisBase static libs (Windows MinGW fully static executables)")
         endif ()
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # Linux GCC: static link only runtime libraries
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+        # Static libstdc++ is applied to executables only (mb_static_cxx_runtime).
+        # Putting it in CMAKE_CXX_FLAGS also links it into mantisbase-dll, and
+        # the Python extension then loads a second libstdc++. SOCI casts and
+        # C++ exceptions across that boundary throw std::bad_cast.
         message("-- Building MantisBase static libs")
     else()
         message("-- Building MantisBase static libs (no runtime static flags for ${CMAKE_CXX_COMPILER_ID})")
@@ -145,6 +147,7 @@ if(MB_SCRIPTING_ENABLED)
         src/scripting/bindings/router_bindings.cpp
         src/scripting/bindings/settings_bindings.cpp
         src/scripting/bindings/auth_bindings.cpp
+        src/scripting/bindings/mailer_bindings.cpp
         src/scripting/bindings/middleware_bindings.cpp
         src/scripting/bindings/files_bindings.cpp
         src/scripting/bindings/logs_bindings.cpp
@@ -169,19 +172,39 @@ if(NOT MB_SHARED_DEPS AND MB_BUILD_SHARED_LIB)
         WINDOWS_EXPORT_ALL_SYMBOLS ON
     )
     if(WIN32 AND NOT MSVC)
-        # WINDOWS_EXPORT_ALL_SYMBOLS is implemented for MSVC only. On MinGW,
-        # any dllexport (MANTISBASE_API) turns off the default "export
-        # everything" behavior, so soci/drogon/trantor symbols linked into
-        # this DLL are missing from the import library. The bindings include
-        # public headers that reference those symbols directly.
-        # Requires SOCI_LTO=OFF (see cmake/add-soci.cmake): ld auto-export
-        # rejects LTO template symbols ("symbol wrong type").
+        # WINDOWS_EXPORT_ALL_SYMBOLS is implemented for MSVC only. MANTISBASE_API
+        # is visibility("default") on MinGW, not dllexport: one dllexport makes
+        # lld export only those symbols, so drogon/soci vtables the Python
+        # extension imports are missing and the first use segfaults.
+        # --export-all-symbols still covers GNU ld. Requires SOCI_LTO=OFF
+        # (see cmake/add-soci.cmake): ld auto-export plus LTO rejects template
+        # symbols ("symbol wrong type").
         target_link_options(mantisbase-dll PRIVATE "-Wl,--export-all-symbols")
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            # Provide std::format / std::call_once symbols that libstdc++-6.dll
+            # does not export, including __once_proxy so call_once does not
+            # jump through libstdc++'s empty thread-local. See
+            # src/platform/mingw_libstdcxx_compat.cpp. Leave the format
+            # instantiation as a COMDAT. -fno-weak makes the libstdc++ vtables
+            # this file emits strong, and they then collide with every other TU.
+            target_sources(mantisbase-dll PRIVATE
+                src/platform/mingw_libstdcxx_compat.cpp)
+        endif()
     endif()
 endif()
 
+# Executables only. GCC has no -shared-libstdc++; the shared library keeps
+# the system runtime by not passing -static-libstdc++. A private copy in
+# libmantisbase.so breaks SOCI casts in the Python extension (std::bad_cast).
+function(mb_static_cxx_runtime target)
+    if(NOT MB_SHARED_DEPS AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT WIN32)
+        target_link_options(${target} PRIVATE -static-libgcc -static-libstdc++)
+    endif()
+endfunction()
+
 # Add main executable
 add_executable(mantisbase_app src/main.cpp)
+mb_static_cxx_runtime(mantisbase_app)
 
 # Ensure resultant name is always `mantisbase` for the app despite targets names for consistency
 set_target_properties(mantisbase_app PROPERTIES OUTPUT_NAME mantisbase)

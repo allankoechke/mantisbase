@@ -4,7 +4,7 @@ Getting started with **MantisBase** is simple. You can use the prebuilt binaries
 
 ## Installation Options
 
-MantisBase is available in two formats:
+MantisBase is available as:
 
 - ✅ **Precompiled binaries** for **Windows**, **Linux** and **macOS** (64-bit)
     - You can find them in the [Releases section](https://github.com/allankoechke/mantisbase/releases).
@@ -12,7 +12,7 @@ MantisBase is available in two formats:
 
 - 💻 **Source code** for embedding into your own C++ application
     - See the [Embedding MantisBase](embedding.md) guide for details.
-- 🐍 **Python package** — `pip install mantisbase`, then follow the [Python Bindings](python.md) guide.
+- 🐍 **Python package** — `pip install mantisbase` for CPython 3.10–3.14 (Windows ARM64 from 3.11), then follow the [Python Bindings](python.md) guide.
 
 ---
 

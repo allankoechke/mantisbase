@@ -29,6 +29,9 @@
 #include <nlohmann/json.hpp>
 
 #include "mantisbase/core/types.h"
+#ifdef MB_SCRIPTING_ENABLED
+#include "../scripting/script_json.h"
+#endif
 
 namespace mb {
     using json = nlohmann::json;
@@ -84,6 +87,17 @@ namespace mb {
 
         /** Admin: patch provider settings (client id/secret, endpoints, etc.). */
         [[nodiscard]] json updateProvider(const std::string &provider_id, const json &updates) const;
+
+#ifdef MB_SCRIPTING_ENABLED
+        [[nodiscard]] json addProviderScript(const MbScriptJson &provider_data) const {
+            return addProvider(provider_data.value);
+        }
+
+        [[nodiscard]] json updateProviderScript(const std::string &provider_id,
+                                                const MbScriptJson &updates) const {
+            return updateProvider(provider_id, updates.value);
+        }
+#endif
 
         /** Admin: delete a provider by id. */
         [[nodiscard]] bool removeProvider(const std::string &provider_id) const;
